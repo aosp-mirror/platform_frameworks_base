@@ -110,11 +110,15 @@ public class GridView extends AbsListView {
         this(context, attrs, com.android.internal.R.attr.gridViewStyle);
     }
 
-    public GridView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public GridView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.GridView, defStyle, 0);
+    public GridView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.GridView, defStyleAttr, defStyleRes);
 
         int hSpacing = a.getDimensionPixelOffset(
                 com.android.internal.R.styleable.GridView_horizontalSpacing, 0);

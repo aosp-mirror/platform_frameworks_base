@@ -59,9 +59,13 @@ public class TextProgressBar extends RelativeLayout implements OnChronometerTick
 
     boolean mChronometerFollow = false;
     int mChronometerGravity = Gravity.NO_GRAVITY;
+
+    public TextProgressBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
     
-    public TextProgressBar(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TextProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     public TextProgressBar(Context context, AttributeSet attrs) {

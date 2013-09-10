@@ -67,8 +67,13 @@ public class MultiAutoCompleteTextView extends AutoCompleteTextView {
         this(context, attrs, com.android.internal.R.attr.autoCompleteTextViewStyle);
     }
 
-    public MultiAutoCompleteTextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public MultiAutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public MultiAutoCompleteTextView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     /* package */ void finishInit() { }

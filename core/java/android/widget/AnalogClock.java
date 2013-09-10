@@ -67,13 +67,16 @@ public class AnalogClock extends View {
         this(context, attrs, 0);
     }
 
-    public AnalogClock(Context context, AttributeSet attrs,
-                       int defStyle) {
-        super(context, attrs, defStyle);
-        Resources r = mContext.getResources();
-        TypedArray a =
-                context.obtainStyledAttributes(
-                        attrs, com.android.internal.R.styleable.AnalogClock, defStyle, 0);
+    public AnalogClock(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public AnalogClock(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final Resources r = context.getResources();
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.AnalogClock, defStyleAttr, defStyleRes);
 
         mDial = a.getDrawable(com.android.internal.R.styleable.AnalogClock_dial);
         if (mDial == null) {

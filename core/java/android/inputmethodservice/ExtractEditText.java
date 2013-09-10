@@ -38,8 +38,12 @@ public class ExtractEditText extends EditText {
         super(context, attrs, com.android.internal.R.attr.editTextStyle);
     }
 
-    public ExtractEditText(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ExtractEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ExtractEditText(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
     
     void setIME(InputMethodService ime) {

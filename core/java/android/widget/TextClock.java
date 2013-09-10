@@ -198,15 +198,19 @@ public class TextClock extends TextView {
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public TextClock(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TextClock(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TextClock, defStyle, 0);
+    public TextClock(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.TextClock, defStyleAttr, defStyleRes);
         try {
             mFormat12 = a.getText(R.styleable.TextClock_format12Hour);
             mFormat24 = a.getText(R.styleable.TextClock_format24Hour);

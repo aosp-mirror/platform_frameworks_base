@@ -173,10 +173,15 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     public AdapterViewAnimator(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.AdapterViewAnimator, defStyleAttr, 0);
+    public AdapterViewAnimator(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.AdapterViewAnimator, defStyleAttr, defStyleRes);
         int resource = a.getResourceId(
                 com.android.internal.R.styleable.AdapterViewAnimator_inAnimation, 0);
         if (resource > 0) {

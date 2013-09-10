@@ -142,11 +142,15 @@ public class ListView extends AbsListView {
         this(context, attrs, com.android.internal.R.attr.listViewStyle);
     }
 
-    public ListView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ListView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ListView, defStyle, 0);
+    public ListView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ListView, defStyleAttr, defStyleRes);
 
         CharSequence[] entries = a.getTextArray(
                 com.android.internal.R.styleable.ListView_entries);

@@ -279,12 +279,15 @@ public class KeyboardView extends View implements View.OnClickListener {
         this(context, attrs, com.android.internal.R.attr.keyboardViewStyle);
     }
 
-    public KeyboardView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public KeyboardView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a =
-            context.obtainStyledAttributes(
-                attrs, android.R.styleable.KeyboardView, defStyle, 0);
+    public KeyboardView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray a = context.obtainStyledAttributes(
+                attrs, android.R.styleable.KeyboardView, defStyleAttr, defStyleRes);
 
         LayoutInflater inflate =
                 (LayoutInflater) context

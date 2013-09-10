@@ -242,7 +242,15 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     }
 
     public SearchView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
+    }
+
+    public SearchView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public SearchView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -281,7 +289,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             }
         });
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
+        TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.SearchView, defStyleAttr, defStyleRes);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
         int maxWidth = a.getDimensionPixelSize(R.styleable.SearchView_maxWidth, -1);
         if (maxWidth != -1) {
@@ -304,7 +313,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
         boolean focusable = true;
 
-        a = context.obtainStyledAttributes(attrs, R.styleable.View, 0, 0);
+        a = context.obtainStyledAttributes(attrs, R.styleable.View, defStyleAttr, defStyleRes);
         focusable = a.getBoolean(R.styleable.View_focusable, focusable);
         a.recycle();
         setFocusable(focusable);
@@ -1661,8 +1670,14 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             mThreshold = getThreshold();
         }
 
-        public SearchAutoComplete(Context context, AttributeSet attrs, int defStyle) {
-            super(context, attrs, defStyle);
+        public SearchAutoComplete(Context context, AttributeSet attrs, int defStyleAttrs) {
+            super(context, attrs, defStyleAttrs);
+            mThreshold = getThreshold();
+        }
+
+        public SearchAutoComplete(
+                Context context, AttributeSet attrs, int defStyleAttrs, int defStyleRes) {
+            super(context, attrs, defStyleAttrs, defStyleRes);
             mThreshold = getThreshold();
         }
 

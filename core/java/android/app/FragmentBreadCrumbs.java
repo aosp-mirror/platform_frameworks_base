@@ -84,11 +84,16 @@ public class FragmentBreadCrumbs extends ViewGroup
         this(context, attrs, android.R.style.Widget_FragmentBreadCrumbs);
     }
 
-    public FragmentBreadCrumbs(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public FragmentBreadCrumbs(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.FragmentBreadCrumbs, defStyle, 0);
+    public FragmentBreadCrumbs(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.FragmentBreadCrumbs, defStyleAttr, defStyleRes);
 
         mGravity = a.getInt(com.android.internal.R.styleable.FragmentBreadCrumbs_gravity,
                 DEFAULT_GRAVITY);

@@ -238,8 +238,14 @@ public class RelativeLayout extends ViewGroup {
         queryCompatibilityModes(context);
     }
 
-    public RelativeLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public RelativeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initFromAttributes(context, attrs);
+        queryCompatibilityModes(context);
+    }
+
+    public RelativeLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initFromAttributes(context, attrs);
         queryCompatibilityModes(context);
     }

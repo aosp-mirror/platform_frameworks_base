@@ -84,8 +84,13 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         this(context, attrs, 0);
     }
 
-    public QuickContactBadge(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public QuickContactBadge(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public QuickContactBadge(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
         mOverlay = styledAttributes.getDrawable(

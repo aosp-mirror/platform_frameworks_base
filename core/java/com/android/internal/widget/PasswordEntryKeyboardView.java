@@ -29,11 +29,16 @@ public class PasswordEntryKeyboardView extends KeyboardView {
     static final int KEYCODE_NEXT_LANGUAGE = -104;
 
     public PasswordEntryKeyboardView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
-    public PasswordEntryKeyboardView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public PasswordEntryKeyboardView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public PasswordEntryKeyboardView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override

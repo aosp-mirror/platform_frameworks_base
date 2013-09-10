@@ -16,7 +16,6 @@
 
 package android.widget;
 
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -24,8 +23,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
-import com.android.internal.R;
 
 /**
  * Displays checked/unchecked states as a button
@@ -46,18 +43,21 @@ public class ToggleButton extends CompoundButton {
 
     private static final int NO_ALPHA = 0xFF;
     private float mDisabledAlpha;
-    
-    public ToggleButton(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a =
-            context.obtainStyledAttributes(
-                    attrs, com.android.internal.R.styleable.ToggleButton, defStyle, 0);
+
+    public ToggleButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ToggleButton, defStyleAttr, defStyleRes);
         mTextOn = a.getText(com.android.internal.R.styleable.ToggleButton_textOn);
         mTextOff = a.getText(com.android.internal.R.styleable.ToggleButton_textOff);
         mDisabledAlpha = a.getFloat(com.android.internal.R.styleable.ToggleButton_disabledAlpha, 0.5f);
         syncTextState();
         a.recycle();
+    }
+
+    public ToggleButton(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public ToggleButton(Context context, AttributeSet attrs) {

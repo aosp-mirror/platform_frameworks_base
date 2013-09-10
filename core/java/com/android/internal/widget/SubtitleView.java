@@ -82,12 +82,15 @@ public class SubtitleView extends View {
         this(context, attrs, 0);
     }
 
-    public SubtitleView(Context context, AttributeSet attrs, int defStyle) {
+    public SubtitleView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public SubtitleView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs);
 
-        final Theme theme = context.getTheme();
-        final TypedArray a = theme.obtainStyledAttributes(
-                    attrs, android.R.styleable.TextView, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                    attrs, android.R.styleable.TextView, defStyleAttr, defStyleRes);
 
         CharSequence text = "";
         int textSize = 15;

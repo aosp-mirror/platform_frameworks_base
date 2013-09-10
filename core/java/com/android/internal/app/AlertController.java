@@ -736,8 +736,13 @@ public class AlertController {
             super(context, attrs);
         }
 
-        public RecycleListView(Context context, AttributeSet attrs, int defStyle) {
-            super(context, attrs, defStyle);
+        public RecycleListView(Context context, AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        public RecycleListView(
+                Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
         }
 
         @Override

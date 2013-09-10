@@ -1135,8 +1135,12 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
         this(context, null, 0);
     }
 
-    public WebVttRenderingWidget(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public WebVttRenderingWidget(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public WebVttRenderingWidget(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         // Cannot render text over video when layer type is hardware.
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);

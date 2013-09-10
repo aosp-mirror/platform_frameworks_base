@@ -3601,6 +3601,7 @@ package android.app {
     ctor public FragmentBreadCrumbs(android.content.Context);
     ctor public FragmentBreadCrumbs(android.content.Context, android.util.AttributeSet);
     ctor public FragmentBreadCrumbs(android.content.Context, android.util.AttributeSet, int);
+    ctor public FragmentBreadCrumbs(android.content.Context, android.util.AttributeSet, int, int);
     method public void onBackStackChanged();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setActivity(android.app.Activity);
@@ -3887,6 +3888,7 @@ package android.app {
     ctor public MediaRouteButton(android.content.Context);
     ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet);
     ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet, int);
+    ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet, int, int);
     method public int getRouteTypes();
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
@@ -8744,6 +8746,7 @@ package android.gesture {
     ctor public GestureOverlayView(android.content.Context);
     ctor public GestureOverlayView(android.content.Context, android.util.AttributeSet);
     ctor public GestureOverlayView(android.content.Context, android.util.AttributeSet, int);
+    ctor public GestureOverlayView(android.content.Context, android.util.AttributeSet, int, int);
     method public void addOnGestureListener(android.gesture.GestureOverlayView.OnGestureListener);
     method public void addOnGesturePerformedListener(android.gesture.GestureOverlayView.OnGesturePerformedListener);
     method public void addOnGesturingListener(android.gesture.GestureOverlayView.OnGesturingListener);
@@ -11465,6 +11468,7 @@ package android.inputmethodservice {
     ctor public ExtractEditText(android.content.Context);
     ctor public ExtractEditText(android.content.Context, android.util.AttributeSet);
     ctor public ExtractEditText(android.content.Context, android.util.AttributeSet, int);
+    ctor public ExtractEditText(android.content.Context, android.util.AttributeSet, int, int);
     method public void finishInternalChanges();
     method public boolean hasVerticalScrollBar();
     method public void startInternalChanges();
@@ -11661,6 +11665,7 @@ package android.inputmethodservice {
   public class KeyboardView extends android.view.View implements android.view.View.OnClickListener {
     ctor public KeyboardView(android.content.Context, android.util.AttributeSet);
     ctor public KeyboardView(android.content.Context, android.util.AttributeSet, int);
+    ctor public KeyboardView(android.content.Context, android.util.AttributeSet, int, int);
     method public void closing();
     method public android.inputmethodservice.Keyboard getKeyboard();
     method protected android.inputmethodservice.KeyboardView.OnKeyboardActionListener getOnKeyboardActionListener();
@@ -18677,12 +18682,14 @@ package android.preference {
 
   public class CheckBoxPreference extends android.preference.TwoStatePreference {
     ctor public CheckBoxPreference(android.content.Context, android.util.AttributeSet, int);
+    ctor public CheckBoxPreference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public CheckBoxPreference(android.content.Context, android.util.AttributeSet);
     ctor public CheckBoxPreference(android.content.Context);
   }
 
   public abstract class DialogPreference extends android.preference.Preference implements android.content.DialogInterface.OnClickListener android.content.DialogInterface.OnDismissListener android.preference.PreferenceManager.OnActivityDestroyListener {
     ctor public DialogPreference(android.content.Context, android.util.AttributeSet, int);
+    ctor public DialogPreference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public DialogPreference(android.content.Context, android.util.AttributeSet);
     method public android.app.Dialog getDialog();
     method public android.graphics.drawable.Drawable getDialogIcon();
@@ -18714,6 +18721,7 @@ package android.preference {
 
   public class EditTextPreference extends android.preference.DialogPreference {
     ctor public EditTextPreference(android.content.Context, android.util.AttributeSet, int);
+    ctor public EditTextPreference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public EditTextPreference(android.content.Context, android.util.AttributeSet);
     ctor public EditTextPreference(android.content.Context);
     method public android.widget.EditText getEditText();
@@ -18723,6 +18731,8 @@ package android.preference {
   }
 
   public class ListPreference extends android.preference.DialogPreference {
+    ctor public ListPreference(android.content.Context, android.util.AttributeSet, int, int);
+    ctor public ListPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public ListPreference(android.content.Context, android.util.AttributeSet);
     ctor public ListPreference(android.content.Context);
     method public int findIndexOfValue(java.lang.String);
@@ -18739,6 +18749,8 @@ package android.preference {
   }
 
   public class MultiSelectListPreference extends android.preference.DialogPreference {
+    ctor public MultiSelectListPreference(android.content.Context, android.util.AttributeSet, int, int);
+    ctor public MultiSelectListPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public MultiSelectListPreference(android.content.Context, android.util.AttributeSet);
     ctor public MultiSelectListPreference(android.content.Context);
     method public int findIndexOfValue(java.lang.String);
@@ -18753,6 +18765,7 @@ package android.preference {
   }
 
   public class Preference implements java.lang.Comparable {
+    ctor public Preference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public Preference(android.content.Context, android.util.AttributeSet, int);
     ctor public Preference(android.content.Context, android.util.AttributeSet);
     ctor public Preference(android.content.Context);
@@ -18918,6 +18931,7 @@ package android.preference {
   }
 
   public class PreferenceCategory extends android.preference.PreferenceGroup {
+    ctor public PreferenceCategory(android.content.Context, android.util.AttributeSet, int, int);
     ctor public PreferenceCategory(android.content.Context, android.util.AttributeSet, int);
     ctor public PreferenceCategory(android.content.Context, android.util.AttributeSet);
     ctor public PreferenceCategory(android.content.Context);
@@ -18939,6 +18953,7 @@ package android.preference {
   }
 
   public abstract class PreferenceGroup extends android.preference.Preference {
+    ctor public PreferenceGroup(android.content.Context, android.util.AttributeSet, int, int);
     ctor public PreferenceGroup(android.content.Context, android.util.AttributeSet, int);
     ctor public PreferenceGroup(android.content.Context, android.util.AttributeSet);
     method public void addItemFromInflater(android.preference.Preference);
@@ -18993,6 +19008,7 @@ package android.preference {
   }
 
   public class RingtonePreference extends android.preference.Preference implements android.preference.PreferenceManager.OnActivityResultListener {
+    ctor public RingtonePreference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public RingtonePreference(android.content.Context, android.util.AttributeSet, int);
     ctor public RingtonePreference(android.content.Context, android.util.AttributeSet);
     ctor public RingtonePreference(android.content.Context);
@@ -19009,6 +19025,7 @@ package android.preference {
   }
 
   public class SwitchPreference extends android.preference.TwoStatePreference {
+    ctor public SwitchPreference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public SwitchPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public SwitchPreference(android.content.Context, android.util.AttributeSet);
     ctor public SwitchPreference(android.content.Context);
@@ -19021,6 +19038,7 @@ package android.preference {
   }
 
   public abstract class TwoStatePreference extends android.preference.Preference {
+    ctor public TwoStatePreference(android.content.Context, android.util.AttributeSet, int, int);
     ctor public TwoStatePreference(android.content.Context, android.util.AttributeSet, int);
     ctor public TwoStatePreference(android.content.Context, android.util.AttributeSet);
     ctor public TwoStatePreference(android.content.Context);
@@ -27388,6 +27406,7 @@ package android.view {
     ctor public SurfaceView(android.content.Context);
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet);
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int);
+    ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean gatherTransparentRegion(android.graphics.Region);
     method public android.view.SurfaceHolder getHolder();
     method public void setSecure(boolean);
@@ -27399,6 +27418,7 @@ package android.view {
     ctor public TextureView(android.content.Context);
     ctor public TextureView(android.content.Context, android.util.AttributeSet);
     ctor public TextureView(android.content.Context, android.util.AttributeSet, int);
+    ctor public TextureView(android.content.Context, android.util.AttributeSet, int, int);
     method public final void draw(android.graphics.Canvas);
     method public android.graphics.Bitmap getBitmap();
     method public android.graphics.Bitmap getBitmap(int, int);
@@ -27450,6 +27470,7 @@ package android.view {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
+    ctor public View(android.content.Context, android.util.AttributeSet, int, int);
     method public void addChildrenForAccessibility(java.util.ArrayList<android.view.View>);
     method public void addFocusables(java.util.ArrayList<android.view.View>, int);
     method public void addFocusables(java.util.ArrayList<android.view.View>, int, int);
@@ -28183,6 +28204,7 @@ package android.view {
     ctor public ViewGroup(android.content.Context);
     ctor public ViewGroup(android.content.Context, android.util.AttributeSet);
     ctor public ViewGroup(android.content.Context, android.util.AttributeSet, int);
+    ctor public ViewGroup(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean addStatesFromChildren();
     method public void addView(android.view.View);
     method public void addView(android.view.View, int);
@@ -28434,6 +28456,7 @@ package android.view {
     ctor public ViewStub(android.content.Context, int);
     ctor public ViewStub(android.content.Context, android.util.AttributeSet);
     ctor public ViewStub(android.content.Context, android.util.AttributeSet, int);
+    ctor public ViewStub(android.content.Context, android.util.AttributeSet, int, int);
     method public int getInflatedId();
     method public android.view.LayoutInflater getLayoutInflater();
     method public int getLayoutResource();
@@ -30187,6 +30210,7 @@ package android.webkit {
     ctor public WebView(android.content.Context);
     ctor public WebView(android.content.Context, android.util.AttributeSet);
     ctor public WebView(android.content.Context, android.util.AttributeSet, int);
+    ctor public WebView(android.content.Context, android.util.AttributeSet, int, int);
     ctor public deprecated WebView(android.content.Context, android.util.AttributeSet, int, boolean);
     method public void addJavascriptInterface(java.lang.Object, java.lang.String);
     method public boolean canGoBack();
@@ -30359,6 +30383,7 @@ package android.widget {
     ctor public AbsListView(android.content.Context);
     ctor public AbsListView(android.content.Context, android.util.AttributeSet);
     ctor public AbsListView(android.content.Context, android.util.AttributeSet, int);
+    ctor public AbsListView(android.content.Context, android.util.AttributeSet, int, int);
     method public void afterTextChanged(android.text.Editable);
     method public void beforeTextChanged(java.lang.CharSequence, int, int, int);
     method public boolean canScrollList(int);
@@ -30472,6 +30497,7 @@ package android.widget {
     ctor public AbsSeekBar(android.content.Context);
     ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet);
     ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet, int);
+    ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet, int, int);
     method public int getKeyProgressIncrement();
     method public android.graphics.drawable.Drawable getThumb();
     method public int getThumbOffset();
@@ -30484,6 +30510,7 @@ package android.widget {
     ctor public AbsSpinner(android.content.Context);
     ctor public AbsSpinner(android.content.Context, android.util.AttributeSet);
     ctor public AbsSpinner(android.content.Context, android.util.AttributeSet, int);
+    ctor public AbsSpinner(android.content.Context, android.util.AttributeSet, int, int);
     method public android.widget.SpinnerAdapter getAdapter();
     method public android.view.View getSelectedView();
     method public void onRestoreInstanceState(android.os.Parcelable);
@@ -30498,6 +30525,7 @@ package android.widget {
     ctor public AbsoluteLayout(android.content.Context);
     ctor public AbsoluteLayout(android.content.Context, android.util.AttributeSet);
     ctor public AbsoluteLayout(android.content.Context, android.util.AttributeSet, int);
+    ctor public AbsoluteLayout(android.content.Context, android.util.AttributeSet, int, int);
     method protected void onLayout(boolean, int, int, int, int);
   }
 
@@ -30529,6 +30557,7 @@ package android.widget {
     ctor public AdapterView(android.content.Context);
     ctor public AdapterView(android.content.Context, android.util.AttributeSet);
     ctor public AdapterView(android.content.Context, android.util.AttributeSet, int);
+    ctor public AdapterView(android.content.Context, android.util.AttributeSet, int, int);
     method public abstract T getAdapter();
     method public int getCount();
     method public android.view.View getEmptyView();
@@ -30582,6 +30611,7 @@ package android.widget {
     ctor public AdapterViewAnimator(android.content.Context);
     ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet);
     ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet, int);
+    ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet, int, int);
     method public void advance();
     method public void deferNotifyDataSetChanged();
     method public void fyiWillBeAdvancedByHostKThx();
@@ -30611,6 +30641,8 @@ package android.widget {
   public class AdapterViewFlipper extends android.widget.AdapterViewAnimator {
     ctor public AdapterViewFlipper(android.content.Context);
     ctor public AdapterViewFlipper(android.content.Context, android.util.AttributeSet);
+    ctor public AdapterViewFlipper(android.content.Context, android.util.AttributeSet, int);
+    ctor public AdapterViewFlipper(android.content.Context, android.util.AttributeSet, int, int);
     method public int getFlipInterval();
     method public boolean isAutoStart();
     method public boolean isFlipping();
@@ -30641,6 +30673,7 @@ package android.widget {
     ctor public AnalogClock(android.content.Context);
     ctor public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor public AnalogClock(android.content.Context, android.util.AttributeSet, int);
+    ctor public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
   }
 
   public class ArrayAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
@@ -30673,6 +30706,7 @@ package android.widget {
     ctor public AutoCompleteTextView(android.content.Context);
     ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet);
     ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet, int);
+    ctor public AutoCompleteTextView(android.content.Context, android.util.AttributeSet, int, int);
     method public void clearListSelection();
     method protected java.lang.CharSequence convertSelectionToString(java.lang.Object);
     method public void dismissDropDown();
@@ -30765,12 +30799,14 @@ package android.widget {
     ctor public Button(android.content.Context);
     ctor public Button(android.content.Context, android.util.AttributeSet);
     ctor public Button(android.content.Context, android.util.AttributeSet, int);
+    ctor public Button(android.content.Context, android.util.AttributeSet, int, int);
   }
 
   public class CalendarView extends android.widget.FrameLayout {
     ctor public CalendarView(android.content.Context);
     ctor public CalendarView(android.content.Context, android.util.AttributeSet);
     ctor public CalendarView(android.content.Context, android.util.AttributeSet, int);
+    ctor public CalendarView(android.content.Context, android.util.AttributeSet, int, int);
     method public long getDate();
     method public int getDateTextAppearance();
     method public int getFirstDayOfWeek();
@@ -30812,6 +30848,7 @@ package android.widget {
     ctor public CheckBox(android.content.Context);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet, int);
+    ctor public CheckBox(android.content.Context, android.util.AttributeSet, int, int);
   }
 
   public abstract interface Checkable {
@@ -30824,6 +30861,7 @@ package android.widget {
     ctor public CheckedTextView(android.content.Context);
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet);
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int);
+    ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int, int);
     method public android.graphics.drawable.Drawable getCheckMarkDrawable();
     method public boolean isChecked();
     method public void setCheckMarkDrawable(int);
@@ -30836,6 +30874,7 @@ package android.widget {
     ctor public Chronometer(android.content.Context);
     ctor public Chronometer(android.content.Context, android.util.AttributeSet);
     ctor public Chronometer(android.content.Context, android.util.AttributeSet, int);
+    ctor public Chronometer(android.content.Context, android.util.AttributeSet, int, int);
     method public long getBase();
     method public java.lang.String getFormat();
     method public android.widget.Chronometer.OnChronometerTickListener getOnChronometerTickListener();
@@ -30854,6 +30893,7 @@ package android.widget {
     ctor public CompoundButton(android.content.Context);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int);
+    ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean isChecked();
     method public void setButtonDrawable(int);
     method public void setButtonDrawable(android.graphics.drawable.Drawable);
@@ -30925,6 +30965,7 @@ package android.widget {
     ctor public DatePicker(android.content.Context);
     ctor public DatePicker(android.content.Context, android.util.AttributeSet);
     ctor public DatePicker(android.content.Context, android.util.AttributeSet, int);
+    ctor public DatePicker(android.content.Context, android.util.AttributeSet, int, int);
     method public android.widget.CalendarView getCalendarView();
     method public boolean getCalendarViewShown();
     method public int getDayOfMonth();
@@ -30988,6 +31029,7 @@ package android.widget {
     ctor public EditText(android.content.Context);
     ctor public EditText(android.content.Context, android.util.AttributeSet);
     ctor public EditText(android.content.Context, android.util.AttributeSet, int);
+    ctor public EditText(android.content.Context, android.util.AttributeSet, int, int);
     method public void extendSelection(int);
     method public void selectAll();
     method public void setSelection(int, int);
@@ -31019,6 +31061,7 @@ package android.widget {
     ctor public ExpandableListView(android.content.Context);
     ctor public ExpandableListView(android.content.Context, android.util.AttributeSet);
     ctor public ExpandableListView(android.content.Context, android.util.AttributeSet, int);
+    ctor public ExpandableListView(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean collapseGroup(int);
     method public boolean expandGroup(int);
     method public boolean expandGroup(int, boolean);
@@ -31108,6 +31151,7 @@ package android.widget {
     ctor public FrameLayout(android.content.Context);
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet);
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet, int);
+    ctor public FrameLayout(android.content.Context, android.util.AttributeSet, int, int);
     method public deprecated boolean getConsiderGoneChildrenWhenMeasuring();
     method public android.graphics.drawable.Drawable getForeground();
     method public int getForegroundGravity();
@@ -31132,6 +31176,7 @@ package android.widget {
     ctor public Gallery(android.content.Context);
     ctor public Gallery(android.content.Context, android.util.AttributeSet);
     ctor public Gallery(android.content.Context, android.util.AttributeSet, int);
+    ctor public Gallery(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean onDown(android.view.MotionEvent);
     method public boolean onFling(android.view.MotionEvent, android.view.MotionEvent, float, float);
     method public void onLongPress(android.view.MotionEvent);
@@ -31153,6 +31198,7 @@ package android.widget {
 
   public class GridLayout extends android.view.ViewGroup {
     ctor public GridLayout(android.content.Context, android.util.AttributeSet, int);
+    ctor public GridLayout(android.content.Context, android.util.AttributeSet, int, int);
     ctor public GridLayout(android.content.Context, android.util.AttributeSet);
     ctor public GridLayout(android.content.Context);
     method public int getAlignmentMode();
@@ -31212,6 +31258,7 @@ package android.widget {
     ctor public GridView(android.content.Context);
     ctor public GridView(android.content.Context, android.util.AttributeSet);
     ctor public GridView(android.content.Context, android.util.AttributeSet, int);
+    ctor public GridView(android.content.Context, android.util.AttributeSet, int, int);
     method public android.widget.ListAdapter getAdapter();
     method public int getColumnWidth();
     method public int getGravity();
@@ -31269,6 +31316,7 @@ package android.widget {
     ctor public HorizontalScrollView(android.content.Context);
     ctor public HorizontalScrollView(android.content.Context, android.util.AttributeSet);
     ctor public HorizontalScrollView(android.content.Context, android.util.AttributeSet, int);
+    ctor public HorizontalScrollView(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean arrowScroll(int);
     method protected int computeScrollDeltaToGetChildRectOnScreen(android.graphics.Rect);
     method public boolean executeKeyEvent(android.view.KeyEvent);
@@ -31288,6 +31336,7 @@ package android.widget {
     ctor public ImageButton(android.content.Context);
     ctor public ImageButton(android.content.Context, android.util.AttributeSet);
     ctor public ImageButton(android.content.Context, android.util.AttributeSet, int);
+    ctor public ImageButton(android.content.Context, android.util.AttributeSet, int, int);
   }
 
   public class ImageSwitcher extends android.widget.ViewSwitcher {
@@ -31302,6 +31351,7 @@ package android.widget {
     ctor public ImageView(android.content.Context);
     ctor public ImageView(android.content.Context, android.util.AttributeSet);
     ctor public ImageView(android.content.Context, android.util.AttributeSet, int);
+    ctor public ImageView(android.content.Context, android.util.AttributeSet, int, int);
     method public final void clearColorFilter();
     method public boolean getAdjustViewBounds();
     method public boolean getBaselineAlignBottom();
@@ -31353,6 +31403,7 @@ package android.widget {
     ctor public LinearLayout(android.content.Context);
     ctor public LinearLayout(android.content.Context, android.util.AttributeSet);
     ctor public LinearLayout(android.content.Context, android.util.AttributeSet, int);
+    ctor public LinearLayout(android.content.Context, android.util.AttributeSet, int, int);
     method public int getBaselineAlignedChildIndex();
     method public android.graphics.drawable.Drawable getDividerDrawable();
     method public int getDividerPadding();
@@ -31462,6 +31513,7 @@ package android.widget {
     ctor public ListView(android.content.Context);
     ctor public ListView(android.content.Context, android.util.AttributeSet);
     ctor public ListView(android.content.Context, android.util.AttributeSet, int);
+    ctor public ListView(android.content.Context, android.util.AttributeSet, int, int);
     method public void addFooterView(android.view.View, java.lang.Object, boolean);
     method public void addFooterView(android.view.View);
     method public void addHeaderView(android.view.View, java.lang.Object, boolean);
@@ -31534,6 +31586,7 @@ package android.widget {
     ctor public MultiAutoCompleteTextView(android.content.Context);
     ctor public MultiAutoCompleteTextView(android.content.Context, android.util.AttributeSet);
     ctor public MultiAutoCompleteTextView(android.content.Context, android.util.AttributeSet, int);
+    ctor public MultiAutoCompleteTextView(android.content.Context, android.util.AttributeSet, int, int);
     method protected void performFiltering(java.lang.CharSequence, int, int, int);
     method public void setTokenizer(android.widget.MultiAutoCompleteTextView.Tokenizer);
   }
@@ -31555,6 +31608,7 @@ package android.widget {
     ctor public NumberPicker(android.content.Context);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int);
+    ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int, int);
     method public java.lang.String[] getDisplayedValues();
     method public int getMaxValue();
     method public int getMinValue();
@@ -31698,6 +31752,7 @@ package android.widget {
     ctor public ProgressBar(android.content.Context);
     ctor public ProgressBar(android.content.Context, android.util.AttributeSet);
     ctor public ProgressBar(android.content.Context, android.util.AttributeSet, int);
+    ctor public ProgressBar(android.content.Context, android.util.AttributeSet, int, int);
     method public android.graphics.drawable.Drawable getIndeterminateDrawable();
     method public android.view.animation.Interpolator getInterpolator();
     method public synchronized int getMax();
@@ -31723,6 +31778,7 @@ package android.widget {
     ctor public QuickContactBadge(android.content.Context);
     ctor public QuickContactBadge(android.content.Context, android.util.AttributeSet);
     ctor public QuickContactBadge(android.content.Context, android.util.AttributeSet, int);
+    ctor public QuickContactBadge(android.content.Context, android.util.AttributeSet, int, int);
     method public void assignContactFromEmail(java.lang.String, boolean);
     method public void assignContactFromEmail(java.lang.String, boolean, android.os.Bundle);
     method public void assignContactFromPhone(java.lang.String, boolean);
@@ -31739,6 +31795,7 @@ package android.widget {
     ctor public RadioButton(android.content.Context);
     ctor public RadioButton(android.content.Context, android.util.AttributeSet);
     ctor public RadioButton(android.content.Context, android.util.AttributeSet, int);
+    ctor public RadioButton(android.content.Context, android.util.AttributeSet, int, int);
   }
 
   public class RadioGroup extends android.widget.LinearLayout {
@@ -31764,6 +31821,7 @@ package android.widget {
 
   public class RatingBar extends android.widget.AbsSeekBar {
     ctor public RatingBar(android.content.Context, android.util.AttributeSet, int);
+    ctor public RatingBar(android.content.Context, android.util.AttributeSet, int, int);
     ctor public RatingBar(android.content.Context, android.util.AttributeSet);
     ctor public RatingBar(android.content.Context);
     method public int getNumStars();
@@ -31786,6 +31844,7 @@ package android.widget {
     ctor public RelativeLayout(android.content.Context);
     ctor public RelativeLayout(android.content.Context, android.util.AttributeSet);
     ctor public RelativeLayout(android.content.Context, android.util.AttributeSet, int);
+    ctor public RelativeLayout(android.content.Context, android.util.AttributeSet, int, int);
     method public int getGravity();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setGravity(int);
@@ -31934,6 +31993,7 @@ package android.widget {
     ctor public ScrollView(android.content.Context);
     ctor public ScrollView(android.content.Context, android.util.AttributeSet);
     ctor public ScrollView(android.content.Context, android.util.AttributeSet, int);
+    ctor public ScrollView(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean arrowScroll(int);
     method protected int computeScrollDeltaToGetChildRectOnScreen(android.graphics.Rect);
     method public boolean executeKeyEvent(android.view.KeyEvent);
@@ -31978,6 +32038,8 @@ package android.widget {
   public class SearchView extends android.widget.LinearLayout implements android.view.CollapsibleActionView {
     ctor public SearchView(android.content.Context);
     ctor public SearchView(android.content.Context, android.util.AttributeSet);
+    ctor public SearchView(android.content.Context, android.util.AttributeSet, int);
+    ctor public SearchView(android.content.Context, android.util.AttributeSet, int, int);
     method public int getImeOptions();
     method public int getInputType();
     method public int getMaxWidth();
@@ -32032,6 +32094,7 @@ package android.widget {
     ctor public SeekBar(android.content.Context);
     ctor public SeekBar(android.content.Context, android.util.AttributeSet);
     ctor public SeekBar(android.content.Context, android.util.AttributeSet, int);
+    ctor public SeekBar(android.content.Context, android.util.AttributeSet, int, int);
     method public void setOnSeekBarChangeListener(android.widget.SeekBar.OnSeekBarChangeListener);
   }
 
@@ -32133,6 +32196,7 @@ package android.widget {
   public deprecated class SlidingDrawer extends android.view.ViewGroup {
     ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet);
     ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet, int);
+    ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet, int, int);
     method public void animateClose();
     method public void animateOpen();
     method public void animateToggle();
@@ -32167,6 +32231,7 @@ package android.widget {
   }
 
   public final class Space extends android.view.View {
+    ctor public Space(android.content.Context, android.util.AttributeSet, int, int);
     ctor public Space(android.content.Context, android.util.AttributeSet, int);
     ctor public Space(android.content.Context, android.util.AttributeSet);
     ctor public Space(android.content.Context);
@@ -32178,6 +32243,7 @@ package android.widget {
     ctor public Spinner(android.content.Context, android.util.AttributeSet);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int);
+    ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int, int);
     method public int getDropDownHorizontalOffset();
     method public int getDropDownVerticalOffset();
     method public int getDropDownWidth();
@@ -32205,12 +32271,14 @@ package android.widget {
     ctor public StackView(android.content.Context);
     ctor public StackView(android.content.Context, android.util.AttributeSet);
     ctor public StackView(android.content.Context, android.util.AttributeSet, int);
+    ctor public StackView(android.content.Context, android.util.AttributeSet, int, int);
   }
 
   public class Switch extends android.widget.CompoundButton {
     ctor public Switch(android.content.Context);
     ctor public Switch(android.content.Context, android.util.AttributeSet);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int);
+    ctor public Switch(android.content.Context, android.util.AttributeSet, int, int);
     method public int getSwitchMinWidth();
     method public int getSwitchPadding();
     method public java.lang.CharSequence getTextOff();
@@ -32236,6 +32304,8 @@ package android.widget {
   public class TabHost extends android.widget.FrameLayout implements android.view.ViewTreeObserver.OnTouchModeChangeListener {
     ctor public TabHost(android.content.Context);
     ctor public TabHost(android.content.Context, android.util.AttributeSet);
+    ctor public TabHost(android.content.Context, android.util.AttributeSet, int);
+    ctor public TabHost(android.content.Context, android.util.AttributeSet, int, int);
     method public void addTab(android.widget.TabHost.TabSpec);
     method public void clearAllTabs();
     method public int getCurrentTab();
@@ -32275,6 +32345,7 @@ package android.widget {
     ctor public TabWidget(android.content.Context);
     ctor public TabWidget(android.content.Context, android.util.AttributeSet);
     ctor public TabWidget(android.content.Context, android.util.AttributeSet, int);
+    ctor public TabWidget(android.content.Context, android.util.AttributeSet, int, int);
     method public void dispatchDraw(android.graphics.Canvas);
     method public void focusCurrentTab(int);
     method public android.view.View getChildTabViewAt(int);
@@ -32337,6 +32408,7 @@ package android.widget {
     ctor public TextClock(android.content.Context);
     ctor public TextClock(android.content.Context, android.util.AttributeSet);
     ctor public TextClock(android.content.Context, android.util.AttributeSet, int);
+    ctor public TextClock(android.content.Context, android.util.AttributeSet, int, int);
     method public java.lang.CharSequence getFormat12Hour();
     method public java.lang.CharSequence getFormat24Hour();
     method public java.lang.String getTimeZone();
@@ -32359,6 +32431,7 @@ package android.widget {
     ctor public TextView(android.content.Context);
     ctor public TextView(android.content.Context, android.util.AttributeSet);
     ctor public TextView(android.content.Context, android.util.AttributeSet, int);
+    ctor public TextView(android.content.Context, android.util.AttributeSet, int, int);
     method public void addTextChangedListener(android.text.TextWatcher);
     method public final void append(java.lang.CharSequence);
     method public void append(java.lang.CharSequence, int, int);
@@ -32566,6 +32639,7 @@ package android.widget {
     ctor public TimePicker(android.content.Context);
     ctor public TimePicker(android.content.Context, android.util.AttributeSet);
     ctor public TimePicker(android.content.Context, android.util.AttributeSet, int);
+    ctor public TimePicker(android.content.Context, android.util.AttributeSet, int, int);
     method public java.lang.Integer getCurrentHour();
     method public java.lang.Integer getCurrentMinute();
     method public boolean is24HourView();
@@ -32603,6 +32677,7 @@ package android.widget {
   }
 
   public class ToggleButton extends android.widget.CompoundButton {
+    ctor public ToggleButton(android.content.Context, android.util.AttributeSet, int, int);
     ctor public ToggleButton(android.content.Context, android.util.AttributeSet, int);
     ctor public ToggleButton(android.content.Context, android.util.AttributeSet);
     ctor public ToggleButton(android.content.Context);
@@ -32616,6 +32691,7 @@ package android.widget {
     ctor public TwoLineListItem(android.content.Context);
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet);
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet, int);
+    ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet, int, int);
     method public android.widget.TextView getText1();
     method public android.widget.TextView getText2();
   }
@@ -32624,6 +32700,7 @@ package android.widget {
     ctor public VideoView(android.content.Context);
     ctor public VideoView(android.content.Context, android.util.AttributeSet);
     ctor public VideoView(android.content.Context, android.util.AttributeSet, int);
+    ctor public VideoView(android.content.Context, android.util.AttributeSet, int, int);
     method public void addSubtitleSource(java.io.InputStream, android.media.MediaFormat);
     method public boolean canPause();
     method public boolean canSeekBackward();
@@ -32698,6 +32775,7 @@ package android.widget {
     ctor public ZoomButton(android.content.Context);
     ctor public ZoomButton(android.content.Context, android.util.AttributeSet);
     ctor public ZoomButton(android.content.Context, android.util.AttributeSet, int);
+    ctor public ZoomButton(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean onLongClick(android.view.View);
     method public void setZoomSpeed(long);
   }

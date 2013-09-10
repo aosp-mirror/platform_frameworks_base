@@ -166,25 +166,25 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
             return;
         }
 
-        int defStyle = com.android.internal.R.attr.textAppearanceMisspelledSuggestion;
+        int defStyleAttr = com.android.internal.R.attr.textAppearanceMisspelledSuggestion;
         TypedArray typedArray = context.obtainStyledAttributes(
-                null, com.android.internal.R.styleable.SuggestionSpan, defStyle, 0);
+                null, com.android.internal.R.styleable.SuggestionSpan, defStyleAttr, 0);
         mMisspelledUnderlineThickness = typedArray.getDimension(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
         mMisspelledUnderlineColor = typedArray.getColor(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
 
-        defStyle = com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion;
+        defStyleAttr = com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion;
         typedArray = context.obtainStyledAttributes(
-                null, com.android.internal.R.styleable.SuggestionSpan, defStyle, 0);
+                null, com.android.internal.R.styleable.SuggestionSpan, defStyleAttr, 0);
         mEasyCorrectUnderlineThickness = typedArray.getDimension(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
         mEasyCorrectUnderlineColor = typedArray.getColor(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
 
-        defStyle = com.android.internal.R.attr.textAppearanceAutoCorrectionSuggestion;
+        defStyleAttr = com.android.internal.R.attr.textAppearanceAutoCorrectionSuggestion;
         typedArray = context.obtainStyledAttributes(
-                null, com.android.internal.R.styleable.SuggestionSpan, defStyle, 0);
+                null, com.android.internal.R.styleable.SuggestionSpan, defStyleAttr, 0);
         mAutoCorrectionUnderlineThickness = typedArray.getDimension(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
         mAutoCorrectionUnderlineColor = typedArray.getColor(

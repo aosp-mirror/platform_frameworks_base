@@ -45,10 +45,15 @@ public class PreferenceFrameLayout extends FrameLayout {
         this(context, attrs, com.android.internal.R.attr.preferenceFrameLayoutStyle);
     }
 
-    public PreferenceFrameLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.PreferenceFrameLayout, defStyle, 0);
+    public PreferenceFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public PreferenceFrameLayout(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.PreferenceFrameLayout, defStyleAttr, defStyleRes);
 
         float density = context.getResources().getDisplayMetrics().density;
         int defaultBorderTop = (int) (density * DEFAULT_BORDER_TOP + 0.5f);

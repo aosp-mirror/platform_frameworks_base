@@ -149,14 +149,18 @@ public class DatePicker extends FrameLayout {
         this(context, attrs, R.attr.datePickerStyle);
     }
 
-    public DatePicker(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public DatePicker(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public DatePicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         // initialization based on locale
         setCurrentLocale(Locale.getDefault());
 
-        TypedArray attributesArray = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
-                defStyle, 0);
+        final TypedArray attributesArray = context.obtainStyledAttributes(
+                attrs, R.styleable.DatePicker, defStyleAttr, defStyleRes);
         boolean spinnersShown = attributesArray.getBoolean(R.styleable.DatePicker_spinnersShown,
                 DEFAULT_SPINNERS_SHOWN);
         boolean calendarViewShown = attributesArray.getBoolean(

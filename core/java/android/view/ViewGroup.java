@@ -465,8 +465,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         initFromAttributes(context, attrs);
     }
 
-    public ViewGroup(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ViewGroup(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initViewGroup();
+        initFromAttributes(context, attrs);
+    }
+
+    public ViewGroup(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initViewGroup();
         initFromAttributes(context, attrs);
     }

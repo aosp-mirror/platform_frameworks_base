@@ -37,8 +37,14 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
         // TODO Auto-generated constructor stub
     }
 
-    public CheckableLinearLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public CheckableLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+        // TODO Auto-generated constructor stub
+    }
+
+    public CheckableLinearLayout(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         // TODO Auto-generated constructor stub
     }
 

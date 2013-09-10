@@ -200,13 +200,32 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      *
      * @param context The application environment.
      * @param attrs A collection of attributes.
-     * @param defStyle The default style to apply to this view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public ActivityChooserView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ActivityChooserView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    /**
+     * Create a new instance.
+     *
+     * @param context The application environment.
+     * @param attrs A collection of attributes.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public ActivityChooserView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray attributesArray = context.obtainStyledAttributes(attrs,
-                R.styleable.ActivityChooserView, defStyle, 0);
+                R.styleable.ActivityChooserView, defStyleAttr, defStyleRes);
 
         mInitialActivityCount = attributesArray.getInt(
                 R.styleable.ActivityChooserView_initialActivityCount,

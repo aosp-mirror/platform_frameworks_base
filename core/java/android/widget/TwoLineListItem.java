@@ -56,11 +56,15 @@ public class TwoLineListItem extends RelativeLayout {
         this(context, attrs, 0); 
     }
 
-    public TwoLineListItem(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TwoLineListItem(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.TwoLineListItem, defStyle, 0);
+    public TwoLineListItem(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.TwoLineListItem, defStyleAttr, defStyleRes);
 
         a.recycle();
     }

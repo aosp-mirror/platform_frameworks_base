@@ -116,8 +116,12 @@ public class VideoView extends SurfaceView
         initVideoView();
     }
 
-    public VideoView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public VideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public VideoView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initVideoView();
     }
 

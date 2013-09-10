@@ -80,9 +80,13 @@ public class TimePicker extends FrameLayout {
         this(context, attrs, R.attr.timePickerStyle);
     }
 
-    public TimePicker(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        mDelegate = new LegacyTimePickerDelegate(this, context, attrs, defStyle);
+    public TimePicker(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public TimePicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        mDelegate = new LegacyTimePickerDelegate(this, context, attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -294,15 +298,15 @@ public class TimePicker extends FrameLayout {
         };
 
         public LegacyTimePickerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
-                                        int defStyle) {
+                int defStyleAttr, int defStyleRes) {
             mDelegator = delegator;
 
             // initialization based on locale
             setCurrentLocale(Locale.getDefault());
 
             // process style attributes
-            TypedArray attributesArray = context.obtainStyledAttributes(
-                    attrs, R.styleable.TimePicker, defStyle, 0);
+            final TypedArray attributesArray = context.obtainStyledAttributes(
+                    attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
             int layoutResourceId = attributesArray.getResourceId(
                     R.styleable.TimePicker_internalLayout, R.layout.time_picker);
             attributesArray.recycle();

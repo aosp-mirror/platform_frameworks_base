@@ -74,10 +74,16 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         this(context, attrs, com.android.internal.R.attr.actionModeStyle);
     }
     
-    public ActionBarContextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionMode, defStyle, 0);
+    public ActionBarContextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ActionBarContextView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.ActionMode, defStyleAttr, defStyleRes);
         setBackgroundDrawable(a.getDrawable(
                 com.android.internal.R.styleable.ActionMode_background));
         mTitleStyleRes = a.getResourceId(

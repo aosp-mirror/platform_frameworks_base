@@ -130,18 +130,17 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
     /**
      * Construct a new spinner with the given context's theme, the supplied attribute set,
-     * and default style.
+     * and default style attribute.
      *
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public Spinner(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, MODE_THEME);
+    public Spinner(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0, MODE_THEME);
     }
 
     /**
@@ -152,20 +151,44 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      * @param mode Constant describing how the user will select choices from the spinner.
-     * 
+     *
      * @see #MODE_DIALOG
      * @see #MODE_DROPDOWN
      */
-    public Spinner(Context context, AttributeSet attrs, int defStyle, int mode) {
-        super(context, attrs, defStyle);
+    public Spinner(Context context, AttributeSet attrs, int defStyleAttr, int mode) {
+        this(context, attrs, defStyleAttr, 0, mode);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Spinner, defStyle, 0);
+    /**
+     * Construct a new spinner with the given context's theme, the supplied attribute set,
+     * and default style. <code>mode</code> may be one of {@link #MODE_DIALOG} or
+     * {@link #MODE_DROPDOWN} and determines how the user will select choices from the spinner.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     * @param mode Constant describing how the user will select choices from the spinner.
+     *
+     * @see #MODE_DIALOG
+     * @see #MODE_DROPDOWN
+     */
+    public Spinner(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes, int mode) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.Spinner, defStyleAttr, defStyleRes);
 
         if (mode == MODE_THEME) {
             mode = a.getInt(com.android.internal.R.styleable.Spinner_spinnerMode, MODE_DIALOG);
@@ -178,7 +201,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         case MODE_DROPDOWN: {
-            final DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
+            final DropdownPopup popup = new DropdownPopup(context, attrs, defStyleAttr, defStyleRes);
 
             mDropDownWidth = a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
@@ -1027,8 +1050,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         private CharSequence mHintText;
         private ListAdapter mAdapter;
 
-        public DropdownPopup(Context context, AttributeSet attrs, int defStyleRes) {
-            super(context, attrs, 0, defStyleRes);
+        public DropdownPopup(
+                Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
 
             setAnchorView(Spinner.this);
             setModal(true);
