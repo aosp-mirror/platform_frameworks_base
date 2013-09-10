@@ -171,10 +171,6 @@ public class DocumentsActivity extends Activity {
         mState.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(this);
 
         if (mState.action == ACTION_MANAGE) {
-            mState.sortOrder = SORT_ORDER_LAST_MODIFIED;
-        }
-
-        if (mState.action == ACTION_MANAGE) {
             final Uri uri = intent.getData();
             final String rootId = DocumentsContract.getRootId(uri);
             final RootInfo root = mRoots.getRoot(uri.getAuthority(), rootId);
@@ -348,8 +344,8 @@ public class DocumentsActivity extends Activity {
 
         if (cwd != null) {
             sort.setVisible(true);
-            grid.setVisible(mState.mode != MODE_GRID);
-            list.setVisible(mState.mode != MODE_LIST);
+            grid.setVisible(mState.derivedMode != MODE_GRID);
+            list.setVisible(mState.derivedMode != MODE_LIST);
         } else {
             sort.setVisible(false);
             grid.setVisible(false);
@@ -433,42 +429,25 @@ public class DocumentsActivity extends Activity {
      * Set state sort order based on explicit user action.
      */
     private void setUserSortOrder(int sortOrder) {
-        final RootInfo root = getCurrentRoot();
-        final DocumentInfo cwd = getCurrentDirectory();
-
-        // TODO: persist async, then trigger rebind
-        final Uri stateUri = RecentsProvider.buildState(
-                root.authority, root.rootId, cwd.documentId);
-        final ContentValues values = new ContentValues();
-        values.put(StateColumns.SORT_ORDER, sortOrder);
-        getContentResolver().insert(stateUri, values);
-
+        mState.userSortOrder = sortOrder;
         DirectoryFragment.get(getFragmentManager()).onUserSortOrderChanged();
-        onStateChanged();
     }
 
     /**
      * Set state mode based on explicit user action.
      */
     private void setUserMode(int mode) {
-        final RootInfo root = getCurrentRoot();
-        final DocumentInfo cwd = getCurrentDirectory();
-
-        // TODO: persist async, then trigger rebind
-        final Uri stateUri = RecentsProvider.buildState(
-                root.authority, root.rootId, cwd.documentId);
-        final ContentValues values = new ContentValues();
-        values.put(StateColumns.MODE, mode);
-        getContentResolver().insert(stateUri, values);
-
-        mState.mode = mode;
-
+        mState.userMode = mode;
         DirectoryFragment.get(getFragmentManager()).onUserModeChanged();
-        onStateChanged();
     }
 
     @Override
     public void onBackPressed() {
+        if (!mState.stackTouched) {
+            super.onBackPressed();
+            return;
+        }
+
         final int size = mState.stack.size();
         if (size > 1) {
             mState.stack.pop();
@@ -564,6 +543,7 @@ public class DocumentsActivity extends Activity {
             }
 
             while (mState.stack.size() > itemPosition + 1) {
+                mState.stackTouched = true;
                 mState.stack.pop();
             }
             onCurrentDirectoryChanged();
@@ -629,6 +609,7 @@ public class DocumentsActivity extends Activity {
 
     public void onStackPicked(DocumentStack stack) {
         mState.stack = stack;
+        mState.stackTouched = true;
         onCurrentDirectoryChanged();
     }
 
@@ -636,6 +617,7 @@ public class DocumentsActivity extends Activity {
         // Clear entire backstack and start in new root
         mState.stack.root = root;
         mState.stack.clear();
+        mState.stackTouched = true;
 
         if (!mRoots.isRecentsRoot(root)) {
             try {
@@ -664,13 +646,8 @@ public class DocumentsActivity extends Activity {
     public void onDocumentPicked(DocumentInfo doc) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isDirectory()) {
-            // TODO: query display mode user preference for this dir
-            if (doc.isGridPreferred()) {
-                mState.mode = MODE_GRID;
-            } else {
-                mState.mode = MODE_LIST;
-            }
             mState.stack.push(doc);
+            mState.stackTouched = true;
             onCurrentDirectoryChanged();
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
@@ -774,13 +751,23 @@ public class DocumentsActivity extends Activity {
 
     public static class State implements android.os.Parcelable {
         public int action;
-        public int mode = MODE_LIST;
         public String[] acceptMimes;
-        public int sortOrder = SORT_ORDER_DISPLAY_NAME;
+
+        /** Explicit user choice */
+        public int userMode = MODE_UNKNOWN;
+        /** Derived after loader */
+        public int derivedMode = MODE_LIST;
+
+        /** Explicit user choice */
+        public int userSortOrder = SORT_ORDER_UNKNOWN;
+        /** Derived after loader */
+        public int derivedSortOrder = SORT_ORDER_DISPLAY_NAME;
+
         public boolean allowMultiple = false;
         public boolean showSize = false;
         public boolean localOnly = false;
         public boolean showAdvanced = false;
+        public boolean stackTouched = false;
 
         /** Current user navigation stack; empty implies recents. */
         public DocumentStack stack = new DocumentStack();
@@ -809,13 +796,14 @@ public class DocumentsActivity extends Activity {
         @Override
         public void writeToParcel(Parcel out, int flags) {
             out.writeInt(action);
-            out.writeInt(mode);
+            out.writeInt(userMode);
             out.writeStringArray(acceptMimes);
-            out.writeInt(sortOrder);
+            out.writeInt(userSortOrder);
             out.writeInt(allowMultiple ? 1 : 0);
             out.writeInt(showSize ? 1 : 0);
             out.writeInt(localOnly ? 1 : 0);
             out.writeInt(showAdvanced ? 1 : 0);
+            out.writeInt(stackTouched ? 1 : 0);
             DurableUtils.writeToParcel(out, stack);
             out.writeString(currentSearch);
         }
@@ -825,13 +813,14 @@ public class DocumentsActivity extends Activity {
             public State createFromParcel(Parcel in) {
                 final State state = new State();
                 state.action = in.readInt();
-                state.mode = in.readInt();
+                state.userMode = in.readInt();
                 state.acceptMimes = in.readStringArray();
-                state.sortOrder = in.readInt();
+                state.userSortOrder = in.readInt();
                 state.allowMultiple = in.readInt() != 0;
                 state.showSize = in.readInt() != 0;
                 state.localOnly = in.readInt() != 0;
                 state.showAdvanced = in.readInt() != 0;
+                state.stackTouched = in.readInt() != 0;
                 DurableUtils.readFromParcel(in, state.stack);
                 state.currentSearch = in.readString();
                 return state;
