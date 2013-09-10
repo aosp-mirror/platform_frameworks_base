@@ -64,8 +64,12 @@ public class CheckBox extends CompoundButton {
         this(context, attrs, com.android.internal.R.attr.checkboxStyle);
     }
 
-    public CheckBox(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public CheckBox(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public CheckBox(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override

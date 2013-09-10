@@ -133,17 +133,21 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         this(context, attrs, com.android.internal.R.attr.autoCompleteTextViewStyle);
     }
 
-    public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public AutoCompleteTextView(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         mPopup = new ListPopupWindow(context, attrs,
                 com.android.internal.R.attr.autoCompleteTextViewStyle);
         mPopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
 
-        TypedArray a =
-            context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.AutoCompleteTextView, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
 
         mThreshold = a.getInt(
                 R.styleable.AutoCompleteTextView_completionThreshold, 2);

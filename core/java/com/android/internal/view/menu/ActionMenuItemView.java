@@ -60,13 +60,17 @@ public class ActionMenuItemView extends TextView
         this(context, attrs, 0);
     }
 
-    public ActionMenuItemView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ActionMenuItemView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ActionMenuItemView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         final Resources res = context.getResources();
         mAllowTextWithIcon = res.getBoolean(
                 com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ActionMenuItemView, 0, 0);
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.ActionMenuItemView, defStyleAttr, defStyleRes);
         mMinWidth = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ActionMenuItemView_minWidth, 0);
         a.recycle();

@@ -230,8 +230,12 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         super(context, attrs);
     }
 
-    public AdapterView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public AdapterView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public AdapterView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         // If not explicitly specified this view is important for accessibility.
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {

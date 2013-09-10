@@ -37,13 +37,18 @@ public class SeekBarPreference extends Preference
     private boolean mTrackingTouch;
 
     public SeekBarPreference(
-            Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ProgressBar, defStyle, 0);
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ProgressBar, defStyleAttr, defStyleRes);
         setMax(a.getInt(com.android.internal.R.styleable.ProgressBar_max, mMax));
         a.recycle();
         setLayoutResource(com.android.internal.R.layout.preference_widget_seekbar);
+    }
+
+    public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public SeekBarPreference(Context context, AttributeSet attrs) {

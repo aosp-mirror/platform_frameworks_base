@@ -88,8 +88,14 @@ public class SizeAdaptiveLayout extends ViewGroup {
         initialize();
     }
 
-    public SizeAdaptiveLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public SizeAdaptiveLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initialize();
+    }
+
+    public SizeAdaptiveLayout(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initialize();
     }
 

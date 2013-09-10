@@ -441,10 +441,12 @@ public class WebView extends AbsoluteLayout
      *
      * @param context a Context object used to access application assets
      * @param attrs an AttributeSet passed to our parent
-     * @param defStyle the default style resource ID
+     * @param defStyleAttr an attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public WebView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, false);
+    public WebView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     /**
@@ -452,7 +454,26 @@ public class WebView extends AbsoluteLayout
      *
      * @param context a Context object used to access application assets
      * @param attrs an AttributeSet passed to our parent
-     * @param defStyle the default style resource ID
+     * @param defStyleAttr an attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes a resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public WebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        this(context, attrs, defStyleAttr, defStyleRes, null, false);
+    }
+
+    /**
+     * Constructs a new WebView with layout parameters and a default style.
+     *
+     * @param context a Context object used to access application assets
+     * @param attrs an AttributeSet passed to our parent
+     * @param defStyleAttr an attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      * @param privateBrowsing whether this WebView will be initialized in
      *                        private mode
      *
@@ -462,9 +483,9 @@ public class WebView extends AbsoluteLayout
      * and {@link WebStorage} for fine-grained control of privacy data.
      */
     @Deprecated
-    public WebView(Context context, AttributeSet attrs, int defStyle,
+    public WebView(Context context, AttributeSet attrs, int defStyleAttr,
             boolean privateBrowsing) {
-        this(context, attrs, defStyle, null, privateBrowsing);
+        this(context, attrs, defStyleAttr, 0, null, privateBrowsing);
     }
 
     /**
@@ -475,7 +496,9 @@ public class WebView extends AbsoluteLayout
      *
      * @param context a Context object used to access application assets
      * @param attrs an AttributeSet passed to our parent
-     * @param defStyle the default style resource ID
+     * @param defStyleAttr an attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      * @param javaScriptInterfaces a Map of interface names, as keys, and
      *                             object implementing those interfaces, as
      *                             values
@@ -484,10 +507,18 @@ public class WebView extends AbsoluteLayout
      * @hide This is used internally by dumprendertree, as it requires the javaScript interfaces to
      *       be added synchronously, before a subsequent loadUrl call takes effect.
      */
-    @SuppressWarnings("deprecation")  // for super() call into deprecated base class constructor.
-    protected WebView(Context context, AttributeSet attrs, int defStyle,
+    protected WebView(Context context, AttributeSet attrs, int defStyleAttr,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
-        super(context, attrs, defStyle);
+        this(context, attrs, defStyleAttr, 0, javaScriptInterfaces, privateBrowsing);
+    }
+
+    /**
+     * @hide
+     */
+    @SuppressWarnings("deprecation")  // for super() call into deprecated base class constructor.
+    protected WebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes,
+            Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }

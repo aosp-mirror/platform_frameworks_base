@@ -117,12 +117,17 @@ public class ImageView extends View {
         this(context, attrs, 0);
     }
 
-    public ImageView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
         initImageView();
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ImageView, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.ImageView, defStyleAttr, defStyleRes);
 
         Drawable d = a.getDrawable(com.android.internal.R.styleable.ImageView_src);
         if (d != null) {

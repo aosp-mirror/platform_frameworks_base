@@ -265,10 +265,15 @@ public class GridLayout extends ViewGroup {
     /**
      * {@inheritDoc}
      */
-    public GridLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public GridLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public GridLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         mDefaultGap = context.getResources().getDimensionPixelOffset(R.dimen.default_gap);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GridLayout);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.GridLayout, defStyleAttr, defStyleRes);
         try {
             setRowCount(a.getInt(ROW_COUNT, DEFAULT_COUNT));
             setColumnCount(a.getInt(COLUMN_COUNT, DEFAULT_COUNT));

@@ -617,9 +617,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         this(context, attrs, com.android.internal.R.attr.textViewStyle);
     }
 
+    public TextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
     @SuppressWarnings("deprecation")
-    public TextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
         mText = "";
 
         final Resources res = getResources();
@@ -656,8 +661,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * to be able to parse the appearance first and then let specific tags
          * for this View override it.
          */
-        TypedArray a = theme.obtainStyledAttributes(
-                    attrs, com.android.internal.R.styleable.TextViewAppearance, defStyle, 0);
+        TypedArray a = theme.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.TextViewAppearance, defStyleAttr, defStyleRes);
         TypedArray appearance = null;
         int ap = a.getResourceId(
                 com.android.internal.R.styleable.TextViewAppearance_textAppearance, -1);
@@ -750,7 +755,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int inputType = EditorInfo.TYPE_NULL;
 
         a = theme.obtainStyledAttributes(
-                    attrs, com.android.internal.R.styleable.TextView, defStyle, 0);
+                    attrs, com.android.internal.R.styleable.TextView, defStyleAttr, defStyleRes);
 
         int n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
@@ -1274,9 +1279,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * However, TextViews that have input or movement methods *are*
          * focusable by default.
          */
-        a = context.obtainStyledAttributes(attrs,
-                                           com.android.internal.R.styleable.View,
-                                           defStyle, 0);
+        a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
 
         boolean focusable = mMovement != null || getKeyListener() != null;
         boolean clickable = focusable;

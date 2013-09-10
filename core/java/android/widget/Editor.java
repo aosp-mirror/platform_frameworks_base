@@ -2321,8 +2321,8 @@ public class Editor {
         private final HashMap<SuggestionSpan, Integer> mSpansLengths;
 
         private class CustomPopupWindow extends PopupWindow {
-            public CustomPopupWindow(Context context, int defStyle) {
-                super(context, null, defStyle);
+            public CustomPopupWindow(Context context, int defStyleAttr) {
+                super(context, null, defStyleAttr);
             }
 
             @Override

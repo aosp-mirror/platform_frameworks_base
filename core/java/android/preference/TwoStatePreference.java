@@ -41,9 +41,13 @@ public abstract class TwoStatePreference extends Preference {
     private boolean mSendClickAccessibilityEvent;
     private boolean mDisableDependentsState;
 
+    public TwoStatePreference(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
 
-    public TwoStatePreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TwoStatePreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public TwoStatePreference(Context context, AttributeSet attrs) {

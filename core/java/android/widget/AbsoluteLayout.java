@@ -47,9 +47,12 @@ public class AbsoluteLayout extends ViewGroup {
         super(context, attrs);
     }
 
-    public AbsoluteLayout(Context context, AttributeSet attrs,
-            int defStyle) {
-        super(context, attrs, defStyle);
+    public AbsoluteLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr, 0);
+    }
+
+    public AbsoluteLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override

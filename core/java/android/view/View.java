@@ -3392,27 +3392,64 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Perform inflation from XML and apply a class-specific base style. This
-     * constructor of View allows subclasses to use their own base style when
-     * they are inflating. For example, a Button class's constructor would call
-     * this version of the super class constructor and supply
-     * <code>R.attr.buttonStyle</code> for <var>defStyle</var>; this allows
-     * the theme's button style to modify all of the base view attributes (in
-     * particular its background) as well as the Button class's attributes.
+     * Perform inflation from XML and apply a class-specific base style from a
+     * theme attribute. This constructor of View allows subclasses to use their
+     * own base style when they are inflating. For example, a Button class's
+     * constructor would call this version of the super class constructor and
+     * supply <code>R.attr.buttonStyle</code> for <var>defStyleAttr</var>; this
+     * allows the theme's button style to modify all of the base view attributes
+     * (in particular its background) as well as the Button class's attributes.
      *
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
      * @param defStyleAttr An attribute in the current theme that contains a
-     *        reference to a style resource to apply to this view. If 0, no
-     *        default style will be applied.
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      * @see #View(Context, AttributeSet)
      */
     public View(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    /**
+     * Perform inflation from XML and apply a class-specific base style from a
+     * theme attribute or style resource. This constructor of View allows
+     * subclasses to use their own base style when they are inflating.
+     * <p>
+     * When determining the final value of a particular attribute, there are
+     * four inputs that come into play:
+     * <ol>
+     * <li>Any attribute values in the given AttributeSet.
+     * <li>The style resource specified in the AttributeSet (named "style").
+     * <li>The default style specified by <var>defStyleAttr</var>.
+     * <li>The default style specified by <var>defStyleRes</var>.
+     * <li>The base values in this theme.
+     * </ol>
+     * <p>
+     * Each of these inputs is considered in-order, with the first listed taking
+     * precedence over the following ones. In other words, if in the
+     * AttributeSet you have supplied <code>&lt;Button * textColor="#ff000000"&gt;</code>
+     * , then the button's text will <em>always</em> be black, regardless of
+     * what is specified in any of the styles.
+     *
+     * @param context The Context the view is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     * @see #View(Context, AttributeSet, int)
+     */
+    public View(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         this(context);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.View,
-                defStyleAttr, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
 
         Drawable background = null;
 

@@ -65,11 +65,15 @@ public abstract class AbsSeekBar extends ProgressBar {
         super(context, attrs);
     }
 
-    public AbsSeekBar(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public AbsSeekBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.SeekBar, defStyle, 0);
+    public AbsSeekBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.SeekBar, defStyleAttr, defStyleRes);
         Drawable thumb = a.getDrawable(com.android.internal.R.styleable.SeekBar_thumb);
         setThumb(thumb); // will guess mThumbOffset if thumb != null...
         // ...but allow layout to override this

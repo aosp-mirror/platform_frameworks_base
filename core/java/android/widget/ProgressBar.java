@@ -242,20 +242,18 @@ public class ProgressBar extends View {
         this(context, attrs, com.android.internal.R.attr.progressBarStyle);
     }
 
-    public ProgressBar(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, 0);
+    public ProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
-    /**
-     * @hide
-     */
-    public ProgressBar(Context context, AttributeSet attrs, int defStyle, int styleRes) {
-        super(context, attrs, defStyle);
+    public ProgressBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
         mUiThreadId = Thread.currentThread().getId();
         initProgressBar();
 
-        TypedArray a =
-            context.obtainStyledAttributes(attrs, R.styleable.ProgressBar, defStyle, styleRes);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.ProgressBar, defStyleAttr, defStyleRes);
         
         mNoInvalidate = true;
         

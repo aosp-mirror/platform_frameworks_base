@@ -330,17 +330,21 @@ public class CalendarView extends FrameLayout {
     }
 
     public CalendarView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.calendarViewStyle);
     }
 
-    public CalendarView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, 0);
+    public CalendarView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public CalendarView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         // initialization based on locale
         setCurrentLocale(Locale.getDefault());
 
-        TypedArray attributesArray = context.obtainStyledAttributes(attrs, R.styleable.CalendarView,
-                R.attr.calendarViewStyle, 0);
+        final TypedArray attributesArray = context.obtainStyledAttributes(
+                attrs, R.styleable.CalendarView, defStyleAttr, defStyleRes);
         mShowWeekNumber = attributesArray.getBoolean(R.styleable.CalendarView_showWeekNumber,
                 DEFAULT_SHOW_WEEK_NUMBER);
         mFirstDayOfWeek = attributesArray.getInt(R.styleable.CalendarView_firstDayOfWeek,

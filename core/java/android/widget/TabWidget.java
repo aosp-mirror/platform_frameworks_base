@@ -74,11 +74,15 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         this(context, attrs, com.android.internal.R.attr.tabWidgetStyle);
     }
 
-    public TabWidget(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public TabWidget(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public TabWidget(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.TabWidget, defStyle, 0);
+                attrs, com.android.internal.R.styleable.TabWidget, defStyleAttr, defStyleRes);
 
         setStripEnabled(a.getBoolean(R.styleable.TabWidget_tabStripEnabled, true));
         setLeftStripDrawable(a.getDrawable(R.styleable.TabWidget_tabStripLeft));

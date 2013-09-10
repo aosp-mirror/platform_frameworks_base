@@ -79,8 +79,12 @@ public class SeekBar extends AbsSeekBar {
         this(context, attrs, com.android.internal.R.attr.seekBarStyle);
     }
 
-    public SeekBar(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public SeekBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public SeekBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override

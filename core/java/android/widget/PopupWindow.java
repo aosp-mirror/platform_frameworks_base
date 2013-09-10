@@ -167,8 +167,8 @@ public class PopupWindow {
      *
      * <p>The popup does provide a background.</p>
      */
-    public PopupWindow(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, 0);
+    public PopupWindow(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
     
     /**
@@ -180,8 +180,7 @@ public class PopupWindow {
         mContext = context;
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
-        TypedArray a =
-            context.obtainStyledAttributes(
+        final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.PopupWindow, defStyleAttr, defStyleRes);
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);

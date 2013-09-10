@@ -139,19 +139,41 @@ public class Switch extends CompoundButton {
      *
      * @param context The Context that will determine this widget's theming.
      * @param attrs Specification of attributes that should deviate from the default styling.
-     * @param defStyle An attribute ID within the active theme containing a reference to the
-     *                 default style for this widget. e.g. android.R.attr.switchStyle.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
      */
-    public Switch(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public Switch(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+
+    /**
+     * Construct a new Switch with a default style determined by the given theme
+     * attribute or style resource, overriding specific style attributes as
+     * requested.
+     *
+     * @param context The Context that will determine this widget's theming.
+     * @param attrs Specification of attributes that should deviate from the
+     *        default styling.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource that supplies default values for
+     *        the view. Can be 0 to not look for defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *        supplies default values for the view, used only if
+     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
+     *        to not look for defaults.
+     */
+    public Switch(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         Resources res = getResources();
         mTextPaint.density = res.getDisplayMetrics().density;
         mTextPaint.setCompatibilityScaling(res.getCompatibilityInfo().applicationScale);
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Switch, defStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, com.android.internal.R.styleable.Switch, defStyleAttr, defStyleRes);
 
         mThumbDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_thumb);
         mTrackDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_track);

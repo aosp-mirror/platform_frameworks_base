@@ -51,13 +51,22 @@ public class VolumePreference extends SeekBarDialogPreference implements
     /** May be null if the dialog isn't visible. */
     private SeekBarVolumizer mSeekBarVolumizer;
 
-    public VolumePreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public VolumePreference(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.VolumePreference, 0, 0);
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.VolumePreference, defStyleAttr, defStyleRes);
         mStreamType = a.getInt(android.R.styleable.VolumePreference_streamType, 0);
         a.recycle();
+    }
+
+    public VolumePreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public VolumePreference(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
     public void setStreamType(int streamType) {

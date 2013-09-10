@@ -58,11 +58,15 @@ public class CheckedTextView extends TextView implements Checkable {
         this(context, attrs, R.attr.checkedTextViewStyle);
     }
 
-    public CheckedTextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public CheckedTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.CheckedTextView, defStyle, 0);
+    public CheckedTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.CheckedTextView, defStyleAttr, defStyleRes);
 
         Drawable d = a.getDrawable(R.styleable.CheckedTextView_checkMark);
         if (d != null) {
