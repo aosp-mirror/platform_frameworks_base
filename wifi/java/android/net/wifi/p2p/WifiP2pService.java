@@ -174,6 +174,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     //   msg.obj  = StateMachine to send to when blocked
     public static final int BLOCK_DISCOVERY                 =   BASE + 15;
 
+    // set country code
+    public static final int SET_COUNTRY_CODE                =   BASE + 16;
+
     public static final int ENABLED                         = 1;
     public static final int DISABLED                        = 0;
 
@@ -632,6 +635,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.START_LISTEN:
                 case WifiP2pManager.STOP_LISTEN:
                 case WifiP2pManager.SET_CHANNEL:
+                case SET_COUNTRY_CODE:
                     break;
                 case WifiStateMachine.CMD_ENABLE_P2P:
                     // Enable is lazy and has no response
@@ -1063,6 +1067,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     } else {
                         replyToMessage(message, WifiP2pManager.SET_CHANNEL_FAILED);
                     }
+                    break;
+                case SET_COUNTRY_CODE:
+                    String countryCode = (String) message.obj;
+                    mWifiNative.setCountryCode(countryCode);
                     break;
                 default:
                    return NOT_HANDLED;
@@ -2536,6 +2544,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mWifiNative.p2pServiceFlush();
         mServiceTransactionId = 0;
         mServiceDiscReqId = null;
+
+        String countryCode = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.WIFI_COUNTRY_CODE);
+        if (countryCode != null && !countryCode.isEmpty()) {
+            mP2pStateMachine.sendMessage(SET_COUNTRY_CODE, countryCode);
+        }
 
         updatePersistentNetworks(RELOAD);
     }
