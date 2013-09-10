@@ -31,6 +31,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -65,6 +66,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Predicate;
@@ -190,11 +192,13 @@ public class DirectoryFragment extends Fragment {
                     case TYPE_NORMAL:
                         contentsUri = DocumentsContract.buildChildDocumentsUri(
                                 doc.authority, doc.documentId);
-                        return new DirectoryLoader(context, root, doc, contentsUri);
+                        return new DirectoryLoader(
+                                context, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_SEARCH:
                         contentsUri = DocumentsContract.buildSearchDocumentsUri(
                                 doc.authority, doc.documentId, query);
-                        return new DirectoryLoader(context, root, doc, contentsUri);
+                        return new DirectoryLoader(
+                                context, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_RECENT_OPEN:
                         final RootsCache roots = DocumentsApplication.getRootsCache(context);
                         final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
@@ -212,14 +216,14 @@ public class DirectoryFragment extends Fragment {
 
                 // Push latest state up to UI
                 // TODO: if mode change was racing with us, don't overwrite it
-                state.mode = result.mode;
-                state.sortOrder = result.sortOrder;
+                state.derivedMode = result.mode;
+                state.derivedSortOrder = result.sortOrder;
                 ((DocumentsActivity) context).onStateChanged();
 
                 updateDisplayState();
 
-                if (mLastSortOrder != result.sortOrder) {
-                    mLastSortOrder = result.sortOrder;
+                if (mLastSortOrder != state.derivedSortOrder) {
+                    mLastSortOrder = state.derivedSortOrder;
                     mListView.smoothScrollToPosition(0);
                     mGridView.smoothScrollToPosition(0);
                 }
@@ -244,12 +248,36 @@ public class DirectoryFragment extends Fragment {
     }
 
     public void onUserSortOrderChanged() {
-        // User change always triggers reload
+        // Sort order change always triggers reload; we'll trigger state change
+        // on the flip side.
         getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
     }
 
     public void onUserModeChanged() {
-        // Mode change is just display; no need to reload
+        final ContentResolver resolver = getActivity().getContentResolver();
+        final State state = getDisplayState(this);
+
+        final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
+        final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
+
+        final Uri stateUri = RecentsProvider.buildState(
+                root.authority, root.rootId, doc.documentId);
+        final ContentValues values = new ContentValues();
+        values.put(StateColumns.MODE, state.userMode);
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                resolver.insert(stateUri, values);
+                return null;
+            }
+        }.execute();
+
+        // Mode change is just visual change; no need to kick loader, and
+        // deliver change event immediately.
+        state.derivedMode = state.userMode;
+        ((DocumentsActivity) getActivity()).onStateChanged();
+
         updateDisplayState();
     }
 
@@ -258,11 +286,11 @@ public class DirectoryFragment extends Fragment {
 
         mFilter = new MimePredicate(state.acceptMimes);
 
-        if (mLastMode == state.mode) return;
-        mLastMode = state.mode;
+        if (mLastMode == state.derivedMode) return;
+        mLastMode = state.derivedMode;
 
-        mListView.setVisibility(state.mode == MODE_LIST ? View.VISIBLE : View.GONE);
-        mGridView.setVisibility(state.mode == MODE_GRID ? View.VISIBLE : View.GONE);
+        mListView.setVisibility(state.derivedMode == MODE_LIST ? View.VISIBLE : View.GONE);
+        mGridView.setVisibility(state.derivedMode == MODE_GRID ? View.VISIBLE : View.GONE);
 
         final int choiceMode;
         if (state.allowMultiple) {
@@ -272,7 +300,7 @@ public class DirectoryFragment extends Fragment {
         }
 
         final int thumbSize;
-        if (state.mode == MODE_GRID) {
+        if (state.derivedMode == MODE_GRID) {
             thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
             mListView.setAdapter(null);
             mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
@@ -281,7 +309,7 @@ public class DirectoryFragment extends Fragment {
             mGridView.setNumColumns(GridView.AUTO_FIT);
             mGridView.setChoiceMode(choiceMode);
             mCurrentView = mGridView;
-        } else if (state.mode == MODE_LIST) {
+        } else if (state.derivedMode == MODE_LIST) {
             thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
             mGridView.setAdapter(null);
             mGridView.setChoiceMode(ListView.CHOICE_MODE_NONE);
@@ -289,7 +317,7 @@ public class DirectoryFragment extends Fragment {
             mListView.setChoiceMode(choiceMode);
             mCurrentView = mListView;
         } else {
-            throw new IllegalStateException("Unknown state " + state.mode);
+            throw new IllegalStateException("Unknown state " + state.derivedMode);
         }
 
         mThumbSize = new Point(thumbSize, thumbSize);
@@ -505,9 +533,9 @@ public class DirectoryFragment extends Fragment {
 
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);
-                if (state.mode == MODE_LIST) {
+                if (state.derivedMode == MODE_LIST) {
                     convertView = inflater.inflate(R.layout.item_message_list, parent, false);
-                } else if (state.mode == MODE_GRID) {
+                } else if (state.derivedMode == MODE_GRID) {
                     convertView = inflater.inflate(R.layout.item_message_grid, parent, false);
                 } else {
                     throw new IllegalStateException();
@@ -582,9 +610,9 @@ public class DirectoryFragment extends Fragment {
 
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);
-                if (state.mode == MODE_LIST) {
+                if (state.derivedMode == MODE_LIST) {
                     convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
-                } else if (state.mode == MODE_GRID) {
+                } else if (state.derivedMode == MODE_GRID) {
                     convertView = inflater.inflate(R.layout.item_doc_grid, parent, false);
                 } else {
                     throw new IllegalStateException();
@@ -618,7 +646,7 @@ public class DirectoryFragment extends Fragment {
             }
 
             final boolean supportsThumbnail = (docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
-            final boolean allowThumbnail = (state.mode == MODE_GRID)
+            final boolean allowThumbnail = (state.derivedMode == MODE_GRID)
                     || MimePredicate.mimeMatches(LIST_THUMBNAIL_MIMES, docMimeType);
 
             if (supportsThumbnail && allowThumbnail) {

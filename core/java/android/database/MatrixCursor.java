@@ -186,7 +186,7 @@ public class MatrixCursor extends AbstractCursor {
      * column value at a time. This follows the same ordering as the column
      * names specified at cursor construction time.
      * <li>Column and value pairs can be offered for possible inclusion using
-     * {@link #offer(String, Object)}. If the cursor includes the given column,
+     * {@link #add(String, Object)}. If the cursor includes the given column,
      * the value will be set for that column, otherwise the value is ignored.
      * This approach is useful when matching data to a custom projection.
      * </ul>
@@ -227,7 +227,7 @@ public class MatrixCursor extends AbstractCursor {
          *
          * @return this builder to support chaining
          */
-        public RowBuilder offer(String columnName, Object value) {
+        public RowBuilder add(String columnName, Object value) {
             for (int i = 0; i < columnNames.length; i++) {
                 if (columnName.equals(columnNames[i])) {
                     data[(row * columnCount) + i] = value;

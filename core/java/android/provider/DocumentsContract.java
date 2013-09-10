@@ -694,6 +694,7 @@ public final class DocumentsContract {
      * @param mimeType MIME type of new document
      * @param displayName name of new document
      * @return newly created document, or {@code null} if failed
+     * @hide
      */
     public static Uri createDocument(ContentResolver resolver, Uri parentDocumentUri,
             String mimeType, String displayName) {
