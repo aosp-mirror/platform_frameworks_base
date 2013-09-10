@@ -101,7 +101,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     /**
      * Set a camera metadata field to a value. The field definitions can be
-     * found in {@link CameraProperties}, {@link CaptureResult}, and
+     * found in {@link CameraCharacteristics}, {@link CaptureResult}, and
      * {@link CaptureRequest}.
      *
      * @param key The metadata field to write.
