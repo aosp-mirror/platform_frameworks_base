@@ -657,6 +657,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозволяє власнику викликати надану оператором програму конфігурації. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"прослуховувати дані спостережень за станом мережі"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозволяє програмі прослуховувати дані спостережень за станом мережі. Ніколи не застосовується для звичайних програм."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролювати довжину паролів для розблокування екрана та дозволені в них символи."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>
@@ -1580,8 +1584,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-коди не збігаються. Повторіть спробу."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-код закороткий. Має бути принаймні 4 цифри."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Спробуйте за 1 с"</item>
-    <item quantity="other" msgid="4730868920742952817">"Спробуйте за <xliff:g id="COUNT">%d</xliff:g> с"</item>
+    <item quantity="one" msgid="311050995198548675">"Повтор за 1 с"</item>
+    <item quantity="other" msgid="4730868920742952817">"Повтор за <xliff:g id="COUNT">%d</xliff:g> с"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Спробуйте пізніше"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Гортайте від краю, щоб відкрити панель"</string>

@@ -657,6 +657,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite al propietario ejecutar la aplicación de configuración proporcionada por el proveedor. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Detectar cambios en el estado de la red"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que una aplicación detecte cambios en el estado de la red. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas para desbloquear la pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa los intentos para desbloquear la pantalla"</string>
@@ -1583,7 +1587,7 @@
     <item quantity="one" msgid="311050995198548675">"Intentar en 1 s"</item>
     <item quantity="other" msgid="4730868920742952817">"Intentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
-    <string name="restr_pin_try_later" msgid="973144472490532377">"Volver a intentar más tarde"</string>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Vuelve a intentar más tarde."</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Desliza el borde para ver la barra."</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Desliza el dedo desde el borde de la pantalla para mostrar la barra del sistema."</string>
 </resources>

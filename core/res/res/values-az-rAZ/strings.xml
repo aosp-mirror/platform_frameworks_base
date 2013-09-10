@@ -657,6 +657,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Sahibinə operator xidmətli tətbiq konfiqurasiyasına  müraciət imkanı verir. Normal tətbiqlər üçün tələb olunmamalıdır."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"şəbəkə şəraiti haqqında müşahidələr üçün qulaq asmaq"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tətbiqə şəbəkə şəraiti üzrə müşahidələr üçün qulaq asmaq imkanı verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"isti söz tanınması tələb et"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Tətbiqə isti söz tanınması tələb etməyə imkan verir. Normal tətbiq üçün lazım ola bilməz."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qaydalarını təyin edin"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açan şifrələrin uzunluğunu və onlardakı icazə verilən işarələrə nəzarət edir."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidi cəhdlərini monitorinq et"</string>
