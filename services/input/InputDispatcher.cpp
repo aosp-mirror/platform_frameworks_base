@@ -3405,6 +3405,7 @@ void InputDispatcher::onANRLocked(
             & InputDispatcher::doNotifyANRLockedInterruptible);
     commandEntry->inputApplicationHandle = applicationHandle;
     commandEntry->inputWindowHandle = windowHandle;
+    commandEntry->reason = reason;
 }
 
 void InputDispatcher::doNotifyConfigurationChangedInterruptible(
@@ -3434,7 +3435,8 @@ void InputDispatcher::doNotifyANRLockedInterruptible(
     mLock.unlock();
 
     nsecs_t newTimeout = mPolicy->notifyANR(
-            commandEntry->inputApplicationHandle, commandEntry->inputWindowHandle);
+            commandEntry->inputApplicationHandle, commandEntry->inputWindowHandle,
+            commandEntry->reason);
 
     mLock.lock();
 

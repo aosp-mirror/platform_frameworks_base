@@ -1917,7 +1917,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             int pid = data.readInt();
             boolean aboveSystem = data.readInt() != 0;
-            long res = inputDispatchingTimedOut(pid, aboveSystem);
+            String reason = data.readString();
+            long res = inputDispatchingTimedOut(pid, aboveSystem, reason);
             reply.writeNoException();
             reply.writeLong(res);
             return true;
@@ -4462,12 +4463,14 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public long inputDispatchingTimedOut(int pid, boolean aboveSystem) throws RemoteException {
+    public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(pid);
         data.writeInt(aboveSystem ? 1 : 0);
+        data.writeString(reason);
         mRemote.transact(INPUT_DISPATCHING_TIMED_OUT_TRANSACTION, data, reply, 0);
         reply.readException();
         long res = reply.readInt();

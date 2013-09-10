@@ -50,7 +50,8 @@ private:
     }
 
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<InputWindowHandle>& inputWindowHandle) {
+            const sp<InputWindowHandle>& inputWindowHandle,
+            const String8& reason) {
         return 0;
     }
 
