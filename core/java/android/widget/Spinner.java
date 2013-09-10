@@ -412,6 +412,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
 
+        mRecycler.clear();
+
         if (mPopup != null) {
             mPopup.setAdapter(new DropDownAdapter(adapter));
         } else {
@@ -426,9 +428,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         if (getChildCount() > 0) {
             child = getChildAt(0);
         } else if (mAdapter != null && mAdapter.getCount() > 0) {
-            child = makeAndAddView(0);
+            child = makeView(0, false);
             mRecycler.put(0, child);
-            removeAllViewsInLayout();
         }
 
         if (child != null) {
@@ -536,7 +537,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         mFirstPosition = mSelectedPosition;
 
         if (mAdapter != null) {
-            View sel = makeAndAddView(mSelectedPosition);
+            View sel = makeView(mSelectedPosition, true);
             int width = sel.getMeasuredWidth();
             int selectedOffset = childrenLeft;
             final int layoutDirection = getLayoutDirection();
@@ -571,17 +572,17 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * from the old to new positions.
      *
      * @param position Position in the spinner for the view to obtain
-     * @return A view that has been added to the spinner
+     * @param addChild true to add the child to the spinner, false to obtain and configure only.
+     * @return A view for the given position
      */
-    private View makeAndAddView(int position) {
-
+    private View makeView(int position, boolean addChild) {
         View child;
 
         if (!mDataChanged) {
             child = mRecycler.get(position);
             if (child != null) {
                 // Position the view
-                setUpChild(child);
+                setUpChild(child, addChild);
 
                 return child;
             }
@@ -591,7 +592,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         child = mAdapter.getView(position, null, this);
 
         // Position the view
-        setUpChild(child);
+        setUpChild(child, addChild);
 
         return child;
     }
@@ -601,8 +602,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * and fill out its layout paramters.
      *
      * @param child The view to position
+     * @param addChild true if the child should be added to the Spinner during setup
      */
-    private void setUpChild(View child) {
+    private void setUpChild(View child, boolean addChild) {
 
         // Respect layout params that are already in the view. Otherwise
         // make some up...
@@ -611,7 +613,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             lp = generateDefaultLayoutParams();
         }
 
-        addViewInLayout(child, 0, lp);
+        if (addChild) {
+            addViewInLayout(child, 0, lp);
+        }
 
         child.setSelected(hasFocus());
         if (mDisableChildrenWhenDisabled) {
