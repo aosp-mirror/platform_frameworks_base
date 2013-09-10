@@ -655,6 +655,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"වාහකයා ලබාදුන් සැකසුම් යෙදුම් උත්පාදනයට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීම"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"යෙදුමකට ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීමට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවේ."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"තිරය අගුළු ඇරීමේ මුරපදයට අනුමත අකුරු සහ දිග පාලනය කරන්න."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1581,7 +1585,7 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN නොගැළපෙයි. නැවත උත්සහ කරන්න."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN කුඩා වැඩිය. ඉලක්කම් 4 වත් විය යුතුය."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"තවත් තත්පර ^1 කින් යළි උත්සාහ කරන්න"</item>
+    <item quantity="one" msgid="311050995198548675">"තවත් තත්පර 1 කින් යළි උත්සාහ කරන්න"</item>
     <item quantity="other" msgid="4730868920742952817">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සහ කරන්න"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>

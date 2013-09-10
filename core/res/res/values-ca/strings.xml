@@ -530,13 +530,13 @@
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"iniciar directament la configuració del telèfon CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Permet que l\'aplicació iniciï l\'aprovisionament CDMA. Les aplicacions malicioses poden iniciar l\'aprovisionament CDMA innecessàriament."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controlar les notificacions d\'actualització de la ubicació"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Permet que l\'aplicació activi i desactivi les notificacions d\'actualització de la ubicació de la ràdio. No la poden fer servir les aplicacions normals."</string>
+    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Permet que l\'aplicació activi i desactivi les notificacions d\'actualització de la ubicació del senyal mòbil. No la poden fer servir les aplicacions normals."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"accedir a les propietats d\'accés"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Permet a l\'aplicació l\'accés de lectura/escriptura a les propietats penjades pel servei de registre. No es pot fer servir per a les aplicacions normals."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"triar widgets"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Permet que l\'aplicació indiqui al sistema quins widgets pot utilitzar cada aplicació. Amb aquest permís, les aplicacions poden concedir accés a les dades personals a altres aplicacions. No indicat per a les aplicacions normals."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificar l\'estat del telèfon"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permet que l\'aplicació controli les funcions de telèfon del dispositiu. Una aplicació amb aquest permís pot canviar de xarxa, activar i desactivar la ràdio del telèfon i dur a terme accions semblants sense notificar-t\'ho."</string>
+    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permet que l\'aplicació controli les funcions de telèfon del dispositiu. Una aplicació amb aquest permís pot canviar de xarxa, activar i desactivar el senyal mòbil i dur a terme accions semblants sense notificar-t\'ho."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"veure l\'estat i la identitat del telèfon"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode d\'inactivitat"</string>
@@ -593,14 +593,14 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces multidifusió, no només a la teva tauleta. Fa servir més energia que el mode que no és multidifusió."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces multidifusió, no només al teu telèfon. Fa servir més energia que el mode que no és multidifusió."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accés a la configuració de Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que cerqui i sincronitzi dispositius remots."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que cerqui i sincronitzi dispositius remots."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que detecti i emparelli dispositius remots."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que detecti i emparelli dispositius remots."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"connecta i desconnecta de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permet que l\'aplicació determini si WiMAX està activat i que vegi la informació sobre totes les xarxes WiMAX que estan connectades."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permet que l\'aplicació connecti i desconnecti la tauleta de les xarxes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permet que l\'aplicació connecti i desconnecti el telèfon de les xarxes WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"sincronització amb dispositius Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"emparella amb dispositius Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet que l\'aplicació visualitzi la configuració de Bluetooth de la tauleta i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració de Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controla Near Field Communication (NFC)"</string>
@@ -655,6 +655,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'ha de necessitar mai per a aplicacions normals."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Defineix les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control d\'intents de desbloqueig de pantalla"</string>
@@ -734,7 +738,7 @@
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"XDSI"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Altres faxos"</string>
-    <string name="phoneTypeRadio" msgid="4093738079908667513">"Ràdio"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Senyal mòbil"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Tèlex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mòbil de la feina"</string>
@@ -1458,7 +1462,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tauleta"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telèfon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculars"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altaveus del connector"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altaveus de la base"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>

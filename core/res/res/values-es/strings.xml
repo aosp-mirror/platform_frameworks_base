@@ -655,6 +655,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite ejecutar la aplicación de configuración proporcionada por el operador. No debe ser necesario para aplicaciones normales."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"detectar cambios en el estado de la red"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que una aplicación detecte cambios en el estado de la red. No debe ser necesario para aplicaciones normales."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas de bloqueo de pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control de intentos de bloqueo de pantalla"</string>
@@ -1568,9 +1572,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelado"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error al escribir contenido"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"desconocido"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introducir PIN de administrador"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introduce el PIN del administrador"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Introducir PIN"</string>
-    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Incorrecta"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Incorrecto"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN actual"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN nuevo"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirma tu nuevo PIN"</string>

@@ -374,7 +374,7 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"धारक को किसी विजेट सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"किसी उपकरण व्‍यवस्‍थापक के साथ सहभागिता करें"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"धारक को किसी उपकरण व्‍यवस्‍थापक को उद्देश्य भेजने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"उपकरण व्यवस्थापक को जोड़ें या निकालें"</string>
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"उपकरण उपकरण सुचारू ढ़ंग से चलाने वाले को जोड़ें या निकालें"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"धारक को सक्रिय डिवाइस व्यवस्थापकों को जोड़ने या निकालने देता है. सामान्य एप्लिकेशन के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"स्‍क्रीन अभिविन्‍यास बदलें"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"एप्‍लिकेशन को किसी भी समय स्‍क्रीन का रोटेशन बदलने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
@@ -453,9 +453,9 @@
     <string name="permlab_readCalendar" msgid="5972727560257612398">"केलैंडर ईवेंट के साथ-साथ गोपनीय जानकारी पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"एप्लिकेशन को मित्रों या सहकर्मियों के कैलेंडर इवेंट सहित, आपके टेबलेट पर संग्रहीत कैलेंडर इवेंट पढ़ने देता है. इससे गोपनीयता या संवेदनशीलता पर ध्यान दिए बिना, एप्लिकेशन आपके कैलेंडर डेटा को साझा कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"एप्लिकेशन को मित्रों या सहकर्मियों के कैलेंडर इवेंट सहित, आपके फ़ोन पर संग्रहीत कैलेंडर इवेंट पढ़ने देता है. इससे गोपनीयता या संवेदनशीलता पर ध्यान दिए बिना, एप्लिकेशन आपके कैलेंडर डेटा को साझा कर सकता है या सहेज सकता है."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"स्‍वामी की जानकारी के बि‍ना कैलेंडर ईवेंट जोड़ें या संशोधि‍त करें और अति‍थि‍यों को ईमेल भेजें"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"एप्लिकेशन को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने टेबलेट पर संशोधित कर सकते हैं. इससे एप्लिकेशन, स्‍वामी की जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"एप्लिकेशन को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने फ़ोन पर संशोधित कर सकते हैं. इससे एप्लिकेशन, स्‍वामी की जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"अपनी जानकारी के बि‍ना कैलेंडर ईवेंट जोड़ें या संशोधि‍त करें और अति‍थि‍यों को ईमेल भेजें"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"एप्लिकेशन को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने टेबलेट पर संशोधित कर सकते हैं. इससे एप्लिकेशन,अपनी जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"एप्लिकेशन को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने फ़ोन पर संशोधित कर सकते हैं. इससे एप्लिकेशन, अपनी जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"परीक्षण के लिए नकली स्‍थान स्रोत"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"परीक्षण के लिए कृत्रिम स्थान स्रोत बनाएं या एक नया स्थान प्रदाता इंस्‍टॉल करें. यह एप्लिकेशन को स्‍थान और/या अन्‍य स्थान स्रोतों जैसे GPS या स्‍थान प्रदाताओं द्वारा लौटाई गई स्थिति को ओवरराइड करने देता है."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्‍थान प्रदाता आदेशों में पहुंचे"</string>
@@ -617,10 +617,10 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"एप्‍लिकेशन को वर्तमान में समन्वयित फ़ीड के बारे में विवरण प्राप्त करने देता है."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"ग्राहकी-प्राप्त फ़ीड लिखें"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"एप्लिकेशन को आपके वर्तमान समन्वयित फ़ीड को संशोधित करने देता है. दुर्भावनापूर्ण एप्लिकेशन आपके समन्वयित फ़ीड को बदल सकते है."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"डिक्शनरी में आपके द्वारा जोड़े गए शब्‍दों को पढ़ें"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"एप्‍लिकेशन को ऐसे सभी शब्‍दों, नामों और वाक्यांशों को पढ़ने देता है जो संभवत: उपयोगकर्ता द्वारा उपयोगकर्ता ‍डिक्शनरी में संग्रहीत किए गए हों."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"उपयोगकर्ता द्वारा परिभाषित डिक्शनरी में शब्द जोड़ें"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"एप्लिकेशन को उपयोगकर्ता डिक्शनरी में नए शब्द लिखने देता है."</string>
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"शब्दकोश में आपके द्वारा जोड़े गए शब्‍दों को पढ़ें"</string>
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"एप्‍लिकेशन को ऐसे सभी शब्‍दों, नामों और वाक्यांशों को पढ़ने देता है जो संभवत: उपयोगकर्ता द्वारा उपयोगकर्ता ‍शब्दकोश में संग्रहीत किए गए हों."</string>
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"उपयोगकर्ता द्वारा परिभाषित शब्दकोश में शब्द जोड़ें"</string>
+    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"एप्लिकेशन को उपयोगकर्ता शब्दकोश में नए शब्द लिखने देता है."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"एप्लि. को USB संग्रहण अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
@@ -655,6 +655,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"धारक को वाहक के द्वारा उपलब्ध कराया गया कॉन्फ़िगरेशन एप्लिकेशन प्रारंभ करने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"नेटवर्क स्थितियों के अवलोकनों को सुनें"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"एप्लिकेशन को नेटवर्क स्थितियों के अवलोकनों को सुनने देता है. सामान्य एप्लिकेशन के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्‍क्रीन-अनलॉक पासवर्ड में अनुमति प्राप्त लंबाई और वर्णों को नियंत्रित करें."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्‍क्रीन-अनलॉक के प्रयासों पर निगरानी रखें"</string>
@@ -804,7 +808,7 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"स्‍क्रीन लॉक की गई है."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"अनलॉक करने के लिए मेनू दबाएं या आपातलकालीन कॉल करें."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"अनलॉक करने के लिए मेनू दबाएं."</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"अनलॉक करने के लिए प्रतिमान आरेखित करें"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"अनलॉक करने के लिए आकार आरेखित करें"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"आपातकालीन कॉल"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"कॉल पर वापस लौटें"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"सही!"</string>
@@ -833,19 +837,19 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"कृपया उपयोगकर्ता मार्गदर्शिका देखें या ग्राहक सहायता से संपर्क करें."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"सिम कार्ड लॉक किया गया है."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"सिम कार्ड अनलॉक कर रहा है…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"आपने अपना अनलॉक प्रतिमान <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत बनाया है. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत बनाया है. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपने अपना पासवर्ड <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से लिखा है. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"आपने अपना पिन <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से लिखा है. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुनः प्रयास करें."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"आपने अपना अनलॉक प्रतिमान <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके टेबलेट को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"आपने अपना अनलॉक प्रतिमान <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके फ़ोन को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके टेबलेट को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके फ़ोन को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"आप गलत तरीके से टेबलेट को अनलॉक करने का प्रयास <xliff:g id="NUMBER_0">%d</xliff:g> बार कर चुके हैं. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयास के बाद, टेबलेट फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"आप गलत तरीके से फ़ोन को अनलॉक करने का प्रयास <xliff:g id="NUMBER_0">%d</xliff:g> बार कर चुके हैं. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयास के बाद, फ़ोन फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"आप टेबलेट को गलत तरीके से <xliff:g id="NUMBER">%d</xliff:g> बार अनलॉक करने का प्रयास कर चुके हैं. टेबलेट अब फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"आप फ़ोन को गलत तरीके से <xliff:g id="NUMBER">%d</xliff:g> बार अनलॉक करने का प्रयास कर चुके हैं. फ़ोन अब फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"प्रतिमान भूल गए?"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"आकार भूल गए?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"खाता अनलॉक"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बहुत अधिक प्रतिमान प्रयास"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बहुत अधिक आकार प्रयास"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"अनलॉक करने के लिए, अपने Google खाते से प्रवेश करें."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"उपयोगकर्ता नाम (ईमेल)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"पासवर्ड"</string>
@@ -856,10 +860,10 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"अनलॉक करें"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"ध्‍वनि चालू करें"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"ध्वनि बंद"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"प्रतिमान प्रारंभ किया गया"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"प्रतिमान साफ़ किया गया"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"आकार प्रारंभ किया गया"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"आकार साफ़ किया गया"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"कक्ष जोड़ा गया"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"प्रतिमान पूरा किया गया"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"आकार पूरा किया गया"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d विजेट में से %2$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"विजेट जोड़ें"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"रिक्त"</string>
@@ -875,11 +879,11 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"विजेट <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> को हटा दिया गया."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"अनलॉक क्षेत्र विस्तृत करें."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"स्लाइड अनलॉक."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"प्रतिमान अनलॉक."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"आकार अनलॉक."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"फेस अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"पिन अनलॉक."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलॉक."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"प्रतिमान क्षेत्र."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"आकार क्षेत्र."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"स्लाइड क्षेत्र."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1479,12 +1483,12 @@
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"यह स्क्रीन अन्य उपकरण पर दिखाई दे रही है"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"डिस्कनेक्ट करें"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"आपातकालीन कॉल"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"प्रतिमान भूल गए"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत प्रतिमान"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"आकार भूल गए"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत आकार"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"गलत PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"अपना प्रतिमान आरेखित करें"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"अपना आकार आरेखित करें"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम PIN डालें"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN डालें"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"पासवर्ड डालें"</string>
@@ -1497,7 +1501,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड पुन: डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड का मिलान नहीं होता"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक प्रतिमान प्रयास"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक आकार प्रयास"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करने के लिए, अपने Google खाते से प्रवेश करें."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"उपयोगकर्ता नाम (ईमेल)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"पासवर्ड"</string>
@@ -1507,13 +1511,13 @@
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते की जांच की जा रही है…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आप अपना PIN <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक प्रतिमान <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"आप टेबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, टेबलेट फ़ैक्टरी डिफ़ॉल्ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"आप फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, फ़ोन फ़ैक्टरी डिफ़ॉल्ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"आप टेबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. टेबलेट अब फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"आप फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. फ़ोन अब फ़ैक्टरी डिफ़ॉल्ट पर रीसेट हो जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"वॉल्यूम को उपरोक्त अनुशंसित स्तर तक बढ़ाएं?\nलंबे समय तक अधिक वॉल्यूम पर सुनने से आपकी सुनने की क्षमता को क्षति पहुंच सकती है."</string>
