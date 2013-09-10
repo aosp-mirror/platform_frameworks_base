@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.impl.binding;
 
-import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.DataBindingItem;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -27,7 +26,6 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.RenderAction;
 import com.android.util.Pair;
 
-import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,124 +33,27 @@ import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
- * Base adapter to do fake data binding in {@link AdapterView} objects.
+ * A Helper class to do fake data binding in {@link AdapterView} objects.
  */
-public class BaseAdapter {
+@SuppressWarnings("deprecation")
+public class AdapterHelper {
 
-    /**
-     * This is the items provided by the adapter. They are dynamically generated.
-     */
-    protected final static class AdapterItem {
-        private final DataBindingItem mItem;
-        private final int mType;
-        private final int mFullPosition;
-        private final int mPositionPerType;
-        private List<AdapterItem> mChildren;
-
-        protected AdapterItem(DataBindingItem item, int type, int fullPosition,
-                int positionPerType) {
-            mItem = item;
-            mType = type;
-            mFullPosition = fullPosition;
-            mPositionPerType = positionPerType;
-        }
-
-        void addChild(AdapterItem child) {
-            if (mChildren == null) {
-                mChildren = new ArrayList<AdapterItem>();
-            }
-
-            mChildren.add(child);
-        }
-
-        List<AdapterItem> getChildren() {
-            if (mChildren != null) {
-                return mChildren;
-            }
-
-            return Collections.emptyList();
-        }
-
-        int getType() {
-            return mType;
-        }
-
-        int getFullPosition() {
-            return mFullPosition;
-        }
-
-        int getPositionPerType() {
-            return mPositionPerType;
-        }
-
-        DataBindingItem getDataBindingItem() {
-            return mItem;
-        }
-    }
-
-    private final AdapterBinding mBinding;
-    private final IProjectCallback mCallback;
-    private final ResourceReference mAdapterRef;
-    private boolean mSkipCallbackParser = false;
-
-    protected final List<AdapterItem> mItems = new ArrayList<AdapterItem>();
-
-    protected BaseAdapter(ResourceReference adapterRef, AdapterBinding binding,
-            IProjectCallback callback) {
-        mAdapterRef = adapterRef;
-        mBinding = binding;
-        mCallback = callback;
-    }
-
-    // ------- Some Adapter method used by all children classes.
-
-    public boolean areAllItemsEnabled() {
-        return true;
-    }
-
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    public boolean isEmpty() {
-        return mItems.size() == 0;
-    }
-
-    public void registerDataSetObserver(DataSetObserver observer) {
-        // pass
-    }
-
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        // pass
-    }
-
-    // -------
-
-
-    protected AdapterBinding getBinding() {
-        return mBinding;
-    }
-
-    protected View getView(AdapterItem item, AdapterItem parentItem, View convertView,
-            ViewGroup parent) {
+    static Pair<View, Boolean> getView(AdapterItem item, AdapterItem parentItem, ViewGroup parent,
+            IProjectCallback callback, ResourceReference adapterRef, boolean skipCallbackParser) {
         // we don't care about recycling here because we never scroll.
         DataBindingItem dataBindingItem = item.getDataBindingItem();
 
         BridgeContext context = RenderAction.getCurrentContext();
 
         Pair<View, Boolean> pair = context.inflateView(dataBindingItem.getViewReference(),
-                parent, false /*attachToRoot*/, mSkipCallbackParser);
+                parent, false /*attachToRoot*/, skipCallbackParser);
 
         View view = pair.getFirst();
-        mSkipCallbackParser |= pair.getSecond();
+        skipCallbackParser |= pair.getSecond();
 
         if (view != null) {
-            fillView(context, view, item, parentItem);
+            fillView(context, view, item, parentItem, callback, adapterRef);
         } else {
             // create a text view to display an error.
             TextView tv = new TextView(context);
@@ -160,16 +61,16 @@ public class BaseAdapter {
             view = tv;
         }
 
-        return view;
+        return Pair.of(view, skipCallbackParser);
     }
 
-    private void fillView(BridgeContext context, View view, AdapterItem item,
-            AdapterItem parentItem) {
+    private static void fillView(BridgeContext context, View view, AdapterItem item,
+            AdapterItem parentItem, IProjectCallback callback, ResourceReference adapterRef) {
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
             for (int i = 0 ; i < count ; i++) {
-                fillView(context, group.getChildAt(i), item, parentItem);
+                fillView(context, group.getChildAt(i), item, parentItem, callback, adapterRef);
             }
         } else {
             int id = view.getId();
@@ -184,8 +85,8 @@ public class BaseAdapter {
 
                     if (view instanceof TextView) {
                         TextView tv = (TextView) view;
-                        Object value = mCallback.getAdapterItemValue(
-                                mAdapterRef, context.getViewKey(view),
+                        Object value = callback.getAdapterItemValue(
+                                adapterRef, context.getViewKey(view),
                                 item.getDataBindingItem().getViewReference(),
                                 fullPosition, positionPerType,
                                 fullParentPosition, parentPositionPerType,
@@ -204,8 +105,8 @@ public class BaseAdapter {
                     if (view instanceof Checkable) {
                         Checkable cb = (Checkable) view;
 
-                        Object value = mCallback.getAdapterItemValue(
-                                mAdapterRef, context.getViewKey(view),
+                        Object value = callback.getAdapterItemValue(
+                                adapterRef, context.getViewKey(view),
                                 item.getDataBindingItem().getViewReference(),
                                 fullPosition, positionPerType,
                                 fullParentPosition, parentPositionPerType,
@@ -224,8 +125,8 @@ public class BaseAdapter {
                     if (view instanceof ImageView) {
                         ImageView iv = (ImageView) view;
 
-                        Object value = mCallback.getAdapterItemValue(
-                                mAdapterRef, context.getViewKey(view),
+                        Object value = callback.getAdapterItemValue(
+                                adapterRef, context.getViewKey(view),
                                 item.getDataBindingItem().getViewReference(),
                                 fullPosition, positionPerType,
                                 fullParentPosition, parentPositionPerType,
