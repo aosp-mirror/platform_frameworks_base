@@ -25,6 +25,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Native calls for bring up/shut down of the supplicant daemon and for
@@ -457,7 +458,7 @@ public class WifiNative {
     }
 
     public boolean setCountryCode(String countryCode) {
-        return doBooleanCommand("DRIVER COUNTRY " + countryCode);
+        return doBooleanCommand("DRIVER COUNTRY " + countryCode.toUpperCase(Locale.ROOT));
     }
 
     public void enableBackgroundScan(boolean enable) {
