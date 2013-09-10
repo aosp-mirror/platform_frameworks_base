@@ -88,7 +88,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      */
     @Override
     public long notifyANR(InputApplicationHandle inputApplicationHandle,
-            InputWindowHandle inputWindowHandle) {
+            InputWindowHandle inputWindowHandle, String reason) {
         AppWindowToken appWindowToken = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
@@ -105,7 +105,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
             if (windowState != null) {
                 Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
-                        + "sending to " + windowState.mAttrs.getTitle());
+                        + "sending to " + windowState.mAttrs.getTitle()
+                        + ".  Reason: " + reason);
                 // Figure out whether this window is layered above system windows.
                 // We need to do this here to help the activity manager know how to
                 // layer its ANR dialog.
@@ -114,19 +115,21 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 aboveSystem = windowState.mBaseLayer > systemAlertLayer;
             } else if (appWindowToken != null) {
                 Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
-                        + "sending to application " + appWindowToken.stringName);
+                        + "sending to application " + appWindowToken.stringName
+                        + ".  Reason: " + reason);
             } else {
-                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out.");
+                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                        + ".  Reason: " + reason);
             }
 
-            mService.saveANRStateLocked(appWindowToken, windowState);
+            mService.saveANRStateLocked(appWindowToken, windowState, reason);
         }
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
             try {
                 // Notify the activity manager about the timeout and let it decide whether
                 // to abort dispatching or keep waiting.
-                boolean abort = appWindowToken.appToken.keyDispatchingTimedOut();
+                boolean abort = appWindowToken.appToken.keyDispatchingTimedOut(reason);
                 if (! abort) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
@@ -139,7 +142,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 // Notify the activity manager about the timeout and let it decide whether
                 // to abort dispatching or keep waiting.
                 long timeout = ActivityManagerNative.getDefault().inputDispatchingTimedOut(
-                        windowState.mSession.mPid, aboveSystem);
+                        windowState.mSession.mPid, aboveSystem, reason);
                 if (timeout >= 0) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.

@@ -384,7 +384,8 @@ public interface IActivityManager extends IInterface {
 
     public void requestBugReport() throws RemoteException;
 
-    public long inputDispatchingTimedOut(int pid, boolean aboveSystem) throws RemoteException;
+    public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason)
+            throws RemoteException;
 
     public Bundle getAssistContextExtras(int requestType) throws RemoteException;
 

@@ -305,9 +305,9 @@ final class ActivityRecord {
             }
         }
 
-        @Override public boolean keyDispatchingTimedOut() {
+        @Override public boolean keyDispatchingTimedOut(String reason) {
             ActivityRecord activity = weakActivity.get();
-            return activity != null && activity.keyDispatchingTimedOut();
+            return activity != null && activity.keyDispatchingTimedOut(reason);
         }
 
         @Override public long getKeyDispatchingTimeout() {
@@ -960,14 +960,14 @@ final class ActivityRecord {
         return r;
     }
 
-    public boolean keyDispatchingTimedOut() {
+    public boolean keyDispatchingTimedOut(String reason) {
         ActivityRecord r;
         ProcessRecord anrApp;
         synchronized(service) {
             r = getWaitingHistoryRecordLocked();
             anrApp = r != null ? r.app : null;
         }
-        return service.inputDispatchingTimedOut(anrApp, r, this, false);
+        return service.inputDispatchingTimedOut(anrApp, r, this, false, reason);
     }
 
     /** Returns the key dispatching timeout for this application token. */

@@ -7974,8 +7974,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return KEY_DISPATCHING_TIMEOUT;
     }
 
-
-    public long inputDispatchingTimedOut(int pid, final boolean aboveSystem) {
+    @Override
+    public long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
         if (checkCallingPermission(android.Manifest.permission.FILTER_EVENTS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -7990,7 +7990,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             timeout = getInputDispatchingTimeoutLocked(proc);
         }
 
-        if (!inputDispatchingTimedOut(proc, null, null, aboveSystem)) {
+        if (!inputDispatchingTimedOut(proc, null, null, aboveSystem, reason)) {
             return -1;
         }
 
@@ -8003,11 +8003,18 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public boolean inputDispatchingTimedOut(final ProcessRecord proc,
             final ActivityRecord activity, final ActivityRecord parent,
-            final boolean aboveSystem) {
+            final boolean aboveSystem, String reason) {
         if (checkCallingPermission(android.Manifest.permission.FILTER_EVENTS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
                     + android.Manifest.permission.FILTER_EVENTS);
+        }
+
+        final String annotation;
+        if (reason == null) {
+            annotation = "Input dispatching timed out";
+        } else {
+            annotation = "Input dispatching timed out (" + reason + ")";
         }
 
         if (proc != null) {
@@ -8025,7 +8032,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (proc.instrumentationClass != null) {
                     Bundle info = new Bundle();
                     info.putString("shortMsg", "keyDispatchingTimedOut");
-                    info.putString("longMsg", "Timed out while dispatching key event");
+                    info.putString("longMsg", annotation);
                     finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
                     return true;
                 }
@@ -8033,7 +8040,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    appNotResponding(proc, activity, parent, aboveSystem, "keyDispatchingTimedOut");
+                    appNotResponding(proc, activity, parent, aboveSystem, annotation);
                 }
             });
         }
