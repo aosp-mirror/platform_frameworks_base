@@ -1476,4 +1476,20 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Set the value for enabling/disabling airplane mode
+     *
+     * @param enable whether to enable airplane mode or not
+     *
+     * <p>This method requires the call to hold the permission
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
+     * @hide
+     */
+    public void setAirplaneMode(boolean enable) {
+        try {
+            mService.setAirplaneMode(enable);
+        } catch (RemoteException e) {
+        }
+    }
 }
