@@ -424,12 +424,17 @@ public final class InputDevice implements Parcelable {
     /**
      * The controller number for a given input device.
      * <p>
-     * Each game controller or joystick is given a unique controller number when initially
-     * configured by the system. The number is not stable and may be changed by the system at any
-     * point.  All controller numbers will be non-negative. A game controller or joystick will be
-     * given a unique number indexed from one; everything else will be assigned a controller number
+     * Each gamepad or joystick is given a unique, positive controller number when initially
+     * configured by the system. This number may change due to events such as device disconnects /
+     * reconnects or user initiated reassignment. Any change in number will trigger an event that
+     * can be observed by registering an {@link InputManager.InputDeviceListener}.
+     * </p>
+     * <p>
+     * All input devices which are not gamepads or joysticks will be assigned a controller number
      * of 0.
      * </p>
+     *
+     * @return The controller number of the device.
      */
     public int getControllerNumber() {
         return mControllerNumber;
