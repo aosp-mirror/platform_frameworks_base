@@ -105,12 +105,8 @@ public final class ApduServiceInfo implements Parcelable {
             if (onHost) {
                 parser = si.loadXmlMetaData(pm, HostApduService.SERVICE_META_DATA);
                 if (parser == null) {
-                    Log.d(TAG, "Didn't find service meta-data, trying legacy.");
-                    parser = si.loadXmlMetaData(pm, HostApduService.OLD_SERVICE_META_DATA);
-                    if (parser == null) {
-                        throw new XmlPullParserException("No " + HostApduService.SERVICE_META_DATA +
-                                " meta-data");
-                    }
+                    throw new XmlPullParserException("No " + HostApduService.SERVICE_META_DATA +
+                            " meta-data");
                 }
             } else {
                 parser = si.loadXmlMetaData(pm, OffHostApduService.SERVICE_META_DATA);

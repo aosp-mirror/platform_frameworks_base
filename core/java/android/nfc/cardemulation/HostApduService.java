@@ -50,23 +50,6 @@ public abstract class HostApduService extends Service {
             "android.nfc.cardemulation.host_apdu_service";
 
     /**
-     * The {@link Intent} that must be declared as handled by the service.
-     * TODO Remove
-     * @hide
-     */
-    public static final String OLD_SERVICE_INTERFACE =
-            "android.nfc.HostApduService";
-
-    /**
-     * The name of the meta-data element that contains
-     * more information about this service.
-     *
-     * TODO Remove
-     * @hide
-     */
-    public static final String OLD_SERVICE_META_DATA = "android.nfc.HostApduService";
-
-    /**
      * Reason for {@link #onDeactivated(int)}.
      * Indicates deactivation was due to the NFC link
      * being lost.
@@ -282,37 +265,7 @@ public abstract class HostApduService extends Service {
      * @return a byte-array containing the response APDU, or null if no
      *         response APDU can be sent at this point.
      */
-    public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
-        // TODO make this abstract
-        return processCommandApdu(commandApdu, 0);
-    }
-
-    /**
-     * <p>This method will be called when a command APDU has been received
-     * from a remote device. A response APDU can be provided directly
-     * by returning a byte-array in this method. Note that in general
-     * response APDUs must be sent as quickly as possible, given the fact
-     * that the user is likely holding his device over an NFC reader
-     * when this method is called.
-     *
-     * <p class="note">If there are multiple services that have registered for the same
-     * AIDs in their meta-data entry, you will only get called if the user has
-     * explicitly selected your service, either as a default or just for the next tap.
-     *
-     * <p class="note">This method is running on the main thread of your application.
-     * If you cannot return a response APDU immediately, return null
-     * and use the {@link #sendResponseApdu(byte[])} method later.
-     *
-     * @deprecated use {@link #processCommandApdu(byte[], Bundle)}
-     * @param commandApdu
-     * @param flags
-     * @return a byte-array containing the response APDU, or null if no
-     *         response APDU can be sent at this point.
-     * @hide
-     */
-    public byte[] processCommandApdu(byte[] commandApdu, int flags) {
-        return null;
-    }
+    public abstract byte[] processCommandApdu(byte[] commandApdu, Bundle extras);
 
     /**
      * This method will be called in two possible scenarios:
