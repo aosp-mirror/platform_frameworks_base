@@ -183,12 +183,12 @@ public class RecentsCreateFragment extends Fragment {
                 convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
             }
 
-            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
+            final ImageView iconMime = (ImageView) convertView.findViewById(R.id.icon_mime);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final View line2 = convertView.findViewById(R.id.line2);
 
             final DocumentStack stack = getItem(position);
-            icon.setImageDrawable(stack.root.loadIcon(context));
+            iconMime.setImageDrawable(stack.root.loadIcon(context));
 
             final Drawable crumb = context.getResources()
                     .getDrawable(R.drawable.ic_breadcrumb_arrow);

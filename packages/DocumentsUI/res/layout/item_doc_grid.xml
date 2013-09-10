@@ -32,12 +32,26 @@
             android:layout_weight="1"
             android:background="#fff">
 
-            <ImageView
+            <FrameLayout
                 android:id="@android:id/icon"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerInside"
-                android:contentDescription="@null" />
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/icon_mime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@null" />
+
+                <ImageView
+                    android:id="@+id/icon_thumb"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@null" />
+
+            </FrameLayout>
 
             <ImageView
                 android:layout_width="match_parent"
