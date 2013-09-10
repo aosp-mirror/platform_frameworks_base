@@ -65,15 +65,18 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private final RootInfo mRoot;
     private final DocumentInfo mDoc;
     private final Uri mUri;
+    private final int mUserSortOrder;
 
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
-    public DirectoryLoader(Context context, RootInfo root, DocumentInfo doc, Uri uri) {
+    public DirectoryLoader(
+            Context context, RootInfo root, DocumentInfo doc, Uri uri, int userSortOrder) {
         super(context);
         mRoot = root;
         mDoc = doc;
         mUri = uri;
+        mUserSortOrder = userSortOrder;
     }
 
     @Override
@@ -91,7 +94,6 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         final DirectoryResult result = new DirectoryResult();
 
         int userMode = State.MODE_UNKNOWN;
-        int userSortOrder = State.SORT_ORDER_UNKNOWN;
 
         // Pick up any custom modes requested by user
         Cursor cursor = null;
@@ -101,7 +103,6 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             cursor = resolver.query(stateUri, null, null, null, null);
             if (cursor.moveToFirst()) {
                 userMode = getCursorInt(cursor, StateColumns.MODE);
-                userSortOrder = getCursorInt(cursor, StateColumns.SORT_ORDER);
             }
         } finally {
             IoUtils.closeQuietly(cursor);
@@ -117,8 +118,8 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             }
         }
 
-        if (userSortOrder != State.SORT_ORDER_UNKNOWN) {
-            result.sortOrder = userSortOrder;
+        if (mUserSortOrder != State.SORT_ORDER_UNKNOWN) {
+            result.sortOrder = mUserSortOrder;
         } else {
             if ((mDoc.flags & Document.FLAG_DIR_PREFERS_LAST_MODIFIED) != 0) {
                 result.sortOrder = State.SORT_ORDER_LAST_MODIFIED;
@@ -127,7 +128,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             }
         }
 
-        Log.d(TAG, "userMode=" + userMode + ", userSortOrder=" + userSortOrder + " --> mode="
+        Log.d(TAG, "userMode=" + userMode + ", userSortOrder=" + mUserSortOrder + " --> mode="
                 + result.mode + ", sortOrder=" + result.sortOrder);
 
         try {
