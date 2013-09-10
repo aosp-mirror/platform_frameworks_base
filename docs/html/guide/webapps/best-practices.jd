@@ -1,6 +1,24 @@
 page.title=Best Practices for Web Apps
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>See also</h2>
+<ul>
+  <li><a href="https://developers.google.com/chrome/mobile/docs/webview/pixelperfect"
+  >Pixel-Perfect UI in the WebView</a></li>
+  <li><a href="http://www.html5rocks.com/en/mobile/responsivedesign/" class="external-link">Creating
+  a Mobile-First Responsive Web Design</a></li>
+  <li><a href="http://www.html5rocks.com/en/mobile/high-dpi/" class="external-link">High
+  DPI Images for Variable Pixel Densities</a></li>
+</ul>
+
+</div>
+</div>
+
+
+
 <style>
 .bold li {
   font-weight:bold;
