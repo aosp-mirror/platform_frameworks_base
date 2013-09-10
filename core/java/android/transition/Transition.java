@@ -122,6 +122,10 @@ public abstract class Transition implements Cloneable {
     // Whether this transition is currently paused, due to a call to pause()
     boolean mPaused = false;
 
+    // Whether this transition has ended. Used to avoid pause/resume on transitions
+    // that have completed
+    private boolean mEnded = false;
+
     // The set of listeners to be sent transition lifecycle events.
     ArrayList<TransitionListener> mListeners = null;
 
@@ -914,21 +918,23 @@ public abstract class Transition implements Cloneable {
      * @hide
      */
     public void pause() {
-        ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
-        int numOldAnims = runningAnimators.size();
-        for (int i = numOldAnims - 1; i >= 0; i--) {
-            Animator anim = runningAnimators.keyAt(i);
-            anim.pause();
-        }
-        if (mListeners != null && mListeners.size() > 0) {
-            ArrayList<TransitionListener> tmpListeners =
-                    (ArrayList<TransitionListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onTransitionPause(this);
+        if (!mEnded) {
+            ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+            int numOldAnims = runningAnimators.size();
+            for (int i = numOldAnims - 1; i >= 0; i--) {
+                Animator anim = runningAnimators.keyAt(i);
+                anim.pause();
             }
+            if (mListeners != null && mListeners.size() > 0) {
+                ArrayList<TransitionListener> tmpListeners =
+                        (ArrayList<TransitionListener>) mListeners.clone();
+                int numListeners = tmpListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    tmpListeners.get(i).onTransitionPause(this);
+                }
+            }
+            mPaused = true;
         }
-        mPaused = true;
     }
 
     /**
@@ -940,18 +946,20 @@ public abstract class Transition implements Cloneable {
      */
     public void resume() {
         if (mPaused) {
-            ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
-            int numOldAnims = runningAnimators.size();
-            for (int i = numOldAnims - 1; i >= 0; i--) {
-                Animator anim = runningAnimators.keyAt(i);
-                anim.resume();
-            }
-            if (mListeners != null && mListeners.size() > 0) {
-                ArrayList<TransitionListener> tmpListeners =
-                        (ArrayList<TransitionListener>) mListeners.clone();
-                int numListeners = tmpListeners.size();
-                for (int i = 0; i < numListeners; ++i) {
-                    tmpListeners.get(i).onTransitionResume(this);
+            if (!mEnded) {
+                ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+                int numOldAnims = runningAnimators.size();
+                for (int i = numOldAnims - 1; i >= 0; i--) {
+                    Animator anim = runningAnimators.keyAt(i);
+                    anim.resume();
+                }
+                if (mListeners != null && mListeners.size() > 0) {
+                    ArrayList<TransitionListener> tmpListeners =
+                            (ArrayList<TransitionListener>) mListeners.clone();
+                    int numListeners = tmpListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        tmpListeners.get(i).onTransitionResume(this);
+                    }
                 }
             }
             mPaused = false;
@@ -1071,6 +1079,7 @@ public abstract class Transition implements Cloneable {
                     tmpListeners.get(i).onTransitionStart(this);
                 }
             }
+            mEnded = false;
         }
         mNumInstances++;
     }
@@ -1111,6 +1120,7 @@ public abstract class Transition implements Cloneable {
                     v.setHasTransientState(false);
                 }
             }
+            mEnded = true;
         }
     }
 
