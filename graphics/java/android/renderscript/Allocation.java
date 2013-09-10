@@ -269,9 +269,12 @@ public class Allocation extends BaseObj {
 
         mType = t;
         mUsage = usage;
-        mSize = mType.getCount() * mType.getElement().getBytesSize();
 
         if (t != null) {
+            // TODO: A3D doesn't have Type info during creation, so we can't
+            // calculate the size ahead of time. We can possibly add a method
+            // to update the size in the future if it seems reasonable.
+            mSize = mType.getCount() * mType.getElement().getBytesSize();
             updateCacheInfo(t);
         }
         try {
