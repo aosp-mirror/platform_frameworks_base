@@ -28,6 +28,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/Log.h"
 #include "private/android_filesystem_config.h"
 
 #include "MtpTypes.h"

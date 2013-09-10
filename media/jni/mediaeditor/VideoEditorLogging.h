@@ -17,6 +17,16 @@
 #ifndef VIDEO_EDITOR_LOGGING_H
 #define VIDEO_EDITOR_LOGGING_H
 
+#ifndef LOG_TAG
+#error "No LOG_TAG defined!"
+#endif
+
+/*
+ * This file is used as a proxy for cutils/log.h.  Include cutils/log.h here to
+ * avoid relying on import ordering.
+ */
+#include <cutils/log.h>
+
 //#define VIDEOEDIT_LOGGING_ENABLED
 
 #define VIDEOEDIT_LOG_INDENTATION                       (3)

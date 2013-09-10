@@ -23,6 +23,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/Log.h"
 #include "hardware/fused_location.h"
 #include "hardware_legacy/power.h"
 
