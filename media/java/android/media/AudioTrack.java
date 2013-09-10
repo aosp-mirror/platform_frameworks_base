@@ -746,31 +746,28 @@ public class AudioTrack
     * If you need such features, consider implementing them at application level.
     *
     * @param timestamp a reference to a non-null AudioTimestamp instance allocated
-    *        and owned by caller, or null.
-    * @return that same instance if timestamp parameter is non-null and a timestamp is available,
-    *         or a reference to a new AudioTimestamp instance which is now owned by caller
-    *         if timestamp parameter is null and a timestamp is available,
-    *         or null if no timestamp is available.  In either successful case,
+    *        and owned by caller.
+    * @return true if a timestamp is available, or false if no timestamp is available.
+    *         If a timestamp if available,
     *         the AudioTimestamp instance is filled in with a position in frame units, together
     *         with the estimated time when that frame was presented or is committed to
     *         be presented.
     *         In the case that no timestamp is available, any supplied instance is left unaltered.
     */
-    public AudioTimestamp getTimestamp(AudioTimestamp timestamp)
+    public boolean getTimestamp(AudioTimestamp timestamp)
     {
+        if (timestamp == null) {
+            throw new IllegalArgumentException();
+        }
         // It's unfortunate, but we have to either create garbage every time or use synchronized
         long[] longArray = new long[2];
         int ret = native_get_timestamp(longArray);
-        if (ret == SUCCESS) {
-            if (timestamp == null) {
-                timestamp = new AudioTimestamp();
-            }
-            timestamp.framePosition = longArray[0];
-            timestamp.nanoTime = longArray[1];
-        } else {
-            timestamp = null;
+        if (ret != SUCCESS) {
+            return false;
         }
-        return timestamp;
+        timestamp.framePosition = longArray[0];
+        timestamp.nanoTime = longArray[1];
+        return true;
     }
 
 
