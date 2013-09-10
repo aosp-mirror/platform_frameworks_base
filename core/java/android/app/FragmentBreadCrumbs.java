@@ -81,7 +81,7 @@ public class FragmentBreadCrumbs extends ViewGroup
     }
 
     public FragmentBreadCrumbs(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.style.Widget_FragmentBreadCrumbs);
+        this(context, attrs, com.android.internal.R.attr.fragmentBreadCrumbsStyle);
     }
 
     public FragmentBreadCrumbs(Context context, AttributeSet attrs, int defStyleAttr) {

@@ -599,6 +599,8 @@
         <attr name="popupMenuStyle" format="reference" />
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
+        <!-- Default style for the FragmentBreadCrumbs widget. -->
+        <attr name="fragmentBreadCrumbsStyle" format="reference" />
 
         <!-- NumberPicker style. -->
         <attr name="numberPickerStyle" format="reference" />

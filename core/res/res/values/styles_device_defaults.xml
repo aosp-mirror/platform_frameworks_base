@@ -206,6 +206,9 @@ easier.
     <style name="Widget.DeviceDefault.ExpandableListView.White" parent="Widget.Holo.ExpandableListView.White">
 
     </style>
+    <style name="Widget.DeviceDefault.FragmentBreadCrumbs" parent="Widget.Holo.FragmentBreadCrumbs">
+
+    </style>
     <style name="Widget.DeviceDefault.Gallery" parent="Widget.Holo.Gallery">
 
     </style>
@@ -307,6 +310,9 @@ easier.
 
     </style>
     <style name="Widget.DeviceDefault.Light.ExpandableListView" parent="Widget.Holo.Light.ExpandableListView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" parent="Widget.Holo.Light.FragmentBreadCrumbs">
 
     </style>
     <style name="Widget.DeviceDefault.Light.GridView" parent="Widget.Holo.Light.GridView" >

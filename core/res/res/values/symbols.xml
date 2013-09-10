@@ -223,6 +223,7 @@
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
+  <java-symbol type="attr" name="fragmentBreadCrumbsStyle" />
   <java-symbol type="attr" name="gestureOverlayViewStyle" />
   <java-symbol type="attr" name="keyboardViewStyle" />
   <java-symbol type="attr" name="numberPickerStyle" />
