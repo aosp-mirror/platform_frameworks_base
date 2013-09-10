@@ -106,6 +106,11 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_DOC = "doc";
     private static final String EXTRA_QUERY = "query";
 
+    /**
+     * MIME types that should always show thumbnails in list mode.
+     */
+    private static final String[] LIST_THUMBNAIL_MIMES = new String[] { "image/*", "video/*" };
+
     private static AtomicInteger sLoaderId = new AtomicInteger(4000);
 
     private final int mLoaderId = sLoaderId.incrementAndGet();
@@ -294,9 +299,11 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Cursor cursor = mAdapter.getItem(position);
-            final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-            if (mFilter.apply(doc)) {
-                ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+            if (cursor != null) {
+                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
+                if (mFilter.apply(doc)) {
+                    ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+                }
             }
         }
     };
@@ -367,10 +374,20 @@ public class DirectoryFragment extends Fragment {
         public void onItemCheckedStateChanged(
                 ActionMode mode, int position, long id, boolean checked) {
             if (checked) {
-                // Directories cannot be checked
+                // Directories and footer items cannot be checked
+                boolean valid = false;
+
                 final Cursor cursor = mAdapter.getItem(position);
-                final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-                if (Document.MIME_TYPE_DIR.equals(docMimeType)) {
+                if (cursor != null) {
+                    final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+
+                    // Only valid if non-directory matches filter
+                    final State state = getDisplayState(DirectoryFragment.this);
+                    valid = !Document.MIME_TYPE_DIR.equals(docMimeType)
+                            && MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
+                }
+
+                if (!valid) {
                     mCurrentView.setItemChecked(position, false);
                 }
             }
@@ -441,11 +458,25 @@ public class DirectoryFragment extends Fragment {
         return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
     }
 
-    private interface Footer {
-        public View getView(View convertView, ViewGroup parent);
+    private static abstract class Footer {
+        private final int mItemViewType;
+
+        public Footer(int itemViewType) {
+            mItemViewType = itemViewType;
+        }
+
+        public abstract View getView(View convertView, ViewGroup parent);
+
+        public int getItemViewType() {
+            return mItemViewType;
+        }
     }
 
-    private static class LoadingFooter implements Footer {
+    private static class LoadingFooter extends Footer {
+        public LoadingFooter() {
+            super(1);
+        }
+
         @Override
         public View getView(View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
@@ -457,11 +488,12 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private class MessageFooter implements Footer {
+    private class MessageFooter extends Footer {
         private final int mIcon;
         private final String mMessage;
 
-        public MessageFooter(int icon, String message) {
+        public MessageFooter(int itemViewType, int icon, String message) {
+            super(itemViewType);
             mIcon = icon;
             mMessage = message;
         }
@@ -506,11 +538,11 @@ public class DirectoryFragment extends Fragment {
             if (extras != null) {
                 final String info = extras.getString(DocumentsContract.EXTRA_INFO);
                 if (info != null) {
-                    mFooters.add(new MessageFooter(R.drawable.ic_dialog_alert, info));
+                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_alert, info));
                 }
                 final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
                 if (error != null) {
-                    mFooters.add(new MessageFooter(R.drawable.ic_dialog_alert, error));
+                    mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, error));
                 }
                 if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
                     mFooters.add(new LoadingFooter());
@@ -532,7 +564,11 @@ public class DirectoryFragment extends Fragment {
                 return getDocumentView(position, convertView, parent);
             } else {
                 position -= mCursorCount;
-                return mFooters.get(position).getView(convertView, parent);
+                convertView = mFooters.get(position).getView(convertView, parent);
+                // Only the view itself is disabled; contents inside shouldn't
+                // be dimmed.
+                convertView.setEnabled(false);
+                return convertView;
             }
         }
 
@@ -581,7 +617,11 @@ public class DirectoryFragment extends Fragment {
                 oldTask.cancel(false);
             }
 
-            if ((docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0) {
+            final boolean supportsThumbnail = (docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
+            final boolean allowThumbnail = (state.mode == MODE_GRID)
+                    || MimePredicate.mimeMatches(LIST_THUMBNAIL_MIMES, docMimeType);
+
+            if (supportsThumbnail && allowThumbnail) {
                 final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
                 final Bitmap cachedResult = thumbs.get(uri);
                 if (cachedResult != null) {
@@ -590,7 +630,7 @@ public class DirectoryFragment extends Fragment {
                     final ThumbnailAsyncTask task = new ThumbnailAsyncTask(icon, mThumbSize);
                     icon.setImageBitmap(null);
                     icon.setTag(task);
-                    task.execute(uri);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
                 }
             } else if (docIcon != 0) {
                 icon.setImageDrawable(IconUtils.loadPackageIcon(context, docAuthority, docIcon));
@@ -642,6 +682,18 @@ public class DirectoryFragment extends Fragment {
 
             line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
 
+            final boolean enabled = Document.MIME_TYPE_DIR.equals(docMimeType)
+                    || MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
+            if (enabled) {
+                setEnabledRecursive(convertView, true);
+                icon.setAlpha(1f);
+                icon1.setAlpha(1f);
+            } else {
+                setEnabledRecursive(convertView, false);
+                icon.setAlpha(0.5f);
+                icon1.setAlpha(0.5f);
+            }
+
             return convertView;
         }
 
@@ -666,22 +718,18 @@ public class DirectoryFragment extends Fragment {
         }
 
         @Override
+        public int getViewTypeCount() {
+            return 4;
+        }
+
+        @Override
         public int getItemViewType(int position) {
             if (position < mCursorCount) {
                 return 0;
             } else {
-                return IGNORE_ITEM_VIEW_TYPE;
+                position -= mCursorCount;
+                return mFooters.get(position).getItemViewType();
             }
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return position < mCursorCount;
         }
     }
 
@@ -771,5 +819,17 @@ public class DirectoryFragment extends Fragment {
         }
 
         return commonType[0] + "/" + commonType[1];
+    }
+
+    private void setEnabledRecursive(View v, boolean enabled) {
+        if (v.isEnabled() == enabled) return;
+        v.setEnabled(enabled);
+
+        if (v instanceof ViewGroup) {
+            final ViewGroup vg = (ViewGroup) v;
+            for (int i = vg.getChildCount() - 1; i >= 0; i--) {
+                setEnabledRecursive(vg.getChildAt(i), enabled);
+            }
+        }
     }
 }

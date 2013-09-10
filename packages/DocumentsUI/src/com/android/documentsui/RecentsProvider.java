@@ -149,9 +149,9 @@ public class RecentsProvider extends ContentProvider {
         final SQLiteDatabase db = mHelper.getReadableDatabase();
         switch (sMatcher.match(uri)) {
             case URI_RECENT:
-                return db.query(TABLE_RECENT, projection,
-                        RecentColumns.TIMESTAMP + "<" + MAX_HISTORY_IN_MILLIS, null, null, null,
-                        null);
+                final long cutoff = System.currentTimeMillis() - MAX_HISTORY_IN_MILLIS;
+                return db.query(TABLE_RECENT, projection, RecentColumns.TIMESTAMP + ">" + cutoff,
+                        null, null, null, null);
             case URI_STATE:
                 final String authority = uri.getPathSegments().get(1);
                 final String rootId = uri.getPathSegments().get(2);
@@ -180,8 +180,8 @@ public class RecentsProvider extends ContentProvider {
             case URI_RECENT:
                 values.put(RecentColumns.TIMESTAMP, System.currentTimeMillis());
                 db.insert(TABLE_RECENT, null, values);
-                db.delete(
-                        TABLE_RECENT, RecentColumns.TIMESTAMP + ">" + MAX_HISTORY_IN_MILLIS, null);
+                final long cutoff = System.currentTimeMillis() - MAX_HISTORY_IN_MILLIS;
+                db.delete(TABLE_RECENT, RecentColumns.TIMESTAMP + "<" + cutoff, null);
                 return uri;
             case URI_STATE:
                 final String authority = uri.getPathSegments().get(1);
