@@ -471,12 +471,14 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.height = getSnapshot()->height;
     getSnapshot()->transform->copyTo(&info.transform[0]);
 
+    bool dirtyClip = mDirtyClip;
     // setup GL state for functor
     if (mDirtyClip) {
-        setScissorFromClip();
         setStencilFromClip(); // can issue draws, so must precede enableScissor()/interrupt()
     }
-    mCaches.enableScissor();
+    if (mCaches.enableScissor() || dirtyClip) {
+        setScissorFromClip();
+    }
     interrupt();
 
     // call functor immediately after GL state setup
