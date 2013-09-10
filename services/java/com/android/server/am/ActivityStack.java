@@ -620,7 +620,13 @@ final class ActivityStack {
     }
 
     void clearLaunchTime(ActivityRecord r) {
-        r.displayStartTime = r.fullyDrawnStartTime = 0;
+        // Make sure that there is no activity waiting for this to launch.
+        if (mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
+            r.displayStartTime = r.fullyDrawnStartTime = 0;
+        } else {
+            mStackSupervisor.removeTimeoutsForActivityLocked(r);
+            mStackSupervisor.scheduleIdleTimeoutLocked(r);
+        }
     }
 
     void awakeFromSleepingLocked() {
