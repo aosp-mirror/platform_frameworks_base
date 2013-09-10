@@ -10541,8 +10541,10 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @param appWindowToken The application that ANR'd, may be null.
      * @param windowState The window that ANR'd, may be null.
+     * @param reason The reason for the ANR, may be null.
      */
-    public void saveANRStateLocked(AppWindowToken appWindowToken, WindowState windowState) {
+    public void saveANRStateLocked(AppWindowToken appWindowToken, WindowState windowState,
+            String reason) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new FastPrintWriter(sw, false, 1024);
         pw.println("  ANR time: " + DateFormat.getInstance().format(new Date()));
@@ -10551,6 +10553,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (windowState != null) {
             pw.println("  Window at fault: " + windowState.mAttrs.getTitle());
+        }
+        if (reason != null) {
+            pw.println("  Reason: " + reason);
         }
         pw.println();
         dumpWindowsNoHeaderLocked(pw, true, null);

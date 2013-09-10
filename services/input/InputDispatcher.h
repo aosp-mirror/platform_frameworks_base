@@ -202,7 +202,8 @@ public:
     /* Notifies the system that an application is not responding.
      * Returns a new timeout to continue waiting, or 0 to abort dispatch. */
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<InputWindowHandle>& inputWindowHandle) = 0;
+            const sp<InputWindowHandle>& inputWindowHandle,
+            const String8& reason) = 0;
 
     /* Notifies the system that an input channel is unrecoverably broken. */
     virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle) = 0;
@@ -596,6 +597,7 @@ private:
         KeyEntry* keyEntry;
         sp<InputApplicationHandle> inputApplicationHandle;
         sp<InputWindowHandle> inputWindowHandle;
+        String8 reason;
         int32_t userActivityEventType;
         uint32_t seq;
         bool handled;
