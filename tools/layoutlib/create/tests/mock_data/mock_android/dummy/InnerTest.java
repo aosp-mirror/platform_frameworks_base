@@ -19,6 +19,7 @@ package mock_android.dummy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class InnerTest {
 
@@ -66,13 +67,13 @@ public class InnerTest {
         }
     }
     
-    public <X> void genericMethod1(X a, X[] a) {
+    public <X> void genericMethod1(X a, X[] b) {
     }
 
     public <X, Y> void genericMethod2(X a, List<Y> b) {
     }
 
-    public <X, Y> void genericMethod3(X a, List<Y extends InnerTest> b) {
+    public <X, Y extends InnerTest> void genericMethod3(X a, List<Y> b) {
     }
 
     public <T extends InnerTest> void genericMethod4(T[] a, Collection<T> b, Collection<?> c) {
@@ -85,6 +86,6 @@ public class InnerTest {
         mInnerInstance = m;
         mTheIntEnum = null;
         mGeneric1 = new MyGenerics1();
-        genericMethod(new DerivingClass[0], new ArrayList<DerivingClass>(), new ArrayList<InnerTest>());
+        genericMethod4(new DerivingClass[0], new ArrayList<DerivingClass>(), new ArrayList<InnerTest>());
     }
 }
