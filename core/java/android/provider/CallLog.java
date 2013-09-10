@@ -137,8 +137,18 @@ public class CallLog {
         public static final String NUMBER = "number";
 
         /**
-         * The number presenting rules set by the network for "allowed",
-         * "payphone", "restricted" or "unknown".
+         * The number presenting rules set by the network.
+         *
+         * <p>
+         * Allowed values:
+         * <ul>
+         * <li>{@link #PRESENTATION_ALLOWED}</li>
+         * <li>{@link #PRESENTATION_RESTRICTED}</li>
+         * <li>{@link #PRESENTATION_UNKNOWN}</li>
+         * <li>{@link #PRESENTATION_PAYPHONE}</li>
+         * </ul>
+         * </p>
+         *
          * <P>Type: INTEGER</P>
          */
         public static final String NUMBER_PRESENTATION = "presentation";
