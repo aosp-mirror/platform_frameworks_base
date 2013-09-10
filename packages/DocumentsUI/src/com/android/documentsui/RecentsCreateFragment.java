@@ -26,10 +26,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils.TruncateAt;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -181,19 +185,28 @@ public class RecentsCreateFragment extends Fragment {
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            final View line2 = convertView.findViewById(R.id.line2);
 
             final DocumentStack stack = getItem(position);
             icon.setImageDrawable(stack.root.loadIcon(context));
 
-            final StringBuilder builder = new StringBuilder();
-            for (int i = stack.size() - 1; i >= 0; i--) {
+            final Drawable crumb = context.getResources()
+                    .getDrawable(R.drawable.ic_breadcrumb_arrow);
+            crumb.setBounds(0, 0, crumb.getIntrinsicWidth(), crumb.getIntrinsicHeight());
+
+            final SpannableStringBuilder builder = new SpannableStringBuilder();
+            builder.append(stack.root.title);
+            appendDrawable(builder, crumb);
+            for (int i = stack.size() - 2; i >= 0; i--) {
                 builder.append(stack.get(i).displayName);
                 if (i > 0) {
-                    builder.append(" \u232a ");
+                    appendDrawable(builder, crumb);
                 }
             }
-            title.setText(builder.toString());
+            title.setText(builder);
             title.setEllipsize(TruncateAt.MIDDLE);
+
+            line2.setVisibility(View.GONE);
 
             return convertView;
         }
@@ -212,5 +225,11 @@ public class RecentsCreateFragment extends Fragment {
         public long getItemId(int position) {
             return getItem(position).hashCode();
         }
+    }
+
+    private static void appendDrawable(SpannableStringBuilder b, Drawable d) {
+        final int length = b.length();
+        b.append("\u232a");
+        b.setSpan(new ImageSpan(d), length, b.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 }
