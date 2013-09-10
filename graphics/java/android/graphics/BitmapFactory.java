@@ -570,24 +570,10 @@ public class BitmapFactory {
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
         try {
-            boolean decodeGenericStream = true;
             if (is instanceof AssetManager.AssetInputStream) {
                 final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
                 bm = nativeDecodeAsset(asset, outPadding, opts);
-                // Do not follow the normal case.
-                decodeGenericStream = false;
-            } else if (is instanceof FileInputStream) {
-                try {
-                    FileDescriptor fd = ((FileInputStream) is).getFD();
-                    // decodeFileDescriptor will take care of throwing the IAE and
-                    // calling setDensityFromOptions.
-                    return decodeFileDescriptor(fd, outPadding, opts);
-                } catch (IOException e) {
-                    // Fall through to nativeDecodeStream.
-                }
-            }
-
-            if (decodeGenericStream) {
+            } else {
                 byte [] tempStorage = null;
                 if (opts != null) tempStorage = opts.inTempStorage;
                 if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
