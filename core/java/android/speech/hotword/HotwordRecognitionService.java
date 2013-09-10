@@ -48,8 +48,7 @@ public abstract class HotwordRecognitionService extends Service {
     private static final boolean DBG = false;
 
     /**
-     * Key used to retrieve a string to be displayed to the user passed to the
-     * {@link android.speech.hotword.HotwordRecognitionListener#onHotwordEvent(int, Bundle)} method.
+     * Key used to retrieve a string to be displayed to the user.
      */
     public static final String KEY_PROMPT_TEXT = "prompt_text";
 
