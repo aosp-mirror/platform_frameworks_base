@@ -3,6 +3,7 @@
 #include "BitmapFactory.h"
 #include "NinePatchPeeker.h"
 #include "SkData.h"
+#include "SkFrontBufferedStream.h"
 #include "SkImageDecoder.h"
 #include "SkImageRef_ashmem.h"
 #include "SkImageRef_GlobalPool.h"
@@ -120,7 +121,7 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
     }
 }
 
-static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
+static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStreamRewindable* stream,
         int sampleSize, bool ditherImage) {
 
     SkImageRef* pr;
@@ -465,13 +466,17 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
         jobject padding, jobject options) {
 
     jobject bitmap = NULL;
-    SkAutoTUnref<SkStreamRewindable> stream(GetRewindableStream(env, is, storage));
+    SkAutoTUnref<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
 
     if (stream.get()) {
+        // Need to buffer enough input to be able to rewind as much as might be read by a decoder
+        // trying to determine the stream's format. Currently the most is 64, read by
+        // SkImageDecoder_libwebp.
+        // FIXME: Get this number from SkImageDecoder
+        SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(stream, 64));
+        SkASSERT(bufferedStream.get() != NULL);
         // for now we don't allow purgeable with java inputstreams
-        // FIXME: GetRewindableStream may have made a copy, in which case
-        // purgeable should be allowed.
-        bitmap = doDecode(env, stream, padding, options, false, false);
+        bitmap = doDecode(env, bufferedStream, padding, options, false, false);
     }
     return bitmap;
 }
