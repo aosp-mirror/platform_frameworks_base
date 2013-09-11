@@ -21,20 +21,20 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.util.SparseBooleanArray;
 import android.view.ActionProvider;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.View.MeasureSpec;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageButton;
 import android.widget.ListPopupWindow;
 import android.widget.ListPopupWindow.ForwardingListener;
-
+import com.android.internal.transition.ActionBarTransition;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
@@ -72,6 +72,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
+
+    private static final Transition sTransition = ActionBarTransition.getActionBarTransition();
 
     public ActionMenuPresenter(Context context) {
         super(context, com.android.internal.R.layout.action_menu_layout,
@@ -211,6 +213,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     @Override
     public void updateMenuView(boolean cleared) {
+        final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
+        if (menuViewParent != null) {
+            TransitionManager.beginDelayedTransition(menuViewParent, sTransition);
+        }
         super.updateMenuView(cleared);
 
         if (mMenu != null) {
