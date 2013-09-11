@@ -479,7 +479,13 @@ void AndroidPixelRef::globalRef(void* localref) {
     if (fWrappedPixelRef) {
         // delegate java obj management to the wrapped ref
         fWrappedPixelRef->globalRef(localref);
-    } else if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
+
+        // Note: we only ref and unref the wrapped AndroidPixelRef so that
+        // bitmap->pixelRef()->globalRef() and globalUnref() can be used in a pair, even if
+        // the bitmap has its underlying AndroidPixelRef swapped out/wrapped
+        return;
+    }
+    if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
         JNIEnv *env = vm2env(fVM);
 
         // If JNI ref was passed, it is always used
@@ -506,7 +512,9 @@ void AndroidPixelRef::globalUnref() {
     if (fWrappedPixelRef) {
         // delegate java obj management to the wrapped ref
         fWrappedPixelRef->globalUnref();
-    } else if (fOnJavaHeap && sk_atomic_dec(&fGlobalRefCnt) == 1) {
+        return;
+    }
+    if (fOnJavaHeap && sk_atomic_dec(&fGlobalRefCnt) == 1) {
         JNIEnv *env = vm2env(fVM);
         if (!fHasGlobalRef) {
             SkDebugf("We don't have a global ref!");
