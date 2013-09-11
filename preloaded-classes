@@ -663,8 +663,8 @@ android.net.wifi.IWifiManager$Stub$Proxy
 android.net.wifi.WifiManager
 android.net.wifi.WifiManager$ServiceHandler
 android.net.wifi.WifiNative
-android.nfc.INdefPushCallback
-android.nfc.INdefPushCallback$Stub
+android.nfc.IAppCallback
+android.nfc.IAppCallback$Stub
 android.nfc.INfcAdapter
 android.nfc.INfcAdapter$Stub
 android.nfc.INfcAdapter$Stub$Proxy
