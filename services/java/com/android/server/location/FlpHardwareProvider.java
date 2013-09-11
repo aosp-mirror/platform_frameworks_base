@@ -141,10 +141,16 @@ public class FlpHardwareProvider {
     }
 
     private void onGeofenceMonitorStatus(int status, int source, Location location) {
+        // allow the location to be optional in this event
+        Location updatedLocation = null;
+        if(location != null) {
+            updatedLocation = updateLocationInformation(location);
+        }
+
         getGeofenceHardwareSink().reportGeofenceMonitorStatus(
                 GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE,
                 status,
-                updateLocationInformation(location),
+                updatedLocation,
                 source);
     }
 
