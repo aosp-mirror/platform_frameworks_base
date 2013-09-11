@@ -16,7 +16,6 @@
 
 package android.print;
 
-
 /**
  * This class represents a print job from the perspective of
  * an application.

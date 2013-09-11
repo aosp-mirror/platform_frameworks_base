@@ -226,6 +226,12 @@ public final class PrintAttributes implements Parcelable {
         StringBuilder builder = new StringBuilder();
         builder.append("PrintAttributes{");
         builder.append("mediaSize: ").append(mMediaSize);
+        if (mMediaSize != null) {
+            builder.append(", orientation: ").append(mMediaSize.isPortrait()
+                    ? "portrait" : "landscape");
+        } else {
+            builder.append(", orientation: ").append("null");
+        }
         builder.append(", resolution: ").append(mResolution);
         builder.append(", margins: ").append(mMargins);
         builder.append(", colorMode: ").append(colorModeToString(mColorMode));
@@ -880,12 +886,6 @@ public final class PrintAttributes implements Parcelable {
          * @param bottomMils The bottom margin in mils (thousands of an inch).
          */
         public Margins(int leftMils, int topMils, int rightMils, int bottomMils) {
-            if (leftMils > rightMils) {
-                throw new IllegalArgumentException("leftMils cannot be less than rightMils.");
-            }
-            if (topMils > bottomMils) {
-                throw new IllegalArgumentException("topMils cannot be less than bottomMils.");
-            }
             mTopMils = topMils;
             mLeftMils = leftMils;
             mRightMils = rightMils;
