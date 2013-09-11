@@ -24,8 +24,8 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="@string/empty"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:visibility="gone" />
+        android:visibility="gone"
+        style="@style/TextAppearance.Medium" />
 
     <ListView
         android:id="@+id/list"
