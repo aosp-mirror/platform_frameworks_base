@@ -2439,7 +2439,9 @@ public final class Settings {
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,
-            VIBRATE_WHEN_RINGING
+            VIBRATE_WHEN_RINGING,
+            RINGTONE,
+            NOTIFICATION_SOUND
         };
 
         // Settings moved to Settings.Secure
