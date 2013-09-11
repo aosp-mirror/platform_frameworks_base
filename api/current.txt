@@ -22805,35 +22805,6 @@ package android.speech {
 
 }
 
-package android.speech.hotword {
-
-  public abstract class HotwordRecognitionService extends android.app.Service {
-    ctor public HotwordRecognitionService();
-    method public android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onStartHotwordRecognition(android.speech.hotword.HotwordRecognitionService.Callback);
-    method public abstract void onStopHotwordRecognition();
-    field public static final int ERROR_AUDIO = 1; // 0x1
-    field public static final int ERROR_CLIENT = 4; // 0x4
-    field public static final int ERROR_FAILED = 3; // 0x3
-    field public static final int ERROR_RECOGNIZER_BUSY = 2; // 0x2
-    field public static final int ERROR_SERVICE_ALREADY_STARTED = 6; // 0x6
-    field public static final int ERROR_TIMEOUT = 5; // 0x5
-    field public static final int ERROR_UNAVAILABLE = 7; // 0x7
-    field public static final int EVENT_TYPE_PROMPT_CHANGED = 1; // 0x1
-    field public static final java.lang.String KEY_PROMPT_TEXT = "prompt_text";
-    field public static final java.lang.String SERVICE_INTERFACE = "android.speech.hotword.HotwordRecognitionService";
-  }
-
-  public static class HotwordRecognitionService.Callback {
-    method public void onError(int) throws android.os.RemoteException;
-    method public void onHotwordEvent(int, android.os.Bundle) throws android.os.RemoteException;
-    method public void onHotwordRecognitionStarted() throws android.os.RemoteException;
-    method public void onHotwordRecognitionStopped() throws android.os.RemoteException;
-    method public void onHotwordRecognized(android.content.Intent) throws android.os.RemoteException;
-  }
-
-}
-
 package android.speech.tts {
 
   public abstract interface SynthesisCallback {

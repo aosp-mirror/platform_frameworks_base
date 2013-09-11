@@ -195,8 +195,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindowSession.aidl \
 	core/java/android/speech/IRecognitionListener.aidl \
 	core/java/android/speech/IRecognitionService.aidl \
-        core/java/android/speech/hotword/IHotwordRecognitionListener.aidl \
-	core/java/android/speech/hotword/IHotwordRecognitionService.aidl \
 	core/java/android/speech/tts/ITextToSpeechCallback.aidl \
 	core/java/android/speech/tts/ITextToSpeechService.aidl \
 	core/java/com/android/internal/app/IAppOpsCallback.aidl \
