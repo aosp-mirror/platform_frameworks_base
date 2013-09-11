@@ -21,6 +21,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.BatteryManager;
+import android.os.SystemClock;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -130,6 +131,10 @@ final class WirelessChargerDetector {
     private long mFirstSampleTime;
     private float mFirstSampleX, mFirstSampleY, mFirstSampleZ;
 
+    // The time and value of the last sample that was collected (for debugging only).
+    private long mLastSampleTime;
+    private float mLastSampleX, mLastSampleY, mLastSampleZ;
+
     public WirelessChargerDetector(SensorManager sensorManager,
             SuspendBlocker suspendBlocker) {
         mSensorManager = sensorManager;
@@ -153,6 +158,9 @@ final class WirelessChargerDetector {
             pw.println("  mFirstSampleTime=" + mFirstSampleTime);
             pw.println("  mFirstSampleX=" + mFirstSampleX
                     + ", mFirstSampleY=" + mFirstSampleY + ", mFirstSampleZ=" + mFirstSampleZ);
+            pw.println("  mLastSampleTime=" + mLastSampleTime);
+            pw.println("  mLastSampleX=" + mLastSampleX
+                    + ", mLastSampleY=" + mLastSampleY + ", mLastSampleZ=" + mLastSampleZ);
         }
     }
 
@@ -223,6 +231,11 @@ final class WirelessChargerDetector {
             if (!mDetectionInProgress) {
                 return;
             }
+
+            mLastSampleTime = timeNanos;
+            mLastSampleX = x;
+            mLastSampleY = y;
+            mLastSampleZ = z;
 
             mTotalSamples += 1;
             if (mTotalSamples == 1) {
@@ -310,7 +323,10 @@ final class WirelessChargerDetector {
     private final SensorEventListener mListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            processSample(event.timestamp, event.values[0], event.values[1], event.values[2]);
+            // We use SystemClock.elapsedRealtimeNanos() instead of event.timestamp because
+            // on some devices the sensor HAL may produce timestamps that are not monotonic.
+            processSample(SystemClock.elapsedRealtimeNanos(),
+                    event.values[0], event.values[1], event.values[2]);
         }
 
         @Override
