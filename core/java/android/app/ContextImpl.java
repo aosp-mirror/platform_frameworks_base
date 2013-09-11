@@ -183,6 +183,7 @@ class ContextImpl extends Context {
 
     /*package*/ LoadedApk mPackageInfo;
     private String mBasePackageName;
+    private String mOpPackageName;
     private Resources mResources;
     /*package*/ ActivityThread mMainThread;
     private Context mOuterContext;
@@ -677,6 +678,12 @@ class ContextImpl extends Context {
     @Override
     public String getBasePackageName() {
         return mBasePackageName != null ? mBasePackageName : getPackageName();
+    }
+
+    /** @hide */
+    @Override
+    public String getOpPackageName() {
+        return mOpPackageName != null ? mOpPackageName : getBasePackageName();
     }
 
     @Override
@@ -1961,6 +1968,7 @@ class ContextImpl extends Context {
     public ContextImpl(ContextImpl context) {
         mPackageInfo = context.mPackageInfo;
         mBasePackageName = context.mBasePackageName;
+        mOpPackageName = context.mOpPackageName;
         mResources = context.mResources;
         mMainThread = context.mMainThread;
         mContentResolver = context.mContentResolver;
@@ -1977,7 +1985,21 @@ class ContextImpl extends Context {
     final void init(LoadedApk packageInfo, IBinder activityToken, ActivityThread mainThread,
             Resources container, String basePackageName, UserHandle user) {
         mPackageInfo = packageInfo;
-        mBasePackageName = basePackageName != null ? basePackageName : packageInfo.mPackageName;
+        if (basePackageName != null) {
+            mBasePackageName = mOpPackageName = basePackageName;
+        } else {
+            mBasePackageName = packageInfo.mPackageName;
+            ApplicationInfo ainfo = packageInfo.getApplicationInfo();
+            if (ainfo.uid == Process.SYSTEM_UID && ainfo.uid != Process.myUid()) {
+                // Special case: system components allow themselves to be loaded in to other
+                // processes.  For purposes of app ops, we must then consider the context as
+                // belonging to the package of this process, not the system itself, otherwise
+                // the package+uid verifications in app ops will fail.
+                mOpPackageName = ActivityThread.currentPackageName();
+            } else {
+                mOpPackageName = mBasePackageName;
+            }
+        }
         mResources = mPackageInfo.getResources(mainThread);
         mResourcesManager = ResourcesManager.getInstance();
 
@@ -2011,6 +2033,7 @@ class ContextImpl extends Context {
     final void init(Resources resources, ActivityThread mainThread, UserHandle user) {
         mPackageInfo = null;
         mBasePackageName = null;
+        mOpPackageName = null;
         mResources = resources;
         mMainThread = mainThread;
         mContentResolver = new ApplicationContentResolver(this, mainThread, user);

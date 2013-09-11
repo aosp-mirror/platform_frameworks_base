@@ -407,7 +407,7 @@ public final class PowerManager {
      */
     public WakeLock newWakeLock(int levelAndFlags, String tag) {
         validateWakeLockParameters(levelAndFlags, tag);
-        return new WakeLock(levelAndFlags, tag, mContext.getBasePackageName());
+        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName());
     }
 
     /** @hide */
