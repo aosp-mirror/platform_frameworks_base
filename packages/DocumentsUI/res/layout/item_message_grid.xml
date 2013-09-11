@@ -16,44 +16,36 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="180dip"
+    android:layout_height="@dimen/grid_height"
+    android:paddingTop="?android:attr/listPreferredItemPaddingStart"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:paddingBottom="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+    android:foreground="@drawable/item_background">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/chip"
-        android:foreground="@drawable/item_background"
-        android:duplicateParentState="true">
+        android:orientation="vertical"
+        android:gravity="center">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="6dp"
-            android:orientation="vertical"
-            android:gravity="center">
+        <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@null" />
 
-            <ImageView
-                android:id="@android:id/icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@null" />
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="4"
+            android:ellipsize="end"
+            android:paddingTop="6dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAlignment="viewStart" />
 
-            <TextView
-                android:id="@android:id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:paddingTop="6dp"
-                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textAlignment="viewStart" />
-
-        </LinearLayout>
-
-    </FrameLayout>
+    </LinearLayout>
 
 </FrameLayout>
