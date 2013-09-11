@@ -1027,6 +1027,8 @@ public class ValueAnimator extends Animator {
             long currentPlayTime = currentTime - mStartTime;
             long timeLeft = mDuration - currentPlayTime;
             mStartTime = currentTime - timeLeft;
+        } else if (mStarted) {
+            end();
         } else {
             start(true);
         }
