@@ -23,7 +23,6 @@ import android.content.ContextWrapper;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.util.Log;
@@ -305,18 +304,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Called by the system when the service is first created.  Do not call this method directly.
      */
     public void onCreate() {
-    }
-
-    /**
-     * This is called on foreground services when the user is requesting an assist, to build a
-     * full {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
-     * running foreground services.  You can override this method to place into the bundle
-     * anything you would like to appear as an item in the
-     * {@link Intent#EXTRA_ASSIST_SERVICES_CONTEXTS} part of the assist Intent.
-     * This method will not be called if this service is not in the foreground.
-     * The default implementation does nothing.
-     */
-    public void onProvideAssistData(Bundle data) {
     }
 
     /**

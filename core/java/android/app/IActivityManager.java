@@ -389,8 +389,7 @@ public interface IActivityManager extends IInterface {
 
     public Bundle getAssistContextExtras(int requestType) throws RemoteException;
 
-    public void reportAssistContextExtras(IBinder token, Bundle extras, int index)
-            throws RemoteException;
+    public void reportAssistContextExtras(IBinder token, Bundle extras) throws RemoteException;
 
     public void killUid(int uid, String reason) throws RemoteException;
 
