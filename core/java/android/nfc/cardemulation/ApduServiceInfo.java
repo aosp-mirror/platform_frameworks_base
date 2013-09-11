@@ -22,6 +22,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -80,10 +81,15 @@ public final class ApduServiceInfo implements Parcelable {
     final boolean mRequiresDeviceUnlock;
 
     /**
+     * The id of the service banner specified in XML.
+     */
+    final int mBannerResourceId;
+
+    /**
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> aidGroups, boolean requiresUnlock) {
+            ArrayList<AidGroup> aidGroups, boolean requiresUnlock, int bannerResource) {
         this.mService = info;
         this.mDescription = description;
         this.mAidGroups = aidGroups;
@@ -95,6 +101,7 @@ public final class ApduServiceInfo implements Parcelable {
             this.mCategoryToGroup.put(aidGroup.category, aidGroup);
             this.mAids.addAll(aidGroup.aids);
         }
+        this.mBannerResourceId = bannerResource;
     }
 
     public ApduServiceInfo(PackageManager pm, ResolveInfo info, boolean onHost)
@@ -141,6 +148,9 @@ public final class ApduServiceInfo implements Parcelable {
                 mRequiresDeviceUnlock = sa.getBoolean(
                         com.android.internal.R.styleable.HostApduService_requireDeviceUnlock,
                         false);
+                mBannerResourceId = sa.getResourceId(
+                        com.android.internal.R.styleable.HostApduService_apduServiceBanner, -1);
+                sa.recycle();
             } else {
                 TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.OffHostApduService);
@@ -148,6 +158,9 @@ public final class ApduServiceInfo implements Parcelable {
                 mDescription = sa.getString(
                         com.android.internal.R.styleable.OffHostApduService_description);
                 mRequiresDeviceUnlock = false;
+                mBannerResourceId = sa.getResourceId(
+                        com.android.internal.R.styleable.HostApduService_apduServiceBanner, -1);
+                sa.recycle();
             }
 
             mAidGroups = new ArrayList<AidGroup>();
@@ -183,6 +196,7 @@ public final class ApduServiceInfo implements Parcelable {
                     } else {
                         currentGroup = new AidGroup(groupCategory, groupDescription);
                     }
+                    groupAttrs.recycle();
                 } else if (eventType == XmlPullParser.END_TAG && "aid-group".equals(tagName) &&
                         currentGroup != null) {
                     if (currentGroup.aids.size() > 0) {
@@ -206,6 +220,7 @@ public final class ApduServiceInfo implements Parcelable {
                     } else {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
+                    a.recycle();
                 }
             }
         } catch (NameNotFoundException e) {
@@ -246,6 +261,21 @@ public final class ApduServiceInfo implements Parcelable {
 
     public Drawable loadIcon(PackageManager pm) {
         return mService.loadIcon(pm);
+    }
+
+    public Drawable loadBanner(PackageManager pm) {
+        Resources res;
+        try {
+            res = pm.getResourcesForApplication(mService.serviceInfo.packageName);
+            Drawable banner = res.getDrawable(mBannerResourceId);
+            return banner;
+        } catch (NotFoundException e) {
+            Log.e(TAG, "Could not load banner.");
+            return null;
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Could not load banner.");
+            return null;
+        }
     }
 
     static boolean isValidAid(String aid) {
@@ -302,6 +332,7 @@ public final class ApduServiceInfo implements Parcelable {
             dest.writeTypedList(mAidGroups);
         }
         dest.writeInt(mRequiresDeviceUnlock ? 1 : 0);
+        dest.writeInt(mBannerResourceId);
     };
 
     public static final Parcelable.Creator<ApduServiceInfo> CREATOR =
@@ -317,7 +348,8 @@ public final class ApduServiceInfo implements Parcelable {
                 source.readTypedList(aidGroups, AidGroup.CREATOR);
             }
             boolean requiresUnlock = (source.readInt() != 0) ? true : false;
-            return new ApduServiceInfo(info, onHost, description, aidGroups, requiresUnlock);
+            int bannerResource = source.readInt();
+            return new ApduServiceInfo(info, onHost, description, aidGroups, requiresUnlock, bannerResource);
         }
 
         @Override
