@@ -62,6 +62,7 @@ class DirectoryResult implements AutoCloseable {
 public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private final ForceLoadContentObserver mObserver = new ForceLoadContentObserver();
 
+    private final int mType;
     private final RootInfo mRoot;
     private final DocumentInfo mDoc;
     private final Uri mUri;
@@ -70,9 +71,10 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
-    public DirectoryLoader(
-            Context context, RootInfo root, DocumentInfo doc, Uri uri, int userSortOrder) {
+    public DirectoryLoader(Context context, int type, RootInfo root, DocumentInfo doc, Uri uri,
+            int userSortOrder) {
         super(context);
+        mType = type;
         mRoot = root;
         mDoc = doc;
         mUri = uri;
@@ -128,6 +130,11 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             }
         }
 
+        // Search always uses ranking from provider
+        if (mType == DirectoryFragment.TYPE_SEARCH) {
+            result.sortOrder = State.SORT_ORDER_UNKNOWN;
+        }
+
         Log.d(TAG, "userMode=" + userMode + ", userSortOrder=" + mUserSortOrder + " --> mode="
                 + result.mode + ", sortOrder=" + result.sortOrder);
 
@@ -137,11 +144,18 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
                     mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
             cursor.registerContentObserver(mObserver);
 
-            final Cursor withRoot = new RootCursorWrapper(
-                    mUri.getAuthority(), mRoot.rootId, cursor, -1);
-            final Cursor sorted = new SortingCursorWrapper(withRoot, result.sortOrder);
+            cursor = new RootCursorWrapper(mUri.getAuthority(), mRoot.rootId, cursor, -1);
 
-            result.cursor = sorted;
+            if (mType == DirectoryFragment.TYPE_SEARCH) {
+                // Filter directories out of search results, for now
+                cursor = new FilteringCursorWrapper(cursor, null, new String[] {
+                        Document.MIME_TYPE_DIR });
+            } else {
+                // Normal directories should have sorting applied
+                cursor = new SortingCursorWrapper(cursor, result.sortOrder);
+            }
+
+            result.cursor = cursor;
         } catch (Exception e) {
             Log.d(TAG, "Failed to query", e);
             result.exception = e;

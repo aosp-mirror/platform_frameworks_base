@@ -38,9 +38,11 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
@@ -56,6 +58,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.AbsListView.RecyclerListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -162,10 +165,12 @@ public class DirectoryFragment extends Fragment {
         mListView = (ListView) view.findViewById(R.id.list);
         mListView.setOnItemClickListener(mItemListener);
         mListView.setMultiChoiceModeListener(mMultiListener);
+        mListView.setRecyclerListener(mRecycleListener);
 
         mGridView = (GridView) view.findViewById(R.id.grid);
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
+        mGridView.setRecyclerListener(mRecycleListener);
 
         return view;
     }
@@ -192,13 +197,19 @@ public class DirectoryFragment extends Fragment {
                     case TYPE_NORMAL:
                         contentsUri = DocumentsContract.buildChildDocumentsUri(
                                 doc.authority, doc.documentId);
+                        if (state.action == ACTION_MANAGE) {
+                            contentsUri = DocumentsContract.setManageMode(contentsUri);
+                        }
                         return new DirectoryLoader(
-                                context, root, doc, contentsUri, state.userSortOrder);
+                                context, mType, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_SEARCH:
                         contentsUri = DocumentsContract.buildSearchDocumentsUri(
                                 doc.authority, doc.documentId, query);
+                        if (state.action == ACTION_MANAGE) {
+                            contentsUri = DocumentsContract.setManageMode(contentsUri);
+                        }
                         return new DirectoryLoader(
-                                context, root, doc, contentsUri, state.userSortOrder);
+                                context, mType, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_RECENT_OPEN:
                         final RootsCache roots = DocumentsApplication.getRootsCache(context);
                         final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
@@ -425,6 +436,20 @@ public class DirectoryFragment extends Fragment {
         }
     };
 
+    private RecyclerListener mRecycleListener = new RecyclerListener() {
+        @Override
+        public void onMovedToScrapHeap(View view) {
+            final ImageView iconThumb = (ImageView) view.findViewById(R.id.icon_thumb);
+            if (iconThumb != null) {
+                final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
+                if (oldTask != null) {
+                    oldTask.reallyCancel();
+                    iconThumb.setTag(null);
+                }
+            }
+        }
+    };
+
     private void onShareDocuments(List<DocumentInfo> docs) {
         Intent intent;
         if (docs.size() == 1) {
@@ -632,7 +657,9 @@ public class DirectoryFragment extends Fragment {
             final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
             final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
+            final View icon = convertView.findViewById(android.R.id.icon);
+            final ImageView iconMime = (ImageView) convertView.findViewById(R.id.icon_mime);
+            final ImageView iconThumb = (ImageView) convertView.findViewById(R.id.icon_thumb);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final View line2 = convertView.findViewById(R.id.line2);
             final ImageView icon1 = (ImageView) convertView.findViewById(android.R.id.icon1);
@@ -640,30 +667,49 @@ public class DirectoryFragment extends Fragment {
             final TextView date = (TextView) convertView.findViewById(R.id.date);
             final TextView size = (TextView) convertView.findViewById(R.id.size);
 
-            final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) icon.getTag();
+            final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
             if (oldTask != null) {
-                oldTask.cancel(false);
+                oldTask.reallyCancel();
+                iconThumb.setTag(null);
             }
+
+            iconMime.animate().cancel();
+            iconThumb.animate().cancel();
 
             final boolean supportsThumbnail = (docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
             final boolean allowThumbnail = (state.derivedMode == MODE_GRID)
                     || MimePredicate.mimeMatches(LIST_THUMBNAIL_MIMES, docMimeType);
 
+            boolean cacheHit = false;
             if (supportsThumbnail && allowThumbnail) {
                 final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
                 final Bitmap cachedResult = thumbs.get(uri);
                 if (cachedResult != null) {
-                    icon.setImageBitmap(cachedResult);
+                    iconThumb.setImageBitmap(cachedResult);
+                    cacheHit = true;
                 } else {
-                    final ThumbnailAsyncTask task = new ThumbnailAsyncTask(icon, mThumbSize);
-                    icon.setImageBitmap(null);
-                    icon.setTag(task);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
+                    iconThumb.setImageDrawable(null);
+                    final ThumbnailAsyncTask task = new ThumbnailAsyncTask(
+                            uri, iconMime, iconThumb, mThumbSize);
+                    iconThumb.setTag(task);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
-            } else if (docIcon != 0) {
-                icon.setImageDrawable(IconUtils.loadPackageIcon(context, docAuthority, docIcon));
+            }
+
+            // Always throw MIME icon into place, even when a thumbnail is being
+            // loaded in background.
+            if (cacheHit) {
+                iconMime.setAlpha(0f);
+                iconThumb.setAlpha(1f);
             } else {
-                icon.setImageDrawable(IconUtils.loadMimeIcon(context, docMimeType));
+                iconMime.setAlpha(1f);
+                iconThumb.setAlpha(0f);
+                if (docIcon != 0) {
+                    iconMime.setImageDrawable(
+                            IconUtils.loadPackageIcon(context, docAuthority, docIcon));
+                } else {
+                    iconMime.setImageDrawable(IconUtils.loadMimeIcon(context, docMimeType));
+                }
             }
 
             title.setText(docDisplayName);
@@ -672,12 +718,19 @@ public class DirectoryFragment extends Fragment {
 
             if (mType == TYPE_RECENT_OPEN) {
                 final RootInfo root = roots.getRoot(docAuthority, docRootId);
+                final Drawable iconDrawable = root.loadIcon(context);
                 icon1.setVisibility(View.VISIBLE);
-                icon1.setImageDrawable(root.loadIcon(context));
-                summary.setText(root.getDirectoryString());
-                summary.setVisibility(View.VISIBLE);
-                summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
-                hasLine2 = true;
+                icon1.setImageDrawable(iconDrawable);
+
+                if (iconDrawable != null && roots.isIconUnique(root)) {
+                    // No summary needed if icon speaks for itself
+                    summary.setVisibility(View.INVISIBLE);
+                } else {
+                    summary.setText(root.getDirectoryString());
+                    summary.setVisibility(View.VISIBLE);
+                    summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
+                    hasLine2 = true;
+                }
             } else {
                 icon1.setVisibility(View.GONE);
                 if (docSummary != null) {
@@ -762,32 +815,39 @@ public class DirectoryFragment extends Fragment {
     }
 
     private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap> {
-        private final ImageView mTarget;
+        private final Uri mUri;
+        private final ImageView mIconMime;
+        private final ImageView mIconThumb;
         private final Point mThumbSize;
+        private final CancellationSignal mSignal;
 
-        public ThumbnailAsyncTask(ImageView target, Point thumbSize) {
-            mTarget = target;
+        public ThumbnailAsyncTask(
+                Uri uri, ImageView iconMime, ImageView iconThumb, Point thumbSize) {
+            mUri = uri;
+            mIconMime = iconMime;
+            mIconThumb = iconThumb;
             mThumbSize = thumbSize;
+            mSignal = new CancellationSignal();
         }
 
-        @Override
-        protected void onPreExecute() {
-            mTarget.setTag(this);
+        public void reallyCancel() {
+            cancel(false);
+            mSignal.cancel();
         }
 
         @Override
         protected Bitmap doInBackground(Uri... params) {
-            final Context context = mTarget.getContext();
-            final Uri uri = params[0];
+            final Context context = mIconThumb.getContext();
 
             Bitmap result = null;
             try {
+                // TODO: switch to using unstable provider
                 result = DocumentsContract.getDocumentThumbnail(
-                        context.getContentResolver(), uri, mThumbSize, null);
+                        context.getContentResolver(), mUri, mThumbSize, mSignal);
                 if (result != null) {
                     final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                             context, mThumbSize);
-                    thumbs.put(uri, result);
+                    thumbs.put(mUri, result);
                 }
             } catch (Exception e) {
                 Log.w(TAG, "Failed to load thumbnail: " + e);
@@ -797,9 +857,14 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            if (mTarget.getTag() == this) {
-                mTarget.setImageBitmap(result);
-                mTarget.setTag(null);
+            if (mIconThumb.getTag() == this && result != null) {
+                mIconThumb.setTag(null);
+                mIconThumb.setImageBitmap(result);
+
+                mIconMime.setAlpha(1f);
+                mIconMime.animate().alpha(0f).start();
+                mIconThumb.setAlpha(0f);
+                mIconThumb.animate().alpha(1f).start();
             }
         }
     }
