@@ -1773,8 +1773,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isProviderEnabled(String provider) {
+        // TODO: remove this check in next release, see b/10696351
         checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
                 provider);
+
+        // Fused provider is accessed indirectly via criteria rather than the provider-based APIs,
+        // so we discourage its use
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
 
         int uid = Binder.getCallingUid();

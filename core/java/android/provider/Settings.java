@@ -3335,7 +3335,9 @@ public final class Settings {
          */
         public static final int LOCATION_MODE_SENSORS_ONLY = 1;
         /**
-         * Reduced power usage, such as limiting the number of GPS updates per hour.
+         * Reduced power usage, such as limiting the number of GPS updates per hour. Requests
+         * with {@link android.location.Criteria#POWER_HIGH} may be downgraded to
+         * {@link android.location.Criteria#POWER_MEDIUM}.
          */
         public static final int LOCATION_MODE_BATTERY_SAVING = 2;
         /**
@@ -4384,10 +4386,13 @@ public final class Settings {
 
         /**
          * Helper method for determining if a location provider is enabled.
+         *
          * @param cr the content resolver to use
          * @param provider the location provider to query
          * @return true if the provider is enabled
-         * @deprecated use {@link #getInt(ContentResolver, String)} and {@link #LOCATION_MODE}
+         *
+         * @deprecated use {@link #LOCATION_MODE} or
+         *             {@link LocationManager#isProviderEnabled(String)}
          */
         @Deprecated
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
@@ -4400,8 +4405,8 @@ public final class Settings {
          * @param provider the location provider to query
          * @param userId the userId to query
          * @return true if the provider is enabled
-         * @deprecated use {@link #getIntForUser(ContentResolver, String, int, int)} and
-         *             {@link #LOCATION_MODE}
+         * @deprecated use {@link #LOCATION_MODE} or
+         *             {@link LocationManager#isProviderEnabled(String)}
          * @hide
          */
         @Deprecated
