@@ -17,7 +17,6 @@
 package com.android.printspooler;
 
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -43,7 +42,7 @@ import java.io.OutputStream;
 final class RemotePrintDocumentAdapter {
     private static final String LOG_TAG = "RemotePrintDocumentAdapter";
 
-    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG = false;
 
     private final IPrintDocumentAdapter mRemoteInterface;
 

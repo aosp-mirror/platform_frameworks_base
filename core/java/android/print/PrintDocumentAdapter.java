@@ -20,8 +20,6 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
-import java.util.List;
-
 /**
  * Base class that provides the content of a document to be printed.
  *
