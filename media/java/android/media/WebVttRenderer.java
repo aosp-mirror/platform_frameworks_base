@@ -1132,7 +1132,7 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
     }
 
     public WebVttRenderingWidget(Context context, AttributeSet attrs) {
-        this(context, null, 0);
+        this(context, attrs, 0);
     }
 
     public WebVttRenderingWidget(Context context, AttributeSet attrs, int defStyleAttr) {

@@ -228,30 +228,27 @@ public class RelativeLayout extends ViewGroup {
     private static final int DEFAULT_WIDTH = 0x00010000;
 
     public RelativeLayout(Context context) {
-        super(context);
-        queryCompatibilityModes(context);
+        this(context, null);
     }
 
     public RelativeLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initFromAttributes(context, attrs);
-        queryCompatibilityModes(context);
+        this(context, attrs, 0);
     }
 
     public RelativeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        initFromAttributes(context, attrs);
-        queryCompatibilityModes(context);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public RelativeLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        initFromAttributes(context, attrs);
+        initFromAttributes(context, attrs, defStyleAttr, defStyleRes);
         queryCompatibilityModes(context);
     }
 
-    private void initFromAttributes(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RelativeLayout);
+    private void initFromAttributes(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.RelativeLayout, defStyleAttr, defStyleRes);
         mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, View.NO_ID);
         mGravity = a.getInt(R.styleable.RelativeLayout_gravity, mGravity);
         a.recycle();

@@ -31195,10 +31195,10 @@ package android.widget {
   }
 
   public class GridLayout extends android.view.ViewGroup {
+    ctor public GridLayout(android.content.Context);
+    ctor public GridLayout(android.content.Context, android.util.AttributeSet);
     ctor public GridLayout(android.content.Context, android.util.AttributeSet, int);
     ctor public GridLayout(android.content.Context, android.util.AttributeSet, int, int);
-    ctor public GridLayout(android.content.Context, android.util.AttributeSet);
-    ctor public GridLayout(android.content.Context);
     method public int getAlignmentMode();
     method public int getColumnCount();
     method public int getOrientation();

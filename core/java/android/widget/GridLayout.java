@@ -262,9 +262,14 @@ public class GridLayout extends ViewGroup {
 
     // Constructors
 
-    /**
-     * {@inheritDoc}
-     */
+    public GridLayout(Context context) {
+        this(context, null);
+    }
+
+    public GridLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
     public GridLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
@@ -285,21 +290,6 @@ public class GridLayout extends ViewGroup {
         } finally {
             a.recycle();
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public GridLayout(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public GridLayout(Context context) {
-        //noinspection NullableProblems
-        this(context, null);
     }
 
     // Implementation

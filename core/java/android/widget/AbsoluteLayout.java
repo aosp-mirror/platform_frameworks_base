@@ -40,15 +40,15 @@ import android.widget.RemoteViews.RemoteView;
 @RemoteView
 public class AbsoluteLayout extends ViewGroup {
     public AbsoluteLayout(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public AbsoluteLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public AbsoluteLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr, 0);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public AbsoluteLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {

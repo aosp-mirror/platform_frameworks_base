@@ -223,11 +223,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     boolean mBlockLayoutRequests = false;
 
     public AdapterView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public AdapterView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public AdapterView(Context context, AttributeSet attrs, int defStyleAttr) {
