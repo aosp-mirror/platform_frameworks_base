@@ -412,6 +412,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         } catch (IOException e) {
             Log.wtf(TAG, "problem during legacy upgrade", e);
+        } catch (OutOfMemoryError e) {
+            Log.wtf(TAG, "problem during legacy upgrade", e);
         }
     }
 
@@ -1186,8 +1188,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private NetworkStats getNetworkStatsTethering() throws RemoteException {
         try {
-            final String[] tetheredIfacePairs = mConnManager.getTetheredIfacePairs();
-            return mNetworkManager.getNetworkStatsTethering(tetheredIfacePairs);
+            return mNetworkManager.getNetworkStatsTethering();
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
             return new NetworkStats(0L, 10);
