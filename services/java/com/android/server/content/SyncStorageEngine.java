@@ -696,65 +696,55 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void setIsSyncable(Account account, int userId, String providerName, int syncable) {
-        synchronized (mAuthorities) {
-            AuthorityInfo authority =
-                    getOrCreateAuthorityLocked(
-                            new EndPoint(account, providerName, userId),
-                            -1 /* ident */,
-                            false);
-            setSyncableLocked(authority, syncable);
-        }
+        setSyncableStateForTarget(new EndPoint(account, providerName, userId), syncable);
     }
 
-    public int getIsTargetServiceActive(ComponentName cname, int userId) {
+    public boolean getIsTargetServiceActive(ComponentName cname, int userId) {
         synchronized (mAuthorities) {
             if (cname != null) {
                 AuthorityInfo authority = getAuthorityLocked(
                         new EndPoint(cname, userId),
                         "get service enabled");
                 if (authority == null) {
-                    return -1;
+                    return false;
                 }
-                return authority.syncable;
+                return (authority.syncable == 1);
             }
-            return -1;
+            return false;
         }
     }
 
-    public void setIsEnabled(ComponentName cname, int userId, int syncable) {
-        synchronized (mAuthorities) {
-            AuthorityInfo authority =
-                    getOrCreateAuthorityLocked(
-                            new EndPoint(cname, userId), -1, false);
-            setSyncableLocked(authority, syncable);
-        }
+    public void setIsTargetServiceActive(ComponentName cname, int userId, boolean active) {
+        setSyncableStateForTarget(new EndPoint(cname, userId), active ? 1 : 0);
     }
 
     /**
      * An enabled sync service and a syncable provider's adapter both get resolved to the same
      * persisted variable - namely the "syncable" attribute for an AuthorityInfo in accounts.xml.
-     * @param aInfo
-     * @param syncable
+     * @param target target to set value for.
+     * @param syncable 0 indicates unsyncable, <0 unknown, >0 is active/syncable.
      */
-    private void setSyncableLocked(AuthorityInfo aInfo, int syncable) {
-        if (syncable > 1) {
-            syncable = 1;
-        } else if (syncable < -1) {
-            syncable = -1;
-        }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.d(TAG, "setIsSyncable: " + aInfo.toString() + " -> " + syncable);
-        }
-
-        if (aInfo.syncable == syncable) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.d(TAG, "setIsSyncable: already set to " + syncable + ", doing nothing");
+    private void setSyncableStateForTarget(EndPoint target, int syncable) {
+        AuthorityInfo aInfo;
+        synchronized (mAuthorities) {
+            aInfo = getOrCreateAuthorityLocked(target, -1, false);
+            if (syncable > 1) {
+                syncable = 1;
+            } else if (syncable < -1) {
+                syncable = -1;
             }
-            return;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.d(TAG, "setIsSyncable: " + aInfo.toString() + " -> " + syncable);
+            }
+            if (aInfo.syncable == syncable) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.d(TAG, "setIsSyncable: already set to " + syncable + ", doing nothing");
+                }
+                return;
+            }
+            aInfo.syncable = syncable;
+            writeAccountInfoLocked();
         }
-        aInfo.syncable = syncable;
-        writeAccountInfoLocked();
-
         if (syncable > 0) {
             requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle());
         }
@@ -816,6 +806,7 @@ public class SyncStorageEngine extends Handler {
      * @param account account for which to set backoff. Null to specify all accounts.
      * @param userId id of the user making this request.
      * @param providerName provider for which to set backoff. Null to specify all providers.
+     * @return true if a change occured.
      */
     private boolean setBackoffLocked(Account account, int userId, String providerName,
             long nextSyncTime, long nextDelay) {

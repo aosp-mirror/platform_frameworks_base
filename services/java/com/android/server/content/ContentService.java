@@ -630,16 +630,16 @@ public final class ContentService extends IContentService.Stub {
     public void setServiceActive(ComponentName cname, boolean active) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        verifySignatureForPackage(Binder.getCallingUid(), cname.getPackageName(), "setIsEnabled");
+        verifySignatureForPackage(Binder.getCallingUid(), cname.getPackageName(),
+                "setServiceActive");
 
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                int syncable = active ? 1 : 0;
-                syncManager.getSyncStorageEngine().setIsEnabled(
-                        cname, userId, syncable);
+                syncManager.getSyncStorageEngine().setIsTargetServiceActive(
+                        cname, userId, active);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -656,7 +656,8 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return (syncManager.getIsTargetServiceActive(cname, userId) == 1);
+                return syncManager.getSyncStorageEngine()
+                        .getIsTargetServiceActive(cname, userId);
             }
         } finally {
             restoreCallingIdentity(identityToken);
