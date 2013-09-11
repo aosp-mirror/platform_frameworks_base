@@ -42,6 +42,7 @@ import android.print.IPrintDocumentAdapter;
 import android.print.IWriteResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
+import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.print.PrintDocumentAdapter;
@@ -341,7 +342,11 @@ public class PrintJobConfigActivity extends Activity {
             if (!mController.hasStarted()) {
                 mController.start();
             }
-            if (!printAttributesChanged() && mDocument.info != null) {
+            if (!printAttributesChanged()) {
+                if (mDocument.info == null) {
+                    // We are waiting for the result of a layout, so do nothing.
+                    return;
+                }
                 // If the attributes didn't change and we have done a layout, then
                 // we do not do a layout but may have to ask the app to write some
                 // pages. Hence, pretend layout completed and nothing changed, so
@@ -738,6 +743,8 @@ public class PrintJobConfigActivity extends Activity {
 
         private PrinterInfo mCurrentPrinter;
 
+        private boolean mRequestedCurrentPrinterRefresh;
+
         private final OnItemSelectedListener mOnItemSelectedListener =
                 new AdapterView.OnItemSelectedListener() {
             @Override
@@ -757,34 +764,34 @@ public class PrintJobConfigActivity extends Activity {
                         return;
                     }
 
-                    mCurrPrintAttributes.clear();
+                    mRequestedCurrentPrinterRefresh = false;
 
-                    PrinterInfo printer = (PrinterInfo) mDestinationSpinnerAdapter
+                    mCurrentPrinter = (PrinterInfo) mDestinationSpinnerAdapter
                             .getItem(position);
 
                     PrintSpoolerService.peekInstance().setPrintJobPrinterNoPersistence(
-                            mPrintJobId, printer);
+                            mPrintJobId, mCurrentPrinter);
 
-                    if (printer != null) {
-                        PrinterCapabilitiesInfo capabilities = printer.getCapabilities();
-                        if (capabilities == null) {
-                            //TODO: We need a timeout for the update.
-                            mEditor.refreshCurrentPrinter();
-                        } else {
-                            capabilities.getDefaults(mCurrPrintAttributes);
-                            if (!mController.hasStarted()) {
-                                mController.start();
-                            }
-                            mController.update();
-                        }
+                    if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE) {
+                        updateUi();
+                        return;
                     }
 
-                    mCurrentPrinter = printer;
-
-                    updateUiForNewPrinterCapabilities();
+                    PrinterCapabilitiesInfo capabilities = mCurrentPrinter.getCapabilities();
+                    if (capabilities == null) {
+                        // TODO: We need a timeout for the update.
+                        mRequestedCurrentPrinterRefresh = true;
+                        updateUi();
+                        refreshCurrentPrinter();
+                    } else {
+                        updatePrintAttributes(capabilities);
+                        updateUi();
+                        mController.update();
+                    }
                 } else if (spinner == mMediaSizeSpinner) {
-                    if (mIgnoreNextMediaSizeChange) {
-                        mIgnoreNextMediaSizeChange = false;
+                    if (mOldMediaSizeSelectionIndex
+                            == mMediaSizeSpinner.getSelectedItemPosition()) {
+                        mOldMediaSizeSelectionIndex = AdapterView.INVALID_POSITION;
                         return;
                     }
                     SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(position);
@@ -793,8 +800,9 @@ public class PrintJobConfigActivity extends Activity {
                         mController.update();
                     }
                 } else if (spinner == mColorModeSpinner) {
-                    if (mIgnoreNextColorModeChange) {
-                        mIgnoreNextColorModeChange = false;
+                    if (mOldColorModeSelectionIndex
+                            == mColorModeSpinner.getSelectedItemPosition()) {
+                        mOldColorModeSelectionIndex = AdapterView.INVALID_POSITION;
                         return;
                     }
                     SpinnerItem<Integer> colorModeItem =
@@ -810,16 +818,7 @@ public class PrintJobConfigActivity extends Activity {
                     }
                     SpinnerItem<Integer> orientationItem =
                             mOrientationSpinnerAdapter.getItem(position);
-                    MediaSize mediaSize = mCurrPrintAttributes.getMediaSize();
-                    if (orientationItem.value == ORIENTATION_PORTRAIT) {
-                        if (!mediaSize.isPortrait()) {
-                            mCurrPrintAttributes.setMediaSize(mediaSize.asPortrait());
-                        }
-                    } else {
-                        if (mediaSize.isPortrait()) {
-                            mCurrPrintAttributes.setMediaSize(mediaSize.asLandscape());
-                        }
-                    }
+                    setCurrentPrintAttributesOrientation(orientationItem.value);
                     if (!hasErrors()) {
                         mController.update();
                     }
@@ -840,6 +839,105 @@ public class PrintJobConfigActivity extends Activity {
                 /* do nothing*/
             }
         };
+
+        private void setCurrentPrintAttributesOrientation(int orientation) {
+            MediaSize mediaSize = mCurrPrintAttributes.getMediaSize();
+            if (orientation == ORIENTATION_PORTRAIT) {
+                if (!mediaSize.isPortrait()) {
+                    // Rotate the media size.
+                    mCurrPrintAttributes.setMediaSize(mediaSize.asPortrait());
+
+                    // Rotate the resolution.
+                    Resolution oldResolution = mCurrPrintAttributes.getResolution();
+                    Resolution newResolution = new Resolution(
+                            oldResolution.getId(),
+                            oldResolution.getLabel(getPackageManager()),
+                            oldResolution.getVerticalDpi(),
+                            oldResolution.getHorizontalDpi());
+                    mCurrPrintAttributes.setResolution(newResolution);
+
+                    // Rotate the physical margins.
+                    Margins oldMargins = mCurrPrintAttributes.getMargins();
+                    Margins newMargins = new Margins(
+                            oldMargins.getBottomMils(),
+                            oldMargins.getLeftMils(),
+                            oldMargins.getTopMils(),
+                            oldMargins.getRightMils());
+                    mCurrPrintAttributes.setMargins(newMargins);
+                }
+            } else {
+                if (mediaSize.isPortrait()) {
+                    // Rotate the media size.
+                    mCurrPrintAttributes.setMediaSize(mediaSize.asLandscape());
+
+                    // Rotate the resolution.
+                    Resolution oldResolution = mCurrPrintAttributes.getResolution();
+                    Resolution newResolution = new Resolution(
+                            oldResolution.getId(),
+                            oldResolution.getLabel(getPackageManager()),
+                            oldResolution.getVerticalDpi(),
+                            oldResolution.getHorizontalDpi());
+                    mCurrPrintAttributes.setResolution(newResolution);
+
+                    // Rotate the physical margins.
+                    Margins oldMargins = mCurrPrintAttributes.getMargins();
+                    Margins newMargins = new Margins(
+                            oldMargins.getTopMils(),
+                            oldMargins.getRightMils(),
+                            oldMargins.getBottomMils(),
+                            oldMargins.getLeftMils());
+                    mCurrPrintAttributes.setMargins(newMargins);
+                }
+            }
+        }
+
+        private void updatePrintAttributes(PrinterCapabilitiesInfo capabilities) {
+            PrintAttributes defaults = mTempPrintAttributes;
+            capabilities.getDefaults(defaults);
+
+            // Media size.
+            MediaSize currMediaSize = mCurrPrintAttributes.getMediaSize();
+            if (currMediaSize == null) {
+                mCurrPrintAttributes.setMediaSize(defaults.getMediaSize());
+            } else {
+                MediaSize currMediaSizePortrait = currMediaSize.asPortrait();
+                List<MediaSize> mediaSizes = capabilities.getMediaSizes();
+                final int mediaSizeCount = mediaSizes.size();
+                for (int i = 0; i < mediaSizeCount; i++) {
+                    MediaSize mediaSize = mediaSizes.get(i);
+                    if (currMediaSizePortrait.equals(mediaSize.asPortrait())) {
+                        mCurrPrintAttributes.setMediaSize(mediaSize);
+                        break;
+                    }
+                }
+            }
+
+            // Color mode.
+            final int colorMode = mCurrPrintAttributes.getColorMode();
+            if ((capabilities.getColorModes() & colorMode) == 0) {
+                mCurrPrintAttributes.setColorMode(colorMode);
+            }
+
+            // Resolution
+            Resolution resolution = mCurrPrintAttributes.getResolution();
+            if (resolution == null || !capabilities.getResolutions().contains(resolution)) {
+                mCurrPrintAttributes.setResolution(defaults.getResolution());
+            }
+
+            // Margins.
+            Margins margins = mCurrPrintAttributes.getMargins();
+            if (margins == null) {
+                mCurrPrintAttributes.setMargins(defaults.getMargins());
+            } else {
+                Margins minMargins = capabilities.getMinMargins();
+                if (margins.getLeftMils() < minMargins.getLeftMils()
+                        || margins.getTopMils() < minMargins.getTopMils()
+                        || margins.getRightMils() > minMargins.getRightMils()
+                        || margins.getBottomMils() > minMargins.getBottomMils()) {
+                    mCurrPrintAttributes.setMargins(defaults.getMargins());
+                }
+            }
+        }
 
         private final TextWatcher mCopiesTextWatcher = new TextWatcher() {
             @Override
@@ -952,8 +1050,8 @@ public class PrintJobConfigActivity extends Activity {
         private int mEditorState;
 
         private boolean mIgnoreNextDestinationChange;
-        private boolean mIgnoreNextMediaSizeChange;
-        private boolean mIgnoreNextColorModeChange;
+        private int mOldMediaSizeSelectionIndex;
+        private int mOldColorModeSelectionIndex;
         private boolean mIgnoreNextOrientationChange;
         private boolean mIgnoreNextRangeOptionChange;
         private boolean mIgnoreNextCopiesChange;
@@ -993,9 +1091,20 @@ public class PrintJobConfigActivity extends Activity {
                                 // capabilities, we refresh it.
                                 if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE
                                         && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE
-                                        && printer.getCapabilities() == null) {
+                                        && printer.getCapabilities() == null
+                                        && !mRequestedCurrentPrinterRefresh) {
+                                    mRequestedCurrentPrinterRefresh = true;
                                     refreshCurrentPrinter();
                                     return;
+                                }
+
+                                // We just refreshed the current printer.
+                                if (printer.getCapabilities() != null
+                                        && mRequestedCurrentPrinterRefresh) {
+                                    mRequestedCurrentPrinterRefresh = false;
+                                    updatePrintAttributes(printer.getCapabilities());
+                                    updateUi();
+                                    mController.update();
                                 }
 
                                 // Update the UI if capabilities changed.
@@ -1010,14 +1119,18 @@ public class PrintJobConfigActivity extends Activity {
                                     capabilitiesChanged = true;
                                 }
 
-                                if (capabilitiesChanged) {
-                                    // Update the current printer.
-                                    mCurrentPrinter.copyFrom(printer);
+                                // Update the UI if the status changed.
+                                final boolean statusChanged = mCurrentPrinter.getStatus()
+                                        != printer.getStatus();
 
-                                    // If something changed during UI update...
+                                // Update the printer with the latest info.
+                                if (!mCurrentPrinter.equals(printer)) {
+                                    mCurrentPrinter.copyFrom(printer);
+                                }
+
+                                if (capabilitiesChanged || statusChanged) {
+                                    // If something changed during update...
                                     if (updateUi()) {
-                                        // Update current attributes.
-                                        printer.getCapabilities().getDefaults(mCurrPrintAttributes);
                                         // Update the document.
                                         mController.update();
                                     }
@@ -1031,7 +1144,7 @@ public class PrintJobConfigActivity extends Activity {
 
                 @Override
                 public void onInvalidated() {
-                    updateUiForNewPrinterCapabilities();
+                    /* do nothing - we always have one fake PDF printer */
                 }
             });
 
@@ -1072,6 +1185,10 @@ public class PrintJobConfigActivity extends Activity {
 
             showUi(UI_EDITING_PRINT_JOB, null);
             bindUi();
+
+            mCurrentPrinter = mDestinationSpinnerAdapter.mFakePdfPrinter;
+            updatePrintAttributes(mCurrentPrinter.getCapabilities());
+
             updateUi();
         }
 
@@ -1393,7 +1510,7 @@ public class PrintJobConfigActivity extends Activity {
             mMediaSizeSpinner.setAdapter(mMediaSizeSpinnerAdapter);
             mMediaSizeSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
             if (mMediaSizeSpinnerAdapter.getCount() > 0) {
-                mIgnoreNextMediaSizeChange = true;
+                mOldMediaSizeSelectionIndex = 0;
             }
 
             // Color mode.
@@ -1401,7 +1518,7 @@ public class PrintJobConfigActivity extends Activity {
             mColorModeSpinner.setAdapter(mColorModeSpinnerAdapter);
             mColorModeSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
             if (mColorModeSpinnerAdapter.getCount() > 0) {
-                mIgnoreNextColorModeChange = true;
+                mOldColorModeSelectionIndex = 0;
             }
 
             // Orientation
@@ -1454,7 +1571,8 @@ public class PrintJobConfigActivity extends Activity {
                 Object item = mDestinationSpinnerAdapter.getItem(selectedIndex);
                 if (item instanceof PrinterInfo) {
                     PrinterInfo printer = (PrinterInfo) item;
-                    if (printer.getCapabilities() != null) {
+                    if (printer.getCapabilities() != null
+                            && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE) {
                         allOptionsEnabled = true;
                     }
                 }
@@ -1470,14 +1588,14 @@ public class PrintJobConfigActivity extends Activity {
 
                 // Media size
                 if (mMediaSizeSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mIgnoreNextMediaSizeChange = true;
+                    mOldMediaSizeSelectionIndex = AdapterView.INVALID_POSITION;
                     mMediaSizeSpinner.setSelection(AdapterView.INVALID_POSITION);
                 }
                 mMediaSizeSpinner.setEnabled(false);
 
                 // Color mode
                 if (mColorModeSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mIgnoreNextColorModeChange = true;
+                    mOldColorModeSelectionIndex = AdapterView.INVALID_POSITION;
                     mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
                 }
                 mColorModeSpinner.setEnabled(false);
@@ -1513,9 +1631,9 @@ public class PrintJobConfigActivity extends Activity {
             } else {
                 boolean someAttributeSelectionChanged = false;
 
-                PrintAttributes defaultAttributes = mTempPrintAttributes;
                 PrinterInfo printer = (PrinterInfo) mDestinationSpinner.getSelectedItem();
                 PrinterCapabilitiesInfo capabilities = printer.getCapabilities();
+                PrintAttributes defaultAttributes = mTempPrintAttributes;
                 printer.getCapabilities().getDefaults(defaultAttributes);
 
                 // Media size.
@@ -1551,25 +1669,19 @@ public class PrintJobConfigActivity extends Activity {
                                 mediaSize, mediaSize.getLabel(getPackageManager())));
                     }
 
-                    if (mediaSizeCount <= 0) {
-                        // No media sizes - clear the selection.
-                        mMediaSizeSpinner.setEnabled(false);
-                        // Clear selection and mark if selection changed.
-                        someAttributeSelectionChanged = setMediaSizeSpinnerSelectionNoCallback(
-                                AdapterView.INVALID_POSITION);
-                    } else {
-                        mMediaSizeSpinner.setEnabled(true);
+                    mMediaSizeSpinner.setEnabled(true);
 
-                        if (oldMediaSizeNewIndex != AdapterView.INVALID_POSITION) {
-                            // Select the old media size - nothing really changed.
-                            setMediaSizeSpinnerSelectionNoCallback(oldMediaSizeNewIndex);
-                        } else {
-                            // Select the first or the default and mark if selection changed.
-                            final int mediaSizeIndex = Math.max(mediaSizes.indexOf(
-                                    defaultAttributes.getMediaSize()), 0);
-                            someAttributeSelectionChanged = setMediaSizeSpinnerSelectionNoCallback(
-                                    mediaSizeIndex);
-                        }
+                    if (oldMediaSizeNewIndex != AdapterView.INVALID_POSITION) {
+                        // Select the old media size - nothing really changed.
+                        setMediaSizeSpinnerSelectionNoCallback(oldMediaSizeNewIndex);
+                    } else {
+                        // Select the first or the default and mark if selection changed.
+                        final int mediaSizeIndex = Math.max(mediaSizes.indexOf(
+                                defaultAttributes.getMediaSize()), 0);
+                        setMediaSizeSpinnerSelectionNoCallback(mediaSizeIndex);
+                        mCurrPrintAttributes.setMediaSize(mMediaSizeSpinnerAdapter
+                                .getItem(mediaSizeIndex).value);
+                        someAttributeSelectionChanged = true;
                     }
                 }
                 mMediaSizeSpinner.setEnabled(true);
@@ -1618,26 +1730,32 @@ public class PrintJobConfigActivity extends Activity {
                         mColorModeSpinnerAdapter.add(new SpinnerItem<Integer>(colorMode,
                                 colorModeLabels[colorBitOffset]));
                     }
-                    final int colorModeCount = Integer.bitCount(colorModes);
-                    if (colorModeCount <= 0) {
-                        mColorModeSpinner.setEnabled(false);
-                        mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
+                    mColorModeSpinner.setEnabled(true);
+                    if (oldColorModeNewIndex != AdapterView.INVALID_POSITION) {
+                        // Select the old color mode - nothing really changed.
+                        setColorModeSpinnerSelectionNoCallback(oldColorModeNewIndex);
                     } else {
-                        mColorModeSpinner.setEnabled(true);
-                        if (oldColorModeNewIndex != AdapterView.INVALID_POSITION) {
-                            // Select the old color mode - nothing really changed.
-                            setColorModeSpinnerSelectionNoCallback(oldColorModeNewIndex);
-                        } else {
-                            final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
+                        final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
                                     (colorModes & defaultAttributes.getColorMode()));
-                            someAttributeSelectionChanged = setColorModeSpinnerSelectionNoCallback(
-                                    selectedColorModeIndex);
-                        }
+                        setColorModeSpinnerSelectionNoCallback(selectedColorModeIndex);
+                        mCurrPrintAttributes.setColorMode(mColorModeSpinnerAdapter
+                                .getItem(selectedColorModeIndex).value);
+                        someAttributeSelectionChanged = true;
                     }
                 }
                 mColorModeSpinner.setEnabled(true);
 
                 // Orientation
+                MediaSize mediaSize = mCurrPrintAttributes.getMediaSize();
+                if (mediaSize.isPortrait()
+                        && mOrientationSpinner.getSelectedItemPosition() != 0) {
+                    mIgnoreNextOrientationChange = true;
+                    mOrientationSpinner.setSelection(0);
+                } else if (!mediaSize.isPortrait()
+                        && mOrientationSpinner.getSelectedItemPosition() != 1) {
+                    mIgnoreNextOrientationChange = true;
+                    mOrientationSpinner.setSelection(1);
+                }
                 mOrientationSpinner.setEnabled(true);
 
                 // Range options
@@ -1723,50 +1841,18 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
-        private boolean setMediaSizeSpinnerSelectionNoCallback(int position) {
+        private void setMediaSizeSpinnerSelectionNoCallback(int position) {
             if (mMediaSizeSpinner.getSelectedItemPosition() != position) {
-                mIgnoreNextMediaSizeChange = true;
+                mOldMediaSizeSelectionIndex = position;
                 mMediaSizeSpinner.setSelection(position);
-                return true;
             }
-            return false;
         }
 
-        private boolean setColorModeSpinnerSelectionNoCallback(int position) {
+        private void setColorModeSpinnerSelectionNoCallback(int position) {
             if (mColorModeSpinner.getSelectedItemPosition() != position) {
-                mIgnoreNextColorModeChange = true;
+                mOldColorModeSelectionIndex = position;
                 mColorModeSpinner.setSelection(position);
-                return true;
             }
-            return false;
-        }
-
-        private void updateUiForNewPrinterCapabilities() {
-            // The printer changed so we want to start with a clean slate
-            // for the print options and let them be populated from the
-            // printer capabilities and use the printer defaults.
-            if (!mMediaSizeSpinnerAdapter.isEmpty()) {
-                mIgnoreNextMediaSizeChange = true;
-                mMediaSizeSpinnerAdapter.clear();
-            }
-            if (!mColorModeSpinnerAdapter.isEmpty()) {
-                mIgnoreNextColorModeChange = true;
-                mColorModeSpinnerAdapter.clear();
-            }
-            if (mOrientationSpinner.getSelectedItemPosition() != 0) {
-                mIgnoreNextOrientationChange = true;
-                mOrientationSpinner.setSelection(0);
-            }
-            if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
-                mIgnoreNextRangeOptionChange = true;
-                mRangeOptionsSpinner.setSelection(0);
-            }
-            if (!TextUtils.isEmpty(mCopiesEditText.getText())) {
-                mIgnoreNextCopiesChange = true;
-                mCopiesEditText.setText(MIN_COPIES_STRING);
-            }
-
-            updateUi();
         }
 
         private void startSelectPrinterActivity() {
