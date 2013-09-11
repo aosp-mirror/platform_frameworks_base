@@ -435,6 +435,13 @@ public abstract class Context {
     /** @hide Return the name of the base context this context is derived from. */
     public abstract String getBasePackageName();
 
+    /** @hide Return the package name that should be used for app ops calls from
+     * this context.  This is the same as {@link #getBasePackageName()} except in
+     * cases where system components are loaded into other app processes, in which
+     * case this will be the name of the primary package in that process (so that app
+     * ops uid verification will work with the name). */
+    public abstract String getOpPackageName();
+
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
 
