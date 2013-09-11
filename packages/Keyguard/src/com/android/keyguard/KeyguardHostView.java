@@ -49,9 +49,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.speech.hotword.HotwordRecognitionListener;
-import android.speech.hotword.HotwordRecognitionService;
-import android.speech.hotword.HotwordRecognizer;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -69,10 +66,6 @@ import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
-    // Don't enable hotword on limited-memory devices.
-    private static final boolean ENABLE_HOTWORD = !ActivityManager.isLowRamDeviceStatic();
-    // Indicates if hotword is enabled, should it also be available on secure keyguard(s).
-    private static final boolean ENABLE_HOTWORD_SECURE = false;
 
     // Transport control states.
     static final int TRANSPORT_GONE = 0;
@@ -87,13 +80,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
-
-    // TODO: Fix this to be non-static.
-    // We need to be careful here to make stopRecognition calls on the same instance
-    // that started it. Since KeyguardHostView is a view, it keeps getting
-    // recreated every now and then, and unless we figure out a better way,
-    // this needs to be a static field.
-    private static HotwordRecognizer sHotwordClient;
 
     private final int MAX_WIDGETS = 5;
 
@@ -218,11 +204,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         if ((mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0) {
             Log.v(TAG, "Keyguard secure camera disabled by DPM");
         }
-
-        // Create Hotword recognizer, for the first time.
-        if (ENABLE_HOTWORD && sHotwordClient == null) {
-            sHotwordClient = HotwordRecognizer.createHotwordRecognizer(getContext());
-        }
     }
 
     private void getInitialTransportState() {
@@ -318,21 +299,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                     if (DEBUGXPORT) Log.v(TAG, "update widget: play state changed");
                     KeyguardHostView.this.post(mSwitchPageRunnable);
                 }
-            }
-        }
-        @Override
-        public void onPhoneStateChanged(int phoneState) {
-            // We need to stop hotword detection when a call state is not idle anymore.
-            if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)
-                    && TelephonyManager.CALL_STATE_IDLE != phoneState) {
-                if (DEBUG) Log.d(TAG, "Stopping due to call state not being idle");
-                maybeStopHotwordDetector();
-            }
-        }
-        @Override
-        public void onUserSwitching(int userId) {
-            if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)) {
-                maybeStopHotwordDetector();
             }
         }
     };
@@ -818,9 +784,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             // If the alternate unlock was suppressed, it can now be safely
             // enabled because the user has left keyguard.
             KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
-            if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)){
-                maybeStopHotwordDetector();
-            }
 
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
@@ -985,9 +948,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         // Emulate Activity life cycle
         if (oldView != null) {
-            if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)) {
-                maybeStopHotwordDetector();
-            }
             oldView.onPause();
             oldView.setKeyguardCallback(mNullCallback); // ignore requests from old view
         }
@@ -1041,11 +1001,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             mViewStateManager.showUsabilityHints();
         }
 
-        // Start hotword detection on insecure Keyguard.
-        if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)) {
-            maybeStartHotwordDetector();
-        }
-
         requestFocus();
     }
 
@@ -1066,11 +1021,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         CameraWidgetFrame cameraPage = findCameraPage();
         if (cameraPage != null) {
             cameraPage.onScreenTurnedOff();
-        }
-
-        // Stop hotword detection on insecure Keyguard.
-        if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)) {
-            maybeStopHotwordDetector();
         }
 
         clearFocus();
@@ -1157,9 +1107,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         new CameraWidgetFrame.Callbacks() {
             @Override
             public void onLaunchingCamera() {
-                if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)) {
-                    maybeStopHotwordDetector();
-                }
                 setSliderHandleAlpha(0);
             }
 
@@ -1689,9 +1636,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     public void showAssistant() {
-        if (shouldRunHotwordInSecurityMode(mCurrentSecuritySelection)) {
-            maybeStopHotwordDetector();
-        }
         final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
           .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
 
@@ -1705,126 +1649,5 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         mActivityLauncher.launchActivityWithAnimation(
                 intent, false, opts.toBundle(), null, null);
-    }
-
-
-    /**
-     * Start the hotword detector if:
-     * <li> ENABLE_HOTWORD is true and
-     * <li> Hotword detection is not already running and
-     * <li> TelephonyManager is in CALL_STATE_IDLE
-     * <li> and Screen is turned on.
-     */
-    private void maybeStartHotwordDetector() {
-        if (!ENABLE_HOTWORD) return;
-
-        if (sHotwordClient != null) {
-            if (DEBUG) Log.d(TAG, "maybeStartHotwordDetector()");
-            // Don't start hotword detection if the screen is off.
-            if (!mIsScreenOn) {
-                if (DEBUG) Log.d(TAG, "screen was off, not starting");
-                return;
-            }
-
-            KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(getContext());
-            if (monitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE) {
-                if (DEBUG) Log.d(TAG, "Call underway, not starting");
-                return;
-            }
-
-            try {
-                sHotwordClient.startRecognition(mHotwordCallback);
-            } catch(Exception ex) {
-                // Don't allow hotword errors to make the keyguard unusable
-                Log.e(TAG, "Failed to start hotword recognition", ex);
-                sHotwordClient = null;
-            }
-        }
-    }
-
-    /**
-     * Stop hotword detector if:
-     * <li> ENABLE_HOTWORD is true
-     * <li> and hotword is running.
-     */
-    private void maybeStopHotwordDetector() {
-        if (!ENABLE_HOTWORD) return;
-
-        if (sHotwordClient != null) {
-            if (DEBUG) Log.d(TAG, "maybeStopHotwordDetector()");
-            try {
-                sHotwordClient.stopRecognition();
-            } catch(Exception ex) {
-                // Don't allow hotword errors to make the keyguard unusable
-                Log.e(TAG, "Failed to start hotword recognition", ex);
-            } finally {
-                sHotwordClient = null;
-            }
-        }
-    }
-
-    private final HotwordRecognitionListener mHotwordCallback = new HotwordRecognitionListener() {
-        private static final String TAG = "HotwordRecognitionListener";
-
-        public void onHotwordRecognitionStarted() {
-            if (DEBUG) Log.d(TAG, "onHotwordRecognitionStarted()");
-        }
-
-        public void onHotwordRecognitionStopped() {
-            if (DEBUG) Log.d(TAG, "onHotwordRecognitionStopped()");
-        }
-
-        public void onHotwordEvent(int eventType, Bundle eventBundle) {
-            if (DEBUG) Log.d(TAG, "onHotwordEvent: " + eventType);
-            if (eventType == HotwordRecognitionService.EVENT_TYPE_PROMPT_CHANGED) {
-                if (eventBundle != null
-                        && eventBundle.containsKey(HotwordRecognitionService.KEY_PROMPT_TEXT)) {
-                    new KeyguardMessageArea
-                        .Helper((View) getSecurityView(mCurrentSecuritySelection))
-                        .setMessage(eventBundle.getString(
-                                HotwordRecognitionService.KEY_PROMPT_TEXT),true);
-                }
-            }
-        }
-
-        public void onHotwordRecognized(final Intent intent) {
-            if (DEBUG) Log.d(TAG, "onHotwordRecognized");
-            maybeStopHotwordDetector();
-            // See if an activity can handle this intent.
-            if (getContext().getPackageManager().resolveActivity(intent, 0) == null)
-                return;
-            if (SecurityMode.None == mCurrentSecuritySelection) {
-                if (intent != null) {
-                    mActivityLauncher.launchActivity(intent, true, true, null, null);
-                }
-                mCallback.userActivity(0);
-            } else if (ENABLE_HOTWORD_SECURE && mLockPatternUtils.isSecure()) {
-                setOnDismissAction(new OnDismissAction() {
-                    @Override
-                    public boolean onDismiss() {
-                        if (intent != null) {
-                            mActivityLauncher.launchActivity(intent, true, true, null, null);
-                        }
-                        return false;
-                    }
-                });
-                getSecurityView(mCurrentSecuritySelection).showBouncer(0);
-            }
-        }
-
-        public void onHotwordError(int errorCode) {
-            if (DEBUG) Log.d(TAG, "onHotwordError: " + errorCode);
-            // TODO: Inspect the error code and handle the errors appropriately
-            // instead of blindly failing.
-            maybeStopHotwordDetector();
-        }
-    };
-
-    private boolean shouldRunHotwordInSecurityMode(SecurityMode mode) {
-        // Enable hotoword for insecure keyguard,
-        // and for pattern unlock if ENABLE_HOTWORD_SECURE is true.
-        return ENABLE_HOTWORD
-                && ((SecurityMode.None == mode)
-                        || (ENABLE_HOTWORD_SECURE && mLockPatternUtils.isSecure()));
     }
 }
