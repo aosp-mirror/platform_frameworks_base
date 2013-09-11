@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.MotionEvent;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -185,6 +186,10 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
+    }
+
+    public void dispatch(MotionEvent event) {
+        // Not used by PhoneWindowManager.  See code in {@link NavigationBarView}
     }
 
     @Override

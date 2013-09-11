@@ -49,6 +49,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
@@ -120,6 +121,7 @@ public class KeyguardViewMediator {
     private static final int SET_HIDDEN = 12;
     private static final int KEYGUARD_TIMEOUT = 13;
     private static final int SHOW_ASSISTANT = 14;
+    private static final int DISPATCH_EVENT = 15;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -1066,6 +1068,9 @@ public class KeyguardViewMediator {
                 case SHOW_ASSISTANT:
                     handleShowAssistant();
                     break;
+                case DISPATCH_EVENT:
+                    handleDispatchEvent((MotionEvent) msg.obj);
+                    break;
             }
         }
     };
@@ -1100,6 +1105,10 @@ public class KeyguardViewMediator {
 
         handleHide();
         sendUserPresentBroadcast();
+    }
+
+    protected void handleDispatchEvent(MotionEvent event) {
+        mKeyguardViewManager.dispatch(event);
     }
 
     private void sendUserPresentBroadcast() {
@@ -1326,5 +1335,10 @@ public class KeyguardViewMediator {
 
     public static MultiUserAvatarCache getAvatarCache() {
         return sMultiUserAvatarCache;
+    }
+
+    public void dispatch(MotionEvent event) {
+        Message msg = mHandler.obtainMessage(DISPATCH_EVENT, event);
+        mHandler.sendMessage(msg);
     }
 }

@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
@@ -423,6 +424,12 @@ public class KeyguardViewManager {
     public void showAssistant() {
         if (mKeyguardView != null) {
             mKeyguardView.showAssistant();
+        }
+    }
+
+    public void dispatch(MotionEvent event) {
+        if (mKeyguardView != null) {
+            mKeyguardView.dispatch(event);
         }
     }
 }

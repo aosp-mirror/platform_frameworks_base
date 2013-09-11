@@ -1650,4 +1650,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         mActivityLauncher.launchActivityWithAnimation(
                 intent, false, opts.toBundle(), null, null);
     }
+
+    public void dispatch(MotionEvent event) {
+        mAppWidgetContainer.handleExternalCameraEvent(event);
+    }
+
 }
