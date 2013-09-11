@@ -10840,22 +10840,20 @@ package android.hardware.camera2 {
     ctor public CameraAccessException(int, java.lang.String, java.lang.Throwable);
     ctor public CameraAccessException(int, java.lang.Throwable);
     method public final int getReason();
-    field public static final int CAMERA_DISABLED = 3; // 0x3
-    field public static final int CAMERA_DISCONNECTED = 4; // 0x4
-    field public static final int CAMERA_IN_USE = 1; // 0x1
-    field public static final int MAX_CAMERAS_IN_USE = 2; // 0x2
+    field public static final int CAMERA_DISABLED = 1; // 0x1
+    field public static final int CAMERA_DISCONNECTED = 2; // 0x2
+    field public static final int CAMERA_ERROR = 3; // 0x3
   }
 
   public abstract interface CameraDevice implements java.lang.AutoCloseable {
     method public abstract void capture(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void captureBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
-    method public abstract void close() throws java.lang.Exception;
+    method public abstract void close();
     method public abstract void configureOutputs(java.util.List<android.view.Surface>) throws android.hardware.camera2.CameraAccessException;
     method public abstract android.hardware.camera2.CaptureRequest.Builder createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
     method public abstract void flush() throws android.hardware.camera2.CameraAccessException;
     method public abstract java.lang.String getId();
     method public abstract android.hardware.camera2.CameraProperties getProperties() throws android.hardware.camera2.CameraAccessException;
-    method public abstract void setDeviceListener(android.hardware.camera2.CameraDevice.CameraDeviceListener, android.os.Handler);
     method public abstract void setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void stopRepeating() throws android.hardware.camera2.CameraAccessException;
@@ -10866,15 +10864,6 @@ package android.hardware.camera2 {
     field public static final int TEMPLATE_VIDEO_SNAPSHOT = 4; // 0x4
   }
 
-  public static abstract class CameraDevice.CameraDeviceListener {
-    ctor public CameraDevice.CameraDeviceListener();
-    method public void onCameraDisconnected(android.hardware.camera2.CameraDevice);
-    method public void onCameraError(android.hardware.camera2.CameraDevice, int);
-    method public void onCameraIdle(android.hardware.camera2.CameraDevice);
-    field public static final int ERROR_CAMERA_DEVICE = 1; // 0x1
-    field public static final int ERROR_CAMERA_SERVICE = 2; // 0x2
-  }
-
   public static abstract class CameraDevice.CaptureListener {
     ctor public CameraDevice.CaptureListener();
     method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
@@ -10882,11 +10871,28 @@ package android.hardware.camera2 {
     method public void onCaptureStarted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, long);
   }
 
+  public static abstract class CameraDevice.StateListener {
+    ctor public CameraDevice.StateListener();
+    method public void onActive(android.hardware.camera2.CameraDevice);
+    method public void onBusy(android.hardware.camera2.CameraDevice);
+    method public void onClosed(android.hardware.camera2.CameraDevice);
+    method public abstract void onDisconnected(android.hardware.camera2.CameraDevice);
+    method public abstract void onError(android.hardware.camera2.CameraDevice, int);
+    method public void onIdle(android.hardware.camera2.CameraDevice);
+    method public abstract void onOpened(android.hardware.camera2.CameraDevice);
+    method public void onUnconfigured(android.hardware.camera2.CameraDevice);
+    field public static final int ERROR_CAMERA_DEVICE = 4; // 0x4
+    field public static final int ERROR_CAMERA_DISABLED = 3; // 0x3
+    field public static final int ERROR_CAMERA_IN_USE = 1; // 0x1
+    field public static final int ERROR_CAMERA_SERVICE = 5; // 0x5
+    field public static final int ERROR_MAX_CAMERAS_IN_USE = 2; // 0x2
+  }
+
   public final class CameraManager {
     method public void addAvailabilityListener(android.hardware.camera2.CameraManager.AvailabilityListener, android.os.Handler);
     method public java.lang.String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method public android.hardware.camera2.CameraProperties getCameraProperties(java.lang.String) throws android.hardware.camera2.CameraAccessException;
-    method public android.hardware.camera2.CameraDevice openCamera(java.lang.String) throws android.hardware.camera2.CameraAccessException;
+    method public void openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public void removeAvailabilityListener(android.hardware.camera2.CameraManager.AvailabilityListener);
   }
 
