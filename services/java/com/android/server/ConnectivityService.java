@@ -4684,12 +4684,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     @Override
     public void setAirplaneMode(boolean enable) {
         enforceConnectivityInternalPermission();
-        final ContentResolver cr = mContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.AIRPLANE_MODE_ON, enable ? 1 : 0);
-        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", enable);
         final long ident = Binder.clearCallingIdentity();
         try {
+            final ContentResolver cr = mContext.getContentResolver();
+            Settings.Global.putInt(cr, Settings.Global.AIRPLANE_MODE_ON, enable ? 1 : 0);
+            Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            intent.putExtra("state", enable);
             mContext.sendBroadcast(intent);
         } finally {
             Binder.restoreCallingIdentity(ident);
