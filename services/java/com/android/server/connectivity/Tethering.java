@@ -688,19 +688,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         return retVal;
     }
 
-    public String[] getTetheredIfacePairs() {
-        final ArrayList<String> list = Lists.newArrayList();
-        synchronized (mPublicSync) {
-            for (TetherInterfaceSM sm : mIfaces.values()) {
-                if (sm.isTethered()) {
-                    list.add(sm.mMyUpstreamIfaceName);
-                    list.add(sm.mIfaceName);
-                }
-            }
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
     public String[] getTetherableIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
