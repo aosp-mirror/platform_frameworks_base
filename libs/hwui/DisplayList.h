@@ -26,6 +26,7 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
+#include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
@@ -34,8 +35,6 @@
 #include <cutils/compiler.h>
 
 #include <androidfw/ResourceTypes.h>
-
-#include "utils/LinearAllocator.h"
 
 #include "Debug.h"
 
@@ -113,7 +112,6 @@ public:
     ANDROID_API static void outputLogBuffer(int fd);
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
-
 
     void defer(DeferStateStruct& deferStruct, const int level);
     void replay(ReplayStateStruct& replayStruct, const int level);
