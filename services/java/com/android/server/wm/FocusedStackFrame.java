@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.Slog;
 import android.view.Display;
+import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -39,9 +40,9 @@ class FocusedStackFrame {
 
     private final SurfaceControl mSurfaceControl;
     private final Surface mSurface = new Surface();
-    private Rect mLastBounds = new Rect();
-    private Rect mBounds = new Rect();
-    private Rect mTmpDrawRect = new Rect();
+    private final Rect mLastBounds = new Rect();
+    private final Rect mBounds = new Rect();
+    private final Rect mTmpDrawRect = new Rect();
 
     public FocusedStackFrame(Display display, SurfaceSession session) {
         SurfaceControl ctrl = null;
@@ -56,7 +57,7 @@ class FocusedStackFrame {
             ctrl.setLayerStack(display.getLayerStack());
             ctrl.setAlpha(ALPHA);
             mSurface.copyFrom(ctrl);
-        } catch (SurfaceControl.OutOfResourcesException e) {
+        } catch (OutOfResourcesException e) {
         }
         mSurfaceControl = ctrl;
     }

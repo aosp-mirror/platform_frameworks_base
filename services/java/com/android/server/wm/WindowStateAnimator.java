@@ -29,6 +29,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -480,7 +481,7 @@ class WindowStateAnimator {
         private final Rect mWindowCrop = new Rect();
         private boolean mShown = false;
         private int mLayerStack;
-        private String mName;
+        private final String mName;
 
         public SurfaceTrace(SurfaceSession s,
                        String name, int w, int h, int format, int flags)
@@ -694,7 +695,7 @@ class WindowStateAnimator {
                         + attrs.format + " flags=0x"
                         + Integer.toHexString(flags)
                         + " / " + this);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 mWin.mHasSurface = false;
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
