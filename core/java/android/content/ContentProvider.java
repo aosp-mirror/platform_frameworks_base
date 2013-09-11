@@ -918,8 +918,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param url The Uri to remove any canonicalization from.
      *
-     * @return Return the non-canonical representation of <var>url</var>, or return
-     * the <var>url</var> as-is if there is nothing to do.  Never return null.
+     * @return Return the non-canonical representation of <var>url</var>, return
+     * the <var>url</var> as-is if there is nothing to do, or return null if
+     * the data identified by the canonical representation can not be found in
+     * the current environment.
      */
     public Uri uncanonicalize(Uri url) {
         return url;
