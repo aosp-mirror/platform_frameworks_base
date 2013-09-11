@@ -847,7 +847,6 @@ package android {
     field public static final int prompt = 16843131; // 0x101017b
     field public static final int propertyName = 16843489; // 0x10102e1
     field public static final int protectionLevel = 16842761; // 0x1010009
-    field public static final int provideAssistData = 16843758; // 0x10103ee
     field public static final int publicKey = 16843686; // 0x10103a6
     field public static final int queryActionMsg = 16843227; // 0x10101db
     field public static final int queryAfterZeroResults = 16843394; // 0x1010282
@@ -4260,7 +4259,6 @@ package android.app {
     method public void onCreate();
     method public void onDestroy();
     method public void onLowMemory();
-    method public void onProvideAssistData(android.os.Bundle);
     method public void onRebind(android.content.Intent);
     method public deprecated void onStart(android.content.Intent, int);
     method public int onStartCommand(android.content.Intent, int, int);
@@ -6427,7 +6425,6 @@ package android.content {
     field public static final java.lang.String ACTION_USER_INITIALIZE = "android.intent.action.USER_INITIALIZE";
     field public static final java.lang.String ACTION_USER_PRESENT = "android.intent.action.USER_PRESENT";
     field public static final java.lang.String ACTION_VIEW = "android.intent.action.VIEW";
-    field public static final java.lang.String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final java.lang.String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
     field public static final deprecated java.lang.String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     field public static final java.lang.String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
@@ -6469,8 +6466,6 @@ package android.content {
     field public static final deprecated java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
     field public static final java.lang.String EXTRA_ASSIST_CONTEXT = "android.intent.extra.ASSIST_CONTEXT";
     field public static final java.lang.String EXTRA_ASSIST_PACKAGE = "android.intent.extra.ASSIST_PACKAGE";
-    field public static final java.lang.String EXTRA_ASSIST_SERVICES_CONTEXTS = "android.intent.extra.ASSIST_SERVICES_CONTEXTS";
-    field public static final java.lang.String EXTRA_ASSIST_SERVICES_PACKAGES = "android.intent.extra.ASSIST_SERVICES_PACKAGES";
     field public static final java.lang.String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final java.lang.String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
     field public static final java.lang.String EXTRA_CC = "android.intent.extra.CC";
@@ -7484,7 +7479,6 @@ package android.content.pm {
     method public void dump(android.util.Printer, java.lang.String);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
-    field public static final int FLAG_PROVIDE_ASSIST_DATA = 4; // 0x4
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
     field public int flags;

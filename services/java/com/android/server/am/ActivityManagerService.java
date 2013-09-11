@@ -187,7 +187,6 @@ import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -314,10 +313,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     // to respond with the result.
     static final int PENDING_ASSIST_EXTRAS_TIMEOUT = 500;
 
-    // Index for assist context bundle pertaining to the top activity. Non-negative indices
-    // correspond to assist context bundles from foreground services.
-    static final int TOP_ACTIVITY_ASSIST_EXTRAS_INDEX = -1;
-
     static final int MY_PID = Process.myPid();
 
     static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -394,30 +389,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
-        public final List<ServiceRecord> services;
-        public int numPending;
-        public int numRespondedServices = 0;
-        public Bundle activityExtras = null;
-        public Bundle[] servicesExtras;
-        public PendingAssistExtras(ActivityRecord _activity, List<ServiceRecord> _services) {
+        public boolean haveResult = false;
+        public Bundle result = null;
+        public PendingAssistExtras(ActivityRecord _activity) {
             activity = _activity;
-            services = _services;
-            numPending = services.size() + 1;
         }
         @Override
         public void run() {
-            if (activityExtras == null) {
-                Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from activtity "
-                        + activity);
-            }
-            for (int i = 0; i < services.size(); i++) {
-                if (servicesExtras[i] == null) {
-                    Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from service "
-                            + i + " " + services.get(i));
-                }
-            }
+            Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from " + activity);
             synchronized (this) {
-                numPending = 0;
+                haveResult = true;
                 notifyAll();
             }
         }
@@ -8053,81 +8034,41 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "getAssistContextExtras()");
         PendingAssistExtras pae;
         Bundle extras = new Bundle();
-        List<ServiceRecord> foregroundServices;
         synchronized (this) {
-            Collection<ServiceRecord> allServices = mServices.mServiceMap.getAllServices(
-                    Binder.getCallingUid());
-            foregroundServices = new ArrayList<ServiceRecord>();
-            for (ServiceRecord record : allServices) {
-                if ((record.serviceInfo.flags & ServiceInfo.FLAG_PROVIDE_ASSIST_DATA) > 0 &&
-                        record.isForeground) {
-                    if (record.app == null || record.app.thread == null) {
-                        Slog.w(TAG, "getAssistContextExtras error: no process for " + record);
-                        continue;
-                    }
-                    if (record.app.pid == Binder.getCallingPid()) {
-                        Slog.w(TAG, "getAssistContextExtras error: request process same as " +
-                                record);
-                        continue;
-                    }
-                    foregroundServices.add(record);
-                }
-            }
-
             ActivityRecord activity = getFocusedStack().mResumedActivity;
-            boolean validActivity = true;
             if (activity == null) {
-                Slog.w(TAG, "getAssistContextExtras error: no resumed activity");
-                validActivity = false;
-            } else if (activity.app == null || activity.app.thread == null) {
-                Slog.w(TAG, "getAssistContextExtras error: no process for " + activity);
-                validActivity = false;
-            } else if (activity.app.pid == Binder.getCallingPid()) {
-                Slog.w(TAG, "getAssistContextExtras error: request process same as " + activity);
-                validActivity = false;
+                Slog.w(TAG, "getAssistContextExtras failed: no resumed activity");
+                return null;
             }
-
-            pae = new PendingAssistExtras(activity, foregroundServices);
+            extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
+            if (activity.app == null || activity.app.thread == null) {
+                Slog.w(TAG, "getAssistContextExtras failed: no process for " + activity);
+                return extras;
+            }
+            if (activity.app.pid == Binder.getCallingPid()) {
+                Slog.w(TAG, "getAssistContextExtras failed: request process same as " + activity);
+                return extras;
+            }
+            pae = new PendingAssistExtras(activity);
             try {
-                if (validActivity) {
-                    activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
-                            requestType, -1);
-                }
-                for (int i = 0; i < foregroundServices.size(); i++) {
-                    ServiceRecord record = foregroundServices.get(i);
-                    record.app.thread.requestAssistContextExtras(record, pae, requestType, i);
-                }
+                activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
+                        requestType);
                 mPendingAssistExtras.add(pae);
                 mHandler.postDelayed(pae, PENDING_ASSIST_EXTRAS_TIMEOUT);
             } catch (RemoteException e) {
-                Slog.w(TAG, "getAssistContextExtras failed: crash fetching extras.", e);
+                Slog.w(TAG, "getAssistContextExtras failed: crash calling " + activity);
+                return extras;
             }
         }
         synchronized (pae) {
-            while (pae.numPending > 0) {
+            while (!pae.haveResult) {
                 try {
                     pae.wait();
                 } catch (InterruptedException e) {
                 }
             }
-            if (pae.activityExtras != null) {
-                extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.activityExtras);
-                extras.putString(Intent.EXTRA_ASSIST_PACKAGE, pae.activity.packageName);
-            }
-            if (pae.numRespondedServices > 0) {
-                Bundle[] servicesExtras = new Bundle[pae.numRespondedServices];
-                String[] servicesPackages = new String[pae.numRespondedServices];
-                int extrasIndex = 0;
-                for (int i = 0; i < foregroundServices.size(); i++) {
-                    if (pae.servicesExtras[i] != null) {
-                        servicesExtras[extrasIndex] = pae.servicesExtras[i];
-                        ServiceRecord record = foregroundServices.get(i);
-                        servicesPackages[extrasIndex] = record.packageName;
-                        extrasIndex++;
-                    }
-                }
-                extras.putParcelableArray(Intent.EXTRA_ASSIST_SERVICES_CONTEXTS, servicesExtras);
-                extras.putStringArray(Intent.EXTRA_ASSIST_SERVICES_PACKAGES, servicesPackages);
+            if (pae.result != null) {
+                extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.result);
             }
         }
         synchronized (this) {
@@ -8137,19 +8078,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         return extras;
     }
 
-    public void reportAssistContextExtras(IBinder token, Bundle extras, int index) {
+    public void reportAssistContextExtras(IBinder token, Bundle extras) {
         PendingAssistExtras pae = (PendingAssistExtras)token;
         synchronized (pae) {
-            if (index == TOP_ACTIVITY_ASSIST_EXTRAS_INDEX) {
-                pae.activityExtras = extras;
-            } else {
-                pae.servicesExtras[index] = extras;
-                pae.numRespondedServices++;
-            }
-            pae.numPending--;
-            if (pae.numPending == 0) {
-                pae.notifyAll();
-            }
+            pae.result = extras;
+            pae.haveResult = true;
+            pae.notifyAll();
         }
     }
 

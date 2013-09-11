@@ -2077,7 +2077,6 @@
   <public type="attr" name="supportsSwitchingToNextInputMethod" />
   <public type="attr" name="requireDeviceUnlock" />
   <public type="attr" name="apduServiceBanner" />
-  <public type="attr" name="provideAssistData" />
   <public type="attr" name="fragmentBreadCrumbsStyle" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
