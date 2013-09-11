@@ -67,8 +67,8 @@ public class SurfaceAndTextureViews extends Activity {
         container.addView(mTextureView);
 
         final TransitionSet transition = new TransitionSet();
-        transition.addTransition(new ChangeBounds()).addTransition(new Crossfade().addTargetId(0).
-                addTargetId(1).addTargetId(2));
+        transition.addTransition(new ChangeBounds()).addTransition(new Crossfade().addTarget(0).
+                addTarget(1).addTarget(2));
 
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override

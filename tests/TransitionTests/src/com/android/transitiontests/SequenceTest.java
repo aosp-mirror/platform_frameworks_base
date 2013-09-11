@@ -51,9 +51,9 @@ public class SequenceTest extends Activity {
         mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test, this);
         mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test_scene_2, this);
 
-        Transition fade1 = new Fade().addTargetId(R.id.removingButton);
-        Transition fade2 = new Fade().addTargetId(R.id.invisibleButton);
-        Transition fade3 = new Fade().addTargetId(R.id.goneButton);
+        Transition fade1 = new Fade().addTarget(R.id.removingButton);
+        Transition fade2 = new Fade().addTarget(R.id.invisibleButton);
+        Transition fade3 = new Fade().addTarget(R.id.goneButton);
         TransitionSet fader = new TransitionSet().
                 setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
         fader.addTransition(fade1).addTransition(fade2).addTransition(fade3).
