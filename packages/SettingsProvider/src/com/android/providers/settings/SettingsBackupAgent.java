@@ -738,10 +738,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
             }
 
+            // Intercept the keys and see if they need special handling
+            value = mSettingsHelper.onBackupValue(key, value);
+
             if (value == null) {
                 continue;
             }
-
             // Write the key and value in the intermediary array.
             byte[] keyBytes = key.getBytes();
             totalSize += INTEGER_BYTE_COUNT + keyBytes.length;
