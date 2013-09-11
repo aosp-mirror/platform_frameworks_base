@@ -551,10 +551,10 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.adjustMasterVolume(direction, flags, mContext.getBasePackageName());
+                service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
                 service.adjustStreamVolume(streamType, direction, flags,
-                        mContext.getBasePackageName());
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustStreamVolume", e);
@@ -582,9 +582,9 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.adjustMasterVolume(direction, flags, mContext.getBasePackageName());
+                service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
-                service.adjustVolume(direction, flags, mContext.getBasePackageName());
+                service.adjustVolume(direction, flags, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustVolume", e);
@@ -612,10 +612,10 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.adjustMasterVolume(direction, flags, mContext.getBasePackageName());
+                service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
                 service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags,
-                        mContext.getBasePackageName());
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustSuggestedStreamVolume", e);
@@ -634,7 +634,7 @@ public class AudioManager {
     public void adjustMasterVolume(int steps, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustMasterVolume(steps, flags, mContext.getBasePackageName());
+            service.adjustMasterVolume(steps, flags, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustMasterVolume", e);
         }
@@ -786,9 +786,9 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.setMasterVolume(index, flags, mContext.getBasePackageName());
+                service.setMasterVolume(index, flags, mContext.getOpPackageName());
             } else {
-                service.setStreamVolume(streamType, index, flags, mContext.getBasePackageName());
+                service.setStreamVolume(streamType, index, flags, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setStreamVolume", e);
@@ -854,7 +854,7 @@ public class AudioManager {
     public void setMasterVolume(int index, int flags) {
         IAudioService service = getService();
         try {
-            service.setMasterVolume(index, flags, mContext.getBasePackageName());
+            service.setMasterVolume(index, flags, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMasterVolume", e);
         }
@@ -1569,7 +1569,7 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             service.adjustLocalOrRemoteStreamVolume(streamType, direction,
-                    mContext.getBasePackageName());
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustLocalOrRemoteStreamVolume", e);
         }
@@ -1996,7 +1996,7 @@ public class AudioManager {
         try {
             status = service.requestAudioFocus(streamType, durationHint, mICallBack,
                     mAudioFocusDispatcher, getIdForAudioFocusListener(l),
-                    mContext.getBasePackageName() /* package name */);
+                    mContext.getOpPackageName() /* package name */);
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocus() on AudioService due to "+e);
         }
@@ -2018,7 +2018,7 @@ public class AudioManager {
         try {
             service.requestAudioFocus(streamType, durationHint, mICallBack, null,
                     MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
-                    mContext.getBasePackageName());
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService due to "+e);
         }

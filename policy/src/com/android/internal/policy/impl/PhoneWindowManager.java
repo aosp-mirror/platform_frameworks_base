@@ -3637,7 +3637,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             ? AudioManager.ADJUST_RAISE
                             : AudioManager.ADJUST_LOWER,
                     0,
-                    mContext.getBasePackageName());
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.w(TAG, "IAudioService.adjustStreamVolume() threw RemoteException " + e);
         } finally {
@@ -4964,7 +4964,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             owningPackage = win.getOwningPackage();
         } else {
             owningUid = android.os.Process.myUid();
-            owningPackage = mContext.getBasePackageName();
+            owningPackage = mContext.getOpPackageName();
         }
         if (pattern.length == 1) {
             // One-shot vibration
