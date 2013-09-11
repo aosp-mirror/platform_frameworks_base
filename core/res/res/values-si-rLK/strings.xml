@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"යෙදුම් මාරු වීම වැළක්වීම"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"වෙනත් යෙදුමක් වෙත පරිශීලකයාව මාරු වීම වළක්වයි."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"පවතින යෙදුමේ තොරතුරු ලබාගැනීම"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"තිරයේ පෙරබිම තුළ තිබෙන දැන් පවත්නා යෙදුමේ සහ සේවාවල පෞද්ගලික තොරතුරු ලබාගැනීමට දරන්නාට අවසර දෙන්න."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"තිරයේ පෙරබිම තුළ තිබෙන දැන් පවත්නා යෙදුමේ පෞද්ගලික තොරතුරු ලබාගැනීමට දරන්නාට අවසර දෙන්න."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"සියලු යෙදුම් දියත් කිරීම් නිරීක්ෂණය සහ පාලනය කිරීම"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"පද්ධතිය ක්‍රියාකාරකම් දියත් කරන්නේ කෙසේදැයි නිරීක්ෂණයට සහ පාලනයට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් මගින් පද්ධතිය සම්පූර්ණයෙන්ම සම්මුතියකට එළඹිය හැක. වර්ධනය සඳහා පමණක් මෙම අවසරය අවශ්‍ය වෙයි, සාමාන්‍ය භාවිතය සඳහා කිසි විටෙකත් අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"පැකේජ ඉවත් කිරීමේ ප්‍රචාරණයක් යවන්න"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"වාහකයා ලබාදුන් සැකසුම් යෙදුම් උත්පාදනයට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීම"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"යෙදුමකට ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීමට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවේ."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"අණවදන හඳුනාගැනීම ඉල්ලයි"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"අණවදන හඳුනාගැනීම සඳහා ඉල්ලීමට යෙදුමට ඉඩ දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"තිරය අගුළු ඇරීමේ මුරපදයට අනුමත අකුරු සහ දිග පාලනය කරන්න."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>

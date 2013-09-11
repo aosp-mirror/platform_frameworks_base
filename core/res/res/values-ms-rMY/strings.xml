@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"halang pertukaran apl"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Menghalang pengguna daripada bertukar kepada apl lain."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"dapatkan maklumat apl semasa"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Membenarkan pemegang mendapatkan maklumat peribadi tentang aplikasi dan perkhidmatan semasa di latar hadapan skrin."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Membenarkan pemegang mendapatkan maklumat peribadi tentang permohonan semasa di latar hadapan skrin"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"pantau dan kawal semua pelancaran apl"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Membenarkan apl untuk memantau dan mengawal cara sistem melancarkan aktiviti. Apl hasad boleh menjejaskan sistem sepenuhnya. Kebenaran ini hanya diperlukan untuk pembangunan, tidak sekali-kali untuk penggunaan biasa."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"hantar siaran bahawa pakej telah dialih keluar"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Membenarkan pemegang menggunakan apl konfigurasi yang diberikan oleh pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"dengar pemerhatian mengenai keadaan rangkaian"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Membenarkan aplikasi mendengar pemerhatian tentang keadaan rangkaian. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"minta pengecaman sebutan laluan"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Membenarkan aplikasi meminta pengecaman sebutan laluan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>

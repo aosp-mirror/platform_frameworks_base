@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запобіг. зміні програм"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запобігати переходу користувача до іншої програми."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"отримати інформацію про поточну програму"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Дозволяє власникові отримувати приватну інформацію про поточну програму та служби на передньому плані екрана."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Дозволяє власникові отримувати приватну інформацію про поточну програму на передньому плані екрана."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"відстежувати та контролювати запуски всіх програм"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дозволяє програмі відстежувати та контролювати, як саме система запускає дії. Шкідливі програми можуть отримати повний контроль над системою. Цей дозвіл потрібний лише для розробки, а не для звичайного користування."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"надсил. запис про видал. пакета"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозволяє власнику викликати надану оператором програму конфігурації. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"прослуховувати дані спостережень за станом мережі"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозволяє програмі прослуховувати дані спостережень за станом мережі. Ніколи не застосовується для звичайних програм."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"запитувати розпізнавання команд швидкого запуску"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Дозволяє програмі надсилати запит на розпізнавання команд швидкого запуску. Ніколи не застосовується для звичайних програм."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролювати довжину паролів для розблокування екрана та дозволені в них символи."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>

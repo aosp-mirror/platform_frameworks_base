@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"estä sovellusten vaihto"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Estää käyttäjää siirtymästä toiseen sovellukseen."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"hae nykyisen sovelluksen tiedot"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Antaa sovellukselle luvan noutaa nykyistä sovellusta ja nykyisiä palveluita koskevia yksityisiä tietoja ruudun etualalla."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Antaa sovellukselle luvan noutaa nykyistä sovellusta koskevia yksityisiä tietoja ruudun etualalla."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"kaikkien sovellusten käynnistämisen valvonta ja hallinta"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Antaa sovelluksen valvoa ja hallita sitä, miten laite käynnistää toimintoja. Haitalliset sovellukset voivat vaarantaa laitteen käytön. Tätä oikeutta tarvitaan vain kehityskäyttöön eikä koskaan tavalliseen käyttöön."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"lähetä paketeista poistettuja lähetyksiä"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Antaa luvanhaltijan käynnistää palveluntarjoajan määrityssovelluksen. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"verkon tilahavaintojen kuunteleminen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Antaa sovellukselle luvan kuunnella verkon tilahavaintoja. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"avainsanan tunnistuspyyntö"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Antaa sovelluksen pyytää avainsanan tunnistusta. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>

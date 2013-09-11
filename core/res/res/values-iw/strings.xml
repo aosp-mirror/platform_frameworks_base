@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת יישומים"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"מניעת מעבר ליישום אחר על ידי המשתמש."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"קבל פרטים על היישום הנוכחי"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"מאפשר לבעלים לאחזר מידע פרטי לגבי האפליקציה והשירותים הנוכחיים שבקדמת המסך."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"מאפשר לבעלים לאחזר מידע פרטי לגבי היישום הנוכחי שבקדמת המסך."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ניהול מעקב ושליטה על כל הפעלות היישומים"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"מאפשר ליישום לנהל מעקב אחר האופן שבו המערכת מפעילה פעילויות, ולשלוט בו. יישומים זדוניים עלולים לסכן את המערכת כולה. הרשאה זו אינה נחוצה לשימוש רגיל, אלא לפיתוח בלבד."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"שלח שידור שהוסר מחבילה"</string>
@@ -644,7 +644,7 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"נהל מדיניות רשת"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"מאפשר ליישום לנהל מדיניות הרשת להגדיר כללים ספציפיים-ליישום."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"שנה ניהול חשבונות של שימוש ברשת"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת ליישום לשנות את אופן החישוב של נתוני שימוש ברשת מול כל יישום. לא מיועד לשימוש ביישומים רגילים."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת לאפליקציה לשנות את אופן החישוב של נתוני שימוש ברשת מול כל אפליקציה. לא מיועד לשימוש באפליקציות רגילות."</string>
     <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"שינוי של סימני Socket"</string>
     <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"ההרשאה הזו מאפשרת לאפליקציה לשנות סימני Socket עבור ניתוב"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להתראות"</string>

@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"предотвратяване на превключването между приложения"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Не позволява на потребителя да превключва към друго приложение."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"извличане на информация за текущото приложение"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Разрешава на собственика да извлича частна информация за текущото приложение и услуги на преден план на екрана."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Разрешава на собственика да извлича частна информация за текущото приложение на преден план на екрана."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"наблюдение и контрол на стартирането на всички приложения"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Разрешава на приложението да наблюдава и контролира как системата стартира дейности. Злонамерените приложения могат изцяло да компрометират системата. Това разрешение е нужно само за програмиране, никога за нормална употреба."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"изпращане на излъчване при премахнат пакет"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Разрешава на притежателя да извиква предоставеното от оператора приложение за конфигуриране. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"слушане за наблюдения на мрежовите условия"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Разрешава на приложението да слуша за наблюдения на мрежовите условия. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"искане за разпознаване на активираща дума"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Разрешава на приложението да поиска разпознаване на активираща дума. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролирайте дължината и разрешените знаци за паролите за отключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>

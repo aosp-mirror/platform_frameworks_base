@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"կանխել ծրագրի փոխարկումները"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Կանխում է օգտվողի անցումը այլ հավելվածի:"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"ստանալ ընթացիկ հավելվածի մասին տեղեկություններ"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Թույլ է տալիս սեփականատիրոջը առբերել գաղտնի տեղեկություններ ընթացիկ հավելվածի և ծառայությունների մասին էկրանի առաջին պլանում:"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Թույլ է տալիս սեփականատիրոջը առբերել գաղտնի տեղեկություններ ընթացիկ հավելվածի մասին էկրանի առաջին պլանում:"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"վերահսկել և կառավարել բոլոր հավելվածների թողարկումը"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Թույլ է տալիս հավելվածին հետևել և վերահսկել, թե ինչպես է համակարգը գործարկում գործողությունները: Վնասարար հավելվածները կարող են ամբողջությամբ վնասել համակարգը: Այս թույլտվությունը անհրաժեշտ է միայն ծրագրավորման համար և ոչ երբեք սովորական օգտագործման համար:"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ուղարկել հեռացված փաթեթի մասին հաղորդում"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Թույլ է տալիս սեփականատիրոջը գործարկել օպերատորի կողմից տրամադրված կազմաձևման ծրագիրը: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"լսել դիտարկումներ ցանցային պայմանների վերաբերյալ"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Հավելվածին թույլ է տալիս լսել դիտարկումներ ցանցային պայմանների վերաբերյալ: Սովորական հավելվածների համար երբեք պետք չի գալիս:"</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ուղարկել թեժ բառի ճանաչման հայց"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Հավելվածին թույլ է տալիս թեժ բառի ճանաչման հայց ուղարկել: Սովորական հավելվածների համար երբեք պետք չի գալիս:"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Վերահսկել էկրանի ապակողպման գաղտնաբառերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Վերահսկել էկրանի ապակողպման փորձերը"</string>

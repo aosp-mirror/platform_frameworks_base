@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"schakelen tussen apps voorkomen"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hiermee wordt voorkomen dat de gebruiker overschakelt naar een andere app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"huidige appgegevens ophalen"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Hiermee kan de houder persoonlijke gegevens ophalen over de app en services die momenteel op de voorgrond worden weergegeven."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"De houder kan hiermee persoonlijke gegevens ophalen over de applicatie die momenteel op de voorgrond wordt weergegeven."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"alle startende apps bijhouden en beheren"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Hiermee kan de app de manier bijhouden en beheren waarop het systeem activiteiten start. Schadelijke apps kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal gebruik."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"melding verzenden dat pakket is verwijderd"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Hiermee kan de houder de door de provider geleverde configuratie-app aanroepen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"controleren op waarnemingen met betrekking tot netwerkomstandigheden"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Hiermee kan een app controleren op waarnemingen met betrekking tot netwerkomstandigheden. Nooit vereist voor normale apps."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"hotwordherkenning aanvragen"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Hiermee kan een app herkenning van hotwords aanvragen. Nooit vereist voor normale apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>

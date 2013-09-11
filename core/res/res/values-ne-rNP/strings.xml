@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"अनुप्रयोग स्विचहरू जोगाउनुहोस्"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"अन्य अनुप्रयोगमा स्विच गर्नबाट प्रयोगकर्ताहरूलाई रोक्छ।"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"वर्तमान अनुप्रयोगको जानकारी प्राप्त गर्नुहोस्"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"स्क्रिनको अग्र भागमा हालको अनुप्रयोग र सेवाहरूका बारे निजी जानकारी निकाल्न बाहकलाई अनुमति दिन्छ।"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"होल्डरलाई स्क्रिनको पृष्ठभूमिमा वर्तमान अनुप्रयोगको बारेमा व्यक्तिगत जानकारी पुनःप्राप्त गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"सबै अनुप्रयोग सुरुवात गर्ने निरीक्षण र नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"अनुप्रयोगलाई कसरी प्रणाली सुरुवात गतिहरू मोनिटर गर्न र नियन्त्रण गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले प्रणालीमा पूर्ण सहमत गर्न सक्दछ। यो अनुमति केवल विकासको लागि आवश्यक छ, साधारण प्रयोगको लागि कहिले होइन।"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"प्याकेज हटाइएको प्रसारणलाई पठाउनुहोस्"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"प्रयोगकर्तालाई वाहक-प्रदान विन्यास अनुप्रयोग सुरु गर्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक पर्ने छैन।"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"सञ्जाल अवस्थाका पर्यवेक्षणका लागि सुन्नुहोस्"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"सञ्जाल अवस्थाका पर्यवेक्षण सुन्नका लागि अनुप्रयोगलाई अनुमति दिन्छ।सामान्य अनुप्रयोगलाई चाँहिदै नचाँहिन सक्छ।"</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"जल्दोबल्दो शब्द पहिचानका लागि अनुरोध गर्नुहोस्"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"जल्दाबल्दा शब्द पहिचानका लागि अनुरोध पठाउन अनुप्रयोगलाई अनुमति दिन्छ।सामान्य अनुप्रयोगका लागि यो कहिल्यै नचाहिन सक्छ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्क्रिन-अनलक पासवर्डहरूमा अनुमति दिइएको लम्बाइ र अक्षरहरू नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"मोनिटर स्क्रिन-अनलक प्रयत्नहरू"</string>

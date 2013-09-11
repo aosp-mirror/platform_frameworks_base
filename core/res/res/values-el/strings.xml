@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"αποτροπή εναλλαγών εφαρμογών"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Δεν επιτρέπει στο χρήστη να μεταβεί σε άλλη εφαρμογή."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"λήψη πληροφοριών σχετικά με την τρέχουσα εφαρμογή"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Επιτρέπει στον κάτοχό του να ανακτήσει ιδιωτικές πληροφορίες σχετικά με την τρέχουσα εφαρμογή και τις υπηρεσίες στο προσκήνιο της οθόνης."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Δίνει στον κάτοχο τη δυνατότητα ανάκτησης απόρρητων πληροφοριών σχετικά με την τρέχουσα εφαρμογή στο προσκήνιο της οθόνης."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"παρακολούθηση και έλεγχος όλων των εκκινήσεων εφαρμογών"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Επιτρέπει στην εφαρμογή να παρακολουθεί και να ελέγχει τον τρόπο με τον οποίο το σύστημα εκκινεί δραστηριότητες. Τυχόν κακόβουλες εφαρμογές ενδέχεται να θέσουν σε κίνδυνο το σύστημα. Αυτή η άδεια είναι απαραίτητη μόνο για σκοπούς ανάπτυξης και ποτέ για συνήθη χρήση."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"αποστολή εκπομπής χωρίς πακέτο"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Επιτρέπει στον κάτοχο την κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"λήψη παρατηρήσεων σχετικά με την κατάσταση δικτύου"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Επιτρέπει σε μια εφαρμογή να λαμβάνει παρατηρήσεις σχετικά με την κατάσταση δικτύου. Δεν θα πρέπει να απαιτείται ποτέ για κανονικές εφαρμογές."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"αίτημα αναγνώρισης λέξης-κλειδιού"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Επιτρέπει σε μια εφαρμογή να υποβάλει αίτημα αναγνώρισης λέξης-κλειδιού. Δεν θα πρέπει να απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>

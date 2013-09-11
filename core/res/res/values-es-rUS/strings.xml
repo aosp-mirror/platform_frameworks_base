@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir conmutadores de aplicación"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Evita que el usuario cambie a otra aplicación."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obtener información de aplicación actual"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Permite que el titular recupere información privada sobre los servicios y la aplicación actuales en el primer plano de la pantalla."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Permite que el titular recupere información privada sobre la aplicación actual en el primer plano de la pantalla."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"supervisar y controlar la ejecución de todas las aplicaciones"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite que la aplicación supervise y controle la manera en la que el sistema inicia actividades. Las aplicaciones maliciosas pueden comprometer el sistema por completo. Este permiso es necesario solo para el desarrollo, nunca para el uso habitual."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar emisión de paquete eliminado"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite al propietario ejecutar la aplicación de configuración proporcionada por el proveedor. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Detectar cambios en el estado de la red"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que una aplicación detecte cambios en el estado de la red. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"solicitar reconocimiento de palabras activas"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permite que una aplicación solicite el reconocimiento de palabras activas. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas para desbloquear la pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa los intentos para desbloquear la pantalla"</string>
