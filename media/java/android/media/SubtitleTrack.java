@@ -69,7 +69,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
     }
 
     /** @hide */
-    public MediaFormat getFormat() {
+    public final MediaFormat getFormat() {
         return mFormat;
     }
 
@@ -201,7 +201,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
     }
 
     /** @hide */
-    public void scheduleTimedEvents() {
+    protected void scheduleTimedEvents() {
         /* get times for the next event */
         if (mTimeProvider != null) {
             mNextScheduledTimeMs = mCues.nextTimeAfter(mLastTimeMs);
@@ -363,7 +363,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
     }
 
     /** @hide */
-    public void setTimeProvider(MediaTimeProvider timeProvider) {
+    public synchronized void setTimeProvider(MediaTimeProvider timeProvider) {
         if (mTimeProvider == timeProvider) {
             return;
         }
