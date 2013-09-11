@@ -46,31 +46,41 @@ using namespace android;
 /*
  * Zip file constants.
  */
-#define kEOCDSignature      0x06054b50
-#define kEOCDLen            22
-#define kEOCDNumEntries     8               // offset to #of entries in file
-#define kEOCDSize           12              // size of the central directory
-#define kEOCDFileOffset     16              // offset to central directory
+#define kEOCDSignature       0x06054b50
+#define kEOCDLen             22
+#define kEOCDDiskNumber      4               // number of the current disk
+#define kEOCDDiskNumberForCD 6               // disk number with the Central Directory
+#define kEOCDNumEntries      8               // offset to #of entries in file
+#define kEOCDTotalNumEntries 10              // offset to total #of entries in spanned archives
+#define kEOCDSize            12              // size of the central directory
+#define kEOCDFileOffset      16              // offset to central directory
+#define kEOCDCommentSize     20              // offset to the length of the file comment
 
-#define kMaxCommentLen      65535           // longest possible in ushort
-#define kMaxEOCDSearch      (kMaxCommentLen + kEOCDLen)
+#define kMaxCommentLen       65535           // longest possible in ushort
+#define kMaxEOCDSearch       (kMaxCommentLen + kEOCDLen)
 
-#define kLFHSignature       0x04034b50
-#define kLFHLen             30              // excluding variable-len fields
-#define kLFHNameLen         26              // offset to filename length
-#define kLFHExtraLen        28              // offset to extra length
+#define kLFHSignature        0x04034b50
+#define kLFHLen              30              // excluding variable-len fields
+#define kLFHGPBFlags          6              // offset to GPB flags
+#define kLFHNameLen          26              // offset to filename length
+#define kLFHExtraLen         28              // offset to extra length
 
-#define kCDESignature       0x02014b50
-#define kCDELen             46              // excluding variable-len fields
-#define kCDEMethod          10              // offset to compression method
-#define kCDEModWhen         12              // offset to modification timestamp
-#define kCDECRC             16              // offset to entry CRC
-#define kCDECompLen         20              // offset to compressed length
-#define kCDEUncompLen       24              // offset to uncompressed length
-#define kCDENameLen         28              // offset to filename length
-#define kCDEExtraLen        30              // offset to extra length
-#define kCDECommentLen      32              // offset to comment length
-#define kCDELocalOffset     42              // offset to local hdr
+#define kCDESignature        0x02014b50
+#define kCDELen              46              // excluding variable-len fields
+#define kCDEGPBFlags          8              // offset to GPB flags
+#define kCDEMethod           10              // offset to compression method
+#define kCDEModWhen          12              // offset to modification timestamp
+#define kCDECRC              16              // offset to entry CRC
+#define kCDECompLen          20              // offset to compressed length
+#define kCDEUncompLen        24              // offset to uncompressed length
+#define kCDENameLen          28              // offset to filename length
+#define kCDEExtraLen         30              // offset to extra length
+#define kCDECommentLen       32              // offset to comment length
+#define kCDELocalOffset      42              // offset to local hdr
+
+/* General Purpose Bit Flag */
+#define kGPFEncryptedFlag    (1 << 0)
+#define kGPFUnsupportedMask  (kGPFEncryptedFlag)
 
 /*
  * The values we return for ZipEntryRO use 0 as an invalid value, so we
@@ -170,6 +180,11 @@ bool ZipFileRO::mapCentralDirectory(void)
     if (readAmount > (ssize_t) mFileLength)
         readAmount = mFileLength;
 
+    if (readAmount < kEOCDSize) {
+        ALOGW("File too short to be a zip file");
+        return false;
+    }
+
     unsigned char* scanBuf = (unsigned char*) malloc(readAmount);
     if (scanBuf == NULL) {
         ALOGW("couldn't allocate scanBuf: %s", strerror(errno));
@@ -193,17 +208,11 @@ bool ZipFileRO::mapCentralDirectory(void)
         return false;
     }
 
-    {
-        unsigned int header = get4LE(scanBuf);
-        if (header == kEOCDSignature) {
-            ALOGI("Found Zip archive, but it looks empty\n");
-            free(scanBuf);
-            return false;
-        } else if (header != kLFHSignature) {
-            ALOGV("Not a Zip archive (found 0x%08x)\n", header);
-            free(scanBuf);
-            return false;
-        }
+    unsigned int header = get4LE(scanBuf);
+    if (header != kLFHSignature) {
+        ALOGV("Not a Zip archive (found 0x%08x)\n", header);
+        free(scanBuf);
+        return false;
     }
 
     /*
@@ -261,24 +270,38 @@ bool ZipFileRO::mapCentralDirectory(void)
      * Grab the CD offset and size, and the number of entries in the
      * archive. After that, we can release our EOCD hunt buffer.
      */
+    unsigned int diskNumber = get2LE(eocdPtr + kEOCDDiskNumber);
+    unsigned int diskWithCentralDir = get2LE(eocdPtr + kEOCDDiskNumberForCD);
     unsigned int numEntries = get2LE(eocdPtr + kEOCDNumEntries);
-    unsigned int dirSize = get4LE(eocdPtr + kEOCDSize);
-    unsigned int dirOffset = get4LE(eocdPtr + kEOCDFileOffset);
+    unsigned int totalNumEntries = get2LE(eocdPtr + kEOCDTotalNumEntries);
+    unsigned int centralDirSize = get4LE(eocdPtr + kEOCDSize);
+    unsigned int centralDirOffset = get4LE(eocdPtr + kEOCDFileOffset);
+    unsigned int commentSize = get2LE(eocdPtr + kEOCDCommentSize);
     free(scanBuf);
 
     // Verify that they look reasonable.
-    if ((long long) dirOffset + (long long) dirSize > (long long) eocdOffset) {
+    if ((long long) centralDirOffset + (long long) centralDirSize > (long long) eocdOffset) {
         ALOGW("bad offsets (dir %ld, size %u, eocd %ld)\n",
-            (long) dirOffset, dirSize, (long) eocdOffset);
+            (long) centralDirOffset, centralDirSize, (long) eocdOffset);
         return false;
     }
     if (numEntries == 0) {
         ALOGW("empty archive?\n");
         return false;
+    } else if (numEntries != totalNumEntries || diskNumber != 0 || diskWithCentralDir != 0) {
+        ALOGW("spanned archives not supported");
+        return false;
+    }
+
+    // Check to see if comment is a sane size
+    if ((commentSize > (mFileLength - kEOCDLen))
+            || (eocdOffset > (mFileLength - kEOCDLen) - commentSize)) {
+        ALOGW("comment size runs off end of file");
+        return false;
     }
 
     ALOGV("+++ numEntries=%d dirSize=%d dirOffset=%d\n",
-        numEntries, dirSize, dirOffset);
+        numEntries, centralDirSize, centralDirOffset);
 
     mDirectoryMap = new FileMap();
     if (mDirectoryMap == NULL) {
@@ -286,14 +309,14 @@ bool ZipFileRO::mapCentralDirectory(void)
         return false;
     }
 
-    if (!mDirectoryMap->create(mFileName, mFd, dirOffset, dirSize, true)) {
+    if (!mDirectoryMap->create(mFileName, mFd, centralDirOffset, centralDirSize, true)) {
         ALOGW("Unable to map '%s' (" ZD " to " ZD "): %s\n", mFileName,
-                (ZD_TYPE) dirOffset, (ZD_TYPE) (dirOffset + dirSize), strerror(errno));
+                (ZD_TYPE) centralDirOffset, (ZD_TYPE) (centralDirOffset + centralDirSize), strerror(errno));
         return false;
     }
 
     mNumEntries = numEntries;
-    mDirectoryOffset = dirOffset;
+    mDirectoryOffset = centralDirOffset;
 
     return true;
 }
@@ -352,17 +375,30 @@ bool ZipFileRO::parseZipArchive(void)
             goto bail;
         }
 
-        unsigned int fileNameLen, extraLen, commentLen, hash;
+        unsigned int gpbf = get2LE(ptr + kCDEGPBFlags);
+        if ((gpbf & kGPFUnsupportedMask) != 0) {
+            ALOGW("Invalid General Purpose Bit Flag: %d", gpbf);
+            goto bail;
+        }
 
-        fileNameLen = get2LE(ptr + kCDENameLen);
-        extraLen = get2LE(ptr + kCDEExtraLen);
-        commentLen = get2LE(ptr + kCDECommentLen);
+        unsigned int nameLen = get2LE(ptr + kCDENameLen);
+        unsigned int extraLen = get2LE(ptr + kCDEExtraLen);
+        unsigned int commentLen = get2LE(ptr + kCDECommentLen);
+
+        const char *name = (const char *) ptr + kCDELen;
+
+        /* Check name for NULL characters */
+        if (memchr(name, 0, nameLen) != NULL) {
+            ALOGW("Filename contains NUL byte");
+            goto bail;
+        }
 
         /* add the CDE filename to the hash table */
-        hash = computeHash((const char*)ptr + kCDELen, fileNameLen);
-        addToHash((const char*)ptr + kCDELen, fileNameLen, hash);
+        unsigned int hash = computeHash(name, nameLen);
+        addToHash(name, nameLen, hash);
 
-        ptr += kCDELen + fileNameLen + extraLen + commentLen;
+        /* We don't care about the comment or extra data. */
+        ptr += kCDELen + nameLen + extraLen + commentLen;
         if ((size_t)(ptr - cdPtr) > cdLength) {
             ALOGW("bad CD advance (%d vs " ZD ") at entry %d\n",
                 (int) (ptr - cdPtr), (ZD_TYPE) cdLength, i);
@@ -475,8 +511,10 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
     bool ret = false;
 
     const int ent = entryToIndex(entry);
-    if (ent < 0)
+    if (ent < 0) {
+        ALOGW("cannot find entry");
         return false;
+    }
 
     HashEntry hashEntry = mHashTable[ent];
 
@@ -585,6 +623,12 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 #endif /* HAVE_PREAD */
 
+        unsigned int gpbf = get2LE(lfhBuf + kLFHGPBFlags);
+        if ((gpbf & kGPFUnsupportedMask) != 0) {
+            ALOGW("Invalid General Purpose Bit Flag: %d", gpbf);
+            return false;
+        }
+
         off64_t dataOffset = localHdrOffset + kLFHLen
             + get2LE(lfhBuf + kLFHNameLen) + get2LE(lfhBuf + kLFHExtraLen);
         if (dataOffset >= cdOffset) {
@@ -593,14 +637,15 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 
         /* check lengths */
-        if ((off64_t)(dataOffset + compLen) > cdOffset) {
+        if ((dataOffset >= cdOffset) || (compLen > (cdOffset - dataOffset))) {
             ALOGW("bad compressed length in zip (%ld + " ZD " > %ld)\n",
                 (long) dataOffset, (ZD_TYPE) compLen, (long) cdOffset);
             return false;
         }
 
         if (method == kCompressStored &&
-            (off64_t)(dataOffset + uncompLen) > cdOffset)
+            ((dataOffset >= cdOffset) ||
+             (uncompLen >= (cdOffset - dataOffset))))
         {
             ALOGE("ERROR: bad uncompressed length in zip (%ld + " ZD " > %ld)\n",
                 (long) dataOffset, (ZD_TYPE) uncompLen, (long) cdOffset);
@@ -645,14 +690,24 @@ FileMap* ZipFileRO::createEntryFileMap(ZipEntryRO entry) const
      */
 
     FileMap* newMap;
+    int method;
+    size_t uncompLen;
     size_t compLen;
     off64_t offset;
 
-    if (!getEntryInfo(entry, NULL, NULL, &compLen, &offset, NULL, NULL))
+    if (!getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL)) {
         return NULL;
+    }
+
+    size_t actualLen;
+    if (method == kCompressStored) {
+        actualLen = uncompLen;
+    } else {
+        actualLen = compLen;
+    }
 
     newMap = new FileMap();
-    if (!newMap->create(mFileName, mFd, offset, compLen, true)) {
+    if (!newMap->create(mFileName, mFd, offset, actualLen, true)) {
         newMap->release();
         return NULL;
     }
@@ -671,17 +726,21 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, void* buffer) const
     const size_t kSequentialMin = 32768;
     bool result = false;
     int ent = entryToIndex(entry);
-    if (ent < 0)
-        return -1;
+    if (ent < 0) {
+        return false;
+    }
 
     int method;
     size_t uncompLen, compLen;
     off64_t offset;
     const unsigned char* ptr;
+    FileMap *file;
 
-    getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL);
+    if (!getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL)) {
+        goto bail;
+    }
 
-    FileMap* file = createEntryFileMap(entry);
+    file = createEntryFileMap(entry);
     if (file == NULL) {
         goto bail;
     }
@@ -731,17 +790,21 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
 {
     bool result = false;
     int ent = entryToIndex(entry);
-    if (ent < 0)
-        return -1;
+    if (ent < 0) {
+        return false;
+    }
 
     int method;
     size_t uncompLen, compLen;
     off64_t offset;
     const unsigned char* ptr;
+    FileMap *file;
 
-    getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL);
+    if (!getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL)) {
+        goto bail;
+    }
 
-    FileMap* file = createEntryFileMap(entry);
+    file = createEntryFileMap(entry);
     if (file == NULL) {
         goto bail;
     }
@@ -761,8 +824,9 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
             ALOGI("+++ successful write\n");
         }
     } else {
-        if (!inflateBuffer(fd, ptr, uncompLen, compLen))
+        if (!inflateBuffer(fd, ptr, uncompLen, compLen)) {
             goto unmap;
+        }
     }
 
     result = true;
