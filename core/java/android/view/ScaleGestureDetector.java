@@ -159,6 +159,7 @@ public class ScaleGestureDetector {
     private static final long TOUCH_STABILIZE_TIME = 128; // ms
     private static final int DOUBLE_TAP_MODE_NONE = 0;
     private static final int DOUBLE_TAP_MODE_IN_PROGRESS = 1;
+    private static final float SCALE_FACTOR = .5f;
 
 
     /**
@@ -197,7 +198,7 @@ public class ScaleGestureDetector {
      * @throws NullPointerException if {@code listener} is null.
      */
     public ScaleGestureDetector(Context context, OnScaleGestureListener listener,
-            Handler handler) {
+                                Handler handler) {
         mContext = context;
         mListener = listener;
         mSpanSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
@@ -409,7 +410,9 @@ public class ScaleGestureDetector {
             mPrevSpanY = mCurrSpanY = spanY;
             mInitialSpan = mPrevSpan = mCurrSpan = span;
         }
-        if (!mInProgress && span >= mMinSpan &&
+
+        final int minSpan = inDoubleTapMode() ? mSpanSlop : mMinSpan;
+        if (!mInProgress && span >=  minSpan &&
                 (wasInProgress || Math.abs(span - mInitialSpan) > mSpanSlop)) {
             mPrevSpanX = mCurrSpanX = spanX;
             mPrevSpanY = mCurrSpanY = spanY;
@@ -464,7 +467,7 @@ public class ScaleGestureDetector {
                             mDoubleTapMode = DOUBLE_TAP_MODE_IN_PROGRESS;
                             return true;
                         }
-            };
+                    };
             mGestureDetector = new GestureDetector(mContext, gestureListener, mHandler);
         }
     }
@@ -572,11 +575,15 @@ public class ScaleGestureDetector {
      * @return The current scaling factor.
      */
     public float getScaleFactor() {
-        if (inDoubleTapMode() && mEventBeforeOrAboveStartingGestureEvent) {
+        if (inDoubleTapMode()) {
             // Drag is moving up; the further away from the gesture
             // start, the smaller the span should be, the closer,
             // the larger the span, and therefore the larger the scale
-            return (1 / mCurrSpan) / (1 / mPrevSpan);
+            final boolean scaleUp =
+                    (mEventBeforeOrAboveStartingGestureEvent && (mCurrSpan < mPrevSpan)) ||
+                    (!mEventBeforeOrAboveStartingGestureEvent && (mCurrSpan > mPrevSpan));
+            final float spanDiff = (Math.abs(1 - (mCurrSpan / mPrevSpan)) * SCALE_FACTOR);
+            return mPrevSpan <= 0 ? 1 : scaleUp ? (1 + spanDiff) : (1 - spanDiff);
         }
         return mPrevSpan > 0 ? mCurrSpan / mPrevSpan : 1;
     }
