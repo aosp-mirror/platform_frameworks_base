@@ -1349,8 +1349,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     };
 
     boolean panelsEnabled() {
-        return ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0
-                && mStatusBarWindowState != StatusBarManager.WINDOW_STATE_HIDING);
+        return (mDisabled & StatusBarManager.DISABLE_EXPAND) == 0;
     }
 
     void makeExpandedVisible() {
