@@ -523,14 +523,6 @@ public class SyncManager {
         }
     }
 
-    /**
-     * TODO: Decide if restricted users have different sync options for the sync service (as is
-     * the case with sync adapters).
-     */
-    public int getIsTargetServiceActive(ComponentName cname, int userId) {
-        return mSyncStorageEngine.getIsTargetServiceActive(cname, userId);
-    }
-
     private void ensureAlarmService() {
         if (mAlarmService == null) {
             mAlarmService = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -564,7 +556,7 @@ public class SyncManager {
         final boolean ignoreSettings =
                 extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
         int source = SyncStorageEngine.SOURCE_SERVICE;
-        int isEnabled = getIsTargetServiceActive(cname, userId);
+        boolean isEnabled = mSyncStorageEngine.getIsTargetServiceActive(cname, userId);
         // Only schedule this sync if
         //   - we've explicitly been told to ignore settings.
         //   - global sync is enabled for this user.
@@ -577,7 +569,7 @@ public class SyncManager {
             }
             return;
         }
-        if (isEnabled == 0) {
+        if (isEnabled) {
             if (isLoggable) {
                 Log.d(TAG, "scheduleSync: " + cname + " is not enabled, dropping request");
             }
@@ -587,7 +579,7 @@ public class SyncManager {
         Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(info);
         long delayUntil = mSyncStorageEngine.getDelayUntilTime(info);
         final long backoffTime = backoff != null ? backoff.first : 0;
-        if (isEnabled < 0) {
+        if (isEnabled) {
             // Initialisation sync.
             Bundle newExtras = new Bundle();
             newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
@@ -2144,7 +2136,7 @@ public class SyncManager {
                     return false;
                 }
             } else if (target.target_service) {
-                if (getIsTargetServiceActive(target.service, target.userId) == 0) {
+                if (mSyncStorageEngine.getIsTargetServiceActive(target.service, target.userId)) {
                     if (isLoggable) {
                         Log.v(TAG, "   Not scheduling periodic operation: isEnabled == 0.");
                     }
@@ -2548,7 +2540,8 @@ public class SyncManager {
                     return false;
                 }
             } else if (target.target_service) {
-                state = getIsTargetServiceActive(target.service, target.userId);
+                state = mSyncStorageEngine.getIsTargetServiceActive(target.service, target.userId)
+                            ? 1 : 0;
                 if (state == 0) {
                     // TODO: Change this to not drop disabled syncs - keep them in the pending queue.
                     if (isLoggable) {
