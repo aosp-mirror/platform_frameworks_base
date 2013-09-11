@@ -25,15 +25,29 @@
     android:paddingBottom="8dip"
     android:orientation="horizontal">
 
-    <ImageView
+    <FrameLayout
         android:id="@android:id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="20dp"
-        android:layout_gravity="center_vertical"
-        android:scaleType="centerInside"
-        android:contentDescription="@null" />
+        android:layout_gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/icon_mime"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/icon_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null" />
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dip"

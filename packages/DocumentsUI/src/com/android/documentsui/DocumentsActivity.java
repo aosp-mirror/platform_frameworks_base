@@ -50,6 +50,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -87,6 +88,7 @@ public class DocumentsActivity extends Activity {
     private static final String EXTRA_STATE = "state";
 
     private boolean mIgnoreNextNavigation;
+    private boolean mIgnoreNextCollapse;
 
     private RootsCache mRoots;
     private State mState;
@@ -234,12 +236,14 @@ public class DocumentsActivity extends Activity {
         public void onDrawerOpened(View drawerView) {
             mDrawerToggle.onDrawerOpened(drawerView);
             updateActionBar();
+            invalidateOptionsMenu();
         }
 
         @Override
         public void onDrawerClosed(View drawerView) {
             mDrawerToggle.onDrawerClosed(drawerView);
             updateActionBar();
+            invalidateOptionsMenu();
         }
 
         @Override
@@ -305,7 +309,6 @@ public class DocumentsActivity extends Activity {
             public boolean onQueryTextSubmit(String query) {
                 mState.currentSearch = query;
                 onCurrentDirectoryChanged();
-                mSearchView.setIconified(true);
                 return true;
             }
 
@@ -315,12 +318,22 @@ public class DocumentsActivity extends Activity {
             }
         });
 
-        mSearchView.setOnCloseListener(new OnCloseListener() {
+        searchMenu.setOnActionExpandListener(new OnActionExpandListener() {
             @Override
-            public boolean onClose() {
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                if (mIgnoreNextCollapse) {
+                    mIgnoreNextCollapse = false;
+                    return true;
+                }
+
                 mState.currentSearch = null;
                 onCurrentDirectoryChanged();
-                return false;
+                return true;
             }
         });
 
@@ -342,6 +355,18 @@ public class DocumentsActivity extends Activity {
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
+        // Open drawer means we hide most actions
+        if (mDrawerLayout.isDrawerOpen(mRootsContainer)) {
+            createDir.setVisible(false);
+            search.setVisible(false);
+            sort.setVisible(false);
+            grid.setVisible(false);
+            list.setVisible(false);
+            mIgnoreNextCollapse = true;
+            search.collapseActionView();
+            return true;
+        }
+
         if (cwd != null) {
             sort.setVisible(true);
             grid.setVisible(mState.derivedMode != MODE_GRID);
@@ -350,6 +375,17 @@ public class DocumentsActivity extends Activity {
             sort.setVisible(false);
             grid.setVisible(false);
             list.setVisible(false);
+        }
+
+        if (mState.currentSearch != null) {
+            // Search uses backend ranking; no sorting
+            sort.setVisible(false);
+
+            search.expandActionView();
+            mSearchView.setQuery(mState.currentSearch, false);
+        } else {
+            mIgnoreNextCollapse = true;
+            search.collapseActionView();
         }
 
         // Only sort by size when visible

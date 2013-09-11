@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract.Root;
+import android.text.TextUtils;
 
 import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
@@ -203,6 +204,6 @@ public class RootInfo implements Durable, Parcelable {
     }
 
     public String getDirectoryString() {
-        return (summary != null) ? summary : title;
+        return !TextUtils.isEmpty(summary) ? summary : title;
     }
 }

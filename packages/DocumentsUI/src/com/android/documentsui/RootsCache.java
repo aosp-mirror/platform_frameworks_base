@@ -109,6 +109,8 @@ public class RootsCache {
                 }
             }
         }
+
+        Log.d(TAG, "Update found " + mRoots.size() + " roots");
     }
 
     @Deprecated
@@ -131,6 +133,21 @@ public class RootsCache {
             }
         }
         return null;
+    }
+
+    @GuardedBy("ActivityThread")
+    public boolean isIconUnique(RootInfo root) {
+        for (RootInfo test : mRoots) {
+            if (Objects.equal(test.authority, root.authority)) {
+                if (Objects.equal(test.rootId, root.rootId)) {
+                    continue;
+                }
+                if (test.icon == root.icon) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @GuardedBy("ActivityThread")

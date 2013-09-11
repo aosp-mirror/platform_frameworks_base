@@ -267,16 +267,15 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
         final LinkedList<File> pending = new LinkedList<File>();
         pending.add(parent);
-        while (!pending.isEmpty() && result.getCount() < 20) {
+        while (!pending.isEmpty() && result.getCount() < 24) {
             final File file = pending.removeFirst();
             if (file.isDirectory()) {
                 for (File child : file.listFiles()) {
                     pending.add(child);
                 }
-            } else {
-                if (file.getName().toLowerCase().contains(query)) {
-                    includeFile(result, null, file);
-                }
+            }
+            if (file.getName().toLowerCase().contains(query)) {
+                includeFile(result, null, file);
             }
         }
         return result;

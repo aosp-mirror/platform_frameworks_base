@@ -167,6 +167,14 @@ public abstract class DocumentsProvider extends ContentProvider {
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException;
 
+    /** {@hide} */
+    @SuppressWarnings("unused")
+    public Cursor queryChildDocumentsForManage(
+            String parentDocumentId, String[] projection, String sortOrder)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Manage not supported");
+    }
+
     /**
      * Return documents that that match the given query, starting the search at
      * the given directory.
@@ -262,7 +270,12 @@ public abstract class DocumentsProvider extends ContentProvider {
                 case MATCH_DOCUMENT:
                     return queryDocument(getDocumentId(uri), projection);
                 case MATCH_CHILDREN:
-                    return queryChildDocuments(getDocumentId(uri), projection, sortOrder);
+                    if (DocumentsContract.isManageMode(uri)) {
+                        return queryChildDocumentsForManage(
+                                getDocumentId(uri), projection, sortOrder);
+                    } else {
+                        return queryChildDocuments(getDocumentId(uri), projection, sortOrder);
+                    }
                 case MATCH_SEARCH:
                     return querySearchDocuments(
                             getDocumentId(uri), getSearchDocumentsQuery(uri), projection);
