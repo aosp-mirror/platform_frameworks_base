@@ -32,7 +32,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
 import android.provider.Settings;
-import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -292,11 +291,7 @@ public class LockPatternUtils {
     public boolean checkPattern(List<LockPatternView.Cell> pattern) {
         final int userId = getCurrentOrCallingUserId();
         try {
-            final boolean matched = getLockSettings().checkPattern(patternToHash(pattern), userId);
-            if (matched && (userId == UserHandle.USER_OWNER)) {
-                KeyStore.getInstance().password(patternToString(pattern));
-            }
-            return matched;
+            return getLockSettings().checkPattern(patternToString(pattern), userId);
         } catch (RemoteException re) {
             return true;
         }
@@ -311,12 +306,7 @@ public class LockPatternUtils {
     public boolean checkPassword(String password) {
         final int userId = getCurrentOrCallingUserId();
         try {
-            final boolean matched = getLockSettings().checkPassword(passwordToHash(password),
-                    userId);
-            if (matched && (userId == UserHandle.USER_OWNER)) {
-                KeyStore.getInstance().password(password);
-            }
-            return matched;
+            return getLockSettings().checkPassword(password, userId);
         } catch (RemoteException re) {
             return true;
         }
@@ -505,14 +495,10 @@ public class LockPatternUtils {
      * @param isFallback Specifies if this is a fallback to biometric weak
      */
     public void saveLockPattern(List<LockPatternView.Cell> pattern, boolean isFallback) {
-        // Compute the hash
-        final byte[] hash = LockPatternUtils.patternToHash(pattern);
         try {
-            getLockSettings().setLockPattern(hash, getCurrentOrCallingUserId());
+            getLockSettings().setLockPattern(patternToString(pattern), getCurrentOrCallingUserId());
             DevicePolicyManager dpm = getDevicePolicyManager();
-            KeyStore keyStore = KeyStore.getInstance();
             if (pattern != null) {
-                keyStore.password(patternToString(pattern));
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 if (!isFallback) {
                     deleteGallery();
@@ -528,9 +514,6 @@ public class LockPatternUtils {
                             0, 0, 0, 0, 0, 0, 0, getCurrentOrCallingUserId());
                 }
             } else {
-                if (keyStore.isEmpty()) {
-                    keyStore.reset();
-                }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
                         0, 0, 0, 0, 0, getCurrentOrCallingUserId());
             }
@@ -637,19 +620,13 @@ public class LockPatternUtils {
      * @param userHandle The userId of the user to change the password for
      */
     public void saveLockPassword(String password, int quality, boolean isFallback, int userHandle) {
-        // Compute the hash
-        final byte[] hash = passwordToHash(password);
         try {
-            getLockSettings().setLockPassword(hash, userHandle);
+            getLockSettings().setLockPassword(password, userHandle);
             DevicePolicyManager dpm = getDevicePolicyManager();
-            KeyStore keyStore = KeyStore.getInstance();
             if (password != null) {
                 if (userHandle == UserHandle.USER_OWNER) {
                     // Update the encryption password.
                     updateEncryptionPassword(password);
-
-                    // Update the keystore password
-                    keyStore.password(password);
                 }
 
                 int computedQuality = computePasswordQuality(password);
@@ -709,6 +686,7 @@ public class LockPatternUtils {
                 if (passwordHistoryLength == 0) {
                     passwordHistory = "";
                 } else {
+                    byte[] hash = passwordToHash(password);
                     passwordHistory = new String(hash) + "," + passwordHistory;
                     // Cut it to contain passwordHistoryLength hashes
                     // and passwordHistoryLength -1 commas.
@@ -718,11 +696,6 @@ public class LockPatternUtils {
                 }
                 setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
             } else {
-                // Conditionally reset the keystore if empty. If
-                // non-empty, we are just switching key guard type
-                if (keyStore.isEmpty()) {
-                    keyStore.reset();
-                }
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0,
                         userHandle);
@@ -803,7 +776,7 @@ public class LockPatternUtils {
      * @param pattern the gesture pattern.
      * @return the hash of the pattern in a byte array.
      */
-    private static byte[] patternToHash(List<LockPatternView.Cell> pattern) {
+    public static byte[] patternToHash(List<LockPatternView.Cell> pattern) {
         if (pattern == null) {
             return null;
         }
