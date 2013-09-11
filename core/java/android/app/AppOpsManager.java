@@ -575,6 +575,10 @@ public class AppOpsManager {
         }
     }
 
+    private String buildSecurityExceptionMsg(int op, int uid, String packageName) {
+        return packageName + " from uid " + uid + " not allowed to perform " + sOpNames[op];
+    }
+
     /**
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(int, int, String)}
@@ -595,7 +599,7 @@ public class AppOpsManager {
         try {
             int mode = mService.checkOperation(op, uid, packageName);
             if (mode == MODE_ERRORED) {
-                throw new SecurityException("Operation not allowed");
+                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
             }
             return mode;
         } catch (RemoteException e) {
@@ -650,7 +654,7 @@ public class AppOpsManager {
         try {
             int mode = mService.noteOperation(op, uid, packageName);
             if (mode == MODE_ERRORED) {
-                throw new SecurityException("Operation not allowed");
+                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
             }
             return mode;
         } catch (RemoteException e) {
@@ -672,7 +676,7 @@ public class AppOpsManager {
 
     /** @hide */
     public int noteOp(int op) {
-        return noteOp(op, Process.myUid(), mContext.getBasePackageName());
+        return noteOp(op, Process.myUid(), mContext.getOpPackageName());
     }
 
     /** @hide */
@@ -710,7 +714,7 @@ public class AppOpsManager {
         try {
             int mode = mService.startOperation(getToken(mService), op, uid, packageName);
             if (mode == MODE_ERRORED) {
-                throw new SecurityException("Operation not allowed");
+                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
             }
             return mode;
         } catch (RemoteException e) {
@@ -732,7 +736,7 @@ public class AppOpsManager {
 
     /** @hide */
     public int startOp(int op) {
-        return startOp(op, Process.myUid(), mContext.getBasePackageName());
+        return startOp(op, Process.myUid(), mContext.getOpPackageName());
     }
 
     /**
@@ -749,6 +753,6 @@ public class AppOpsManager {
     }
 
     public void finishOp(int op) {
-        finishOp(op, Process.myUid(), mContext.getBasePackageName());
+        finishOp(op, Process.myUid(), mContext.getOpPackageName());
     }
 }

@@ -833,7 +833,7 @@ public class WifiManager {
      */
     public List<BatchedScanResult> getBatchedScanResults() {
         try {
-            return mService.getBatchedScanResults(mContext.getBasePackageName());
+            return mService.getBatchedScanResults(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
@@ -883,7 +883,7 @@ public class WifiManager {
      */
     public List<ScanResult> getScanResults() {
         try {
-            return mService.getScanResults(mContext.getBasePackageName());
+            return mService.getScanResults(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }
