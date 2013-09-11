@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="marquee"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textAlignment="viewStart" />
+        android:textAlignment="viewStart"
+        style="@style/TextAppearance.Medium" />
 
 </LinearLayout>

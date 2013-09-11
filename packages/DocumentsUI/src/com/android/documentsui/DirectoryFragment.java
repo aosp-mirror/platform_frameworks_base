@@ -100,6 +100,7 @@ public class DirectoryFragment extends Fragment {
 
     private int mLastMode = MODE_UNKNOWN;
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
+    private boolean mLastShowSize = false;
 
     private Point mThumbSize;
 
@@ -297,8 +298,9 @@ public class DirectoryFragment extends Fragment {
 
         mFilter = new MimePredicate(state.acceptMimes);
 
-        if (mLastMode == state.derivedMode) return;
+        if (mLastMode == state.derivedMode && mLastShowSize == state.showSize) return;
         mLastMode = state.derivedMode;
+        mLastShowSize = state.showSize;
 
         mListView.setVisibility(state.derivedMode == MODE_LIST ? View.VISIBLE : View.GONE);
         mGridView.setVisibility(state.derivedMode == MODE_GRID ? View.VISIBLE : View.GONE);
@@ -525,7 +527,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private static class LoadingFooter extends Footer {
+    private class LoadingFooter extends Footer {
         public LoadingFooter() {
             super(1);
         }
@@ -533,10 +535,19 @@ public class DirectoryFragment extends Fragment {
         @Override
         public View getView(View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
+            final State state = getDisplayState(DirectoryFragment.this);
+
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);
-                convertView = inflater.inflate(R.layout.item_loading, parent, false);
+                if (state.derivedMode == MODE_LIST) {
+                    convertView = inflater.inflate(R.layout.item_loading_list, parent, false);
+                } else if (state.derivedMode == MODE_GRID) {
+                    convertView = inflater.inflate(R.layout.item_loading_grid, parent, false);
+                } else {
+                    throw new IllegalStateException();
+                }
             }
+
             return convertView;
         }
     }
