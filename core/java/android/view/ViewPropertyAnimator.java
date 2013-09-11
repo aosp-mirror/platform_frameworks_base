@@ -702,6 +702,7 @@ public class ViewPropertyAnimator {
             @Override
             public void run() {
                 mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                mView.buildLayer();
             }
         };
         final int currentLayerType = mView.getLayerType();
