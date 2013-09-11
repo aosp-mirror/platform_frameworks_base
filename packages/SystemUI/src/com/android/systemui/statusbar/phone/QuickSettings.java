@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -62,6 +63,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.ActivityState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
@@ -401,8 +403,9 @@ class QuickSettings {
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
         // Wi-fi
-        final QuickSettingsBasicTile wifiTile
-                = new QuickSettingsBasicTile(mContext);
+        final QuickSettingsTileView wifiTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        wifiTile.setContent(R.layout.quick_settings_tile_wifi, inflater);
         wifiTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -433,12 +436,15 @@ class QuickSettings {
                     return true;
                 }} );
         }
-        mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
+        mModel.addWifiTile(wifiTile, new NetworkActivityCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView unused, State state) {
+            public void refreshView(QuickSettingsTileView view, State state) {
                 WifiState wifiState = (WifiState) state;
-                wifiTile.setImageResource(wifiState.iconId);
-                wifiTile.setText(wifiState.label);
+                ImageView iv = (ImageView) view.findViewById(R.id.image);
+                iv.setImageResource(wifiState.iconId);
+                setActivity(view, wifiState);
+                TextView tv = (TextView) view.findViewById(R.id.text);
+                tv.setText(wifiState.label);
                 wifiTile.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_wifi,
                         wifiState.signalContentDescription,
@@ -462,7 +468,7 @@ class QuickSettings {
                     startSettingsActivity(intent);
                 }
             });
-            mModel.addRSSITile(rssiTile, new QuickSettingsModel.RefreshCallback() {
+            mModel.addRSSITile(rssiTile, new NetworkActivityCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
                     RSSIState rssiState = (RSSIState) state;
@@ -478,6 +484,8 @@ class QuickSettings {
                     } else {
                         iov.setImageDrawable(null);
                     }
+                    setActivity(view, rssiState);
+
                     tv.setText(state.label);
                     view.setContentDescription(mContext.getResources().getString(
                             R.string.accessibility_quick_settings_mobile,
@@ -942,4 +950,25 @@ class QuickSettings {
 
         }
     };
+
+    private abstract static class NetworkActivityCallback
+            implements QuickSettingsModel.RefreshCallback {
+        private final long mDefaultDuration = new ValueAnimator().getDuration();
+        private final long mShortDuration = mDefaultDuration / 3;
+
+        public void setActivity(View view, ActivityState state) {
+            setVisibility(view.findViewById(R.id.activity_in), state.activityIn);
+            setVisibility(view.findViewById(R.id.activity_out), state.activityOut);
+        }
+
+        private void setVisibility(View view, boolean visible) {
+            final float newAlpha = visible ? 1 : 0;
+            if (view.getAlpha() != newAlpha) {
+                view.animate()
+                    .setDuration(visible ? mShortDuration : mDefaultDuration)
+                    .alpha(newAlpha)
+                    .start();
+            }
+        }
+    }
 }
