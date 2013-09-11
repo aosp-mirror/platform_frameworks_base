@@ -38,7 +38,8 @@
     <string name="save_error" msgid="6167009778003223664">"無法儲存文件"</string>
     <string name="root_recent" msgid="4470053704320518133">"最近使用過的項目"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"可用空間：<xliff:g id="SIZE">%1$s</xliff:g>"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"服務"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"捷徑"</string>
     <string name="root_type_device" msgid="7121342474653483538">"裝置"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"更多應用程式"</string>
@@ -48,7 +49,5 @@
     <string name="empty" msgid="7858882803708117596">"沒有項目"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"無法開啟檔案"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"無法刪除部分文件"</string>
-    <string name="more" msgid="7117420986529297171">"更多"</string>
-    <string name="loading" msgid="7933681260296021180">"載入中…"</string>
     <string name="share_via" msgid="8966594246261344259">"分享方式："</string>
 </resources>
