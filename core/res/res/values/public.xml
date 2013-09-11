@@ -2077,6 +2077,5 @@
   <public type="attr" name="supportsSwitchingToNextInputMethod" />
   <public type="attr" name="requireDeviceUnlock" />
   <public type="attr" name="apduServiceBanner" />
-  <public type="attr" name="provideAssistData" />
 
 </resources>

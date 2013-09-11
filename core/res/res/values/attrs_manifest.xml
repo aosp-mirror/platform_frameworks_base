@@ -1379,9 +1379,6 @@
              component specific values). -->
         <attr name="enabled" />
         <attr name="exported" />
-        <!-- If set to true, onProvideAssistData will be called on this service when this service
-             is running in the foreground. -->
-        <attr name="provideAssistData" format="boolean" />
         <!-- If set to true, this service with be automatically stopped
              when the user remove a task rooted in an activity owned by
              the application.  The default is false. -->

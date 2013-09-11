@@ -528,7 +528,6 @@ public final class ActivityThread {
         IBinder activityToken;
         IBinder requestToken;
         int requestType;
-        int index;
     }
 
     private native void dumpGraphicsInfo(FileDescriptor fd);
@@ -1194,12 +1193,11 @@ public final class ActivityThread {
 
         @Override
         public void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
-                int requestType, int index) {
+                int requestType) {
             RequestAssistContextExtras cmd = new RequestAssistContextExtras();
             cmd.activityToken = activityToken;
             cmd.requestToken = requestToken;
             cmd.requestType = requestType;
-            cmd.index = index;
             queueOrSendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
         }
 
@@ -2278,18 +2276,13 @@ public final class ActivityThread {
         if (r != null) {
             r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
             r.activity.onProvideAssistData(data);
-        } else {
-            Service service = mServices.get(cmd.activityToken);
-            if (service != null) {
-                service.onProvideAssistData(data);
-            }
         }
         if (data.isEmpty()) {
             data = null;
         }
         IActivityManager mgr = ActivityManagerNative.getDefault();
         try {
-            mgr.reportAssistContextExtras(cmd.requestToken, data, cmd.index);
+            mgr.reportAssistContextExtras(cmd.requestToken, data);
         } catch (RemoteException e) {
         }
     }
