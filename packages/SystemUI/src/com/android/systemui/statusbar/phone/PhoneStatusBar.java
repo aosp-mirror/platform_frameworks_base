@@ -306,6 +306,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
+    final private ContentObserver mHeadsUpObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            boolean wasUsing = mUseHeadsUp;
+            mUseHeadsUp = ENABLE_HEADS_UP && 0 != Settings.Global.getInt(
+                    mContext.getContentResolver(), SETTING_HEADS_UP, 0);
+            Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
+            if (wasUsing != mUseHeadsUp) {
+                if (!mUseHeadsUp) {
+                    Log.d(TAG, "dismissing any existing heads up notification on disable event");
+                    mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                    removeHeadsUpView();
+                } else {
+                    addHeadsUpView();
+                }
+            }
+        }
+    };
+
     private int mInteractingWindows;
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
@@ -332,6 +351,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
+
+        mHeadsUpObserver.onChange(true); // set up
+        if (ENABLE_HEADS_UP) {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(SETTING_HEADS_UP), true,
+                    mHeadsUpObserver);
+        }
     }
 
     // ================================================================================
@@ -815,6 +841,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         lp.windowAnimations = R.style.Animation_StatusBar_HeadsUp;
 
         mWindowManager.addView(mHeadsUpNotificationView, lp);
+    }
+
+    private void removeHeadsUpView() {
+        mWindowManager.removeView(mHeadsUpNotificationView);
     }
 
     public void refreshAllStatusBarIcons() {
@@ -2206,7 +2236,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     @Override
     public void createAndAddWindows() {
         addStatusBarWindow();
-        if (ENABLE_HEADS_UP) addHeadsUpView();
     }
 
     private void addStatusBarWindow() {
