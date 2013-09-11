@@ -1395,9 +1395,8 @@ final class Settings {
                     final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                     final int[] gids = pkg.getGids();
 
-                    // Avoid any application that has a space in its path
-                    // or that is handled by the system.
-                    if (dataPath.indexOf(" ") >= 0 || ai.uid < Process.FIRST_APPLICATION_UID)
+                    // Avoid any application that has a space in its path.
+                    if (dataPath.indexOf(" ") >= 0)
                         continue;
 
                     // we store on each line the following information for now:
