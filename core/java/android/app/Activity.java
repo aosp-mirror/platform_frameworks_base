@@ -4907,6 +4907,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #convertToTranslucent(TranslucentConversionListener)
      * @see TranslucentConversionListener
+     *
+     * @hide
      */
     public void convertFromTranslucent() {
         try {
@@ -4937,6 +4939,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #convertFromTranslucent()
      * @see TranslucentConversionListener
+     *
+     * @hide
      */
     public void convertToTranslucent(TranslucentConversionListener callback) {
         try {
@@ -5441,6 +5445,8 @@ public class Activity extends ContextThemeWrapper
      * opaque using {@link Activity#convertFromTranslucent()} and before it has been drawn
      * translucent again following a call to {@link
      * Activity#convertToTranslucent(TranslucentConversionListener)}.
+     *
+     * @hide
      */
     public interface TranslucentConversionListener {
         /**
