@@ -1018,6 +1018,28 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      */
     public static native long getPss(int pid, long[] outUss);
 
+    /** @hide */
+    public static final int MEMINFO_TOTAL = 0;
+    /** @hide */
+    public static final int MEMINFO_FREE = 1;
+    /** @hide */
+    public static final int MEMINFO_BUFFERS = 2;
+    /** @hide */
+    public static final int MEMINFO_CACHED = 3;
+    /** @hide */
+    public static final int MEMINFO_SHMEM = 4;
+    /** @hide */
+    public static final int MEMINFO_SLAB = 5;
+    /** @hide */
+    public static final int MEMINFO_COUNT = 6;
+
+    /**
+     * Retrieves /proc/meminfo.  outSizes is filled with fields
+     * as defined by MEMINFO_* offsets.
+     * @hide
+     */
+    public static native void getMemInfo(long[] outSizes);
+
     /**
      * Establish an object allocation limit in the current thread.
      * This feature was never enabled in release builds.  The

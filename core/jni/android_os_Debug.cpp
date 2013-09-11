@@ -516,6 +516,87 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL);
 }
 
+static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
+{
+    char buffer[1024];
+    int numFound = 0;
+
+    if (out == NULL) {
+        jniThrowNullPointerException(env, "out == null");
+        return;
+    }
+
+    int fd = open("/proc/meminfo", O_RDONLY);
+
+    if (fd < 0) {
+        printf("Unable to open /proc/meminfo: %s\n", strerror(errno));
+        return;
+    }
+
+    const int len = read(fd, buffer, sizeof(buffer)-1);
+    close(fd);
+
+    if (len < 0) {
+        printf("Empty /proc/meminfo");
+        return;
+    }
+    buffer[len] = 0;
+
+    static const char* const tags[] = {
+            "MemTotal:",
+            "MemFree:",
+            "Buffers:",
+            "Cached:",
+            "Shmem:",
+            "Slab:",
+            NULL
+    };
+    static const int tagsLen[] = {
+            9,
+            8,
+            8,
+            7,
+            6,
+            5,
+            0
+    };
+    long mem[] = { 0, 0, 0, 0, 0, 0 };
+
+    char* p = buffer;
+    while (*p && numFound < 6) {
+        int i = 0;
+        while (tags[i]) {
+            if (strncmp(p, tags[i], tagsLen[i]) == 0) {
+                p += tagsLen[i];
+                while (*p == ' ') p++;
+                char* num = p;
+                while (*p >= '0' && *p <= '9') p++;
+                if (*p != 0) {
+                    *p = 0;
+                    p++;
+                }
+                mem[i] = atoll(num);
+                numFound++;
+                break;
+            }
+            i++;
+        }
+        while (*p && *p != '\n') {
+            p++;
+        }
+        if (*p) p++;
+    }
+
+    int maxNum = env->GetArrayLength(out);
+    jlong* outArray = env->GetLongArrayElements(out, 0);
+    if (outArray != NULL) {
+        for (int i=0; i<maxNum && tags[i]; i++) {
+            outArray[i] = mem[i];
+        }
+    }
+    env->ReleaseLongArrayElements(out, outArray, 0);
+}
+
 static jint read_binder_stat(const char* stat)
 {
     FILE* fp = fopen(BINDER_STATS, "r");
@@ -790,6 +871,8 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getPss },
     { "getPss",                 "(I[J)J",
             (void*) android_os_Debug_getPssPid },
+    { "getMemInfo",             "([J)V",
+            (void*) android_os_Debug_getMemInfo },
     { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
             (void*) android_os_Debug_dumpNativeHeap },
     { "getBinderSentTransactions", "()I",

@@ -529,9 +529,8 @@ final class ProcessRecord {
     }
 
     public String makeAdjReason() {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append('(').append(adjType).append(')');
         if (adjSource != null || adjTarget != null) {
+            StringBuilder sb = new StringBuilder(128);
             sb.append(' ');
             if (adjTarget instanceof ComponentName) {
                 sb.append(((ComponentName)adjTarget).flattenToShortString());
@@ -550,8 +549,9 @@ final class ProcessRecord {
             } else {
                 sb.append("{null}");
             }
+            return sb.toString();
         }
-        return sb.toString();
+        return null;
     }
 
     /*
