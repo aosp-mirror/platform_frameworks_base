@@ -40,7 +40,6 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
 import static org.easymock.EasyMock.anyLong;
-import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -74,12 +73,12 @@ import com.android.server.net.NetworkStatsService;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
 
+import libcore.io.IoUtils;
+
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 
 import java.io.File;
-
-import libcore.io.IoUtils;
 
 /**
  * Tests for {@link NetworkStatsService}.
@@ -919,8 +918,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expect(mNetManager.getNetworkStatsUidDetail(eq(UID_ALL))).andReturn(detail).atLeastOnce();
 
         // also include tethering details, since they are folded into UID
-        expect(mConnManager.getTetheredIfacePairs()).andReturn(tetherIfacePairs).atLeastOnce();
-        expect(mNetManager.getNetworkStatsTethering(aryEq(tetherIfacePairs)))
+        expect(mNetManager.getNetworkStatsTethering())
                 .andReturn(tetherStats).atLeastOnce();
     }
 

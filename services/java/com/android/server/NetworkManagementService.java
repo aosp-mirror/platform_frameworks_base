@@ -24,15 +24,15 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 import static com.android.server.NetworkManagementService.NetdResponseCode.ClatdStatusResult;
+import static com.android.server.NetworkManagementService.NetdResponseCode.GetMarkResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.IpFwdStatusResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetherDnsFwdTgtListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetherInterfaceListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetherStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsResult;
+import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.GetMarkResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.content.Context;
@@ -118,6 +118,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int TetherInterfaceListResult = 111;
         public static final int TetherDnsFwdTgtListResult = 112;
         public static final int TtyListResult             = 113;
+        public static final int TetheringStatsListResult  = 114;
 
         public static final int TetherStatusResult        = 210;
         public static final int IpFwdStatusResult         = 211;
@@ -523,7 +524,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         throw new IllegalStateException(msg);
                     }
 
-                    int flags, scope;
+                    int flags;
+                    int scope;
                     try {
                         flags = Integer.parseInt(cooked[5]);
                         scope = Integer.parseInt(cooked[6]);
@@ -1373,55 +1375,42 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public NetworkStats getNetworkStatsTethering(String[] ifacePairs) {
+    public NetworkStats getNetworkStatsTethering() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        if (ifacePairs.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "unexpected ifacePairs; length=" + ifacePairs.length);
-        }
-
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-        for (int i = 0; i < ifacePairs.length; i += 2) {
-            final String ifaceIn = ifacePairs[i];
-            final String ifaceOut = ifacePairs[i + 1];
-            if (ifaceIn != null && ifaceOut != null) {
-                stats.combineValues(getNetworkStatsTethering(ifaceIn, ifaceOut));
-            }
-        }
-        return stats;
-    }
-
-    private NetworkStats.Entry getNetworkStatsTethering(String ifaceIn, String ifaceOut) {
-        final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("bandwidth", "gettetherstats", ifaceIn, ifaceOut);
+            final NativeDaemonEvent[] events = mConnector.executeForList(
+                    "bandwidth", "gettetherstats");
+            for (NativeDaemonEvent event : events) {
+                if (event.getCode() != TetheringStatsListResult) continue;
+
+                // 114 ifaceIn ifaceOut rx_bytes rx_packets tx_bytes tx_packets
+                final StringTokenizer tok = new StringTokenizer(event.getMessage());
+                try {
+                    final String ifaceIn = tok.nextToken();
+                    final String ifaceOut = tok.nextToken();
+
+                    final NetworkStats.Entry entry = new NetworkStats.Entry();
+                    entry.iface = ifaceOut;
+                    entry.uid = UID_TETHERING;
+                    entry.set = SET_DEFAULT;
+                    entry.tag = TAG_NONE;
+                    entry.rxBytes = Long.parseLong(tok.nextToken());
+                    entry.rxPackets = Long.parseLong(tok.nextToken());
+                    entry.txBytes = Long.parseLong(tok.nextToken());
+                    entry.txPackets = Long.parseLong(tok.nextToken());
+                    stats.combineValues(entry);
+                } catch (NoSuchElementException e) {
+                    throw new IllegalStateException("problem parsing tethering stats: " + event);
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException("problem parsing tethering stats: " + event);
+                }
+            }
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
-
-        event.checkCode(TetheringStatsResult);
-
-        // 221 ifaceIn ifaceOut rx_bytes rx_packets tx_bytes tx_packets
-        final StringTokenizer tok = new StringTokenizer(event.getMessage());
-        tok.nextToken();
-        tok.nextToken();
-
-        try {
-            final NetworkStats.Entry entry = new NetworkStats.Entry();
-            entry.iface = ifaceIn;
-            entry.uid = UID_TETHERING;
-            entry.set = SET_DEFAULT;
-            entry.tag = TAG_NONE;
-            entry.rxBytes = Long.parseLong(tok.nextToken());
-            entry.rxPackets = Long.parseLong(tok.nextToken());
-            entry.txBytes = Long.parseLong(tok.nextToken());
-            entry.txPackets = Long.parseLong(tok.nextToken());
-            return entry;
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException(
-                    "problem parsing tethering stats for " + ifaceIn + " " + ifaceOut + ": " + e);
-        }
+        return stats;
     }
 
     @Override

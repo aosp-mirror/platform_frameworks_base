@@ -58,8 +58,8 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.LinkQualityInfo;
 import android.net.LinkProperties.CompareResult;
+import android.net.LinkQualityInfo;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
@@ -89,7 +89,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -114,7 +113,6 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
-import com.android.net.IProxyService;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
@@ -3207,12 +3205,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public String[] getTetheredIfaces() {
         enforceTetherAccessPermission();
         return mTethering.getTetheredIfaces();
-    }
-
-    @Override
-    public String[] getTetheredIfacePairs() {
-        enforceTetherAccessPermission();
-        return mTethering.getTetheredIfacePairs();
     }
 
     public String[] getTetheringErroredIfaces() {
