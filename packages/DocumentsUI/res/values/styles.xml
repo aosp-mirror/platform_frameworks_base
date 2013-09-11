@@ -14,19 +14,16 @@
      limitations under the License.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/menu_open"
-        android:title="@string/menu_open"
-        android:showAsAction="always" />
-    <item
-        android:id="@+id/menu_share"
-        android:icon="@drawable/ic_menu_share"
-        android:title="@string/menu_share"
-        android:showAsAction="always" />
-    <item
-        android:id="@+id/menu_delete"
-        android:icon="@drawable/ic_menu_delete"
-        android:title="@string/menu_delete"
-        android:showAsAction="always" />
-</menu>
+<resources>
+    <style name="TextAppearance" />
+
+    <style name="TextAppearance.Medium">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.Small">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
+</resources>

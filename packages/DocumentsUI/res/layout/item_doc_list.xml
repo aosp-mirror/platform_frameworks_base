@@ -68,8 +68,8 @@
                 android:layout_weight="1"
                 android:singleLine="true"
                 android:ellipsize="marquee"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textAlignment="viewStart" />
+                android:textAlignment="viewStart"
+                style="@style/TextAppearance.Medium" />
 
             <ImageView
                 android:id="@android:id/icon1"
@@ -96,7 +96,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                style="@style/TextAppearance.Small" />
 
             <TextView
                 android:id="@+id/size"
@@ -108,7 +108,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                style="@style/TextAppearance.Small" />
 
             <TextView
                 android:id="@android:id/summary"
@@ -120,7 +120,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                style="@style/TextAppearance.Small" />
 
         </LinearLayout>
 
