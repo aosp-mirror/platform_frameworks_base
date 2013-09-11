@@ -738,7 +738,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     int outputWidth = buffer->width;
     int outputHeight = buffer->height;
 
-    // Correct with/height when crop is set.
+    // Correct width/height when crop is set.
     if (buffer->crop.getWidth() > 0) {
         outputWidth = buffer->crop.getWidth() + 1;
     }
@@ -748,12 +748,19 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
 
     int imageReaderWidth = ctx->getBufferWidth();
     int imageReaderHeight = ctx->getBufferHeight();
-    if (imageReaderWidth != outputWidth
-            || imageReaderHeight != outputHeight) {
-        // Spew warning for now, since MediaCodec decoder has a bug to setup the right crop
-        // TODO: make it throw exception once the decoder bug is fixed.
-        ALOGW("Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
-              outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
+    if ((buffer->format != HAL_PIXEL_FORMAT_BLOB) &&
+            (imageReaderWidth != outputWidth || imageReaderHeight > outputHeight)) {
+        /**
+         * For video decoder, the buffer height is actually the vertical stride,
+         * which is always >= actual image height. For future, decoder need provide
+         * right crop rectangle to CpuConsumer to indicate the actual image height,
+         * see bug 9563986. After this bug is fixed, we can enforce the height equal
+         * check. Right now, only make sure buffer height is no less than ImageReader
+         * height.
+         */
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                "Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
+                outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
     }
 
     if (ctx->getBufferFormat() != buffer->format) {
