@@ -645,7 +645,7 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
 
         if (method == kCompressStored &&
             ((dataOffset >= cdOffset) ||
-             (uncompLen >= (cdOffset - dataOffset))))
+             (uncompLen > (cdOffset - dataOffset))))
         {
             ALOGE("ERROR: bad uncompressed length in zip (%ld + " ZD " > %ld)\n",
                 (long) dataOffset, (ZD_TYPE) uncompLen, (long) cdOffset);
