@@ -104,6 +104,10 @@ public class SettingsHelper {
         } else {
             Uri canonicalUri = Uri.parse(value);
             ringtoneUri = mContext.getContentResolver().uncanonicalize(canonicalUri);
+            if (ringtoneUri == null) {
+                // Unrecognized or invalid Uri, don't restore
+                return;
+            }
         }
         final int ringtoneType = Settings.System.RINGTONE.equals(name)
                 ? RingtoneManager.TYPE_RINGTONE : RingtoneManager.TYPE_NOTIFICATION;
