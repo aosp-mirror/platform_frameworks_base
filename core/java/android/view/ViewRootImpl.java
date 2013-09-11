@@ -68,6 +68,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.Surface.OutOfResourcesException;
 import android.widget.Scroller;
 
 import com.android.internal.R;
@@ -187,7 +188,7 @@ public final class ViewRootImpl implements ViewParent,
     InputQueue mInputQueue;
     FallbackEventHandler mFallbackEventHandler;
     Choreographer mChoreographer;
-    
+
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
@@ -278,8 +279,8 @@ public final class ViewRootImpl implements ViewParent,
     volatile Object mLocalDragState;
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
-    
-    private boolean mProfileRendering;    
+
+    private boolean mProfileRendering;
     private Choreographer.FrameCallback mRenderProfiler;
     private boolean mRenderProfilingEnabled;
 
@@ -291,7 +292,7 @@ public final class ViewRootImpl implements ViewParent,
     private int mFpsNumFrames;
 
     private final ArrayList<DisplayList> mDisplayLists = new ArrayList<DisplayList>();
-    
+
     /**
      * see {@link #playSoundEffect(int)}
      */
@@ -332,7 +333,7 @@ public final class ViewRootImpl implements ViewParent,
         int localValue;
         int localChanges;
     }
-    
+
     public ViewRootImpl(Context context, Display display) {
         mContext = context;
         mWindowSession = WindowManagerGlobal.getWindowSession();
@@ -383,13 +384,13 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
     }
-    
+
     public static void addConfigCallback(ComponentCallbacks callback) {
         synchronized (sConfigCallbacks) {
             sConfigCallbacks.add(callback);
         }
     }
-    
+
     // FIXME for perf testing only
     private boolean mProfile = false;
 
@@ -514,7 +515,7 @@ public final class ViewRootImpl implements ViewParent,
                         attrs.restore();
                     }
                 }
-                
+
                 if (mTranslator != null) {
                     mTranslator.translateRectInScreenToAppWindow(mAttachInfo.mContentInsets);
                 }
@@ -680,7 +681,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) return;
 
         // Try to enable hardware acceleration if requested
-        final boolean hardwareAccelerated = 
+        final boolean hardwareAccelerated =
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
 
         if (hardwareAccelerated) {
@@ -707,7 +708,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Don't enable hardware acceleration when we're not on the main thread
                 if (!HardwareRenderer.sSystemRendererDisabled &&
                         Looper.getMainLooper() != Looper.myLooper()) {
-                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware " 
+                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware "
                             + "acceleration outside of the main thread, aborting");
                     return;
                 }
@@ -918,6 +919,7 @@ public final class ViewRootImpl implements ViewParent,
         return r.intersect(0, 0, mWidth, mHeight);
     }
 
+    @Override
     public void bringChildToFront(View child) {
     }
 
@@ -1152,9 +1154,9 @@ public final class ViewRootImpl implements ViewParent,
                 mLastInCompatMode = true;
             }
         }
-        
+
         mWindowAttributesChangesFlag = 0;
-        
+
         Rect frame = mWinFrame;
         if (mFirst) {
             mFullRedrawNeeded = true;
@@ -1522,7 +1524,7 @@ public final class ViewRootImpl implements ViewParent,
                             try {
                                 hwInitialized = mAttachInfo.mHardwareRenderer.initialize(
                                         mHolder.getSurface());
-                            } catch (Surface.OutOfResourcesException e) {
+                            } catch (OutOfResourcesException e) {
                                 handleOutOfResourcesException(e);
                                 return;
                             }
@@ -1549,7 +1551,7 @@ public final class ViewRootImpl implements ViewParent,
                     mFullRedrawNeeded = true;
                     try {
                         mAttachInfo.mHardwareRenderer.updateSurface(mHolder.getSurface());
-                    } catch (Surface.OutOfResourcesException e) {
+                    } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
                     }
@@ -1644,23 +1646,23 @@ public final class ViewRootImpl implements ViewParent,
                         || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
                     int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
                     int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
-    
+
                     if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
                             + mWidth + " measuredWidth=" + host.getMeasuredWidth()
                             + " mHeight=" + mHeight
                             + " measuredHeight=" + host.getMeasuredHeight()
                             + " coveredInsetsChanged=" + contentInsetsChanged);
-    
+
                      // Ask host how big it wants to be
                     performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
-    
+
                     // Implementation of weights from WindowManager.LayoutParams
                     // We just grow the dimensions as needed and re-measure if
                     // needs be
                     int width = host.getMeasuredWidth();
                     int height = host.getMeasuredHeight();
                     boolean measureAgain = false;
-    
+
                     if (lp.horizontalWeight > 0.0f) {
                         width += (int) ((mWidth - width) * lp.horizontalWeight);
                         childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width,
@@ -1673,14 +1675,14 @@ public final class ViewRootImpl implements ViewParent,
                                 MeasureSpec.EXACTLY);
                         measureAgain = true;
                     }
-    
+
                     if (measureAgain) {
                         if (DEBUG_LAYOUT) Log.v(TAG,
                                 "And hey let's measure once more: width=" + width
                                 + " height=" + height);
                         performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                     }
-    
+
                     layoutRequested = true;
                 }
             }
@@ -1851,7 +1853,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mPendingTransitions.clear();
                 }
-    
+
                 performDraw();
             }
         } else {
@@ -2078,6 +2080,7 @@ public final class ViewRootImpl implements ViewParent,
         return validLayoutRequesters;
     }
 
+    @Override
     public void requestTransparentRegion(View child) {
         // the test below should not fail unless someone is messing with us
         checkThread();
@@ -2128,10 +2131,12 @@ public final class ViewRootImpl implements ViewParent,
     int mResizeAlpha;
     final Paint mResizePaint = new Paint();
 
+    @Override
     public void onHardwarePreDraw(HardwareCanvas canvas) {
         canvas.translate(0, -mHardwareYOffset);
     }
 
+    @Override
     public void onHardwarePostDraw(HardwareCanvas canvas) {
         if (mResizeBuffer != null) {
             mResizePaint.setAlpha(mResizeAlpha);
@@ -2365,7 +2370,7 @@ public final class ViewRootImpl implements ViewParent,
                     try {
                         attachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
                                 mHolder.getSurface());
-                    } catch (Surface.OutOfResourcesException e) {
+                    } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
                     }
@@ -2741,6 +2746,7 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityFocusedVirtualView = node;
     }
 
+    @Override
     public void requestChildFocus(View child, View focused) {
         if (DEBUG_INPUT_RESIZE) {
             Log.v(TAG, "Request child focus: focus now " + focused);
@@ -2749,6 +2755,7 @@ public final class ViewRootImpl implements ViewParent,
         scheduleTraversals();
     }
 
+    @Override
     public void clearChildFocus(View child) {
         if (DEBUG_INPUT_RESIZE) {
             Log.v(TAG, "Clearing child focus");
@@ -2762,6 +2769,7 @@ public final class ViewRootImpl implements ViewParent,
         return null;
     }
 
+    @Override
     public void focusableViewAvailable(View v) {
         checkThread();
         if (mView != null) {
@@ -2783,6 +2791,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    @Override
     public void recomputeViewAttributes(View child) {
         checkThread();
         if (mView == child) {
@@ -3076,7 +3085,7 @@ public final class ViewRootImpl implements ViewParent,
                             try {
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
                                         mWidth, mHeight, mHolder.getSurface());
-                            } catch (Surface.OutOfResourcesException e) {
+                            } catch (OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {
                                     if (!mWindowSession.outOfMemory(mWindow)) {
@@ -4990,7 +4999,7 @@ public final class ViewRootImpl implements ViewParent,
             // most recent data.
             mSeq = args.seq;
             mAttachInfo.mForceReportNewAttributes = true;
-            scheduleTraversals();            
+            scheduleTraversals();
         }
         if (mView == null) return;
         if (args.localChanges != 0) {
@@ -5080,7 +5089,7 @@ public final class ViewRootImpl implements ViewParent,
         if (restore) {
             params.restore();
         }
-        
+
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWinFrame(mWinFrame);
             mTranslator.translateRectInScreenToAppWindow(mPendingOverscanInsets);
@@ -5093,6 +5102,7 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * {@inheritDoc}
      */
+    @Override
     public void playSoundEffect(int effectId) {
         checkThread();
 
@@ -5133,6 +5143,7 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
         try {
             return mWindowSession.performHapticFeedback(mWindow, effectId, always);
@@ -5144,6 +5155,7 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * {@inheritDoc}
      */
+    @Override
     public View focusSearch(View focused, int direction) {
         checkThread();
         if (!(mView instanceof ViewGroup)) {
@@ -5155,7 +5167,7 @@ public final class ViewRootImpl implements ViewParent,
     public void debug() {
         mView.debug();
     }
-    
+
     public void dumpGfxInfo(int[] info) {
         info[0] = info[1] = 0;
         if (mView != null) {
@@ -5574,8 +5586,8 @@ public final class ViewRootImpl implements ViewParent,
 
     final class InvalidateOnAnimationRunnable implements Runnable {
         private boolean mPosted;
-        private ArrayList<View> mViews = new ArrayList<View>();
-        private ArrayList<AttachInfo.InvalidateInfo> mViewRects =
+        private final ArrayList<View> mViews = new ArrayList<View>();
+        private final ArrayList<AttachInfo.InvalidateInfo> mViewRects =
                 new ArrayList<AttachInfo.InvalidateInfo>();
         private View[] mTempViews;
         private AttachInfo.InvalidateInfo[] mTempViewRects;
@@ -5813,20 +5825,25 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    @Override
     public boolean showContextMenuForChild(View originalView) {
         return false;
     }
 
+    @Override
     public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
         return null;
     }
 
+    @Override
     public void createContextMenu(ContextMenu menu) {
     }
 
+    @Override
     public void childDrawableStateChanged(View child) {
     }
 
+    @Override
     public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
         if (mView == null) {
             return false;
@@ -5958,10 +5975,12 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         // ViewAncestor never intercepts touch event, so this can be a no-op
     }
 
+    @Override
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle, boolean immediate) {
         final boolean scrolled = scrollToRectOrFocus(rectangle, immediate);
         if (rectangle != null) {
@@ -5977,6 +5996,7 @@ public final class ViewRootImpl implements ViewParent,
         return scrolled;
     }
 
+    @Override
     public void childHasTransientStateChanged(View child, boolean hasTransientState) {
         // Do nothing.
     }
@@ -5997,20 +6017,23 @@ public final class ViewRootImpl implements ViewParent,
             // Not currently interesting -- from changing between fixed and layout size.
         }
 
+        @Override
         public void setFormat(int format) {
             ((RootViewSurfaceTaker)mView).setSurfaceFormat(format);
         }
 
+        @Override
         public void setType(int type) {
             ((RootViewSurfaceTaker)mView).setSurfaceType(type);
         }
-        
+
         @Override
         public void onUpdateSurface() {
             // We take care of format and type changes on our own.
             throw new IllegalStateException("Shouldn't be here");
         }
 
+        @Override
         public boolean isCreating() {
             return mIsCreating;
         }
@@ -6020,7 +6043,8 @@ public final class ViewRootImpl implements ViewParent,
             throw new UnsupportedOperationException(
                     "Currently only support sizing from layout");
         }
-        
+
+        @Override
         public void setKeepScreenOn(boolean screenOn) {
             ((RootViewSurfaceTaker)mView).setSurfaceKeepScreenOn(screenOn);
         }
@@ -6035,6 +6059,7 @@ public final class ViewRootImpl implements ViewParent,
             mWindowSession = viewAncestor.mWindowSession;
         }
 
+        @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
@@ -6052,6 +6077,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void dispatchAppVisibility(boolean visible) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6059,6 +6085,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void dispatchScreenState(boolean on) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6066,6 +6093,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void dispatchGetNewSurface() {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6073,6 +6101,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6089,6 +6118,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6119,14 +6149,16 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         }
-        
+
+        @Override
         public void closeSystemDialogs(String reason) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchCloseSystemDialogs(reason);
             }
         }
-        
+
+        @Override
         public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
                 boolean sync) {
             if (sync) {
@@ -6137,6 +6169,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void dispatchWallpaperCommand(String action, int x, int y,
                 int z, Bundle extras, boolean sync) {
             if (sync) {
@@ -6148,6 +6181,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         /* Drag/drop */
+        @Override
         public void dispatchDragEvent(DragEvent event) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6155,6 +6189,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
                 int localValue, int localChanges) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
@@ -6164,6 +6199,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void doneAnimating() {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -6178,50 +6214,63 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private SurfaceHolder mHolder = new SurfaceHolder() {
+    private final SurfaceHolder mHolder = new SurfaceHolder() {
         // we only need a SurfaceHolder for opengl. it would be nice
         // to implement everything else though, especially the callback
         // support (opengl doesn't make use of it right now, but eventually
         // will).
+        @Override
         public Surface getSurface() {
             return mSurface;
         }
 
+        @Override
         public boolean isCreating() {
             return false;
         }
 
+        @Override
         public void addCallback(Callback callback) {
         }
 
+        @Override
         public void removeCallback(Callback callback) {
         }
 
+        @Override
         public void setFixedSize(int width, int height) {
         }
 
+        @Override
         public void setSizeFromLayout() {
         }
 
+        @Override
         public void setFormat(int format) {
         }
 
+        @Override
         public void setType(int type) {
         }
 
+        @Override
         public void setKeepScreenOn(boolean screenOn) {
         }
 
+        @Override
         public Canvas lockCanvas() {
             return null;
         }
 
+        @Override
         public Canvas lockCanvas(Rect dirty) {
             return null;
         }
 
+        @Override
         public void unlockCanvasAndPost(Canvas canvas) {
         }
+        @Override
         public Rect getSurfaceFrame() {
             return null;
         }
@@ -6316,6 +6365,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     final class AccessibilityInteractionConnectionManager
             implements AccessibilityStateChangeListener {
+        @Override
         public void onAccessibilityStateChanged(boolean enabled) {
             if (enabled) {
                 ensureConnection();
@@ -6491,6 +6541,7 @@ public final class ViewRootImpl implements ViewParent,
         public View mSource;
         public long mLastEventTimeMillis;
 
+        @Override
         public void run() {
             // The accessibility may be turned off while we were waiting so check again.
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {

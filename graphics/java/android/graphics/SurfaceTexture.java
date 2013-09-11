@@ -21,6 +21,7 @@ import java.lang.ref.WeakReference;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.view.Surface;
 
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
@@ -80,8 +81,12 @@ public class SurfaceTexture {
     }
 
     /**
-     * Exception thrown when a surface couldn't be created or resized
+     * Exception thrown when a SurfaceTexture couldn't be created or resized.
+     *
+     * @deprecated No longer thrown. {@link Surface.OutOfResourcesException} is used instead.
      */
+    @SuppressWarnings("serial")
+    @Deprecated
     public static class OutOfResourcesException extends Exception {
         public OutOfResourcesException() {
         }
@@ -94,6 +99,8 @@ public class SurfaceTexture {
      * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
      *
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
+     *
+     * @throws OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName) {
         init(texName, false);
@@ -113,6 +120,8 @@ public class SurfaceTexture {
      *
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
+     *
+     * @throws throws OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName, boolean singleBufferMode) {
         init(texName, singleBufferMode);
@@ -140,9 +149,9 @@ public class SurfaceTexture {
      * android.view.Surface#lockCanvas} is called.  For OpenGL ES, the EGLSurface should be
      * destroyed (via eglDestroySurface), made not-current (via eglMakeCurrent), and then recreated
      * (via eglCreateWindowSurface) to ensure that the new default size has taken effect.
-     * 
+     *
      * The width and height parameters must be no greater than the minimum of
-     * GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see 
+     * GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see
      * {@link javax.microedition.khronos.opengles.GL10#glGetIntegerv glGetIntegerv}).
      * An error due to invalid dimensions might not be reported until
      * updateTexImage() is called.
@@ -267,6 +276,7 @@ public class SurfaceTexture {
         nativeRelease();
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             nativeFinalize();
@@ -305,7 +315,7 @@ public class SurfaceTexture {
         }
     }
 
-    private void init(int texName, boolean singleBufferMode) {
+    private void init(int texName, boolean singleBufferMode) throws Surface.OutOfResourcesException {
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(looper);
@@ -317,7 +327,8 @@ public class SurfaceTexture {
         nativeInit(texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
     }
 
-    private native void nativeInit(int texName, boolean singleBufferMode, Object weakSelf);
+    private native void nativeInit(int texName, boolean singleBufferMode, Object weakSelf)
+            throws Surface.OutOfResourcesException;
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();

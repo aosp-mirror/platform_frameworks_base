@@ -116,6 +116,7 @@ public class Surface implements Parcelable {
      *
      * @param surfaceTexture The {@link SurfaceTexture} that is updated by this
      * Surface.
+     * @throws OutOfResourcesException if the surface could not be created.
      */
     public Surface(SurfaceTexture surfaceTexture) {
         if (surfaceTexture == null) {
@@ -124,12 +125,7 @@ public class Surface implements Parcelable {
 
         synchronized (mLock) {
             mName = surfaceTexture.toString();
-            try {
-                setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
-            } catch (OutOfResourcesException ex) {
-                // We can't throw OutOfResourcesException because it would be an API change.
-                throw new RuntimeException(ex);
-            }
+            setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
         }
     }
 
@@ -229,9 +225,12 @@ public class Surface implements Parcelable {
      * The caller may also pass <code>null</code> instead, in the case where the
      * entire surface should be redrawn.
      * @return A canvas for drawing into the surface.
+     *
+     * @throws IllegalArgumentException If the inOutDirty rectangle is not valid.
+     * @throws OutOfResourcesException If the canvas cannot be locked.
      */
     public Canvas lockCanvas(Rect inOutDirty)
-            throws OutOfResourcesException, IllegalArgumentException {
+            throws Surface.OutOfResourcesException, IllegalArgumentException {
         synchronized (mLock) {
             checkNotReleasedLocked();
             if (mLockedObject != 0) {
@@ -239,7 +238,7 @@ public class Surface implements Parcelable {
                 // double-lock, but that won't happen if mNativeObject was updated.  We can't
                 // abandon the old mLockedObject because it might still be in use, so instead
                 // we just refuse to re-lock the Surface.
-                throw new RuntimeException("Surface was already locked");
+                throw new IllegalStateException("Surface was already locked");
             }
             mLockedObject = nativeLockCanvas(mNativeObject, mCanvas, inOutDirty);
             return mCanvas;
@@ -266,7 +265,7 @@ public class Surface implements Parcelable {
                         Integer.toHexString(mLockedObject) +")");
             }
             if (mLockedObject == 0) {
-                throw new RuntimeException("Surface was not locked");
+                throw new IllegalStateException("Surface was not locked");
             }
             nativeUnlockCanvasAndPost(mLockedObject, canvas);
             nativeRelease(mLockedObject);
@@ -411,9 +410,11 @@ public class Surface implements Parcelable {
     }
 
     /**
-     * Exception thrown when a surface couldn't be created or resized.
+     * Exception thrown when a Canvas couldn't be locked with {@link Surface#lockCanvas}, or
+     * when a SurfaceTexture could not successfully be allocated.
      */
-    public static class OutOfResourcesException extends Exception {
+    @SuppressWarnings("serial")
+    public static class OutOfResourcesException extends RuntimeException {
         public OutOfResourcesException() {
         }
         public OutOfResourcesException(String name) {
