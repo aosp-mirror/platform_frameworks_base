@@ -1578,7 +1578,8 @@ public class MediaPlayer implements SubtitleController.Listener
          * unknown or could not be determined, null is returned.
          */
         public MediaFormat getFormat() {
-            if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT) {
+            if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT
+                    || mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
                 return mFormat;
             }
             return null;
@@ -1602,6 +1603,12 @@ public class MediaPlayer implements SubtitleController.Listener
             if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT) {
                 mFormat = MediaFormat.createSubtitleFormat(
                     MEDIA_MIMETYPE_TEXT_SUBRIP, language);
+            } else if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
+                mFormat = MediaFormat.createSubtitleFormat(
+                    MEDIA_MIMETYPE_TEXT_VTT, language);
+                mFormat.setInteger(MediaFormat.KEY_AUTOSELECT, in.readInt());
+                mFormat.setInteger(MediaFormat.KEY_DEFAULT, in.readInt());
+                mFormat.setInteger(MediaFormat.KEY_FORCED, in.readInt());
             } else {
                 mFormat = new MediaFormat();
                 mFormat.setString(MediaFormat.KEY_LANGUAGE, language);
@@ -1629,6 +1636,12 @@ public class MediaPlayer implements SubtitleController.Listener
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mTrackType);
             dest.writeString(getLanguage());
+
+            if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
+                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_AUTOSELECT));
+                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_DEFAULT));
+                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_FORCED));
+            }
         }
 
         /**
@@ -1692,6 +1705,12 @@ public class MediaPlayer implements SubtitleController.Listener
      * MIME type for SubRip (SRT) container. Used in addTimedTextSource APIs.
      */
     public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
+
+    /**
+     * MIME type for WebVTT subtitle data.
+     * @hide
+     */
+    public static final String MEDIA_MIMETYPE_TEXT_VTT = "text/vtt";
 
     /*
      * A helper function to check if the mime type is supported by media framework.
@@ -1829,9 +1848,8 @@ public class MediaPlayer implements SubtitleController.Listener
                 if (i < mInbandSubtitleTracks.length) {
                     inbandTracks[i] = mInbandSubtitleTracks[i];
                 } else {
-                    MediaFormat format = MediaFormat.createSubtitleFormat(
-                            "text/vtt", tracks[i].getLanguage());
-                    SubtitleTrack track = mSubtitleController.addTrack(format);
+                    SubtitleTrack track = mSubtitleController.addTrack(
+                            tracks[i].getFormat());
                     inbandTracks[i] = track;
                 }
             }

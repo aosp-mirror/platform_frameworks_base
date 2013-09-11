@@ -197,6 +197,28 @@ public final class MediaFormat {
      */
     public static final String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
 
+    /**
+     * A key for boolean AUTOSELECT field. Tracks with AUTOSELECT=true are
+     * considered when automatically selecting a track without specific user
+     * choice (as defined by HLS).
+     * @hide
+     */
+    public static final String KEY_AUTOSELECT = "autoselect";
+
+    /**
+     * A key for boolean DEFAULT field. The track with DEFAULT=true is selected
+     * in the absence of a specific user choice (as defined by HLS).
+     * @hide
+     */
+    public static final String KEY_DEFAULT = "default";
+
+    /**
+     * A key for boolean FORCED field for subtitle tracks. True if it is a
+     * forced subtitle track.
+     * @hide
+     */
+    public static final String KEY_FORCED = "forced";
+
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
     }
