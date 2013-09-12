@@ -73,9 +73,9 @@ public final class PrintSpoolerService extends Service {
 
     private static final String LOG_TAG = "PrintSpoolerService";
 
-    private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = true;
+    private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = false;
 
-    private static final boolean DEBUG_PERSISTENCE = true;
+    private static final boolean DEBUG_PERSISTENCE = false;
 
     private static final boolean PERSISTNECE_MANAGER_ENABLED = true;
 
@@ -838,18 +838,8 @@ public final class PrintSpoolerService extends Service {
                                     resolution.getHorizontalDpi()));
                             serializer.attribute(null, ATTR_VERTICAL_DPI, String.valueOf(
                                     resolution.getVerticalDpi()));
-                            // We prefer to store only the package name and
-                            // resource id and fallback to the label.
-                            if (!TextUtils.isEmpty(mediaSize.mPackageName)
-                                    && resolution.mLabelResId > 0) {
-                                serializer.attribute(null, ATTR_PACKAGE_NAME,
-                                        resolution.mPackageName);
-                                serializer.attribute(null, ATTR_LABEL_RES_ID,
-                                        String.valueOf(resolution.mLabelResId));
-                            } else {
-                                serializer.attribute(null, ATTR_LABEL,
-                                        resolution.getLabel(getPackageManager()));
-                            }
+                            serializer.attribute(null, ATTR_LABEL,
+                                    resolution.getLabel(getPackageManager()));
                             serializer.endTag(null, TAG_RESOLUTION);
                         }
 
@@ -1047,11 +1037,7 @@ public final class PrintSpoolerService extends Service {
                             ATTR_HORIZONTAL_DPI));
                     final int verticalDpi = Integer.parseInt(parser.getAttributeValue(null,
                             ATTR_VERTICAL_DPI));
-                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                    final int labelResId = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_LABEL_RES_ID));
-                    Resolution resolution = new Resolution(id, label, packageName, labelResId,
-                                horizontalDpi, verticalDpi);
+                    Resolution resolution = new Resolution(id, label, horizontalDpi, verticalDpi);
                     builder.setResolution(resolution);
                     parser.next();
                     skipEmptyTextTags(parser);

@@ -21,11 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
-import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -38,8 +36,6 @@ import android.print.PrinterInfo;
 import android.printservice.IPrintService;
 import android.printservice.IPrintServiceClient;
 import android.util.Slog;
-
-import com.android.internal.R;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -55,7 +51,7 @@ final class RemotePrintService implements DeathRecipient {
 
     private static final String LOG_TAG = "RemotePrintService";
 
-    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
 
@@ -65,7 +61,7 @@ final class RemotePrintService implements DeathRecipient {
 
     private final RemotePrintSpooler mSpooler;
 
-    private final UserState mUserState;
+    private final PrintServiceCallbacks mCallbacks;
 
     private final int mUserId;
 
@@ -83,14 +79,24 @@ final class RemotePrintService implements DeathRecipient {
 
     private boolean mDestroyed;
 
-    private boolean mAllPrintJobsHandled;
+    private boolean mHasActivePrintJobs;
 
     private boolean mHasPrinterDiscoverySession;
 
+    private List<PrinterId> mDiscoveryPriorityList;
+
+    private List<PrinterId> mTrackedPrinterList;
+
+    public static interface PrintServiceCallbacks {
+        public void onPrintersAdded(List<PrinterInfo> printers);
+        public void onPrintersRemoved(List<PrinterId> printerIds);
+        public void onServiceDied(RemotePrintService service);
+    }
+
     public RemotePrintService(Context context, ComponentName componentName, int userId,
-            RemotePrintSpooler spooler, UserState userState) {
+            RemotePrintSpooler spooler, PrintServiceCallbacks callbacks) {
         mContext = context;
-        mUserState = userState;
+        mCallbacks = callbacks;
         mComponentName = componentName;
         mIntent = new Intent().setComponent(mComponentName);
         mUserId = userId;
@@ -99,15 +105,42 @@ final class RemotePrintService implements DeathRecipient {
         mPrintServiceClient = new RemotePrintServiceClient(this);
     }
 
+    public ComponentName getComponentName() {
+        return mComponentName;
+    }
+
     public void destroy() {
         mHandler.sendEmptyMessage(MyHandler.MSG_DESTROY);
     }
 
     private void handleDestroy() {
         throwIfDestroyed();
+
+        // Stop tracking printers.
+        if (mTrackedPrinterList != null) {
+            final int trackedPrinterCount = mTrackedPrinterList.size();
+            for (int i = 0; i < trackedPrinterCount; i++) {
+                PrinterId printerId = mTrackedPrinterList.get(i);
+                if (printerId.getServiceName().equals(mComponentName)) {
+                    handleStopPrinterStateTracking(printerId);
+                }
+            }
+        }
+
+        // Stop printer discovery.
+        if (mDiscoveryPriorityList != null) {
+            handleStopPrinterDiscovery();
+        }
+
+        // Destroy the discovery session.
+        if (mHasPrinterDiscoverySession) {
+            handleDestroyPrinterDiscoverySession();
+        }
+
+        // Unbind.
         ensureUnbound();
-        mAllPrintJobsHandled = false;
-        mHasPrinterDiscoverySession = false;
+
+        // Done
         mDestroyed = true;
     }
 
@@ -121,21 +154,9 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     private void handleBinderDied() {
-        mAllPrintJobsHandled = false;
-        mHasPrinterDiscoverySession = false;
-        mPendingCommands.clear();
-        ensureUnbound();
-
-        // Makes sure all active print jobs are failed since the service
-        // just died. Do this off the main thread since we do to allow
-        // calls into the spooler on the main thread.
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                failAllActivePrintJobs();
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+        mPrintService.asBinder().unlinkToDeath(this, 0);
+        mPrintService = null;
+        mCallbacks.onServiceDied(this);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -148,32 +169,17 @@ final class RemotePrintService implements DeathRecipient {
         pw.append(prefix).append(tab).append("bound=")
                 .append(String.valueOf(isBound())).println();
         pw.append(prefix).append(tab).append("hasDicoverySession=")
-                .append(String.valueOf(mHasPrinterDiscoverySession));
-    }
-
-    private void failAllActivePrintJobs() {
-        List<PrintJobInfo> printJobs = mSpooler.getPrintJobInfos(mComponentName,
-                PrintJobInfo.STATE_ANY_ACTIVE, PrintManager.APP_ID_ANY);
-        if (printJobs == null) {
-            return;
-        }
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final int printJobCount = printJobs.size();
-            for (int i = 0; i < printJobCount; i++) {
-                PrintJobInfo printJob = printJobs.get(i);
-                mSpooler.setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
-                        mContext.getString(R.string.reason_unknown));
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+                .append(String.valueOf(mHasPrinterDiscoverySession)).println();
+        pw.append(prefix).append(tab).append("isDiscoveringPrinters=")
+                .append(String.valueOf(mDiscoveryPriorityList != null)).println();
+        pw.append(prefix).append(tab).append("trackedPrinters=")
+                .append((mTrackedPrinterList != null) ? mTrackedPrinterList.toString() : "null");
     }
 
     private void handleOnAllPrintJobsHandled() {
         throwIfDestroyed();
 
-        mAllPrintJobsHandled = true;
+        mHasActivePrintJobs = false;
 
         if (isBound()) {
             if (DEBUG) {
@@ -217,7 +223,7 @@ final class RemotePrintService implements DeathRecipient {
     private void handleOnPrintJobQueued(final PrintJobInfo printJob) {
         throwIfDestroyed();
 
-        mAllPrintJobsHandled = false;
+        mHasActivePrintJobs = true;
 
         if (!isBound()) {
             ensureBound();
@@ -296,7 +302,7 @@ final class RemotePrintService implements DeathRecipient {
 
             // If the service has no print jobs and no active discovery
             // session anymore we should disconnect from it.
-            if (mAllPrintJobsHandled) {
+            if (!mHasActivePrintJobs) {
                 ensureUnbound();
             }
         }
@@ -326,6 +332,11 @@ final class RemotePrintService implements DeathRecipient {
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error starting printer dicovery.", re);
             }
+            // Take a note that we are doing discovery.
+            mDiscoveryPriorityList = new ArrayList<PrinterId>();
+            if (priorityList != null) {
+                mDiscoveryPriorityList.addAll(priorityList);
+            }
         }
     }
 
@@ -347,6 +358,8 @@ final class RemotePrintService implements DeathRecipient {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserId + "] stopPrinterDiscovery()");
             }
+            // We are not doing discovery anymore.
+            mDiscoveryPriorityList = null;
             try {
                 mPrintService.stopPrinterDiscovery();
             } catch (RemoteException re) {
@@ -406,6 +419,11 @@ final class RemotePrintService implements DeathRecipient {
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error requesting start printer tracking.", re);
             }
+            // Take a note we are tracking the printer.
+            if (mTrackedPrinterList == null) {
+                mTrackedPrinterList = new ArrayList<PrinterId>();
+            }
+            mTrackedPrinterList.add(printerId);
         }
     }
 
@@ -427,6 +445,11 @@ final class RemotePrintService implements DeathRecipient {
         } else {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserId + "] stopPrinterTracking()");
+            }
+            // We are no longer tracking the printer.
+            mTrackedPrinterList.remove(printerId);
+            if (mTrackedPrinterList.isEmpty()) {
+                mTrackedPrinterList = null;
             }
             try {
                 mPrintService.stopPrinterStateTracking(printerId);
@@ -461,6 +484,10 @@ final class RemotePrintService implements DeathRecipient {
         }
         mBinding = false;
         mPendingCommands.clear();
+        mHasActivePrintJobs = false;
+        mHasPrinterDiscoverySession = false;
+        mDiscoveryPriorityList = null;
+        mTrackedPrinterList = null;
         if (isBound()) {
             try {
                 mPrintService.setClient(null);
@@ -500,11 +527,31 @@ final class RemotePrintService implements DeathRecipient {
                 handleBinderDied();
                 return;
             }
+            // If there is a session, then the service died after creating
+            // a session. Hence, recreate the session.
+            if (mHasPrinterDiscoverySession) {
+                handleCreatePrinterDiscoverySession();
+            }
+            // If there is a priority list, then the service died during
+            // discovery and is restarted. Hence, start discovery.
+            if (mDiscoveryPriorityList != null) {
+                handleStartPrinterDiscovery(mDiscoveryPriorityList);
+            }
+            // If there is a tracked printer list, then the service died
+            // during discovery and is restarted. Hence, start tracking.
+            if (mTrackedPrinterList != null) {
+                final int trackedPrinterCount = mTrackedPrinterList.size();
+                for (int i = 0; i < trackedPrinterCount; i++) {
+                    handleStartPrinterStateTracking(mTrackedPrinterList.get(i));
+                }
+            }
+            // Finally, do all the pending work.
             final int pendingCommandCount = mPendingCommands.size();
             for (int i = 0; i < pendingCommandCount; i++) {
                 Runnable pendingCommand = mPendingCommands.get(i);
                 pendingCommand.run();
             }
+            mPendingCommands.clear();
         }
 
         @Override
@@ -677,7 +724,7 @@ final class RemotePrintService implements DeathRecipient {
                 throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mUserState.onPrintersAdded(printers);
+                    service.mCallbacks.onPrintersAdded(printers);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -691,7 +738,7 @@ final class RemotePrintService implements DeathRecipient {
                 throwIfPrinterIdsTampered(service.mComponentName, printerIds);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mUserState.onPrintersRemoved(printerIds);
+                    service.mCallbacks.onPrintersRemoved(printerIds);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
