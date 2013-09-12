@@ -21,6 +21,7 @@
 #include "android_view_PointerIcon.h"
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <android/graphics/GraphicsJNI.h>
 

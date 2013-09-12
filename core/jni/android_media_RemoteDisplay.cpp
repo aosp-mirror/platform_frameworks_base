@@ -24,6 +24,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/Log.h>
 
 #include <binder/IServiceManager.h>
 

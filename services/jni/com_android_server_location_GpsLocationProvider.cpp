@@ -26,6 +26,7 @@
 #include "utils/Log.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/Log.h"
 
 #include <string.h>
 #include <pthread.h>

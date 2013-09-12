@@ -21,6 +21,7 @@
 #include "utils/misc.h"
 #include "cutils/debugger.h"
 
+#include <cutils/log.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
