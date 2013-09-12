@@ -859,6 +859,7 @@ public class WifiStateMachine extends StateMachine {
             mExpectedBatchedScans = Integer.parseInt(scansExpected);
             setNextBatchedAlarm(mExpectedBatchedScans);
         } catch (NumberFormatException e) {
+            stopBatchedScan();
             loge("Exception parsing WifiNative.setBatchedScanSettings response " + e);
         }
     }
@@ -876,6 +877,11 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void handleBatchedScanPollRequest() {
+        if (DBG) {
+            log("handleBatchedScanPoll Request - mBatchedScanMinPollTime=" +
+                    mBatchedScanMinPollTime + " , mBatchedScanSettings=" +
+                    mBatchedScanSettings);
+        }
         // if there is no appropriate PollTime that's because we either aren't
         // batching or we've already set a time for a poll request
         if (mBatchedScanMinPollTime == 0) return;
@@ -887,7 +893,7 @@ public class WifiStateMachine extends StateMachine {
             // do the poll and reset our timers
             startNextBatchedScan();
         } else {
-            mAlarmManager.set(AlarmManager.RTC_WAKEUP, mBatchedScanMinPollTime,
+            mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, mBatchedScanMinPollTime,
                     mBatchedScanIntervalIntent);
             mBatchedScanMinPollTime = 0;
         }
@@ -932,7 +938,7 @@ public class WifiStateMachine extends StateMachine {
 
         // set the alarm to do the next poll.  We set it a little short as we'd rather
         // wake up wearly than miss a scan due to buffer overflow
-        mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+        mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
                 + ((secToFull - (mBatchedScanSettings.scanIntervalSec / 2)) * 1000),
                 mBatchedScanIntervalIntent);
     }
@@ -964,11 +970,13 @@ public class WifiStateMachine extends StateMachine {
      *   etc
      *   "----"
      */
+    private final static boolean DEBUG_PARSE = false;
     private void retrieveBatchedScanData() {
         String rawData = mWifiNative.getBatchedScanResults();
+        if (DEBUG_PARSE) log("rawData = " + rawData);
         mBatchedScanMinPollTime = 0;
-        if (rawData == null) {
-            loge("Unexpected null BatchedScanResults");
+        if (rawData == null || rawData.equalsIgnoreCase("OK")) {
+            loge("Unexpected BatchedScanResults :" + rawData);
             return;
         }
 
@@ -978,17 +986,19 @@ public class WifiStateMachine extends StateMachine {
         final String TRUNCATED = "trunc";
         final String AGE = "age=";
         final String DIST = "dist=";
-        final String DISTSD = "distsd=";
+        final String DISTSD = "distSd=";
 
         String splitData[] = rawData.split("\n");
         int n = 0;
         if (splitData[n].startsWith(SCANCOUNT)) {
             try {
                 scanCount = Integer.parseInt(splitData[n++].substring(SCANCOUNT.length()));
-            } catch (NumberFormatException e) {}
-        }
+            } catch (NumberFormatException e) {
+                loge("scancount parseInt Exception from " + splitData[n]);
+            }
+        } else log("scancount not found");
         if (scanCount == 0) {
-            loge("scanCount not found");
+            loge("scanCount==0 - aborting");
             return;
         }
 
@@ -1010,13 +1020,15 @@ public class WifiStateMachine extends StateMachine {
 
             while (true) {
                 while (n < splitData.length) {
+                    if (DEBUG_PARSE) logd("parsing " + splitData[n]);
                     if (splitData[n].equals(END_OF_BATCHES)) {
-                        if (++n != splitData.length) {
+                        if (n+1 != splitData.length) {
                             loge("didn't consume " + (splitData.length-n));
                         }
                         if (mBatchedScanResults.size() > 0) {
-                            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+                            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
                         }
+                        logd("retrieveBatchedScanResults X");
                         return;
                     }
                     if ((splitData[n].equals(END_STR)) || splitData[n].equals(DELIMITER_STR)) {
@@ -1038,51 +1050,56 @@ public class WifiStateMachine extends StateMachine {
                                 logd("Found empty batch");
                             }
                         }
-                        n++;
-                    } else if (splitData[n].equals(BSSID_STR)) {
-                        bssid = splitData[n++].substring(BSSID_STR.length());
-                    } else if (splitData[n].equals(FREQ_STR)) {
+                    } else if (splitData[n].equals(TRUNCATED)) {
+                        batchedScanResult.truncated = true;
+                    } else if (splitData[n].startsWith(BSSID_STR)) {
+                        bssid = splitData[n].substring(BSSID_STR.length());
+                    } else if (splitData[n].startsWith(FREQ_STR)) {
                         try {
-                            freq = Integer.parseInt(splitData[n++].substring(FREQ_STR.length()));
+                            freq = Integer.parseInt(splitData[n].substring(FREQ_STR.length()));
                         } catch (NumberFormatException e) {
-                            loge("Invalid freqency: " + splitData[n-1]);
+                            loge("Invalid freqency: " + splitData[n]);
                             freq = 0;
                         }
-                    } else if (splitData[n].equals(AGE)) {
+                    } else if (splitData[n].startsWith(AGE)) {
                         try {
-                            tsf = now - Long.parseLong(splitData[n++].substring(AGE.length()));
+                            tsf = now - Long.parseLong(splitData[n].substring(AGE.length()));
                         } catch (NumberFormatException e) {
-                            loge("Invalid timestamp: " + splitData[n-1]);
+                            loge("Invalid timestamp: " + splitData[n]);
                             tsf = 0;
                         }
-                    } else if (splitData[n].equals(SSID_STR)) {
+                    } else if (splitData[n].startsWith(SSID_STR)) {
                         wifiSsid = WifiSsid.createFromAsciiEncoded(
-                                splitData[n++].substring(SSID_STR.length()));
-                    } else if (splitData[n].equals(LEVEL_STR)) {
+                                splitData[n].substring(SSID_STR.length()));
+                    } else if (splitData[n].startsWith(LEVEL_STR)) {
                         try {
-                            level = Integer.parseInt(splitData[n++].substring(LEVEL_STR.length()));
+                            level = Integer.parseInt(splitData[n].substring(LEVEL_STR.length()));
                             if (level > 0) level -= 256;
                         } catch (NumberFormatException e) {
-                            loge("Invalid level: " + splitData[n-1]);
+                            loge("Invalid level: " + splitData[n]);
                             level = 0;
                         }
-                    } else if (splitData[n].equals(DIST)) {
+                    } else if (splitData[n].startsWith(DIST)) {
                         try {
-                            dist = Integer.parseInt(splitData[n++].substring(DIST.length()));
+                            dist = Integer.parseInt(splitData[n].substring(DIST.length()));
                         } catch (NumberFormatException e) {
-                            loge("Invalid distance: " + splitData[n-1]);
+                            loge("Invalid distance: " + splitData[n]);
                             dist = ScanResult.UNSPECIFIED;
                         }
-                    } else if (splitData[n].equals(DISTSD)) {
+                    } else if (splitData[n].startsWith(DISTSD)) {
                         try {
-                            distSd = Integer.parseInt(splitData[n++].substring(DISTSD.length()));
+                            distSd = Integer.parseInt(splitData[n].substring(DISTSD.length()));
                         } catch (NumberFormatException e) {
-                            loge("Invalid distanceSd: " + splitData[n-1]);
+                            loge("Invalid distanceSd: " + splitData[n]);
                             distSd = ScanResult.UNSPECIFIED;
                         }
+                    } else {
+                        loge("Unable to parse batched scan result line: " + splitData[n]);
                     }
+                    n++;
                 }
                 rawData = mWifiNative.getBatchedScanResults();
+                if (DEBUG_PARSE) log("reading more data:\n" + rawData);
                 if (rawData == null) {
                     loge("Unexpected null BatchedScanResults");
                     return;
@@ -2392,6 +2409,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_POLL_BATCHED_SCAN:
                     handleBatchedScanPollRequest();
+                    break;
                 case CMD_START_NEXT_BATCHED_SCAN:
                     startNextBatchedScan();
                     break;
