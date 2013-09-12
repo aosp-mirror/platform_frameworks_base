@@ -18,11 +18,13 @@
 #define ANDROID_HWUI_DEFERRED_DISPLAY_LIST_H
 
 #include <utils/Errors.h>
+#include <utils/LinearAllocator.h>
 #include <utils/Vector.h>
+#include <utils/TinyHashMap.h>
 
 #include "Matrix.h"
+#include "OpenGLRenderer.h"
 #include "Rect.h"
-#include "utils/TinyHashMap.h"
 
 class SkBitmap;
 
@@ -34,6 +36,8 @@ class DrawOp;
 class SaveOp;
 class SaveLayerOp;
 class StateOp;
+
+class DeferredDisplayState;
 class OpenGLRenderer;
 
 class Batch;
@@ -41,6 +45,38 @@ class DrawBatch;
 class MergingDrawBatch;
 
 typedef const void* mergeid_t;
+
+class DeferredDisplayState {
+public:
+    /** static void* operator new(size_t size); PURPOSELY OMITTED **/
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
+    // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped
+    Rect mBounds;
+
+    // the below are set and used by the OpenGLRenderer at record and deferred playback
+    bool mClipValid;
+    Rect mClip;
+    int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
+    bool mClipped;
+    mat4 mMatrix;
+    DrawModifiers mDrawModifiers;
+    float mAlpha;
+};
+
+class OpStatePair {
+public:
+    OpStatePair()
+            : op(NULL), state(NULL) {}
+    OpStatePair(DrawOp* newOp, const DeferredDisplayState* newState)
+            : op(newOp), state(newState) {}
+    OpStatePair(const OpStatePair& other)
+            : op(other.op), state(other.state) {}
+    DrawOp* op;
+    const DeferredDisplayState* state;
+};
 
 class DeferredDisplayList {
 public:
@@ -84,6 +120,14 @@ public:
     void addDrawOp(OpenGLRenderer& renderer, DrawOp* op);
 
 private:
+    DeferredDisplayState* createState() {
+        return new (mAllocator) DeferredDisplayState();
+    }
+
+    void tryRecycleState(DeferredDisplayState* state) {
+        mAllocator.rewindIfLastAlloc(state, sizeof(DeferredDisplayState));
+    }
+
     /**
      * Resets the batching back-pointers, creating a barrier in the operation stream so that no ops
      * added in the future will be inserted into a batch that already exist.
@@ -131,6 +175,8 @@ private:
      * collide, which avoids the need to resolve mergeid collisions.
      */
     TinyHashMap<mergeid_t, DrawBatch*> mMergingBatches[kOpBatch_Count];
+
+    LinearAllocator mAllocator;
 };
 
 /**
