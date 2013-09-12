@@ -26,7 +26,9 @@ import android.util.Log;
  *
  * <p>
  * To obtain an instance of the system infrared transmitter, call
- * {@link Context#getSystemService} with {@link Context#CONSUMER_IR} as the argument.
+ * {@link android.content.Context#getSystemService(java.lang.String)
+ * Context.getSystemService()} with
+ * {@link android.content.Context#CONSUMER_IR_SERVICE} as the argument.
  * </p>
  */
 public final class ConsumerIrManager {
@@ -123,9 +125,10 @@ public final class ConsumerIrManager {
     /**
      * Query the infrared transmitter's supported carrier frequencies
      *
-     * @return an array of {@link #CarrierFreqRange} objects representing
-     * the ranges that the transmitter can support, or null if there was
-     * an error communicating with the Consumer IR Service.
+     * @return an array of
+     * {@link android.hardware.ConsumerIrManager.CarrierFrequencyRange}
+     * objects representing the ranges that the transmitter can support, or
+     * null if there was an error communicating with the Consumer IR Service.
      */
     public CarrierFrequencyRange[] getCarrierFrequencies() {
         if (mService == null) {
