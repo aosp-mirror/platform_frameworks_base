@@ -38,7 +38,8 @@
     <string name="save_error" msgid="6167009778003223664">"Neizdevās saglabāt dokumentu."</string>
     <string name="root_recent" msgid="4470053704320518133">"Pēdējie"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Brīva vieta: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"Pakalpojumi"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"Saīsnes"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Ierīces"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Vairāk lietotņu"</string>
@@ -48,7 +49,5 @@
     <string name="empty" msgid="7858882803708117596">"Nav vienumu"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Nevar atvērt failu."</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nevar dzēst dažus dokumentus."</string>
-    <string name="more" msgid="7117420986529297171">"Vēl"</string>
-    <string name="loading" msgid="7933681260296021180">"Notiek ielāde..."</string>
     <string name="share_via" msgid="8966594246261344259">"Kopīgot, izmantojot"</string>
 </resources>

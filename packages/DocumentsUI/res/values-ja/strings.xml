@@ -38,7 +38,8 @@
     <string name="save_error" msgid="6167009778003223664">"ドキュメントを保存できませんでした"</string>
     <string name="root_recent" msgid="4470053704320518133">"最近"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"空き容量: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"サービス"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"ショートカット"</string>
     <string name="root_type_device" msgid="7121342474653483538">"端末"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"その他のアプリ"</string>
@@ -48,7 +49,5 @@
     <string name="empty" msgid="7858882803708117596">"アイテムがありません"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ファイルを開けません"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"一部のドキュメントを削除できません"</string>
-    <string name="more" msgid="7117420986529297171">"その他"</string>
-    <string name="loading" msgid="7933681260296021180">"読み込んでいます..."</string>
     <string name="share_via" msgid="8966594246261344259">"共有ツール"</string>
 </resources>

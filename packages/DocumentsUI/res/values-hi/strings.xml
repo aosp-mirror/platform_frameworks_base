@@ -38,17 +38,16 @@
     <string name="save_error" msgid="6167009778003223664">"दस्तावेज़ सहेजने में विफल रहा"</string>
     <string name="root_recent" msgid="4470053704320518133">"हाल ही के"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> रिक्त"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"सेवाएं"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"शॉर्टकट"</string>
     <string name="root_type_device" msgid="7121342474653483538">"उपकरण"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"अधिक एप्लिकेशन"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"अधिक एप्स"</string>
     <string name="pref_advanced_devices" msgid="903257239609301276">"उन्नत उपकरणों को दिखाएं"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"फ़ाइल का आकार दिखाएं"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"उपकरण का आकार दिखाएं"</string>
     <string name="empty" msgid="7858882803708117596">"कोई आइटम नहीं"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"फ़ाइल नहीं खोली जा सकती"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"कुछ दस्तावेज़ों को हटाने में अक्षम"</string>
-    <string name="more" msgid="7117420986529297171">"अधिक"</string>
-    <string name="loading" msgid="7933681260296021180">"लोड हो रहे हैं..."</string>
     <string name="share_via" msgid="8966594246261344259">"इसके द्वारा साझा करें"</string>
 </resources>

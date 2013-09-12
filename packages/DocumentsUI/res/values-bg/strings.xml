@@ -38,7 +38,8 @@
     <string name="save_error" msgid="6167009778003223664">"Запазването на документа не бе успешно"</string>
     <string name="root_recent" msgid="4470053704320518133">"Скорошно"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Свободно: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"Услуги"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"Преки пътища"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Устройства"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Още приложения"</string>
@@ -48,7 +49,5 @@
     <string name="empty" msgid="7858882803708117596">"Няма елементи"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Файлът не може да се отвори"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Някои документи не могат да бъдат изтрити"</string>
-    <string name="more" msgid="7117420986529297171">"Още"</string>
-    <string name="loading" msgid="7933681260296021180">"Зарежда се..."</string>
     <string name="share_via" msgid="8966594246261344259">"Споделяне чрез"</string>
 </resources>

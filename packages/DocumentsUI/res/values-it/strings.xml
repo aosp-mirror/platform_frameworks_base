@@ -38,7 +38,8 @@
     <string name="save_error" msgid="6167009778003223664">"Impossibile salvare il documento"</string>
     <string name="root_recent" msgid="4470053704320518133">"Recente"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> liberi"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"Servizi"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"Scorciatoie"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivi"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Altre app"</string>
@@ -48,7 +49,5 @@
     <string name="empty" msgid="7858882803708117596">"Nessun articolo"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Impossibile aprire il file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Impossibile eliminare alcuni documenti"</string>
-    <string name="more" msgid="7117420986529297171">"Altro"</string>
-    <string name="loading" msgid="7933681260296021180">"Caricamento..."</string>
     <string name="share_via" msgid="8966594246261344259">"Condividi via"</string>
 </resources>
