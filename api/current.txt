@@ -10973,6 +10973,8 @@ package android.hardware.camera2 {
     field public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2; // 0x2
     field public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0; // 0x0
     field public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1; // 0x1
+    field public static final int STATISTICS_LENS_SHADING_MAP_MODE_OFF = 0; // 0x0
+    field public static final int STATISTICS_LENS_SHADING_MAP_MODE_ON = 1; // 0x1
     field public static final int STATISTICS_SCENE_FLICKER_50HZ = 1; // 0x1
     field public static final int STATISTICS_SCENE_FLICKER_60HZ = 2; // 0x2
     field public static final int STATISTICS_SCENE_FLICKER_NONE = 0; // 0x0
@@ -11078,6 +11080,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_GREEN;
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_RED;
