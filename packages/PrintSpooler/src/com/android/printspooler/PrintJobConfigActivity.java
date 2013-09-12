@@ -147,9 +147,8 @@ public class PrintJobConfigActivity extends Activity {
 
     public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {PageRange.ALL_PAGES};
 
-    private final PrintAttributes mOldPrintAttributes = new PrintAttributes.Builder().create();
-    private final PrintAttributes mCurrPrintAttributes = new PrintAttributes.Builder().create();
-    private final PrintAttributes mTempPrintAttributes = new PrintAttributes.Builder().create();
+    private final PrintAttributes mOldPrintAttributes = new PrintAttributes.Builder().build();
+    private final PrintAttributes mCurrPrintAttributes = new PrintAttributes.Builder().build();
 
     private final DeathRecipient mDeathRecipient = new DeathRecipient() {
         @Override
@@ -851,19 +850,19 @@ public class PrintJobConfigActivity extends Activity {
                     Resolution oldResolution = mCurrPrintAttributes.getResolution();
                     Resolution newResolution = new Resolution(
                             oldResolution.getId(),
-                            oldResolution.getLabel(getPackageManager()),
+                            oldResolution.getLabel(),
                             oldResolution.getVerticalDpi(),
                             oldResolution.getHorizontalDpi());
                     mCurrPrintAttributes.setResolution(newResolution);
 
                     // Rotate the physical margins.
-                    Margins oldMargins = mCurrPrintAttributes.getMargins();
-                    Margins newMargins = new Margins(
-                            oldMargins.getBottomMils(),
-                            oldMargins.getLeftMils(),
-                            oldMargins.getTopMils(),
-                            oldMargins.getRightMils());
-                    mCurrPrintAttributes.setMargins(newMargins);
+                    Margins oldMinMargins = mCurrPrintAttributes.getMinMargins();
+                    Margins newMinMargins = new Margins(
+                            oldMinMargins.getBottomMils(),
+                            oldMinMargins.getLeftMils(),
+                            oldMinMargins.getTopMils(),
+                            oldMinMargins.getRightMils());
+                    mCurrPrintAttributes.setMinMargins(newMinMargins);
                 }
             } else {
                 if (mediaSize.isPortrait()) {
@@ -874,26 +873,25 @@ public class PrintJobConfigActivity extends Activity {
                     Resolution oldResolution = mCurrPrintAttributes.getResolution();
                     Resolution newResolution = new Resolution(
                             oldResolution.getId(),
-                            oldResolution.getLabel(getPackageManager()),
+                            oldResolution.getLabel(),
                             oldResolution.getVerticalDpi(),
                             oldResolution.getHorizontalDpi());
                     mCurrPrintAttributes.setResolution(newResolution);
 
                     // Rotate the physical margins.
-                    Margins oldMargins = mCurrPrintAttributes.getMargins();
+                    Margins oldMinMargins = mCurrPrintAttributes.getMinMargins();
                     Margins newMargins = new Margins(
-                            oldMargins.getTopMils(),
-                            oldMargins.getRightMils(),
-                            oldMargins.getBottomMils(),
-                            oldMargins.getLeftMils());
-                    mCurrPrintAttributes.setMargins(newMargins);
+                            oldMinMargins.getTopMils(),
+                            oldMinMargins.getRightMils(),
+                            oldMinMargins.getBottomMils(),
+                            oldMinMargins.getLeftMils());
+                    mCurrPrintAttributes.setMinMargins(newMargins);
                 }
             }
         }
 
         private void updatePrintAttributes(PrinterCapabilitiesInfo capabilities) {
-            PrintAttributes defaults = mTempPrintAttributes;
-            capabilities.getDefaults(defaults);
+            PrintAttributes defaults = capabilities.getDefaults();
 
             // Media size.
             MediaSize currMediaSize = mCurrPrintAttributes.getMediaSize();
@@ -925,16 +923,16 @@ public class PrintJobConfigActivity extends Activity {
             }
 
             // Margins.
-            Margins margins = mCurrPrintAttributes.getMargins();
+            Margins margins = mCurrPrintAttributes.getMinMargins();
             if (margins == null) {
-                mCurrPrintAttributes.setMargins(defaults.getMargins());
+                mCurrPrintAttributes.setMinMargins(defaults.getMinMargins());
             } else {
                 Margins minMargins = capabilities.getMinMargins();
                 if (margins.getLeftMils() < minMargins.getLeftMils()
                         || margins.getTopMils() < minMargins.getTopMils()
                         || margins.getRightMils() > minMargins.getRightMils()
                         || margins.getBottomMils() > minMargins.getBottomMils()) {
-                    mCurrPrintAttributes.setMargins(defaults.getMargins());
+                    mCurrPrintAttributes.setMinMargins(defaults.getMinMargins());
                 }
             }
         }
@@ -1633,8 +1631,7 @@ public class PrintJobConfigActivity extends Activity {
 
                 PrinterInfo printer = (PrinterInfo) mDestinationSpinner.getSelectedItem();
                 PrinterCapabilitiesInfo capabilities = printer.getCapabilities();
-                PrintAttributes defaultAttributes = mTempPrintAttributes;
-                printer.getCapabilities().getDefaults(defaultAttributes);
+                PrintAttributes defaultAttributes = printer.getCapabilities().getDefaults();
 
                 // Media size.
                 List<MediaSize> mediaSizes = capabilities.getMediaSizes();
@@ -2069,12 +2066,12 @@ public class PrintJobConfigActivity extends Activity {
                     .setColorModes(PrintAttributes.COLOR_MODE_COLOR
                             | PrintAttributes.COLOR_MODE_MONOCHROME,
                             PrintAttributes.COLOR_MODE_COLOR)
-                    .create();
+                    .build();
 
                 return new PrinterInfo.Builder(printerId, getString(R.string.save_as_pdf),
                         PrinterInfo.STATUS_IDLE)
                     .setCapabilities(capabilities)
-                    .create();
+                    .build();
             }
         }
     }

@@ -277,7 +277,7 @@ public final class PrintDocumentInfo implements Parcelable {
          *
          * @return The new instance.
          */
-        public PrintDocumentInfo create() {
+        public PrintDocumentInfo build() {
             return new PrintDocumentInfo(mPrototype);
         }
     }

@@ -100,7 +100,7 @@ public class AccessibilityNodeInfoCache {
                     }
                 } break;
             }
-            if (Build.IS_DEBUGGABLE && CHECK_INTEGRITY_IF_DEBUGGABLE_BUILD) {
+            if (CHECK_INTEGRITY_IF_DEBUGGABLE_BUILD && Build.IS_DEBUGGABLE) {
                 checkIntegrity();
             }
         }
