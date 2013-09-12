@@ -19,6 +19,7 @@ package android.provider;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static libcore.io.OsConstants.SEEK_SET;
 
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,16 +35,18 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.google.android.collect.Lists;
 
 import libcore.io.ErrnoException;
-import libcore.io.IoBridge;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
 
+import java.io.BufferedInputStream;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -75,6 +78,11 @@ public final class DocumentsContract {
     public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
     /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+
+    /**
+     * Buffer is large enough to rewind past any EXIF headers.
+     */
+    private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
 
     /**
      * Constants related to a document, including {@link Cursor} columns names
@@ -642,35 +650,47 @@ public final class DocumentsContract {
      */
     public static Bitmap getDocumentThumbnail(
             ContentResolver resolver, Uri documentUri, Point size, CancellationSignal signal) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                documentUri.getAuthority());
+        try {
+            return getDocumentThumbnail(client, documentUri, size, signal);
+        } catch (RemoteException e) {
+            return null;
+        } finally {
+            ContentProviderClient.closeQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static Bitmap getDocumentThumbnail(
+            ContentProviderClient client, Uri documentUri, Point size, CancellationSignal signal)
+            throws RemoteException {
         final Bundle openOpts = new Bundle();
         openOpts.putParcelable(DocumentsContract.EXTRA_THUMBNAIL_SIZE, size);
 
         AssetFileDescriptor afd = null;
         try {
-            afd = resolver.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts, signal);
+            afd = client.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts, signal);
 
             final FileDescriptor fd = afd.getFileDescriptor();
             final long offset = afd.getStartOffset();
-            final long length = afd.getDeclaredLength();
 
-            // Some thumbnails might be a region inside a larger file, such as
-            // an EXIF thumbnail. Since BitmapFactory aggressively seeks around
-            // the entire file, we read the region manually.
-            byte[] region = null;
-            if (offset > 0 && length <= 64 * KB_IN_BYTES) {
-                region = new byte[(int) length];
+            // Try seeking on the returned FD, since it gives us the most
+            // optimal decode path; otherwise fall back to buffering.
+            BufferedInputStream is = null;
+            try {
                 Libcore.os.lseek(fd, offset, SEEK_SET);
-                if (IoBridge.read(fd, region, 0, region.length) != region.length) {
-                    region = null;
-                }
+            } catch (ErrnoException e) {
+                is = new BufferedInputStream(new FileInputStream(fd), THUMBNAIL_BUFFER_SIZE);
+                is.mark(THUMBNAIL_BUFFER_SIZE);
             }
 
             // We requested a rough thumbnail size, but the remote size may have
             // returned something giant, so defensively scale down as needed.
             final BitmapFactory.Options opts = new BitmapFactory.Options();
             opts.inJustDecodeBounds = true;
-            if (region != null) {
-                BitmapFactory.decodeByteArray(region, 0, region.length, opts);
+            if (is != null) {
+                BitmapFactory.decodeStream(is, null, opts);
             } else {
                 BitmapFactory.decodeFileDescriptor(fd, null, opts);
             }
@@ -681,14 +701,17 @@ public final class DocumentsContract {
             opts.inJustDecodeBounds = false;
             opts.inSampleSize = Math.min(widthSample, heightSample);
             Log.d(TAG, "Decoding with sample size " + opts.inSampleSize);
-            if (region != null) {
-                return BitmapFactory.decodeByteArray(region, 0, region.length, opts);
+            if (is != null) {
+                is.reset();
+                return BitmapFactory.decodeStream(is, null, opts);
             } else {
+                try {
+                    Libcore.os.lseek(fd, offset, SEEK_SET);
+                } catch (ErrnoException e) {
+                    e.rethrowAsIOException();
+                }
                 return BitmapFactory.decodeFileDescriptor(fd, null, opts);
             }
-        } catch (ErrnoException e) {
-            Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
-            return null;
         } catch (IOException e) {
             Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
             return null;
@@ -709,13 +732,25 @@ public final class DocumentsContract {
      */
     public static Uri createDocument(ContentResolver resolver, Uri parentDocumentUri,
             String mimeType, String displayName) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                parentDocumentUri.getAuthority());
+        try {
+            return createDocument(client, parentDocumentUri, mimeType, displayName);
+        } finally {
+            ContentProviderClient.closeQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static Uri createDocument(ContentProviderClient client, Uri parentDocumentUri,
+            String mimeType, String displayName) {
         final Bundle in = new Bundle();
         in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(parentDocumentUri));
         in.putString(Document.COLUMN_MIME_TYPE, mimeType);
         in.putString(Document.COLUMN_DISPLAY_NAME, displayName);
 
         try {
-            final Bundle out = resolver.call(parentDocumentUri, METHOD_CREATE_DOCUMENT, null, in);
+            final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
             return buildDocumentUri(
                     parentDocumentUri.getAuthority(), out.getString(Document.COLUMN_DOCUMENT_ID));
         } catch (Exception e) {
@@ -730,11 +765,22 @@ public final class DocumentsContract {
      * @param documentUri document with {@link Document#FLAG_SUPPORTS_DELETE}
      */
     public static boolean deleteDocument(ContentResolver resolver, Uri documentUri) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                documentUri.getAuthority());
+        try {
+            return deleteDocument(client, documentUri);
+        } finally {
+            ContentProviderClient.closeQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static boolean deleteDocument(ContentProviderClient client, Uri documentUri) {
         final Bundle in = new Bundle();
         in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(documentUri));
 
         try {
-            final Bundle out = resolver.call(documentUri, METHOD_DELETE_DOCUMENT, null, in);
+            final Bundle out = client.call(METHOD_DELETE_DOCUMENT, null, in);
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to delete document", e);
