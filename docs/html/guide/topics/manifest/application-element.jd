@@ -80,7 +80,7 @@ information.
 </p></dd>
 
 
-<dt><a name="allowbackup"></a>{@code android:allowbackup}</dt>
+<dt><a name="allowbackup"></a>{@code android:allowBackup}</dt>
 <dd>Whether to allow the application to participate in the backup
 and restore infrastructure. If this attribute is set to false, no backup
 or restore of the application will ever be performed, even by a full-system
