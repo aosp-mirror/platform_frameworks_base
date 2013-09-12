@@ -26,6 +26,7 @@ import android.location.FusedBatchOptions;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -73,10 +74,19 @@ public class FlpHardwareProvider {
         // register for listening for passive provider data
         LocationManager manager = (LocationManager) mContext.getSystemService(
                 Context.LOCATION_SERVICE);
-        manager.requestLocationUpdates(
+        final long minTime = 0;
+        final float minDistance = 0;
+        final boolean oneShot = false;
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 LocationManager.PASSIVE_PROVIDER,
-                0 /* minTime */,
-                0 /* minDistance */,
+                minTime,
+                minDistance,
+                oneShot);
+        // Don't keep track of this request since it's done on behalf of other clients
+        // (which are kept track of separately).
+        request.setHideFromAppOps(true);
+        manager.requestLocationUpdates(
+                request,
                 new NetworkLocationListener(),
                 Looper.myLooper());
     }
