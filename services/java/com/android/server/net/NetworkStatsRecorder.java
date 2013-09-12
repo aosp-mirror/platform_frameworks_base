@@ -135,6 +135,9 @@ public class NetworkStatsRecorder {
             } catch (IOException e) {
                 Log.wtf(TAG, "problem completely reading network stats", e);
                 recoverFromWtf();
+            } catch (OutOfMemoryError e) {
+                Log.wtf(TAG, "problem completely reading network stats", e);
+                recoverFromWtf();
             }
         }
         return complete;
@@ -226,6 +229,9 @@ public class NetworkStatsRecorder {
             } catch (IOException e) {
                 Log.wtf(TAG, "problem persisting pending stats", e);
                 recoverFromWtf();
+            } catch (OutOfMemoryError e) {
+                Log.wtf(TAG, "problem persisting pending stats", e);
+                recoverFromWtf();
             }
         }
     }
@@ -239,6 +245,9 @@ public class NetworkStatsRecorder {
             // Rewrite all persisted data to migrate UID stats
             mRotator.rewriteAll(new RemoveUidRewriter(mBucketDuration, uids));
         } catch (IOException e) {
+            Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
+            recoverFromWtf();
+        } catch (OutOfMemoryError e) {
             Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
             recoverFromWtf();
         }
