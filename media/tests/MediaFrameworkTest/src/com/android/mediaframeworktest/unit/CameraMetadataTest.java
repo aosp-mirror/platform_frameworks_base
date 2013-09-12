@@ -23,8 +23,9 @@ import android.graphics.Rect;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.Rational;
 import android.hardware.camera2.Size;
+import android.hardware.camera2.impl.CameraMetadataNative;
 
-import static android.hardware.camera2.CameraMetadata.*;
+import static android.hardware.camera2.impl.CameraMetadataNative.*;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -42,7 +43,7 @@ import static org.junit.Assert.assertArrayEquals;
  */
 public class CameraMetadataTest extends junit.framework.TestCase {
 
-    CameraMetadata mMetadata;
+    CameraMetadataNative mMetadata;
     Parcel mParcel;
 
     // Sections
@@ -62,13 +63,12 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     @Override
     public void setUp() {
-        mMetadata = new CameraMetadata();
+        mMetadata = new CameraMetadataNative();
         mParcel = Parcel.obtain();
     }
 
     @Override
     public void tearDown() throws Exception {
-        mMetadata.close();
         mMetadata = null;
 
         mParcel.recycle();
@@ -82,115 +82,47 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     }
 
     @SmallTest
-    public void testClose() throws Exception {
-        mMetadata.isEmpty(); // no throw
-
-        assertFalse(mMetadata.isClosed());
-
-        mMetadata.close();
-
-        assertTrue(mMetadata.isClosed());
-
-        // OK: second close should not throw
-        mMetadata.close();
-
-        assertTrue(mMetadata.isClosed());
-
-        // All other calls after close should throw IllegalStateException
-
-        try {
-            mMetadata.isEmpty();
-            fail("Unreachable -- isEmpty after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-            // good: we expect calling this method after close to fail
-        }
-
-        try {
-            mMetadata.getEntryCount();
-            fail("Unreachable -- getEntryCount after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-            // good: we expect calling this method after close to fail
-        }
-
-
-        try {
-            mMetadata.swap(mMetadata);
-            fail("Unreachable -- swap after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-         // good: we expect calling this method after close to fail
-        }
-
-        try {
-            mMetadata.readFromParcel(mParcel);
-            fail("Unreachable -- readFromParcel after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-         // good: we expect calling this method after close to fail
-        }
-
-        try {
-            mMetadata.writeToParcel(mParcel, /*flags*/0);
-            fail("Unreachable -- writeToParcel after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-         // good: we expect calling this method after close to fail
-        }
-
-        try {
-            mMetadata.readValues(/*tag*/0);
-            fail("Unreachable -- readValues after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-         // good: we expect calling this method after close to fail
-        }
-
-        try {
-            mMetadata.writeValues(/*tag*/0, /*source*/new byte[] { 1,2,3 });
-            fail("Unreachable -- readValues after close should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-         // good: we expect calling this method after close to fail
-        }
-    }
-
-    @SmallTest
     public void testGetTagFromKey() {
 
         // Test success
 
         assertEquals(ANDROID_COLOR_CORRECTION_MODE,
-                CameraMetadata.getTag("android.colorCorrection.mode"));
+                CameraMetadataNative.getTag("android.colorCorrection.mode"));
         assertEquals(ANDROID_COLOR_CORRECTION_TRANSFORM,
-                CameraMetadata.getTag("android.colorCorrection.transform"));
+                CameraMetadataNative.getTag("android.colorCorrection.transform"));
         assertEquals(ANDROID_CONTROL_AE_ANTIBANDING_MODE,
-                CameraMetadata.getTag("android.control.aeAntibandingMode"));
+                CameraMetadataNative.getTag("android.control.aeAntibandingMode"));
         assertEquals(ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION,
-                CameraMetadata.getTag("android.control.aeExposureCompensation"));
+                CameraMetadataNative.getTag("android.control.aeExposureCompensation"));
 
         // Test failures
 
         try {
-            CameraMetadata.getTag(null);
+            CameraMetadataNative.getTag(null);
             fail("A null key should throw NPE");
         } catch(NullPointerException e) {
         }
 
         try {
-            CameraMetadata.getTag("android.control");
+            CameraMetadataNative.getTag("android.control");
             fail("A section name only should not be a valid key");
         } catch(IllegalArgumentException e) {
         }
 
         try {
-            CameraMetadata.getTag("android.control.thisTagNameIsFakeAndDoesNotExist");
+            CameraMetadataNative.getTag("android.control.thisTagNameIsFakeAndDoesNotExist");
             fail("A valid section with an invalid tag name should not be a valid key");
         } catch(IllegalArgumentException e) {
         }
 
         try {
-            CameraMetadata.getTag("android");
+            CameraMetadataNative.getTag("android");
             fail("A namespace name only should not be a valid key");
         } catch(IllegalArgumentException e) {
         }
 
         try {
-            CameraMetadata.getTag("this.key.is.definitely.invalid");
+            CameraMetadataNative.getTag("this.key.is.definitely.invalid");
             fail("A completely fake key name should not be valid");
         } catch(IllegalArgumentException e) {
         }
@@ -198,14 +130,14 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     @SmallTest
     public void testGetTypeFromTag() {
-        assertEquals(TYPE_BYTE, CameraMetadata.getNativeType(ANDROID_COLOR_CORRECTION_MODE));
-        assertEquals(TYPE_FLOAT, CameraMetadata.getNativeType(ANDROID_COLOR_CORRECTION_TRANSFORM));
-        assertEquals(TYPE_BYTE, CameraMetadata.getNativeType(ANDROID_CONTROL_AE_ANTIBANDING_MODE));
+        assertEquals(TYPE_BYTE, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_MODE));
+        assertEquals(TYPE_FLOAT, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_TRANSFORM));
+        assertEquals(TYPE_BYTE, CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_ANTIBANDING_MODE));
         assertEquals(TYPE_INT32,
-                CameraMetadata.getNativeType(ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION));
+                CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION));
 
         try {
-            CameraMetadata.getNativeType(0xDEADF00D);
+            CameraMetadataNative.getNativeType(0xDEADF00D);
             fail("No type should exist for invalid tag 0xDEADF00D");
         } catch(IllegalArgumentException e) {
         }
@@ -454,7 +386,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     @SmallTest
     public void testReadWriteEnumWithCustomValues() {
-        CameraMetadata.registerEnumValues(AeAntibandingMode.class, new int[] {
+        CameraMetadataNative.registerEnumValues(AeAntibandingMode.class, new int[] {
             0,
             10,
             20,
@@ -475,7 +407,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         Key<AeAntibandingMode[]> aeAntibandingModeKey =
                 new Key<AeAntibandingMode[]>("android.control.aeAvailableAntibandingModes",
                         AeAntibandingMode[].class);
-        byte[] aeAntibandingModeValues = mMetadata.readValues(CameraMetadata
+        byte[] aeAntibandingModeValues = mMetadata.readValues(CameraMetadataNative
                 .getTag("android.control.aeAvailableAntibandingModes"));
         byte[] expectedValues = new byte[] { 0, 10, 20, 30 };
         assertArrayEquals(expectedValues, aeAntibandingModeValues);
@@ -485,7 +417,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
          * Stranger cases that don't use byte enums
          */
         // int (n)
-        CameraMetadata.registerEnumValues(AvailableFormat.class, new int[] {
+        CameraMetadataNative.registerEnumValues(AvailableFormat.class, new int[] {
             0x20,
             0x32315659,
             0x11,
@@ -505,7 +437,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         Key<AeAntibandingMode> availableFormatsKey =
                 new Key<AeAntibandingMode>("android.scaler.availableFormats",
                         AeAntibandingMode.class);
-        byte[] availableFormatValues = mMetadata.readValues(CameraMetadata
+        byte[] availableFormatValues = mMetadata.readValues(CameraMetadataNative
                 .getTag(availableFormatsKey.getName()));
 
         int[] expectedIntValues = new int[] {

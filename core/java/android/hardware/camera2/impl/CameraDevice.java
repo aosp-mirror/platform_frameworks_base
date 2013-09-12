@@ -29,6 +29,8 @@ import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
@@ -40,7 +42,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * HAL2.1+ implementation of CameraDevice Use CameraManager#open to instantiate
+ * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
  */
 public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
@@ -53,10 +55,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Object mLock = new Object();
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
-    // XX: Make this a WeakReference<CaptureListener> ?
-    // TODO: Convert to SparseIntArray
-    private final HashMap<Integer, CaptureListenerHolder> mCaptureListenerMap =
-            new HashMap<Integer, CaptureListenerHolder>();
+    private CameraDeviceListener mDeviceListener;
+    private Handler mDeviceHandler;
+
+    private final SparseArray<CaptureListenerHolder> mCaptureListenerMap =
+            new SparseArray<CaptureListenerHolder>();
 
     private final Stack<Integer> mRepeatingRequestIdStack = new Stack<Integer>();
     // Map stream IDs to Surfaces
@@ -80,10 +83,14 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
+    public String getId() {
+        return mCameraId;
+    }
+
+    @Override
     public CameraProperties getProperties() throws CameraAccessException {
 
-        CameraProperties properties = new CameraProperties();
-        CameraMetadata info = new CameraMetadata();
+        CameraMetadataNative info = new CameraMetadataNative();
 
         try {
             mRemoteDevice.getCameraInfo(/*out*/info);
@@ -94,7 +101,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             return null;
         }
 
-        properties.swap(info);
+        CameraProperties properties = new CameraProperties(info);
         return properties;
     }
 
@@ -149,11 +156,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public CaptureRequest createCaptureRequest(int templateType) throws CameraAccessException {
-
+    public CaptureRequest.Builder createCaptureRequest(int templateType)
+            throws CameraAccessException {
         synchronized (mLock) {
 
-            CameraMetadata templatedRequest = new CameraMetadata();
+            CameraMetadataNative templatedRequest = new CameraMetadataNative();
 
             try {
                 mRemoteDevice.createDefaultRequest(templateType, /* out */templatedRequest);
@@ -164,23 +171,22 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 return null;
             }
 
-            CaptureRequest request = new CaptureRequest();
-            request.swap(templatedRequest);
+            CaptureRequest.Builder builder =
+                    new CaptureRequest.Builder(templatedRequest);
 
-            return request;
-
+            return builder;
         }
     }
 
     @Override
-    public void capture(CaptureRequest request, CaptureListener listener)
+    public void capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException {
-        submitCaptureRequest(request, listener, /*streaming*/false);
+        submitCaptureRequest(request, listener, handler, /*streaming*/false);
     }
 
     @Override
-    public void captureBurst(List<CaptureRequest> requests, CaptureListener listener)
-            throws CameraAccessException {
+    public void captureBurst(List<CaptureRequest> requests, CaptureListener listener,
+            Handler handler) throws CameraAccessException {
         if (requests.isEmpty()) {
             Log.w(TAG, "Capture burst request list is empty, do nothing!");
             return;
@@ -191,7 +197,18 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     private void submitCaptureRequest(CaptureRequest request, CaptureListener listener,
-            boolean repeating) throws CameraAccessException {
+            Handler handler, boolean repeating) throws CameraAccessException {
+
+        // Need a valid handler, or current thread needs to have a looper, if
+        // listener is valid
+        if (handler == null && listener != null) {
+            Looper looper = Looper.myLooper();
+            if (looper == null) {
+                throw new IllegalArgumentException(
+                        "No handler given, and current thread has no looper!");
+            }
+            handler = new Handler(looper);
+        }
 
         synchronized (mLock) {
 
@@ -205,9 +222,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // impossible
                 return;
             }
-
-            mCaptureListenerMap.put(requestId, new CaptureListenerHolder(listener, request,
-                    repeating));
+            if (listener != null) {
+                mCaptureListenerMap.put(requestId, new CaptureListenerHolder(listener, request,
+                        handler, repeating));
+            }
 
             if (repeating) {
                 mRepeatingRequestIdStack.add(requestId);
@@ -217,14 +235,14 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public void setRepeatingRequest(CaptureRequest request, CaptureListener listener)
-            throws CameraAccessException {
-        submitCaptureRequest(request, listener, /*streaming*/true);
+    public void setRepeatingRequest(CaptureRequest request, CaptureListener listener,
+            Handler handler) throws CameraAccessException {
+        submitCaptureRequest(request, listener, handler, /*streaming*/true);
     }
 
     @Override
-    public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener)
-            throws CameraAccessException {
+    public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
+            Handler handler) throws CameraAccessException {
         if (requests.isEmpty()) {
             Log.w(TAG, "Set Repeating burst request list is empty, do nothing!");
             return;
@@ -274,9 +292,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public void setErrorListener(ErrorListener listener) {
-        // TODO Auto-generated method stub
-
+    public void setDeviceListener(CameraDeviceListener listener, Handler handler) {
+        synchronized (mLock) {
+            mDeviceListener = listener;
+            mDeviceHandler = handler;
+        }
     }
 
     @Override
@@ -332,9 +352,16 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         private final boolean mRepeating;
         private final CaptureListener mListener;
         private final CaptureRequest mRequest;
+        private final Handler mHandler;
 
-        CaptureListenerHolder(CaptureListener listener, CaptureRequest request, boolean repeating) {
+        CaptureListenerHolder(CaptureListener listener, CaptureRequest request, Handler handler,
+                boolean repeating) {
+            if (listener == null || handler == null) {
+                throw new UnsupportedOperationException(
+                    "Must have a valid handler and a valid listener");
+            }
             mRepeating = repeating;
+            mHandler = handler;
             mRequest = request;
             mListener = listener;
         }
@@ -350,6 +377,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         public CaptureRequest getRequest() {
             return mRequest;
         }
+
+        public Handler getHandler() {
+            return mHandler;
+        }
+
     }
 
     // TODO: unit tests
@@ -370,11 +402,12 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         }
 
         @Override
-        public void onResultReceived(int requestId, CameraMetadata result) throws RemoteException {
+        public void onResultReceived(int requestId, CameraMetadataNative result)
+                throws RemoteException {
             if (DEBUG) {
                 Log.d(TAG, "Received result for id " + requestId);
             }
-            CaptureListenerHolder holder;
+            final CaptureListenerHolder holder;
 
             synchronized (mLock) {
                 // TODO: move this whole map into this class to make it more testable,
@@ -393,18 +426,22 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 }
             }
 
+            // Check if we have a listener for this
             if (holder == null) {
-                Log.e(TAG, "Result had no listener holder associated with it, dropping result");
                 return;
             }
 
-            CaptureResult resultAsCapture = new CaptureResult();
-            resultAsCapture.swap(result);
+            final CaptureResult resultAsCapture = new CaptureResult(result);
 
-            if (holder.getListener() != null) {
-                holder.getListener().onCaptureComplete(CameraDevice.this, holder.getRequest(),
-                        resultAsCapture);
-            }
+            holder.getHandler().post(
+                new Runnable() {
+                    public void run() {
+                        holder.getListener().onCaptureCompleted(
+                            CameraDevice.this,
+                            holder.getRequest(),
+                            resultAsCapture);
+                    }
+                });
         }
 
     }
