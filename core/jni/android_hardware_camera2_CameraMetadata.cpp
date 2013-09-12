@@ -38,7 +38,7 @@
 #endif
 
 // fully-qualified class name
-#define CAMERA_METADATA_CLASS_NAME "android/hardware/camera2/CameraMetadata"
+#define CAMERA_METADATA_CLASS_NAME "android/hardware/camera2/impl/CameraMetadataNative"
 
 using namespace android;
 
@@ -151,6 +151,21 @@ static jlong CameraMetadata_allocate(JNIEnv *env, jobject thiz) {
 
     return reinterpret_cast<jlong>(new CameraMetadata());
 }
+
+static jlong CameraMetadata_allocateCopy(JNIEnv *env, jobject thiz,
+        jobject other) {
+    ALOGV("%s", __FUNCTION__);
+
+    CameraMetadata* otherMetadata =
+            CameraMetadata_getPointerThrow(env, other, "other");
+
+    // In case of exception, return
+    if (otherMetadata == NULL) return NULL;
+
+    // Clone native metadata and return new pointer
+    return reinterpret_cast<jlong>(new CameraMetadata(*otherMetadata));
+}
+
 
 static jboolean CameraMetadata_isEmpty(JNIEnv *env, jobject thiz) {
     ALOGV("%s", __FUNCTION__);
@@ -361,6 +376,9 @@ static JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeAllocate",
     "()J",
     (void*)CameraMetadata_allocate },
+  { "nativeAllocateCopy",
+    "(L" CAMERA_METADATA_CLASS_NAME ";)J",
+    (void *)CameraMetadata_allocateCopy },
   { "nativeIsEmpty",
     "()Z",
     (void*)CameraMetadata_isEmpty },

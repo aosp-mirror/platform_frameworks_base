@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import android.hardware.camera2.impl.CameraMetadataNative;
+
 /**
  * <p>The properties describing a
  * {@link CameraDevice CameraDevice}.</p>
@@ -28,6 +30,21 @@ package android.hardware.camera2;
  * @see CameraManager
  */
 public final class CameraProperties extends CameraMetadata {
+
+    private final CameraMetadataNative mProperties;
+
+    /**
+     * Takes ownership of the passed-in properties object
+     * @hide
+     */
+    public CameraProperties(CameraMetadataNative properties) {
+        mProperties = properties;
+    }
+
+    @Override
+    public <T> T get(Key<T> key) {
+        return mProperties.get(key);
+    }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * The key entries below this point are generated from metadata
