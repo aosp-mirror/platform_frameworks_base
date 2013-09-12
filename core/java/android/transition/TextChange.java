@@ -137,14 +137,17 @@ public class TextChange extends Transition {
     @Override
     public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
-        if (startValues == null || endValues == null || !(endValues.view instanceof TextView)) {
+        if (startValues == null || endValues == null ||
+                !(startValues.view instanceof TextView) || !(endValues.view instanceof TextView)) {
             return null;
         }
         final TextView view = (TextView) endValues.view;
         Map<String, Object> startVals = startValues.values;
         Map<String, Object> endVals = endValues.values;
-        final CharSequence startText = (CharSequence) startVals.get(PROPNAME_TEXT);
-        final CharSequence endText = (CharSequence) endVals.get(PROPNAME_TEXT);
+        final CharSequence startText = startVals.get(PROPNAME_TEXT) != null ?
+                (CharSequence) startVals.get(PROPNAME_TEXT) : "";
+        final CharSequence endText = endVals.get(PROPNAME_TEXT) != null ?
+                (CharSequence) endVals.get(PROPNAME_TEXT) : "";
         if (!startText.equals(endText)) {
             view.setText(startText);
             Animator anim;
