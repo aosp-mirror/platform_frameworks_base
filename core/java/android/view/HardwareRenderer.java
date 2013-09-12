@@ -34,6 +34,8 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Surface.OutOfResourcesException;
+
 import com.google.android.gles_jni.EGLImpl;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -74,7 +76,7 @@ public abstract class HardwareRenderer {
      * System property used to enable or disable dirty regions invalidation.
      * This property is only queried if {@link #RENDER_DIRTY_REGIONS} is true.
      * The default value of this property is assumed to be true.
-     * 
+     *
      * Possible values:
      * "true", to enable partial invalidates
      * "false", to disable partial invalidates
@@ -134,7 +136,7 @@ public abstract class HardwareRenderer {
 
     /**
      * System property used to debug EGL configuration choice.
-     * 
+     *
      * Possible values:
      * "choice", print the chosen configuration only
      * "all", print all possible configurations
@@ -147,7 +149,7 @@ public abstract class HardwareRenderer {
      * Possible values:
      * "true", to enable dirty regions debugging
      * "false", to disable dirty regions debugging
-     * 
+     *
      * @hide
      */
     public static final String DEBUG_DIRTY_REGIONS_PROPERTY = "debug.hwui.show_dirty_regions";
@@ -208,14 +210,14 @@ public abstract class HardwareRenderer {
     /**
      * A process can set this flag to false to prevent the use of hardware
      * rendering.
-     * 
+     *
      * @hide
      */
     public static boolean sRendererDisabled = false;
 
     /**
      * Further hardware renderer disabling for the system process.
-     * 
+     *
      * @hide
      */
     public static boolean sSystemRendererDisabled = false;
@@ -235,7 +237,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Invoke this method to disable hardware rendering in the current process.
-     * 
+     *
      * @hide
      */
     public static void disable(boolean system) {
@@ -248,7 +250,7 @@ public abstract class HardwareRenderer {
     /**
      * Indicates whether hardware acceleration is available under any form for
      * the view hierarchy.
-     * 
+     *
      * @return True if the view hierarchy can potentially be hardware accelerated,
      *         false otherwise
      */
@@ -258,30 +260,30 @@ public abstract class HardwareRenderer {
 
     /**
      * Destroys the hardware rendering context.
-     * 
+     *
      * @param full If true, destroys all associated resources.
      */
     abstract void destroy(boolean full);
 
     /**
      * Initializes the hardware renderer for the specified surface.
-     * 
+     *
      * @param surface The surface to hardware accelerate
-     * 
+     *
      * @return True if the initialization was successful, false otherwise.
      */
-    abstract boolean initialize(Surface surface) throws Surface.OutOfResourcesException;
-    
+    abstract boolean initialize(Surface surface) throws OutOfResourcesException;
+
     /**
      * Updates the hardware renderer for the specified surface.
      *
      * @param surface The surface to hardware accelerate
      */
-    abstract void updateSurface(Surface surface) throws Surface.OutOfResourcesException;
+    abstract void updateSurface(Surface surface) throws OutOfResourcesException;
 
     /**
      * Destroys the layers used by the specified view hierarchy.
-     * 
+     *
      * @param view The root of the view hierarchy
      */
     abstract void destroyLayers(View view);
@@ -289,11 +291,11 @@ public abstract class HardwareRenderer {
     /**
      * Destroys all hardware rendering resources associated with the specified
      * view hierarchy.
-     * 
+     *
      * @param view The root of the view hierarchy
      */
     abstract void destroyHardwareResources(View view);
-    
+
     /**
      * This method should be invoked whenever the current hardware renderer
      * context should be reset.
@@ -306,7 +308,7 @@ public abstract class HardwareRenderer {
      * This method should be invoked to ensure the hardware renderer is in
      * valid state (for instance, to ensure the correct EGL context is bound
      * to the current thread.)
-     * 
+     *
      * @return true if the renderer is now valid, false otherwise
      */
     abstract boolean validate();
@@ -314,7 +316,7 @@ public abstract class HardwareRenderer {
     /**
      * This method ensures the hardware renderer is in a valid state
      * before executing the specified action.
-     * 
+     *
      * This method will attempt to set a valid state even if the window
      * the renderer is attached to was destroyed.
      *
@@ -325,7 +327,7 @@ public abstract class HardwareRenderer {
     /**
      * Setup the hardware renderer for drawing. This is called whenever the
      * size of the target surface changes or when the surface is first created.
-     * 
+     *
      * @param width Width of the drawing surface.
      * @param height Height of the drawing surface.
      */
@@ -384,7 +386,7 @@ public abstract class HardwareRenderer {
     /**
      * Sets the directory to use as a persistent storage for hardware rendering
      * resources.
-     * 
+     *
      * @param cacheDir A directory the current process can write to
      *
      * @hide
@@ -447,7 +449,7 @@ public abstract class HardwareRenderer {
     /**
      * Indicates that the specified hardware layer needs to be updated
      * as soon as possible.
-     * 
+     *
      * @param layer The hardware layer that needs an update
      *
      * @see #flushLayerUpdates()
@@ -481,7 +483,7 @@ public abstract class HardwareRenderer {
          * Invoked before a view is drawn by a hardware renderer.
          * This method can be used to apply transformations to the
          * canvas but no drawing command should be issued.
-         * 
+         *
          * @param canvas The Canvas used to render the view.
          */
         void onHardwarePreDraw(HardwareCanvas canvas);
@@ -489,7 +491,7 @@ public abstract class HardwareRenderer {
         /**
          * Invoked after a view is drawn by a hardware renderer.
          * It is safe to invoke drawing commands from this method.
-         * 
+         *
          * @param canvas The Canvas used to render the view.
          */
         void onHardwarePostDraw(HardwareCanvas canvas);
@@ -509,9 +511,9 @@ public abstract class HardwareRenderer {
     /**
      * Creates a new display list that can be used to record batches of
      * drawing operations.
-     * 
+     *
      * @param name The name of the display list, used for debugging purpose. May be null.
-     * 
+     *
      * @return A new display list.
      *
      * @hide
@@ -521,20 +523,20 @@ public abstract class HardwareRenderer {
     /**
      * Creates a new hardware layer. A hardware layer built by calling this
      * method will be treated as a texture layer, instead of as a render target.
-     * 
+     *
      * @param isOpaque Whether the layer should be opaque or not
-     * 
+     *
      * @return A hardware layer
      */
     abstract HardwareLayer createHardwareLayer(boolean isOpaque);
 
     /**
      * Creates a new hardware layer.
-     * 
+     *
      * @param width The minimum width of the layer
      * @param height The minimum height of the layer
      * @param isOpaque Whether the layer should be opaque or not
-     * 
+     *
      * @return A hardware layer
      */
     abstract HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque);
@@ -544,7 +546,7 @@ public abstract class HardwareRenderer {
      * specified hardware layer.
      *
      * @param layer The layer to render into using a {@link android.graphics.SurfaceTexture}
-     * 
+     *
      * @return A {@link SurfaceTexture}
      */
     abstract SurfaceTexture createSurfaceTexture(HardwareLayer layer);
@@ -560,11 +562,11 @@ public abstract class HardwareRenderer {
 
     /**
      * Detaches the specified functor from the current functor execution queue.
-     * 
+     *
      * @param functor The native functor to remove from the execution queue.
-     *                
-     * @see HardwareCanvas#callDrawGLFunction(int) 
-     * @see #attachFunctor(android.view.View.AttachInfo, int) 
+     *
+     * @see HardwareCanvas#callDrawGLFunction(int)
+     * @see #attachFunctor(android.view.View.AttachInfo, int)
      */
     abstract void detachFunctor(int functor);
 
@@ -591,12 +593,12 @@ public abstract class HardwareRenderer {
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
      * @param surface The surface to hardware accelerate
-     *                
+     *
      * @return true if the surface was initialized, false otherwise. Returning
      *         false might mean that the surface was already initialized.
      */
     boolean initializeIfNeeded(int width, int height, Surface surface)
-            throws Surface.OutOfResourcesException {
+            throws OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
@@ -618,10 +620,10 @@ public abstract class HardwareRenderer {
 
     /**
      * Creates a hardware renderer using OpenGL.
-     * 
+     *
      * @param glVersion The version of OpenGL to use (1 for OpenGL 1, 11 for OpenGL 1.1, etc.)
      * @param translucent True if the surface is translucent, false otherwise
-     * 
+     *
      * @return A hardware renderer backed by OpenGL.
      */
     static HardwareRenderer createGlRenderer(int glVersion, boolean translucent) {
@@ -636,7 +638,7 @@ public abstract class HardwareRenderer {
      * Invoke this method when the system is running out of memory. This
      * method will attempt to recover as much memory as possible, based on
      * the specified hint.
-     * 
+     *
      * @param level Hint about the amount of memory that should be trimmed,
      *              see {@link android.content.ComponentCallbacks}
      */
@@ -649,7 +651,7 @@ public abstract class HardwareRenderer {
      * Starts the process of trimming memory. Usually this call will setup
      * hardware rendering context and reclaim memory.Extra cleanup might
      * be required by calling {@link #endTrimMemory()}.
-     * 
+     *
      * @param level Hint about the amount of memory that should be trimmed,
      *              see {@link android.content.ComponentCallbacks}
      */
@@ -667,7 +669,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Indicates whether hardware acceleration is currently enabled.
-     * 
+     *
      * @return True if hardware acceleration is in use, false otherwise.
      */
     boolean isEnabled() {
@@ -676,7 +678,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Indicates whether hardware acceleration is currently enabled.
-     * 
+     *
      * @param enabled True if the hardware renderer is in use, false otherwise.
      */
     void setEnabled(boolean enabled) {
@@ -686,7 +688,7 @@ public abstract class HardwareRenderer {
     /**
      * Indicates whether hardware acceleration is currently request but not
      * necessarily enabled yet.
-     * 
+     *
      * @return True if requested, false otherwise.
      */
     boolean isRequested() {
@@ -696,7 +698,7 @@ public abstract class HardwareRenderer {
     /**
      * Indicates whether hardware acceleration is currently requested but not
      * necessarily enabled yet.
-     * 
+     *
      * @return True to request hardware acceleration, false otherwise.
      */
     void setRequested(boolean requested) {
@@ -837,7 +839,7 @@ public abstract class HardwareRenderer {
         Thread mEglThread;
 
         EGLSurface mEglSurface;
-        
+
         GL mGl;
         HardwareCanvas mCanvas;
 
@@ -1050,7 +1052,7 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        boolean initialize(Surface surface) throws Surface.OutOfResourcesException {
+        boolean initialize(Surface surface) throws OutOfResourcesException {
             if (isRequested() && !isEnabled()) {
                 boolean contextCreated = initializeEgl();
                 mGl = createEglSurface(surface);
@@ -1078,9 +1080,9 @@ public abstract class HardwareRenderer {
             }
             return false;
         }
-        
+
         @Override
-        void updateSurface(Surface surface) throws Surface.OutOfResourcesException {
+        void updateSurface(Surface surface) throws OutOfResourcesException {
             if (isRequested() && isEnabled()) {
                 createEglSurface(surface);
             }
@@ -1094,15 +1096,15 @@ public abstract class HardwareRenderer {
             synchronized (sEglLock) {
                 if (sEgl == null && sEglConfig == null) {
                     sEgl = (EGL10) EGLContext.getEGL();
-                    
+
                     // Get to the default display.
                     sEglDisplay = sEgl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
-                    
+
                     if (sEglDisplay == EGL_NO_DISPLAY) {
                         throw new RuntimeException("eglGetDisplay failed "
                                 + GLUtils.getEGLErrorString(sEgl.eglGetError()));
                     }
-                    
+
                     // We can now initialize EGL for that display
                     int[] version = new int[2];
                     if (!sEgl.eglInitialize(sEglDisplay, version)) {
@@ -1216,7 +1218,7 @@ public abstract class HardwareRenderer {
             Log.d(LOG_TAG, "  CONFIG_CAVEAT = 0x" + Integer.toHexString(value[0]));
         }
 
-        GL createEglSurface(Surface surface) throws Surface.OutOfResourcesException {
+        GL createEglSurface(Surface surface) throws OutOfResourcesException {
             // Check preconditions.
             if (sEgl == null) {
                 throw new RuntimeException("egl not initialized");
@@ -1228,7 +1230,7 @@ public abstract class HardwareRenderer {
                 throw new RuntimeException("eglConfig not initialized");
             }
             if (Thread.currentThread() != mEglThread) {
-                throw new IllegalStateException("HardwareRenderer cannot be used " 
+                throw new IllegalStateException("HardwareRenderer cannot be used "
                         + "from multiple threads");
             }
 
@@ -1394,8 +1396,8 @@ public abstract class HardwareRenderer {
 
         boolean canDraw() {
             return mGl != null && mCanvas != null;
-        }        
-        
+        }
+
         int onPreDraw(Rect dirty) {
             return DisplayList.STATUS_DONE;
         }
@@ -1732,7 +1734,7 @@ public abstract class HardwareRenderer {
          * Ensures the current EGL context and surface are the ones we expect.
          * This method throws an IllegalStateException if invoked from a thread
          * that did not initialize EGL.
-         * 
+         *
          * @return {@link #SURFACE_STATE_ERROR} if the correct EGL context cannot be made current,
          *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
          *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one

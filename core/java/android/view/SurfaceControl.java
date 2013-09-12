@@ -24,6 +24,7 @@ import android.view.Surface;
 import android.os.IBinder;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.view.Surface.OutOfResourcesException;
 
 /**
  * SurfaceControl
@@ -75,22 +76,11 @@ public class SurfaceControl {
 
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
-    private String mName;
+    private final String mName;
     int mNativeObject; // package visibility only for Surface.java access
 
     private static final boolean HEADLESS = "1".equals(
         SystemProperties.get("ro.config.headless", "0"));
-
-    /**
-     * Exception thrown when a surface couldn't be created or resized.
-     */
-    public static class OutOfResourcesException extends Exception {
-        public OutOfResourcesException() {
-        }
-        public OutOfResourcesException(String name) {
-            super(name);
-        }
-    }
 
     /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
 
@@ -220,6 +210,8 @@ public class SurfaceControl {
      * @param h The surface initial height.
      * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
      * in the creation flags.
+     *
+     * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     public SurfaceControl(SurfaceSession session,
             String name, int w, int h, int format, int flags)

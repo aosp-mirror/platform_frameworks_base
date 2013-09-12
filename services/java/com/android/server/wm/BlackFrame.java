@@ -22,6 +22,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -36,7 +37,7 @@ public class BlackFrame {
         final SurfaceControl surface;
 
         BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b, int layerStack)
-                throws SurfaceControl.OutOfResourcesException {
+                throws OutOfResourcesException {
             left = l;
             top = t;
             this.layer = layer;
@@ -112,7 +113,7 @@ public class BlackFrame {
     }
 
     public BlackFrame(SurfaceSession session, Rect outer, Rect inner, int layer, int layerStack,
-            boolean forceDefaultOrientation) throws SurfaceControl.OutOfResourcesException {
+            boolean forceDefaultOrientation) throws OutOfResourcesException {
         boolean success = false;
 
         mForceDefaultOrientation = forceDefaultOrientation;

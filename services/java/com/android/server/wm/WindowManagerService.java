@@ -116,6 +116,7 @@ import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
+import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -461,7 +462,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
-    private PowerManager.WakeLock mScreenFrozenLock;
+    private final PowerManager.WakeLock mScreenFrozenLock;
 
     final AppTransition mAppTransition;
     boolean mStartingIconInTransition = false;
@@ -664,7 +665,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mInTouchMode = true;
 
     private ViewServer mViewServer;
-    private ArrayList<WindowChangeListener> mWindowChangeListeners =
+    private final ArrayList<WindowChangeListener> mWindowChangeListeners =
         new ArrayList<WindowChangeListener>();
     private boolean mWindowsChanged = false;
 
@@ -6812,7 +6813,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         Slog.w(TAG, "Drag already in progress");
                     }
-                } catch (SurfaceControl.OutOfResourcesException e) {
+                } catch (OutOfResourcesException e) {
                     Slog.e(TAG, "Can't allocate drag surface w=" + width + " h=" + height, e);
                     if (mDragState != null) {
                         mDragState.reset();
@@ -8580,12 +8581,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAppTransition.getStartingPoint(p);
                     appAnimator.thumbnailX = p.x;
                     appAnimator.thumbnailY = p.y;
-                } catch (SurfaceControl.OutOfResourcesException e) {
-                    Slog.e(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
-                            + " h=" + dirty.height(), e);
-                    appAnimator.clearThumbnail();
-                } catch (Surface.OutOfResourcesException e) {
-                    Slog.e(TAG, "Can't allocate Canvas surface w=" + dirty.width()
+                } catch (OutOfResourcesException e) {
+                    Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w=" + dirty.width()
                             + " h=" + dirty.height(), e);
                     appAnimator.clearThumbnail();
                 }

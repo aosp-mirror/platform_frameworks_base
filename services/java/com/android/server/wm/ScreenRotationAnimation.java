@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -262,7 +263,7 @@ class ScreenRotationAnimation {
                 mSurfaceControl.setAlpha(0);
                 mSurfaceControl.show();
                 sur.destroy();
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
 
@@ -547,7 +548,7 @@ class ScreenRotationAnimation {
                 mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3,
                         layerStack, false);
                 mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -587,7 +588,7 @@ class ScreenRotationAnimation {
                 mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2,
                         layerStack, mForceDefaultOrientation);
                 mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -609,7 +610,7 @@ class ScreenRotationAnimation {
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
                 mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER,
                         layerStack, false);
-            } catch (SurfaceControl.OutOfResourcesException e) {
+            } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
@@ -894,7 +895,7 @@ class ScreenRotationAnimation {
                     && (mMoreStartEnter || mMoreStartExit || mMoreFinishEnter || mMoreFinishExit))
                 || (USE_CUSTOM_BLACK_FRAME
                         && (mMoreStartFrame || mMoreRotateFrame || mMoreFinishFrame))
-                || mMoreRotateEnter || mMoreRotateExit 
+                || mMoreRotateEnter || mMoreRotateExit
                 || !mFinishAnimReady;
 
         mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
