@@ -78,7 +78,7 @@ static jintArray halGetCarrierFrequencies(JNIEnv *env, jobject obj,
 
     ranges = new consumerir_freq_range_t[len];
 
-    len = dev->get_carrier_freqs(dev, ranges);
+    len = dev->get_carrier_freqs(dev, len, ranges);
     if (len <= 0) {
         delete[] ranges;
         return NULL;
