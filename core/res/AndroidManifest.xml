@@ -2451,13 +2451,6 @@
         android:description="@string/permdesc_accessNetworkConditions"
         android:protectionLevel="signature|system" />
 
-    <!-- Allows an application to request HotwordRecognition.
-         @hide This is not a third-party API (intended for system apps). -->
-    <permission android:name="android.permission.HOTWORD_RECOGNITION"
-        android:label="@string/permlab_hotwordRecognition"
-        android:description="@string/permdesc_hotwordRecognition"
-        android:protectionLevel="signature|system" />
-
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
