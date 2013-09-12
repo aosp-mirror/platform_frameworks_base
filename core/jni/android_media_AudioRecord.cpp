@@ -190,7 +190,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     int frameSize = nbChannels * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
 
-    if (uint32_t(source) >= AUDIO_SOURCE_CNT) {
+    if ((uint32_t(source) >= AUDIO_SOURCE_CNT) && (uint32_t(source) != AUDIO_SOURCE_HOTWORD)) {
         ALOGE("Error creating AudioRecord: unknown source.");
         return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
@@ -387,6 +387,9 @@ static jint android_media_AudioRecord_readInByteArray(JNIEnv *env,  jobject thiz
                                             (jint)recorderBuffSize : sizeInBytes );
     env->ReleaseByteArrayElements(javaAudioData, recordBuff, 0);
 
+    if (readSize < 0) {
+        readSize = AUDIORECORD_ERROR_INVALID_OPERATION;
+    }
     return (jint) readSize;
 }
 
@@ -427,8 +430,12 @@ static jint android_media_AudioRecord_readInDirectBuffer(JNIEnv *env,  jobject t
     }
 
     // read new data from the recorder
-    return (jint) lpRecorder->read(nativeFromJavaBuf,
+    ssize_t readSize = lpRecorder->read(nativeFromJavaBuf,
                                    capacity < sizeInBytes ? capacity : sizeInBytes);
+    if (readSize < 0) {
+        readSize = AUDIORECORD_ERROR_INVALID_OPERATION;
+    }
+    return (jint)readSize;
 }
 
 
