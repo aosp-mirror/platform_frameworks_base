@@ -117,12 +117,12 @@ public class WifiNative {
 
     public boolean connectToSupplicant() {
         // No synchronization necessary .. it is implemented in WifiMonitor
-        localLog(mInterfacePrefix + "connectToSupplicant");
+        if (VDBG) localLog(mInterfacePrefix + "connectToSupplicant");
         return connectToSupplicantNative();
     }
 
     public void closeSupplicantConnection() {
-        localLog(mInterfacePrefix + "closeSupplicantConnection");
+        if (VDBG) localLog(mInterfacePrefix + "closeSupplicantConnection");
         closeSupplicantConnectionNative();
     }
 
@@ -135,9 +135,9 @@ public class WifiNative {
         if (DBG) Log.d(mTAG, "doBoolean: " + command);
         synchronized (mLock) {
             int cmdId = getNewCmdIdLocked();
-            localLog(cmdId + "->" + mInterfacePrefix + command);
+            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
             boolean result = doBooleanCommandNative(mInterfacePrefix + command);
-            localLog(cmdId + "<-" + result);
+            if (VDBG) localLog(cmdId + "<-" + result);
             if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
@@ -147,9 +147,9 @@ public class WifiNative {
         if (DBG) Log.d(mTAG, "doInt: " + command);
         synchronized (mLock) {
             int cmdId = getNewCmdIdLocked();
-            localLog(cmdId + "->" + mInterfacePrefix + command);
+            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
             int result = doIntCommandNative(mInterfacePrefix + command);
-            localLog(cmdId + "<-" + result);
+            if (VDBG) localLog(cmdId + "<-" + result);
             if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
@@ -159,9 +159,9 @@ public class WifiNative {
         if (DBG) Log.d(mTAG, "doString: " + command);
         synchronized (mLock) {
             int cmdId = getNewCmdIdLocked();
-            localLog(cmdId + "->" + mInterfacePrefix + command);
+            if (VDBG) localLog(cmdId + "->" + mInterfacePrefix + command);
             String result = doStringCommandNative(mInterfacePrefix + command);
-            localLog(cmdId + "<-" + result);
+            if (VDBG) localLog(cmdId + "<-" + result);
             if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
