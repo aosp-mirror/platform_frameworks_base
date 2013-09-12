@@ -646,7 +646,7 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"נהל מדיניות רשת"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"מאפשר ליישום לנהל מדיניות הרשת להגדיר כללים ספציפיים-ליישום."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"שנה ניהול חשבונות של שימוש ברשת"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת ליישום לשנות את אופן החישוב של נתוני שימוש ברשת מול כל יישום. לא מיועד לשימוש ביישומים רגילים."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת לאפליקציה לשנות את אופן החישוב של נתוני שימוש ברשת מול כל אפליקציה. לא מיועד לשימוש באפליקציות רגילות."</string>
     <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"שינוי של סימני Socket"</string>
     <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"ההרשאה הזו מאפשרת לאפליקציה לשנות סימני Socket עבור ניתוב"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להתראות"</string>

@@ -657,10 +657,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o proprietário invoque o aplicativo de configuração fornecido pela operadora. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"detectar observações nas condições da rede"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que o aplicativo detecte observações nas condições da rede. Não deve ser necessário para aplicativos comuns."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"solicitar reconhecimento de hotword"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permite que o aplicativo solicite o reconhecimento de hotword. Não deve ser necessário para aplicativos comuns."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras para senha"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controle o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorar tentativas de desbloqueio da tela"</string>

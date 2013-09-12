@@ -657,10 +657,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"වාහකයා ලබාදුන් සැකසුම් යෙදුම් උත්පාදනයට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීම"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"යෙදුමකට ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීමට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවේ."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"අණවදන හඳුනාගැනීම ඉල්ලයි"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"අණවදන හඳුනාගැනීම සඳහා ඉල්ලීමට යෙදුමට ඉඩ දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"තිරය අගුළු ඇරීමේ මුරපදයට අනුමත අකුරු සහ දිග පාලනය කරන්න."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
