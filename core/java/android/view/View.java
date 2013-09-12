@@ -1035,7 +1035,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @IntDef(flag = true,
             value = {
                 FOCUSABLES_ALL,
-                FOCUSABLES_TOUCH_MODE,
+                FOCUSABLES_TOUCH_MODE
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusableMode {}
