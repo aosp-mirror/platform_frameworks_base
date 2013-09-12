@@ -1119,6 +1119,11 @@ public abstract class CameraMetadata {
      */
     public static final int LENS_STATE_STATIONARY = 0;
 
+    /**
+     * @see CaptureResult#LENS_STATE
+     */
+    public static final int LENS_STATE_MOVING = 1;
+
     //
     // Enumeration values for CaptureResult#STATISTICS_SCENE_FLICKER
     //

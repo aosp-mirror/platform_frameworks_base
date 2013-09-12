@@ -587,6 +587,7 @@ public final class CaptureResult extends CameraMetadata {
      * Current lens status
      * </p>
      * @see #LENS_STATE_STATIONARY
+     * @see #LENS_STATE_MOVING
      */
     public static final Key<Integer> LENS_STATE =
             new Key<Integer>("android.lens.state", int.class);
