@@ -650,8 +650,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock) {
-        if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0 &&
-                isScreenLock(wakeLock)) {
+        if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0
+                && isScreenLock(wakeLock)) {
             wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
         }
     }
@@ -725,7 +725,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private void applyWakeLockFlagsOnReleaseLocked(WakeLock wakeLock) {
-        if ((wakeLock.mFlags & PowerManager.ON_AFTER_RELEASE) != 0) {
+        if ((wakeLock.mFlags & PowerManager.ON_AFTER_RELEASE) != 0
+                && isScreenLock(wakeLock)) {
             userActivityNoUpdateLocked(SystemClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_OTHER,
                     PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS,
