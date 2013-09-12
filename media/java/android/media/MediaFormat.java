@@ -44,9 +44,19 @@ import java.util.Map;
  *         for encoders, readable in the output format of decoders</b></td></tr>
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
+ * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
  * <tr><td>{@link #KEY_PUSH_BLANK_BUFFERS_ON_STOP}</td><td>Integer(1)</td><td><b>video decoder rendering to a surface only</b></td></tr>
  * </table>
+ * Specify both {@link #KEY_MAX_WIDTH} and {@link #KEY_MAX_HEIGHT} to enable
+ * adaptive playback (seamless resolution change) for a video decoder that
+ * supports it ({@link MediaCodecInfo.CodecCapabilities#FEATURE_AdaptivePlayback}).
+ * The values are used as hints for the codec: they are the maximum expected
+ * resolution to prepare for.  Depending on codec support, preparing for larger
+ * maximum resolution may require more memory even if that resolution is never
+ * reached.  These fields have no effect for codecs that do not support adaptive
+ * playback.<br /><br />
  *
  * Audio formats have the following keys:
  * <table>
@@ -103,6 +113,20 @@ public final class MediaFormat {
      * The associated value is an integer
      */
     public static final String KEY_HEIGHT = "height";
+
+    /**
+     * A key describing the maximum expected width of the content in a video
+     * decoder format, in case there are resolution changes in the video content.
+     * The associated value is an integer
+     */
+    public static final String KEY_MAX_WIDTH = "max-width";
+
+    /**
+     * A key describing the maximum expected height of the content in a video
+     * decoder format, in case there are resolution changes in the video content.
+     * The associated value is an integer
+     */
+    public static final String KEY_MAX_HEIGHT = "max-height";
 
     /** A key describing the maximum size in bytes of a buffer of data
      * described by this MediaFormat.
