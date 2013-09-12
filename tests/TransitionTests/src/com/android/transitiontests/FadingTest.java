@@ -34,8 +34,8 @@ public class FadingTest extends Activity {
     Scene mCurrentScene;
 
     static {
-        sFade.addTargetId(R.id.removingButton).addTargetId(R.id.invisibleButton).
-                addTargetId(R.id.goneButton);
+        sFade.addTarget(R.id.removingButton).addTarget(R.id.invisibleButton).
+                addTarget(R.id.goneButton);
     }
 
     @Override

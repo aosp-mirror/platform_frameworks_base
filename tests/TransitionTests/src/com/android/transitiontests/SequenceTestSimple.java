@@ -52,14 +52,14 @@ public class SequenceTestSimple extends Activity {
 
         TransitionSet fader = new TransitionSet().
                 setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-        fader.addTransition(new Fade().addTargetId(R.id.removingButton));
-        fader.addTransition(new ChangeBounds().addTargetId(R.id.sceneSwitchButton));
+        fader.addTransition(new Fade().addTarget(R.id.removingButton));
+        fader.addTransition(new ChangeBounds().addTarget(R.id.sceneSwitchButton));
         sequencedFade = fader;
 
         sequencedFadeReverse = new TransitionSet().
                 setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-        sequencedFadeReverse.addTransition(new ChangeBounds().addTargetId(R.id.sceneSwitchButton));
-        sequencedFadeReverse.addTransition(new Fade().addTargetId(R.id.removingButton));
+        sequencedFadeReverse.addTransition(new ChangeBounds().addTarget(R.id.sceneSwitchButton));
+        sequencedFadeReverse.addTransition(new Fade().addTarget(R.id.removingButton));
 
         mCurrentScene = mScene1;
     }

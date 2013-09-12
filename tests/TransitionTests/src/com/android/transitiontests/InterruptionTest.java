@@ -53,9 +53,9 @@ public class InterruptionTest extends Activity {
         mScene4RB = (RadioButton) findViewById(R.id.scene4RB);
 
         ChangeBounds changeBounds1 = new ChangeBounds();
-        changeBounds1.addTargetId(R.id.button);
+        changeBounds1.addTarget(R.id.button);
         ChangeBounds changeBounds2 = new ChangeBounds();
-        changeBounds2.addTargetId(R.id.button1);
+        changeBounds2.addTarget(R.id.button1);
 
         mSequencedMove.addTransition(changeBounds1).addTransition(changeBounds2);
         mSequencedMove.setDuration(1000);
