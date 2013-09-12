@@ -899,6 +899,13 @@
         android:label="@string/permlab_wakeLock"
         android:description="@string/permdesc_wakeLock" />
 
+    <!-- Allows using the device's IR transmitter, if available -->
+    <permission android:name="android.permission.TRANSMIT_IR"
+        android:permissionGroup="android.permission-group.AFFECTS_BATTERY"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_transmitIr"
+        android:description="@string/permdesc_transmitIr" />
+
     <!-- ==================================================== -->
     <!-- Permissions related to changing audio settings   -->
     <!-- ==================================================== -->

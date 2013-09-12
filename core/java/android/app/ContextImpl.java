@@ -47,6 +47,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
@@ -579,6 +580,11 @@ class ContextImpl extends Context {
                 IPrintManager service = IPrintManager.Stub.asInterface(iBinder);
                 return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
                         UserHandle.getAppId(Process.myUid()));
+            }});
+
+        registerService(CONSUMER_IR_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                return new ConsumerIrManager(ctx);
             }});
     }
 

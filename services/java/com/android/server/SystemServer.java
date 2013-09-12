@@ -154,6 +154,7 @@ class ServerThread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
+        ConsumerIrService consumerIr = null;
 
         // Create a handler thread just for the window manager to enjoy.
         HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
@@ -283,6 +284,10 @@ class ServerThread {
             Slog.i(TAG, "Vibrator Service");
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);
+
+            Slog.i(TAG, "Consumer IR Service");
+            consumerIr = new ConsumerIrService(context);
+            ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
