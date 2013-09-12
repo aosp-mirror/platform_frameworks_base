@@ -375,6 +375,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         return mOverflowPopup != null && mOverflowPopup.isShowing();
     }
 
+    public boolean isOverflowMenuShowPending() {
+        return mPostedOpenRunnable != null || isOverflowMenuShowing();
+    }
+
     /**
      * @return true if space has been reserved in the action menu for an overflow item.
      */
