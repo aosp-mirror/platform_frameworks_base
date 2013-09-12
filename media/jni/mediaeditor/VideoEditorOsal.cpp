@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "VideoEditorOsal"
+
 #include <VideoEditorJava.h>
 #include <VideoEditorLogging.h>
 #include <VideoEditorOsal.h>

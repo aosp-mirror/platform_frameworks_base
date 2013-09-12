@@ -20,6 +20,7 @@
 
 #include <SkMatrix.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <input/Input.h>
 #include "android_os_Parcel.h"

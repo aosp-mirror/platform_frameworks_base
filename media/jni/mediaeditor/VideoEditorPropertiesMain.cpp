@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "VideoEditorPropertiesMain"
+
 #include <dlfcn.h>
 #include <stdio.h>
 #include <unistd.h>

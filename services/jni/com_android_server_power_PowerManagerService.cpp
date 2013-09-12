@@ -26,6 +26,7 @@
 #include <limits.h>
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <utils/Timers.h>
 #include <utils/misc.h>
 #include <utils/String8.h>

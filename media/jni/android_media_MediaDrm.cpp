@@ -21,6 +21,7 @@
 #include "android_media_MediaDrm.h"
 
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/Log.h"
 #include "android_os_Parcel.h"
 #include "jni.h"
 #include "JNIHelp.h"
