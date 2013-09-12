@@ -72,6 +72,7 @@ public class ContentProviderClient {
                     throws RemoteException {
         ICancellationSignal remoteCancellationSignal = null;
         if (cancellationSignal != null) {
+            cancellationSignal.throwIfCanceled();
             remoteCancellationSignal = mContentProvider.createCancellationSignal();
             cancellationSignal.setRemote(remoteCancellationSignal);
         }
@@ -208,6 +209,7 @@ public class ContentProviderClient {
             throws RemoteException, FileNotFoundException {
         ICancellationSignal remoteSignal = null;
         if (signal != null) {
+            signal.throwIfCanceled();
             remoteSignal = mContentProvider.createCancellationSignal();
             signal.setRemote(remoteSignal);
         }
@@ -244,6 +246,7 @@ public class ContentProviderClient {
             throws RemoteException, FileNotFoundException {
         ICancellationSignal remoteSignal = null;
         if (signal != null) {
+            signal.throwIfCanceled();
             remoteSignal = mContentProvider.createCancellationSignal();
             signal.setRemote(remoteSignal);
         }
@@ -269,6 +272,7 @@ public class ContentProviderClient {
             throws RemoteException, FileNotFoundException {
         ICancellationSignal remoteSignal = null;
         if (signal != null) {
+            signal.throwIfCanceled();
             remoteSignal = mContentProvider.createCancellationSignal();
             signal.setRemote(remoteSignal);
         }
