@@ -144,6 +144,7 @@ public final class DisplayInfo implements Parcelable {
      * more than one physical display.
      * </p>
      */
+    @Surface.Rotation
     public int rotation;
 
     /**

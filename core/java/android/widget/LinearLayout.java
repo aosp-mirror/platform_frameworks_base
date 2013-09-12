@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -30,6 +31,9 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 
 /**
@@ -57,8 +61,24 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class LinearLayout extends ViewGroup {
+    /** @hide */
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OrientationMode {}
+
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                SHOW_DIVIDER_NONE,
+                SHOW_DIVIDER_BEGINNING,
+                SHOW_DIVIDER_MIDDLE,
+                SHOW_DIVIDER_END
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DividerMode {}
 
     /**
      * Don't show any dividers.
@@ -218,7 +238,7 @@ public class LinearLayout extends ViewGroup {
      *                     {@link #SHOW_DIVIDER_MIDDLE}, or {@link #SHOW_DIVIDER_END},
      *                     or {@link #SHOW_DIVIDER_NONE} to show no dividers.
      */
-    public void setShowDividers(int showDividers) {
+    public void setShowDividers(@DividerMode int showDividers) {
         if (showDividers != mShowDividers) {
             requestLayout();
         }
@@ -234,6 +254,7 @@ public class LinearLayout extends ViewGroup {
      * @return A flag set indicating how dividers should be shown around items.
      * @see #setShowDividers(int)
      */
+    @DividerMode
     public int getShowDividers() {
         return mShowDividers;
     }
@@ -1677,12 +1698,12 @@ public class LinearLayout extends ViewGroup {
     
     /**
      * Should the layout be a column or a row.
-     * @param orientation Pass HORIZONTAL or VERTICAL. Default
-     * value is HORIZONTAL.
+     * @param orientation Pass {@link #HORIZONTAL} or {@link #VERTICAL}. Default
+     * value is {@link #HORIZONTAL}.
      * 
      * @attr ref android.R.styleable#LinearLayout_orientation
      */
-    public void setOrientation(int orientation) {
+    public void setOrientation(@OrientationMode int orientation) {
         if (mOrientation != orientation) {
             mOrientation = orientation;
             requestLayout();
@@ -1694,6 +1715,7 @@ public class LinearLayout extends ViewGroup {
      * 
      * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
      */
+    @OrientationMode
     public int getOrientation() {
         return mOrientation;
     }

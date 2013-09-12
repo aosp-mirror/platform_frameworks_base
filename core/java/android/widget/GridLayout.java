@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -35,6 +36,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -165,6 +168,11 @@ public class GridLayout extends ViewGroup {
 
     // Public constants
 
+    /** @hide */
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Orientation {}
+
     /**
      * The horizontal orientation.
      */
@@ -185,6 +193,11 @@ public class GridLayout extends ViewGroup {
      * intended to avoid confusion between valid values whose sign may not be known.
      */
     public static final int UNDEFINED = Integer.MIN_VALUE;
+
+    /** @hide */
+    @IntDef({ALIGN_BOUNDS, ALIGN_MARGINS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AlignmentMode {}
 
     /**
      * This constant is an {@link #setAlignmentMode(int) alignmentMode}.
@@ -313,6 +326,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_orientation
      */
+    @Orientation
     public int getOrientation() {
         return mOrientation;
     }
@@ -353,7 +367,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_orientation
      */
-    public void setOrientation(int orientation) {
+    public void setOrientation(@Orientation int orientation) {
         if (this.mOrientation != orientation) {
             this.mOrientation = orientation;
             invalidateStructure();
@@ -484,6 +498,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_alignmentMode
      */
+    @AlignmentMode
     public int getAlignmentMode() {
         return mAlignmentMode;
     }
@@ -503,7 +518,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_alignmentMode
      */
-    public void setAlignmentMode(int alignmentMode) {
+    public void setAlignmentMode(@AlignmentMode int alignmentMode) {
         this.mAlignmentMode = alignmentMode;
         requestLayout();
     }

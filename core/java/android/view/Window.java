@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -240,6 +242,7 @@ public abstract class Window {
          *
          * @see #onPreparePanel
          */
+        @Nullable
         public View onCreatePanelView(int featureId);
 
         /**
@@ -368,6 +371,7 @@ public abstract class Window {
          * @param callback Callback to control the lifecycle of this action mode
          * @return The ActionMode that was started, or null if the system should present it
          */
+        @Nullable
         public ActionMode onWindowStartingActionMode(ActionMode.Callback callback);
 
         /**
@@ -956,6 +960,7 @@ public abstract class Window {
      *
      * @return View The current View with focus or null.
      */
+    @Nullable
     public abstract View getCurrentFocus();
 
     /**
@@ -964,6 +969,7 @@ public abstract class Window {
      *
      * @return LayoutInflater The shared LayoutInflater.
      */
+    @NonNull
     public abstract LayoutInflater getLayoutInflater();
 
     public abstract void setTitle(CharSequence title);

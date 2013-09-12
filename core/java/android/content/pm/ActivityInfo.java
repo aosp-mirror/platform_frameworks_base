@@ -16,10 +16,14 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information you can retrieve about a particular application
@@ -212,6 +216,28 @@ public class ActivityInfo extends ComponentInfo
      */
     public int flags;
 
+    /** @hide */
+    @IntDef({
+            SCREEN_ORIENTATION_UNSPECIFIED,
+            SCREEN_ORIENTATION_LANDSCAPE,
+            SCREEN_ORIENTATION_PORTRAIT,
+            SCREEN_ORIENTATION_USER,
+            SCREEN_ORIENTATION_BEHIND,
+            SCREEN_ORIENTATION_SENSOR,
+            SCREEN_ORIENTATION_NOSENSOR,
+            SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
+            SCREEN_ORIENTATION_SENSOR_PORTRAIT,
+            SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
+            SCREEN_ORIENTATION_REVERSE_PORTRAIT,
+            SCREEN_ORIENTATION_FULL_SENSOR,
+            SCREEN_ORIENTATION_USER_LANDSCAPE,
+            SCREEN_ORIENTATION_USER_PORTRAIT,
+            SCREEN_ORIENTATION_FULL_USER,
+            SCREEN_ORIENTATION_LOCKED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScreenOrientation {}
+
     /**
      * Constant corresponding to <code>unspecified</code> in
      * the {@link android.R.attr#screenOrientation} attribute.
@@ -323,6 +349,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link #SCREEN_ORIENTATION_FULL_USER},
      * {@link #SCREEN_ORIENTATION_LOCKED},
      */
+    @ScreenOrientation
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
     
     /**

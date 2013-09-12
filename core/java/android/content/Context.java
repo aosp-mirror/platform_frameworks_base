@@ -16,6 +16,10 @@
 
 package android.content;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -45,6 +49,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -129,6 +135,20 @@ public abstract class Context {
      * @see SQLiteDatabase#enableWriteAheadLogging
      */
     public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 0x0008;
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                BIND_AUTO_CREATE,
+                BIND_AUTO_CREATE,
+                BIND_DEBUG_UNBIND,
+                BIND_NOT_FOREGROUND,
+                BIND_ABOVE_CLIENT,
+                BIND_ALLOW_OOM_MANAGEMENT,
+                BIND_WAIVE_PRIORITY
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BindServiceFlags {}
 
     /**
      * Flag for {@link #bindService}: automatically create the service as long
@@ -493,7 +513,7 @@ public abstract class Context {
      * and {@link #MODE_WORLD_WRITEABLE} to control permissions.  The bit
      * {@link #MODE_MULTI_PROCESS} can also be used if multiple processes
      * are mutating the same SharedPreferences file.  {@link #MODE_MULTI_PROCESS}
-     * is always on in apps targetting Gingerbread (Android 2.3) and below, and
+     * is always on in apps targeting Gingerbread (Android 2.3) and below, and
      * off by default in later versions.
      *
      * @return The single {@link SharedPreferences} instance that can be used
@@ -669,7 +689,8 @@ public abstract class Context {
      * @see #getFilesDir
      * @see android.os.Environment#getExternalStoragePublicDirectory
      */
-    public abstract File getExternalFilesDir(String type);
+    @Nullable
+    public abstract File getExternalFilesDir(@Nullable String type);
 
     /**
      * Returns absolute paths to application-specific directories on all
@@ -794,6 +815,7 @@ public abstract class Context {
      *
      * @see #getCacheDir
      */
+    @Nullable
     public abstract File getExternalCacheDir();
 
     /**
@@ -900,7 +922,8 @@ public abstract class Context {
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
-            int mode, CursorFactory factory, DatabaseErrorHandler errorHandler);
+            int mode, CursorFactory factory,
+            @Nullable DatabaseErrorHandler errorHandler);
 
     /**
      * Delete an existing private SQLiteDatabase associated with this Context's
@@ -1046,7 +1069,7 @@ public abstract class Context {
      * @see #startActivity(Intent)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivity(Intent intent, Bundle options);
+    public abstract void startActivity(Intent intent, @Nullable Bundle options);
 
     /**
      * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
@@ -1062,7 +1085,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    public void startActivityAsUser(Intent intent, Bundle options, UserHandle userId) {
+    public void startActivityAsUser(Intent intent, @Nullable Bundle options, UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -1181,7 +1204,7 @@ public abstract class Context {
      * @see #startIntentSender(IntentSender, Intent, int, int, int)
      */
     public abstract void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
             Bundle options) throws IntentSender.SendIntentException;
 
     /**
@@ -1231,11 +1254,11 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendBroadcast(Intent intent,
-            String receiverPermission);
+            @Nullable String receiverPermission);
 
     /**
      * Like {@link #sendBroadcast(Intent, String)}, but also allows specification
-     * of an assocated app op as per {@link android.app.AppOpsManager}.
+     * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
      */
     public abstract void sendBroadcast(Intent intent,
@@ -1262,7 +1285,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendOrderedBroadcast(Intent intent,
-            String receiverPermission);
+            @Nullable String receiverPermission);
 
     /**
      * Version of {@link #sendBroadcast(Intent)} that allows you to
@@ -1306,15 +1329,15 @@ public abstract class Context {
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
      */
-    public abstract void sendOrderedBroadcast(Intent intent,
-            String receiverPermission, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras);
+    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+            @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras);
 
     /**
      * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,
      * int, String, android.os.Bundle)}, but also allows specification
-     * of an assocated app op as per {@link android.app.AppOpsManager}.
+     * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
      */
     public abstract void sendOrderedBroadcast(Intent intent,
@@ -1349,7 +1372,7 @@ public abstract class Context {
      * @see #sendBroadcast(Intent, String)
      */
     public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission);
+            @Nullable String receiverPermission);
 
     /**
      * Version of
@@ -1382,8 +1405,9 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
-            int initialCode, String initialData, Bundle initialExtras);
+            @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable  Bundle initialExtras);
 
     /**
      * Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
@@ -1448,8 +1472,8 @@ public abstract class Context {
      */
     public abstract void sendStickyOrderedBroadcast(Intent intent,
             BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras);
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras);
 
     /**
      * Remove the data previously sent with {@link #sendStickyBroadcast},
@@ -1509,8 +1533,8 @@ public abstract class Context {
      */
     public abstract void sendStickyOrderedBroadcastAsUser(Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
-            Handler scheduler, int initialCode, String initialData,
-            Bundle initialExtras);
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras);
 
     /**
      * Version of {@link #removeStickyBroadcast(Intent)} that allows you to specify the
@@ -1577,7 +1601,8 @@ public abstract class Context {
      * @see #sendBroadcast
      * @see #unregisterReceiver
      */
-    public abstract Intent registerReceiver(BroadcastReceiver receiver,
+    @Nullable
+    public abstract Intent registerReceiver(@Nullable BroadcastReceiver receiver,
                                             IntentFilter filter);
 
     /**
@@ -1611,8 +1636,10 @@ public abstract class Context {
      * @see #sendBroadcast
      * @see #unregisterReceiver
      */
+    @Nullable
     public abstract Intent registerReceiver(BroadcastReceiver receiver,
-            IntentFilter filter, String broadcastPermission, Handler scheduler);
+            IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler);
 
     /**
      * @hide
@@ -1638,9 +1665,10 @@ public abstract class Context {
      * @see #sendBroadcast
      * @see #unregisterReceiver
      */
+    @Nullable
     public abstract Intent registerReceiverAsUser(BroadcastReceiver receiver,
-            UserHandle user, IntentFilter filter, String broadcastPermission,
-            Handler scheduler);
+            UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler);
 
     /**
      * Unregister a previously registered BroadcastReceiver.  <em>All</em>
@@ -1700,6 +1728,7 @@ public abstract class Context {
      * @see #stopService
      * @see #bindService
      */
+    @Nullable
     public abstract ComponentName startService(Intent service);
 
     /**
@@ -1787,8 +1816,8 @@ public abstract class Context {
      * @see #BIND_DEBUG_UNBIND
      * @see #BIND_NOT_FOREGROUND
      */
-    public abstract boolean bindService(Intent service, ServiceConnection conn,
-            int flags);
+    public abstract boolean bindService(Intent service, @NonNull ServiceConnection conn,
+            @BindServiceFlags int flags);
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
@@ -1809,7 +1838,7 @@ public abstract class Context {
      *
      * @see #bindService
      */
-    public abstract void unbindService(ServiceConnection conn);
+    public abstract void unbindService(@NonNull ServiceConnection conn);
 
     /**
      * Start executing an {@link android.app.Instrumentation} class.  The given
@@ -1834,8 +1863,64 @@ public abstract class Context {
      * @return {@code true} if the instrumentation was successfully started,
      * else {@code false} if it could not be found.
      */
-    public abstract boolean startInstrumentation(ComponentName className,
-            String profileFile, Bundle arguments);
+    public abstract boolean startInstrumentation(@NonNull ComponentName className,
+            @Nullable String profileFile, @Nullable Bundle arguments);
+
+    /** @hide */
+    @StringDef({
+            POWER_SERVICE,
+            WINDOW_SERVICE,
+            LAYOUT_INFLATER_SERVICE,
+            ACCOUNT_SERVICE,
+            ACTIVITY_SERVICE,
+            ALARM_SERVICE,
+            NOTIFICATION_SERVICE,
+            ACCESSIBILITY_SERVICE,
+            CAPTIONING_SERVICE,
+            KEYGUARD_SERVICE,
+            LOCATION_SERVICE,
+            //@hide: COUNTRY_DETECTOR,
+            SEARCH_SERVICE,
+            SENSOR_SERVICE,
+            STORAGE_SERVICE,
+            WALLPAPER_SERVICE,
+            VIBRATOR_SERVICE,
+            //@hide: STATUS_BAR_SERVICE,
+            CONNECTIVITY_SERVICE,
+            //@hide: UPDATE_LOCK_SERVICE,
+            //@hide: NETWORKMANAGEMENT_SERVICE,
+            //@hide: NETWORK_STATS_SERVICE,
+            //@hide: NETWORK_POLICY_SERVICE,
+            WIFI_SERVICE,
+            WIFI_P2P_SERVICE,
+            NSD_SERVICE,
+            AUDIO_SERVICE,
+            MEDIA_ROUTER_SERVICE,
+            TELEPHONY_SERVICE,
+            CLIPBOARD_SERVICE,
+            INPUT_METHOD_SERVICE,
+            TEXT_SERVICES_MANAGER_SERVICE,
+            //@hide: APPWIDGET_SERVICE,
+            //@hide: BACKUP_SERVICE,
+            DROPBOX_SERVICE,
+            DEVICE_POLICY_SERVICE,
+            UI_MODE_SERVICE,
+            DOWNLOAD_SERVICE,
+            NFC_SERVICE,
+            BLUETOOTH_SERVICE,
+            //@hide: SIP_SERVICE,
+            USB_SERVICE,
+            //@hide: SERIAL_SERVICE,
+            INPUT_SERVICE,
+            DISPLAY_SERVICE,
+            //@hide: SCHEDULING_POLICY_SERVICE,
+            USER_SERVICE,
+            //@hide: APP_OPS_SERVICE
+            CAMERA_SERVICE,
+            PRINT_SERVICE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ServiceName {}
 
     /**
      * Return the handle to a system-level service by name. The class of the
@@ -1936,7 +2021,7 @@ public abstract class Context {
      * @see #DOWNLOAD_SERVICE
      * @see android.app.DownloadManager
      */
-    public abstract Object getSystemService(String name);
+    public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -2426,7 +2511,8 @@ public abstract class Context {
      * @see PackageManager#checkPermission(String, String)
      * @see #checkCallingPermission
      */
-    public abstract int checkPermission(String permission, int pid, int uid);
+    @PackageManager.PermissionResult
+    public abstract int checkPermission(@NonNull String permission, int pid, int uid);
 
     /**
      * Determine whether the calling process of an IPC you are handling has been
@@ -2449,7 +2535,8 @@ public abstract class Context {
      * @see #checkPermission
      * @see #checkCallingOrSelfPermission
      */
-    public abstract int checkCallingPermission(String permission);
+    @PackageManager.PermissionResult
+    public abstract int checkCallingPermission(@NonNull String permission);
 
     /**
      * Determine whether the calling process of an IPC <em>or you</em> have been
@@ -2467,7 +2554,8 @@ public abstract class Context {
      * @see #checkPermission
      * @see #checkCallingPermission
      */
-    public abstract int checkCallingOrSelfPermission(String permission);
+    @PackageManager.PermissionResult
+    public abstract int checkCallingOrSelfPermission(@NonNull String permission);
 
     /**
      * If the given permission is not allowed for a particular process
@@ -2482,7 +2570,7 @@ public abstract class Context {
      * @see #checkPermission(String, int, int)
      */
     public abstract void enforcePermission(
-            String permission, int pid, int uid, String message);
+            @NonNull String permission, int pid, int uid, @Nullable String message);
 
     /**
      * If the calling process of an IPC you are handling has not been
@@ -2503,7 +2591,7 @@ public abstract class Context {
      * @see #checkCallingPermission(String)
      */
     public abstract void enforceCallingPermission(
-            String permission, String message);
+            @NonNull String permission, @Nullable String message);
 
     /**
      * If neither you nor the calling process of an IPC you are
@@ -2519,7 +2607,7 @@ public abstract class Context {
      * @see #checkCallingOrSelfPermission(String)
      */
     public abstract void enforceCallingOrSelfPermission(
-            String permission, String message);
+            @NonNull String permission, @Nullable String message);
 
     /**
      * Grant permission to access a specific Uri to another package, regardless
@@ -2555,7 +2643,7 @@ public abstract class Context {
      * @see #revokeUriPermission
      */
     public abstract void grantUriPermission(String toPackage, Uri uri,
-            int modeFlags);
+            @Intent.GrantUriMode int modeFlags);
 
     /**
      * Remove all permissions to access a particular content provider Uri
@@ -2574,7 +2662,7 @@ public abstract class Context {
      *
      * @see #grantUriPermission
      */
-    public abstract void revokeUriPermission(Uri uri, int modeFlags);
+    public abstract void revokeUriPermission(Uri uri, @Intent.GrantUriMode int modeFlags);
 
     /**
      * Determine whether a particular process and user ID has been granted
@@ -2597,7 +2685,8 @@ public abstract class Context {
      *
      * @see #checkCallingUriPermission
      */
-    public abstract int checkUriPermission(Uri uri, int pid, int uid, int modeFlags);
+    public abstract int checkUriPermission(Uri uri, int pid, int uid,
+            @Intent.GrantUriMode int modeFlags);
 
     /**
      * Determine whether the calling process and user ID has been
@@ -2620,7 +2709,7 @@ public abstract class Context {
      *
      * @see #checkUriPermission(Uri, int, int, int)
      */
-    public abstract int checkCallingUriPermission(Uri uri, int modeFlags);
+    public abstract int checkCallingUriPermission(Uri uri, @Intent.GrantUriMode int modeFlags);
 
     /**
      * Determine whether the calling process of an IPC <em>or you</em> has been granted
@@ -2639,7 +2728,8 @@ public abstract class Context {
      *
      * @see #checkCallingUriPermission
      */
-    public abstract int checkCallingOrSelfUriPermission(Uri uri, int modeFlags);
+    public abstract int checkCallingOrSelfUriPermission(Uri uri,
+            @Intent.GrantUriMode int modeFlags);
 
     /**
      * Check both a Uri and normal permission.  This allows you to perform
@@ -2651,7 +2741,7 @@ public abstract class Context {
      * @param readPermission The permission that provides overall read access,
      * or null to not do this check.
      * @param writePermission The permission that provides overall write
-     * acess, or null to not do this check.
+     * access, or null to not do this check.
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
@@ -2663,8 +2753,9 @@ public abstract class Context {
      * is allowed to access that uri or holds one of the given permissions, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      */
-    public abstract int checkUriPermission(Uri uri, String readPermission,
-            String writePermission, int pid, int uid, int modeFlags);
+    public abstract int checkUriPermission(@Nullable Uri uri, @Nullable String readPermission,
+            @Nullable String writePermission, int pid, int uid,
+            @Intent.GrantUriMode int modeFlags);
 
     /**
      * If a particular process and user ID has not been granted
@@ -2686,7 +2777,7 @@ public abstract class Context {
      * @see #checkUriPermission(Uri, int, int, int)
      */
     public abstract void enforceUriPermission(
-            Uri uri, int pid, int uid, int modeFlags, String message);
+            Uri uri, int pid, int uid, @Intent.GrantUriMode int modeFlags, String message);
 
     /**
      * If the calling process and user ID has not been granted
@@ -2708,7 +2799,7 @@ public abstract class Context {
      * @see #checkCallingUriPermission(Uri, int)
      */
     public abstract void enforceCallingUriPermission(
-            Uri uri, int modeFlags, String message);
+            Uri uri, @Intent.GrantUriMode int modeFlags, String message);
 
     /**
      * If the calling process of an IPC <em>or you</em> has not been
@@ -2727,7 +2818,7 @@ public abstract class Context {
      * @see #checkCallingOrSelfUriPermission(Uri, int)
      */
     public abstract void enforceCallingOrSelfUriPermission(
-            Uri uri, int modeFlags, String message);
+            Uri uri, @Intent.GrantUriMode int modeFlags, String message);
 
     /**
      * Enforce both a Uri and normal permission.  This allows you to perform
@@ -2739,7 +2830,7 @@ public abstract class Context {
      * @param readPermission The permission that provides overall read access,
      * or null to not do this check.
      * @param writePermission The permission that provides overall write
-     * acess, or null to not do this check.
+     * access, or null to not do this check.
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
@@ -2751,8 +2842,15 @@ public abstract class Context {
      * @see #checkUriPermission(Uri, String, String, int, int, int)
      */
     public abstract void enforceUriPermission(
-            Uri uri, String readPermission, String writePermission,
-            int pid, int uid, int modeFlags, String message);
+            @Nullable Uri uri, @Nullable String readPermission,
+            @Nullable String writePermission, int pid, int uid, @Intent.GrantUriMode int modeFlags,
+            @Nullable String message);
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {CONTEXT_INCLUDE_CODE, CONTEXT_IGNORE_SECURITY, CONTEXT_RESTRICTED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CreatePackageOptions {}
 
     /**
      * Flag for use with {@link #createPackageContext}: include the application
@@ -2810,7 +2908,7 @@ public abstract class Context {
      * the given package name.
      */
     public abstract Context createPackageContext(String packageName,
-            int flags) throws PackageManager.NameNotFoundException;
+            @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException;
 
     /**
      * Similar to {@link #createPackageContext(String, int)}, but with a
@@ -2846,7 +2944,8 @@ public abstract class Context {
      *
      * @return A {@link Context} with the given configuration override.
      */
-    public abstract Context createConfigurationContext(Configuration overrideConfiguration);
+    public abstract Context createConfigurationContext(
+            @NonNull Configuration overrideConfiguration);
 
     /**
      * Return a new Context object for the current Context but whose resources
@@ -2866,7 +2965,7 @@ public abstract class Context {
      *
      * @return A {@link Context} for the display.
      */
-    public abstract Context createDisplayContext(Display display);
+    public abstract Context createDisplayContext(@NonNull Display display);
 
     /**
      * Gets the display adjustments holder for this context.  This information

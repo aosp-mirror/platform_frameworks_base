@@ -528,6 +528,7 @@ public final class Display {
      * 90 degrees clockwise and thus the returned value here will be
      * {@link Surface#ROTATION_90 Surface.ROTATION_90}.
      */
+    @Surface.Rotation
     public int getRotation() {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -540,6 +541,7 @@ public final class Display {
      * @return orientation of this display.
      */
     @Deprecated
+    @Surface.Rotation
     public int getOrientation() {
         return getRotation();
     }

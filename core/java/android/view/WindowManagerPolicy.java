@@ -16,7 +16,9 @@
 
 package android.view;
 
+import android.annotation.IntDef;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -27,6 +29,8 @@ import android.os.Looper;
 import android.view.animation.Animation;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This interface supplies all UI-specific behavior of the window manager.  An
@@ -461,6 +465,11 @@ public interface WindowManagerPolicy {
     public final int OFF_BECAUSE_OF_TIMEOUT = 3;
     /** Screen turned off because of proximity sensor */
     public final int OFF_BECAUSE_OF_PROX_SENSOR = 4;
+
+    /** @hide */
+    @IntDef({USER_ROTATION_FREE, USER_ROTATION_LOCKED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserRotationMode {}
 
     /** When not otherwise specified by the activity's screenOrientation, rotation should be
      * determined by the system (that is, using sensors). */
@@ -1029,7 +1038,8 @@ public interface WindowManagerPolicy {
      * @param lastRotation The most recently used rotation.
      * @return The surface rotation to use.
      */
-    public int rotationForOrientationLw(int orientation, int lastRotation);
+    public int rotationForOrientationLw(@ActivityInfo.ScreenOrientation int orientation,
+            int lastRotation);
 
     /**
      * Given an orientation constant and a rotation, returns true if the rotation
@@ -1044,7 +1054,8 @@ public interface WindowManagerPolicy {
      * @param rotation The rotation to check.
      * @return True if the rotation is compatible with the requested orientation.
      */
-    public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation);
+    public boolean rotationHasCompatibleMetricsLw(@ActivityInfo.ScreenOrientation int orientation,
+            int rotation);
 
     /**
      * Called by the window manager when the rotation changes.
@@ -1093,7 +1104,7 @@ public interface WindowManagerPolicy {
      */
     public void enableScreenAfterBoot();
     
-    public void setCurrentOrientationLw(int newOrientation);
+    public void setCurrentOrientationLw(@ActivityInfo.ScreenOrientation int newOrientation);
     
     /**
      * Call from application to perform haptic feedback on its window.
@@ -1120,6 +1131,7 @@ public interface WindowManagerPolicy {
      * @see WindowManagerPolicy#USER_ROTATION_LOCKED
      * @see WindowManagerPolicy#USER_ROTATION_FREE 
      */
+    @UserRotationMode
     public int getUserRotationMode();
 
     /**
@@ -1130,12 +1142,12 @@ public interface WindowManagerPolicy {
      * @param rotation One of {@link Surface#ROTATION_0}, {@link Surface#ROTATION_90},
      *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}.
      */
-    public void setUserRotationMode(int mode, int rotation);
+    public void setUserRotationMode(@UserRotationMode int mode, @Surface.Rotation int rotation);
 
     /**
      * Called when a new system UI visibility is being reported, allowing
      * the policy to adjust what is actually reported.
-     * @param visibility The raw visiblity reported by the status bar.
+     * @param visibility The raw visibility reported by the status bar.
      * @return The new desired visibility.
      */
     public int adjustSystemUiVisibilityLw(int visibility);

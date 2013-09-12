@@ -16,6 +16,9 @@
 
 package android.app;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -27,6 +30,9 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.widget.SpinnerAdapter;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A window feature at the top of the activity that may display the activity title, navigation
@@ -57,6 +63,11 @@ import android.widget.SpinnerAdapter;
  * </div>
  */
 public abstract class ActionBar {
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
+    public @interface NavigationMode {}
+
     /**
      * Standard navigation mode. Consists of either a logo or icon
      * and title text with an optional subtitle. Clicking any of these elements
@@ -77,6 +88,19 @@ public abstract class ActionBar {
      * presents a series of tabs for navigation within the activity.
      */
     public static final int NAVIGATION_MODE_TABS = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            value = {
+                    DISPLAY_USE_LOGO,
+                    DISPLAY_SHOW_HOME,
+                    DISPLAY_HOME_AS_UP,
+                    DISPLAY_SHOW_TITLE,
+                    DISPLAY_SHOW_CUSTOM,
+                    DISPLAY_TITLE_MULTIPLE_LINES
+            })
+    public @interface DisplayOptions {}
 
     /**
      * Use logo instead of icon if available. This flag will cause appropriate
@@ -341,7 +365,7 @@ public abstract class ActionBar {
      * @param options A combination of the bits defined by the DISPLAY_ constants
      *                defined in ActionBar.
      */
-    public abstract void setDisplayOptions(int options);
+    public abstract void setDisplayOptions(@DisplayOptions int options);
     
     /**
      * Set selected display options. Only the options specified by mask will be changed.
@@ -356,7 +380,7 @@ public abstract class ActionBar {
      *                defined in ActionBar.
      * @param mask A bit mask declaring which display options should be changed.
      */
-    public abstract void setDisplayOptions(int options, int mask);
+    public abstract void setDisplayOptions(@DisplayOptions int options, @DisplayOptions int mask);
 
     /**
      * Set whether to display the activity logo rather than the activity icon.
@@ -431,7 +455,7 @@ public abstract class ActionBar {
      * @see #setStackedBackgroundDrawable(Drawable)
      * @see #setSplitBackgroundDrawable(Drawable)
      */
-    public abstract void setBackgroundDrawable(Drawable d);
+    public abstract void setBackgroundDrawable(@Nullable Drawable d);
 
     /**
      * Set the ActionBar's stacked background. This will appear
@@ -484,6 +508,7 @@ public abstract class ActionBar {
      *
      * @return The current navigation mode.
      */
+    @NavigationMode
     public abstract int getNavigationMode();
 
     /**
@@ -494,7 +519,7 @@ public abstract class ActionBar {
      * @see #NAVIGATION_MODE_LIST
      * @see #NAVIGATION_MODE_TABS
      */
-    public abstract void setNavigationMode(int mode);
+    public abstract void setNavigationMode(@NavigationMode int mode);
 
     /**
      * @return The current set of display options. 
@@ -1024,7 +1049,7 @@ public abstract class ActionBar {
         })
         public int gravity = Gravity.NO_GRAVITY;
 
-        public LayoutParams(Context c, AttributeSet attrs) {
+        public LayoutParams(@NonNull Context c, AttributeSet attrs) {
             super(c, attrs);
 
             TypedArray a = c.obtainStyledAttributes(attrs,

@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -33,6 +34,8 @@ import android.util.AndroidException;
 import android.util.DisplayMetrics;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -189,6 +192,11 @@ public abstract class PackageManager {
      * supplied Intent.
      */
     public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
+
+    /** @hide */
+    @IntDef({PERMISSION_GRANTED, PERMISSION_DENIED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionResult {}
 
     /**
      * Permission check result: this is returned by {@link #checkPermission}
