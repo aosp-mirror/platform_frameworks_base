@@ -29,6 +29,7 @@
 #include "jni.h"
 #include <limits.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 
 #include <utils/Log.h>
 #include <utils/Looper.h>
