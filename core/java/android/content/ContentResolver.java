@@ -548,14 +548,16 @@ public abstract class ContentResolver {
      * it to its local non-canonical form.  This can be useful in some cases where
      * you know that you will only be using the Uri in the current environment and
      * want to avoid any possible overhead when using it with the content
-     * provider.
+     * provider or want to verify that the referenced data exists at all in the
+     * new environment.
      *
      * @param url The canonical {@link Uri} that is to be convered back to its
      * non-canonical form.
      *
-     * @return Returns the non-canonical representation of <var>url</var>.  This
-     * function never returns null; if there is no conversion to be done, it returns
-     * the same Uri that was provided.
+     * @return Returns the non-canonical representation of <var>url</var>.  This will
+     * return null if data identified by the canonical Uri can not be found in
+     * the current environment; callers must always check for null and deal with
+     * that by appropriately falling back to an alternative.
      *
      * @see #canonicalize
      */
