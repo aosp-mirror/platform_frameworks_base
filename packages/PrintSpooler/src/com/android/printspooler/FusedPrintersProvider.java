@@ -57,7 +57,7 @@ import java.util.Map;
 public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     private static final String LOG_TAG = "FusedPrintersProvider";
 
-    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG = false;
 
     private static final double WEIGHT_DECAY_COEFFICIENT = 0.95f;
 
