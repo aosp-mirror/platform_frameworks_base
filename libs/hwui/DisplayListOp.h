@@ -82,15 +82,6 @@ public:
     // NOTE: it would be nice to declare constants and overriding the implementation in each op to
     // point at the constants, but that seems to require a .cpp file
     virtual const char* name() = 0;
-
-    /**
-     * Stores the relevant canvas state of the object between deferral and replay (if the canvas
-     * state supports being stored) See OpenGLRenderer::simpleClipAndState()
-     *
-     * TODO: don't reserve space for StateOps that won't be deferred
-     */
-    DeferredDisplayState state;
-
 };
 
 class StateOp : public DisplayListOp {
@@ -129,14 +120,6 @@ public:
             return;
         }
 
-        if (getLocalBounds(state.mBounds)) {
-            // valid empty bounds, don't bother deferring
-            if (state.mBounds.isEmpty()) return;
-        } else {
-            // empty bounds signify bounds can't be calculated
-            state.mBounds.setEmpty();
-        }
-
         deferStruct.mDeferredList.addDrawOp(deferStruct.mRenderer, this);
     }
 
@@ -159,11 +142,11 @@ public:
      * reducing which operations are tagged as mergeable.
      */
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<DrawOp*>& ops, const Rect& bounds) {
+            const Vector<OpStatePair>& ops, const Rect& bounds) {
         status_t status = DrawGlInfo::kStatusDone;
         for (unsigned int i = 0; i < ops.size(); i++) {
-            renderer.restoreDisplayState(ops[i]->state, true);
-            status |= ops[i]->applyDraw(renderer, dirty);
+            renderer.restoreDisplayState(*(ops[i].state), true);
+            status |= ops[i].op->applyDraw(renderer, dirty);
         }
         return status;
     }
@@ -178,20 +161,23 @@ public:
      *
      * if a subclass can set deferInfo.mergeable to true, it should implement multiDraw()
      */
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {}
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {}
 
     /**
      * Query the conservative, local bounds (unmapped) bounds of the op.
      *
      * returns true if bounds exist
      */
-    virtual bool getLocalBounds(Rect& localBounds) { return false; }
+    virtual bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
+        return false;
+    }
 
     // TODO: better refine localbounds usage
     void setQuickRejected(bool quickRejected) { mQuickRejected = quickRejected; }
     bool getQuickRejected() { return mQuickRejected; }
 
-    inline int getPaintAlpha() {
+    inline int getPaintAlpha() const {
         return OpenGLRenderer::getAlphaDirect(mPaint);
     }
 
@@ -208,7 +194,7 @@ protected:
 
     // Helper method for determining op opaqueness. Assumes op fills its bounds in local
     // coordinates, and that paint's alpha is used
-    inline bool isOpaqueOverBounds() {
+    inline bool isOpaqueOverBounds(const DeferredDisplayState& state) {
         // ensure that local bounds cover mapped bounds
         if (!state.mMatrix.isSimple()) return false;
 
@@ -251,12 +237,13 @@ public:
     // default empty constructor for bounds, to be overridden in child constructor body
     DrawBoundedOp(SkPaint* paint): DrawOp(paint) { }
 
-    bool getLocalBounds(Rect& localBounds) {
+    bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
         localBounds.set(mLocalBounds);
-        if (state.mDrawModifiers.mHasShadow) {
+        if (drawModifiers.mHasShadow) {
+            // TODO: inspect paint's looper directly
             Rect shadow(mLocalBounds);
-            shadow.translate(state.mDrawModifiers.mShadowDx, state.mDrawModifiers.mShadowDy);
-            shadow.outset(state.mDrawModifiers.mShadowRadius);
+            shadow.translate(drawModifiers.mShadowDx, drawModifiers.mShadowDy);
+            shadow.outset(drawModifiers.mShadowRadius);
             localBounds.unionWith(shadow);
         }
         return true;
@@ -777,8 +764,10 @@ public:
      * the current layer, if any.
      */
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<DrawOp*>& ops, const Rect& bounds) {
-        renderer.restoreDisplayState(state, true); // restore all but the clip
+            const Vector<OpStatePair>& ops, const Rect& bounds) {
+        const DeferredDisplayState& firstState = *(ops[0].state);
+        renderer.restoreDisplayState(firstState, true); // restore all but the clip
+
         TextureVertex vertices[6 * ops.size()];
         TextureVertex* vertex = &vertices[0];
 
@@ -788,14 +777,15 @@ public:
         // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op,
         // and allowing them to be merged in getBatchId()
         for (unsigned int i = 0; i < ops.size(); i++) {
-            const Rect& opBounds = ops[i]->state.mBounds;
+            const DeferredDisplayState& state = *(ops[i].state);
+            const Rect& opBounds = state.mBounds;
             // When we reach multiDraw(), the matrix can be either
             // pureTranslate or simple (translate and/or scale).
             // If the matrix is not pureTranslate, then we have a scale
-            if (!ops[i]->state.mMatrix.isPureTranslate()) transformed = true;
+            if (state.mMatrix.isPureTranslate()) transformed = true;
 
             Rect texCoords(0, 0, 1, 1);
-            ((DrawBitmapOp*) ops[i])->mUvMapper.map(texCoords);
+            ((DrawBitmapOp*) ops[i].op)->mUvMapper.map(texCoords);
 
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, top);
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, top);
@@ -806,8 +796,7 @@ public:
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, bottom);
 
             if (hasLayer) {
-                const Rect& dirty = ops[i]->state.mBounds;
-                renderer.dirtyLayer(dirty.left, dirty.top, dirty.right, dirty.bottom);
+                renderer.dirtyLayer(opBounds.left, opBounds.top, opBounds.right, opBounds.bottom);
             }
         }
 
@@ -821,7 +810,8 @@ public:
 
     virtual const char* name() { return "DrawBitmap"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
         deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
 
@@ -861,7 +851,8 @@ public:
 
     virtual const char* name() { return "DrawBitmapMatrix"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
     }
 
@@ -890,7 +881,8 @@ public:
 
     virtual const char* name() { return "DrawBitmapRect"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
     }
 
@@ -915,7 +907,8 @@ public:
 
     virtual const char* name() { return "DrawBitmapData"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
     }
 };
@@ -939,7 +932,8 @@ public:
 
     virtual const char* name() { return "DrawBitmapMesh"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
     }
 
@@ -989,15 +983,16 @@ public:
      * is also responsible for dirtying the current layer, if any.
      */
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<DrawOp*>& ops, const Rect& bounds) {
-        renderer.restoreDisplayState(state, true);
+            const Vector<OpStatePair>& ops, const Rect& bounds) {
+        const DeferredDisplayState& firstState = *(ops[0].state);
+        renderer.restoreDisplayState(firstState, true); // restore all but the clip
 
         // Batches will usually contain a small number of items so it's
         // worth performing a first iteration to count the exact number
         // of vertices we need in the new mesh
         uint32_t totalVertices = 0;
         for (unsigned int i = 0; i < ops.size(); i++) {
-            totalVertices += ((DrawPatchOp*) ops[i])->getMesh(renderer)->verticesCount;
+            totalVertices += ((DrawPatchOp*) ops[i].op)->getMesh(renderer)->verticesCount;
         }
 
         const bool hasLayer = renderer.hasLayer();
@@ -1012,7 +1007,8 @@ public:
         // enforces ops drawn by this function to have a pure translate or
         // identity matrix
         for (unsigned int i = 0; i < ops.size(); i++) {
-            DrawPatchOp* patchOp = (DrawPatchOp*) ops[i];
+            DrawPatchOp* patchOp = (DrawPatchOp*) ops[i].op;
+            const DeferredDisplayState* state = ops[i].state;
             const Patch* opMesh = patchOp->getMesh(renderer);
             uint32_t vertexCount = opMesh->verticesCount;
             if (vertexCount == 0) continue;
@@ -1020,9 +1016,9 @@ public:
             // We use the bounds to know where to translate our vertices
             // Using patchOp->state.mBounds wouldn't work because these
             // bounds are clipped
-            const float tx = (int) floorf(patchOp->state.mMatrix.getTranslateX() +
+            const float tx = (int) floorf(state->mMatrix.getTranslateX() +
                     patchOp->mLocalBounds.left + 0.5f);
-            const float ty = (int) floorf(patchOp->state.mMatrix.getTranslateY() +
+            const float ty = (int) floorf(state->mMatrix.getTranslateY() +
                     patchOp->mLocalBounds.top + 0.5f);
 
             // Copy & transform all the vertices for the current operation
@@ -1074,12 +1070,13 @@ public:
 
     virtual const char* name() { return "DrawPatch"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
         deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
         deferInfo.mergeable = state.mMatrix.isPureTranslate() &&
                 OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
-        deferInfo.opaqueOverBounds = isOpaqueOverBounds() && mBitmap->isOpaque();
+        deferInfo.opaqueOverBounds = isOpaqueOverBounds(state) && mBitmap->isOpaque();
     }
 
 private:
@@ -1119,7 +1116,7 @@ public:
     DrawStrokableOp(float left, float top, float right, float bottom, SkPaint* paint)
             : DrawBoundedOp(left, top, right, bottom, paint) {};
 
-    bool getLocalBounds(Rect& localBounds) {
+    bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
         localBounds.set(mLocalBounds);
         if (mPaint && mPaint->getStyle() != SkPaint::kFill_Style) {
             localBounds.outset(strokeWidthOutset());
@@ -1127,7 +1124,8 @@ public:
         return true;
     }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         if (mPaint->getPathEffect()) {
             deferInfo.batchId = DeferredDisplayList::kOpBatch_AlphaMaskTexture;
         } else {
@@ -1152,9 +1150,10 @@ public:
         OP_LOG("Draw Rect "RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
-        DrawStrokableOp::onDefer(renderer, deferInfo);
-        deferInfo.opaqueOverBounds = isOpaqueOverBounds() &&
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
+        DrawStrokableOp::onDefer(renderer, deferInfo, state);
+        deferInfo.opaqueOverBounds = isOpaqueOverBounds(state) &&
                 mPaint->getStyle() == SkPaint::kFill_Style;
     }
 
@@ -1177,7 +1176,8 @@ public:
 
     virtual const char* name() { return "DrawRects"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Vertices;
     }
 
@@ -1289,7 +1289,8 @@ public:
         return renderer.drawPath(mPath, getPaint(renderer));
     }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         SkPaint* paint = getPaint(renderer);
         renderer.getCaches().pathCache.precache(mPath, paint);
 
@@ -1324,7 +1325,8 @@ public:
 
     virtual const char* name() { return "DrawLines"; }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         deferInfo.batchId = mPaint->isAntiAlias() ?
                 DeferredDisplayList::kOpBatch_AlphaVertices :
                 DeferredDisplayList::kOpBatch_Vertices;
@@ -1360,7 +1362,8 @@ public:
         OP_LOG("Draw some text, %d bytes", mBytesCount);
     }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         fontRenderer.precache(paint, mText, mCount, mat4::identity());
@@ -1425,7 +1428,8 @@ public:
         memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
     }
 
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
+            const DeferredDisplayState& state) {
         SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
         const mat4& transform = renderer.findBestFontTransform(state.mMatrix);
@@ -1448,19 +1452,20 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         Rect bounds;
-        getLocalBounds(bounds);
+        getLocalBounds(renderer.getDrawModifiers(), bounds);
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
                 mPositions, getPaint(renderer), mTotalAdvance, bounds);
     }
 
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<DrawOp*>& ops, const Rect& bounds) {
+            const Vector<OpStatePair>& ops, const Rect& bounds) {
         status_t status = DrawGlInfo::kStatusDone;
         for (unsigned int i = 0; i < ops.size(); i++) {
+            const DeferredDisplayState& state = *(ops[i].state);
             DrawOpMode drawOpMode = (i == ops.size() - 1) ? kDrawOpMode_Flush : kDrawOpMode_Defer;
-            renderer.restoreDisplayState(ops[i]->state, true); // restore all but the clip
+            renderer.restoreDisplayState(state, true); // restore all but the clip
 
-            DrawTextOp& op = *((DrawTextOp*)ops[i]);
+            DrawTextOp& op = *((DrawTextOp*)ops[i].op);
             // quickReject() will not occure in drawText() so we can use mLocalBounds
             // directly, we do not need to account for shadow by calling getLocalBounds()
             status |= renderer.drawText(op.mText, op.mBytesCount, op.mCount, op.mX, op.mY,

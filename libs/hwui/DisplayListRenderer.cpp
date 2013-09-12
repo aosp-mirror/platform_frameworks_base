@@ -505,17 +505,12 @@ void DisplayListRenderer::addStateOp(StateOp* op) {
 
 void DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
-    if (mDrawModifiers.mHasShadow) {
-        op->state.mDrawModifiers = mDrawModifiers;
-    }
-    if (op->getLocalBounds(localBounds)) {
+    if (op->getLocalBounds(mDrawModifiers, localBounds)) {
         bool rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);
     }
-    if (mDrawModifiers.mHasShadow) {
-        op->state.mDrawModifiers.reset();
-    }
+
     mHasDrawOps = true;
     addOpInternal(op);
 }

@@ -98,24 +98,11 @@ enum ClipSideFlags {
     kClipSide_ConservativeFull = 0x1F
 };
 
-struct DeferredDisplayState {
-    // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped
-    Rect mBounds;
-
-    // the below are set and used by the OpenGLRenderer at record and deferred playback
-    bool mClipValid;
-    Rect mClip;
-    int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
-    bool mClipped;
-    mat4 mMatrix;
-    DrawModifiers mDrawModifiers;
-    float mAlpha;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
+class DeferredDisplayState;
 class DisplayList;
 class TextSetupFunctor;
 class VertexBuffer;
@@ -423,7 +410,7 @@ public:
         return getXfermode(paint->getXfermode());
     }
 
-    static inline int getAlphaDirect(SkPaint* paint) {
+    static inline int getAlphaDirect(const SkPaint* paint) {
         if (!paint) return 255;
         return paint->getAlpha();
     }
