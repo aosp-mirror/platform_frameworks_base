@@ -447,7 +447,9 @@ final class RemotePrintService implements DeathRecipient {
                 Slog.i(LOG_TAG, "[user: " + mUserId + "] stopPrinterTracking()");
             }
             // We are no longer tracking the printer.
-            mTrackedPrinterList.remove(printerId);
+            if (mTrackedPrinterList == null || !mTrackedPrinterList.remove(printerId)) {
+                return;
+            }
             if (mTrackedPrinterList.isEmpty()) {
                 mTrackedPrinterList = null;
             }
