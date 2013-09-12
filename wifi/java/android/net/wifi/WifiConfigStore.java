@@ -115,6 +115,7 @@ class WifiConfigStore {
     private Context mContext;
     private static final String TAG = "WifiConfigStore";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     private static final String SUPPLICANT_CONFIG_FILE = "/data/misc/wifi/wpa_supplicant.conf";
 
@@ -154,7 +155,7 @@ class WifiConfigStore {
     private static final String EOS = "eos";
 
     private final LocalLog mLocalLog;
-    WpaConfigFileObserver mFileObserver;
+    private final WpaConfigFileObserver mFileObserver;
 
     private WifiNative mWifiNative;
     private final KeyStore mKeyStore = KeyStore.getInstance();
@@ -163,10 +164,13 @@ class WifiConfigStore {
         mContext = c;
         mWifiNative = wn;
 
-        if (DBG) {
+        if (VDBG) {
             mLocalLog = mWifiNative.getLocalLog();
             mFileObserver = new WpaConfigFileObserver();
             mFileObserver.startWatching();
+        } else {
+            mLocalLog = null;
+            mFileObserver = null;
         }
     }
 
@@ -180,7 +184,7 @@ class WifiConfigStore {
         public void onEvent(int event, String path) {
             if (event == CLOSE_WRITE) {
                 File file = new File(SUPPLICANT_CONFIG_FILE);
-                localLog("wpa_supplicant.conf changed; new size = " + file.length());
+                if (VDBG) localLog("wpa_supplicant.conf changed; new size = " + file.length());
             }
         }
     }
@@ -245,7 +249,7 @@ class WifiConfigStore {
      * @return false if the network id is invalid
      */
     boolean selectNetwork(int netId) {
-        localLog("selectNetwork", netId);
+        if (VDBG) localLog("selectNetwork", netId);
         if (netId == INVALID_NETWORK_ID) return false;
 
         // Reset the priority of each network at start or if it goes too high.
@@ -282,7 +286,7 @@ class WifiConfigStore {
      * @return network update result
      */
     NetworkUpdateResult saveNetwork(WifiConfiguration config) {
-        localLog("saveNetwork", config.networkId);
+        if (VDBG) localLog("saveNetwork", config.networkId);
         // A new network cannot have null SSID
         if (config == null || (config.networkId == INVALID_NETWORK_ID &&
                 config.SSID == null)) {
@@ -331,7 +335,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean forgetNetwork(int netId) {
-        localLog("forgetNetwork", netId);
+        if (VDBG) localLog("forgetNetwork", netId);
         if (mWifiNative.removeNetwork(netId)) {
             mWifiNative.saveConfig();
             removeConfigAndSendBroadcastIfNeeded(netId);
@@ -352,7 +356,7 @@ class WifiConfigStore {
      * @return network Id
      */
     int addOrUpdateNetwork(WifiConfiguration config) {
-        localLog("addOrUpdateNetwork", config.networkId);
+        if (VDBG) localLog("addOrUpdateNetwork", config.networkId);
         NetworkUpdateResult result = addOrUpdateNetworkNative(config);
         if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
             sendConfiguredNetworksChangedBroadcast(mConfiguredNetworks.get(result.getNetworkId()),
@@ -372,7 +376,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean removeNetwork(int netId) {
-        localLog("removeNetwork", netId);
+        if (VDBG) localLog("removeNetwork", netId);
         boolean ret = mWifiNative.removeNetwork(netId);
         if (ret) {
             removeConfigAndSendBroadcastIfNeeded(netId);
@@ -407,10 +411,10 @@ class WifiConfigStore {
     boolean enableNetwork(int netId, boolean disableOthers) {
         boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
         if (disableOthers) {
-            localLog("enableNetwork(disableOthers=true) ", netId);
+            if (VDBG) localLog("enableNetwork(disableOthers=true) ", netId);
             sendConfiguredNetworksChangedBroadcast();
         } else {
-            localLog("enableNetwork(disableOthers=false) ", netId);
+            if (VDBG) localLog("enableNetwork(disableOthers=false) ", netId);
             WifiConfiguration enabledNetwork = null;
             synchronized(mConfiguredNetworks) {
                 enabledNetwork = mConfiguredNetworks.get(netId);
@@ -437,7 +441,7 @@ class WifiConfigStore {
     }
 
     void disableAllNetworks() {
-        localLog("disableAllNetworks");
+        if (VDBG) localLog("disableAllNetworks");
         boolean networkDisabled = false;
         for(WifiConfiguration config : mConfiguredNetworks.values()) {
             if(config != null && config.status != Status.DISABLED) {
@@ -470,7 +474,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean disableNetwork(int netId, int reason) {
-        localLog("disableNetwork", netId);
+        if (VDBG) localLog("disableNetwork", netId);
         boolean ret = mWifiNative.disableNetwork(netId);
         WifiConfiguration network = null;
         WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -683,33 +687,33 @@ class WifiConfigStore {
 
             if (mNetworkIds.containsKey(configKey(config))) {
                 // That SSID is already known, just ignore this duplicate entry
-                localLog("discarded duplicate network", config.networkId);
+                if (VDBG) localLog("discarded duplicate network", config.networkId);
             } else {
                 mConfiguredNetworks.put(config.networkId, config);
                 mNetworkIds.put(configKey(config), config.networkId);
-                localLog("loaded configured network", config.networkId);
+                if (VDBG) localLog("loaded configured network", config.networkId);
             }
         }
 
         readIpAndProxyConfigurations();
         sendConfiguredNetworksChangedBroadcast();
 
-        localLog("loadConfiguredNetworks loaded " + mNetworkIds.size() + " networks");
+        if (VDBG) localLog("loadConfiguredNetworks loaded " + mNetworkIds.size() + " networks");
 
         if (mNetworkIds.size() == 0) {
             // no networks? Lets log if the wpa_supplicant.conf file contents
             BufferedReader reader = null;
             try {
                 reader = new BufferedReader(new FileReader(SUPPLICANT_CONFIG_FILE));
-                localLog("--- Begin wpa_supplicant.conf Contents ---");
+                if (VDBG) localLog("--- Begin wpa_supplicant.conf Contents ---");
                 for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                    localLog(line);
+                    if (VDBG) localLog(line);
                 }
-                localLog("--- End wpa_supplicant.conf Contents ---");
+                if (VDBG) localLog("--- End wpa_supplicant.conf Contents ---");
             } catch (FileNotFoundException e) {
-                localLog("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e);
+                if (VDBG) localLog("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e);
             } catch (IOException e) {
-                localLog("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e);
+                if (VDBG) localLog("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e);
             } finally {
                 try {
                     if (reader != null) {
@@ -1050,7 +1054,7 @@ class WifiConfigStore {
          * refer to an existing configuration.
          */
 
-        localLog("addOrUpdateNetworkNative " + config.getPrintableSsid());
+        if (VDBG) localLog("addOrUpdateNetworkNative " + config.getPrintableSsid());
 
         int netId = config.networkId;
         boolean newNetwork = false;
