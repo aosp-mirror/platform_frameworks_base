@@ -1320,6 +1320,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 WebViewClassic.disablePlatformNotifications();
             }
         }
+        @Override
+        public void freeMemoryForTests() {
+            // noop.
+        }
 
         @Override
         public Statics getStatics() { return this; }
