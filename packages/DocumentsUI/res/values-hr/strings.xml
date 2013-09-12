@@ -38,7 +38,8 @@
     <string name="save_error" msgid="6167009778003223664">"Nije uspjelo spremanje dokumenta"</string>
     <string name="root_recent" msgid="4470053704320518133">"Nedavno"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> besplatno"</string>
-    <string name="root_type_service" msgid="2857362700576006694">"Usluge"</string>
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
     <string name="root_type_shortcut" msgid="3318760609471618093">"Prečaci"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Uređaji"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Više aplikacija"</string>
@@ -48,7 +49,5 @@
     <string name="empty" msgid="7858882803708117596">"Nema stavki"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Datoteku nije moguće otvoriti"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nije moguće izbrisati neke dokumente"</string>
-    <string name="more" msgid="7117420986529297171">"Više"</string>
-    <string name="loading" msgid="7933681260296021180">"Učitavanje…"</string>
     <string name="share_via" msgid="8966594246261344259">"Dijeli putem"</string>
 </resources>
