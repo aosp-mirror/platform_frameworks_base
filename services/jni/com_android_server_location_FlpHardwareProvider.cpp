@@ -318,7 +318,7 @@ static void TranslateGeofenceFromGeofenceHardwareRequestParcelable(
   jmethodID getNotificationResponsiveness = env->GetMethodID(
       geofenceRequestClass,
       "getNotificationResponsiveness",
-      "()D");
+      "()I");
   options->notification_responsivenes_ms = env->CallIntMethod(
       geofenceRequestObject,
       getNotificationResponsiveness);
