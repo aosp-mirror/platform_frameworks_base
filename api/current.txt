@@ -10958,6 +10958,7 @@ package android.hardware.camera2 {
     field public static final int LENS_FACING_FRONT = 0; // 0x0
     field public static final int LENS_OPTICAL_STABILIZATION_MODE_OFF = 0; // 0x0
     field public static final int LENS_OPTICAL_STABILIZATION_MODE_ON = 1; // 0x1
+    field public static final int LENS_STATE_MOVING = 1; // 0x1
     field public static final int LENS_STATE_STATIONARY = 0; // 0x0
     field public static final int NOISE_REDUCTION_MODE_FAST = 1; // 0x1
     field public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2; // 0x2
