@@ -62,7 +62,7 @@ public class ConnectivityManagerMobileTest extends
         if (Settings.Global.getInt(getInstrumentation().getContext().getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON) == 1) {
             log("airplane is not disabled, disable it.");
-            cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+            cmActivity.mCM.setAirplaneMode(false);
         }
 
         if (!mWifiOnlyFlag) {
@@ -87,7 +87,7 @@ public class ConnectivityManagerMobileTest extends
         if (Settings.Global.getInt(getInstrumentation().getContext().getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON) == 1) {
             log("disable airplane mode if it is enabled");
-            cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+            cmActivity.mCM.setAirplaneMode(false);
         }
         super.tearDown();
     }
@@ -344,7 +344,7 @@ public class ConnectivityManagerMobileTest extends
 
         // Enable airplane mode
         log("Enable airplane mode");
-        cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
+        cmActivity.mCM.setAirplaneMode(true);
         sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
 
         networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -370,7 +370,7 @@ public class ConnectivityManagerMobileTest extends
                 NetworkState.DO_NOTHING, State.DISCONNECTED);
 
         // disable airplane mode
-        cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+        cmActivity.mCM.setAirplaneMode(false);
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
                 ConnectivityManagerTestActivity.LONG_TIMEOUT));
@@ -400,7 +400,7 @@ public class ConnectivityManagerMobileTest extends
         assertNotNull("SSID is null", mTestAccessPoint);
         // Eanble airplane mode
         log("Enable airplane mode");
-        cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
+        cmActivity.mCM.setAirplaneMode(true);
 
         NetworkInfo networkInfo;
         if (!mWifiOnlyFlag) {
@@ -437,7 +437,7 @@ public class ConnectivityManagerMobileTest extends
                 assertTrue("state validation failed", false);
             }
         }
-        cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+        cmActivity.mCM.setAirplaneMode(false);
     }
 
     // Test case 7: test connectivity while transit from Wifi->AM->Wifi
@@ -463,7 +463,7 @@ public class ConnectivityManagerMobileTest extends
         }
 
         // Enable airplane mode without clearing Wifi
-        cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
+        cmActivity.mCM.setAirplaneMode(true);
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
                 ConnectivityManagerTestActivity.LONG_TIMEOUT));
@@ -481,7 +481,7 @@ public class ConnectivityManagerMobileTest extends
                 networkInfo.getState(), NetworkState.TO_CONNECTION, State.CONNECTED);
 
         // Disable airplane mode
-        cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+        cmActivity.mCM.setAirplaneMode(false);
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
                 ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));

@@ -651,19 +651,6 @@ public class ConnectivityManagerTestActivity extends Activity {
         } catch (InterruptedException e) {}
     }
 
-    /**
-     * Set airplane mode
-     */
-    public void setAirplaneMode(Context context, boolean enableAM) {
-        //set the airplane mode
-        Settings.Global.putInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,
-                enableAM ? 1 : 0);
-        // Post the intent
-        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", enableAM);
-        context.sendBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
     protected static String convertToQuotedString(String string) {
         return "\"" + string + "\"";
     }
@@ -694,7 +681,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     //A thread to set the device into airplane mode then turn on wifi.
     Thread setDeviceWifiAndAirplaneThread = new Thread(new Runnable() {
         public void run() {
-            setAirplaneMode(mContext, true);
+            mCM.setAirplaneMode(true);
             connectToWifi(mPowerSsid);
         }
     });
