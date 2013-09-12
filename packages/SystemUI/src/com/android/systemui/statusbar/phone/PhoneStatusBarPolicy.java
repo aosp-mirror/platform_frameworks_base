@@ -66,20 +66,6 @@ public class PhoneStatusBarPolicy {
     // bluetooth device status
     private boolean mBluetoothEnabled = false;
 
-    // wifi
-    private static final int[][] sWifiSignalImages = {
-            { R.drawable.stat_sys_wifi_signal_1,
-              R.drawable.stat_sys_wifi_signal_2,
-              R.drawable.stat_sys_wifi_signal_3,
-              R.drawable.stat_sys_wifi_signal_4 },
-            { R.drawable.stat_sys_wifi_signal_1_fully,
-              R.drawable.stat_sys_wifi_signal_2_fully,
-              R.drawable.stat_sys_wifi_signal_3_fully,
-              R.drawable.stat_sys_wifi_signal_4_fully }
-        };
-    private static final int sWifiTemporarilyNotConnectedImage =
-            R.drawable.stat_sys_wifi_signal_0;
-
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
 
