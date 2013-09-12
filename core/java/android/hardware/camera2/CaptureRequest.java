@@ -957,6 +957,22 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     /**
      * <p>
+     * Whether the HAL needs to output the lens
+     * shading map in output result metadata
+     * </p>
+     * <p>
+     * When set to ON,
+     * android.statistics.lensShadingMap must be provided in
+     * the output result metdata.
+     * </p>
+     * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
+     * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
+     */
+    public static final Key<Integer> STATISTICS_LENS_SHADING_MAP_MODE =
+            new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
+
+    /**
+     * <p>
      * Table mapping blue input values to output
      * values
      * </p>

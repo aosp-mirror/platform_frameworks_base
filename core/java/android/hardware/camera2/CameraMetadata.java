@@ -874,6 +874,20 @@ public abstract class CameraMetadata {
     public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2;
 
     //
+    // Enumeration values for CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
+    //
+
+    /**
+     * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
+     */
+    public static final int STATISTICS_LENS_SHADING_MAP_MODE_OFF = 0;
+
+    /**
+     * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
+     */
+    public static final int STATISTICS_LENS_SHADING_MAP_MODE_ON = 1;
+
+    //
     // Enumeration values for CaptureRequest#TONEMAP_MODE
     //
 
