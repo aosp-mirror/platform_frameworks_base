@@ -57,7 +57,7 @@ public class CrossfadeMultiple extends Activity {
         mTextView = (TextView) findViewById(R.id.textview);
 
         mCrossfade = new Crossfade();
-        mCrossfade.addTargetId(R.id.button).addTargetId(R.id.textview).addTargetId(R.id.imageview);
+        mCrossfade.addTarget(R.id.button).addTarget(R.id.textview).addTarget(R.id.imageview);
 
         mCrossfadeGroup = new TransitionSet();
         mCrossfadeGroup.setDuration(300);

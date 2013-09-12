@@ -46,17 +46,17 @@ public class Demo4 extends Activity {
 
         TransitionSet transitionToResults = new TransitionSet();
         Fade fade = new Fade();
-        fade.addTargetId(R.id.resultsText).addTargetId(R.id.resultsList);
+        fade.addTarget(R.id.resultsText).addTarget(R.id.resultsList);
         fade.setStartDelay(300);
         fade.setDuration(1000);
         transitionToResults.addTransition(fade).
-                addTransition(new ChangeBounds().addTargetId(R.id.searchContainer)).
-                addTransition(new Recolor().addTargetId(R.id.container));
+                addTransition(new ChangeBounds().addTarget(R.id.searchContainer)).
+                addTransition(new Recolor().addTarget(R.id.container));
 
         TransitionSet transitionToSearch = new TransitionSet();
         transitionToSearch.addTransition(fade).
-                addTransition(new ChangeBounds().addTargetId(R.id.searchContainer)).
-                addTransition(new Recolor().addTargetId(R.id.container));
+                addTransition(new ChangeBounds().addTarget(R.id.searchContainer)).
+                addTransition(new Recolor().addTarget(R.id.container));
 
         mTransitionManager = new TransitionManager();
         mTransitionManager.setTransition(mSearchScreen, transitionToSearch);

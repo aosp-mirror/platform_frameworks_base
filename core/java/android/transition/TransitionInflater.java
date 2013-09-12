@@ -235,7 +235,7 @@ public class TransitionInflater {
         int numTargets = targetIds.size();
         if (numTargets > 0) {
             for (int i = 0; i < numTargets; ++i) {
-                transition.addTargetId(targetIds.get(i));
+                transition.addTarget(targetIds.get(i));
             }
         }
     }

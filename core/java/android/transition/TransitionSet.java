@@ -155,8 +155,8 @@ public class TransitionSet extends Transition {
     }
 
     @Override
-    public TransitionSet addTargetId(int targetId) {
-        return (TransitionSet) super.addTargetId(targetId);
+    public TransitionSet addTarget(int targetId) {
+        return (TransitionSet) super.addTarget(targetId);
     }
 
     @Override
@@ -165,8 +165,8 @@ public class TransitionSet extends Transition {
     }
 
     @Override
-    public TransitionSet removeTargetId(int targetId) {
-        return (TransitionSet) super.removeTargetId(targetId);
+    public TransitionSet removeTarget(int targetId) {
+        return (TransitionSet) super.removeTarget(targetId);
     }
 
     @Override
@@ -278,9 +278,11 @@ public class TransitionSet extends Transition {
     @Override
     public void captureStartValues(TransitionValues transitionValues) {
         int targetId = transitionValues.view.getId();
-        for (Transition childTransition : mTransitions) {
-            if (childTransition.isValidTarget(transitionValues.view, targetId)) {
-                childTransition.captureStartValues(transitionValues);
+        if (isValidTarget(transitionValues.view, targetId)) {
+            for (Transition childTransition : mTransitions) {
+                if (childTransition.isValidTarget(transitionValues.view, targetId)) {
+                    childTransition.captureStartValues(transitionValues);
+                }
             }
         }
     }
@@ -288,9 +290,11 @@ public class TransitionSet extends Transition {
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
         int targetId = transitionValues.view.getId();
-        for (Transition childTransition : mTransitions) {
-            if (childTransition.isValidTarget(transitionValues.view, targetId)) {
-                childTransition.captureEndValues(transitionValues);
+        if (isValidTarget(transitionValues.view, targetId)) {
+            for (Transition childTransition : mTransitions) {
+                if (childTransition.isValidTarget(transitionValues.view, targetId)) {
+                    childTransition.captureEndValues(transitionValues);
+                }
             }
         }
     }

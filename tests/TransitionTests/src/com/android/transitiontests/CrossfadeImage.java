@@ -48,7 +48,7 @@ public class CrossfadeImage extends Activity {
         mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         Crossfade mCrossfade = new Crossfade();
-        mCrossfade.addTargetId(R.id.contact_picture);
+        mCrossfade.addTarget(R.id.contact_picture);
 
         TransitionSet group = new TransitionSet();
         group.setDuration(1500);

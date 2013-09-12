@@ -4546,7 +4546,7 @@
     </declare-styleable>
 
     <!-- Use <code>target</code> as the root tag of the XML resource that
-     describes a {@link android.transition.Transition#addTargetId(int)
+     describes a {@link android.transition.Transition#addTarget(int)
      targetId} of a transition. There can be one or more targets inside
      a <code>targets</code> tag, which is itself inside an appropriate
      {@link android.R.styleable#Transition Transition} tag.
