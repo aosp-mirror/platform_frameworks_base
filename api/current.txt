@@ -2540,6 +2540,7 @@ package android.animation {
 
   public class RectEvaluator implements android.animation.TypeEvaluator {
     ctor public RectEvaluator();
+    ctor public RectEvaluator(android.graphics.Rect);
     method public android.graphics.Rect evaluate(float, android.graphics.Rect, android.graphics.Rect);
   }
 
@@ -31782,8 +31783,6 @@ package android.widget {
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int, int);
-    method public int computeVerticalScrollOffset();
-    method public int computeVerticalScrollRange();
     method public java.lang.String[] getDisplayedValues();
     method public int getMaxValue();
     method public int getMinValue();
