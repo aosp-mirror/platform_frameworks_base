@@ -10815,16 +10815,17 @@ package android.hardware.camera2 {
   }
 
   public abstract interface CameraDevice implements java.lang.AutoCloseable {
-    method public abstract void capture(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener) throws android.hardware.camera2.CameraAccessException;
-    method public abstract void captureBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void capture(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void captureBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void close() throws java.lang.Exception;
     method public abstract void configureOutputs(java.util.List<android.view.Surface>) throws android.hardware.camera2.CameraAccessException;
-    method public abstract android.hardware.camera2.CaptureRequest createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
+    method public abstract android.hardware.camera2.CaptureRequest.Builder createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
     method public abstract void flush() throws android.hardware.camera2.CameraAccessException;
+    method public abstract java.lang.String getId();
     method public abstract android.hardware.camera2.CameraProperties getProperties() throws android.hardware.camera2.CameraAccessException;
-    method public abstract void setErrorListener(android.hardware.camera2.CameraDevice.ErrorListener);
-    method public abstract void setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener) throws android.hardware.camera2.CameraAccessException;
-    method public abstract void setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void setDeviceListener(android.hardware.camera2.CameraDevice.CameraDeviceListener, android.os.Handler);
+    method public abstract void setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void stopRepeating() throws android.hardware.camera2.CameraAccessException;
     method public abstract void waitUntilIdle() throws android.hardware.camera2.CameraAccessException;
     field public static final int TEMPLATE_MANUAL = 5; // 0x5
@@ -10834,39 +10835,38 @@ package android.hardware.camera2 {
     field public static final int TEMPLATE_VIDEO_SNAPSHOT = 4; // 0x4
   }
 
-  public static abstract interface CameraDevice.CaptureListener {
-    method public abstract void onCaptureComplete(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
-    method public abstract void onCaptureFailed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest);
+  public static abstract class CameraDevice.CameraDeviceListener {
+    ctor public CameraDevice.CameraDeviceListener();
+    method public void onCameraDisconnected(android.hardware.camera2.CameraDevice);
+    method public void onCameraError(android.hardware.camera2.CameraDevice, int);
+    method public void onCameraIdle(android.hardware.camera2.CameraDevice);
+    field public static final int ERROR_CAMERA_DEVICE = 1; // 0x1
+    field public static final int ERROR_CAMERA_SERVICE = 2; // 0x2
   }
 
-  public static abstract interface CameraDevice.ErrorListener {
-    method public abstract void onCameraDeviceError(android.hardware.camera2.CameraDevice, int);
-    field public static final int DEVICE_DISCONNECTED = 1; // 0x1
-    field public static final int DEVICE_ERROR = 2; // 0x2
-    field public static final int SERVICE_ERROR = 3; // 0x3
+  public static abstract class CameraDevice.CaptureListener {
+    ctor public CameraDevice.CaptureListener();
+    method public void onCaptureCompleted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
+    method public void onCaptureFailed(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest);
+    method public void onCaptureStarted(android.hardware.camera2.CameraDevice, android.hardware.camera2.CaptureRequest, long);
   }
 
   public final class CameraManager {
+    method public void addAvailabilityListener(android.hardware.camera2.CameraManager.AvailabilityListener, android.os.Handler);
+    method public java.lang.String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method public android.hardware.camera2.CameraProperties getCameraProperties(java.lang.String) throws android.hardware.camera2.CameraAccessException;
-    method public java.lang.String[] getDeviceIdList() throws android.hardware.camera2.CameraAccessException;
     method public android.hardware.camera2.CameraDevice openCamera(java.lang.String) throws android.hardware.camera2.CameraAccessException;
-    method public void registerCameraListener(android.hardware.camera2.CameraManager.CameraListener);
-    method public void unregisterCameraListener(android.hardware.camera2.CameraManager.CameraListener);
+    method public void removeAvailabilityListener(android.hardware.camera2.CameraManager.AvailabilityListener);
   }
 
-  public static abstract interface CameraManager.CameraListener {
-    method public abstract void onCameraAvailable(java.lang.String);
-    method public abstract void onCameraUnavailable(java.lang.String);
+  public static abstract class CameraManager.AvailabilityListener {
+    ctor public CameraManager.AvailabilityListener();
+    method public void onCameraAvailable(java.lang.String);
+    method public void onCameraUnavailable(java.lang.String);
   }
 
-  public class CameraMetadata implements java.lang.AutoCloseable android.os.Parcelable {
-    ctor public CameraMetadata();
-    method public void close() throws java.lang.Exception;
-    method public int describeContents();
-    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
-    method public void readFromParcel(android.os.Parcel);
-    method public void set(android.hardware.camera2.CameraMetadata.Key<T>, T);
-    method public void writeToParcel(android.os.Parcel, int);
+  public abstract class CameraMetadata {
+    method public abstract T get(android.hardware.camera2.CameraMetadata.Key<T>);
     field public static final int COLOR_CORRECTION_MODE_FAST = 1; // 0x1
     field public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0; // 0x0
@@ -10950,7 +10950,6 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_SUNSET = 10; // 0xa
     field public static final int CONTROL_SCENE_MODE_THEATRE = 7; // 0x7
     field public static final int CONTROL_SCENE_MODE_UNSUPPORTED = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int EDGE_MODE_FAST = 1; // 0x1
     field public static final int EDGE_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int EDGE_MODE_OFF = 0; // 0x0
@@ -10983,14 +10982,13 @@ package android.hardware.camera2 {
   }
 
   public static class CameraMetadata.Key {
-    ctor public CameraMetadata.Key(java.lang.String, java.lang.Class<T>);
     method public final boolean equals(java.lang.Object);
     method public final java.lang.String getName();
     method public final int hashCode();
   }
 
   public final class CameraProperties extends android.hardware.camera2.CameraMetadata {
-    ctor public CameraProperties();
+    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_RANGE;
@@ -11033,10 +11031,10 @@ package android.hardware.camera2 {
   }
 
   public final class CaptureRequest extends android.hardware.camera2.CameraMetadata implements android.os.Parcelable {
-    method public void addTarget(android.view.Surface);
+    method public int describeContents();
+    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
     method public java.lang.Object getTag();
-    method public void removeTarget(android.view.Surface);
-    method public void setTag(java.lang.Object);
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.hardware.camera2.CameraMetadata.Key BLACK_LEVEL_LOCK;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_GAINS;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_MODE;
@@ -11086,7 +11084,17 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MODE;
   }
 
+  public static final class CaptureRequest.Builder {
+    method public void addTarget(android.view.Surface);
+    method public android.hardware.camera2.CaptureRequest build();
+    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
+    method public void removeTarget(android.view.Surface);
+    method public void set(android.hardware.camera2.CameraMetadata.Key<T>, T);
+    method public void setTag(java.lang.Object);
+  }
+
   public final class CaptureResult extends android.hardware.camera2.CameraMetadata {
+    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
     field public static final android.hardware.camera2.CameraMetadata.Key BLACK_LEVEL_LOCK;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_GAINS;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_TRANSFORM;

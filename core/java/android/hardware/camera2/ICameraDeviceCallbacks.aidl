@@ -16,7 +16,7 @@
 
 package android.hardware.camera2;
 
-import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.impl.CameraMetadataNative;
 
 /** @hide */
 interface ICameraDeviceCallbacks
@@ -26,5 +26,5 @@ interface ICameraDeviceCallbacks
      */
 
     oneway void notifyCallback(int msgType, int ext1, int ext2);
-    oneway void onResultReceived(int frameId, in CameraMetadata result);
+    oneway void onResultReceived(int frameId, in CameraMetadataNative result);
 }
