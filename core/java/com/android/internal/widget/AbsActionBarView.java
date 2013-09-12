@@ -206,6 +206,13 @@ public abstract class AbsActionBarView extends ViewGroup {
         return false;
     }
 
+    public boolean isOverflowMenuShowPending() {
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.isOverflowMenuShowPending();
+        }
+        return false;
+    }
+
     public boolean isOverflowReserved() {
         return mActionMenuPresenter != null && mActionMenuPresenter.isOverflowReserved();
     }

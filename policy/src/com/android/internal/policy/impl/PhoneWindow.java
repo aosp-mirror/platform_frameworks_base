@@ -22,6 +22,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.view.ViewConfiguration;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -540,7 +541,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public final void openPanel(int featureId, KeyEvent event) {
         if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
-                mActionBar.isOverflowReserved()) {
+                mActionBar.isOverflowReserved() &&
+                !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
             if (mActionBar.getVisibility() == View.VISIBLE) {
                 mActionBar.showOverflowMenu();
             }
@@ -549,7 +551,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    private void openPanel(PanelFeatureState st, KeyEvent event) {
+    private void openPanel(final PanelFeatureState st, KeyEvent event) {
         // System.out.println("Open panel: isOpen=" + st.isOpen);
 
         // Already open, return
@@ -673,7 +675,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public final void closePanel(int featureId) {
         if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
-                mActionBar.isOverflowReserved()) {
+                mActionBar.isOverflowReserved() &&
+                !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
             mActionBar.hideOverflowMenu();
         } else if (featureId == FEATURE_CONTEXT_MENU) {
             closeContextMenu();
@@ -836,7 +839,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             boolean playSoundEffect = false;
             final PanelFeatureState st = getPanelState(featureId, true);
             if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
-                    mActionBar.isOverflowReserved()) {
+                    mActionBar.isOverflowReserved() &&
+                    !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
                 if (mActionBar.getVisibility() == View.VISIBLE) {
                     if (!mActionBar.isOverflowMenuShowing()) {
                         if (!isDestroyed() && preparePanel(st, event)) {
@@ -1014,7 +1018,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void reopenMenu(boolean toggleMenuMode) {
-        if (mActionBar != null && mActionBar.isOverflowReserved()) {
+        if (mActionBar != null && mActionBar.isOverflowReserved() &&
+                (!ViewConfiguration.get(getContext()).hasPermanentMenuKey() ||
+                        mActionBar.isOverflowMenuShowPending())) {
             final Callback cb = getCallback();
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
                 if (cb != null && !isDestroyed() && mActionBar.getVisibility() == View.VISIBLE) {
