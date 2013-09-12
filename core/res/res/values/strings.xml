@@ -1410,6 +1410,12 @@
     <string name="permdesc_captureAudioOutput">Allows the app to capture and redirect audio output.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureAudioHotword">Hotword detection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureAudioHotword">Allows the app to capture audio for Hotword detection. The capture can
+      happen in the background but does not prevent other audio capture (e.g. Camcorder).</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_captureVideoOutput">capture video output</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_captureVideoOutput">Allows the app to capture and redirect video output.</string>
