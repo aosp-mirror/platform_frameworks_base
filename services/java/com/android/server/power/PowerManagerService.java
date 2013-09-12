@@ -63,7 +63,6 @@ import android.util.TimeUtils;
 import android.view.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -287,6 +286,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
 
+    // True if the device should suspend when the screen is off due to proximity.
+    private boolean mSuspendWhenScreenOffDueToProximityConfig;
+
     // True if dreams are supported on this device.
     private boolean mDreamsSupportedConfig;
 
@@ -447,7 +449,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             // own handler thread to ensure timely operation.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
                     mContext, mNotifier, mLightsService, twilight, sensorManager,
-                    mDisplayManagerService, mDisplayBlanker,
+                    mDisplayManagerService, mDisplaySuspendBlocker, mDisplayBlanker,
                     mDisplayPowerControllerCallbacks, mHandler);
 
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
@@ -514,6 +516,8 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
+        mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
         mDreamsSupportedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsSupported);
         mDreamsEnabledByDefaultConfig = resources.getBoolean(
@@ -639,6 +643,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static boolean isScreenLock(final WakeLock wakeLock) {
         switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
             case PowerManager.FULL_WAKE_LOCK:
@@ -817,6 +822,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    @SuppressWarnings("deprecation")
     private boolean isWakeLockLevelSupportedInternal(int level) {
         synchronized (mLock) {
             switch (level) {
@@ -1005,6 +1011,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    @SuppressWarnings("deprecation")
     private boolean goToSleepNoUpdateLocked(long eventTime, int reason) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "goToSleepNoUpdateLocked: eventTime=" + eventTime + ", reason=" + reason);
@@ -1261,6 +1268,7 @@ public final class PowerManagerService extends IPowerManager.Stub
      *
      * This function must have no other side-effects.
      */
+    @SuppressWarnings("deprecation")
     private void updateWakeLockSummaryLocked(int dirty) {
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_WAKEFULNESS)) != 0) {
             mWakeLockSummary = 0;
@@ -1299,7 +1307,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                         break;
                     case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                         if (mWakefulness != WAKEFULNESS_ASLEEP) {
-                            mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_PROXIMITY_SCREEN_OFF;
+                            mWakeLockSummary |= WAKE_LOCK_PROXIMITY_SCREEN_OFF;
                         }
                         break;
                 }
@@ -1458,7 +1466,11 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     /**
      * Returns true if the device is being kept awake by a wake lock, user activity
-     * or the stay on while powered setting.
+     * or the stay on while powered setting.  We also keep the phone awake when
+     * the proximity sensor returns a positive result so that the device does not
+     * lock while in a phone call.  This function only controls whether the device
+     * will go to sleep or dream which is independent of whether it will be allowed
+     * to suspend.
      */
     private boolean isBeingKeptAwakeLocked() {
         return mStayOn
@@ -1749,10 +1761,8 @@ public final class PowerManagerService extends IPowerManager.Stub
      * This function must have no other side-effects.
      */
     private void updateSuspendBlockerLocked() {
-        final boolean needWakeLockSuspendBlocker = (mWakeLockSummary != 0);
-        final boolean needDisplaySuspendBlocker = (mUserActivitySummary != 0
-                || mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF
-                || !mDisplayReady || !mBootCompleted);
+        final boolean needWakeLockSuspendBlocker = ((mWakeLockSummary & WAKE_LOCK_CPU) != 0);
+        final boolean needDisplaySuspendBlocker = needDisplaySuspendBlocker();
 
         // First acquire suspend blockers if needed.
         if (needWakeLockSuspendBlocker && !mHoldingWakeLockSuspendBlocker) {
@@ -1773,6 +1783,27 @@ public final class PowerManagerService extends IPowerManager.Stub
             mDisplaySuspendBlocker.release();
             mHoldingDisplaySuspendBlocker = false;
         }
+    }
+
+    /**
+     * Return true if we must keep a suspend blocker active on behalf of the display.
+     * We do so if the screen is on or is in transition between states.
+     */
+    private boolean needDisplaySuspendBlocker() {
+        if (!mDisplayReady) {
+            return true;
+        }
+        if (mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF) {
+            // If we asked for the screen to be on but it is off due to the proximity
+            // sensor then we may suspend but only if the configuration allows it.
+            // On some hardware it may not be safe to suspend because the proximity
+            // sensor may not be correctly configured as a wake-up source.
+            if (!mDisplayPowerRequest.useProximitySensor || !mProximityPositive
+                    || !mSuspendWhenScreenOffDueToProximityConfig) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override // Binder call
@@ -2115,7 +2146,7 @@ public final class PowerManagerService extends IPowerManager.Stub
      *
      * @param brightness The overridden brightness.
      *
-     * @see Settings.System#SCREEN_BRIGHTNESS
+     * @see android.provider.Settings.System#SCREEN_BRIGHTNESS
      */
     @Override // Binder call
     public void setTemporaryScreenBrightnessSettingOverride(int brightness) {
@@ -2255,7 +2286,16 @@ public final class PowerManagerService extends IPowerManager.Stub
 
             pw.println();
             pw.println("Settings and Configuration:");
+            pw.println("  mWakeUpWhenPluggedOrUnpluggedConfig="
+                    + mWakeUpWhenPluggedOrUnpluggedConfig);
+            pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
+                    + mSuspendWhenScreenOffDueToProximityConfig);
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
+            pw.println("  mDreamsEnabledByDefaultConfig=" + mDreamsEnabledByDefaultConfig);
+            pw.println("  mDreamsActivatedOnSleepByDefaultConfig="
+                    + mDreamsActivatedOnSleepByDefaultConfig);
+            pw.println("  mDreamsActivatedOnDockByDefaultConfig="
+                    + mDreamsActivatedOnDockByDefaultConfig);
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
