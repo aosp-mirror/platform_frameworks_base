@@ -227,9 +227,9 @@ public final class NfcAdapter {
     /**
      * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
-     * Setting this flag enables polling for Kovio technology.
+     * Setting this flag enables polling for NfcBarcode technology.
      */
-    public static final int FLAG_READER_KOVIO = 0x10;
+    public static final int FLAG_READER_NFC_BARCODE = 0x10;
 
     /**
      * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.

@@ -15193,9 +15193,9 @@ package android.nfc {
     field public static final java.lang.String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
     field public static final java.lang.String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
     field public static final java.lang.String EXTRA_TAG = "android.nfc.extra.TAG";
-    field public static final int FLAG_READER_KOVIO = 16; // 0x10
     field public static final int FLAG_READER_NFC_A = 1; // 0x1
     field public static final int FLAG_READER_NFC_B = 2; // 0x2
+    field public static final int FLAG_READER_NFC_BARCODE = 16; // 0x10
     field public static final int FLAG_READER_NFC_F = 4; // 0x4
     field public static final int FLAG_READER_NFC_V = 8; // 0x8
     field public static final int FLAG_READER_NO_PLATFORM_SOUNDS = 256; // 0x100
