@@ -325,17 +325,23 @@ public final class WifiService extends IWifiManager.Stub {
     private class BatchedScanRequest extends DeathRecipient {
         BatchedScanSettings settings;
         int uid;
+        int pid;
 
-        BatchedScanRequest(BatchedScanSettings settings, IBinder binder, int uid) {
+        BatchedScanRequest(BatchedScanSettings settings, IBinder binder) {
             super(0, null, binder, null);
             this.settings = settings;
-            this.uid = uid;
+            this.uid = getCallingUid();
+            this.pid = getCallingPid();
         }
         public void binderDied() {
             stopBatchedScan(settings, mBinder);
         }
         public String toString() {
             return "BatchedScanRequest{settings=" + settings + ", binder=" + mBinder + "}";
+        }
+
+        public boolean isSameApp() {
+            return (this.uid == getCallingUid() && this.pid == getCallingPid());
         }
     }
 
@@ -359,7 +365,7 @@ public final class WifiService extends IWifiManager.Stub {
         if (mBatchedScanSupported == false) return false;
         requested = new BatchedScanSettings(requested);
         if (requested.isInvalid()) return false;
-        BatchedScanRequest r = new BatchedScanRequest(requested, binder, Binder.getCallingUid());
+        BatchedScanRequest r = new BatchedScanRequest(requested, binder);
         synchronized(mBatchedScanners) {
             mBatchedScanners.add(r);
             resolveBatchedScannersLocked();
@@ -393,16 +399,18 @@ public final class WifiService extends IWifiManager.Stub {
     public void stopBatchedScan(BatchedScanSettings settings, IBinder binder) {
         enforceChangePermission();
         if (mBatchedScanSupported == false) return;
+        ArrayList<BatchedScanRequest> found = new ArrayList<BatchedScanRequest>();
         synchronized(mBatchedScanners) {
-            BatchedScanRequest found = null;
             for (BatchedScanRequest r : mBatchedScanners) {
-                if (r.mBinder.equals(binder) && r.settings.equals(settings)) {
-                    found = r;
-                    break;
+                if (r.isSameApp() && (settings == null || settings.equals(r.settings))) {
+                    found.add(r);
+                    if (settings != null) break;
                 }
             }
-            if (found != null) {
-                mBatchedScanners.remove(found);
+            for (BatchedScanRequest r : found) {
+                mBatchedScanners.remove(r);
+            }
+            if (found.size() != 0) {
                 resolveBatchedScannersLocked();
             }
         }

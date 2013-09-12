@@ -818,6 +818,10 @@ public class WifiManager {
     /**
      * End a requested batch scan for this applicaiton.  Note that batched scan may
      * still occur if other apps are using them.
+     *
+     * @param requested {@link BatchedScanSettings} the scan settings you previously requested
+     *        and now wish to stop.  A value of null here will stop all scans requested by the
+     *        calling App.
      * @hide
      */
     public void stopBatchedScan(BatchedScanSettings requested) {
