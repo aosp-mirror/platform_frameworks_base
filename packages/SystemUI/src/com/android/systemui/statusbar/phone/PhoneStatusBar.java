@@ -1737,7 +1737,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         if (mStatusBarWindowState == WINDOW_STATE_SHOWING) {
-            setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
+            final boolean upOrCancel =
+                    event.getAction() == MotionEvent.ACTION_UP ||
+                    event.getAction() == MotionEvent.ACTION_CANCEL;
+            if (upOrCancel && !mExpandedVisible) {
+                setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
+            } else {
+                setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
+            }
         }
         return false;
     }
