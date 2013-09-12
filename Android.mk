@@ -467,6 +467,13 @@ framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
 sample_dir := development/samples
 new_sample_dir := developers/samples/android
 
+# Whitelist of valid groups, used for default TOC grouping. Each sample must
+# belong to one (and only one) group. Assign samples to groups by setting
+# a sample.group var to one of these groups in the sample's _index.jd.
+sample_groups := -samplegroup Input \
+                 -samplegroup Sensors \
+                 -samplegroup Connectivity
+
 # the list here should match the list of samples included in the sdk samples package
 # (see development/build/sdk.atree)
 # remove htmlified samples for now -- samples are still available through the SDK
@@ -700,7 +707,8 @@ LOCAL_MODULE := online-sdk
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
-		-hdf android.whichdoc online 
+		-hdf android.whichdoc online
+#		$(sample_groups) \
 #		$(web_docs_sample_code_flags)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
