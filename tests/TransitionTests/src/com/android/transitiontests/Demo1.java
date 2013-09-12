@@ -70,9 +70,9 @@ public class Demo1 extends Activity {
         if (mFirstTime) {
             mFirstTime = false;
             TransitionSet transition = new TransitionSet();
-            transition.addTransition(new Fade().addTargetId(R.id.resultsText).
-                    addTargetId(R.id.resultsList)).
-                    addTransition(new ChangeBounds().addTargetId(R.id.searchContainer));
+            transition.addTransition(new Fade().addTarget(R.id.resultsText).
+                    addTarget(R.id.resultsList)).
+                    addTransition(new ChangeBounds().addTarget(R.id.searchContainer));
             mTransitionManager = new TransitionManager();
             mTransitionManager.setTransition(mSearchScreen, transition);
             mTransitionManager.setTransition(mResultsScreen, transition);

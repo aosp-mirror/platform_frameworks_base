@@ -54,9 +54,9 @@ public class LoginActivity extends Activity {
 
         // Custom transitions in/out of NewUser screen - slide in the 2nd password UI
         TransitionSet slider = new TransitionSet();
-        slider.addTransition(new Slide().addTargetId(R.id.retype).addTargetId(R.id.retypeEdit));
-        slider.addTransition(new Recolor().addTargetId(R.id.password).
-                addTargetId(R.id.passwordEdit));
+        slider.addTransition(new Slide().addTarget(R.id.retype).addTarget(R.id.retypeEdit));
+        slider.addTransition(new Recolor().addTarget(R.id.password).
+                addTarget(R.id.passwordEdit));
         slider.addTransition(new Fade());
         mTransitionManager.setTransition(mLoginScene, mNewUserScene, slider);
         mTransitionManager.setTransition(mPasswordScene, mNewUserScene, slider);
@@ -64,8 +64,8 @@ public class LoginActivity extends Activity {
         mTransitionManager.setTransition(mNewUserScene, mPasswordScene, slider);
 
         // Custom transitions with recoloring password field
-        Transition colorizer = new Recolor().addTargetId(R.id.password).
-                addTargetId(R.id.passwordEdit);
+        Transition colorizer = new Recolor().addTarget(R.id.password).
+                addTarget(R.id.passwordEdit);
         mTransitionManager.setTransition(mLoginScene, mPasswordScene, colorizer);
         mTransitionManager.setTransition(mPasswordScene, mLoginScene, colorizer);
 

@@ -25516,12 +25516,18 @@ package android.transition {
   public abstract class Transition implements java.lang.Cloneable {
     ctor public Transition();
     method public android.transition.Transition addListener(android.transition.Transition.TransitionListener);
+    method public android.transition.Transition addTarget(int);
     method public android.transition.Transition addTarget(android.view.View);
-    method public android.transition.Transition addTargetId(int);
     method public abstract void captureEndValues(android.transition.TransitionValues);
     method public abstract void captureStartValues(android.transition.TransitionValues);
     method public android.transition.Transition clone();
     method public android.animation.Animator createAnimator(android.view.ViewGroup, android.transition.TransitionValues, android.transition.TransitionValues);
+    method public android.transition.Transition excludeChildren(int, boolean);
+    method public android.transition.Transition excludeChildren(android.view.View, boolean);
+    method public android.transition.Transition excludeChildren(java.lang.Class, boolean);
+    method public android.transition.Transition excludeTarget(int, boolean);
+    method public android.transition.Transition excludeTarget(android.view.View, boolean);
+    method public android.transition.Transition excludeTarget(java.lang.Class, boolean);
     method public long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.lang.String getName();
@@ -25531,8 +25537,8 @@ package android.transition {
     method public java.lang.String[] getTransitionProperties();
     method public android.transition.TransitionValues getTransitionValues(android.view.View, boolean);
     method public android.transition.Transition removeListener(android.transition.Transition.TransitionListener);
+    method public android.transition.Transition removeTarget(int);
     method public android.transition.Transition removeTarget(android.view.View);
-    method public android.transition.Transition removeTargetId(int);
     method public android.transition.Transition setDuration(long);
     method public android.transition.Transition setInterpolator(android.animation.TimeInterpolator);
     method public android.transition.Transition setStartDelay(long);

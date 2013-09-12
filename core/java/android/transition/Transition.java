@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOverlay;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +101,12 @@ public abstract class Transition implements Cloneable {
     TimeInterpolator mInterpolator = null;
     ArrayList<Integer> mTargetIds = new ArrayList<Integer>();
     ArrayList<View> mTargets = new ArrayList<View>();
+    ArrayList<Integer> mTargetIdExcludes = null;
+    ArrayList<View> mTargetExcludes = null;
+    ArrayList<Class> mTargetTypeExcludes = null;
+    ArrayList<Integer> mTargetIdChildExcludes = null;
+    ArrayList<View> mTargetChildExcludes = null;
+    ArrayList<Class> mTargetTypeChildExcludes = null;
     private TransitionValuesMaps mStartValues = new TransitionValuesMaps();
     private TransitionValuesMaps mEndValues = new TransitionValuesMaps();
     TransitionSet mParent = null;
@@ -430,10 +437,8 @@ public abstract class Transition implements Cloneable {
                         Log.d(LOG_TAG, "  differing start/end values for view " +
                                 view);
                         if (start == null || end == null) {
-                            if (start == null) {
-                                Log.d(LOG_TAG, "    " + ((start == null) ?
-                                        "start null, end non-null" : "start non-null, end null"));
-                            }
+                            Log.d(LOG_TAG, "    " + ((start == null) ?
+                                    "start null, end non-null" : "start non-null, end null"));
                         } else {
                             for (String key : start.values.keySet()) {
                                 Object startValue = start.values.get(key);
@@ -504,6 +509,21 @@ public abstract class Transition implements Cloneable {
      * views are ignored and only the ids are used).
      */
     boolean isValidTarget(View target, long targetId) {
+        if (mTargetIdExcludes != null && mTargetIdExcludes.contains(targetId)) {
+            return false;
+        }
+        if (mTargetExcludes != null && mTargetExcludes.contains(target)) {
+            return false;
+        }
+        if (mTargetTypeExcludes != null && target != null) {
+            int numTypes = mTargetTypeExcludes.size();
+            for (int i = 0; i < numTypes; ++i) {
+                Class type = mTargetTypeExcludes.get(i);
+                if (type.isInstance(target)) {
+                    return false;
+                }
+            }
+        }
         if (mTargetIds.size() == 0 && mTargets.size() == 0) {
             return true;
         }
@@ -652,9 +672,9 @@ public abstract class Transition implements Cloneable {
      * @return The Transition to which the targetId is added.
      * Returning the same object makes it easier to chain calls during
      * construction, such as
-     * <code>transitionSet.addTransitions(new Fade()).addTargetId(someId);</code>
+     * <code>transitionSet.addTransitions(new Fade()).addTarget(someId);</code>
      */
-    public Transition addTargetId(int targetId) {
+    public Transition addTarget(int targetId) {
         if (targetId > 0) {
             mTargetIds.add(targetId);
         }
@@ -671,11 +691,217 @@ public abstract class Transition implements Cloneable {
      * construction, such as
      * <code>transitionSet.addTransitions(new Fade()).removeTargetId(someId);</code>
      */
-    public Transition removeTargetId(int targetId) {
+    public Transition removeTarget(int targetId) {
         if (targetId > 0) {
             mTargetIds.remove(targetId);
         }
         return this;
+    }
+
+    /**
+     * Whether to add the given id to the list of target ids to exclude from this
+     * transition. The <code>exclude</code> parameter specifies whether the target
+     * should be added to or removed from the excluded list.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded either by their
+     * id, or by their instance reference, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeChildren(int, boolean)
+     * @see #excludeTarget(View, boolean)
+     * @see #excludeTarget(Class, boolean)
+     *
+     * @param targetId The id of a target to ignore when running this transition.
+     * @param exclude Whether to add the target to or remove the target from the
+     * current list of excluded targets.
+     * @return This transition object.
+     */
+    public Transition excludeTarget(int targetId, boolean exclude) {
+        mTargetIdExcludes = excludeId(mTargetIdExcludes, targetId, exclude);
+        return this;
+    }
+
+    /**
+     * Whether to add the children of the given id to the list of targets to exclude
+     * from this transition. The <code>exclude</code> parameter specifies whether
+     * the children of the target should be added to or removed from the excluded list.
+     * Excluding children in this way provides a simple mechanism for excluding all
+     * children of specific targets, rather than individually excluding each
+     * child individually.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded either by their
+     * id, or by their instance reference, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeTarget(int, boolean)
+     * @see #excludeChildren(View, boolean)
+     * @see #excludeChildren(Class, boolean)
+     *
+     * @param targetId The id of a target whose children should be ignored when running
+     * this transition.
+     * @param exclude Whether to add the target to or remove the target from the
+     * current list of excluded-child targets.
+     * @return This transition object.
+     */
+    public Transition excludeChildren(int targetId, boolean exclude) {
+        mTargetIdChildExcludes = excludeId(mTargetIdChildExcludes, targetId, exclude);
+        return this;
+    }
+
+    /**
+     * Utility method to manage the boilerplate code that is the same whether we
+     * are excluding targets or their children.
+     */
+    private ArrayList<Integer> excludeId(ArrayList<Integer> list, int targetId, boolean exclude) {
+        if (targetId > 0) {
+            if (exclude) {
+                list = ArrayListManager.add(list, targetId);
+            } else {
+                list = ArrayListManager.remove(list, targetId);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Whether to add the given target to the list of targets to exclude from this
+     * transition. The <code>exclude</code> parameter specifies whether the target
+     * should be added to or removed from the excluded list.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded either by their
+     * id, or by their instance reference, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeChildren(View, boolean)
+     * @see #excludeTarget(int, boolean)
+     * @see #excludeTarget(Class, boolean)
+     *
+     * @param target The target to ignore when running this transition.
+     * @param exclude Whether to add the target to or remove the target from the
+     * current list of excluded targets.
+     * @return This transition object.
+     */
+    public Transition excludeTarget(View target, boolean exclude) {
+        mTargetExcludes = excludeView(mTargetExcludes, target, exclude);
+        return this;
+    }
+
+    /**
+     * Whether to add the children of given target to the list of target children
+     * to exclude from this transition. The <code>exclude</code> parameter specifies
+     * whether the target should be added to or removed from the excluded list.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded either by their
+     * id, or by their instance reference, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeTarget(View, boolean)
+     * @see #excludeChildren(int, boolean)
+     * @see #excludeChildren(Class, boolean)
+     *
+     * @param target The target to ignore when running this transition.
+     * @param exclude Whether to add the target to or remove the target from the
+     * current list of excluded targets.
+     * @return This transition object.
+     */
+    public Transition excludeChildren(View target, boolean exclude) {
+        mTargetChildExcludes = excludeView(mTargetChildExcludes, target, exclude);
+        return this;
+    }
+
+    /**
+     * Utility method to manage the boilerplate code that is the same whether we
+     * are excluding targets or their children.
+     */
+    private ArrayList<View> excludeView(ArrayList<View> list, View target, boolean exclude) {
+        if (target != null) {
+            if (exclude) {
+                list = ArrayListManager.add(list, target);
+            } else {
+                list = ArrayListManager.remove(list, target);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Whether to add the given type to the list of types to exclude from this
+     * transition. The <code>exclude</code> parameter specifies whether the target
+     * type should be added to or removed from the excluded list.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded either by their
+     * id, or by their instance reference, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeChildren(Class, boolean)
+     * @see #excludeTarget(int, boolean)
+     * @see #excludeTarget(View, boolean)
+     *
+     * @param type The type to ignore when running this transition.
+     * @param exclude Whether to add the target type to or remove it from the
+     * current list of excluded target types.
+     * @return This transition object.
+     */
+    public Transition excludeTarget(Class type, boolean exclude) {
+        mTargetTypeExcludes = excludeType(mTargetTypeExcludes, type, exclude);
+        return this;
+    }
+
+    /**
+     * Whether to add the given type to the list of types whose children should
+     * be excluded from this transition. The <code>exclude</code> parameter
+     * specifies whether the target type should be added to or removed from
+     * the excluded list.
+     *
+     * <p>Excluding targets is a general mechanism for allowing transitions to run on
+     * a view hierarchy while skipping target views that should not be part of
+     * the transition. For example, you may want to avoid animating children
+     * of a specific ListView or Spinner. Views can be excluded either by their
+     * id, or by their instance reference, or by the Class of that view
+     * (eg, {@link Spinner}).</p>
+     *
+     * @see #excludeTarget(Class, boolean)
+     * @see #excludeChildren(int, boolean)
+     * @see #excludeChildren(View, boolean)
+     *
+     * @param type The type to ignore when running this transition.
+     * @param exclude Whether to add the target type to or remove it from the
+     * current list of excluded target types.
+     * @return This transition object.
+     */
+    public Transition excludeChildren(Class type, boolean exclude) {
+        mTargetTypeChildExcludes = excludeType(mTargetTypeChildExcludes, type, exclude);
+        return this;
+    }
+
+    /**
+     * Utility method to manage the boilerplate code that is the same whether we
+     * are excluding targets or their children.
+     */
+    private ArrayList<Class> excludeType(ArrayList<Class> list, Class type, boolean exclude) {
+        if (type != null) {
+            if (exclude) {
+                list = ArrayListManager.add(list, type);
+            } else {
+                list = ArrayListManager.remove(list, type);
+            }
+        }
+        return list;
     }
 
     /**
@@ -686,18 +912,18 @@ public abstract class Transition implements Cloneable {
      * the Transition to only listen for, and act on, these views.
      * All other views will be ignored.
      *
-     * <p>The target list is like the {@link #addTargetId(int) targetId}
+     * <p>The target list is like the {@link #addTarget(int) targetId}
      * list except this list specifies the actual View instances, not the ids
      * of the views. This is an important distinction when scene changes involve
      * view hierarchies which have been inflated separately; different views may
      * share the same id but not actually be the same instance. If the transition
-     * should treat those views as the same, then {@link #addTargetId(int)} should be used
+     * should treat those views as the same, then {@link #addTarget(int)} should be used
      * instead of {@link #addTarget(View)}. If, on the other hand, scene changes involve
      * changes all within the same view hierarchy, among views which do not
      * necessarily have ids set on them, then the target list of views may be more
      * convenient.</p>
      *
-     * @see #addTargetId(int)
+     * @see #addTarget(int)
      * @param target A View on which the Transition will act, must be non-null.
      * @return The Transition to which the target is added.
      * Returning the same object makes it easier to chain calls during
@@ -842,14 +1068,29 @@ public abstract class Transition implements Cloneable {
             // ignore listview children unless we can track them with stable IDs
             return;
         }
-        long id;
+        int id = View.NO_ID;
+        long itemId = View.NO_ID;
         if (!isListViewItem) {
             id = view.getId();
         } else {
             ListView listview = (ListView) view.getParent();
             int position = listview.getPositionForView(view);
-            id = listview.getItemIdAtPosition(position);
+            itemId = listview.getItemIdAtPosition(position);
             view.setHasTransientState(true);
+        }
+        if (mTargetIdExcludes != null && mTargetIdExcludes.contains(id)) {
+            return;
+        }
+        if (mTargetExcludes != null && mTargetExcludes.contains(view)) {
+            return;
+        }
+        if (mTargetTypeExcludes != null && view != null) {
+            int numTypes = mTargetTypeExcludes.size();
+            for (int i = 0; i < numTypes; ++i) {
+                if (mTargetTypeExcludes.get(i).isInstance(view)) {
+                    return;
+                }
+            }
         }
         TransitionValues values = new TransitionValues();
         values.view = view;
@@ -861,7 +1102,7 @@ public abstract class Transition implements Cloneable {
                     mStartValues.idValues.put((int) id, values);
                 }
             } else {
-                mStartValues.itemIdValues.put(id, values);
+                mStartValues.itemIdValues.put(itemId, values);
             }
         } else {
             if (!isListViewItem) {
@@ -870,10 +1111,25 @@ public abstract class Transition implements Cloneable {
                     mEndValues.idValues.put((int) id, values);
                 }
             } else {
-                mEndValues.itemIdValues.put(id, values);
+                mEndValues.itemIdValues.put(itemId, values);
             }
         }
         if (view instanceof ViewGroup) {
+            // Don't traverse child hierarchy if there are any child-excludes on this view
+            if (mTargetIdChildExcludes != null && mTargetIdChildExcludes.contains(id)) {
+                return;
+            }
+            if (mTargetChildExcludes != null && mTargetChildExcludes.contains(view)) {
+                return;
+            }
+            if (mTargetTypeChildExcludes != null && view != null) {
+                int numTypes = mTargetTypeChildExcludes.size();
+                for (int i = 0; i < numTypes; ++i) {
+                    if (mTargetTypeChildExcludes.get(i).isInstance(view)) {
+                        return;
+                    }
+                }
+            }
             ViewGroup parent = (ViewGroup) view;
             for (int i = 0; i < parent.getChildCount(); ++i) {
                 captureHierarchy(parent.getChildAt(i), start);
@@ -1356,4 +1612,51 @@ public abstract class Transition implements Cloneable {
             this.values = values;
         }
     }
+
+    /**
+     * Utility class for managing typed ArrayLists efficiently. In particular, this
+     * can be useful for lists that we don't expect to be used often (eg, the exclude
+     * lists), so we'd like to keep them nulled out by default. This causes the code to
+     * become tedious, with constant null checks, code to allocate when necessary,
+     * and code to null out the reference when the list is empty. This class encapsulates
+     * all of that functionality into simple add()/remove() methods which perform the
+     * necessary checks, allocation/null-out as appropriate, and return the
+     * resulting list.
+     */
+    private static class ArrayListManager {
+
+        /**
+         * Add the specified item to the list, returning the resulting list.
+         * The returned list can either the be same list passed in or, if that
+         * list was null, the new list that was created.
+         *
+         * Note that the list holds unique items; if the item already exists in the
+         * list, the list is not modified.
+         */
+        static <T> ArrayList<T> add(ArrayList<T> list, T item) {
+            if (list == null) {
+                list = new ArrayList<T>();
+            }
+            if (!list.contains(item)) {
+                list.add(item);
+            }
+            return list;
+        }
+
+        /**
+         * Remove the specified item from the list, returning the resulting list.
+         * The returned list can either the be same list passed in or, if that
+         * list becomes empty as a result of the remove(), the new list was created.
+         */
+        static <T> ArrayList<T> remove(ArrayList<T> list, T item) {
+            if (list != null) {
+                list.remove(item);
+                if (list.isEmpty()) {
+                    list = null;
+                }
+            }
+            return list;
+        }
+    }
+
 }

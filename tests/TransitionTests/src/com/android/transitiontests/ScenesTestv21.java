@@ -47,17 +47,17 @@ public class ScenesTestv21 extends Activity {
 
         TransitionSet transitionToResults = new TransitionSet();
         Fade fade = new Fade();
-        fade.addTargetId(R.id.resultsText).addTargetId(R.id.resultsList);
+        fade.addTarget(R.id.resultsText).addTarget(R.id.resultsList);
         fade.setStartDelay(300);
         transitionToResults.addTransition(fade);
-        transitionToResults.addTransition(new ChangeBounds().addTargetId(R.id.searchContainer));
-        transitionToResults.addTransition(new Recolor().addTargetId(R.id.container));
+        transitionToResults.addTransition(new ChangeBounds().addTarget(R.id.searchContainer));
+        transitionToResults.addTransition(new Recolor().addTarget(R.id.container));
 
         TransitionSet transitionToSearch = new TransitionSet();
-        transitionToSearch.addTransition(new Fade().addTargetId(R.id.resultsText).
-                addTargetId(R.id.resultsList));
-        transitionToSearch.addTransition(new ChangeBounds().addTargetId(R.id.searchContainer));
-        transitionToSearch.addTransition(new Recolor().addTargetId(R.id.container));
+        transitionToSearch.addTransition(new Fade().addTarget(R.id.resultsText).
+                addTarget(R.id.resultsList));
+        transitionToSearch.addTransition(new ChangeBounds().addTarget(R.id.searchContainer));
+        transitionToSearch.addTransition(new Recolor().addTarget(R.id.container));
         mTransitionManager = new TransitionManager();
         mTransitionManager.setTransition(mSearchScreen, transitionToSearch);
         mTransitionManager.setTransition(mResultsScreen, transitionToResults);

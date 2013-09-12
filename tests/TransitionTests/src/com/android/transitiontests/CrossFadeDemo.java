@@ -47,8 +47,8 @@ public class CrossFadeDemo extends Activity {
         Crossfade crossfade = new Crossfade();
         crossfade.setFadeBehavior(Crossfade.FADE_BEHAVIOR_CROSSFADE);
         crossfade.setResizeBehavior(Crossfade.RESIZE_BEHAVIOR_NONE);
-        crossfade.addTargetId(R.id.textview).addTargetId(R.id.textview1).
-                addTargetId(R.id.textview2);
+        crossfade.addTarget(R.id.textview).addTarget(R.id.textview1).
+                addTarget(R.id.textview2);
         mTransitionManager = new TransitionManager();
         TransitionSet moveCrossFade = new TransitionSet();
         moveCrossFade.addTransition(crossfade).addTransition(new ChangeBounds());

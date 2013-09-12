@@ -76,10 +76,10 @@ public class ContactsExpansion extends Activity {
 
         final TransitionSet myTransition = new TransitionSet();
         myTransition.addTransition(new Fade(Fade.IN)).
-                addTransition(new Rotate().addTargetId(R.id.contact_arrow)).
+                addTransition(new Rotate().addTarget(R.id.contact_arrow)).
                 addTransition(new ChangeBounds()).
                 addTransition(new Fade(Fade.OUT)).
-                addTransition(new Crossfade().addTargetId(R.id.contact_picture));
+                addTransition(new Crossfade().addTarget(R.id.contact_picture));
         final ToggleScene toggleScene = new ToggleScene(container, myTransition);
         contactItem.setOnClickListener(new View.OnClickListener() {
             @Override
