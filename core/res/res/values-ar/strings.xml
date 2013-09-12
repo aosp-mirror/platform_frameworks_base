@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"لمنع المستخدم من التبديل إلى تطبيق آخر."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"الحصول على معلومات عن التطبيق الحالي"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"للسماح للمالك باسترداد معلومات خاصة عن الخدمات والتطبيق الحالي في مقدمة الشاشة."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"للسماح للمالك باسترداد معلومات خاصة عن التطبيق الحالي في مقدمة الشاشة."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"مراقبة بدء تشغيل جميع التطبيقات والتحكم فيها"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"للسماح للتطبيق بمراقبة كيفية بدء النظام للأنشطة والتحكم فيها. قد تُعرِّض التطبيقات الضارة النظام للضرر بشكل كامل. لن تكون هناك حاجة لهذا الإذن سوى للتطوير فقط، وليس للاستخدام العادي على الإطلاق."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"إرسال بث الحزمة الذي تمت إزالته"</string>

@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ngăn chuyển đổi ứng dụng"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Ngăn người dùng chuyển sang ứng dụng khác."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"truy cập thông tin ứng dụng hiện tại"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Cho phép chủ sở hữu truy xuất thông tin cá nhân về ứng dụng và dịch vụ hiện tại ở nền trước của màn hình."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Cho phép chủ sở hữu truy xuất thông tin cá nhân về ứng dụng hiện tại ở nền trước của màn hình."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"giám sát và kiểm soát tất cả hoạt động khởi chạy ứng dụng"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Cho phép ứng dụng giám sát và kiểm soát cách hệ thống khởi chạy các hoạt động. Ứng dụng độc hại hoàn toàn có thể làm tổn hại hệ thống. Quyền này chỉ cần cho mục đích phát triển, không dành cho mục đích sử dụng thông thường."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"gửi truyền phát đã xóa của gói"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Cho phép chủ sở hữu gọi ra ứng dụng cấu hình do nhà cung cấp dịch vụ cung cấp. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"quan sát các điều kiện mạng"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Cho phép ứng dụng quan sát các điều kiện mạng. Không bao giờ cần cho ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"yêu cầu công nhận từ nóng"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Cho phép ứng dụng yêu cầu công nhận từ nóng. Không bao giờ cần cho ứng dụng thông thường."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kiểm soát độ dài và ký tự được phép trong mật khẩu mở khóa màn hình."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Giám sát những lần thử mở khóa màn hình"</string>

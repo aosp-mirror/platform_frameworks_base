@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabránění přepínání aplikací"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Zabrání uživateli přepnout na jinou aplikaci."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"získat informace o aktuální aplikaci"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Umožňuje držiteli získat soukromé informace o aktuální aplikaci a službách na popředí obrazovky."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Umožňuje držiteli získat soukromé informace o aktuální aplikaci na popředí obrazovky."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"sledování a řízení spouštění všech aplikací"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou systém zcela ovládnout. Toto oprávnění je požadováno pouze pro účely vývoje, nikdy pro běžné použití."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"odeslání vysílání o odstranění balíčku"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje vyvolání konfigurační aplikace poskytnuté operátorem. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"naslouchat informacím o stavu sítě"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Umožňuje aplikaci naslouchat informacím o stavu sítě. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"požadavek na rozpoznání klíčových slov"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Umožňuje aplikaci požádat o rozpoznání klíčových slov. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Řídit délku hesel pro odemčení obrazovky a povolené znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>

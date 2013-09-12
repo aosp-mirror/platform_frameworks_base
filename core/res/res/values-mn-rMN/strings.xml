@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"апп шилжүүлэхийг хориглох"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Хэрэглэгч бусад апп-руу сэлгэхийг хориглох."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"одоогийн апп-н мэдээллийг авах"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Эзэмшигч нь дэлгэцний нүүрэнд байгаа одоогийн аппликешн болон үйлчилгээний талаарх хувийн мэдээллийг унших боломжтой."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Эзэмшигч нь дэлгэцний нүүрэнд байгаа одоогийн аппликешны талаарх хувийн мэдээллийг унших боломжтой."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"бүх апп-ын эхлэлийг хянах болон удирдах"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Апп нь систем активитиг яаж эхлүүлж байгааг хянах болон удирдан боломжтой. Хортой апп нь системд бүрэн нөлөөлж болзошгүй. Энэ эрх нь зөвхөн хөгжүүлэлтийн үед л хэрэгтэй ба энгийн хэрэглээнд огт хэрэггүй."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"багц хасагдсан өргөн дамжууллыг илгээх"</string>

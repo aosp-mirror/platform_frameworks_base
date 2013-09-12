@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ការ​ពារ​​ការ​ប្ដូរ​កម្មវិធី"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ការ​ពារ​អ្នក​ប្រើ​មិន​ឲ្យ​ប្ដូរ​​ទៅ​កម្មវិធី​ផ្សេង។"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"យក​ព័ត៌មាន​កម្មវិធី​បច្ចុប្បន្ន"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"អនុញ្ញាត​ឱ្យ​ម្ចាស់ទៅ​យក​ព័​ត៌​មាន​ឯកជន​អំពី​កម្មវិធី​បច្ចុប្បន្ន ​និង​សេវាកម្ម​នៅ​ក្នុង​ផ្ទៃ​ខាងមុខ​របស់​អេក្រង់​។"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ឲ្យ​ម្ចាស់​ទៅ​យក​ព័ត៌មាន​ផ្ទាល់ខ្លួន​អំពី​កម្មវិធី​បច្ចុប្បន្ន​ក្នុង​ផ្ទៃ​ខាង​មុខ​នៃ​អេក្រង់។"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"តាមដាន និង​ពិនិត្យ​ការ​ចាប់ផ្ដើម​កម្មវិធី"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"ឲ្យ​កម្មវិធី​តាមដាន និង​ពិនិត្យ​វិធី​ដែល​ប្រព័ន្ធ​ចាប់ផ្ដើម​​សកម្មភាព។ កម្មវិធី​ព្យាបាទ​អាច​​សម្របសម្រួល​ប្រព័ន្ធ​ទាំង​ស្រុង។ សិទ្ធិ​នេះ​ចាំបាច់​សម្រាប់​តែ​ការ​អភិវឌ្ឍ មិន​សម្រាប់​​ប្រើ​ធម្ម​តា​ទេ។"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ផ្ញើ​កញ្ចប់​​ការ​ប្រកាស​បាន​យកចេញ"</string>

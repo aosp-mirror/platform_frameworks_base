@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"tətbiqdən tətbiqə keçidin qarşısını almaq"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"İstifadəçinin başqa tətbiqə keçməsinin qarşısını alır."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"cari tətbiq informasiyası əldə etmək"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Sahibə ekran önündə cari tətbiq və xidmətlər haqqında şəxsi məlumat əldə etməyə imkan verir."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Sahibinə ekranda öndə olan cari tətbiq haqda gizli məlumatı almaq icazəsi verir."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"işə salınan bütün tətbiqləri izləyir və idarə edir"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tətbiqə sistemin fəaliyyətləri necə başlatdığını nəzarət və kontrol etməyə imkan verir. Zərərli tətbiqlər sistemi tamamilə kompromis edə bilər. Bu icazə yalnız inkişaf üçündür, heç vaxt normal istifadə üçün deyil."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"qaldırılmış yayım paketini göndər"</string>

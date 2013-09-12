@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"neleisti perjungti programų"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Neleidžiama naudotojui perjungti į kitą programą."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"gauti esamos programos informaciją"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Savininkui leidžiama gauti privačios informacijos apie dabartinę programą ir paslaugas, naudojamas ekrano priekiniame plane."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Savininkui leidžiama gauti privačią esamos pirmaeilės ekrano programos informaciją."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"stebėti ir valdyti visų programų paleidimą"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Leidžiama programai stebėti ir valdyti, kaip sistema paleidžia veiklą. Kenkėjiškos programos gali visiškai pažeisti sistemą. Šis leidimas reikalingas tik kuriant ir jo niekada nereikia naudojant įprastai."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"siųsti pašalinto paketo perdavimą"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Turėtojui leidžiama iškviesti operatoriaus pateiktą konfigūravimo programą. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"vykdyti tinklo sąlygų stebėjimą"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Leidžiama programai vykdyti tinklo sąlygų stebėjimą. To niekada neturėtų prireikti naudojant įprastas programas."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"teikti aktyvinamojo žodžio atpažinimo užklausas"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Programai leidžiama teikti aktyvinamojo žodžio atpažinimo užklausas. To niekada neturėtų prireikti naudojant įprastas programas."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Valdyti leidžiamą ekrano atrakinimo slaptažodžių ilgį ir leidžiamus naudoti simbolius."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Stebėti bandymus atrakinti ekraną"</string>

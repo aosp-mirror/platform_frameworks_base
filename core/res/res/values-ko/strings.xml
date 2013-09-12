@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"사용자가 다른 앱으로 전환하지 못하게 합니다."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"현재 앱 정보 얻기"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"권한을 가진 프로그램이 화면의 포그라운드에서 현재 애플리케이션 및 서비스에 대한 비공개 정보를 검색하도록 허용합니다."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"권한을 가진 프로그램이 화면의 포그라운드에서 현재 애플리케이션에 대한 비공개 정보를 검색하도록 허용합니다."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"실행 중인 모든 앱 모니터링 및 제어"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"앱이 시스템에서 활동이 시작되는 방식을 모니터링하고 관리할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 사용 시에는 필요하지 않습니다."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"패키지 제거 브로드캐스트 보내기"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"권한을 가진 프로그램이 이동통신사에서 제공한 구성 앱을 호출하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"네트워크 상태에 대한 관측 보고 수신"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"애플리케이션이 네트워크 상태에 대한 관측 보고를 수신하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"핫워드 감지 요청"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"애플리케이션이 핫워드 감지를 요청할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>

@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"pigilan ang mga paglipat ng app"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Pinipigilan ang mga user sa paglipat sa isa pang app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"kunin ang impormasyon ng kasalukuyang app"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Pinapayagan ang may-ari na kumuha ng pribadong impormasyon tungkol sa kasalukuyang application at mga serbisyo sa foreground ng screen."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Pinapayagan ang may-ari na bawiin ang pribadong impormasyon tungkol sa kasalukuyang application sa foreground ng screen."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"subaybayan at kontrolin ang lahat ng paglunsad ng app"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Pinapayagan ang app na subaybayan at kontrolin kung paano naglulunsad ng mga aktibidad ang system. Maaaring ganap na ikompromiso ng nakakahamak na apps ang system. Kinakailangan lamang ang pahintulot na ito para sa pagpapabuti, hindi kailanman para sa normal na paggamit."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"magpadala ng package inalis ang broadcast"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Nagbibigay-daan sa may-ari na paganahin ang app ng configuration na ibinigay ng carrier. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"makinig sa mga obserbasyon sa mga kundisyon ng network"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Nagbibigay-daan sa isang application na makinig sa mga obserbasyon sa mga kundisyon ng network. Dapat na hindi kailanman kakailanganin para sa normal na apps."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"humiling ng hotword recognition"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Pinapayagan ang isang application na humiling ng hotword recognition. Hindi dapat kailanganin kailanman para sa normal na apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>

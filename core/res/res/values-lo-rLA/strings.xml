@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ຂັດຂວາງການສະລັບແອັບຯ"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ປ້ອງກັນບໍ່ໃຫ້ຜູ່ໃຊ້ສະຫຼັບໄປຫາແອັບຯອື່ນ."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"ດຶງຂໍ້ມູນແອັບຯໃນປັດຈຸບັນ"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງດຶງຂໍ້ມູນສ່ວນໂຕ ກ່ຽວກັບແອັບພລິເຄຊັນ ແລະ ການບໍລິການປັດຈຸບັນໃນໜ້າຈໍໄດ້."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງດຶງຂໍ້ມູນສ່ວນໂຕ ກ່ຽວກັບແອັບພລິເຄຊັນປັດຈຸບັນໃນສ່ວນຂອງໜ້າຈໍໄດ້."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ຕິດຕາມ ແລະຄວບຄຸມການເປີດໂຕຂອງແອັບຯທັງໝົດ"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"ອະນຸຍາດໃຫ້ແອັບຯ ຕິດຕາມ ແລະຄວບຄຸມວິທີທີ່ລະບົບເລີ່ມການເຮັດວຽກຕ່າງໆ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດເຮັດໃຫ້ລະບົບທັງໝົດເກີດອັນຕະລາຍໄດ້. ການກຳນົດສິດນີ້ຈຳເປັນສຳລັບການພັດທະນາເທົ່ານັ້ນ, ບໍ່ແມ່ນສຳລັບການນຳໃຊ້ທົ່ວໄປ."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ສົ່ງການກະຈ່າຍຂໍ້ມູນທີ່ເອົາແພັກເກດອອກແລ້ວ"</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າຂອງຮ້ອງຂໍແອັບຯປັບຄ່າທີ່ສະໜອງໂດຍຜູ່ໃຫ້ບໍລິການ. ບໍ່ໜ້າຈະຕ້ອງການສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ຕິດຕາມເພື່ອສັງເກດສະພາບຂອງເຄືອຂ່າຍ"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັ່ນຕິດຕາມເພື່ອສັງເກດສະພາບຂອງເຄືອຂ່າຍ. ປົກກະຕິແລ້ວແອັບຯທຳມະດາຈະບໍ່ຕ້ອງການໃຊ້."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ຮ້ອງຂໍການຮັບຮູ້ hotword"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບພລິເຄຊັນຮ້ອງຂໍການຮັບຮູ້ hotword. ສ່ວນໃຫຍ່ບໍ່ໄດ້ໃຊ້ໃນແອັບຯທົ່ວໄປ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ຄວບຄຸມຄວາມຍາວຂອງໂຕອັກສອນທີ່ສາມາດໃຊ້ກັບລະຫັດປົດລັອກໜ້າຈໍ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>

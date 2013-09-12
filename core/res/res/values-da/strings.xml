@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"undgå programskift"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Forhindrer brugeren i at skifte til en anden app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"få aktuelle app-oplysninger"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Tillader, at brugeren henter private oplysninger om den aktuelle applikation og de aktuelle tjenester i forgrunden af skærmen."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Tillader, at brugeren henter private oplysninger om den aktuelle applikation i forgrunden på ​​skærmen."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"overvåge og kontrollere åbning af alle apps"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tillader, at appen kan overvåge og kontrollere, hvordan systemet starter aktiviteter. Ondsindede apps kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal brug."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send udsendelse om fjernet pakke"</string>
@@ -573,7 +573,7 @@
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Tillader, at appen kan foretage handlinger såsom at tilføje og fjerne konti og slette adgangskoden."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"bruge konti på enheden"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Tillader, at appen kan anmode om godkendelsestokens."</string>
-    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"få vist netværksforbindelser"</string>
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"se netværksforbindelser"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Tillader, at appen kan læse oplysninger om netværksforbindelser, f.eks. eksisterende og forbundne netværk."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"fuld netværksadgang"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Tillader, at appen kan oprette netværkssockets og bruge tilpassede netværksprotokoller. Browseren og andre applikationer indeholder midler til at sende data til internettet, så med denne tilladelse er der ingen forpligtelse til at sende data til internettet."</string>
@@ -585,7 +585,7 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Tillader, at appen kan ændre tilstand for en netværksforbindelse via netdeling."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"skift brugerindstilling for baggrundsdata"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Tillader, at appen kan ændre indstillingen for brug af baggrundsdata."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"få vist Wi-Fi-forbindelser"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"se Wi-Fi-forbindelser"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Tillader, at appen kan læse oplysninger om Wi-Fi-netværk, f.eks. hvorvidt Wi-Fi er aktiveret og navnet på forbundne Wi-Fi-enheder."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"oprette og afbryde Wi-Fi-forbindelse"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Tillader, at appen kan oprette og afbryde forbindelsen fra Wi-Fi-adgangspunkter og foretage ændringer i enhedskonfigurationen for Wi-Fi-netværk."</string>
@@ -655,10 +655,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Tillader, at brugeren aktiverer konfigurationsappen, der er forsynet af mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"observer netværksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tillader, at en applikation observerer netværksforhold. Bør aldrig være nødvendigt for almindelige apps."</string>
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
-    <skip />
+    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"anmode om genkendelse af kommandoord"</string>
+    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Tillader, at en applikation anmoder om genkendelse af kommandoord. Bør aldrig være nødvendigt for normale apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -694,13 +692,13 @@
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Hjem"</item>
     <item msgid="7084237356602625604">"Arbejde"</item>
-    <item msgid="1112044410659011023">"Andre"</item>
+    <item msgid="1112044410659011023">"Andet"</item>
     <item msgid="2374913952870110618">"Tilpasset"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Hjem"</item>
     <item msgid="5629153956045109251">"Arbejde"</item>
-    <item msgid="4966604264500343469">"Andre"</item>
+    <item msgid="4966604264500343469">"Andet"</item>
     <item msgid="4932682847595299369">"Tilpasset"</item>
   </string-array>
   <string-array name="imAddressTypes">
@@ -711,7 +709,7 @@
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Arbejde"</item>
-    <item msgid="4378074129049520373">"Andre"</item>
+    <item msgid="4378074129049520373">"Andet"</item>
     <item msgid="3455047468583965104">"Tilpasset"</item>
   </string-array>
   <string-array name="imProtocols">
@@ -731,7 +729,7 @@
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Arbejdsfax"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Hjemmefax"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Personsøger"</string>
-    <string name="phoneTypeOther" msgid="1544425847868765990">"Andre"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Andet"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Tilbagekald"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Bil"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Virksomhed (hovednummer)"</string>
@@ -748,20 +746,20 @@
     <string name="eventTypeCustom" msgid="7837586198458073404">"Tilpasset"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Fødselsdato"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Årsdag"</string>
-    <string name="eventTypeOther" msgid="7388178939010143077">"Andre"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Andet"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Tilpasset"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Hjem"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Arbejde"</string>
-    <string name="emailTypeOther" msgid="2923008695272639549">"Andre"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Andet"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Tilpasset"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Hjem"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Arbejde"</string>
-    <string name="postalTypeOther" msgid="2726111966623584341">"Andre"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Andet"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Tilpasset"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Hjem"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Arbejde"</string>
-    <string name="imTypeOther" msgid="5377007495735915478">"Andre"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Andet"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Tilpasset"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
@@ -773,7 +771,7 @@
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Arbejde"</string>
-    <string name="orgTypeOther" msgid="3951781131570124082">"Andre"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Andet"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Tilpasset"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Tilpasset"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Assistent"</string>
@@ -793,7 +791,7 @@
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Tilpasset"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hjem"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbejde"</string>
-    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andre"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andet"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Indtast pinkode"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Indtast PUK- og pinkode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
