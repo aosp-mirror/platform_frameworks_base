@@ -512,8 +512,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
             public void run() {
                 LocationManager locManager =
                         (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-                locManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                        0, 0, new NetworkLocationListener(), mHandler.getLooper());
+                final long minTime = 0;
+                final float minDistance = 0;
+                final boolean oneShot = false;
+                LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                        LocationManager.PASSIVE_PROVIDER,
+                        minTime,
+                        minDistance,
+                        oneShot);
+                // Don't keep track of this request since it's done on behalf of other clients
+                // (which are kept track of separately).
+                request.setHideFromAppOps(true);
+                locManager.requestLocationUpdates(
+                        request,
+                        new NetworkLocationListener(),
+                        mHandler.getLooper());
             }
         });
     }
