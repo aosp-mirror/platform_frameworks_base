@@ -527,7 +527,33 @@ final class ProcessRecord {
         sb.append('}');
         return stringName = sb.toString();
     }
-    
+
+    public String makeAdjReason() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append('(').append(adjType).append(')');
+        if (adjSource != null || adjTarget != null) {
+            sb.append(' ');
+            if (adjTarget instanceof ComponentName) {
+                sb.append(((ComponentName)adjTarget).flattenToShortString());
+            } else if (adjTarget != null) {
+                sb.append(adjTarget.toString());
+            } else {
+                sb.append("{null}");
+            }
+            sb.append("<=");
+            if (adjSource instanceof ProcessRecord) {
+                sb.append("Proc{");
+                sb.append(((ProcessRecord)adjSource).toShortString());
+                sb.append("}");
+            } else if (adjSource != null) {
+                sb.append(adjSource.toString());
+            } else {
+                sb.append("{null}");
+            }
+        }
+        return sb.toString();
+    }
+
     /*
      *  Return true if package has been added false if not
      */
