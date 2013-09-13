@@ -2910,6 +2910,19 @@ final class ActivityStack {
         mWindowManager.prepareAppTransition(transit, false);
     }
 
+    void moveHomeTaskToTop() {
+        final int top = mTaskHistory.size() - 1;
+        for (int taskNdx = top; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            if (task.isHomeTask()) {
+                mTaskHistory.remove(taskNdx);
+                mTaskHistory.add(top, task);
+                mWindowManager.moveTaskToTop(task.taskId);
+                return;
+            }
+        }
+    }
+
     final boolean findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
         final TaskRecord task = taskForIdLocked(taskId);
         if (task != null) {
