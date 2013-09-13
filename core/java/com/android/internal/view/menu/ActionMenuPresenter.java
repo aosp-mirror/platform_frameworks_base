@@ -161,10 +161,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     public View getItemView(final MenuItemImpl item, View convertView, ViewGroup parent) {
         View actionView = item.getActionView();
         if (actionView == null || item.hasCollapsibleActionView()) {
-            if (!(convertView instanceof ActionMenuItemView)) {
-                convertView = null;
-            }
-            actionView = super.getItemView(item, convertView, parent);
+            // Don't recycle existing item views for action buttons; it interferes with transitions.
+            actionView = super.getItemView(item, null, parent);
         }
         actionView.setVisibility(item.isActionViewExpanded() ? View.GONE : View.VISIBLE);
 
