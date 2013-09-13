@@ -228,6 +228,7 @@ package android {
     field public static final int accessibilityEventTypes = 16843648; // 0x1010380
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
     field public static final int accessibilityFlags = 16843652; // 0x1010384
+    field public static final int accessibilityLiveRegion = 16843758; // 0x10103ee
     field public static final int accountPreferences = 16843423; // 0x101029f
     field public static final int accountType = 16843407; // 0x101028f
     field public static final int action = 16842797; // 0x101002d
@@ -27481,6 +27482,7 @@ package android.view {
     method public android.view.View focusSearch(int);
     method public void forceLayout();
     method public static int generateViewId();
+    method public int getAccessibilityLiveRegion();
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
@@ -27742,6 +27744,7 @@ package android.view {
     method public void sendAccessibilityEvent(int);
     method public void sendAccessibilityEventUnchecked(android.view.accessibility.AccessibilityEvent);
     method public void setAccessibilityDelegate(android.view.View.AccessibilityDelegate);
+    method public void setAccessibilityLiveRegion(int);
     method public void setActivated(boolean);
     method public void setAlpha(float);
     method public void setAnimation(android.view.animation.Animation);
@@ -27847,6 +27850,9 @@ package android.view {
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
+    field public static final int ACCESSIBILITY_LIVE_REGION_ASSERTIVE = 2; // 0x2
+    field public static final int ACCESSIBILITY_LIVE_REGION_NONE = 0; // 0x0
+    field public static final int ACCESSIBILITY_LIVE_REGION_POLITE = 1; // 0x1
     field public static final android.util.Property ALPHA;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
@@ -28155,7 +28161,6 @@ package android.view {
     method public void bringChildToFront(android.view.View);
     method protected boolean canAnimate();
     method protected boolean checkLayoutParams(android.view.ViewGroup.LayoutParams);
-    method public void childAccessibilityStateChanged(android.view.View);
     method public void childDrawableStateChanged(android.view.View);
     method public void childHasTransientStateChanged(android.view.View, boolean);
     method protected void cleanupLayoutState(android.view.View);
@@ -28204,6 +28209,7 @@ package android.view {
     method protected void measureChild(android.view.View, int, int);
     method protected void measureChildWithMargins(android.view.View, int, int, int, int);
     method protected void measureChildren(int, int);
+    method public void notifySubtreeAccessibilityStateChanged(android.view.View, android.view.View, int);
     method public final void offsetDescendantRectToMyCoords(android.view.View, android.graphics.Rect);
     method public final void offsetRectIntoDescendantCoords(android.view.View, android.graphics.Rect);
     method public boolean onInterceptHoverEvent(android.view.MotionEvent);
@@ -28321,7 +28327,6 @@ package android.view {
     method public abstract boolean canResolveLayoutDirection();
     method public abstract boolean canResolveTextAlignment();
     method public abstract boolean canResolveTextDirection();
-    method public abstract void childAccessibilityStateChanged(android.view.View);
     method public abstract void childDrawableStateChanged(android.view.View);
     method public abstract void childHasTransientStateChanged(android.view.View, boolean);
     method public abstract void clearChildFocus(android.view.View);
@@ -28340,6 +28345,7 @@ package android.view {
     method public abstract boolean isLayoutRequested();
     method public abstract boolean isTextAlignmentResolved();
     method public abstract boolean isTextDirectionResolved();
+    method public abstract void notifySubtreeAccessibilityStateChanged(android.view.View, android.view.View, int);
     method public abstract void recomputeViewAttributes(android.view.View);
     method public abstract void requestChildFocus(android.view.View, android.view.View);
     method public abstract boolean requestChildRectangleOnScreen(android.view.View, android.graphics.Rect, boolean);
@@ -28765,7 +28771,7 @@ package android.view.accessibility {
     method public int describeContents();
     method public static java.lang.String eventTypeToString(int);
     method public int getAction();
-    method public int getContentChangeType();
+    method public int getContentChangeTypes();
     method public long getEventTime();
     method public int getEventType();
     method public int getMovementGranularity();
@@ -28777,14 +28783,16 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
     method public static android.view.accessibility.AccessibilityEvent obtain();
     method public void setAction(int);
-    method public void setContentChangeType(int);
+    method public void setContentChangeTypes(int);
     method public void setEventTime(long);
     method public void setEventType(int);
     method public void setMovementGranularity(int);
     method public void setPackageName(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CONTENT_CHANGE_TYPE_NODE = 1; // 0x1
-    field public static final int CONTENT_CHANGE_TYPE_SUBTREE = 0; // 0x0
+    field public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 4; // 0x4
+    field public static final int CONTENT_CHANGE_TYPE_SUBTREE = 1; // 0x1
+    field public static final int CONTENT_CHANGE_TYPE_TEXT = 2; // 0x2
+    field public static final int CONTENT_CHANGE_TYPE_UNDEFINED = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
     field public static final deprecated int MAX_TEXT_LENGTH = 500; // 0x1f4
@@ -28857,6 +28865,7 @@ package android.view.accessibility {
     method public int getInputType();
     method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
+    method public int getLiveRegion();
     method public int getMovementGranularities();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
@@ -28874,11 +28883,8 @@ package android.view.accessibility {
     method public boolean isDismissable();
     method public boolean isEditable();
     method public boolean isEnabled();
-    method public boolean isExpandable();
-    method public boolean isExpanded();
     method public boolean isFocusable();
     method public boolean isFocused();
-    method public boolean isLiveRegion();
     method public boolean isLongClickable();
     method public boolean isMultiLine();
     method public boolean isPassword();
@@ -28908,8 +28914,6 @@ package android.view.accessibility {
     method public void setDismissable(boolean);
     method public void setEditable(boolean);
     method public void setEnabled(boolean);
-    method public void setExpandable(boolean);
-    method public void setExpanded(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
     method public void setInputType(int);
@@ -28917,7 +28921,7 @@ package android.view.accessibility {
     method public void setLabelFor(android.view.View, int);
     method public void setLabeledBy(android.view.View);
     method public void setLabeledBy(android.view.View, int);
-    method public void setLiveRegion(boolean);
+    method public void setLiveRegion(int);
     method public void setLongClickable(boolean);
     method public void setMovementGranularities(int);
     method public void setMultiLine(boolean);

@@ -91,11 +91,11 @@ public class AccessibilityNodeInfoCache {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
                     synchronized (mLock) {
                         final long sourceId = event.getSourceNodeId();
-                        if (event.getContentChangeType()
-                                == AccessibilityEvent.CONTENT_CHANGE_TYPE_NODE) {
-                            refreshCachedNode(sourceId);
-                        } else {
+                        if ((event.getContentChangeTypes()
+                                & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) != 0) {
                             clearSubTreeLocked(sourceId);
+                        } else {
+                            refreshCachedNode(sourceId);
                         }
                     }
                 } break;

@@ -5807,12 +5807,12 @@ public final class ViewRootImpl implements ViewParent,
      * This event is send at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
      */
-    private void postSendWindowContentChangedCallback(View source) {
+    private void postSendWindowContentChangedCallback(View source, int changeType) {
         if (mSendWindowContentChangedAccessibilityEvent == null) {
             mSendWindowContentChangedAccessibilityEvent =
                 new SendWindowContentChangedAccessibilityEvent();
         }
-        mSendWindowContentChangedAccessibilityEvent.runOrPost(source);
+        mSendWindowContentChangedAccessibilityEvent.runOrPost(source, changeType);
     }
 
     /**
@@ -5884,8 +5884,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @Override
-    public void childAccessibilityStateChanged(View child) {
-        postSendWindowContentChangedCallback(child);
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
+        postSendWindowContentChangedCallback(source, changeType);
     }
 
     @Override
@@ -6538,6 +6538,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {
+        private int mChangeTypes = 0;
+
         public View mSource;
         public long mLastEventTimeMillis;
 
@@ -6548,7 +6550,7 @@ public final class ViewRootImpl implements ViewParent,
                 mLastEventTimeMillis = SystemClock.uptimeMillis();
                 AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+                event.setContentChangeTypes(mChangeTypes);
                 mSource.sendAccessibilityEventUnchecked(event);
             } else {
                 mLastEventTimeMillis = 0;
@@ -6556,17 +6558,20 @@ public final class ViewRootImpl implements ViewParent,
             // In any case reset to initial state.
             mSource.resetSubtreeAccessibilityStateChanged();
             mSource = null;
+            mChangeTypes = 0;
         }
 
-        public void runOrPost(View source) {
+        public void runOrPost(View source, int changeType) {
             if (mSource != null) {
                 // If there is no common predecessor, then mSource points to
                 // a removed view, hence in this case always prefer the source.
                 View predecessor = getCommonPredecessor(mSource, source);
                 mSource = (predecessor != null) ? predecessor : source;
+                mChangeTypes |= changeType;
                 return;
             }
             mSource = source;
+            mChangeTypes = changeType;
             final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
