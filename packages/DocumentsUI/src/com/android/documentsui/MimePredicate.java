@@ -22,6 +22,12 @@ import com.android.internal.util.Predicate;
 public class MimePredicate implements Predicate<DocumentInfo> {
     private final String[] mFilters;
 
+    /**
+     * MIME types that are visual in nature. For example, they should always be
+     * shown as thumbnails in list mode.
+     */
+    public static final String[] VISUAL_MIMES = new String[] { "image/*", "video/*" };
+
     public MimePredicate(String[] filters) {
         mFilters = filters;
     }

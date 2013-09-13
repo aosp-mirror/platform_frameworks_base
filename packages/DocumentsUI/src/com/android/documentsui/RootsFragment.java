@@ -35,6 +35,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Space;
 import android.widget.TextView;
 
 import com.android.documentsui.DocumentsActivity.State;
@@ -136,11 +137,8 @@ public class RootsFragment extends Fragment {
     };
 
     private static class RootsAdapter extends ArrayAdapter<RootInfo> implements SectionAdapter {
-        private int mHeaderId;
-
-        public RootsAdapter(Context context, int headerId) {
+        public RootsAdapter(Context context) {
             super(context, 0);
-            mHeaderId = headerId;
         }
 
         @Override
@@ -177,13 +175,8 @@ public class RootsFragment extends Fragment {
         @Override
         public View getHeaderView(View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_root_header, parent, false);
+                convertView = new Space(parent.getContext());
             }
-
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            title.setText(mHeaderId);
-
             return convertView;
         }
     }
@@ -237,9 +230,9 @@ public class RootsFragment extends Fragment {
         private final AppsAdapter mApps;
 
         public SectionedRootsAdapter(Context context, List<RootInfo> roots, Intent includeApps) {
-            mServices = new RootsAdapter(context, R.string.root_type_service);
-            mShortcuts = new RootsAdapter(context, R.string.root_type_shortcut);
-            mDevices = new RootsAdapter(context, R.string.root_type_device);
+            mServices = new RootsAdapter(context);
+            mShortcuts = new RootsAdapter(context);
+            mDevices = new RootsAdapter(context);
             mApps = new AppsAdapter(context);
 
             for (RootInfo root : roots) {
@@ -274,14 +267,14 @@ public class RootsFragment extends Fragment {
             mShortcuts.sort(comp);
             mDevices.sort(comp);
 
-            if (mServices.getCount() > 0) {
-                addSection(mServices);
-            }
             if (mShortcuts.getCount() > 0) {
                 addSection(mShortcuts);
             }
             if (mDevices.getCount() > 0) {
                 addSection(mDevices);
+            }
+            if (mServices.getCount() > 0) {
+                addSection(mServices);
             }
             if (mApps.getCount() > 0) {
                 addSection(mApps);

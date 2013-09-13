@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.database.MergeCursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
@@ -176,7 +177,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
                 try {
                     final Cursor cursor = task.get();
                     final FilteringCursorWrapper filtered = new FilteringCursorWrapper(
-                            cursor, mAcceptMimes) {
+                            cursor, mAcceptMimes, new String[] { Document.MIME_TYPE_DIR }) {
                         @Override
                         public void close() {
                             // Ignored, since we manage cursor lifecycle internally
