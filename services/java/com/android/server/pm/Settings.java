@@ -351,6 +351,19 @@ final class Settings {
         return null;
     }
 
+    void pruneSharedUsersLPw() {
+        ArrayList<String> removeStage = new ArrayList<String>();
+        for (Map.Entry<String,SharedUserSetting> entry : mSharedUsers.entrySet()) {
+            final SharedUserSetting sus = entry.getValue();
+            if (sus == null || sus.packages.size() == 0) {
+                removeStage.add(entry.getKey());
+            }
+        }
+        for (int i = 0; i < removeStage.size(); i++) {
+            mSharedUsers.remove(removeStage.get(i));
+        }
+    }
+
     // Transfer ownership of permissions from one package to another.
     void transferPermissionsLPw(String origPkg, String newPkg) {
         // Transfer ownership of permissions to the new package.
