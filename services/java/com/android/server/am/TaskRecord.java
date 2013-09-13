@@ -322,6 +322,10 @@ final class TaskRecord extends ThumbnailHolder {
         return subtask.activity;
     }
 
+    boolean isHomeTask() {
+        return mTaskType == ActivityRecord.HOME_ACTIVITY_TYPE;
+    }
+
     boolean isApplicationTask() {
         return mTaskType == ActivityRecord.APPLICATION_ACTIVITY_TYPE;
     }
