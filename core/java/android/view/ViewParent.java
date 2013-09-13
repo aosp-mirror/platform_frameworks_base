@@ -309,12 +309,21 @@ public interface ViewParent {
     public ViewParent getParentForAccessibility();
 
     /**
-     * A child notifies its parent that the accessibility state of a subtree rooted
-     * at a given node changed. That is the structure of the subtree is different.
-     *
-     * @param root The root of the changed subtree.
+     * Notifies a view parent that the accessibility state of one of its
+     * descendants has changed and that the structure of the subtree is
+     * different.
+     * @param child The direct child whose subtree has changed.
+     * @param source The descendant view that changed.
+     * @param changeType A bit mask of the types of changes that occurred. One
+     *            or more of:
+     *            <ul>
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+     *            </ul>
      */
-    public void childAccessibilityStateChanged(View root);
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType);
 
     /**
      * Tells if this view parent can resolve the layout direction.
