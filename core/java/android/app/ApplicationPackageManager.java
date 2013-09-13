@@ -1251,6 +1251,16 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public ComponentName getHomeActivities(List<ResolveInfo> outActivities) {
+        try {
+            return mPM.getHomeActivities(outActivities);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+        return null;
+    }
+
+    @Override
     public void setComponentEnabledSetting(ComponentName componentName,
                                            int newState, int flags) {
         try {
