@@ -125,9 +125,8 @@ public class DirectoryFragment extends Fragment {
         show(fm, TYPE_NORMAL, root, doc, null);
     }
 
-    public static void showSearch(
-            FragmentManager fm, RootInfo root, DocumentInfo doc, String query) {
-        show(fm, TYPE_SEARCH, root, doc, query);
+    public static void showSearch(FragmentManager fm, RootInfo root, String query) {
+        show(fm, TYPE_SEARCH, root, null, query);
     }
 
     public static void showRecentsOpen(FragmentManager fm) {
@@ -205,7 +204,7 @@ public class DirectoryFragment extends Fragment {
                                 context, mType, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_SEARCH:
                         contentsUri = DocumentsContract.buildSearchDocumentsUri(
-                                doc.authority, doc.documentId, query);
+                                root.authority, root.rootId, query);
                         if (state.action == ACTION_MANAGE) {
                             contentsUri = DocumentsContract.setManageMode(contentsUri);
                         }
@@ -274,7 +273,7 @@ public class DirectoryFragment extends Fragment {
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
 
-        if (root != null) {
+        if (root != null && doc != null) {
             final Uri stateUri = RecentsProvider.buildState(
                     root.authority, root.rootId, doc.documentId);
             final ContentValues values = new ContentValues();

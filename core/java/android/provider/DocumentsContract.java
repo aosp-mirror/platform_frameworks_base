@@ -64,9 +64,9 @@ public final class DocumentsContract {
     // content://com.example/root/
     // content://com.example/root/sdcard/
     // content://com.example/root/sdcard/recent/
+    // content://com.example/root/sdcard/search/?query=pony
     // content://com.example/document/12/
     // content://com.example/document/12/children/
-    // content://com.example/document/12/search/?query=pony
 
     private DocumentsContract() {
     }
@@ -174,7 +174,6 @@ public final class DocumentsContract {
          * @see #FLAG_SUPPORTS_THUMBNAIL
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_SUPPORTS_CREATE
-         * @see #FLAG_DIR_SUPPORTS_SEARCH
          */
         public static final String COLUMN_FLAGS = "flags";
 
@@ -241,16 +240,6 @@ public final class DocumentsContract {
         public static final int FLAG_DIR_SUPPORTS_CREATE = 1 << 3;
 
         /**
-         * Flag indicating that a directory supports search. Only valid when
-         * {@link #COLUMN_MIME_TYPE} is {@link #MIME_TYPE_DIR}.
-         *
-         * @see #COLUMN_FLAGS
-         * @see DocumentsProvider#querySearchDocuments(String, String,
-         *      String[])
-         */
-        public static final int FLAG_DIR_SUPPORTS_SEARCH = 1 << 4;
-
-        /**
          * Flag indicating that a directory prefers its contents be shown in a
          * larger format grid. Usually suitable when a directory contains mostly
          * pictures. Only valid when {@link #COLUMN_MIME_TYPE} is
@@ -258,7 +247,7 @@ public final class DocumentsContract {
          *
          * @see #COLUMN_FLAGS
          */
-        public static final int FLAG_DIR_PREFERS_GRID = 1 << 5;
+        public static final int FLAG_DIR_PREFERS_GRID = 1 << 4;
 
         /**
          * Flag indicating that a directory prefers its contents be sorted by
@@ -267,7 +256,7 @@ public final class DocumentsContract {
          *
          * @see #COLUMN_FLAGS
          */
-        public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 1 << 6;
+        public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 1 << 5;
     }
 
     /**
@@ -306,9 +295,12 @@ public final class DocumentsContract {
          * <p>
          * Type: INTEGER (int)
          *
+         * @see #FLAG_ADVANCED
+         * @see #FLAG_EMPTY
          * @see #FLAG_LOCAL_ONLY
          * @see #FLAG_SUPPORTS_CREATE
-         * @see #FLAG_ADVANCED
+         * @see #FLAG_SUPPORTS_RECENTS
+         * @see #FLAG_SUPPORTS_SEARCH
          */
         public static final String COLUMN_FLAGS = "flags";
 
@@ -422,6 +414,27 @@ public final class DocumentsContract {
          * @see DocumentsContract#buildRecentDocumentsUri(String, String)
          */
         public static final int FLAG_SUPPORTS_RECENTS = 1 << 3;
+
+        /**
+         * Flag indicating that this root supports search.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsProvider#querySearchDocuments(String, String,
+         *      String[])
+         */
+        public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
+
+        /**
+         * Flag indicating that this root is currently empty. This may be used
+         * to hide the root when opening documents, but the root will still be
+         * shown when creating documents and {@link #FLAG_SUPPORTS_CREATE} is
+         * also set.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsProvider#querySearchDocuments(String, String,
+         *      String[])
+         */
+        public static final int FLAG_EMPTY = 1 << 5;
     }
 
     /**
@@ -493,9 +506,9 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build Uri representing the recently modified documents of a specific
-     * root. When queried, a provider will return zero or more rows with columns
-     * defined by {@link Document}.
+     * Build Uri representing the recently modified documents of a specific root
+     * in a document provider. When queried, a provider will return zero or more
+     * rows with columns defined by {@link Document}.
      *
      * @see DocumentsProvider#queryRecentDocuments(String, String[])
      * @see #getRootId(Uri)
@@ -538,21 +551,17 @@ public final class DocumentsContract {
 
     /**
      * Build Uri representing a search for matching documents under a specific
-     * directory in a document provider. When queried, a provider will return
-     * zero or more rows with columns defined by {@link Document}.
+     * root in a document provider. When queried, a provider will return zero or
+     * more rows with columns defined by {@link Document}.
      *
-     * @param parentDocumentId the document to return children for, which must
-     *            be both a directory with MIME type of
-     *            {@link Document#MIME_TYPE_DIR} and have
-     *            {@link Document#FLAG_DIR_SUPPORTS_SEARCH} set.
      * @see DocumentsProvider#querySearchDocuments(String, String, String[])
-     * @see #getDocumentId(Uri)
+     * @see #getRootId(Uri)
      * @see #getSearchDocumentsQuery(Uri)
      */
     public static Uri buildSearchDocumentsUri(
-            String authority, String parentDocumentId, String query) {
+            String authority, String rootId, String query) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
-                .appendPath(PATH_DOCUMENT).appendPath(parentDocumentId).appendPath(PATH_SEARCH)
+                .appendPath(PATH_ROOT).appendPath(rootId).appendPath(PATH_SEARCH)
                 .appendQueryParameter(PARAM_QUERY, query).build();
     }
 

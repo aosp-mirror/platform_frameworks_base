@@ -75,9 +75,9 @@ public abstract class DocumentsProvider extends ContentProvider {
     private static final int MATCH_ROOTS = 1;
     private static final int MATCH_ROOT = 2;
     private static final int MATCH_RECENT = 3;
-    private static final int MATCH_DOCUMENT = 4;
-    private static final int MATCH_CHILDREN = 5;
-    private static final int MATCH_SEARCH = 6;
+    private static final int MATCH_SEARCH = 4;
+    private static final int MATCH_DOCUMENT = 5;
+    private static final int MATCH_CHILDREN = 6;
 
     private String mAuthority;
 
@@ -94,9 +94,9 @@ public abstract class DocumentsProvider extends ContentProvider {
         mMatcher.addURI(mAuthority, "root", MATCH_ROOTS);
         mMatcher.addURI(mAuthority, "root/*", MATCH_ROOT);
         mMatcher.addURI(mAuthority, "root/*/recent", MATCH_RECENT);
+        mMatcher.addURI(mAuthority, "root/*/search", MATCH_SEARCH);
         mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
         mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
-        mMatcher.addURI(mAuthority, "document/*/search", MATCH_SEARCH);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -176,13 +176,12 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return documents that that match the given query, starting the search at
-     * the given directory.
+     * Return documents that that match the given query.
      *
-     * @param parentDocumentId the directory to start search at.
+     * @param rootId the root to search under.
      */
     @SuppressWarnings("unused")
-    public Cursor querySearchDocuments(String parentDocumentId, String query, String[] projection)
+    public Cursor querySearchDocuments(String rootId, String query, String[] projection)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Search not supported");
     }
@@ -267,6 +266,9 @@ public abstract class DocumentsProvider extends ContentProvider {
                     return queryRoots(projection);
                 case MATCH_RECENT:
                     return queryRecentDocuments(getRootId(uri), projection);
+                case MATCH_SEARCH:
+                    return querySearchDocuments(
+                            getRootId(uri), getSearchDocumentsQuery(uri), projection);
                 case MATCH_DOCUMENT:
                     return queryDocument(getDocumentId(uri), projection);
                 case MATCH_CHILDREN:
@@ -276,9 +278,6 @@ public abstract class DocumentsProvider extends ContentProvider {
                     } else {
                         return queryChildDocuments(getDocumentId(uri), projection, sortOrder);
                     }
-                case MATCH_SEARCH:
-                    return querySearchDocuments(
-                            getDocumentId(uri), getSearchDocumentsQuery(uri), projection);
                 default:
                     throw new UnsupportedOperationException("Unsupported Uri " + uri);
             }
