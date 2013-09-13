@@ -39,6 +39,7 @@ import java.util.Locale;
 public class WifiNative {
 
     private static final boolean DBG = false;
+    private static final boolean VDBG = false;
     private final String mTAG;
     private static final int DEFAULT_GROUP_OWNER_INTENT     = 6;
 
