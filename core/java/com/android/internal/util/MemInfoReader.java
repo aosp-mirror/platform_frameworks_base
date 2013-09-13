@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import java.io.FileInputStream;
 
+import android.os.Debug;
 import android.os.StrictMode;
 
 public class MemInfoReader {
@@ -63,34 +64,11 @@ public class MemInfoReader {
         // /proc/ and /sys/ files perhaps?
         StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
         try {
-            mTotalSize = 0;
-            mFreeSize = 0;
-            mCachedSize = 0;
-            FileInputStream is = new FileInputStream("/proc/meminfo");
-            int len = is.read(mBuffer);
-            is.close();
-            final int BUFLEN = mBuffer.length;
-            int count = 0;
-            for (int i=0; i<len && count < 3; i++) {
-                if (matchText(mBuffer, i, "MemTotal")) {
-                    i += 8;
-                    mTotalSize = extractMemValue(mBuffer, i);
-                    count++;
-                } else if (matchText(mBuffer, i, "MemFree")) {
-                    i += 7;
-                    mFreeSize = extractMemValue(mBuffer, i);
-                    count++;
-                } else if (matchText(mBuffer, i, "Cached")) {
-                    i += 6;
-                    mCachedSize = extractMemValue(mBuffer, i);
-                    count++;
-                }
-                while (i < BUFLEN && mBuffer[i] != '\n') {
-                    i++;
-                }
-            }
-        } catch (java.io.FileNotFoundException e) {
-        } catch (java.io.IOException e) {
+            long[] infos = new long[Debug.MEMINFO_COUNT];
+            Debug.getMemInfo(infos);
+            mTotalSize = infos[Debug.MEMINFO_TOTAL] * 1024;
+            mFreeSize = infos[Debug.MEMINFO_FREE] * 1024;
+            mCachedSize = infos[Debug.MEMINFO_CACHED] * 1024;
         } finally {
             StrictMode.setThreadPolicy(savedPolicy);
         }
