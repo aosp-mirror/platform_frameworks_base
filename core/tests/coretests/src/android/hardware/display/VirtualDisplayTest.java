@@ -26,7 +26,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
-import android.media.ImageReader.MaxImagesAcquiredException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -427,9 +426,6 @@ public class VirtualDisplayTest extends AndroidTestCase {
                         image.close();
                     }
                 }
-            } catch (MaxImagesAcquiredException e) {
-                // We should never try to consume more buffers than maxImages.
-                throw new IllegalStateException(e);
             } finally {
                 mImageReaderLock.unlock();
             }

@@ -49,43 +49,20 @@ import java.nio.ByteOrder;
 public class ImageReader implements AutoCloseable {
 
     /**
-     * <p>
-     * This exception is thrown when the user of an {@link ImageReader} tries to acquire a new
-     * {@link Image} when the maximum number of {@link Image Images} have already been acquired.
-     * The maximum number is determined by the {@code maxBuffers} argument of
-     * {@link ImageReader#newInstance newInstance}.
-     * </p>
-     *
-     * <p>
-     * To recover from this exception, release existing {@link Image images} back to the
-     * reader with {@link Image#close}.
-     * </p>
-     *
-     * @see Image#close
-     * @see ImageReader#acquireLatestImage
-     * @see ImageReader#acquireNextImage
+     * Returned by nativeImageSetup when acquiring the image was successful.
      */
-    public static class MaxImagesAcquiredException extends Exception {
-        /**
-         * Suppress Eclipse warnings
-         */
-        private static final long serialVersionUID = 761231231236L;
-
-        public MaxImagesAcquiredException() {
-        }
-
-        public MaxImagesAcquiredException(String message) {
-            super(message);
-        }
-
-        public MaxImagesAcquiredException(String message, Throwable throwable) {
-            super(message, throwable);
-        }
-
-        public MaxImagesAcquiredException(Throwable throwable) {
-            super(throwable);
-        }
-    }
+    private static final int ACQUIRE_SUCCESS = 0;
+    /**
+     * Returned by nativeImageSetup when we couldn't acquire the buffer,
+     * because there were no buffers available to acquire.
+     */
+    private static final int ACQUIRE_NO_BUFS = 1;
+    /**
+     * Returned by nativeImageSetup when we couldn't acquire the buffer
+     * because the consumer has already acquired {@maxImages} and cannot
+     * acquire more than that.
+     */
+    private static final int ACQUIRE_MAX_IMAGES = 2;
 
     /**
      * <p>Create a new reader for images of the desired size and format.</p>
@@ -195,7 +172,7 @@ public class ImageReader implements AutoCloseable {
      * </p>
      *
      * <p>Attempting to acquire more than {@code maxImages} concurrently will result in the
-     * acquire function throwing a {@link MaxImagesAcquiredException}. Furthermore,
+     * acquire function throwing a {@link IllegalStateException}. Furthermore,
      * while the max number of images have been acquired by the ImageReader user, the producer
      * enqueueing additional images may stall until at least one image has been released. </p>
      *
@@ -243,26 +220,26 @@ public class ImageReader implements AutoCloseable {
      * {@code (maxImages - currentAcquiredImages < 2)} will not discard as expected.
      * </p>
      * <p>
-     * This operation will fail by throwing an {@link MaxImagesAcquiredException} if
+     * This operation will fail by throwing an {@link IllegalStateException} if
      * {@code maxImages} have been acquired with {@link #acquireLatestImage} or
      * {@link #acquireNextImage}. In particular a sequence of {@link #acquireLatestImage}
      * calls greater than {@link #getMaxImages} without calling {@link Image#close} in-between
-     * will exhaust the underlying queue. At such a time, {@link MaxImagesAcquiredException}
+     * will exhaust the underlying queue. At such a time, {@link IllegalStateException}
      * will be thrown until more images are
      * released with {@link Image#close}.
      * </p>
      *
      * @return latest frame of image data, or {@code null} if no image data is available.
-     * @throws MaxImagesAcquiredException if too many images are currently acquired
+     * @throws IllegalStateException if too many images are currently acquired
      */
-    public Image acquireLatestImage() throws MaxImagesAcquiredException {
+    public Image acquireLatestImage() {
         Image image = acquireNextImage();
         if (image == null) {
             return null;
         }
         try {
             for (;;) {
-                Image next = acquireNextImageNoThrow();
+                Image next = acquireNextImageNoThrowISE();
                 if (next == null) {
                     Image result = image;
                     image = null;
@@ -278,12 +255,48 @@ public class ImageReader implements AutoCloseable {
         }
     }
 
-    private Image acquireNextImageNoThrow() {
-        try {
-            return acquireNextImage();
-        } catch (MaxImagesAcquiredException ex) {
-            return null;
+    /**
+     * Don't throw IllegalStateException if there are too many images acquired.
+     *
+     * @return Image if acquiring succeeded, or null otherwise.
+     *
+     * @hide
+     */
+    public Image acquireNextImageNoThrowISE() {
+        SurfaceImage si = new SurfaceImage();
+        return acquireNextSurfaceImage(si) == ACQUIRE_SUCCESS ? si : null;
+    }
+
+    /**
+     * Attempts to acquire the next image from the underlying native implementation.
+     *
+     * <p>
+     * Note that unexpected failures will throw at the JNI level.
+     * </p>
+     *
+     * @param si A blank SurfaceImage.
+     * @return One of the {@code ACQUIRE_*} codes that determine success or failure.
+     *
+     * @see #ACQUIRE_MAX_IMAGES
+     * @see #ACQUIRE_NO_BUFS
+     * @see #ACQUIRE_SUCCESS
+     */
+    private int acquireNextSurfaceImage(SurfaceImage si) {
+
+        int status = nativeImageSetup(si);
+
+        switch (status) {
+            case ACQUIRE_SUCCESS:
+                si.createSurfacePlanes();
+                si.setImageValid(true);
+            case ACQUIRE_NO_BUFS:
+            case ACQUIRE_MAX_IMAGES:
+                break;
+            default:
+                throw new AssertionError("Unknown nativeImageSetup return code " + status);
         }
+
+        return status;
     }
 
     /**
@@ -301,28 +314,36 @@ public class ImageReader implements AutoCloseable {
      * </p>
      *
      * <p>
-     * This operation will fail by throwing an {@link MaxImagesAcquiredException} if
+     * This operation will fail by throwing an {@link IllegalStateException} if
      * {@code maxImages} have been acquired with {@link #acquireNextImage} or
      * {@link #acquireLatestImage}. In particular a sequence of {@link #acquireNextImage} or
      * {@link #acquireLatestImage} calls greater than {@link #getMaxImages maxImages} without
      * calling {@link Image#close} in-between will exhaust the underlying queue. At such a time,
-     * {@link MaxImagesAcquiredException} will be thrown until more images are released with
+     * {@link IllegalStateException} will be thrown until more images are released with
      * {@link Image#close}.
      * </p>
      *
      * @return a new frame of image data, or {@code null} if no image data is available.
-     * @throws MaxImagesAcquiredException if {@code maxImages} images are currently acquired
+     * @throws IllegalStateException if {@code maxImages} images are currently acquired
      * @see #acquireLatestImage
      */
-    public Image acquireNextImage() throws MaxImagesAcquiredException {
+    public Image acquireNextImage() {
         SurfaceImage si = new SurfaceImage();
-        if (nativeImageSetup(si)) {
-            // create SurfacePlane objects
-            si.createSurfacePlanes();
-            si.setImageValid(true);
-            return si;
+        int status = acquireNextSurfaceImage(si);
+
+        switch (status) {
+            case ACQUIRE_SUCCESS:
+                return si;
+            case ACQUIRE_NO_BUFS:
+                return null;
+            case ACQUIRE_MAX_IMAGES:
+                throw new IllegalStateException(
+                        String.format(
+                                "maxImages (%d) has already been acquired, " +
+                                "call #close before acquiring more.", mMaxImages));
+            default:
+                throw new AssertionError("Unknown nativeImageSetup return code " + status);
         }
-        return null;
     }
 
     /**
@@ -658,7 +679,15 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
-    private synchronized native boolean nativeImageSetup(Image i);
+
+    /**
+     * @return A return code {@code ACQUIRE_*}
+     *
+     * @see #ACQUIRE_SUCCESS
+     * @see #ACQUIRE_NO_BUFS
+     * @see #ACQUIRE_MAX_IMAGES
+     */
+    private synchronized native int nativeImageSetup(Image i);
 
     /**
      * We use a class initializer to allow the native code to cache some
