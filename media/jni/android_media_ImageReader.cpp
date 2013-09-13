@@ -43,11 +43,14 @@
 
 using namespace android;
 
-static const char* const MaxImagesAcquiredException =
-    "android/media/ImageReader$MaxImagesAcquiredException";
-
 enum {
     IMAGE_READER_MAX_NUM_PLANES = 3,
+};
+
+enum {
+    ACQUIRE_SUCCESS = 0,
+    ACQUIRE_NO_BUFFERS = 1,
+    ACQUIRE_MAX_IMAGES = 2,
 };
 
 static struct {
@@ -685,14 +688,14 @@ static void ImageReader_imageRelease(JNIEnv* env, jobject thiz, jobject image)
     ctx->returnLockedBuffer(buffer);
 }
 
-static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
+static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
                                              jobject image)
 {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
     if (ctx == NULL) {
         jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
-        return false;
+        return -1;
     }
 
     CpuConsumer* consumer = ctx->getCpuConsumer();
@@ -700,27 +703,22 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     if (buffer == NULL) {
         ALOGW("Unable to acquire a lockedBuffer, very likely client tries to lock more than"
             " maxImages buffers");
-        jniThrowException(env, MaxImagesAcquiredException,
-                  "Too many outstanding images, close existing images"
-                  " to be able to acquire more.");
-        return false;
+        return ACQUIRE_MAX_IMAGES;
     }
     status_t res = consumer->lockNextBuffer(buffer);
     if (res != NO_ERROR) {
         if (res != BAD_VALUE /*no buffers*/) {
             if (res == NOT_ENOUGH_DATA) {
-                jniThrowException(env, MaxImagesAcquiredException,
-                          "Too many outstanding images, close existing images"
-                          " to be able to acquire more.");
+                return ACQUIRE_MAX_IMAGES;
             } else {
                 ALOGE("%s Fail to lockNextBuffer with error: %d ",
                       __FUNCTION__, res);
-                jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                jniThrowExceptionFmt(env, "java/lang/AssertionError",
                           "Unknown error (%d) when we tried to lock buffer.",
                           res);
             }
         }
-        return false;
+        return ACQUIRE_NO_BUFFERS;
     }
 
     // Check if the left-top corner of the crop rect is origin, we currently assume this point is
@@ -730,7 +728,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         ALOGE("crop left: %d, top = %d", lt.x, lt.y);
         jniThrowException(env, "java/lang/UnsupportedOperationException",
                           "crop left top corner need to at origin");
-        return false;
+        return -1;
     }
 
     // Check if the producer buffer configurations match what ImageReader configured.
@@ -761,6 +759,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 "Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
                 outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
+        return -1;
     }
 
     if (ctx->getBufferFormat() != buffer->format) {
@@ -777,14 +776,14 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
                 buffer->format, ctx->getBufferFormat());
         jniThrowException(env, "java/lang/UnsupportedOperationException",
                 msg.string());
-        return false;
+        return -1;
     }
     // Set SurfaceImage instance member variables
     Image_setBuffer(env, image, buffer);
     env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
             static_cast<jlong>(buffer->timestamp));
 
-    return true;
+    return ACQUIRE_SUCCESS;
 }
 
 static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
@@ -855,7 +854,7 @@ static JNINativeMethod gImageReaderMethods[] = {
     {"nativeInit",             "(Ljava/lang/Object;IIII)V",  (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
-    {"nativeImageSetup",       "(Landroid/media/Image;)Z",    (void*)ImageReader_imageSetup },
+    {"nativeImageSetup",       "(Landroid/media/Image;)I",    (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
 };
 
