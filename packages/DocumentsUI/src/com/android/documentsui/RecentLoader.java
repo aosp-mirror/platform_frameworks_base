@@ -17,8 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
-import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
 
 import android.content.AsyncTaskLoader;
@@ -194,9 +192,6 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         }
 
         final DirectoryResult result = new DirectoryResult();
-
-        final boolean acceptImages = MimePredicate.mimeMatches("image/*", mAcceptMimes);
-        result.mode = acceptImages ? MODE_GRID : MODE_LIST;
         result.sortOrder = SORT_ORDER_LAST_MODIFIED;
 
         if (cursors.size() > 0) {
