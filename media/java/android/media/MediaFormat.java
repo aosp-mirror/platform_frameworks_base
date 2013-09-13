@@ -273,6 +273,20 @@ public final class MediaFormat {
     }
 
     /**
+     * Returns the value of an integer key, or the default value if the
+     * key is missing or is for another type value.
+     * @hide
+     */
+    public final int getInteger(String name, int defaultValue) {
+        try {
+            return getInteger(name);
+        }
+        catch (NullPointerException  e) { /* no such field */ }
+        catch (ClassCastException e) { /* field of different type */ }
+        return defaultValue;
+    }
+
+    /**
      * Returns the value of a long key.
      */
     public final long getLong(String name) {
