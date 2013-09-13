@@ -2222,6 +2222,50 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
 
     /**
+     * Shift for the bits in {@link #mPrivateFlags2} related to the
+     * "accessibilityLiveRegion" attribute.
+     */
+    static final int PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT = 22;
+
+    /**
+     * Live region mode specifying that accessibility services should not
+     * automatically announce changes to this view. This is the default live
+     * region mode for most views.
+     * <p>
+     * Use with {@link #setAccessibilityLiveRegion(int)}.
+     */
+    public static final int ACCESSIBILITY_LIVE_REGION_NONE = 0x00000000;
+
+    /**
+     * Live region mode specifying that accessibility services should announce
+     * changes to this view.
+     * <p>
+     * Use with {@link #setAccessibilityLiveRegion(int)}.
+     */
+    public static final int ACCESSIBILITY_LIVE_REGION_POLITE = 0x00000001;
+
+    /**
+     * Live region mode specifying that accessibility services should interrupt
+     * ongoing speech to immediately announce changes to this view.
+     * <p>
+     * Use with {@link #setAccessibilityLiveRegion(int)}.
+     */
+    public static final int ACCESSIBILITY_LIVE_REGION_ASSERTIVE = 0x00000002;
+
+    /**
+     * The default whether the view is important for accessibility.
+     */
+    static final int ACCESSIBILITY_LIVE_REGION_DEFAULT = ACCESSIBILITY_LIVE_REGION_NONE;
+
+    /**
+     * Mask for obtaining the bits which specify a view's accessibility live
+     * region mode.
+     */
+    static final int PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK = (ACCESSIBILITY_LIVE_REGION_NONE
+            | ACCESSIBILITY_LIVE_REGION_POLITE | ACCESSIBILITY_LIVE_REGION_ASSERTIVE)
+            << PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT;
+
+    /**
      * Flag indicating whether a view has accessibility focus.
      */
     static final int PFLAG2_ACCESSIBILITY_FOCUSED = 0x04000000;
@@ -3894,6 +3938,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setImportantForAccessibility(a.getInt(attr,
                             IMPORTANT_FOR_ACCESSIBILITY_DEFAULT));
                     break;
+                case R.styleable.View_accessibilityLiveRegion:
+                    setAccessibilityLiveRegion(a.getInt(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT));
+                    break;
             }
         }
 
@@ -4842,7 +4889,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (gainFocus) {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         } else {
-            notifyViewAccessibilityStateChangedIfNeeded();
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
 
         InputMethodManager imm = InputMethodManager.peekInstance();
@@ -5563,7 +5611,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
             notifySubtreeAccessibilityStateChangedIfNeeded();
         } else {
-            notifyViewAccessibilityStateChangedIfNeeded();
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
         }
     }
 
@@ -7092,6 +7141,58 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets the live region mode for this view. This indicates to accessibility
+     * services whether they should automatically notify the user about changes
+     * to the view's content description or text, or to the content descriptions
+     * or text of the view's children (where applicable).
+     * <p>
+     * For example, in a login screen with a TextView that displays an "incorrect
+     * password" notification, that view should be marked as a live region with
+     * mode {@link #ACCESSIBILITY_LIVE_REGION_POLITE}.
+     * <p>
+     * To disable change notifications for this view, use
+     * {@link #ACCESSIBILITY_LIVE_REGION_NONE}. This is the default live region
+     * mode for most views.
+     * <p>
+     * To indicate that the user should be notified of changes, use
+     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE}.
+     * <p>
+     * If the view's changes should interrupt ongoing speech and notify the user
+     * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}.
+     *
+     * @param mode The live region mode for this view, one of:
+     *        <ul>
+     *        <li>{@link #ACCESSIBILITY_LIVE_REGION_NONE}
+     *        <li>{@link #ACCESSIBILITY_LIVE_REGION_POLITE}
+     *        <li>{@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}
+     *        </ul>
+     * @attr ref android.R.styleable#View_accessibilityLiveRegion
+     */
+    public void setAccessibilityLiveRegion(int mode) {
+        if (mode != getAccessibilityLiveRegion()) {
+            mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
+            mPrivateFlags2 |= (mode << PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT)
+                    & PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        }
+    }
+
+    /**
+     * Gets the live region mode for this View.
+     *
+     * @return The live region mode for the view.
+     *
+     * @attr ref android.R.styleable#View_accessibilityLiveRegion
+     *
+     * @see #setAccessibilityLiveRegion(int)
+     */
+    public int getAccessibilityLiveRegion() {
+        return (mPrivateFlags2 & PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK)
+                >> PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT;
+    }
+
+    /**
      * Sets how to determine whether this view is important for accessibility
      * which is if it fires accessibility events and if it is reported to
      * accessibility services that query the screen.
@@ -7113,7 +7214,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (oldIncludeForAccessibility != includeForAccessibility()) {
                 notifySubtreeAccessibilityStateChangedIfNeeded();
             } else {
-                notifyViewAccessibilityStateChangedIfNeeded();
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -7135,7 +7237,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return false;
             case IMPORTANT_FOR_ACCESSIBILITY_AUTO:
                 return isActionableForAccessibility() || hasListenersForAccessibility()
-                        || getAccessibilityNodeProvider() != null;
+                        || getAccessibilityNodeProvider() != null
+                        || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE;
             default:
                 throw new IllegalArgumentException("Unknown important for accessibility mode: "
                         + mode);
@@ -7232,7 +7335,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void notifyViewAccessibilityStateChangedIfNeeded() {
+    public void notifyViewAccessibilityStateChangedIfNeeded(int changeType) {
         if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
             return;
         }
@@ -7240,7 +7343,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mSendViewStateChangedAccessibilityEvent =
                     new SendViewStateChangedAccessibilityEvent();
         }
-        mSendViewStateChangedAccessibilityEvent.runOrPost();
+        mSendViewStateChangedAccessibilityEvent.runOrPost(changeType);
     }
 
     /**
@@ -7262,7 +7365,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
             if (mParent != null) {
                 try {
-                    mParent.childAccessibilityStateChanged(this);
+                    mParent.notifySubtreeAccessibilityStateChanged(
+                            this, this, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
                 } catch (AbstractMethodError e) {
                     Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);
@@ -7389,7 +7493,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         || getAccessibilitySelectionEnd() != end)
                         && (start == end)) {
                     setAccessibilitySelection(start, end);
-                    notifyViewAccessibilityStateChangedIfNeeded();
+                    notifyViewAccessibilityStateChangedIfNeeded(
+                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                     return true;
                 }
             } break;
@@ -8965,11 +9070,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
                     notifySubtreeAccessibilityStateChangedIfNeeded();
                 } else {
-                    notifyViewAccessibilityStateChangedIfNeeded();
+                    notifyViewAccessibilityStateChangedIfNeeded(
+                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                 }
-            }
-            if ((changed & ENABLED_MASK) != 0) {
-                notifyViewAccessibilityStateChangedIfNeeded();
+            } else if ((changed & ENABLED_MASK) != 0) {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -15571,7 +15677,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(true);
             refreshDrawableState();
             dispatchSetSelected(selected);
-            notifyViewAccessibilityStateChangedIfNeeded();
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -19315,21 +19422,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private class SendViewStateChangedAccessibilityEvent implements Runnable {
+        private int mChangeTypes = 0;
         private boolean mPosted;
+        private boolean mPostedWithDelay;
         private long mLastEventTimeMillis;
 
+        @Override
         public void run() {
             mPosted = false;
+            mPostedWithDelay = false;
             mLastEventTimeMillis = SystemClock.uptimeMillis();
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                AccessibilityEvent event = AccessibilityEvent.obtain();
+                final AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_NODE);
+                event.setContentChangeTypes(mChangeTypes);
                 sendAccessibilityEventUnchecked(event);
             }
+            mChangeTypes = 0;
         }
 
-        public void runOrPost() {
+        public void runOrPost(int changeType) {
+            mChangeTypes |= changeType;
+
+            // If this is a live region or the child of a live region, collect
+            // all events from this frame and send them on the next frame.
+            if (inLiveRegion()) {
+                // If we're already posted with a delay, remove that.
+                if (mPostedWithDelay) {
+                    removeCallbacks(this);
+                    mPostedWithDelay = false;
+                }
+                // Only post if we're not already posted.
+                if (!mPosted) {
+                    post(this);
+                    mPosted = true;
+                }
+                return;
+            }
+
             if (mPosted) {
                 return;
             }
@@ -19342,8 +19472,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
                 mPosted = true;
+                mPostedWithDelay = true;
             }
         }
+    }
+
+    private boolean inLiveRegion() {
+        if (getAccessibilityLiveRegion() != View.ACCESSIBILITY_LIVE_REGION_NONE) {
+            return true;
+        }
+
+        ViewParent parent = getParent();
+        while (parent instanceof View) {
+            if (((View) parent).getAccessibilityLiveRegion()
+                    != View.ACCESSIBILITY_LIVE_REGION_NONE) {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+
+        return false;
     }
 
     /**

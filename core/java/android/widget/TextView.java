@@ -1727,7 +1727,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setText(mText);
 
         if (hasPasswordTransformationMethod()) {
-            notifyViewAccessibilityStateChangedIfNeeded();
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -3830,6 +3831,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
+        notifyViewAccessibilityStateChangedIfNeeded(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         }
@@ -4414,7 +4417,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setError(CharSequence error, Drawable icon) {
         createEditorIfNeeded();
         mEditor.setError(error, icon);
-        notifyViewAccessibilityStateChangedIfNeeded();
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     @Override

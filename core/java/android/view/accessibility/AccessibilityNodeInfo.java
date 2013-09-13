@@ -418,19 +418,13 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_EDITABLE = 0x00001000;
 
-    private static final int BOOLEAN_PROPERTY_LIVE_REGION = 0x00002000;
+    private static final int BOOLEAN_PROPERTY_OPENS_POPUP = 0x00002000;
 
-    private static final int BOOLEAN_PROPERTY_OPENS_POPUP = 0x00004000;
+    private static final int BOOLEAN_PROPERTY_DISMISSABLE = 0x00004000;
 
-    private static final int BOOLEAN_PROPERTY_EXPANDABLE = 0x00008000;
+    private static final int BOOLEAN_PROPERTY_MULTI_LINE = 0x00008000;
 
-    private static final int BOOLEAN_PROPERTY_EXPANDED = 0x00010000;
-
-    private static final int BOOLEAN_PROPERTY_DISMISSABLE = 0x00020000;
-
-    private static final int BOOLEAN_PROPERTY_MULTI_LINE = 0x00040000;
-
-    private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00080000;
+    private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -517,6 +511,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private int mTextSelectionStart = UNDEFINED;
     private int mTextSelectionEnd = UNDEFINED;
     private int mInputType = InputType.TYPE_NULL;
+    private int mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
 
     private Bundle mExtras;
 
@@ -1471,39 +1466,42 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets if the node is a live region.
+     * Gets the node's live region mode.
      * <p>
-     * A live region is a node that contains information that is important
-     * for the user and when it changes the user has to be notified. For
-     * example, if the user plays a video and the application shows a
-     * progress indicator with the percentage of buffering, then the progress
-     * indicator should be marked as a live region.
-     * </p>
+     * A live region is a node that contains information that is important for
+     * the user and when it changes the user should be notified. For example,
+     * in a login screen with a TextView that displays an "incorrect password"
+     * notification, that view should be marked as a live region with mode
+     * {@link View#ACCESSIBILITY_LIVE_REGION_POLITE}.
      * <p>
-     * It is the responsibility of the accessibility
-     * service to monitor this region and notify the user if it changes.
-     * </p>
+     * It is the responsibility of the accessibility service to monitor
+     * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} events indicating
+     * changes to live region nodes and their children.
      *
-     * @return If the node is a live region.
+     * @return The live region mode, or
+     *         {@link View#ACCESSIBILITY_LIVE_REGION_NONE} if the view is not a
+     *         live region.
+     * @see android.view.View#getAccessibilityLiveRegion()
      */
-    public boolean isLiveRegion() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_LIVE_REGION);
+    public int getLiveRegion() {
+        return mLiveRegion;
     }
 
     /**
-     * Sets if the node is a live region for whose changes the user
-     * should be notified. It is the responsibility of the accessibility
-     * service to monitor this region and notify the user if it changes.
+     * Sets the node's live region mode.
      * <p>
-     *   <strong>Note:</strong> Cannot be called from an
-     *   {@link android.accessibilityservice.AccessibilityService}.
-     *   This class is made immutable before being delivered to an AccessibilityService.
-     * </p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}. This class is
+     * made immutable before being delivered to an AccessibilityService.
      *
-     * @param liveRegion If the node is a live region.
+     * @param mode The live region mode, or
+     *        {@link View#ACCESSIBILITY_LIVE_REGION_NONE} if the view is not a
+     *        live region.
+     * @see android.view.View#setAccessibilityLiveRegion(int)
      */
-    public void setLiveRegion(boolean liveRegion) {
-        setBooleanProperty(BOOLEAN_PROPERTY_LIVE_REGION, liveRegion);
+    public void setLiveRegion(int mode) {
+        enforceNotSealed();
+        mLiveRegion = mode;
     }
 
     /**
@@ -1551,52 +1549,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setCanOpenPopup(boolean opensPopup) {
         enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP, opensPopup);
-    }
-
-    /**
-     * Gets if the node can be expanded.
-     *
-     * @return If the node can be expanded.
-     */
-    public boolean isExpandable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_EXPANDABLE);
-    }
-
-    /**
-     * Sets if the node can be expanded.
-     * <p>
-     *   <strong>Note:</strong> Cannot be called from an
-     *   {@link android.accessibilityservice.AccessibilityService}.
-     *   This class is made immutable before being delivered to an AccessibilityService.
-     * </p>
-     *
-     * @param expandable If the node can be expanded.
-     */
-    public void setExpandable(boolean expandable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_EXPANDABLE, expandable);
-    }
-
-    /**
-     * Gets if the node is expanded.
-     *
-     * @return If the node is expanded.
-     */
-    public boolean isExpanded() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_EXPANDED);
-    }
-
-    /**
-     * Sets if the node is expanded.
-     * <p>
-     *   <strong>Note:</strong> Cannot be called from an
-     *   {@link android.accessibilityservice.AccessibilityService}.
-     *   This class is made immutable before being delivered to an AccessibilityService.
-     * </p>
-     *
-     * @param expanded If the node is expanded.
-     */
-    public void setExpanded(boolean expanded) {
-        setBooleanProperty(BOOLEAN_PROPERTY_EXPANDED, expanded);
     }
 
     /**
@@ -2203,6 +2155,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mTextSelectionStart);
         parcel.writeInt(mTextSelectionEnd);
         parcel.writeInt(mInputType);
+        parcel.writeInt(mLiveRegion);
 
         if (mExtras != null) {
             parcel.writeInt(1);
@@ -2276,6 +2229,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionStart = other.mTextSelectionStart;
         mTextSelectionEnd = other.mTextSelectionEnd;
         mInputType = other.mInputType;
+        mLiveRegion = other.mLiveRegion;
         if (other.mExtras != null && !other.mExtras.isEmpty()) {
             getExtras().putAll(other.mExtras);
         }
@@ -2334,6 +2288,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionEnd = parcel.readInt();
 
         mInputType = parcel.readInt();
+        mLiveRegion = parcel.readInt();
 
         if (parcel.readInt() == 1) {
             getExtras().putAll(parcel.readBundle());
@@ -2389,6 +2344,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionStart = UNDEFINED;
         mTextSelectionEnd = UNDEFINED;
         mInputType = InputType.TYPE_NULL;
+        mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
         if (mExtras != null) {
             mExtras.clear();
         }

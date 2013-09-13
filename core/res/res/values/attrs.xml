@@ -2186,6 +2186,18 @@
             <enum name="no" value="2" />
         </attr>
 
+        <!-- Indicates to accessibility services whether the user should be notified when
+             this view changes. -->
+        <attr name="accessibilityLiveRegion" format="integer">
+            <!-- Accessibility services should not announce changes to this view. -->
+            <enum name="none" value="0" />
+            <!-- Accessibility services should announce changes to this view. -->
+            <enum name="polite" value="1" />
+            <!-- Accessibility services should interrupt ongoing speech to immediately
+                 announce changes to this view. -->
+            <enum name="assertive" value="2" />
+        </attr>
+
         <!-- Specifies the id of a view for which this view serves as a label for
              accessibility purposes. For example, a TextView before an EditText in
              the UI usually specifies what infomation is contained in the EditText.

@@ -38,6 +38,7 @@ import android.util.Log;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -2534,10 +2535,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void childAccessibilityStateChanged(View root) {
-        if (mParent != null) {
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
+        // If this is a live region, we should send a subtree change event
+        // from this view. Otherwise, we can let it propagate up.
+        if (getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE) {
+            notifyViewAccessibilityStateChangedIfNeeded(changeType);
+        } else if (mParent != null) {
             try {
-                mParent.childAccessibilityStateChanged(root);
+                mParent.notifySubtreeAccessibilityStateChanged(this, source, changeType);
             } catch (AbstractMethodError e) {
                 Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                         " does not fully implement ViewParent", e);
