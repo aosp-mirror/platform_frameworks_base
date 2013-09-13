@@ -18,5 +18,5 @@
     <item android:state_pressed="true" android:drawable="@color/item_root_activated" />
     <item android:state_activated="true" android:drawable="@color/item_root_activated" />
     <item android:state_focused="true" android:drawable="@color/item_root_activated" />
-    <item android:drawable="@android:color/white" />
+    <item android:drawable="@android:color/transparent" />
 </selector>

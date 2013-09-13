@@ -86,8 +86,8 @@ public class RootsFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         updateRootsAdapter();
     }
 

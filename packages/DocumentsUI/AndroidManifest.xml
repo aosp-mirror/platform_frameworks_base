@@ -11,7 +11,7 @@
         <!-- TODO: allow rotation when state saving is in better shape -->
         <activity
             android:name=".DocumentsActivity"
-            android:theme="@android:style/Theme.Holo.Light">
+            android:theme="@style/Theme">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.OPEN_DOCUMENT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -39,8 +39,8 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:title="@string/menu_settings"
-            android:theme="@android:style/Theme.Holo.Light"
+            android:label="@string/menu_settings"
+            android:theme="@android:style/Theme.Holo.Light.DialogWhenLarge"
             android:exported="false" />
 
         <provider
