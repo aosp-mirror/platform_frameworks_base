@@ -66,6 +66,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
 
     private static final String NAME_H2W = "h2w";
     private static final String NAME_USB_AUDIO = "usb_audio";
+    private static final String NAME_EMU_AUDIO = "semu_audio";
     private static final String NAME_HDMI_AUDIO = "hdmi_audio";
     private static final String NAME_HDMI = "hdmi";
 
@@ -356,6 +357,14 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                 Slog.w(TAG, "This kernel does not have usb audio support");
             }
 
+            // Monitor Motorola EMU audio jack
+            uei = new UEventInfo(NAME_EMU_AUDIO, BIT_USB_HEADSET_ANLG, 0);
+            if (uei.checkSwitchExists()) {
+                retVal.add(uei);
+            } else {
+                Slog.w(TAG, "This kernel does not have Motorola EMU audio support");
+            }
+
             // Monitor Samsung USB audio
             uei = new UEventInfo("dock", BIT_USB_HEADSET_DGTL, BIT_USB_HEADSET_ANLG);
             if (uei.checkSwitchExists()) {
@@ -395,6 +404,12 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             try {
                 String devPath = event.get("DEVPATH");
                 String name = event.get("SWITCH_NAME");
+                if (name.equals("CAR") || name.equals("DESK")) {
+                    // Motorola dock - ignore this event and don't change
+                    // the audio routing just because we're docked.
+                    // Let only the dock emu audio jack sensing do that.
+                    return;
+                }
                 synchronized (mLock) {
                     updateStateLocked(devPath, name, state);
                 }
