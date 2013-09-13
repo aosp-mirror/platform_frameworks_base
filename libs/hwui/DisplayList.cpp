@@ -369,11 +369,10 @@ void DisplayList::outputViewProperties(const int level) {
         }
     }
 
-    bool clipToBoundsNeeded = mClipToBounds;
+    bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
     if (mAlpha < 1) {
         if (mCaching) {
             ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mAlpha);
-            clipToBoundsNeeded = false; // clipping done by layer
         } else if (!mHasOverlappingRendering) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
         } else {
@@ -422,11 +421,10 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             renderer.concatMatrix(mTransformMatrix);
         }
     }
-    bool clipToBoundsNeeded = mClipToBounds;
+    bool clipToBoundsNeeded = mCaching ? false : mClipToBounds;
     if (mAlpha < 1) {
         if (mCaching) {
             renderer.setOverrideLayerAlpha(mAlpha);
-            clipToBoundsNeeded = false; // clipping done by layer
         } else if (!mHasOverlappingRendering) {
             renderer.scaleAlpha(mAlpha);
         } else {
