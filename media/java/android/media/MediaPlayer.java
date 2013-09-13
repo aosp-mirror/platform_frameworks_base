@@ -1819,8 +1819,6 @@ public class MediaPlayer implements SubtitleController.Listener
                 scanner.close();
                 mOutOfBandSubtitleTracks.add(track);
                 track.onData(contents, true /* eos */, ~0 /* runID: keep forever */);
-                // update default track selection
-                mSubtitleController.selectDefaultTrack();
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
 
@@ -2232,9 +2230,12 @@ public class MediaPlayer implements SubtitleController.Listener
                     break;
                 case MEDIA_INFO_METADATA_UPDATE:
                     scanInternalSubtitleTracks();
-                    break;
+                    // fall through
+
                 case MEDIA_INFO_EXTERNAL_METADATA_UPDATE:
                     msg.arg1 = MEDIA_INFO_METADATA_UPDATE;
+                    // update default track selection
+                    mSubtitleController.selectDefaultTrack();
                     break;
                 }
 
