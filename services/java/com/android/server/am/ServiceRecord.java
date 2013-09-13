@@ -85,11 +85,14 @@ final class ServiceRecord extends Binder {
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
     ProcessStats.ServiceState tracker; // tracking service execution, may be null
+    boolean delayed;        // are we waiting to start this service in the background?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
     long lastActivity;      // last time there was some activity on the service.
+    long startingBgTimeout;  // time at which we scheduled this for a delayed start.
     boolean startRequested; // someone explicitly called start?
+    boolean delayedStop;    // service has been stopped but is in a delayed start?
     boolean stopIfKilled;   // last onStart() said to stop if service killed?
     boolean callStart;      // last onStart() has asked to alway be called on restart.
     int executeNesting;     // number of outstanding operations keeping foreground.
@@ -220,6 +223,9 @@ final class ServiceRecord extends Binder {
         if (isolatedProc != null) {
             pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
         }
+        if (delayed) {
+            pw.print(prefix); pw.print("delayed="); pw.println(delayed);
+        }
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
                     pw.print(" foregroundId="); pw.print(foregroundId);
@@ -227,14 +233,17 @@ final class ServiceRecord extends Binder {
         }
         pw.print(prefix); pw.print("createTime=");
                 TimeUtils.formatDuration(createTime, nowReal, pw);
-                pw.print(" lastActivity=");
-                TimeUtils.formatDuration(lastActivity, now, pw);
+                pw.print(" startingBgTimeout=");
+                TimeUtils.formatDuration(startingBgTimeout, now, pw);
                 pw.println();
-        pw.print(prefix); pw.print("restartTime=");
+        pw.print(prefix); pw.print("lastActivity=");
+                TimeUtils.formatDuration(lastActivity, now, pw);
+                pw.print(" restartTime=");
                 TimeUtils.formatDuration(restartTime, now, pw);
                 pw.print(" createdFromFg="); pw.println(createdFromFg);
-        if (startRequested || lastStartId != 0) {
+        if (startRequested || delayedStop || lastStartId != 0) {
             pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
+                    pw.print(" delayedStop="); pw.print(delayedStop);
                     pw.print(" stopIfKilled="); pw.print(stopIfKilled);
                     pw.print(" callStart="); pw.print(callStart);
                     pw.print(" lastStartId="); pw.println(lastStartId);
