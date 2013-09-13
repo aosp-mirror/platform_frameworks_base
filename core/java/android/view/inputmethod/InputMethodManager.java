@@ -1412,12 +1412,17 @@ public final class InputMethodManager {
 
                 try {
                     if (DEBUG) Log.v(TAG, "SELECTION CHANGE: " + mCurMethod);
-                    mCurMethod.updateSelection(mCursorSelStart, mCursorSelEnd,
-                            selStart, selEnd, candidatesStart, candidatesEnd);
+                    final int oldSelStart = mCursorSelStart;
+                    final int oldSelEnd = mCursorSelEnd;
+                    // Update internal values before sending updateSelection to the IME, because
+                    // if it changes the text within its onUpdateSelection handler in a way that
+                    // does not move the cursor we don't want to call it again with the same values.
                     mCursorSelStart = selStart;
                     mCursorSelEnd = selEnd;
                     mCursorCandStart = candidatesStart;
                     mCursorCandEnd = candidatesEnd;
+                    mCurMethod.updateSelection(oldSelStart, oldSelEnd,
+                            selStart, selEnd, candidatesStart, candidatesEnd);
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
