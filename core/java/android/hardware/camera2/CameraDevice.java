@@ -89,6 +89,16 @@ public interface CameraDevice extends AutoCloseable {
     public static final int TEMPLATE_VIDEO_SNAPSHOT = 4;
 
     /**
+     * Create a request suitable for zero shutter lag still capture. This means
+     * means maximizing image quality without compromising preview frame rate.
+     * AE/AWB/AF should be on auto mode.
+     *
+     * @see #createCaptureRequest
+     * @hide
+     */
+    public static final int TEMPLATE_ZERO_SHUTTER_LAG = 5;
+
+    /**
      * A basic template for direct application control of capture
      * parameters. All automatic control is disabled (auto-exposure, auto-white
      * balance, auto-focus), and post-processing parameters are set to preview
@@ -97,8 +107,9 @@ public interface CameraDevice extends AutoCloseable {
      * application depending on the intended use case.
      *
      * @see #createCaptureRequest
+     * @hide
      */
-    public static final int TEMPLATE_MANUAL = 5;
+    public static final int TEMPLATE_MANUAL = 6;
 
     /**
      * Get the ID of this camera device.
