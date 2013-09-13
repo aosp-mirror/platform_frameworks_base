@@ -65,6 +65,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -1016,7 +1017,7 @@ public class WifiStateMachine extends StateMachine {
             int dist, distSd;
             long tsf = 0;
             dist = distSd = ScanResult.UNSPECIFIED;
-            long now = System.currentTimeMillis();
+            long now = SystemClock.elapsedRealtime();
 
             while (true) {
                 while (n < splitData.length) {
@@ -1064,6 +1065,7 @@ public class WifiStateMachine extends StateMachine {
                     } else if (splitData[n].startsWith(AGE)) {
                         try {
                             tsf = now - Long.parseLong(splitData[n].substring(AGE.length()));
+                            tsf *= 1000; // convert mS -> uS
                         } catch (NumberFormatException e) {
                             loge("Invalid timestamp: " + splitData[n]);
                             tsf = 0;
