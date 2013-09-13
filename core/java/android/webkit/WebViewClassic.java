@@ -62,7 +62,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
 import android.security.KeyChain;
 import android.text.Editable;
 import android.text.InputType;
@@ -2894,12 +2894,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * See {@link WebView#exportToPdf()}
+     * See {@link WebView#createPrintDocumentAdapter()}
      */
     @Override
-    public void exportToPdf(android.os.ParcelFileDescriptor fd, PrintAttributes attributes,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal)
-            throws java.io.IOException {
+    public PrintDocumentAdapter createPrintDocumentAdapter() {
         // K-only API not implemented in WebViewClassic.
         throw new IllegalStateException("This API not supported on Android 4.3 and earlier");
     }
