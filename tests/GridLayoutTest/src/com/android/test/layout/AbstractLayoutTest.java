@@ -24,7 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import static android.view.Gravity.*;
+import static android.view.Gravity.BOTTOM;
+import static android.view.Gravity.CENTER;
+import static android.view.Gravity.FILL;
+import static android.view.Gravity.LEFT;
+import static android.view.Gravity.NO_GRAVITY;
+import static android.view.Gravity.RIGHT;
+import static android.view.Gravity.TOP;
 
 public abstract class AbstractLayoutTest extends Activity {
 

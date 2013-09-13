@@ -21,7 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 
-import static android.widget.GridLayout.*;
+import static android.widget.GridLayout.Spec;
+import static android.widget.GridLayout.UNDEFINED;
+import static android.widget.GridLayout.VERTICAL;
+import static android.widget.GridLayout.spec;
 
 public class GridLayoutTest extends AbstractLayoutTest {
     public ViewGroup create(Context context) {

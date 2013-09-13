@@ -22,11 +22,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
-import android.widget.*;
+import android.widget.Space;
+import android.widget.TextView;
 
-import static android.text.InputType.*;
-import static android.widget.GridLayout.*;
+import static android.text.InputType.TYPE_CLASS_TEXT;
+import static android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+import static android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;
+import static android.widget.GridLayout.ALIGN_BOUNDS;
+import static android.widget.GridLayout.BASELINE;
+import static android.widget.GridLayout.CENTER;
+import static android.widget.GridLayout.FILL;
+import static android.widget.GridLayout.LEFT;
+import static android.widget.GridLayout.RIGHT;
+import static android.widget.GridLayout.START;
+import static android.widget.GridLayout.Spec;
+import static android.widget.GridLayout.spec;
 
 public class BiDiTestGridLayoutCodeRtl extends Fragment {
 
