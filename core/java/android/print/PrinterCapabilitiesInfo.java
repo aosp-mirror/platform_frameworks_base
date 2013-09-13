@@ -51,7 +51,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     private int mColorModes;
 
     private final int[] mDefaults = new int[PROPERTY_COUNT];
-    private Margins mDefaultMargins = DEFAULT_MARGINS;
 
     /**
      * @hide
@@ -71,6 +70,10 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      * @hide
      */
     public void copyFrom(PrinterCapabilitiesInfo other) {
+        if (this == other) {
+            return;
+        }
+
         mMinMargins = other.mMinMargins;
 
         if (other.mMediaSizes != null) {
@@ -101,8 +104,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         for (int i = 0; i < defaultCount; i++) {
             mDefaults[i] = other.mDefaults[i];
         }
-
-        mDefaultMargins = other.mDefaultMargins;
     }
 
     /**
@@ -124,7 +125,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     }
 
     /**
-     * Gets the minimal supported margins.
+     * Gets the minimal margins. These are the minimal margins
+     * the printer physically supports.
      *
      * @return The minimal margins.
      */
@@ -147,27 +149,29 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     /**
      * Gets the default print attributes.
      *
-     * @param outAttributes The attributes to populated.
+     * @return The default attributes.
      */
-    public void getDefaults(PrintAttributes outAttributes) {
-        outAttributes.clear();
+    public PrintAttributes getDefaults() {
+        PrintAttributes.Builder builder = new PrintAttributes.Builder();
 
-        outAttributes.setMargins(mDefaultMargins);
+        builder.setMinMargins(mMinMargins);
 
         final int mediaSizeIndex = mDefaults[PROPERTY_MEDIA_SIZE];
         if (mediaSizeIndex >= 0) {
-            outAttributes.setMediaSize(mMediaSizes.get(mediaSizeIndex));
+            builder.setMediaSize(mMediaSizes.get(mediaSizeIndex));
         }
 
         final int resolutionIndex = mDefaults[PROPERTY_RESOLUTION];
         if (resolutionIndex >= 0) {
-            outAttributes.setResolution(mResolutions.get(resolutionIndex));
+            builder.setResolution(mResolutions.get(resolutionIndex));
         }
 
         final int colorMode = mDefaults[PROPERTY_COLOR_MODE];
         if (colorMode > 0) {
-            outAttributes.setColorMode(colorMode);
+            builder.setColorMode(colorMode);
         }
+
+        return builder.build();
     }
 
     private PrinterCapabilitiesInfo(Parcel parcel) {
@@ -178,7 +182,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         mColorModes = parcel.readInt();
 
         readDefaults(parcel);
-        mDefaultMargins = readMargins(parcel);
     }
 
     @Override
@@ -195,7 +198,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         parcel.writeInt(mColorModes);
 
         writeDefaults(parcel);
-        writeMargins(mDefaultMargins, parcel);
     }
 
     @Override
@@ -207,7 +209,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         result = prime * result + ((mResolutions == null) ? 0 : mResolutions.hashCode());
         result = prime * result + mColorModes;
         result = prime * result + Arrays.hashCode(mDefaults);
-        result = prime * result + ((mDefaultMargins == null) ? 0 : mDefaultMargins.hashCode());
         return result;
     }
 
@@ -250,13 +251,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         if (!Arrays.equals(mDefaults, other.mDefaults)) {
             return false;
         }
-        if (mDefaultMargins == null) {
-            if (other.mDefaultMargins != null) {
-                return false;
-            }
-        } else if (!mDefaultMargins.equals(other.mDefaultMargins)) {
-            return false;
-        }
         return true;
     }
 
@@ -279,7 +273,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         while (colorModes != 0) {
             final int colorMode = 1 << Integer.numberOfTrailingZeros(colorModes);
             colorModes &= ~colorMode;
-            if (builder.length() > 0) {
+            if (builder.length() > 1) {
                 builder.append(", ");
             }
             builder.append(PrintAttributes.colorModeToString(colorMode));
@@ -442,27 +436,25 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         }
 
         /**
-         * Sets the minimal margins.
+         * Sets the minimal margins. These are the minimal margins
+         * the printer physically supports.
+         *
          * <p>
-         * <strong>Required:</strong> No
+         * <strong>Required:</strong> Yes
          * </p>
          *
          * @param margins The margins.
-         * @param defaultMargins The default margins.
          * @return This builder.
+         *
+         * @throws IllegalArgumentException If margins are <code>null</code>.
          *
          * @see PrintAttributes.Margins
          */
-        public Builder setMinMargins(Margins margins, Margins defaultMargins) {
-            if (margins.getLeftMils() > defaultMargins.getLeftMils()
-                    || margins.getTopMils() > defaultMargins.getTopMils()
-                    || margins.getRightMils() < defaultMargins.getRightMils()
-                    || margins.getBottomMils() < defaultMargins.getBottomMils()) {
-                throw new IllegalArgumentException("Default margins"
-                    + " cannot be outside of the min margins.");
+        public Builder setMinMargins(Margins margins) {
+            if (margins == null) {
+                throw new IllegalArgumentException("margins cannot be null");
             }
             mPrototype.mMinMargins = margins;
-            mPrototype.mDefaultMargins = defaultMargins;
             return this;
         }
 
@@ -507,7 +499,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @throws IllegalStateException If a required attribute was not specified.
          */
-        public PrinterCapabilitiesInfo create() {
+        public PrinterCapabilitiesInfo build() {
             if (mPrototype.mMediaSizes == null || mPrototype.mMediaSizes.isEmpty()) {
                 throw new IllegalStateException("No media size specified.");
             }
@@ -527,10 +519,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
                 throw new IllegalStateException("No default color mode specified.");
             }
             if (mPrototype.mMinMargins == null) {
-                mPrototype.mMinMargins  = new Margins(0, 0, 0, 0);
-            }
-            if (mPrototype.mDefaultMargins == null) {
-                mPrototype.mDefaultMargins = mPrototype.mMinMargins;
+                throw new IllegalArgumentException("margins cannot be null");
             }
             return new PrinterCapabilitiesInfo(mPrototype);
         }

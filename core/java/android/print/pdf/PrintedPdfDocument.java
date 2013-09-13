@@ -77,14 +77,14 @@ public final class PrintedPdfDocument {
         mPageSize.set(0, 0, pageWidth, pageHeight);
 
         // Compute the content size from the attributes.
-        Margins margins = attributes.getMargins();
-        final int marginLeft = (int) (((float) margins.getLeftMils() /MILS_PER_INCH)
+        Margins minMargins = attributes.getMinMargins();
+        final int marginLeft = (int) (((float) minMargins.getLeftMils() /MILS_PER_INCH)
                 * POINTS_IN_INCH);
-        final int marginTop = (int) (((float) margins.getTopMils() / MILS_PER_INCH)
+        final int marginTop = (int) (((float) minMargins.getTopMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
-        final int marginRight = (int) (((float) margins.getRightMils() / MILS_PER_INCH)
+        final int marginRight = (int) (((float) minMargins.getRightMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
-        final int marginBottom = (int) (((float) margins.getBottomMils() / MILS_PER_INCH)
+        final int marginBottom = (int) (((float) minMargins.getBottomMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
         mContentSize.set(mPageSize.left + marginLeft, mPageSize.top + marginTop,
                 mPageSize.right - marginRight, mPageSize.bottom - marginBottom);

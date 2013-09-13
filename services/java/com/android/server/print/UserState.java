@@ -433,7 +433,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         return false;
     }
 
-
     private boolean readEnabledPrintServicesLocked() {
         Set<ComponentName> tempEnabledServiceNameSet = new HashSet<ComponentName>();
         readPrintServicesFromSettingLocked(Settings.Secure.ENABLED_PRINT_SERVICES,

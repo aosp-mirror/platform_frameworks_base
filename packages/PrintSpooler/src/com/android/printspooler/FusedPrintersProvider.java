@@ -455,7 +455,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
                 PrinterInfo.Builder builder = new PrinterInfo.Builder(printerId, name, status);
                 builder.setDescription(description);
-                PrinterInfo printer = builder.create();
+                PrinterInfo printer = builder.build();
 
                 outPrinters.add(printer);
 

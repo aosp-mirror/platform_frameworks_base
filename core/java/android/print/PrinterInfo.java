@@ -56,6 +56,9 @@ public final class PrinterInfo implements Parcelable {
      * @hide
      */
     public void copyFrom(PrinterInfo other) {
+        if (this == other) {
+            return;
+        }
         mId = other.mId;
         mName = other.mName;
         mStatus = other.mStatus;
@@ -293,7 +296,7 @@ public final class PrinterInfo implements Parcelable {
          *
          * @return A new {@link PrinterInfo}.
          */
-        public PrinterInfo create() {
+        public PrinterInfo build() {
             return new PrinterInfo(mPrototype);
         }
 

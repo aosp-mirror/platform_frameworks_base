@@ -41,7 +41,7 @@ public final class PrintAttributes implements Parcelable {
 
     private MediaSize mMediaSize;
     private Resolution mResolution;
-    private Margins mMargins;
+    private Margins mMinMargins;
 
     private int mColorMode;
 
@@ -52,7 +52,7 @@ public final class PrintAttributes implements Parcelable {
     private PrintAttributes(Parcel parcel) {
         mMediaSize = (parcel.readInt() ==  1) ? MediaSize.createFromParcel(parcel) : null;
         mResolution = (parcel.readInt() ==  1) ? Resolution.createFromParcel(parcel) : null;
-        mMargins = (parcel.readInt() ==  1) ? Margins.createFromParcel(parcel) : null;
+        mMinMargins = (parcel.readInt() ==  1) ? Margins.createFromParcel(parcel) : null;
         mColorMode = parcel.readInt();
     }
 
@@ -97,23 +97,25 @@ public final class PrintAttributes implements Parcelable {
     }
 
     /**
-     * Gets the margins.
+     * Gets the minimal margins. If the content does not fit
+     * these margins it will be clipped.
      *
      * @return The margins or <code>null</code> if not set.
      */
-    public Margins getMargins() {
-        return mMargins;
+    public Margins getMinMargins() {
+        return mMinMargins;
     }
 
     /**
-     * Sets the margins.
+     * Sets the minimal margins. If the content does not fit
+     * these margins it will be clipped.
      *
      * @param The margins.
      *
      * @hide
      */
-    public void setMargins(Margins margins) {
-        mMargins = margins;
+    public void setMinMargins(Margins margins) {
+        mMinMargins = margins;
     }
 
     /**
@@ -157,9 +159,9 @@ public final class PrintAttributes implements Parcelable {
         } else {
             parcel.writeInt(0);
         }
-        if (mMargins != null) {
+        if (mMinMargins != null) {
             parcel.writeInt(1);
-            mMargins.writeToParcel(parcel);
+            mMinMargins.writeToParcel(parcel);
         } else {
             parcel.writeInt(0);
         }
@@ -176,7 +178,7 @@ public final class PrintAttributes implements Parcelable {
         final int prime = 31;
         int result = 1;
         result = prime * result + mColorMode;
-        result = prime * result + ((mMargins == null) ? 0 : mMargins.hashCode());
+        result = prime * result + ((mMinMargins == null) ? 0 : mMinMargins.hashCode());
         result = prime * result + ((mMediaSize == null) ? 0 : mMediaSize.hashCode());
         result = prime * result + ((mResolution == null) ? 0 : mResolution.hashCode());
         return result;
@@ -197,11 +199,11 @@ public final class PrintAttributes implements Parcelable {
         if (mColorMode != other.mColorMode) {
             return false;
         }
-        if (mMargins == null) {
-            if (other.mMargins != null) {
+        if (mMinMargins == null) {
+            if (other.mMinMargins != null) {
                 return false;
             }
-        } else if (!mMargins.equals(other.mMargins)) {
+        } else if (!mMinMargins.equals(other.mMinMargins)) {
             return false;
         }
         if (mMediaSize == null) {
@@ -233,7 +235,7 @@ public final class PrintAttributes implements Parcelable {
             builder.append(", orientation: ").append("null");
         }
         builder.append(", resolution: ").append(mResolution);
-        builder.append(", margins: ").append(mMargins);
+        builder.append(", minMargins: ").append(mMinMargins);
         builder.append(", colorMode: ").append(colorModeToString(mColorMode));
         builder.append("}");
         return builder.toString();
@@ -243,7 +245,7 @@ public final class PrintAttributes implements Parcelable {
     public void clear() {
         mMediaSize = null;
         mResolution = null;
-        mMargins = null;
+        mMinMargins = null;
         mColorMode = 0;
     }
 
@@ -253,7 +255,7 @@ public final class PrintAttributes implements Parcelable {
     public void copyFrom(PrintAttributes other) {
         mMediaSize = other.mMediaSize;
         mResolution = other.mResolution;
-        mMargins = other.mMargins;
+        mMinMargins = other.mMinMargins;
         mColorMode = other.mColorMode;
     }
 
@@ -649,62 +651,10 @@ public final class PrintAttributes implements Parcelable {
      * This class specifies a supported resolution in dpi (dots per inch).
      */
     public static final class Resolution {
-        private static final String LOG_TAG = "Resolution";
-
         private final String mId;
-        /**@hide */
-        public final String mLabel;
-        /**@hide */
-        public final String mPackageName;
-        /**@hide */
-        public final int mLabelResId;
+        private final String mLabel;
         private final int mHorizontalDpi;
         private final int mVerticalDpi;
-
-        /**
-         * Creates a new instance. This is the preferred constructor since
-         * it enables the resolution label to be shown in a localized fashion
-         * on a locale change.
-         *
-         * @param id The unique resolution id.
-         * @param packageName The name of the creating package.
-         * @param labelResId The resource id of a human readable label.
-         * @param horizontalDpi The horizontal resolution in dpi.
-         * @param verticalDpi The vertical resolution in dpi.
-         *
-         * @throws IllegalArgumentException If the id is empty.
-         * @throws IllegalArgumentException If the label is empty.
-         * @throws IllegalArgumentException If the horizontalDpi is less than or equal to zero.
-         * @throws IllegalArgumentException If the verticalDpi is less than or equal to zero.
-         *
-         * @hide
-         */
-        public Resolution(String id, String packageName, int labelResId,
-                int horizontalDpi, int verticalDpi) {
-            if (TextUtils.isEmpty(id)) {
-                throw new IllegalArgumentException("id cannot be empty.");
-            }
-            if (TextUtils.isEmpty(packageName)) {
-                throw new IllegalArgumentException("packageName cannot be empty.");
-            }
-            if (labelResId <= 0) {
-                throw new IllegalArgumentException("labelResId must be greater than zero.");
-            }
-            if (horizontalDpi <= 0) {
-                throw new IllegalArgumentException("horizontalDpi "
-                        + "cannot be less than or equal to zero.");
-            }
-            if (verticalDpi <= 0) {
-                throw new IllegalArgumentException("verticalDpi"
-                       + " cannot be less than or equal to zero.");
-            }
-            mId = id;
-            mPackageName = packageName;
-            mLabelResId = labelResId;
-            mHorizontalDpi = horizontalDpi;
-            mVerticalDpi = verticalDpi;
-            mLabel = null;
-        }
 
         /**
          * Creates a new instance.
@@ -738,19 +688,6 @@ public final class PrintAttributes implements Parcelable {
             mLabel = label;
             mHorizontalDpi = horizontalDpi;
             mVerticalDpi = verticalDpi;
-            mPackageName = null;
-            mLabelResId = 0;
-        }
-
-        /** @hide */
-        public Resolution(String id, String label, String packageName,
-                int horizontalDpi, int verticalDpi, int labelResId) {
-            mId = id;
-            mPackageName = packageName;
-            mLabelResId = labelResId;
-            mHorizontalDpi = horizontalDpi;
-            mVerticalDpi = verticalDpi;
-            mLabel = label;
         }
 
         /**
@@ -765,22 +702,9 @@ public final class PrintAttributes implements Parcelable {
         /**
          * Gets the resolution human readable label.
          *
-         * @param packageManager The package manager for loading the label.
          * @return The human readable label.
          */
-        public String getLabel(PackageManager packageManager) {
-            if (!TextUtils.isEmpty(mPackageName) && mLabelResId > 0) {
-                try {
-                    return packageManager.getResourcesForApplication(
-                            mPackageName).getString(mLabelResId);
-                } catch (NotFoundException nfe) {
-                    Log.w(LOG_TAG, "Could not load resouce" + mLabelResId
-                            + " from package " + mPackageName);
-                } catch (NameNotFoundException nnfee) {
-                    Log.w(LOG_TAG, "Could not load resouce" + mLabelResId
-                            + " from package " + mPackageName);
-                }
-            }
+        public String getLabel() {
             return mLabel;
         }
 
@@ -805,18 +729,14 @@ public final class PrintAttributes implements Parcelable {
         void writeToParcel(Parcel parcel) {
             parcel.writeString(mId);
             parcel.writeString(mLabel);
-            parcel.writeString(mPackageName);
             parcel.writeInt(mHorizontalDpi);
             parcel.writeInt(mVerticalDpi);
-            parcel.writeInt(mLabelResId);
         }
 
         static Resolution createFromParcel(Parcel parcel) {
             return new Resolution(
                     parcel.readString(),
                     parcel.readString(),
-                    parcel.readString(),
-                    parcel.readInt(),
                     parcel.readInt(),
                     parcel.readInt());
         }
@@ -857,10 +777,8 @@ public final class PrintAttributes implements Parcelable {
             builder.append("Resolution{");
             builder.append("id: ").append(mId);
             builder.append(", label: ").append(mLabel);
-            builder.append(", packageName: ").append(mPackageName);
             builder.append(", horizontalDpi: ").append(mHorizontalDpi);
             builder.append(", verticalDpi: ").append(mVerticalDpi);
-            builder.append(", labelResId: ").append(mLabelResId);
             builder.append("}");
             return builder.toString();
         }
@@ -1042,13 +960,14 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Sets the margins.
+         * Sets the minimal margins. If the content does not fit
+         * these margins it will be clipped.
          *
          * @param margins The margins.
          * @return This builder.
          */
-        public Builder setMargins(Margins margins) {
-            mAttributes.setMargins(margins);
+        public Builder setMinMargins(Margins margins) {
+            mAttributes.setMinMargins(margins);
             return this;
         }
 
@@ -1074,7 +993,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The new instance.
          */
-        public PrintAttributes create() {
+        public PrintAttributes build() {
             return mAttributes;
         }
     }
