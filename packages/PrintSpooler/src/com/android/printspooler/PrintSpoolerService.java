@@ -839,11 +839,11 @@ public final class PrintSpoolerService extends Service {
                             serializer.attribute(null, ATTR_VERTICAL_DPI, String.valueOf(
                                     resolution.getVerticalDpi()));
                             serializer.attribute(null, ATTR_LABEL,
-                                    resolution.getLabel(getPackageManager()));
+                                    resolution.getLabel());
                             serializer.endTag(null, TAG_RESOLUTION);
                         }
 
-                        Margins margins = attributes.getMargins();
+                        Margins margins = attributes.getMinMargins();
                         if (margins != null) {
                             serializer.startTag(null, TAG_MARGINS);
                             serializer.attribute(null, ATTR_LEFT_MILS, String.valueOf(
@@ -1056,14 +1056,14 @@ public final class PrintSpoolerService extends Service {
                     final int bottomMils = Integer.parseInt(parser.getAttributeValue(null,
                             ATTR_BOTTOM_MILS));
                     Margins margins = new Margins(leftMils, topMils, rightMils, bottomMils);
-                    builder.setMargins(margins);
+                    builder.setMinMargins(margins);
                     parser.next();
                     skipEmptyTextTags(parser);
                     expect(parser, XmlPullParser.END_TAG, TAG_MARGINS);
                     parser.next();
                 }
 
-                printJob.setAttributes(builder.create());
+                printJob.setAttributes(builder.build());
 
                 skipEmptyTextTags(parser);
                 expect(parser, XmlPullParser.END_TAG, TAG_ATTRIBUTES);
@@ -1079,7 +1079,7 @@ public final class PrintSpoolerService extends Service {
                         ATTR_CONTENT_TYPE));
                 PrintDocumentInfo info = new PrintDocumentInfo.Builder(name)
                         .setPageCount(pageCount)
-                        .setContentType(contentType).create();
+                        .setContentType(contentType).build();
                 printJob.setDocumentInfo(info);
                 parser.next();
                 skipEmptyTextTags(parser);
