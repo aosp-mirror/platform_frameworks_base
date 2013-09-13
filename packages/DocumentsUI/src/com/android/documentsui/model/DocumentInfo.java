@@ -204,6 +204,10 @@ public class DocumentInfo implements Durable, Parcelable {
         return (flags & Document.FLAG_SUPPORTS_DELETE) != 0;
     }
 
+    public boolean isGridTitlesHidden() {
+        return (flags & Document.FLAG_DIR_HIDE_GRID_TITLES) != 0;
+    }
+
     public static String getCursorString(Cursor cursor, String columnName) {
         final int index = cursor.getColumnIndex(columnName);
         return (index != -1) ? cursor.getString(index) : null;

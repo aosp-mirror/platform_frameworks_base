@@ -137,12 +137,14 @@ public class RootsCache {
 
     @GuardedBy("ActivityThread")
     public boolean isIconUnique(RootInfo root) {
+        final int rootIcon = root.derivedIcon != 0 ? root.derivedIcon : root.icon;
         for (RootInfo test : mRoots) {
             if (Objects.equal(test.authority, root.authority)) {
                 if (Objects.equal(test.rootId, root.rootId)) {
                     continue;
                 }
-                if (test.icon == root.icon) {
+                final int testIcon = test.derivedIcon != 0 ? test.derivedIcon : test.icon;
+                if (testIcon == rootIcon) {
                     return false;
                 }
             }

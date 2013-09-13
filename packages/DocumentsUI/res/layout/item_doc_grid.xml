@@ -30,6 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"
+            android:layout_marginBottom="6dp"
             android:background="#fff">
 
             <FrameLayout
@@ -63,10 +64,10 @@
         </FrameLayout>
 
         <LinearLayout
+            android:id="@+id/line1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingTop="6dp"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
@@ -120,6 +121,20 @@
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
                 style="@style/TextAppearance.Small" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@android:id/icon2"
+                android:layout_width="@dimen/root_icon_size"
+                android:layout_height="@dimen/root_icon_size"
+                android:layout_marginStart="8dip"
+                android:scaleType="centerInside"
+                android:contentDescription="@null"
+                android:visibility="gone" />
 
         </LinearLayout>
 

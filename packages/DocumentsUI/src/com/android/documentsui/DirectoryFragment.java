@@ -102,6 +102,8 @@ public class DirectoryFragment extends Fragment {
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
     private boolean mLastShowSize = false;
 
+    private boolean mHideGridTitles = false;
+
     private Point mThumbSize;
 
     private DocumentsAdapter mAdapter;
@@ -111,11 +113,6 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_ROOT = "root";
     private static final String EXTRA_DOC = "doc";
     private static final String EXTRA_QUERY = "query";
-
-    /**
-     * MIME types that should always show thumbnails in list mode.
-     */
-    private static final String[] LIST_THUMBNAIL_MIMES = new String[] { "image/*", "video/*" };
 
     private static AtomicInteger sLoaderId = new AtomicInteger(4000);
 
@@ -182,14 +179,23 @@ public class DirectoryFragment extends Fragment {
         final Context context = getActivity();
         final State state = getDisplayState(DirectoryFragment.this);
 
+        final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
+        final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
+
         mAdapter = new DocumentsAdapter();
         mType = getArguments().getInt(EXTRA_TYPE);
+
+        if (mType == TYPE_RECENT_OPEN) {
+            // Hide titles when showing recents for picking images/videos
+            mHideGridTitles = MimePredicate.mimeMatches(
+                    MimePredicate.VISUAL_MIMES, state.acceptMimes);
+        } else {
+            mHideGridTitles = (doc != null) && doc.isGridTitlesHidden();
+        }
 
         mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
             public Loader<DirectoryResult> onCreateLoader(int id, Bundle args) {
-                final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
-                final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
                 final String query = getArguments().getString(EXTRA_QUERY);
 
                 Uri contentsUri;
@@ -643,6 +649,8 @@ public class DirectoryFragment extends Fragment {
             final Context context = parent.getContext();
             final State state = getDisplayState(DirectoryFragment.this);
 
+            final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
+
             final RootsCache roots = DocumentsApplication.getRootsCache(context);
             final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                     context, mThumbSize);
@@ -671,12 +679,15 @@ public class DirectoryFragment extends Fragment {
             final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
             final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
+            final View line1 = convertView.findViewById(R.id.line1);
+            final View line2 = convertView.findViewById(R.id.line2);
+
             final View icon = convertView.findViewById(android.R.id.icon);
             final ImageView iconMime = (ImageView) convertView.findViewById(R.id.icon_mime);
             final ImageView iconThumb = (ImageView) convertView.findViewById(R.id.icon_thumb);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final View line2 = convertView.findViewById(R.id.line2);
             final ImageView icon1 = (ImageView) convertView.findViewById(android.R.id.icon1);
+            final ImageView icon2 = (ImageView) convertView.findViewById(android.R.id.icon2);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
             final TextView date = (TextView) convertView.findViewById(R.id.date);
             final TextView size = (TextView) convertView.findViewById(R.id.size);
@@ -692,10 +703,11 @@ public class DirectoryFragment extends Fragment {
 
             final boolean supportsThumbnail = (docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
             final boolean allowThumbnail = (state.derivedMode == MODE_GRID)
-                    || MimePredicate.mimeMatches(LIST_THUMBNAIL_MIMES, docMimeType);
+                    || MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, docMimeType);
+            final boolean showThumbnail = supportsThumbnail && allowThumbnail;
 
             boolean cacheHit = false;
-            if (supportsThumbnail && allowThumbnail) {
+            if (showThumbnail) {
                 final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
                 final Bitmap cachedResult = thumbs.get(uri);
                 if (cachedResult != null) {
@@ -726,15 +738,19 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            title.setText(docDisplayName);
-
+            boolean hasLine1 = false;
             boolean hasLine2 = false;
 
+            final boolean hideTitle = (state.derivedMode == MODE_GRID) && mHideGridTitles;
+            if (!hideTitle) {
+                title.setText(docDisplayName);
+                hasLine1 = true;
+            }
+
+            Drawable iconDrawable = null;
             if (mType == TYPE_RECENT_OPEN) {
                 final RootInfo root = roots.getRoot(docAuthority, docRootId);
-                final Drawable iconDrawable = root.loadIcon(context);
-                icon1.setVisibility(View.VISIBLE);
-                icon1.setImageDrawable(iconDrawable);
+                iconDrawable = root.loadIcon(context);
 
                 if (summary != null) {
                     final boolean alwaysShowSummary = getResources()
@@ -756,7 +772,13 @@ public class DirectoryFragment extends Fragment {
                     }
                 }
             } else {
-                icon1.setVisibility(View.GONE);
+                // Directories showing thumbnails in grid mode get a little icon
+                // hint to remind user they're a directory.
+                if (Document.MIME_TYPE_DIR.equals(docMimeType) && state.derivedMode == MODE_GRID
+                        && showThumbnail) {
+                    iconDrawable = context.getResources().getDrawable(R.drawable.ic_root_folder);
+                }
+
                 if (summary != null) {
                     if (docSummary != null) {
                         summary.setText(docSummary);
@@ -765,6 +787,19 @@ public class DirectoryFragment extends Fragment {
                     } else {
                         summary.setVisibility(View.INVISIBLE);
                     }
+                }
+            }
+
+            if (icon1 != null) icon1.setVisibility(View.GONE);
+            if (icon2 != null) icon2.setVisibility(View.GONE);
+
+            if (iconDrawable != null) {
+                if (hasLine1) {
+                    icon1.setVisibility(View.VISIBLE);
+                    icon1.setImageDrawable(iconDrawable);
+                } else {
+                    icon2.setVisibility(View.VISIBLE);
+                    icon2.setImageDrawable(iconDrawable);
                 }
             }
 
@@ -787,6 +822,9 @@ public class DirectoryFragment extends Fragment {
                 size.setVisibility(View.GONE);
             }
 
+            if (line1 != null) {
+                line1.setVisibility(hasLine1 ? View.VISIBLE : View.GONE);
+            }
             if (line2 != null) {
                 line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
             }
@@ -796,11 +834,13 @@ public class DirectoryFragment extends Fragment {
             if (enabled) {
                 setEnabledRecursive(convertView, true);
                 icon.setAlpha(1f);
-                icon1.setAlpha(1f);
+                if (icon1 != null) icon1.setAlpha(1f);
+                if (icon2 != null) icon2.setAlpha(1f);
             } else {
                 setEnabledRecursive(convertView, false);
                 icon.setAlpha(0.5f);
-                icon1.setAlpha(0.5f);
+                if (icon1 != null) icon1.setAlpha(0.5f);
+                if (icon2 != null) icon2.setAlpha(0.5f);
             }
 
             return convertView;
@@ -943,6 +983,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void setEnabledRecursive(View v, boolean enabled) {
+        if (v == null) return;
         if (v.isEnabled() == enabled) return;
         v.setEnabled(enabled);
 
