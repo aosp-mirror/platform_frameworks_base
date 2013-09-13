@@ -3748,9 +3748,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         == PackageManager.PERMISSION_GRANTED) {
                     forceStopPackageLocked(packageName, pkgUid, "clear data");
                 } else {
-                    throw new SecurityException(pid+" does not have permission:"+
-                            android.Manifest.permission.CLEAR_APP_USER_DATA+" to clear data" +
-                                    "for process:"+packageName);
+                    throw new SecurityException("PID " + pid + " does not have permission "
+                            + android.Manifest.permission.CLEAR_APP_USER_DATA + " to clear data"
+                                    + " of package " + packageName);
                 }
             }
 
