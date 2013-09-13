@@ -179,6 +179,7 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/androi
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/idc/frameworks)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/keylayout/frameworks)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/keychars/frameworks)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/system/media/video/*)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
