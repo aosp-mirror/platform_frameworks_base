@@ -249,7 +249,7 @@ public:
         return true;
     }
 
-    virtual void add(DrawOp* op, DeferredDisplayState* state, bool opaqueOverBounds) {
+    virtual void add(DrawOp* op, const DeferredDisplayState* state, bool opaqueOverBounds) {
         DrawBatch::add(op, state, opaqueOverBounds);
 
         const int newClipSideFlags = state->mClipSideFlags;
