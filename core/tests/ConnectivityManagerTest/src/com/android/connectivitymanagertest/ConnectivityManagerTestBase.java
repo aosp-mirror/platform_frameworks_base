@@ -16,7 +16,7 @@
 
 package com.android.connectivitymanagertest;
 
-import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -26,21 +26,14 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.IPowerManager;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
+import android.test.InstrumentationTestCase;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.LinearLayout;
 
 import com.android.internal.util.AsyncChannel;
 
@@ -52,13 +45,17 @@ import java.util.List;
 
 
 /**
- * An activity registered with connectivity manager broadcast
- * provides network connectivity information and
- * can be used to set device states: Cellular, Wifi, Airplane mode.
+ * Base InstrumentationTestCase for Connectivity Manager (CM) test suite
+ *
+ * It registers connectivity manager broadcast and WiFi broadcast to provide
+ * network connectivity information, also provides a set of utility functions
+ * to modify and verify connectivity states.
+ *
+ * A CM test case should extend this base class.
  */
-public class ConnectivityManagerTestActivity extends Activity {
+public class ConnectivityManagerTestBase extends InstrumentationTestCase {
 
-    public static final String LOG_TAG = "ConnectivityManagerTestActivity";
+    public static final String LOG_TAG = "ConnectivityManagerTestBase";
     public static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; //10 seconds
     public static final int WIFI_SCAN_TIMEOUT = 50 * 1000; // 50 seconds
     public static final int SHORT_TIMEOUT = 5 * 1000; // 5 seconds
@@ -94,14 +91,9 @@ public class ConnectivityManagerTestActivity extends Activity {
     private Context mContext;
     public boolean scanResultAvailable = false;
 
-    /*
-     * Control Wifi States
-     */
+    /* Control Wifi States */
     public WifiManager mWifiManager;
-
-    /*
-     * Verify connectivity state
-     */
+    /* Verify connectivity state */
     public static final int NUM_NETWORK_TYPES = ConnectivityManager.MAX_NETWORK_TYPE + 1;
     NetworkState[] connectivityState = new NetworkState[NUM_NETWORK_TYPES];
 
@@ -208,26 +200,28 @@ public class ConnectivityManagerTestActivity extends Activity {
         }
     }
 
-    public ConnectivityManagerTestActivity() {
+    @Override
+    public void setUp() throws Exception {
         mState = State.UNKNOWN;
         scanResultAvailable = false;
-    }
+        mContext = getInstrumentation().getContext();
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        log("onCreate, inst=" + Integer.toHexString(hashCode()));
+        // Get an instance of ConnectivityManager
+        mCM = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Get an instance of WifiManager
+        mWifiManager =(WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
 
-        // Create a simple layout
-        LinearLayout contentView = new LinearLayout(this);
-        contentView.setOrientation(LinearLayout.VERTICAL);
-        setContentView(contentView);
-        setTitle("ConnectivityManagerTestActivity");
+        if (mWifiManager.isWifiApEnabled()) {
+            // if soft AP is enabled, disable it
+            mWifiManager.setWifiApEnabled(null, false);
+            log("Disable soft ap");
+        }
 
+        initializeNetworkStates();
 
         // register a connectivity receiver for CONNECTIVITY_ACTION;
         mConnectivityReceiver = new ConnectivityReceiver();
-        registerReceiver(mConnectivityReceiver,
+        mContext.registerReceiver(mConnectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         mWifiReceiver = new WifiReceiver();
@@ -238,28 +232,15 @@ public class ConnectivityManagerTestActivity extends Activity {
         mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         mIntentFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
-        registerReceiver(mWifiReceiver, mIntentFilter);
+        mContext.registerReceiver(mWifiReceiver, mIntentFilter);
 
-        // Get an instance of ConnectivityManager
-        mCM = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        // Get an instance of WifiManager
-        mWifiManager =(WifiManager)getSystemService(Context.WIFI_SERVICE);
-        mContext = this;
-
-        if (mWifiManager.isWifiApEnabled()) {
-            // if soft AP is enabled, disable it
-            mWifiManager.setWifiApEnabled(null, false);
-            log("Disable soft ap");
-        }
-
-        initializeNetworkStates();
         log("Clear Wifi before we start the test.");
         removeConfiguredNetworksAndDisableWifi();
         mWifiRegexs = mCM.getTetherableWifiRegexs();
      }
 
     public List<WifiConfiguration> loadNetworkConfigurations() throws Exception {
-        InputStream in = getAssets().open(ACCESS_POINT_FILE);
+        InputStream in = mContext.getAssets().open(ACCESS_POINT_FILE);
         mParseHelper = new AccessPointParserHelper(in);
         return mParseHelper.getNetworkConfigurations();
     }
@@ -277,6 +258,12 @@ public class ConnectivityManagerTestActivity extends Activity {
     public void recordNetworkState(int networkType, State networkState) {
         log("record network state for network " +  networkType +
                 ", state is " + networkState);
+        if (connectivityState == null) {
+             log("ConnectivityState is null");
+        }
+        if (connectivityState[networkType] == null) {
+             log("connectivityState[networkType] is null");
+        }
         connectivityState[networkType].recordState(networkState);
     }
 
@@ -503,7 +490,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     public void turnScreenOff() {
         log("Turn screen off");
         PowerManager pm =
-            (PowerManager) getSystemService(Context.POWER_SERVICE);
+            (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         pm.goToSleep(SystemClock.uptimeMillis());
     }
 
@@ -511,8 +498,13 @@ public class ConnectivityManagerTestActivity extends Activity {
     public void turnScreenOn() {
         log("Turn screen on");
         PowerManager pm =
-                (PowerManager) getSystemService(Context.POWER_SERVICE);
+                (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         pm.wakeUp(SystemClock.uptimeMillis());
+        // disable lock screen
+        KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        if (km.inKeyguardRestrictedInputMode()) {
+            sendKeys(KeyEvent.KEYCODE_MENU);
+        }
     }
 
     /**
@@ -607,7 +599,12 @@ public class ConnectivityManagerTestActivity extends Activity {
             mWifiManager.setWifiEnabled(true);
             sleep(SHORT_TIMEOUT);
         }
+
         List<WifiConfiguration> wifiConfigList = mWifiManager.getConfiguredNetworks();
+        if (wifiConfigList == null) {
+            log("no configuration list is null");
+            return true;
+        }
         log("size of wifiConfigList: " + wifiConfigList.size());
         for (WifiConfiguration wifiConfig: wifiConfigList) {
             log("remove wifi configuration: " + wifiConfig.networkId);
@@ -656,57 +653,15 @@ public class ConnectivityManagerTestActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
+    public void tearDown() throws Exception{
         //Unregister receiver
         if (mConnectivityReceiver != null) {
-            unregisterReceiver(mConnectivityReceiver);
+          mContext.unregisterReceiver(mConnectivityReceiver);
         }
         if (mWifiReceiver != null) {
-            unregisterReceiver(mWifiReceiver);
+          mContext.unregisterReceiver(mWifiReceiver);
         }
-        log("onDestroy, inst=" + Integer.toHexString(hashCode()));
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mContext = this;
-        Bundle bundle = this.getIntent().getExtras();
-        if (bundle != null){
-            mPowerSsid = bundle.getString("power_ssid");
-        }
-    }
-    //A thread to set the device into airplane mode then turn on wifi.
-    Thread setDeviceWifiAndAirplaneThread = new Thread(new Runnable() {
-        public void run() {
-            mCM.setAirplaneMode(true);
-            connectToWifi(mPowerSsid);
-        }
-    });
-
-    //A thread to set the device into wifi
-    Thread setDeviceInWifiOnlyThread = new Thread(new Runnable() {
-        public void run() {
-            connectToWifi(mPowerSsid);
-        }
-    });
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            //This is a tricky way for the scripted monkey to
-            //set the device in wifi and wifi in airplane mode.
-            case KeyEvent.KEYCODE_1:
-                setDeviceWifiAndAirplaneThread.start();
-                break;
-
-            case KeyEvent.KEYCODE_2:
-                setDeviceInWifiOnlyThread.start();
-                break;
-        }
-        return super.onKeyDown(keyCode, event);
+        super.tearDown();
     }
 
     private void log(String message) {
