@@ -14,12 +14,10 @@
      limitations under the License.
 -->
 
-<resources>
-    <dimen name="icon_size">32dp</dimen>
-    <dimen name="root_icon_size">24dp</dimen>
-    <dimen name="grid_width">180dp</dimen>
-    <dimen name="grid_height">180dp</dimen>
-
-    <bool name="show_as_dialog">false</bool>
-    <bool name="always_show_summary">false</bool>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="Theme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:windowBackground">@*android:drawable/dialog_full_holo_light</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 </resources>

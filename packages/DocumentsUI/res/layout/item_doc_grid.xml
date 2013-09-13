@@ -121,18 +121,6 @@
                 android:textAlignment="viewStart"
                 style="@style/TextAppearance.Small" />
 
-            <TextView
-                android:id="@android:id/summary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="8dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:textAlignment="viewStart"
-                style="@style/TextAppearance.Small" />
-
         </LinearLayout>
 
     </LinearLayout>

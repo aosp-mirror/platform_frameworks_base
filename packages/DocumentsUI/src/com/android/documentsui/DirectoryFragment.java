@@ -228,7 +228,9 @@ public class DirectoryFragment extends Fragment {
 
                 // Push latest state up to UI
                 // TODO: if mode change was racing with us, don't overwrite it
-                state.derivedMode = result.mode;
+                if (result.mode != MODE_UNKNOWN) {
+                    state.derivedMode = result.mode;
+                }
                 state.derivedSortOrder = result.sortOrder;
                 ((DocumentsActivity) context).onStateChanged();
 
@@ -254,8 +256,8 @@ public class DirectoryFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         updateDisplayState();
     }
 
@@ -272,18 +274,20 @@ public class DirectoryFragment extends Fragment {
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
 
-        final Uri stateUri = RecentsProvider.buildState(
-                root.authority, root.rootId, doc.documentId);
-        final ContentValues values = new ContentValues();
-        values.put(StateColumns.MODE, state.userMode);
+        if (root != null) {
+            final Uri stateUri = RecentsProvider.buildState(
+                    root.authority, root.rootId, doc.documentId);
+            final ContentValues values = new ContentValues();
+            values.put(StateColumns.MODE, state.userMode);
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                resolver.insert(stateUri, values);
-                return null;
-            }
-        }.execute();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    resolver.insert(stateUri, values);
+                    return null;
+                }
+            }.execute();
+        }
 
         // Mode change is just visual change; no need to kick loader, and
         // deliver change event immediately.
@@ -733,23 +737,35 @@ public class DirectoryFragment extends Fragment {
                 icon1.setVisibility(View.VISIBLE);
                 icon1.setImageDrawable(iconDrawable);
 
-                if (iconDrawable != null && roots.isIconUnique(root)) {
-                    // No summary needed if icon speaks for itself
-                    summary.setVisibility(View.INVISIBLE);
-                } else {
-                    summary.setText(root.getDirectoryString());
-                    summary.setVisibility(View.VISIBLE);
-                    summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
-                    hasLine2 = true;
+                if (summary != null) {
+                    final boolean alwaysShowSummary = getResources()
+                            .getBoolean(R.bool.always_show_summary);
+                    if (alwaysShowSummary) {
+                        summary.setText(root.getDirectoryString());
+                        summary.setVisibility(View.VISIBLE);
+                        hasLine2 = true;
+                    } else {
+                        if (iconDrawable != null && roots.isIconUnique(root)) {
+                            // No summary needed if icon speaks for itself
+                            summary.setVisibility(View.INVISIBLE);
+                        } else {
+                            summary.setText(root.getDirectoryString());
+                            summary.setVisibility(View.VISIBLE);
+                            summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
+                            hasLine2 = true;
+                        }
+                    }
                 }
             } else {
                 icon1.setVisibility(View.GONE);
-                if (docSummary != null) {
-                    summary.setText(docSummary);
-                    summary.setVisibility(View.VISIBLE);
-                    hasLine2 = true;
-                } else {
-                    summary.setVisibility(View.INVISIBLE);
+                if (summary != null) {
+                    if (docSummary != null) {
+                        summary.setText(docSummary);
+                        summary.setVisibility(View.VISIBLE);
+                        hasLine2 = true;
+                    } else {
+                        summary.setVisibility(View.INVISIBLE);
+                    }
                 }
             }
 
@@ -772,7 +788,9 @@ public class DirectoryFragment extends Fragment {
                 size.setVisibility(View.GONE);
             }
 
-            line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
+            if (line2 != null) {
+                line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
+            }
 
             final boolean enabled = Document.MIME_TYPE_DIR.equals(docMimeType)
                     || MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
