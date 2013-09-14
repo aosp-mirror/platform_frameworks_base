@@ -236,40 +236,40 @@ public final class Debug
             return dalvikSharedClean + nativeSharedClean + otherSharedClean;
         }
 
-        /* @hide */
+        /** @hide */
         public int getOtherPss(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetPss];
         }
 
 
-        /* @hide */
+        /** @hide */
         public int getOtherSwappablePss(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSwappablePss];
         }
 
 
-        /* @hide */
+        /** @hide */
         public int getOtherPrivateDirty(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetPrivateDirty];
         }
 
-        /* @hide */
+        /** @hide */
         public int getOtherSharedDirty(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSharedDirty];
         }
 
-        /* @hide */
+        /** @hide */
         public int getOtherPrivateClean(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetPrivateClean];
         }
 
 
-        /* @hide */
+        /** @hide */
         public int getOtherSharedClean(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSharedClean];
         }
 
-        /* @hide */
+        /** @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
                 case 0: return "Dalvik Other";
@@ -733,7 +733,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Clears the global size of objects allocated.
-     * @see #getGlobalAllocCountSize()
+     * @see #getGlobalAllocSize()
      */
     public static void resetGlobalAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
