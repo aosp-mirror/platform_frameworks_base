@@ -20812,6 +20812,7 @@ package android.provider {
     field public static final java.lang.String COLUMN_MIME_TYPE = "mime_type";
     field public static final java.lang.String COLUMN_SIZE = "_size";
     field public static final java.lang.String COLUMN_SUMMARY = "summary";
+    field public static final int FLAG_DIR_HIDE_GRID_TITLES = 64; // 0x40
     field public static final int FLAG_DIR_PREFERS_GRID = 16; // 0x10
     field public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 32; // 0x20
     field public static final int FLAG_DIR_SUPPORTS_CREATE = 8; // 0x8

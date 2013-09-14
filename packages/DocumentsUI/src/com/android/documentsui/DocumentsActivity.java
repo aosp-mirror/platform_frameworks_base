@@ -244,6 +244,7 @@ public class DocumentsActivity extends Activity {
         } else {
             // Restore last stack for calling package
             // TODO: move into async loader
+            boolean restoredStack = false;
             final String packageName = getCallingPackage();
             final Cursor cursor = getContentResolver()
                     .query(RecentsProvider.buildResume(packageName), null, null, null, null);
@@ -252,6 +253,7 @@ public class DocumentsActivity extends Activity {
                     final byte[] rawStack = cursor.getBlob(
                             cursor.getColumnIndex(ResumeColumns.STACK));
                     DurableUtils.readFromArray(rawStack, mState.stack);
+                    restoredStack = true;
                 }
             } catch (IOException e) {
                 Log.w(TAG, "Failed to resume", e);
@@ -264,10 +266,13 @@ public class DocumentsActivity extends Activity {
             final List<RootInfo> matchingRoots = mRoots.getMatchingRoots(mState);
             if (!matchingRoots.contains(root)) {
                 mState.stack.reset();
+                restoredStack = false;
             }
 
-            // Only open drawer when showing recents
-            if (mState.stack.isRecents()) {
+            // Only open drawer when not restoring stack, and when not showing
+            // visual content.
+            if (!restoredStack
+                    && !MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
                 setRootsDrawerOpen(true);
             }
         }
