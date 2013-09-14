@@ -1349,6 +1349,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             //delete tmp files
             deleteTempPackageFiles();
 
+            // Remove any shared userIDs that have no associated packages
+            mSettings.pruneSharedUsersLPw();
+
             if (!mOnlyCore) {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
