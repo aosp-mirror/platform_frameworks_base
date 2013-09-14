@@ -3035,6 +3035,13 @@ public abstract class PackageManager {
             List<ComponentName> outActivities, String packageName);
 
     /**
+     * Ask for the set of available 'home' activities and the current explicit
+     * default, if any.
+     * @hide
+     */
+    public abstract ComponentName getHomeActivities(List<ResolveInfo> outActivities);
+
+    /**
      * Set the enabled setting for a package component (activity, receiver, service, provider).
      * This setting will override any enabled state which may have been set by the component in its
      * manifest.

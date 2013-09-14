@@ -234,6 +234,12 @@ interface IPackageManager {
             out List<ComponentName> outActivities, String packageName);
 
     /**
+     * Report the set of 'Home' activity candidates, plus (if any) which of them
+     * is the current "always use this one" setting.
+     */
+     ComponentName getHomeActivities(out List<ResolveInfo> outHomeCandidates);
+
+    /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */
     void setComponentEnabledSetting(in ComponentName componentName,
