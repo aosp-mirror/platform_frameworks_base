@@ -355,10 +355,10 @@ public class TransitionManager {
 //            if (transition == null) {
 //                transition = sDefaultTransition;
 //            }
-//            final Transition finalTransition = transition.clone();
-//            sceneChangeSetup(sceneRoot, transition);
+//            final Transition transitionClone = transition.clone();
+//            sceneChangeSetup(sceneRoot, transitionClone);
 //            Scene.setCurrentScene(sceneRoot, null);
-//            sceneChangeRunTransition(sceneRoot, finalTransition);
+//            sceneChangeRunTransition(sceneRoot, transitionClone);
 //        }
     }
 }
