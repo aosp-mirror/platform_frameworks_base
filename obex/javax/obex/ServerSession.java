@@ -256,6 +256,10 @@ public final class ServerSession extends ObexSession implements Runnable {
     public void sendResponse(int code, byte[] header) throws IOException {
         int totalLength = 3;
         byte[] data = null;
+        OutputStream op = mOutput;
+        if (op == null) {
+            return;
+        }
 
         if (header != null) {
             totalLength += header.length;
@@ -270,8 +274,8 @@ public final class ServerSession extends ObexSession implements Runnable {
             data[1] = (byte)0x00;
             data[2] = (byte)totalLength;
         }
-        mOutput.write(data);
-        mOutput.flush();
+        op.write(data);
+        op.flush();
     }
 
     /**

@@ -27,7 +27,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.Pair;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ import java.util.UUID;
  * devices, and start a scan for Bluetooth LE devices.
  *
  * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
- * adapter, when running on JELLY_BEAN_MR1 and below, call the 
+ * adapter, when running on JELLY_BEAN_MR1 and below, call the
  * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
  * higher, retrieve it through
  * {@link android.content.Context#getSystemService} with
@@ -1229,6 +1228,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.HEALTH) {
             BluetoothHealth health = new BluetoothHealth(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.MAP) {
+            BluetoothMap map = new BluetoothMap(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -1276,6 +1278,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.GATT_SERVER:
                 BluetoothGattServer gattServer = (BluetoothGattServer)proxy;
                 gattServer.close();
+                break;
+            case BluetoothProfile.MAP:
+                BluetoothMap map = (BluetoothMap)proxy;
+                map.close();
                 break;
         }
     }
