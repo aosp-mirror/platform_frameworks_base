@@ -22,17 +22,24 @@
         android:versionCode="1">
 
     <!-- Allows an application to call APIs that give it access to all print jobs
-         on the device. Usually an app can access only the print jobs it created.
-    -->
+         on the device. Usually an app can access only the print jobs it created. -->
     <permission
         android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"
         android:label="@string/permlab_accessAllPrintJobs"
         android:description="@string/permdesc_accessAllPrintJobs"
         android:protectionLevel="signature" />
 
+    <!-- May be required by the settings and add printer activities of a
+         print service if the developer wants only trusted system code to
+         be able to launch these activities. -->
+    <permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
+        android:label="@string/permlab_startPrintServiceConfigActivity"
+        android:description="@string/permdesc_startPrintServiceConfigActivity"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"/>
-    <uses-permission android:name="android.permission.ACCESS_ALL_PRINT_JOBS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"/>
 
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
 

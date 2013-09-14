@@ -28,6 +28,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.print.PrintDocumentAdapter.LayoutResultCallback;
 import android.print.PrintDocumentAdapter.WriteResultCallback;
+import android.printservice.PrintServiceInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -201,6 +202,25 @@ public final class PrintManager {
             Log.e(LOG_TAG, "Error creating a print job", re);
         }
         return null;
+    }
+
+    /**
+     * Gets the list of enabled print services.
+     *
+     * @return The enabled service list or an empty list.
+     *
+     * @hide
+     */
+    public List<PrintServiceInfo> getEnabledPrintServices() {
+        try {
+            List<PrintServiceInfo> enabledServices = mService.getEnabledPrintServices(mUserId);
+            if (enabledServices != null) {
+                return enabledServices;
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting the enalbed print services", re);
+        }
+        return Collections.emptyList();
     }
 
     /**

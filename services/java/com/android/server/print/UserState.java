@@ -134,6 +134,26 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
+    public List<PrintServiceInfo> getEnabledPrintServices() {
+        synchronized (mLock) {
+            List<PrintServiceInfo> enabledServices = null;
+            final int installedServiceCount = mInstalledServices.size();
+            for (int i = 0; i < installedServiceCount; i++) {
+                PrintServiceInfo installedService = mInstalledServices.get(i);
+                ComponentName componentName = new ComponentName(
+                        installedService.getResolveInfo().serviceInfo.packageName,
+                        installedService.getResolveInfo().serviceInfo.name);
+                if (mActiveServices.containsKey(componentName)) {
+                    if (enabledServices == null) {
+                        enabledServices = new ArrayList<PrintServiceInfo>();
+                    }
+                    enabledServices.add(installedService);
+                }
+            }
+            return enabledServices;
+        }
+    }
+
     public void createPrinterDiscoverySession(IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             throwIfDestroyedLocked();

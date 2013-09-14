@@ -62,9 +62,11 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -1371,7 +1373,8 @@ public class PrintJobConfigActivity extends Activity {
                     null, false);
 
             // First animation - fade out the old content.
-            hidingView.animate().alpha(0.0f).withLayer().withEndAction(new Runnable() {
+            AutoCancellingAnimator.animate(hidingView).alpha(0.0f)
+                    .withLayer().withEndAction(new Runnable() {
                 @Override
                 public void run() {
                     hidingView.setVisibility(View.INVISIBLE);
@@ -1390,8 +1393,8 @@ public class PrintJobConfigActivity extends Activity {
                             / (float) contentContainer.getHeight();
 
                     // Second animation - resize the container.
-                    contentContainer.animate().scaleY(scaleY).withLayer().withEndAction(
-                            new Runnable() {
+                    AutoCancellingAnimator.animate(contentContainer).scaleY(scaleY).withLayer()
+                            .withEndAction(new Runnable() {
                         @Override
                         public void run() {
                             // Swap the old and the new content.
@@ -1400,8 +1403,8 @@ public class PrintJobConfigActivity extends Activity {
                             contentContainer.addView(showingView);
 
                             // Third animation - show the new content.
-                            showingView.animate().withLayer().alpha(1.0f).withEndAction(
-                                    new Runnable() {
+                            AutoCancellingAnimator.animate(showingView).withLayer().alpha(1.0f)
+                                    .withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
                                     postAnimateCommand.run();
@@ -2209,6 +2212,69 @@ public class PrintJobConfigActivity extends Activity {
                 final int start = pageRanges[i].getStart() + offset;
                 final int end = pageRanges[i].getEnd() + offset;
                 pageRanges[i] = new PageRange(start, end);
+            }
+        }
+    }
+
+    private static final class AutoCancellingAnimator
+            implements OnAttachStateChangeListener, Runnable {
+
+        private ViewPropertyAnimator mAnimator;
+
+        private boolean mCancelled;
+        private Runnable mEndCallback;
+
+        public static AutoCancellingAnimator animate(View view) {
+            ViewPropertyAnimator animator = view.animate();
+            AutoCancellingAnimator cancellingWrapper =
+                    new AutoCancellingAnimator(animator);
+            view.addOnAttachStateChangeListener(cancellingWrapper);
+            return cancellingWrapper;
+        }
+
+        private AutoCancellingAnimator(ViewPropertyAnimator animator) {
+            mAnimator = animator;
+        }
+
+        public AutoCancellingAnimator alpha(float alpha) {
+            mAnimator = mAnimator.alpha(alpha);
+            return this;
+        }
+
+        public void cancel() {
+            mAnimator.cancel();
+        }
+
+        public AutoCancellingAnimator withLayer() {
+            mAnimator = mAnimator.withLayer();
+            return this;
+        }
+
+        public AutoCancellingAnimator withEndAction(Runnable callback) {
+            mEndCallback = callback;
+            mAnimator = mAnimator.withEndAction(this);
+            return this;
+        }
+
+        public AutoCancellingAnimator scaleY(float scale) {
+            mAnimator = mAnimator.scaleY(scale);
+            return this;
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            /* do nothing */
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            cancel();
+        }
+
+        @Override
+        public void run() {
+            if (!mCancelled) {
+                mEndCallback.run();
             }
         }
     }
