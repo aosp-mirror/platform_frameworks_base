@@ -181,8 +181,8 @@ public final class ActiveServices {
                 if (DEBUG_DELAYED_STATS) Slog.v(TAG, "No longer background starting: " + r);
                 rescheduleDelayedStarts();
             }
-            if (mPendingServices.remove(r)) {
-                if (DEBUG_DELAYED_STATS) Slog.v(TAG, "No longer pending start: " + r);
+            if (mDelayedStartList.remove(r)) {
+                if (DEBUG_DELAYED_STATS) Slog.v(TAG, "No longer delaying start: " + r);
             }
         }
 
