@@ -476,6 +476,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite que la aplicación controle funciones de bajo nivel de las pantallas Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"Capturar salida de audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite que la aplicación capture y redirija la salida de audio."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Detectar palabras activas"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Permite que la aplicación capture audio para la detección de palabras activas. La captura puede ocurrir en segundo plano, pero no impide otras capturas de audio (por ejemplo, de la videocámara)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"Capturar salida de video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite que la aplicación capture y redirija la salida de video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"Capturar salida de video segura"</string>
@@ -543,6 +545,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar que el dispositivo entre en estado de inactividad"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que la aplicación evite que la tablet entre en estado de inactividad."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que la aplicación evite que el dispositivo entre en estado de inactividad."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"Transmitir por infrarrojos"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite que la aplicación utilice el transmisor infrarrojo de la tablet."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Permite que la aplicación utilice el transmisor infrarrojo del teléfono."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"apagar o encender el tablet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"apagar o encender el dispositivo"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite que la aplicación encienda o apague la tablet."</string>
@@ -655,8 +660,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite al propietario ejecutar la aplicación de configuración proporcionada por el proveedor. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Detectar cambios en el estado de la red"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que una aplicación detecte cambios en el estado de la red. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"solicitar reconocimiento de palabras activas"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permite que una aplicación solicite el reconocimiento de palabras activas. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas para desbloquear la pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa los intentos para desbloquear la pantalla"</string>
@@ -814,7 +817,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Volver a intentarlo"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Se superó el máximo de intentos permitido para el desbloqueo facial del dispositivo."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Cargando <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="321635745684060624">"Cargado"</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Cargada"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sin tarjeta SIM"</string>

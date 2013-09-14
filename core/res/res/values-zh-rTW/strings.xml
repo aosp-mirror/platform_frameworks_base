@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"擷取音訊輸出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音訊輸出。"</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"擷取視訊輸出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允許應用程式擷取及重新導向視訊輸出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"擷取安全視訊輸出"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手機進入待命狀態"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允許應用程式防止平板電腦進入休眠狀態。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"允許應用程式防止手機進入休眠狀態。"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"開啟或關閉平板電腦"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"開啟或關閉電源"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允許應用程式開啟或關閉平板電腦。"</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允許應用程式叫用行動通訊業者提供的設定應用程式 (一般應用程式並不需要)。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"監聽網路狀況觀察資訊"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"允許應用程式監聽網路狀況觀察資訊 (一般應用程式並不需要)。"</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"要求識別熱門字詞"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"允許應用程式要求識別熱門字詞 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
@@ -674,7 +682,7 @@
     <string name="policylab_expirePassword" msgid="885279151847254056">"設定螢幕上鎖密碼到期日"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"控制螢幕上鎖密碼的變更頻率。"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"設定儲存裝置加密"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"必須為儲存的應用程式資料加密。"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"必須為儲存的應用程式資料進行加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相機"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有裝置相機。"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"停用鍵盤保護框上的功能"</string>
@@ -724,7 +732,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"自訂"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"住家"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"行動裝置"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"手機"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"公司"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"公司傳真"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"住家傳真"</string>

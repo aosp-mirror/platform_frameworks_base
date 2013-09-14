@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Omogućuje aplikaciji upravljanje značajkama Wi-Fi zaslona niske razine."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"primanje audioizlaza"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Omogućuje aplikaciji primanje i preusmjeravanje audioizlaza."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"primanje videoizlaza"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Omogućuje aplikaciji primanje i preusmjeravanje videoizlaza."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"primanje sigurnog videoizlaza"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"sprečava telefon da prijeđe u stanje mirovanja"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Aplikaciji omogućuje sprječavanje prelaska tabletnog računala u mirovanje."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Aplikaciji omogućuje da spriječi prelazak telefona u mirovanje."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"uključivanje ili isključivanje tabletnog uređaja"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"uključivanje ili isključivanje telefona"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Aplikaciji omogućuje uključivanje i isključivanje tabletnog računala."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Dopušta nositelju pozivanje operaterove aplikacije za konfiguraciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"praćenje motrenja mrežnih uvjeta"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Omogućuje aplikaciji praćenje motrenja mrežnih uvjeta. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"zahtjev za prepoznavanje pokretača značajke"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Omogućuje aplikaciji da zahtijeva prepoznavanje pokretača značajke. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Upravljajte duljinom zaporki za otključavanje zaslona i dopuštenim znakovima u tim zaporkama."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>

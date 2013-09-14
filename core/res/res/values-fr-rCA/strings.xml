@@ -476,6 +476,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet à l\'application de contrôler les fonctionnalités de base des écrans Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"capturer la sortie audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Autoriser l\'application à capturer et à rediriger la sortie audio."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Détection de mots clés"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Permet à l\'application de capturer de l\'audio pour la détection de mots clés. La capture peut s\'effectuer en arrière-plan, et n\'empêche pas les autres opérations de capture audio (par exemple, avec un caméscope)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"capturer la sortie vidéo"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Autoriser l\'application à capturer et à rediriger la sortie vidéo."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"capturer la sortie vidéo sécurisée"</string>
@@ -543,6 +545,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"empêcher le téléphone de passer en mode veille"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet à l\'application d\'empêcher la tablette de passer en mode veille."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permet à l\'application d\'empêcher le téléphone de passer en mode veille."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"transmettre des signaux infrarouges"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permet à l\'application d\'utiliser l\'émetteur infrarouge de la tablette."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Permet à l\'application d\'utiliser l\'émetteur infrarouge du téléphone."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"éteindre ou allumer la tablette"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"éteindre ou allumer le téléphone"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permet à l\'application d\'éteindre et d\'allumer la tablette."</string>
@@ -655,8 +660,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet à l\'application autorisée de faire appel à l\'application de configuration fournie par le fournisseur de services. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"détecter des observations sur les conditions du réseau"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet à une application de détecter les observations sur les conditions du réseau. Ne devrait jamais être nécessaire pour les applications standards."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"demander la reconnaissance des mots clés"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permet à une application de demander la reconnaissance des mots clés. Ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Choisir le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>

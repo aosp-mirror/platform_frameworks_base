@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"מאפשר לאפליקציה לשלוט בתכונות ברמה נמוכה של תצוגות Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"קליטת פלט אודיו"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"מאפשרת לאפליקציה לקלוט ולהפנות מחדש פלט אודיו."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"קליטת פלט וידאו"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"מאפשרת לאפליקציה לקלוט ולהפנות מחדש פלט וידאו."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"קליטת פלט וידאו מאובטח"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"מניעת מעבר הטלפון למצב שינה"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"מאפשר ליישום למנוע מהטבלט לעבור למצב שינה."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"מאפשר ליישום למנוע מהטלפון לעבור למצב שינה."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"הפעלה או כיבוי של טאבלט"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"הפעל או כבה את הטלפון"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"מאפשר ליישום להפעיל או לכבות את הטבלט."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ההרשאה הזו מאפשרת לבעלים להפעיל את אפליקציית התצורה שסופקה על ידי ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"קליטת מעקב אחר תנאי רשת"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"מאפשרת לאפליקציה לקלוט מעקב אחר תנאי רשת. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"בקשה של הכרה במילת הפעלה"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"מאפשרת לאפליקציה לבקש הכרה במילת הפעלה. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"שלוט באורך ובתווים המותרים בסיסמאות לביטול נעילת מסך."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"עקוב אחר ניסיונות לביטול נעילת מסך"</string>
@@ -812,7 +820,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"נכון!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"נסה שוב"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"נסה שוב"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"חרגת ממספר הניסיונות המרבי של זיהוי פרצוף"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"חרגת ממספר הניסיונות המרבי של זיהוי פנים"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"טוען (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"טעון"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -878,7 +886,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"הרחב את אזור ביטול הנעילה."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ביטול נעילה באמצעות הסטה."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ביטול נעילה באמצעות ציור קו."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ביטול נעילה באמצעות זיהוי פרצוף."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ביטול נעילה באמצעות זיהוי פנים."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ביטול נעילה באמצעות מספר PIN."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ביטול נעילה באמצעות סיסמה."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"אזור ציור קו."</string>

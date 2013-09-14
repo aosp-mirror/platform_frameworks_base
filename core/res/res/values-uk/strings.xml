@@ -476,6 +476,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Дозволяє програмі керувати низькорівневими функціями екранів Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"отримувати доступ до аудіовиходу"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Дозволяє програмі отримувати доступ до аудіовиходу й переспрямовувати його."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"виявляти команди швидкого запуску"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Дозволяє програмі записувати аудіо для виявлення команд швидкого запуску. Запис відбуватиметься у фоновому режимі й не перешкоджатиме запису іншого аудіо (напр., з відеокамери)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"отримувати доступ до відеовиходу"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Дозволяє програмі отримувати доступ до відеовиходу й переспрямовувати його."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"отримувати доступ до захищеного відеовиходу"</string>
@@ -543,6 +545,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"недоп. перехід тел. в реж. сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дозволяє програмі не допускати перехід планшетного ПК у режим сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дозволяє програмі не допускати перехід телефону в режим сну."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"передавати в інфрачервоному діапазоні"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Дозволяє програмі використовувати інфрачервоний передавач планшета."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Дозволяє програмі використовувати інфрачервоний передавач телефону."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"увімк. чи вимк. пристрій"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"вмик. чи вимик. телефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дозволяє програмі вимикати чи вимикати планшетний ПК."</string>
@@ -655,8 +660,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозволяє власнику викликати надану оператором програму конфігурації. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"прослуховувати дані спостережень за станом мережі"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозволяє програмі прослуховувати дані спостережень за станом мережі. Ніколи не застосовується для звичайних програм."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"запитувати розпізнавання команд швидкого запуску"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Дозволяє програмі надсилати запит на розпізнавання команд швидкого запуску. Ніколи не застосовується для звичайних програм."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролювати довжину паролів для розблокування екрана та дозволені в них символи."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>

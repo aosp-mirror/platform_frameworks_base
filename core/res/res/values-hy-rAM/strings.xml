@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Թույլ է տալիս հավելվածին կառավարել WiFi ցուցադրիչների ցածր մակարդակի գործառույթները:"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"պահել աուդիո արտածումը"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Թույլ է տալիս ծրագրին պահել և վերահղել աուդիո արտածումը:"</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"պահել վիդեո արտածումը"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Թույլ է տալիս ծրագրին պահել և վերահղել վիդեո արտածումը:"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"պահել անվտանգ վիդեո արտածումը"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"կանխել հեռախոսի քնի ռեժիմին անցնելը"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Թույլ է տալիս հավելվածին կանխել գրասալիկի` քնի ռեժիմին անցնելը:"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Թույլ է տալիս հավելվածին կանխել հեռախոսի` քնի ռեժիմին անցնելը:"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"գրասալիկը միացնել կամ անջատել"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"հեռախոսը միացնել կամ անջատել"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Թույլ է տալիս հավելվածին միացնել կամ անջատել գրասալիկը:"</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Թույլ է տալիս սեփականատիրոջը գործարկել օպերատորի կողմից տրամադրված կազմաձևման ծրագիրը: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"լսել դիտարկումներ ցանցային պայմանների վերաբերյալ"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Հավելվածին թույլ է տալիս լսել դիտարկումներ ցանցային պայմանների վերաբերյալ: Սովորական հավելվածների համար երբեք պետք չի գալիս:"</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ուղարկել թեժ բառի ճանաչման հայց"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Հավելվածին թույլ է տալիս թեժ բառի ճանաչման հայց ուղարկել: Սովորական հավելվածների համար երբեք պետք չի գալիս:"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Վերահսկել էկրանի ապակողպման գաղտնաբառերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Վերահսկել էկրանի ապակողպման փորձերը"</string>

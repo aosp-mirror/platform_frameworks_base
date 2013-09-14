@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Cho phép ứng dụng kiểm soát các tính năng cấp thấp của màn hình Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"thu thập dữ liệu đầu ra âm thanh"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Cho phép ứng dụng thu thập và chuyển hướng dữ liệu đầu ra âm thanh."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"thu thập dữ liệu đầu ra video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Cho phép ứng dụng thu thập và chuyển hướng dữ liệu đầu ra video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"thu thập dữ liệu đầu ra video an toàn"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Cho phép ứng dụng ngăn điện thoại chuyển sang chế độ ngủ."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"bật hoặc tắt máy tính bảng"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"bật hoặc tắt điện thoại"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Cho phép ứng dụng bật hoặc tắt máy tính bảng."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Cho phép chủ sở hữu gọi ra ứng dụng cấu hình do nhà cung cấp dịch vụ cung cấp. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"quan sát các điều kiện mạng"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Cho phép ứng dụng quan sát các điều kiện mạng. Không bao giờ cần cho ứng dụng thông thường."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"yêu cầu công nhận từ nóng"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Cho phép ứng dụng yêu cầu công nhận từ nóng. Không bao giờ cần cho ứng dụng thông thường."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kiểm soát độ dài và ký tự được phép trong mật khẩu mở khóa màn hình."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Giám sát những lần thử mở khóa màn hình"</string>

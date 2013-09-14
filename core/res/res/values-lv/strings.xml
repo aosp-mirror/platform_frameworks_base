@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Ļauj lietotnei kontrolēt zema līmeņa funkcijas Wi-Fi displejos."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"tvert audio izvadi"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Ļauj lietotnei tvert un novirzīt audio izvadi."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"tvert video izvadi"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Ļauj lietotnei tvert un novirzīt video izvadi."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"tvert drošu video izvadi"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"novērst tālruņa pāriešanu miega režīmā"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ļauj lietotnei novērst planšetdatora pāriešanu miega režīmā."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Ļauj lietotnei novērst tālruņa pāriešanu miega režīmā."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ieslēgt vai izslēgt planšetdatoru"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ieslēgt vai izslēgt tālruni"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ļauj lietotnei ieslēgt vai izslēgt planšetdatoru."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ļauj īpašniekam izsaukt operatora nodrošināto konfigurācijas lietotni. Parastām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"iegūt informāciju par tīkla stāvokļa novērojumiem"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ļauj lietojumprogrammai iegūt informāciju par tīkla stāvokļa novērojumiem. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"pieprasīt īsinājumvārdu atpazīšanu"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Ļauj lietojumprogrammai pieprasīt īsinājumvārdu atpazīšanu. Parastajām lietotnēm šī atļauja nav nepieciešama."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolē ekrāna atbloķēšanas parolē atļautās rakstzīmes un garumu."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
