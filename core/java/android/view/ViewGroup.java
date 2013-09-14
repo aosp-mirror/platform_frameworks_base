@@ -456,26 +456,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private int mChildCountWithTransientState = 0;
 
     public ViewGroup(Context context) {
-        super(context);
-        initViewGroup();
+        this(context, null);
     }
 
     public ViewGroup(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initViewGroup();
-        initFromAttributes(context, attrs);
+        this(context, attrs, 0);
     }
 
     public ViewGroup(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        initViewGroup();
-        initFromAttributes(context, attrs);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public ViewGroup(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initViewGroup();
-        initFromAttributes(context, attrs);
+        initFromAttributes(context, attrs, defStyleAttr, defStyleRes);
     }
 
     private boolean debugDraw() {
@@ -505,9 +500,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mPersistentDrawingCache = PERSISTENT_SCROLLING_CACHE;
     }
 
-    private void initFromAttributes(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.ViewGroup);
+    private void initFromAttributes(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup);
 
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {

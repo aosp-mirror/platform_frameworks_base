@@ -79,18 +79,15 @@ public class SizeAdaptiveLayout extends ViewGroup {
     private int mModestyPanelTop;
 
     public SizeAdaptiveLayout(Context context) {
-        super(context);
-        initialize();
+        this(context, null);
     }
 
     public SizeAdaptiveLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initialize();
+        this(context, attrs, 0);
     }
 
     public SizeAdaptiveLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        initialize();
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public SizeAdaptiveLayout(

@@ -185,7 +185,7 @@ public class LinearLayout extends ViewGroup {
     private int mDividerPadding;
 
     public LinearLayout(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public LinearLayout(Context context, AttributeSet attrs) {
