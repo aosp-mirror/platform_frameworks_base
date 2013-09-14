@@ -2953,8 +2953,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (ConnectivityManager.isNetworkTypeMobile(info.getType())
                             && (0 != Settings.Global.getInt(mContext.getContentResolver(),
                                         Settings.Global.DEVICE_PROVISIONED, 0))
-                            && ((state == NetworkInfo.State.CONNECTED)
-                                    || info.isConnectedToProvisioningNetwork())) {
+                            && (((state == NetworkInfo.State.CONNECTED)
+                                    && (info.getType() == ConnectivityManager.TYPE_MOBILE))
+                                || info.isConnectedToProvisioningNetwork())) {
+                        log("ConnectivityChange checkMobileProvisioning for"
+                                + " TYPE_MOBILE or ProvisioningNetwork");
                         checkMobileProvisioning(CheckMp.MAX_TIMEOUT_MS);
                     }
 
