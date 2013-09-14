@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Antaa sovelluksen hallita wifi-näyttöjen matalan tason ominaisuuksia."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"äänentoiston kaappaus"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Antaa sovellukselle luvan äänentoiston kaappaamiseen ja uudelleenohjaamiseen."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"videokuvan kaappaus"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Antaa sovellukselle luvan videokuvan kaappaamiseen ja uudelleenohjaamiseen"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"suojatun videokuvan kaappaus"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Antaa sovelluksen estää tablet-laitetta siirtymästä virransäästötilaan."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Antaa sovelluksen estää puhelinta siirtymästä virransäästötilaan."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"käynnistä tai sammuta tablet-laite"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sammutta tai käynnistä puhelin"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Antaa sovelluksen sammuttaa tai käynnistää tablet-laitteen."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Antaa luvanhaltijan käynnistää palveluntarjoajan määrityssovelluksen. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"verkon tilahavaintojen kuunteleminen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Antaa sovellukselle luvan kuunnella verkon tilahavaintoja. Ei tavallisten sovellusten käyttöön."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"avainsanan tunnistuspyyntö"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Antaa sovelluksen pyytää avainsanan tunnistusta. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>

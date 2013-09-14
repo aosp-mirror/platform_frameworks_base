@@ -476,6 +476,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Allows the app to control low-level features of Wi-Fi displays."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"capture audio output"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Allows the app to capture and redirect audio output."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotword detection"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Allows the app to capture audio for Hotword detection. The capture can happen in the background but does not prevent other audio capture (e.g. Camcorder)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"capture video output"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Allows the app to capture and redirect video output."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"capture secure video output"</string>
@@ -543,6 +545,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"prevent phone from sleeping"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Allows the app to prevent the tablet from going to sleep."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Allows the app to prevent the phone from going to sleep."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"transmit infrared"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Allows the app to use the tablet\'s infrared transmitter."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Allows the app to use the phone\'s infrared transmitter."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"turn tablet on or off"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"turn phone on or off"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Allows the app to turn the tablet on or off."</string>
@@ -655,8 +660,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"listen for observations on network conditions"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Allows an application to listen for observations on network conditions. Should never be needed for normal apps."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"request hotword recognition"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Allows an application to request hotword recognition. Should never be needed for normal apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Control the length and the characters allowed in screen-unlock passwords."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>

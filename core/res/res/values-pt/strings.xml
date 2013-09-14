@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite que o aplicativo controle recursos de baixo nível de monitores Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"capturar saída de áudio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite que o aplicativo capture e redirecione a saída de áudio."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"capturar saída de vídeo"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite que o aplicativo capture e redirecione a saída de vídeo."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"capturar saída de vídeo segura"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inatividade do telefone"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o aplicativo impeça o tablet de entrar no modo de inatividade."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o aplicativo impeça o telefone de entrar no modo de inatividade."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ligar ou desligar o tablet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ligar ou desligar o telefone"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite que o aplicativo ative ou desative o tablet."</string>
@@ -655,10 +665,8 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o proprietário invoque o aplicativo de configuração fornecido pela operadora. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"detectar observações nas condições da rede"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que o aplicativo detecte observações nas condições da rede. Não deve ser necessário para aplicativos comuns."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"solicitar reconhecimento de hotword"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permite que o aplicativo solicite o reconhecimento de hotword. Não deve ser necessário para aplicativos comuns."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras para senha"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controle o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela."</string>
+    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorar tentativas de desbloqueio da tela"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitorar quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloquear o tablet ou apagar todos os dados do tablet se a senha for digitada incorretamente muitas vezes."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitorar quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloquear o telefone ou apagar todos os dados do telefone se a senha for digitada incorretamente muitas vezes."</string>
@@ -668,7 +676,7 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controle como e quando a tela é bloqueada."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apague os dados do telefone sem aviso redefinindo a configuração original."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apagar os dados do telefone sem aviso redefinindo a configuração original."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir o proxy global do dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Configura o proxy global do dispositivo para ser usado enquanto a política estiver ativada. Somente o primeiro administrador do dispositivo pode configurar um verdadeiro proxy global."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Definir val. da senha de bloqueio"</string>

@@ -476,6 +476,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tillader, at appen kontrollerer Wi-Fi-skærmfunktioner på lavt niveau."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"opfang et lydoutput"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Tillader, at appen opfanger og omdirigerer et lydoutput."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Registrering af kommandoord"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Tillader, at appen optager lyd til registrering af kommandoord. Optagelsen kan ske i baggrunden, men forhindrer ikke andre lydoptagelser (f.eks. videokamera)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"opfang et videooutput"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Tillader, at appen opfanger og omdirigerer et videooutput."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"opfang et sikkert videooutput"</string>
@@ -543,6 +545,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"afholde telefonen fra at gå i dvale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tillader, at appen kan forhindre tabletten i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Tillader, at appen kan forhindre, at telefonen går i dvale."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"send infrarød"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Tillader, at appen bruger tablettens infrarøde sender."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Tillader, at appen bruger telefonens infrarøde sender."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tænd eller sluk for tabletcomputeren"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"tænd eller sluk for telefonen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Tillader, at appen kan slukke og tænde din tablet."</string>
@@ -655,8 +660,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Tillader, at brugeren aktiverer konfigurationsappen, der er forsynet af mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"observer netværksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tillader, at en applikation observerer netværksforhold. Bør aldrig være nødvendigt for almindelige apps."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"anmode om genkendelse af kommandoord"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Tillader, at en applikation anmoder om genkendelse af kommandoord. Bør aldrig være nødvendigt for normale apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>

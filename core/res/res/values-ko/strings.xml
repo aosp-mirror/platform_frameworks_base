@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"앱이 Wi-Fi 디스플레이의 하위 수준 기능을 제어하도록 허용합니다."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"오디오 출력 캡처"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"앱이 오디오 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"동영상 출력 캡처"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"앱이 동영상 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"안전한 동영상 출력 캡처"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"앱이 휴대전화의 절전 모드 전환을 막도록 허용합니다."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"태블릿 전원 켜고 끄기"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"휴대전화 전원 켜고 끄기"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"앱이 태블릿을 켜거나 끌 수 있도록 허용합니다."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"권한을 가진 프로그램이 이동통신사에서 제공한 구성 앱을 호출하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"네트워크 상태에 대한 관측 보고 수신"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"애플리케이션이 네트워크 상태에 대한 관측 보고를 수신하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"핫워드 감지 요청"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"애플리케이션이 핫워드 감지를 요청할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>

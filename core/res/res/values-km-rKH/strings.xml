@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"ឲ្យ​កម្មវិធី​ពិនិត្យ​លក្ខណៈ​កម្រិត​ទាប​​នៃ​ការ​បង្ហាញ​វ៉ាយហ្វាយ។"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ចាប់​យក​លទ្ធផល​អូឌីយ៉ូ"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"​ឱ្យ​កម្មវិធី​ដើម្បី​ចាប់​យក​ និង​​ប្ដូរ​​ទិស​លទ្ធផល​អូឌីយ៉ូ​។"</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ចាប់​យក​លទ្ធផល​វីដេអូ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ឲ្យ​កម្មវិធី​ចាប់​យក​ និង​ប្ដូរ​​ទិស​លទ្ធផល​វីដេអូ​។"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ចាប់​យក​លទ្ធផល​វីដេអូ​សុវត្ថិភាព"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ឲ្យ​​កម្មវិធី​ការពារ​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក។"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ឲ្យ​កម្មវិធី​ការពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក។"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"បិទ/បើក​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"បិទ/បើក​ទូរស័ព្ទ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ឲ្យ​កម្មវិធី​បិទ/បើក​កុំព្យូទ័រ​បន្ទះ។"</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ដក​ហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"សង្កេត​មើល​លើ​លក្ខខណ្ឌ​បណ្ដាញ"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ឲ្យ​កម្មវិធី​សង្កេត​មើល​​លើ​លក្ខខណ្ឌ​បណ្ដាញ​។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ស្នើ​ការ​ស្គាល់ hotword"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"ឲ្យ​កម្មវិធី​ស្នើ​ការ​ស្គាល់ hotword ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ពិនិត្យ​ប្រវែង និង​តួអក្សរ​ដែល​បាន​អនុញ្ញាត​ក្នុង​ពាក្យ​សម្ងាត់​ចាក់​សោ​អេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>

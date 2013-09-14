@@ -476,6 +476,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"ອະນຸຍາດໃຫ້ແອັບຯ ຄວບຄຸມຄວາມສາມາດລະດັບຕໍ່າຂອງການສະແດງຜົນ Wifi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ບັນທຶກສຽງອອກ"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງສຽງ."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ບັນທຶກວິດີໂອອອກ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງວິດີໂອ."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ບັນທຶກວິດີໂອອອກຢ່າງປອດໄພ"</string>
@@ -543,6 +547,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ຂັດຂວາງບໍ່ໃຫ້ໂທລະສັບປິດໜ້າຈໍ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ອະນຸຍາດໃຫ້ແອັບຯ ປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ອະນຸຍາດໃຫ້ແອັບຯປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍໂທລະສັບ."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ເປີດ ຫຼືປິດແທັບເລັດ"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ເປີດ ຫຼືປິດໂທລະສັບ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ອະນຸຍາດໃຫ້ແອັບຯເປີດ ຫຼືປິດແທັບເລັດ."</string>
@@ -655,8 +665,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າຂອງຮ້ອງຂໍແອັບຯປັບຄ່າທີ່ສະໜອງໂດຍຜູ່ໃຫ້ບໍລິການ. ບໍ່ໜ້າຈະຕ້ອງການສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ຕິດຕາມເພື່ອສັງເກດສະພາບຂອງເຄືອຂ່າຍ"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັ່ນຕິດຕາມເພື່ອສັງເກດສະພາບຂອງເຄືອຂ່າຍ. ປົກກະຕິແລ້ວແອັບຯທຳມະດາຈະບໍ່ຕ້ອງການໃຊ້."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ຮ້ອງຂໍການຮັບຮູ້ hotword"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບພລິເຄຊັນຮ້ອງຂໍການຮັບຮູ້ hotword. ສ່ວນໃຫຍ່ບໍ່ໄດ້ໃຊ້ໃນແອັບຯທົ່ວໄປ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ຄວບຄຸມຄວາມຍາວຂອງໂຕອັກສອນທີ່ສາມາດໃຊ້ກັບລະຫັດປົດລັອກໜ້າຈໍ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
