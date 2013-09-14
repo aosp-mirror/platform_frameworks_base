@@ -265,6 +265,8 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \
+	packages/services/Proxy/com/android/net/IProxyCallback.aidl \
+	packages/services/Proxy/com/android/net/IProxyPortListener.aidl \
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)

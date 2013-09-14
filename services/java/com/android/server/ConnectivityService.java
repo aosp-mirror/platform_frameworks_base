@@ -3463,7 +3463,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendProxyBroadcast(ProxyProperties proxy) {
         if (proxy == null) proxy = new ProxyProperties("", 0, "");
-        mPacManager.setCurrentProxyScriptUrl(proxy);
+        if (mPacManager.setCurrentProxyScriptUrl(proxy)) return;
         if (DBG) log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |

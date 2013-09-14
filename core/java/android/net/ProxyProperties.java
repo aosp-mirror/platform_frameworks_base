@@ -38,7 +38,7 @@ public class ProxyProperties implements Parcelable {
 
     private String mPacFileUrl;
     public static final String LOCAL_EXCL_LIST = "";
-    public static final int LOCAL_PORT = 8182;
+    public static final int LOCAL_PORT = -1;
     public static final String LOCAL_HOST = "localhost";
 
     public ProxyProperties(String host, int port, String exclList) {
@@ -50,6 +50,14 @@ public class ProxyProperties implements Parcelable {
     public ProxyProperties(String pacFileUrl) {
         mHost = LOCAL_HOST;
         mPort = LOCAL_PORT;
+        setExclusionList(LOCAL_EXCL_LIST);
+        mPacFileUrl = pacFileUrl;
+    }
+
+    // Only used in PacManager after Local Proxy is bound.
+    public ProxyProperties(String pacFileUrl, int localProxyPort) {
+        mHost = LOCAL_HOST;
+        mPort = localProxyPort;
         setExclusionList(LOCAL_EXCL_LIST);
         mPacFileUrl = pacFileUrl;
     }
