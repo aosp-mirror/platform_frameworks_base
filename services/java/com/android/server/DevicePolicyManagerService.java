@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 
+import com.android.internal.R;
 import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -33,6 +34,9 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.INotificationManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
@@ -51,6 +55,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -123,6 +128,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     protected static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION
             = "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
 
+    private static final int MONITORING_CERT_NOTIFICATION_ID = R.string.ssl_ca_cert_warning;
+
     private static final boolean DBG = false;
 
     final Context mContext;
@@ -130,6 +137,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     IPowerManager mIPowerManager;
     IWindowManager mIWindowManager;
+    NotificationManager mNotificationManager;
 
     private DeviceOwner mDeviceOwner;
 
@@ -177,7 +185,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         handlePasswordExpirationNotification(getUserData(userHandle));
                     }
                 });
-            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+            }
+            if (Intent.ACTION_BOOT_COMPLETED.equals(action)
+                    || KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
+                manageMonitoringCertificateNotification(intent);
+            }
+            if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 removeUserData(userHandle);
             } else if (Intent.ACTION_USER_STARTED.equals(action)
                     || Intent.ACTION_PACKAGE_CHANGED.equals(action)
@@ -526,6 +539,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(ACTION_EXPIRED_PASSWORD_NOTIFICATION);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
@@ -633,6 +647,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mIWindowManager = IWindowManager.Stub.asInterface(b);
         }
         return mIWindowManager;
+    }
+
+    private NotificationManager getNotificationManager() {
+        if (mNotificationManager == null) {
+            mNotificationManager =
+                    (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        return mNotificationManager;
     }
 
     ActiveAdmin getActiveAdminUncheckedLocked(ComponentName who, int userHandle) {
@@ -1050,6 +1072,63 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             setExpirationAlarmCheckLocked(mContext, policy);
+        }
+    }
+
+    private void manageMonitoringCertificateNotification(Intent intent) {
+        final NotificationManager notificationManager = getNotificationManager();
+
+        final boolean hasCert = DevicePolicyManager.hasAnyCaCertsInstalled();
+        if (! hasCert) {
+            if (intent.getAction().equals(KeyChain.ACTION_STORAGE_CHANGED)) {
+                UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                for (UserInfo user : um.getUsers()) {
+                    notificationManager.cancelAsUser(
+                            null, MONITORING_CERT_NOTIFICATION_ID, user.getUserHandle());
+                }
+            }
+            return;
+        }
+        final boolean isManaged = getDeviceOwner() != null;
+        int smallIconId;
+        String contentText;
+        if (isManaged) {
+            contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed,
+                    getDeviceOwnerName());
+            smallIconId = R.drawable.stat_sys_certificate_info;
+        } else {
+            contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_unknown);
+            smallIconId = android.R.drawable.stat_sys_warning;
+        }
+
+        Intent dialogIntent = new Intent(Settings.ACTION_MONITORING_CERT_INFO);
+        dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        dialogIntent.setPackage("com.android.settings");
+        // Notification will be sent individually to all users. The activity should start as
+        // whichever user is current when it starts.
+        PendingIntent notifyIntent = PendingIntent.getActivityAsUser(mContext, 0, dialogIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT, null, UserHandle.CURRENT);
+
+        Notification noti = new Notification.Builder(mContext)
+            .setSmallIcon(smallIconId)
+            .setContentTitle(mContext.getString(R.string.ssl_ca_cert_warning))
+            .setContentText(contentText)
+            .setContentIntent(notifyIntent)
+            .setPriority(Notification.PRIORITY_HIGH)
+            .setShowWhen(false)
+            .build();
+
+        // If this is a boot intent, this will fire for each user. But if this is a storage changed
+        // intent, it will fire once, so we need to notify all users.
+        if (intent.getAction().equals(KeyChain.ACTION_STORAGE_CHANGED)) {
+            UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            for (UserInfo user : um.getUsers()) {
+                notificationManager.notifyAsUser(
+                        null, MONITORING_CERT_NOTIFICATION_ID, noti, user.getUserHandle());
+            }
+        } else {
+            notificationManager.notifyAsUser(
+                    null, MONITORING_CERT_NOTIFICATION_ID, noti, UserHandle.CURRENT);
         }
     }
 

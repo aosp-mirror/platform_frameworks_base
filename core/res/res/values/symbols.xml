@@ -887,6 +887,9 @@
   <java-symbol type="string" name="write_fail_reason_cannot_write" />
   <java-symbol type="string" name="transient_navigation_confirmation" />
   <java-symbol type="string" name="transient_navigation_confirmation_long" />
+  <java-symbol type="string" name="ssl_ca_cert_noti_by_unknown" />
+  <java-symbol type="string" name="ssl_ca_cert_noti_managed" />
+  <java-symbol type="string" name="ssl_ca_cert_warning" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
@@ -1009,6 +1012,7 @@
   <java-symbol type="drawable" name="stat_notify_rssi_in_range" />
   <java-symbol type="drawable" name="stat_sys_gps_on" />
   <java-symbol type="drawable" name="stat_sys_tether_wifi" />
+  <java-symbol type="drawable" name="stat_sys_certificate_info" />
   <java-symbol type="drawable" name="status_bar_background" />
   <java-symbol type="drawable" name="sym_keyboard_shift" />
   <java-symbol type="drawable" name="sym_keyboard_shift_locked" />
