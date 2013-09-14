@@ -1,77 +1,11 @@
 page.title=Samples
-header.hide=1
 @jd:body
 
-<style>
-div.landing-cell,
-div.cell-icon {
-  height:150px;
-}
-div.cell-icon {
-  float:left;
-  margin-right:20px;
-}
-div.cell-icon img {
-  margin:0;
-}
-</style>
 
-<div class="landing-banner">
-        
-<div class="col-6" style="min-height:0">
-  <img src="{@docRoot}images/google/google-services.png" alt="" width="340" height="193" />
-</div>
-<div class="col-6">
-
-  <h1 itemprop="name" style="margin-bottom:0;">Samples</h1>
-  <p itemprop="description">Some intro here. Overview of Samples, where to get them,
-  links to related tools and SDK, and what's new in samples. </p>
-
-</div>
-</div>
-<div>&nbsp;</div>
-
-
-
-
-<div style="margin-top:10px">
-<div class="col-6 normal-links" style="margin-left:0">
-
-<div class="landing-cell">
-  <div class="cell-icon">
-  <img src="{@docRoot}images/google/maps-pin.png" width="40" >
-  </div>
-    <h4><a href="{@docRoot}google/play-services/maps.html"
-    >Google Maps</a></h4>
-    <p>The power of Google Maps is available to your app
-    with an embeddable map view. You can customize the map with
-    markers and overlays, control the user's perspective, draw lines
-    and shapes, and much more.</p>
+<div id="samples">
+<p>Some kind of sample sorting will appear here.</p>
 </div>
 
-</div><!-- col-6 -->
 
-
-
-
-<div class="col-6" style="margin-right:0">
-
-<div class="landing-cell">
-  <div class="cell-icon">
-    <img src="{@docRoot}images/google/iab-99c.png" width="40" />
-  </div>
-    <h4><a href="{@docRoot}google/play/billing/index.html"
-    >Google Play In-App Billing</a></h4>
-    <p>Build an app with a steady revenue stream that keeps users engaged
-    by offering new content or virtual goods directly in your app. All transactions are handled
-    by Google Play Store for a simple user experience.
-    </p>
-</div>
-  
-</div><!-- col-6 -->
-
-</div><!-- margin wrapper -->
-
-
-
-
+<script>
+</script>
