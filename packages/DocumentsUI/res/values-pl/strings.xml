@@ -31,7 +31,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"Usuń"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Wybrano: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Według nazwy"</string>
-    <string name="sort_date" msgid="586080032956151448">"Według daty zmiany"</string>
+    <string name="sort_date" msgid="586080032956151448">"Według daty edycji"</string>
     <string name="sort_size" msgid="3350681319735474741">"Według rozmiaru"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Pokaż elementy główne"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Ukryj elementy główne"</string>
