@@ -16,8 +16,11 @@
 
 package android.app;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,7 +33,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Binder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,13 +44,13 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Provides access to the system wallpaper. With WallpaperManager, you can
@@ -60,6 +63,15 @@ public class WallpaperManager {
     private static boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
+
+    /**
+     * Activity Action: Show settings for choosing wallpaper. Do not use directly to construct
+     * an intent; instead, use {@link #getCropAndSetWallpaperIntent}.
+     * <p>Input:  {@link Intent#getData} is the URI of the image to crop and set as wallpaper.
+     * <p>Output: RESULT_OK if user decided to crop/set the wallpaper, RESULT_CANCEL otherwise
+     */
+    public static final String ACTION_CROP_AND_SET_WALLPAPER =
+            "android.service.wallpaper.CROP_AND_SET_WALLPAPER";
 
     /**
      * Launch an activity for the user to pick the current global live
@@ -463,7 +475,39 @@ public class WallpaperManager {
             return null;
         }
     }
-    
+
+    /**
+     * Gets an Intent that will launch an activity that crops the given
+     * image and sets the device's wallpaper. If there is a default HOME activity
+     * that supports cropping wallpapers, it will be preferred as the default.
+     * Use this method instead of directly creating a {@link Intent#CROP_AND_SET_WALLPAPER}
+     * intent.
+     */
+    public Intent getCropAndSetWallpaperIntent(Uri imageUri) {
+        final PackageManager packageManager = mContext.getPackageManager();
+        Intent cropAndSetWallpaperIntent =
+                new Intent(ACTION_CROP_AND_SET_WALLPAPER, imageUri);
+        cropAndSetWallpaperIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // Find out if the default HOME activity supports CROP_AND_SET_WALLPAPER
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolvedHome = packageManager.resolveActivity(homeIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolvedHome != null) {
+            cropAndSetWallpaperIntent.setPackage(resolvedHome.activityInfo.packageName);
+
+            List<ResolveInfo> cropAppList = packageManager.queryIntentActivities(
+                    cropAndSetWallpaperIntent, 0);
+            if (cropAppList.size() > 0) {
+                return cropAndSetWallpaperIntent;
+            }
+        }
+
+        // fallback crop activity
+        cropAndSetWallpaperIntent.setPackage("com.android.wallpapercropper");
+        return cropAndSetWallpaperIntent;
+    }
+
     /**
      * Change the current system wallpaper to the bitmap in the given resource.
      * The resource is opened as a raw data stream and copied into the
