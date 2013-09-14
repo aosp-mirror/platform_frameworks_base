@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.app.StatusBarManager;
 import android.content.Context;
@@ -25,11 +23,8 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Handler;
 import android.os.Message;
-import android.os.ServiceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -38,16 +33,13 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
-import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -59,11 +51,8 @@ public class NavigationBarView extends LinearLayout {
     final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
 
     // slippery nav bar when everything is disabled, e.g. during setup
-    final static boolean SLIPPERY_WHEN_DISABLED= true;
+    final static boolean SLIPPERY_WHEN_DISABLED = true;
 
-    final static boolean ANIMATE_HIDE_TRANSITION = false; // turned off because it introduces unsightly delay when videos goes to full screen
-
-    protected IStatusBarService mBarService;
     final Display mDisplay;
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
@@ -72,7 +61,7 @@ public class NavigationBarView extends LinearLayout {
     boolean mVertical;
     boolean mScreenOn;
 
-    boolean mHidden, mLowProfile, mShowMenu;
+    boolean mShowMenu;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
@@ -111,62 +100,11 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    private final class NavigationBarTransitions extends BarTransitions {
-        private static final boolean ENABLE_GRADIENT = false;  // until we can smooth transition
-
-        private final Drawable mTransparentBottom;
-        private final Drawable mTransparentRight;
-        private final int mTransparentColor;
-
-        public NavigationBarTransitions(Context context) {
-            super(context, NavigationBarView.this);
-            final Resources res = mContext.getResources();
-            final int[] gradientColors = new int[] {
-                    res.getColor(R.color.navigation_bar_background_transparent_start),
-                    res.getColor(R.color.navigation_bar_background_transparent_end)
-            };
-            mTransparentBottom = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
-            mTransparentRight = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
-            mTransparentColor = res.getColor(R.color.status_bar_background_transparent);
-        }
-
-        public void setVertical(boolean isVertical) {
-            if (!ENABLE_GRADIENT) return;
-            mTransparent = isVertical ? mTransparentRight : mTransparentBottom;
-        }
-
-        @Override
-        protected Integer getBackgroundColor(int mode) {
-            if (!ENABLE_GRADIENT && mode == MODE_TRANSPARENT) return mTransparentColor;
-            return super.getBackgroundColor(mode);
-        }
-
-        @Override
-        protected void onTransition(int oldMode, int newMode, boolean animate) {
-            super.onTransition(oldMode, newMode, animate);
-            final float alpha = newMode == MODE_OPAQUE ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
-            setKeyButtonViewQuiescentAlpha(getBackButton(), alpha);
-            setKeyButtonViewQuiescentAlpha(getHomeButton(), alpha);
-            setKeyButtonViewQuiescentAlpha(getRecentsButton(), alpha);
-            setKeyButtonViewQuiescentAlpha(getMenuButton(), alpha);
-        }
-
-        private void setKeyButtonViewQuiescentAlpha(View button, float alpha) {
-            if (button instanceof KeyButtonView) {
-                ((KeyButtonView) button).setQuiescentAlpha(alpha);
-            }
-        }
-    }
-
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mHidden = false;
-
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         final Resources res = mContext.getResources();
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
@@ -176,7 +114,7 @@ public class NavigationBarView extends LinearLayout {
 
         getIcons(res);
 
-        mBarTransitions = new NavigationBarTransitions(context);
+        mBarTransitions = new NavigationBarTransitions(this);
     }
 
     public BarTransitions getBarTransitions() {
@@ -209,6 +147,10 @@ public class NavigationBarView extends LinearLayout {
     }
 
     private H mHandler = new H();
+
+    public View getCurrentView() {
+        return mCurrentView;
+    }
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -251,24 +193,6 @@ public class NavigationBarView extends LinearLayout {
         mScreenOn = screenOn;
         setDisabledFlags(mDisabledFlags, true);
     }
-
-    View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent ev) {
-            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                // even though setting the systemUI visibility below will turn these views
-                // on, we need them to come up faster so that they can catch this motion
-                // event
-                setLowProfile(false, false, false);
-
-                try {
-                    mBarService.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
-                } catch (android.os.RemoteException ex) {
-                }
-            }
-            return false;
-        }
-    };
 
     public void setNavigationIconHints(int hints) {
         setNavigationIconHints(hints, false);
@@ -366,65 +290,6 @@ public class NavigationBarView extends LinearLayout {
         getMenuButton().setVisibility(mShowMenu ? View.VISIBLE : View.INVISIBLE);
     }
 
-    public void setLowProfile(final boolean lightsOut) {
-        setLowProfile(lightsOut, true, false);
-    }
-
-    public void setLowProfile(final boolean lightsOut, final boolean animate, final boolean force) {
-        if (!force && lightsOut == mLowProfile) return;
-
-        mLowProfile = lightsOut;
-
-        if (DEBUG) Log.d(TAG, "setting lights " + (lightsOut?"out":"on"));
-
-        final View navButtons = mCurrentView.findViewById(R.id.nav_buttons);
-        final View lowLights = mCurrentView.findViewById(R.id.lights_out);
-
-        // ok, everyone, stop it right there
-        navButtons.animate().cancel();
-        lowLights.animate().cancel();
-
-        if (!animate) {
-            navButtons.setAlpha(lightsOut ? 0f : 1f);
-
-            lowLights.setAlpha(lightsOut ? 1f : 0f);
-            lowLights.setVisibility(lightsOut ? View.VISIBLE : View.GONE);
-        } else {
-            navButtons.animate()
-                .alpha(lightsOut ? 0f : 1f)
-                .setDuration(lightsOut ? 750 : 250)
-                .start();
-
-            lowLights.setOnTouchListener(mLightsOutListener);
-            if (lowLights.getVisibility() == View.GONE) {
-                lowLights.setAlpha(0f);
-                lowLights.setVisibility(View.VISIBLE);
-            }
-            lowLights.animate()
-                .alpha(lightsOut ? 1f : 0f)
-                .setDuration(lightsOut ? 750 : 250)
-                .setInterpolator(new AccelerateInterpolator(2.0f))
-                .setListener(lightsOut ? null : new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator _a) {
-                        lowLights.setVisibility(View.GONE);
-                    }
-                })
-                .start();
-        }
-    }
-
-    public void setHidden(final boolean hide) {
-        if (hide == mHidden) return;
-
-        mHidden = hide;
-        Log.d(TAG,
-            (hide ? "HIDING" : "SHOWING") + " navigation bar");
-
-        // bring up the lights no matter what
-        setLowProfile(false);
-    }
-
     @Override
     public void onFinishInflate() {
         mRotatedViews[Surface.ROTATION_0] =
@@ -454,7 +319,7 @@ public class NavigationBarView extends LinearLayout {
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
 
         // force the low profile & disabled states into compliance
-        setLowProfile(mLowProfile, false, true /* force */);
+        mBarTransitions.reapplyMode();
         setDisabledFlags(mDisabledFlags, true /* force */);
         setMenuVisibility(mShowMenu, true /* force */);
 
@@ -562,8 +427,6 @@ public class NavigationBarView extends LinearLayout {
         pw.println(String.format("      disabled=0x%08x vertical=%s hidden=%s low=%s menu=%s",
                         mDisabledFlags,
                         mVertical ? "true" : "false",
-                        mHidden ? "true" : "false",
-                        mLowProfile ? "true" : "false",
                         mShowMenu ? "true" : "false"));
 
         final View back = getBackButton();

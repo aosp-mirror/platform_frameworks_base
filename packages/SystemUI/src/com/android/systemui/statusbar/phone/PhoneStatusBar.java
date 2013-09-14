@@ -17,15 +17,16 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
@@ -250,9 +251,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
-
-    private Animator mLightsOutAnimation;
-    private Animator mLightsOnAnimation;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -1808,11 +1806,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     }
                 }
 
-                if (mNavigationBarView != null) {
-                    mNavigationBarView.setLowProfile(lightsOut);
-                }
-
-                setStatusBarLowProfile(lightsOut);
+                setAreThereNotifications();
             }
 
             // update status bar mode
@@ -1872,6 +1866,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private int barMode(int vis, int transientFlag, int transparentFlag) {
         return (vis & transientFlag) != 0 ? MODE_SEMI_TRANSPARENT
                 : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
+                : (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0 ? MODE_LIGHTS_OUT
                 : MODE_OPAQUE;
     }
 
@@ -1888,7 +1883,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
         final boolean imeVisible = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
         final int finalMode = imeVisible ? MODE_OPAQUE : mode;
-        final boolean animate = windowState == WINDOW_STATE_SHOWING;
+        final boolean animate = windowState != WINDOW_STATE_HIDDEN;
         transitions.transitionTo(finalMode, animate);
     }
 
@@ -1946,47 +1941,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void userAutohide() {
         cancelAutohide();
         mHandler.postDelayed(mAutohide, 350); // longer than app gesture -> flag clear
-    }
-
-    private void setStatusBarLowProfile(boolean lightsOut) {
-        if (mLightsOutAnimation == null) {
-            final View notifications = mStatusBarView.findViewById(R.id.notification_icon_area);
-            final View systemIcons = mStatusBarView.findViewById(R.id.statusIcons);
-            final View signal = mStatusBarView.findViewById(R.id.signal_cluster);
-            final View battery = mStatusBarView.findViewById(R.id.battery);
-            final View clock = mStatusBarView.findViewById(R.id.clock);
-
-            final AnimatorSet lightsOutAnim = new AnimatorSet();
-            lightsOutAnim.playTogether(
-                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 0),
-                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
-                    ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
-                    ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
-                );
-            lightsOutAnim.setDuration(750);
-
-            final AnimatorSet lightsOnAnim = new AnimatorSet();
-            lightsOnAnim.playTogether(
-                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
-                );
-            lightsOnAnim.setDuration(250);
-
-            mLightsOutAnimation = lightsOutAnim;
-            mLightsOnAnimation = lightsOnAnim;
-        }
-
-        mLightsOutAnimation.cancel();
-        mLightsOnAnimation.cancel();
-
-        final Animator a = lightsOut ? mLightsOutAnimation : mLightsOnAnimation;
-        a.start();
-
-        setAreThereNotifications();
     }
 
     private boolean areLightsOn() {
