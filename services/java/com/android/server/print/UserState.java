@@ -312,6 +312,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
             // Fail all print jobs.
             failActivePrintJobsForService(service.getComponentName());
+            service.onAllPrintJobsHandled();
             // No session - nothing to do.
             if (mPrinterDiscoverySession == null) {
                 return;
@@ -1004,11 +1005,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     removedPrinterIds.add(printerId);
                 }
             }
-            final int removedPrinterCount = removedPrinterIds.size();
-            for (int i = 0; i < removedPrinterCount; i++) {
-                mPrinters.remove(removedPrinterIds.get(i));
-            }
             if (removedPrinterIds != null) {
+                final int removedPrinterCount = removedPrinterIds.size();
+                for (int i = 0; i < removedPrinterCount; i++) {
+                    mPrinters.remove(removedPrinterIds.get(i));
+                }
                 mHandler.obtainMessage(
                         SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
                         removedPrinterIds).sendToTarget();
