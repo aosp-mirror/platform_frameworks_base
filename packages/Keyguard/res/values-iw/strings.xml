@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"הקלד קוד PIN לביטול הנעילה"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"קוד PIN שגוי"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"כדי לבטל את הנעילה, לחץ על \'תפריט\' ולאחר מכן על 0."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"חרגת ממספר הניסיונות המרבי של זיהוי פרצוף"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"חרגת ממספר הניסיונות המרבי של זיהוי פנים"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"טעון"</string>
     <string name="keyguard_plugged_in" msgid="8117572000639998388">"טוען, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"חבר את המטען."</string>
@@ -61,7 +61,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"הרחב את אזור ביטול הנעילה."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ביטול נעילה באמצעות הסטה."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ביטול נעילה באמצעות ציור קו."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ביטול נעילה באמצעות זיהוי פרצוף."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ביטול נעילה באמצעות זיהוי פנים."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ביטול נעילה באמצעות מספר PIN."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ביטול נעילה באמצעות סיסמה."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"אזור ציור קו."</string>
