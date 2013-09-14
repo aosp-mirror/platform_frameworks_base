@@ -194,7 +194,7 @@ class QuickSettings {
         mQueryCertTask = new AsyncTask<Void, Void, Pair<Boolean, Boolean>>() {
             @Override
             protected Pair<Boolean, Boolean> doInBackground(Void... params) {
-                boolean hasCert = mDevicePolicyManager.hasAnyCaCertsInstalled();
+                boolean hasCert = DevicePolicyManager.hasAnyCaCertsInstalled();
                 boolean isManaged = mDevicePolicyManager.getDeviceOwner() != null;
 
                 return Pair.create(hasCert, isManaged);
@@ -764,7 +764,7 @@ class QuickSettings {
             @Override
             public void onClick(View v) {
                 collapsePanels();
-                showSslCaCertWarningDialog();
+                startSettingsActivity(Settings.ACTION_MONITORING_CERT_INFO);
             }
         });
 
@@ -823,45 +823,6 @@ class QuickSettings {
         builder.setMessage(com.android.internal.R.string.bugreport_message);
         builder.setTitle(com.android.internal.R.string.bugreport_title);
         builder.setCancelable(true);
-        final Dialog dialog = builder.create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        try {
-            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
-        } catch (RemoteException e) {
-        }
-        dialog.show();
-    }
-
-    private void showSslCaCertWarningDialog() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(R.string.ssl_ca_cert_dialog_title);
-        builder.setCancelable(true);
-        final boolean hasDeviceOwner = mDevicePolicyManager.getDeviceOwner() != null;
-        int buttonLabel;
-        if (hasDeviceOwner) {
-            // Institutional case.  Show informational message.
-            String message = mContext.getResources().getString(R.string.ssl_ca_cert_info_message,
-                    mDevicePolicyManager.getDeviceOwnerName());
-            builder.setMessage(message);
-            buttonLabel = R.string.done_button;
-        } else {
-            // Consumer case.  Show scary warning.
-            builder.setMessage(R.string.ssl_ca_cert_warning_message);
-            buttonLabel = R.string.ssl_ca_cert_settings_button;
-        }
-
-        builder.setPositiveButton(buttonLabel, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // do something.
-                if (hasDeviceOwner) {
-                    // Close
-                } else {
-                    startSettingsActivity("com.android.settings.TRUSTED_CREDENTIALS_USER");
-                }
-            }
-        });
-
         final Dialog dialog = builder.create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         try {

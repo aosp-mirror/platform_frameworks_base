@@ -160,6 +160,38 @@ public final class Settings {
             "android.settings.SECURITY_SETTINGS";
 
     /**
+     * Activity Action: Show trusted credentials settings, opening to the user tab,
+     * to allow management of installed credentials.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TRUSTED_CREDENTIALS_USER =
+            "com.android.settings.TRUSTED_CREDENTIALS_USER";
+
+    /**
+     * Activity Action: Show dialog explaining that an installed CA cert may enable
+     * monitoring of encrypted network traffic.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MONITORING_CERT_INFO =
+            "com.android.settings.MONITORING_CERT_INFO";
+
+    /**
      * Activity Action: Show settings to allow configuration of privacy options.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
