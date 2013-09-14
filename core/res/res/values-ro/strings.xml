@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"împiedicare comutare între aplicaţii"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Împiedică trecerea utilizatorului la o altă aplicaţie."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obținere informații despre aplicația curentă"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Permite titularului să afișeze informații private despre aplicația și serviciile curente în prim-planul ecranului."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Permite proprietarului să preia informațiile private despre aplicația curentă în prim-planul ecranului."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitorizare şi control asupra lansării tuturor aplicaţiilor"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite aplicaţiei să monitorizeze şi să controleze modul în care sistemul lansează activităţi. Aplicaţiile rău intenţionate pot să compromită sistemul în întregime. Această permisiune este necesară doar pentru dezvoltare şi niciodată pentru utilizarea normală."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"trimitere mesaj difuzat privind extragerea din pachet"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite aplicaţiei să controleze funcţiile de nivel redus ale afişajelor Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"să intercepteze ieșirea audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite aplicației să intercepteze și să redirecționeze ieșirea audio."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"să intercepteze ieșirea video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite aplicației să intercepteze și să redirecționeze ieșirea video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"să intercepteze ieșirea video securizată"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"împiedicare intrare telefon în repaus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite aplicaţiei să împiedice intrarea tabletei în stare de repaus."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite aplicaţiei să împiedice intrarea telefonului în stare de repaus."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"pornire sau oprire computer tablet PC"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefon pornit sau oprit"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite aplicaţiei să pornească sau să oprească tableta."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite proprietarului să apeleze aplicația de configurare furnizată de operator. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascultă observații despre starea rețelei"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite unei aplicații să asculte observații despre starea rețelei. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"solicitare de recunoaștere a unei expresii de activare"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permite unei aplicații să solicite recunoașterea unei expresii de activare. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Stabiliţi lungimea şi tipul de caractere permise în parolele pentru deblocarea ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>

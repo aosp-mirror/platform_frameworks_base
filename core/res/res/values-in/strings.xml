@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"cegah pergantian aplikasi"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Mencegah pengguna beralih ke apl lain."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"dapatkan info tentang aplikasi yang aktif"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Mengizinkan pemegang mengambil informasi pribadi tentang aplikasi dan layanan saat ini di latar depan layar."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Memungkinkan pemegang mengambil informasi pribadi tentang aplikasi yang aktif di latar depan layar."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"memantau dan mengontrol semua peluncuran apl"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Mengizinkan apl memantau dan mengontrol cara sistem meluncurkan kegiatan. Apl berbahaya dapat meretas sistem sepenuhnya. Izin ini hanya diperlukan untuk pengembangan, tidak pernah diperlukan untuk penggunaan normal."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kirim siaran paket dihapus"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Izinkan aplikasi mengontrol fitur tingkat rendah dari tampilan Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"tangkap keluaran audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Memungkinkan aplikasi menangkap dan mengalihkan keluaran audio."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"tangkap keluaran video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Memungkinkan aplikasi menangkap dan mengalihkan keluaran video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"tangkap keluaran video aman"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Mengizinkan apl mencegah tablet tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Mengizinkan apl mencegah ponsel tidur."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"hidupkan atau matikan tablet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"daya ponsel hidup atau mati"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Mengizinkan apl menyalakan atau mematikan tablet."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Memungkinkan pemegang meminta aplikasi konfigurasi yang disediakan operator. Tidak pernah diperlukan aplikasi normal."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"mendengar untuk observasi kondisi jaringan"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Memungkinkan aplikasi mendengar untuk observasi kondisi jaringan. Tidak pernah dibutuhkan oleh aplikasi normal."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"meminta pengenalan kata cepat"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Memungkinkan aplikasi meminta pengenalan kata cepat. Tidak pernah dibutuhkan oleh aplikasi normal."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrol panjang dan karakter yang diizinkan dalam sandi pembuka layar."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Upaya pembukaan kunci layar monitor"</string>

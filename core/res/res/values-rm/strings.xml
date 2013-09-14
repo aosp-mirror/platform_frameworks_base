@@ -479,7 +479,7 @@
     <skip />
     <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
     <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
     <skip />
     <!-- no translation found for permlab_runSetActivityWatcher (892239094867182656) -->
     <skip />
@@ -785,6 +785,10 @@
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
     <skip />
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
     <skip />
     <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
@@ -903,6 +907,12 @@
     <!-- no translation found for permdesc_wakeLock (7311319824400447868) -->
     <skip />
     <!-- no translation found for permdesc_wakeLock (8559100677372928754) -->
+    <skip />
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
     <skip />
     <!-- no translation found for permlab_devicePower (2787034722616350417) -->
     <skip />
@@ -1111,10 +1121,6 @@
     <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
     <skip />
     <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
-    <skip />
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
     <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />

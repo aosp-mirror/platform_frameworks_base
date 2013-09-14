@@ -100,7 +100,7 @@
     <string name="roamingText9" msgid="7969296811355152491">"Roaming - Funcionalidade de Serviço Total"</string>
     <string name="roamingText10" msgid="3992906999815316417">"Roaming - Funcionalidade de Serviço Parcial"</string>
     <string name="roamingText11" msgid="4154476854426920970">"Faixa de Roaming activada"</string>
-    <string name="roamingText12" msgid="1189071119992726320">"Faixa de Roaming desactivada"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"Faixa de Roaming desativada"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"A procurar Serviço"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não reencaminhado"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -135,8 +135,8 @@
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opções do tablet"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opções do telefone"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Modo silencioso"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"Activar sem fios"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"Desactivar sem fios"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Ativar sem fios"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"Desativar sem fios"</string>
     <string name="screen_lock" msgid="799094655496098153">"Bloqueio de ecrã"</string>
     <string name="power_off" msgid="4266614107412865048">"Desligar"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Campainha desativada"</string>
@@ -237,7 +237,7 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Poderão ser instalados scripts para tornar o conteúdo da aplicação mais acessível."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto que escreve"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclui dados pessoais, como números de cartões de crédito e palavras-passe."</string>
-    <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar ou modificar barra de estado"</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite à aplicação desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permite que a aplicação seja apresentada na barra de estado."</string>
@@ -289,7 +289,7 @@
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite que a aplicação ative a depuração para outra aplicação. As aplicações maliciosas podem utilizar isto para eliminar outras aplicações."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"alterar as definições de visualização do sistema"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Permite à aplicação alterar a configuração atual, como o local ou o tamanho global do tipo de letra."</string>
-    <string name="permlab_enableCarMode" msgid="5684504058192921098">"activar modo de carro"</string>
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"ativar modo de carro"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que a aplicação ative o modo automóvel."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"fechar outras aplicações"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite que a aplicação termine processos em segundo plano de outras aplicações. Isto pode fazer com que outras aplicações deixem de funcionar."</string>
@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir trocas de aplicações"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Impede que o utilizador mude para outra aplicação."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obter informações da aplicação atual"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Permite ao titular obter informações privadas acerca da aplicação e dos serviços atuais no primeiro plano do ecrã."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Permite ao titular recuperar informações privadas acerca da aplicação atual no primeiro plano do ecrã."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitorizar e controlar a iniciação de todas as aplicações"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite que uma aplicação monitorize e controle a forma como o sistema inicia atividades. As aplicações maliciosas podem comprometer totalmente o sistema. Esta autorização só é necessária para programação, nunca para utilização normal."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar difusão de pacote removido"</string>
@@ -478,6 +478,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite que a aplicação controle funcionalidades de baixo nível em visores Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"capturar saída de áudio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite à aplicação capturar e redirecionar a saída de áudio."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Deteção de Palavra de ativação"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Permite à aplicação capturar áudio para deteção da Palavra de ativação. A captura pode acontecer em segundo plano, mas não impede outras capturas de áudio (por exemplo com câmara de vídeo)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"capturar saída de vídeo"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite à aplicação capturar e redirecionar a saída de vídeo."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"capturar saída de vídeo segura"</string>
@@ -490,8 +492,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que a aplicação tire fotografias e grave vídeos com a câmara. Esta autorização permite que a aplicação utilize a câmara sem a sua confirmação em qualquer altura."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desativar LED indicador de transmissão com a câmara em utilização"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite que uma aplicação de sistema pré-instalada desative o LED indicador de utilização da câmara."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desactivar tablet de forma permanente"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"desactivar telefone de forma permanente"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desativar tablet de forma permanente"</string>
+    <string name="permlab_brick" product="default" msgid="8337817093326370537">"desativar telefone de forma permanente"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permite que a aplicação desative definitivamente todo o tablet. Esta ação é muito perigosa."</string>
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Permite que a aplicação desative definitivamente todo o telemóvel. Esta ação é muito perigosa."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"forçar reinício do tablet"</string>
@@ -545,6 +547,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inactividade do telefone"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que a aplicação impeça o tablet de entrar no modo de suspensão."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que a aplicação impeça o telemóvel de entrar em inatividade."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"transmitir infravermelhos"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite que a aplicação utilize o transmissor de infravermelhos do tablet."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Permite que a aplicação utilize o transmissor de infravermelhos do telemóvel."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ligar ou desligar o tablet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ligar ou desligar o telefone"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite que uma aplicação ligue ou desligue o tablet."</string>
@@ -657,8 +662,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o titular invoque a aplicação de configuração fornecida pela operadora. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ouvir observações sobre as condições da rede"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite que uma aplicação ouça observações sobre as condições da rede. Nunca deverá ser necessário para aplicações normais."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"solicitar reconhecimento de palavras de ativação"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Permite que uma aplicação solicite o reconhecimento de palavras de ativação. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras de palavra-passe"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar o comprimento e os caracteres permitidos nas palavras-passe de desbloqueio do ecrã."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizar tentativas de desbloqueio do ecrã"</string>
@@ -1098,7 +1101,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenção"</string>
     <string name="loading" msgid="7933681260296021180">"A carregar…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Ativado"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Desactivar"</string>
+    <string name="capital_off" msgid="6815870386972805832">"Desativar"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Concluir ação utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Limpar a predefinição nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>
@@ -1218,19 +1221,19 @@
     <string name="usb_storage_title" msgid="5901459041398751495">"Ligado através de USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Ligou ao computador através de USB. Toque no botão abaixo se pretender copiar ficheiros entre o computador e a memória de armazenamento USB do Android."</string>
     <string name="usb_storage_message" product="default" msgid="805351000446037811">"Ligou ao computador através de USB. Toque no botão abaixo se pretender copiar ficheiros entre o computador e o cartão SD do Android."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar armazenamento USB"</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Ativar armazenamento USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Existe um problema ao utilizar a memória de armazenamento USB para o armazenamento em massa USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Existe um problema ao utilizar o cartão SD para armazenamento em massa USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"Ligado através de USB"</string>
     <string name="usb_storage_notification_message" msgid="939822783828183763">"Toque para copiar ficheiros para/do computador."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Desactivar armazenamento USB"</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Desativar armazenamento USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Toque para desativar a memória de armazenamento USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"O armazenamento USB está a ser utilizado"</string>
     <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Antes de desativar a memória de armazenamento USB, desmonte (\"ejete\") a memória de armazenamento USB do Android do computador."</string>
     <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Antes de desativar a memória de armazenamento USB, desmonte (\"ejete\") o cartão SD do Android do computador."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desactivar armazenamento USB"</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desativar armazenamento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Ocorreu um problema ao desativar a memória de armazenamento USB. Verifique se desinstalou o anfitrião USB e, em seguida, tente novamente."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activar armazenamento USB"</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ativar armazenamento USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Se ativar a memória de armazenamento USB, algumas aplicações que estiver a utilizar serão paradas e poderão ficar indisponíveis até desativar a memória de armazenamento USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operação USB sem êxito"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>

@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"спречавање пребацивања са једне апликације на другу"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Спречава да корисник пређе на другу апликацију."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"преузимање информација о актуелној апликацији"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Дозвољава власнику да преузима приватне информације о актуелној апликацији и услугама у првом плану екрана."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Дозвољава власнику да преузима приватне информације о актуелној апликацији у првом плану екрана."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"надгледање и контрола покретања свих апликација"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дозвољава апликацији да прати начин на који систем покреће активности и да њиме управља. Злонамерне апликације могу у потпуности да угрозе систем. Ова дозвола је потребна само за програмирање, а никада за уобичајено коришћење."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"слање емитовања уклоњеног пакета"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Дозвољава апликацији да контролише функције Wi-Fi екрана ниског нивоа."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"снимање аудио садржаја"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Дозвољава апликацији да снима и преусмерава аудио садржај."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"снимање видео садржаја"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Дозвољава апликацији да снима и преусмерава видео садржај."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"снимање безбедног видео садржаја"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"спречавање преласка телефона у стање спавања"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дозвољава апликацији да спречи таблет да пређе у стање спавања."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дозвољава апликацији да спречи телефон да пређе у стање спавања."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"укључивање или искључивање таблета"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"укључивање или искључивање телефона"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дозвољава апликацији да укључује или искључује таблет."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозвољава власнику да позива апликацију са конфигурацијом коју одређује оператер. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"праћење података о условима на мрежи"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозвољава апликацији да прати податке о условима на мрежи. Не би никада требало да буде потребно за нормалне апликације."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"захтевање препознавања актуелних речи"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Дозвољава апликацији да захтева препознавање актуелних речи. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Подешавање правила за лозинку"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролишите дужину и знакове дозвољене у лозинкама за откључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Надгледање покушаја откључавања екрана"</string>

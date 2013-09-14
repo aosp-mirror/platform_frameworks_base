@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"апп шилжүүлэхийг хориглох"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Хэрэглэгч бусад апп-руу сэлгэхийг хориглох."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"одоогийн апп-н мэдээллийг авах"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Эзэмшигч нь дэлгэцний нүүрэнд байгаа одоогийн аппликешн болон үйлчилгээний талаарх хувийн мэдээллийг унших боломжтой."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Эзэмшигч нь дэлгэцний нүүрэнд байгаа одоогийн аппликешны талаарх хувийн мэдээллийг унших боломжтой."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"бүх апп-ын эхлэлийг хянах болон удирдах"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Апп нь систем активитиг яаж эхлүүлж байгааг хянах болон удирдан боломжтой. Хортой апп нь системд бүрэн нөлөөлж болзошгүй. Энэ эрх нь зөвхөн хөгжүүлэлтийн үед л хэрэгтэй ба энгийн хэрэглээнд огт хэрэггүй."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"багц хасагдсан өргөн дамжууллыг илгээх"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Апп нь Wifi дэлгэцний доод-төвшиний функцийг удирдах боломжтой."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"аудио гаралтыг барих"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Апп-т аудио гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"видео гаралтыг барих"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Апп-т видео гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"найдвартай видео гаралтыг барих"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"утсыг унтуулахгүй байлгах"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Апп нь таблетыг унтахаас сэргийлэх боломжтой"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Апп нь утсыг унтахаас сэргийлэх боломжтой"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"таблетыг унтраах эсвэл асаах"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"утсыг унтраах эсвэл асаах"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Апп нь таблетыг асаах, унтраах боломжтой."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Эзэмшигчид үүрэн компанийн нийлүүлсэн тохируулах апп-г өдөөх боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Сүлжээний байдлын талаар ажиглалтуудыг хүлээн авах"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Аппликешнд сүлжээний байдлын талаар ажиглалтуудыг хүлээн авахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"хотворд таних хүсэлт"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Аппликешнд хотворд таних хүсэлт гаргахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Дэлгэц түгжих нууц үгэнд зөвшөөрөгдсөн тэмдэгт болон уртыг удирдах"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Дэлгэц тайлах оролдлогыг хянах"</string>

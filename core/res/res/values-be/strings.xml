@@ -316,8 +316,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"прадухіляць пераключэнне прыкладанняў"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Не дазваляе карыстальніку пераходзіць да іншага прыкладання."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"атрымаць бягучую інфармацыю прыкладання"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Дазваляе ўладальніку атрымлiваць асабістую інфармацыю аб бягучым прыкладаннi на пярэднім плане экрана."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"адсочваць і кантраляваць запуск усіх прыкладанняў"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дазваляе прыкладанню сачыць і кантраляваць, як сістэма запускае працэсы. Шкоднасныя прыкладанні могуць цалкам парушыць працу сістэмы. Гэты дазвол патрэбны толькі для распрацоўкі, ніколі для звычайнага выкарыстання."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"трансляваць паведамленні аб выдаленні пакетаў"</string>
@@ -495,6 +494,10 @@
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
     <skip />
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
     <skip />
     <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
@@ -566,6 +569,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дазваляе прыкладанням прадухіляць пераход планшэта ў рэжым сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дазваляе прыкладанням прадухіляць тэлефон ад пераходу ў рэжым сну."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Уключыць або выключыць планшэт"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"уключаць або выключаць тэлефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дазваляе прыкладанням уключаць ці адключаць планшэт."</string>
@@ -683,10 +692,6 @@
     <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
     <skip />
     <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
-    <skip />
-    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
-    <skip />
-    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
     <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устанавіць правілы паролю"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Кіраванне даўжынёй і колькасцю знакаў у паролі разблакоўкі экрана."</string>

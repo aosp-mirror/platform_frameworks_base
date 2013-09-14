@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zuia swichi za app"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Huzuia mtumiaji dhidi ya kubadilisha na kwenda kwa programu nyingine."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"pata maelezo ya sasa kuhusu programu"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Huruhusu mmiliki kurejesha maelezo binafsi kuhusu programu ya sasa na huduma katika mandharimbele ya skrini."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Huruhusu mmiliki kurejesha maelezo ya faragha kuhusu programu ya sasa katika mandharimbele ya skrini."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Fuatilia na kudhibiti uzinduzi wote wa programu"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Inaruhusu programu kufuatilia na kudhibiti jinsi mfumo unazindua shughuli. Programu hasidi zinaweza kutia mfumo hatarini. Ruhusa inahitajika tu kwa usanidi, kamwe sio kwa matumizi ya kawaida."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"furushi lililotumwa limeondoa tangazo"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Inaruhusu programu kudhibiti vipengele vya kiwango cha chini vya maonyesho ya Wifi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"nasa sauti"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Inaruhusu programu kunasa na kuelekeza sauti kwingine."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"nasa sauti ya video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Inaruhusu programu kunasa na kuelekeza video kwingine."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"nasa sauti ya video kwa usalama"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zuia simu dhidi ya kulala"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Inaruhusu programu kuzuia kompyuta kibao  kwenda kulala."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Inaruhusu programu kuzuia simu isiende kulala."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Washa au zima kompyuta kibao"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"washa au zima simu"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Inaruhusu programu kuwasha au kuzima kompyuta kibao."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"sikiliza matukio katika hali za mtandao"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Huruhusu programu kusikiliza matukio katika hali za mtandao. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"kuomba utambuzi wa neno tekelezi"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Huruhusu programu kuomba utambuzi wa neno tekelezi. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Weka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Dhibiti urefu na vibambo vinavyoruhusiwa katika manenosiri ya kufungua skrini."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Chunguza majaribio ya kutofun gua skrini"</string>

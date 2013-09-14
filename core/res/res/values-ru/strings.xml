@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"Защита от переключения приложений"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запрещает пользователям переключаться между приложениями."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"Показ информации о текущем приложении"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"На экране будут отображаться сведения о текущем приложении и запущенных сервисах."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"На экране будут отображаться сведения о текущем приложении."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Отслеживание и управление запуском всех приложений"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Приложение сможет отслеживать запуск системных процессов и управлять им. Вредоносные программы смогут получить полный контроль над системой. Это разрешение необходимо только для разработки и не нужно в обычном режиме."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Отправка оповещений об удалении пакетов"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Приложение сможет управлять низкоуровневыми функциями экранов, подключенных через Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"захват аудиосигнала"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Приложение сможет захватывать и перенаправлять аудиосигнал."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"захват видеосигнала"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Приложение сможет захватывать и перенаправлять видеосигнал."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"захват защищенного видеосигнала"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Отключение спящего режима"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Приложение сможет запрещать перевод планшетного ПК в спящий режим."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Приложение сможет запрещать перевод телефона в спящий режим."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Включение/выключение планшета"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"Включение/выключение телефона"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Приложение сможет включать и выключать планшетный ПК."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Владелец сможет запускать приложение настроек, предоставленное оператором. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Использование данных о состоянии сети"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Приложение сможет использовать данные о состоянии сети. Это разрешение обычно используется только специальными приложениями."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"запрашивать распознавание голосовых команд"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Приложение сможет запрашивать распознавание голосовых команд. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
