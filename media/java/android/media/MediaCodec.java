@@ -294,6 +294,9 @@ final public class MediaCodec {
      */
     public native final void flush();
 
+    /**
+     * Thrown when a crypto error occurs while queueing a secure input buffer.
+     */
     public final static class CryptoException extends RuntimeException {
         public CryptoException(int errorCode, String detailMessage) {
             super(detailMessage);
@@ -318,6 +321,9 @@ final public class MediaCodec {
          */
         public static final int ERROR_RESOURCE_BUSY = 3;
 
+        /**
+         * Retrieve the error code associated with a CryptoException
+         */
         public int getErrorCode() {
             return mErrorCode;
         }
@@ -449,6 +455,9 @@ final public class MediaCodec {
      * @param presentationTimeUs The time at which this buffer should be rendered.
      * @param flags A bitmask of flags {@link #BUFFER_FLAG_SYNC_FRAME},
      *              {@link #BUFFER_FLAG_CODEC_CONFIG} or {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * @throws CryptoException if an error occurs while attempting to decrypt the buffer.
+     *              An error code associated with the exception helps identify the
+     *              reason for the failure.
      */
     public native final void queueSecureInputBuffer(
             int index,
