@@ -983,7 +983,7 @@ public final class ProcessStats implements Parcelable {
                 PackageState pkgState = uids.valueAt(iu);
                 for (int iproc=pkgState.mProcesses.size()-1; iproc>=0; iproc--) {
                     ProcessState ps = pkgState.mProcesses.valueAt(iproc);
-                    if (ps.isInUse()) {
+                    if (ps.isInUse() || ps.mCommonProcess.isInUse()) {
                         pkgState.mProcesses.valueAt(iproc).resetSafely(now);
                     } else {
                         pkgState.mProcesses.removeAt(iproc);
@@ -2496,8 +2496,12 @@ public final class ProcessStats implements Parcelable {
                 // The array map is still pointing to a common process state
                 // that is now shared across packages.  Update it to point to
                 // the new per-package state.
-                proc = mStats.mPackages.get(pkgList.keyAt(index),
-                        proc.mUid).mProcesses.get(proc.mName);
+                PackageState pkg = mStats.mPackages.get(pkgList.keyAt(index), proc.mUid);
+                if (pkg == null) {
+                    throw new IllegalStateException("No existing package "
+                            + pkgList.keyAt(index) + " for multi-proc" + proc.mName);
+                }
+                proc = pkg.mProcesses.get(proc.mName);
                 if (proc == null) {
                     throw new IllegalStateException("Didn't create per-package process");
                 }
