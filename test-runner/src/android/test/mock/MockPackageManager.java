@@ -46,6 +46,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import java.util.List;
@@ -540,6 +541,12 @@ public class MockPackageManager extends PackageManager {
     @Override
     public int getPreferredActivities(List<IntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide - hidden in superclass */
+    @Override
+    public ComponentName getHomeActivities(List<ResolveInfo> outActivities) {
         throw new UnsupportedOperationException();
     }
 
