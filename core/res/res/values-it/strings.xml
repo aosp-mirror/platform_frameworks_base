@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedire commutazione applicazione"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Impedisce all\'utente di passare a un\'altra applicazione."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"recupero di informazioni sull\'app corrente"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Consente al titolare di recuperare le informazioni private sull\'applicazione e sui servizi attualmente in primo piano sullo schermo."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Consente al titolare di recuperare le informazioni private sull\'app correntemente in primo piano sullo schermo."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitoraggio e controllo avvio di tutte le applicazioni"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Consente all\'applicazione di monitorare e controllare l\'avvio delle attività da parte del sistema. Le applicazioni dannose potrebbero compromettere completamente il sistema. Questa autorizzazione è necessaria solo per lo sviluppo, mai per l\'utilizzo normale."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"invio broadcast rimossi dal pacchetto"</string>
@@ -478,6 +478,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Consente all\'applicazione di controllare le funzioni di basso livello di schermi Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"acquisizione dell\'uscita audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Consente all\'app di acquisire e reindirizzare l\'uscita audio."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Rilevamento hotword"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Consente all\'app di acquisire l\'audio per il rilevamento Hotword. L\'acquisizione può avvenire in background ma non impedisce l\'acquisizione di altro audio (ad esempio con la videocamera)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"acquisizione dell\'uscita video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Consente all\'app di acquisire e reindirizzare l\'uscita video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"acquisizione dell\'uscita video sicura"</string>
@@ -545,6 +547,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"disattivazione stand-by del telefono"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Consente all\'applicazione di impedire lo stand-by del tablet."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Consente all\'applicazione di impedire lo stand-by del telefono."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"trasmissione a infrarossi"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Consente all\'app di utilizzare il trasmettitore a infrarossi del tablet."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Consente all\'app di utilizzare il trasmettitore a infrarossi del telefono."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"accensione o spegnimento del tablet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"accensione o spegnimento del telefono"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Consente all\'applicazione di accendere o spegnere il tablet."</string>
@@ -657,8 +662,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Consente al titolare di richiamare l\'app di configurazione dell\'operatore-provider. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascolto delle osservazioni sulle condizioni di rete"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Consente a un\'applicazione di ascoltare le osservazioni sulle condizioni di rete. Da non utilizzare mai con app normali."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"richiesta di riconoscimento hotword"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Consente a un\'applicazione di richiedere il riconoscimento hotword. Da non utilizzare mai con app normali."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Imposta regole password"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlla la lunghezza e i caratteri ammessi nelle password di sblocco dello schermo."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitora tentativi di sblocco dello schermo"</string>

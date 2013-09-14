@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"väldi rakenduste ümberlülitamist"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Takistab kasutaja lülitumist teisele rakendusele."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"aktiivse rakenduse teabe hankimine"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Lubab õiguse omanikul hankida privaatset teavet ekraani esiplaanil oleva aktiivse rakenduse ja teenuste kohta."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Lubab õiguste saajal hankida privaatset teavet ekraanil esiplaanil oleva aktiivse rakenduse kohta."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Kõigi rakenduste käivitumise jälgimine ja juhtimine"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Võimaldab rakendusel jälgida ja juhtida, kuidas süsteem tegevusi käivitab. Pahatahtlikud rakendused võivad süsteemi täielikult rikkuda. Seda õigust on vaja ainult arenduseks, mitte tavakasutuse korral."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"saada paketist eemaldatud saade"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lubab rakendusel juhtida WiFi-ekraanide madala taseme funktsioone."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"heliväljundi jäädvustamine"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Lubab rakendusel jäädvustada ja ümber suunata heliväljundit."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"videoväljundi jäädvustamine"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Lubab rakendusel jäädvustada ja ümber suunata videoväljundit."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"kaitstud videoväljundi jäädvustamine"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"väldi telefoni uinumist"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Võimaldab rakendusel vältida tahvelarvuti uinumist."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Võimaldab rakendusel vältida telefoni uinumist."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"lülita tahvelarvuti sisse või välja"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"lülita telefon sisse või välja"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Võimaldab rakendusel tahvelarvutit sisse või välja lülitada."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lubab omanikul aktiveerida operaatoripoolse konfiguratsioonirakenduse. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"võrgutingimuste teabe kuulamine"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Lubab rakendusel kuulata võrgutingimuste teavet. Ei ole kunagi vajalik tavaliste rakenduste puhul."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"otsetee sõna tuvastamise taotlemine"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Lubab rakendusel taotleda otsetee sõna tuvastamist. Tavarakenduste puhul ei tohiks see vajalik olla."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrollige ekraaniluku avamise paroolide pikkust ja tähemärke."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekraani avamiskatsed"</string>

@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"აპის გადართვებისგან დაცვა"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ხელს უშლის მომხმარებლის სხვა აპზე გადართვას."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"ამჟამინდელი აპის ინფორმაციის მიღება"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"ნებას რთავს მფლობელს, მოიპოვოს მიმდინარე აპლიკაციის და სერვისების შესახებ პირადი ინფორმაცია ეკრანის წინა პლანზე."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ნებას რთავს მფლობელს, მოიპოვოს მიმდინარე აპლიკაციის შესახებ პირადი ინფორმაცია ეკრანის წინა პლანზე."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ყველა აპის გაშვების მონიტორინგი დ კონტროლი"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"აპს შეეძლება სისტემის მიერ გამოძახებული აქტივობების მონიტორინგი და მართვა. მავნე აპლიკაციებს შეეძლებათ სისტემის სრული კონტროლი. ეს ნებართვა საჭროა მხოლოდ დეველოპმენტისთვის და ჩვეულებრივი მოხმარებისთის არ გამოიყენება."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"პაკეტების წაშლის შესახებ შეტყობინებების გაგზავნა"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"აპს შეეძლება აკონტროლოს Wifi ეკრანების დაბალი დონის ფუნქციები."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"გამომავალი აუდიოს დაჭერა"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"საშუალებას აძლევს აპს დაიჭიროს და გადაამისამართოს გამომავალი აუდიო."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"გამომავალი ვიდეოს დაჭერა"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"საშუალებას აძლევს აპს დაიჭიროს და გადაამისამართოს გამომავალი ვიდეო."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"გამომავალი დაცული ვიდეოს დაჭერა"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ტელეფონის ძილის რეჟიმში გადასვლის აღკვეთა"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"აპს შეეძლება ხელი შეუშალოს ტაბლეტის დაძინებას."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"აპს შეეძლება ხელი შეუშალოს ტელეფონის დაძინებას."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ტაბლეტის ჩართვა ან გამორთვა"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ტელეფონის ჩართვა ან გამორთვა"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"აპს შეეძლება, ჩართოს ან გამორთოს ტაბლეტი."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"საშუალებას აძლევს მფლობელს გამოიწვიოს ოპერატორის მიერ მოწოდებული კონფიგურაციის აპი. ჩვეულებრივ აპს ეს წესით არასოდეს არ უნდა დაჭირდეს."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"განხორციელდეს ქსელის მდგომარეობის მონიტორინგი"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"საშუალებას აძლევს აპლიკაციებს განახორციელოს ქსელის მდგომარეობის მონიტორინგი. ეს ფუნქცია ჩვეულებრივ აპებს არ ჭირდება."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ჯადოსნური სიტყვის ამოცნობის მოთხოვნა"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"საშუალებას აძლევს აპლიკაციებს განახორციელოს ჯადოსნური სიტყვის ამოცნობა. ეს ფუნქცია ჩვეულებრივ აპებს არ ჭირდება."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"გააკონტროლეთ ეკრანის განბლოკვის პაროლში დაშვებული სიმბოლოები და მისი სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ეკრანის განბლოკვის მცდელობების გაკონტროლება"</string>

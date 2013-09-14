@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindert den Nutzer daran, zu einer anderen App zu wechseln"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"Informationen zur aktuellen App abrufen"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Ermöglicht es dem Inhaber, private Informationen zur aktuellen App und zu aktuellen Diensten im Vordergrund des Bildschirms abzurufen"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Ermöglicht es dem Inhaber, private Informationen zur aktuellen App im Vordergrund des Bildschirms abzurufen"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Start von Apps überwachen und steuern"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ermöglicht der App, den Start von Systemaktivitäten zu überwachen und zu steuern. Schädliche Apps können so das gesamte System beeinträchtigen. Diese Berechtigung wird nur zu Entwicklungszwecken und nie für die normale Nutzung benötigt."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Broadcast ohne Paket senden"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Erlaubt der App, untergeordnete Funktionen von WLAN-Anzeigen zu steuern"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"Audioausgabe erfassen"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Ermöglicht der App die Erfassung und Weiterleitung von Audioausgaben"</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"Videoausgabe erfassen"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Ermöglicht der App die Erfassung und Weiterleitung von Videoausgaben"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"Sichere Videoausgabe erfassen"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Ruhezustand deaktivieren"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ermöglicht der App, den Ruhezustand des Tablets zu deaktivieren"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Ermöglicht der App, den Ruhezustand des Telefons zu deaktivieren"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Tablet ein- oder ausschalten"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"Gerät ein- oder ausschalten"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ermöglicht der App, das Tablet ein- oder auszuschalten"</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Inhaber, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Informationen zu den Netzwerkbedingungen erfassen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ermöglicht der App, Informationen zu den Netzwerkbedingungen zu erfassen. Sollte für normale Apps nie benötigt werden."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"Hotword-Erkennung anfordern"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Ermöglicht einer App, eine Hotword-Erkennung anzufordern. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Bildschirms festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>

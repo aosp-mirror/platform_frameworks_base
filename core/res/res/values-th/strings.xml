@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ป้องกันการเปลี่ยนแอปพลิเคชัน"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ป้องกันไม่ให้ผู้ใช้สลับไปใช้แอปพลิเคชันอื่น"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"รับข้อมูลแอปพลิเคชันปัจจุบัน"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"ช่วยให้เจ้าของสามารถดึงข้อมูลส่วนตัวเกี่ยวกับแอปพลิเคชันและบริการปัจจุบันในส่วนหน้าของหน้าจอ"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ช่วยให้เจ้าของสามารถดึงข้อมูลส่วนตัวเกี่ยวกับแอปพลิเคชันปัจจุบันในส่วนหน้าของหน้าจอ"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ตรวจสอบและควบคุมแอปพลิเคชันทั้งหมดที่เปิดใช้งาน"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"อนุญาตให้แอปพลิเคชันตรวจสอบและควบคุมวิธีการที่ระบบเปิดกิจกรรมต่างๆ แอปพลิเคชันที่เป็นอันตรายอาจทำอันตรายแก่ระบบได้อย่างสิ้นเชิง การอนุญาตนี้จำเป็นสำหรับการพัฒนาเท่านั้น ไม่ใช้สำหรับแอปพลิเคชันทั่วไปโดยเด็ดขาด"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ส่งการกระจายข้อมูลว่ามีการนำแพคเกจออก"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"อนุญาตให้แอปควบคุมคุณลักษณะต่างๆ ในระดับล่างของการแสดงผลด้วย WiFi"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"บันทึกเอาต์พุตเสียง"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"อนุญาตให้แอปบันทึกและเปลี่ยนเส้นทางเอาต์พุตเสียง"</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"บันทึกเอาต์พุตวิดีโอ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"อนุญาตให้แอปบันทึกและเปลี่ยนเส้นทางเอาต์พุตวิดีโอ"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"บันทึกเอาต์พุตเสียงที่ปลอดภัย"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ป้องกันไม่ให้โทรศัพท์เข้าโหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้โทรศัพท์เข้าสู่โหมดสลีป"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"เปิดหรือปิดเครื่องแท็บเล็ต"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"เปิดหรือปิดโทรศัพท์"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"อนุญาตให้แอปพลิเคชันเปิดหรือปิดแท็บเล็ต"</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"อนุญาตให้ผู้ใช้สามารถเรียกใช้แอปการกำหนดค่าของผู้ให้บริการ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ฟังข้อสังเกตเกี่ยวกับสภาวะของเครือข่าย"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"อนุญาตให้แอปพลิเคชันฟังข้อสังเกตเกี่ยวกับสภาวะของเครือข่าย ไม่จำเป็นสำหรับแอปปกติ"</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"ขอการจดจำเสียงคำที่นิยม"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"อนุญาตให้แอปพลิเคชันขอการจดจำเสียงคำที่นิยม ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>

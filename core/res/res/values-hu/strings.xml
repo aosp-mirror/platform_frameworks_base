@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"alkalmazásváltás megakadályozása"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Megakadályozza, hogy a felhasználó átváltson egy másik alkalmazásra."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"az alkalmazás aktuális információinak lekérése"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Lehetővé teszi, hogy a felhasználó privát adatokat kérjen le az aktuális alkalmazásról és szolgáltatásról a képernyő előterében."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Lehetővé teszi, hogy a felhasználó privát adatokat kérjen le az aktuális alkalmazásról a képernyő előterében."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"alkalmazásindítások nyomon követése és vezérlése"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Lehetővé teszi az alkalmazás számára, hogy figyelje és vezérelje, hogy a rendszer hogyan indít el tevékenységeket. A rosszindulatú alkalmazások teljesen tönkretehetik a rendszert. Ez az engedély csak fejlesztéshez szükséges, normál használathoz sosem."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"eltávolított csomagú üzenetek küldése"</string>
@@ -478,6 +478,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lehetővé teszi, hogy az alkalmazás irányítsa a Wi-Fi kijelzők alacsonyabb szintű funkcióit."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"audiokimenet rögzítése"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Engedélyezi az alkalmazásnak a hangkimenet rögzítését és átirányítását."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotwordérzékelés"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Lehetővé teszi, hogy alkalmazás rögzítse a befelé jövő hangokat hotwordérzékelés céljából. A rögzítés végbemehet a háttérben, és nem zavarja a más jellegű hangrögzítést, például a kamera esetében."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"videokimenet rögzítése"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Engedélyezi az alkalmazásnak a videokimenet rögzítését és átirányítását."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"biztonságos videokimenet rögzítése"</string>
@@ -545,6 +547,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefon alvó üzemmódjának megakadályozása"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a táblagép alvó üzemmódra váltson."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a telefon alvó üzemmódra váltson."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"infravörös érzékelő"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Engedélyezi, hogy az alkalmazás használhassa a táblagép infravörös érzékelőjét."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Engedélyezi, hogy az alkalmazás használhassa a telefon infravörös érzékelőjét."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"a táblagép be- és kikapcsolása"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"a telefon be- és kikapcsolása"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Lehetővé teszi az alkalmazás számára a táblagép be- és kikapcsolását."</string>
@@ -657,8 +662,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lehetővé teszi a használó számára a szolgáltató által biztosított konfigurációs alkalmazás hívását. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"hálózati körülményekkel kapcsolatos észrevételek figyelemmel kísérése"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Lehetővé teszi egy alkalmazás számára, hogy figyelemmel kísérje a hálózati körülményekkel kapcsolatos észrevételeket. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"hotword-felismeréssel kapcsolatos kérelem"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Lehetővé teszi egy alkalmazás számára a hotword-felismeréssel kapcsolatos kérelmeket. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"A képernyőzár-feloldási jelszavakban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>

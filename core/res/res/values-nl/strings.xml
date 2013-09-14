@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"schakelen tussen apps voorkomen"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hiermee wordt voorkomen dat de gebruiker overschakelt naar een andere app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"huidige appgegevens ophalen"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Hiermee kan de houder persoonlijke gegevens ophalen over de app en services die momenteel op de voorgrond worden weergegeven."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"De houder kan hiermee persoonlijke gegevens ophalen over de applicatie die momenteel op de voorgrond wordt weergegeven."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"alle startende apps bijhouden en beheren"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Hiermee kan de app de manier bijhouden en beheren waarop het systeem activiteiten start. Schadelijke apps kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal gebruik."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"melding verzenden dat pakket is verwijderd"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"De app toestaan minder belangrijke functies van wifi-displays te beheren."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"audio-uitvoer vastleggen"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Hiermee kan de app audio-uitvoer vastleggen en verwerken."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"video-uitvoer vastleggen"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Hiermee kan de app video-uitvoer vastleggen en verwerken."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"beveiligde video-uitvoer vastleggen"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Hiermee kan de app voorkomen dat de tablet overschakelt naar de slaapmodus."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Hiermee kan de app voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tablet in- of uitschakelen"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefoon in- of uitschakelen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Hiermee kan de app de tablet in- of uitschakelen."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Hiermee kan de houder de door de provider geleverde configuratie-app aanroepen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"controleren op waarnemingen met betrekking tot netwerkomstandigheden"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Hiermee kan een app controleren op waarnemingen met betrekking tot netwerkomstandigheden. Nooit vereist voor normale apps."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"hotwordherkenning aanvragen"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Hiermee kan een app herkenning van hotwords aanvragen. Nooit vereist voor normale apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -850,7 +858,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Patroon vergeten?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Account ontgrendelen"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Te veel patroonpogingen"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Als u wilt ontgrendelen, moet u zich aanmelden bij uw Google-account."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Log in op uw Google-account om te ontgrendelen."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Gebruikersnaam (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Inloggen"</string>
@@ -1165,7 +1173,7 @@
     <item quantity="one" msgid="1634101450343277345">"Open wifi-netwerk beschikbaar"</item>
     <item quantity="other" msgid="7915895323644292768">"Open wifi-netwerken beschikbaar"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Aanmelden bij wifi-netwerk"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Inloggen op wifi-netwerk"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Inloggen bij netwerk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />

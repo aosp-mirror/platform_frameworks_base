@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"forhindre bytte mellom apper"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindrer brukeren i å bytte til en annen app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"få informasjon om appen"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Tillater innehaveren å hente privat informasjon om den gjeldende appen og tjenester i forgrunnen av skjermen."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Tillater brukeren å få tilgang til privat informasjon om den aktuelle appen i forgrunnen på skjermen."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"overvåke og kontrollere all oppstart av apper"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Lar appen overvåke og kontrollere hvordan systemet starter opp aktiviteter. Ondsinnede apper kan utsette hele systemet for sikkerhetsbrudd. Denne tillatelsen er bare nødvendig for utviklere, aldri for vanlig bruk."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kringkaste melding om fjernet pakke"</string>
@@ -478,6 +478,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tillater appen å kontrollere lavnivåfunksjoner i Wi-Fi-skjermer."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ta opp fra lydutdata"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Lar appen ta opp og omdirigere lydutdata."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Gjenkjennelse av kommandoord"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Gir appen tillatelse til å ta opp lyd for å gjenkjenne kommandoord. Opptaket kan skje i bakgrunnen, men forhindrer ikke lydopptak i andre funksjoner (f.eks. i videoopptak)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ta opp fra videoutdata"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Lar appen ta opp og omdirigere videoutdata."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ta opp fra sikre videoutdata"</string>
@@ -545,6 +547,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Lar appen hindre nettbrettet fra å gå over i sovemodus."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Lar appen hindre telefonen fra å gå over i sovemodus."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"infrarød overføring"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Gir appen tillatelse til å bruke nettbrettets infrarøde sender."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Gir appen tillatelse til å bruke telefonens infrarøde sender."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"slå på eller av nettbrettet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"slå telefonen av eller på"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Lar appen slå på eller av nettbrettet."</string>
@@ -657,8 +662,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Gir innehaveren tillatelse til å kalle opp den konfigurasjonsappen som ble levert av operatøren. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lytte etter observasjoner om nettverksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Gir appen tillatelse til å lytte etter observasjoner om nettverksforhold. Dette skal ikke være nødvendig for vanlige apper."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"forespørsel om gjenkjenning via kommandoord"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Gir appen tillatelse til å be om gjenkjenning via kommandoord. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>

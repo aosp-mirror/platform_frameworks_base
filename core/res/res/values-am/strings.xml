@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"የትግበራ መቀያየርን ተከላከል"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ተጠቃሚው ከሌላ መተግበሪያ ከመቀየር ይከላከላል።"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"የአሁኑ የመተግበሪያ መረጃ ያግኙ"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"ያዢው በአሁኑ መተግበሪያ እና በማያ ገጹ ፊት ላይ ስላሉ መተግበሪያዎች የግል መረጃ እንዲያመጣ ያስችለዋል።"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ያዢው በማያ ገጹ ፊት ላይ ስላለው የአሁኑ መተግበሪያ የግል መረጃ እንዲያመጣ ያስችለዋል።"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ሁሉንም መተግበሪያ ማስነሻ አሳይ እና ተቆጣጠር"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"እንቅስቃሴዎችን ስርዓቱ እንዴት እንደሚያስጀምር ለመከታተል እና ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓቱን ክብረ ገመና ሙሉለሙሉ ሊያጋልጡ ይችላሉ፡፡ ይህ ፍቃድ የሚያስፈልገው ለግንባታ ብቻ ነው፤ ለመደበኛ አጠቃቀም ፈጽሞ አይደለም፡፡"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"አካታች የተወገደለት ስርጭት ላክ"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"መተግበሪያው በዝቅተኛ ደረጃ ላይ ያሉ የWifi ማሳያዎችን እንዲቆጣጠር ይፈቅድለታል።"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"የድምጽ ውጽዓት ይቅረጹ"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"መተግበሪያው የድምጽ ውጽዓት እንዲቀርጽ እና አቅጣጫውን እንዲያዞር ያስችለዋል።"</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"የቪዲዮ ውጽዓት ይቅረጹ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"መተግበሪያው የቪዲዮ ውጽዓት እንዲቀርጽ እና አቅጣጫውን እንዲያዞር ያስችለዋል።"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ደህንነቱ የተጠበቀ የቪዲዮ ውጽዓት ይቅረጹ"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ስልክ ከማንቀላፋት ተከላከል"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ጡባዊውን ከመተኛት መከልከል ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ስልኩን ከመተኛት መከልከል ለመተግበሪያው ይፈቅዳሉ።"</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ጡባዊ አብራ ወይም አጥፋ"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ስልክ አብራ ወይም አጥፋ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ጡባዊ ተኮውን ለማብራት እና ለማጥፋት ለመተግበሪያው ይፈቅዳሉ።"</string>
@@ -657,9 +667,7 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ያዢው በድምጸ-ተያያዥ ሞደም የቀረበው የውቅር መተግበሪያውን እንዲጠራው ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"በአውታረ መረብ ሁኔታዎች ላይ የተስተዋሉ ነገሮችን ያዳምጣል"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"አንድ መተግበሪያ በአውታረ መረብ ሁኔታዎች ላይ የተስተዋሉ ነገሮችን እንዲያዳምጥ ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አስፈላጊ ሊሆን አይገባም።"</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"የትኩስ ቃል ማወቅ ይጠይቁ"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"አንድ መተግበሪያ ትኩስ ቃል እንዲያውቅ እንዲጠይቅ ይፍቀዱለት። ለመደበኛ መተግበሪያዎች በጭራሽ አስፈላጊ ሊሆን አይገባም።"</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ድንቦች አዘጋጅ"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"በማያ-መክፈት የተፈቀዱ የይለፍ ቃል ርዝመት እና ቁምፊዎች ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ማሳያውን በምትከፍትበት ጊዜ በስህተት የተተየቡ የይለፍ ቃሎችን ቁጥር ተቆጣጠር፤ እና ጡባዊ ተኮውን ቆልፍ  ወይም በጣም ብዙ የተሳሳቱ የይለፍ ቃሎች ከተተየቡ የጡባዊ ተኮን ውሂብ አጥፋ፡፡"</string>

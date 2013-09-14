@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"لمنع المستخدم من التبديل إلى تطبيق آخر."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"الحصول على معلومات عن التطبيق الحالي"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"للسماح للمالك باسترداد معلومات خاصة عن الخدمات والتطبيق الحالي في مقدمة الشاشة."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"للسماح للمالك باسترداد معلومات خاصة عن التطبيق الحالي في مقدمة الشاشة."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"مراقبة بدء تشغيل جميع التطبيقات والتحكم فيها"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"للسماح للتطبيق بمراقبة كيفية بدء النظام للأنشطة والتحكم فيها. قد تُعرِّض التطبيقات الضارة النظام للضرر بشكل كامل. لن تكون هناك حاجة لهذا الإذن سوى للتطوير فقط، وليس للاستخدام العادي على الإطلاق."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"إرسال بث الحزمة الذي تمت إزالته"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"للسماح للتطبيق بالتحكم في الميزات ذات المستوى المنخفض في شاشات Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"التقاط إخراج الصوت"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"السماح للتطبيق بالتقاط إخراج الصوت وإعادة توجيهه."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"التقاط إخراج الفيديو"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"السماح للتطبيق بالتقاط إخراج الفيديو وإعادة توجيهه."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"التقاط إخراج الفيديو الآمن"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"منع الهاتف من الدخول في وضع السكون"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"للسماح للتطبيق بمنع الجهاز اللوحي من الانتقال إلى وضع السكون."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"للسماح للتطبيق بمنع الهاتف من الانتقال إلى وضع السكون."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"تشغيل الجهاز اللوحي أو إيقاف تشغيله"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"تشغيل الهاتف أو إيقاف تشغيله"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"للسماح للتطبيق بتشغيل الجهاز اللوحي أو إيقاف تشغيله."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"للسماح للمالك باستدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"الاستماع إلى ملاحظات حول أحوال الشبكة"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"للسماح للتطبيق بالاستماع إلى ملاحظات حول أحوال الشبكة. لا حاجة إلى هذا مع التطبيقات العادية."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"طلب التعرف على الكلمة المهمة"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"للسماح للتطبيق بطلب التعرف على الكلمة المهمة. لا حاجة إلى هذا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"يمكنك التحكم في الطول والأحرف المسموح بها في كلمات مرور إلغاء تأمين الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>

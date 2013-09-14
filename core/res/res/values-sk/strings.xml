@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabrániť prepínaniu aplikácií"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Zabráni používateľovi prepnúť na inú aplikáciu."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"získať informácie o aktuálnej aplikácii"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Umožňuje držiteľovi povolenia načítať súkromné informácie o aktuálnej aplikácii a službách v popredí obrazovky."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Umožňuje držiteľovi povolenia načítať súkromné ​​informácie o aktuálnej aplikácii v popredí obrazovky."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"sledovať a ovládať všetky spustenia aplikácií"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Umožňuje aplikácii sledovať a ovládať spúšťanie aktivít systémom. Škodlivé aplikácie môžu systém úplne ovládnuť. Toto povolenie je potrebné len na účely vývoja, nikdy nie na bežné používanie."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"odoslanie vysielania o odstránení balíčka"</string>
@@ -478,6 +478,10 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Umožňuje aplikácii ovládať základné funkcie displejov cez siete Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"zachytiť výstup zvuku"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Umožňuje aplikácii zachytiť a presmerovať výstup zvuku."</string>
+    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
+    <skip />
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"zachytiť výstup videa"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Umožňuje aplikácii zachytiť a presmerovať výstup videa."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"zachytiť zabezpečený výstup videa"</string>
@@ -545,6 +549,12 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zabránenie prechodu telefónu do režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikácii zabrániť prechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Umožňuje aplikácii zabrániť prechodu telefónu do režimu spánku."</string>
+    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
+    <skip />
+    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
+    <skip />
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"zapnutie a vypnutie tabletu"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"zapnutie a vypnutie telefónu"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Umožňuje aplikácii zapnúť a vypnúť tablet."</string>
@@ -657,8 +667,6 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje držiteľovi vyvolať aplikáciu pre konfiguráciu poskytnutú operátorom. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"zachytávať informácie o stave siete"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Umožňuje aplikácii zachytávať informácie o stave siete. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"požiadavka rozpoznania kľúčových slov"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Umožňuje aplikácii požadovať rozpoznanie kľúčových slov. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
