@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -47,73 +45,7 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
-    private final StatusBarTransitions mBarTransitions;
-
-    private final class StatusBarTransitions extends BarTransitions {
-        private final int mTransparent;
-        private final float mAlphaWhenOpaque;
-        private final float mAlphaWhenTransparent = 1;
-        private View mLeftSide, mStatusIcons, mSignalCluster, mClock;
-
-        public StatusBarTransitions(Context context) {
-            super(context, PhoneStatusBarView.this);
-            final Resources res = context.getResources();
-            mTransparent = res.getColor(R.color.status_bar_background_transparent);
-            mAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-        }
-
-        public void init() {
-            mLeftSide = findViewById(R.id.notification_icon_area);
-            mStatusIcons = findViewById(R.id.statusIcons);
-            mSignalCluster = findViewById(R.id.signal_battery_cluster);
-            mClock = findViewById(R.id.clock);
-            applyMode(getMode(), false /*animate*/);
-        }
-
-        @Override
-        protected Integer getBackgroundColor(int mode) {
-            if (mode == MODE_TRANSPARENT) return mTransparent;
-            return super.getBackgroundColor(mode);
-        }
-
-        public ObjectAnimator animateTransitionTo(View v, float toAlpha) {
-            return ObjectAnimator.ofFloat(v, "alpha", v.getAlpha(), toAlpha);
-        }
-
-        public float getAlphaFor(int mode) {
-            return isTransparent(mode) ? mAlphaWhenTransparent : mAlphaWhenOpaque;
-        }
-
-        private boolean isTransparent(int mode) {
-            return mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSPARENT;
-        }
-
-        @Override
-        protected void onTransition(int oldMode, int newMode, boolean animate) {
-            super.onTransition(oldMode, newMode, animate);
-            applyMode(newMode, animate);
-        }
-
-        private void applyMode(int mode, boolean animate) {
-            if (mLeftSide == null) return; // pre-init
-            float newAlpha = getAlphaFor(mode);
-            if (animate) {
-                AnimatorSet anims = new AnimatorSet();
-                anims.playTogether(
-                        animateTransitionTo(mLeftSide, newAlpha),
-                        animateTransitionTo(mStatusIcons, newAlpha),
-                        animateTransitionTo(mSignalCluster, newAlpha),
-                        animateTransitionTo(mClock, newAlpha)
-                        );
-                anims.start();
-            } else {
-                mLeftSide.setAlpha(newAlpha);
-                mStatusIcons.setAlpha(newAlpha);
-                mSignalCluster.setAlpha(newAlpha);
-                mClock.setAlpha(newAlpha);
-            }
-        }
-    }
+    private final PhoneStatusBarTransitions mBarTransitions;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -127,7 +59,7 @@ public class PhoneStatusBarView extends PanelBar {
             mSettingsPanelDragzoneFrac = 0f;
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
-        mBarTransitions = new StatusBarTransitions(context);
+        mBarTransitions = new PhoneStatusBarTransitions(this);
     }
 
     public BarTransitions getBarTransitions() {

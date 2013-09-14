@@ -20,7 +20,6 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -35,6 +34,10 @@ public class BarTransitions {
     public static final int MODE_OPAQUE = 0;
     public static final int MODE_SEMI_TRANSPARENT = 1;
     public static final int MODE_TRANSPARENT = 2;
+    public static final int MODE_LIGHTS_OUT = 3;
+
+    protected static final int LIGHTS_IN_DURATION = 250;
+    protected static final int LIGHTS_OUT_DURATION = 750;
 
     private final String mTag;
     protected final View mTarget;
@@ -52,10 +55,10 @@ public class BarTransitions {
         }
     };
 
-    public BarTransitions(Context context, View target) {
+    public BarTransitions(View target) {
         mTag = "BarTransitions." + target.getClass().getSimpleName();
         mTarget = target;
-        final Resources res = context.getResources();
+        final Resources res = target.getContext().getResources();
         mOpaque = res.getColor(R.drawable.status_bar_background);
         mSemiTransparent = res.getColor(R.color.status_bar_background_semi_transparent);
     }
@@ -76,6 +79,7 @@ public class BarTransitions {
     protected Integer getBackgroundColor(int mode) {
         if (mode == MODE_SEMI_TRANSPARENT) return mSemiTransparent;
         if (mode == MODE_OPAQUE) return mOpaque;
+        if (mode == MODE_LIGHTS_OUT) return mOpaque;
         return null;
     }
 
@@ -113,6 +117,7 @@ public class BarTransitions {
         if (mode == MODE_OPAQUE) return "MODE_OPAQUE";
         if (mode == MODE_SEMI_TRANSPARENT) return "MODE_SEMI_TRANSPARENT";
         if (mode == MODE_TRANSPARENT) return "MODE_TRANSPARENT";
+        if (mode == MODE_LIGHTS_OUT) return "MODE_LIGHTS_OUT";
         throw new IllegalArgumentException("Unknown mode " + mode);
     }
 }
