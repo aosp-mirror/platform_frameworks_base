@@ -19,6 +19,7 @@ package com.android.server.am;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.app.ActivityManager;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.wm.WindowManagerService;
 
@@ -97,6 +98,10 @@ final class ProcessList {
 
     // The system process runs at the default adjustment.
     static final int SYSTEM_ADJ = -16;
+
+    // Special code for native processes that are not being managed by the system (so
+    // don't have an oom adj assigned by the system).
+    static final int NATIVE_ADJ = -17;
 
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
@@ -278,6 +283,46 @@ final class ProcessList {
         return (totalProcessLimit*2)/3;
     }
 
+    private static String buildOomTag(String prefix, String space, int val, int base) {
+        if (val == base) {
+            if (space == null) return prefix;
+            return prefix + "  ";
+        }
+        return prefix + "+" + Integer.toString(val-base);
+    }
+
+    public static String makeOomAdjString(int setAdj) {
+        if (setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+            return buildOomTag("cch", "  ", setAdj, ProcessList.CACHED_APP_MIN_ADJ);
+        } else if (setAdj >= ProcessList.SERVICE_B_ADJ) {
+            return buildOomTag("svcb ", null, setAdj, ProcessList.SERVICE_B_ADJ);
+        } else if (setAdj >= ProcessList.PREVIOUS_APP_ADJ) {
+            return buildOomTag("prev ", null, setAdj, ProcessList.PREVIOUS_APP_ADJ);
+        } else if (setAdj >= ProcessList.HOME_APP_ADJ) {
+            return buildOomTag("home ", null, setAdj, ProcessList.HOME_APP_ADJ);
+        } else if (setAdj >= ProcessList.SERVICE_ADJ) {
+            return buildOomTag("svc  ", null, setAdj, ProcessList.SERVICE_ADJ);
+        } else if (setAdj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
+            return buildOomTag("hvy  ", null, setAdj, ProcessList.HEAVY_WEIGHT_APP_ADJ);
+        } else if (setAdj >= ProcessList.BACKUP_APP_ADJ) {
+            return buildOomTag("bkup ", null, setAdj, ProcessList.BACKUP_APP_ADJ);
+        } else if (setAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
+            return buildOomTag("prcp ", null, setAdj, ProcessList.PERCEPTIBLE_APP_ADJ);
+        } else if (setAdj >= ProcessList.VISIBLE_APP_ADJ) {
+            return buildOomTag("vis  ", null, setAdj, ProcessList.VISIBLE_APP_ADJ);
+        } else if (setAdj >= ProcessList.FOREGROUND_APP_ADJ) {
+            return buildOomTag("fore ", null, setAdj, ProcessList.FOREGROUND_APP_ADJ);
+        } else if (setAdj >= ProcessList.PERSISTENT_PROC_ADJ) {
+            return buildOomTag("pers ", null, setAdj, ProcessList.PERSISTENT_PROC_ADJ);
+        } else if (setAdj >= ProcessList.SYSTEM_ADJ) {
+            return buildOomTag("sys  ", null, setAdj, ProcessList.SYSTEM_ADJ);
+        } else if (setAdj >= ProcessList.NATIVE_ADJ) {
+            return buildOomTag("ntv  ", null, setAdj, ProcessList.NATIVE_ADJ);
+        } else {
+            return Integer.toString(setAdj);
+        }
+    }
+
     // The minimum amount of time after a state change it is safe ro collect PSS.
     public static final int PSS_MIN_TIME_FROM_STATE_CHANGE = 15*1000;
 
@@ -364,6 +409,70 @@ final class ProcessList {
 
     public static boolean procStatesDifferForMem(int procState1, int procState2) {
         return sProcStateToProcMem[procState1] != sProcStateToProcMem[procState2];
+    }
+
+    public static String makeProcStateString(int curProcState) {
+        String procState;
+        switch (curProcState) {
+            case -1:
+                procState = "N ";
+                break;
+            case ActivityManager.PROCESS_STATE_PERSISTENT:
+                procState = "P ";
+                break;
+            case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
+                procState = "PU";
+                break;
+            case ActivityManager.PROCESS_STATE_TOP:
+                procState = "T ";
+                break;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
+                procState = "IF";
+                break;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                procState = "IB";
+                break;
+            case ActivityManager.PROCESS_STATE_BACKUP:
+                procState = "BU";
+                break;
+            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
+                procState = "HW";
+                break;
+            case ActivityManager.PROCESS_STATE_SERVICE:
+                procState = "S ";
+                break;
+            case ActivityManager.PROCESS_STATE_RECEIVER:
+                procState = "R ";
+                break;
+            case ActivityManager.PROCESS_STATE_HOME:
+                procState = "HO";
+                break;
+            case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
+                procState = "LA";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
+                procState = "CA";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
+                procState = "Ca";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
+                procState = "CE";
+                break;
+            default:
+                procState = "??";
+                break;
+        }
+        return procState;
+    }
+
+    public static void appendRamKb(StringBuilder sb, long ramKb) {
+        for (int j=0, fact=10; j<6; j++, fact*=10) {
+            if (ramKb < fact) {
+                sb.append(' ');
+            }
+        }
+        sb.append(ramKb);
     }
 
     public static long computeNextPssTime(int procState, boolean first, boolean sleeping,

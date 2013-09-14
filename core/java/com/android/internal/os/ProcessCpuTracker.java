@@ -49,12 +49,12 @@ public class ProcessCpuTracker {
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 9: minor faults
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 10: minor faults
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 11: major faults
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 12: major faults
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 13: utime
-        PROC_SPACE_TERM|PROC_OUT_LONG                   // 14: stime
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 14: utime
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 15: stime
     };
 
     static final int PROCESS_STAT_MINOR_FAULTS = 0;
@@ -69,7 +69,7 @@ public class ProcessCpuTracker {
 
     private static final int[] PROCESS_FULL_STATS_FORMAT = new int[] {
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_PARENS|PROC_OUT_STRING,    // 1: name
+        PROC_SPACE_TERM|PROC_PARENS|PROC_OUT_STRING,    // 2: name
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
@@ -77,19 +77,20 @@ public class ProcessCpuTracker {
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 9: minor faults
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 10: minor faults
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 11: major faults
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 12: major faults
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 13: utime
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 14: stime
-        PROC_SPACE_TERM,
-        PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 14: utime
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 15: stime
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 21: vsize
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 23: vsize
     };
 
     static final int PROCESS_FULL_STAT_MINOR_FAULTS = 1;
@@ -189,6 +190,10 @@ public class ProcessCpuTracker {
         public String baseName;
         public String name;
         public int nameWidth;
+
+        // vsize capture when process first detected; can be used to
+        // filter out kernel processes.
+        public long vsize;
 
         public long base_uptime;
         public long rel_uptime;
@@ -444,6 +449,7 @@ public class ProcessCpuTracker {
                     // are actually kernel threads...  do we want to?  Some
                     // of them do use CPU, but there can be a *lot* that are
                     // not doing anything.
+                    st.vsize = procStats[PROCESS_FULL_STAT_VSIZE];
                     if (true || procStats[PROCESS_FULL_STAT_VSIZE] != 0) {
                         st.interesting = true;
                         st.baseName = procStatsString[0];

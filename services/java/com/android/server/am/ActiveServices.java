@@ -328,8 +328,17 @@ public final class ActiveServices {
                 addToStarting = true;
                 if (DEBUG_DELAYED_STATS) Slog.v(TAG, "Not delaying, but counting as bg: " + r);
             } else if (DEBUG_DELAYED_STATS) {
-                Slog.v(TAG, "Not potential delay (state=" + proc.curProcState
-                        + " " + proc.makeAdjReason() + "): " + r);
+                StringBuilder sb = new StringBuilder(128);
+                sb.append("Not potential delay (state=").append(proc.curProcState)
+                        .append(' ').append(proc.adjType);
+                String reason = proc.makeAdjReason();
+                if (reason != null) {
+                    sb.append(' ');
+                    sb.append(reason);
+                }
+                sb.append("): ");
+                sb.append(r.toString());
+                Slog.v(TAG, sb.toString());
             }
         } else if (DEBUG_DELAYED_STATS) {
             if (callerFg) {
