@@ -97,6 +97,16 @@ public class WorkSource implements Parcelable {
     }
 
     /**
+     * Clear names from this WorkSource.  Uids are left intact.
+     *
+     * <p>Useful when combining with another WorkSource that doesn't have names.
+     * @hide
+     */
+    public void clearNames() {
+        mNames = null;
+    }
+
+    /**
      * Clear this WorkSource to be empty.
      */
     public void clear() {
