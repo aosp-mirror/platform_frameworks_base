@@ -45,6 +45,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Root;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -442,6 +443,8 @@ public class DocumentsActivity extends Activity {
         super.onPrepareOptionsMenu(menu);
 
         final FragmentManager fm = getFragmentManager();
+
+        final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
@@ -503,7 +506,9 @@ public class DocumentsActivity extends Activity {
             SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
         } else {
             createDir.setVisible(false);
-            searchVisible = cwd != null && cwd.isSearchSupported();
+
+            searchVisible = root != null
+                    && ((root.flags & Root.FLAG_SUPPORTS_SEARCH) != 0);
         }
 
         // TODO: close any search in-progress when hiding
@@ -722,7 +727,7 @@ public class DocumentsActivity extends Activity {
         } else {
             if (mState.currentSearch != null) {
                 // Ongoing search
-                DirectoryFragment.showSearch(fm, root, cwd, mState.currentSearch);
+                DirectoryFragment.showSearch(fm, root, mState.currentSearch);
             } else {
                 // Normal boring directory
                 DirectoryFragment.showNormal(fm, root, cwd);
