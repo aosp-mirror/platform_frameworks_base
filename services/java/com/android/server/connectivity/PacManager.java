@@ -24,17 +24,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Proxy;
 import android.net.ProxyProperties;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.net.IProxyCallback;
+import com.android.net.IProxyPortListener;
 import com.android.net.IProxyService;
 import com.android.server.IoThread;
 
@@ -79,6 +84,7 @@ public class PacManager {
     private Context mContext;
 
     private int mCurrentDelay;
+    private int mLastPort;
 
     /**
      * Used for locking when setting mProxyService and all references to mPacUrl or mCurrentPac.
@@ -119,6 +125,7 @@ public class PacManager {
 
     public PacManager(Context context) {
         mContext = context;
+        mLastPort = -1;
 
         mPacRefreshIntent = PendingIntent.getBroadcast(
                 context, 0, new Intent(ACTION_PAC_REFRESH), 0);
@@ -133,7 +140,16 @@ public class PacManager {
         return mAlarmManager;
     }
 
-    public synchronized void setCurrentProxyScriptUrl(ProxyProperties proxy) {
+    /**
+     * Updates the PAC Manager with current Proxy information. This is called by
+     * the ConnectivityService directly before a broadcast takes place to allow
+     * the PacManager to indicate that the broadcast should not be sent and the
+     * PacManager will trigger a new broadcast when it is ready.
+     *
+     * @param proxy Proxy information that is about to be broadcast.
+     * @return Returns true when the broadcast should not be sent
+     */
+    public synchronized boolean setCurrentProxyScriptUrl(ProxyProperties proxy) {
         if (!TextUtils.isEmpty(proxy.getPacFileUrl())) {
             synchronized (mProxyLock) {
                 mPacUrl = proxy.getPacFileUrl();
@@ -141,6 +157,7 @@ public class PacManager {
             mCurrentDelay = DELAY_1;
             getAlarmManager().cancel(mPacRefreshIntent);
             bind();
+            return true;
         } else {
             getAlarmManager().cancel(mPacRefreshIntent);
             synchronized (mProxyLock) {
@@ -156,6 +173,7 @@ public class PacManager {
                     }
                 }
             }
+            return false;
         }
     }
 
@@ -233,6 +251,16 @@ public class PacManager {
         }
         Intent intent = new Intent();
         intent.setClassName(PAC_PACKAGE, PAC_SERVICE);
+        // Already bound no need to bind again.
+        if (mProxyConnection != null) {
+            if (mLastPort != -1) {
+                sendPacBroadcast(new ProxyProperties(mPacUrl, mLastPort));
+            } else {
+                Log.e(TAG, "Received invalid port from Local Proxy,"
+                        + " PAC will not be operational");
+            }
+            return;
+        }
         mConnection = new ServiceConnection() {
             @Override
             public void onServiceDisconnected(ComponentName component) {
@@ -277,6 +305,26 @@ public class PacManager {
 
             @Override
             public void onServiceConnected(ComponentName component, IBinder binder) {
+                IProxyCallback callbackService = IProxyCallback.Stub.asInterface(binder);
+                if (callbackService != null) {
+                    try {
+                        callbackService.getProxyPort(new IProxyPortListener.Stub() {
+                            @Override
+                            public void setProxyPort(int port) throws RemoteException {
+                                mLastPort = port;
+                                if (port != -1) {
+                                    Log.d(TAG, "Local proxy is bound on " + port);
+                                    sendPacBroadcast(new ProxyProperties(mPacUrl, port));
+                                } else {
+                                    Log.e(TAG, "Received invalid port from Local Proxy,"
+                                            + " PAC will not be operational");
+                                }
+                            }
+                        });
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         };
         mContext.bindService(intent, mProxyConnection,
@@ -287,5 +335,19 @@ public class PacManager {
         mContext.unbindService(mConnection);
         mContext.unbindService(mProxyConnection);
         mConnection = null;
+        mProxyConnection = null;
+    }
+
+    private void sendPacBroadcast(ProxyProperties proxy) {
+        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
+            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 }

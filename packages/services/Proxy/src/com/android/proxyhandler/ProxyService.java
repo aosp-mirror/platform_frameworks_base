@@ -21,7 +21,11 @@ import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.text.TextUtils;
+
+import com.android.net.IProxyCallback;
+import com.android.net.IProxyPortListener;
 
 /**
  * @hide
@@ -56,6 +60,16 @@ public class ProxyService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new IProxyCallback.Stub() {
+            @Override
+            public void getProxyPort(IBinder callback) throws RemoteException {
+                if (server != null) {
+                    IProxyPortListener portListener = IProxyPortListener.Stub.asInterface(callback);
+                    if (portListener != null) {
+                        server.setCallback(portListener);
+                    }
+                }
+            }
+        };
     }
 }
