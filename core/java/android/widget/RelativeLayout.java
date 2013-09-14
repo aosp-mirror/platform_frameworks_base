@@ -542,7 +542,7 @@ public class RelativeLayout extends ViewGroup {
             // the right of each child view
             width += mPaddingRight;
 
-            if (mLayoutParams.width >= 0) {
+            if (mLayoutParams != null && mLayoutParams.width >= 0) {
                 width = Math.max(width, mLayoutParams.width);
             }
 
@@ -572,7 +572,7 @@ public class RelativeLayout extends ViewGroup {
             // the bottom of each child view
             height += mPaddingBottom;
 
-            if (mLayoutParams.height >= 0) {
+            if (mLayoutParams != null && mLayoutParams.height >= 0) {
                 height = Math.max(height, mLayoutParams.height);
             }
 
