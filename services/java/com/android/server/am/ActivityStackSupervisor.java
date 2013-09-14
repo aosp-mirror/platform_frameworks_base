@@ -284,6 +284,7 @@ public final class ActivityStackSupervisor {
         if (prev != null) {
             prev.mLaunchHomeTaskNext = false;
         }
+        mHomeStack.moveHomeTaskToTop();
         ActivityRecord r = mHomeStack.topRunningActivityLocked(null);
         if (r != null) {
             mService.setFocusedActivityLocked(r);

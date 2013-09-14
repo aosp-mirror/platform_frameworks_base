@@ -354,7 +354,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             if (mPopup != null) {
                 mPopup.dismiss();
             }
-            ((RecentsActivity) mContext).moveTaskToBack(true);
         }
     }
 
