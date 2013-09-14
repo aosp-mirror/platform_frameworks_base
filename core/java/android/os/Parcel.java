@@ -228,6 +228,7 @@ public final class Parcel {
     private static final int EX_ILLEGAL_ARGUMENT = -3;
     private static final int EX_NULL_POINTER = -4;
     private static final int EX_ILLEGAL_STATE = -5;
+    private static final int EX_NETWORK_MAIN_THREAD = -6;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
 
     private static native int nativeDataSize(int nativePtr);
@@ -1321,6 +1322,7 @@ public final class Parcel {
      * <li>{@link IllegalStateException}
      * <li>{@link NullPointerException}
      * <li>{@link SecurityException}
+     * <li>{@link NetworkOnMainThreadException}
      * </ul>
      * 
      * @param e The Exception to be written.
@@ -1340,6 +1342,8 @@ public final class Parcel {
             code = EX_NULL_POINTER;
         } else if (e instanceof IllegalStateException) {
             code = EX_ILLEGAL_STATE;
+        } else if (e instanceof NetworkOnMainThreadException) {
+            code = EX_NETWORK_MAIN_THREAD;
         }
         writeInt(code);
         StrictMode.clearGatheredViolations();
@@ -1455,6 +1459,8 @@ public final class Parcel {
                 throw new NullPointerException(msg);
             case EX_ILLEGAL_STATE:
                 throw new IllegalStateException(msg);
+            case EX_NETWORK_MAIN_THREAD:
+                throw new NetworkOnMainThreadException();
         }
         throw new RuntimeException("Unknown exception code: " + code
                 + " msg " + msg);
