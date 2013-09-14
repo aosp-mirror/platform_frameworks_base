@@ -480,7 +480,7 @@ public class WallpaperManager {
      * Gets an Intent that will launch an activity that crops the given
      * image and sets the device's wallpaper. If there is a default HOME activity
      * that supports cropping wallpapers, it will be preferred as the default.
-     * Use this method instead of directly creating a {@link Intent#CROP_AND_SET_WALLPAPER}
+     * Use this method instead of directly creating a {@link #ACTION_CROP_AND_SET_WALLPAPER}
      * intent.
      */
     public Intent getCropAndSetWallpaperIntent(Uri imageUri) {
