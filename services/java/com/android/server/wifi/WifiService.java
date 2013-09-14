@@ -342,6 +342,9 @@ public final class WifiService extends IWifiManager.Stub {
         enforceChangePermission();
         if (workSource != null) {
             enforceWorkSourcePermission();
+            // WifiManager currently doesn't use names, so need to clear names out of the
+            // supplied WorkSource to allow future WorkSource combining.
+            workSource.clearNames();
         }
         mWifiStateMachine.startScan(Binder.getCallingUid(), workSource);
     }
