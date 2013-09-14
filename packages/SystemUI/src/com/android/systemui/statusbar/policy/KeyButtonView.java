@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -60,6 +58,7 @@ public class KeyButtonView extends ImageView {
     boolean mSupportsLongpress = true;
     RectF mRect = new RectF(0f,0f,0f,0f);
     AnimatorSet mPressedAnim;
+    Animator mAnimateToQuiescent = new ObjectAnimator();
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -72,15 +71,6 @@ public class KeyButtonView extends ImageView {
                     // Just an old-fashioned ImageView
                     performLongClick();
                 }
-            }
-        }
-    };
-
-    private final AnimatorListener mRecoverToQuiescentListener = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            if (mQuiescentAlpha != mDrawingAlpha) {
-                animateToQuiescent().setDuration(200).start();
             }
         }
     };
@@ -133,14 +123,24 @@ public class KeyButtonView extends ImageView {
         super.onDraw(canvas);
     }
 
-    public void setQuiescentAlpha(float alpha) {
+    public void setQuiescentAlpha(float alpha, boolean animate) {
+        mAnimateToQuiescent.cancel();
         alpha = Math.min(Math.max(alpha, 0), 1);
         if (alpha == mQuiescentAlpha) return;
         mQuiescentAlpha = alpha;
         if (DEBUG) Log.d(TAG, "New quiescent alpha = " + mQuiescentAlpha);
         if (mGlowBG != null) {
-            setDrawingAlpha(mQuiescentAlpha);
+            if (animate) {
+                mAnimateToQuiescent = animateToQuiescent();
+                mAnimateToQuiescent.start();
+            } else {
+                setDrawingAlpha(mQuiescentAlpha);
+            }
         }
+    }
+
+    private ObjectAnimator animateToQuiescent() {
+        return ObjectAnimator.ofFloat(this, "drawingAlpha", mQuiescentAlpha);
     }
 
     public float getDrawingAlpha() {
@@ -197,12 +197,6 @@ public class KeyButtonView extends ImageView {
         }
     }
 
-    private ObjectAnimator animateToQuiescent() {
-        ObjectAnimator anim = ObjectAnimator.ofFloat(this, "drawingAlpha", mQuiescentAlpha);
-        anim.addListener(mRecoverToQuiescentListener);  // mQuiescentAlpha may change mid-animation
-        return anim;
-    }
-
     public void setPressed(boolean pressed) {
         if (mGlowBG != null) {
             if (pressed != isPressed()) {
@@ -222,10 +216,12 @@ public class KeyButtonView extends ImageView {
                     );
                     as.setDuration(50);
                 } else {
+                    mAnimateToQuiescent.cancel();
+                    mAnimateToQuiescent = animateToQuiescent();
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 0f),
                         ObjectAnimator.ofFloat(this, "glowScale", 1f),
-                        animateToQuiescent()
+                        mAnimateToQuiescent
                     );
                     as.setDuration(500);
                 }

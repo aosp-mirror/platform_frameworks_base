@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * Controls state/behavior specific to a system bar window.
  */
 public class BarController {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int TRANSIENT_BAR_NONE = 0;
     private static final int TRANSIENT_BAR_SHOWING = 1;
@@ -106,24 +106,32 @@ public class BarController {
             mPendingShow = true;
             return false;
         }
-        final boolean oldVis = mWin.isVisibleLw();
-        final boolean oldAnim = mWin.isAnimatingLw();
-        final boolean rt = show ? mWin.showLw(true) : mWin.hideLw(true);
-        final int state = computeState(oldVis, oldAnim, mWin.isVisibleLw(), mWin.isAnimatingLw());
-        if (state > -1 && mWin.hasDrawnLw()) {
-            updateState(state);
+        final boolean wasVis = mWin.isVisibleLw();
+        final boolean wasAnim = mWin.isAnimatingLw();
+        final boolean change = show ? mWin.showLw(true) : mWin.hideLw(true);
+        final int state = computeStateLw(wasVis, wasAnim, mWin, change);
+        updateStateLw(state);
+        return change;
+    }
+
+    private int computeStateLw(boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
+        if (win.hasDrawnLw()) {
+            final boolean vis = win.isVisibleLw();
+            final boolean anim = win.isAnimatingLw();
+            if (mState == StatusBarManager.WINDOW_STATE_HIDING && !change && !vis) {
+                return StatusBarManager.WINDOW_STATE_HIDDEN;
+            } else if (change) {
+                if (wasVis && vis && !wasAnim && anim) {
+                    return StatusBarManager.WINDOW_STATE_HIDING;
+                } else {
+                    return StatusBarManager.WINDOW_STATE_SHOWING;
+                }
+            }
         }
-        return rt;
+        return mState;
     }
 
-    private int computeState(boolean oldVis, boolean oldAnim, boolean newVis, boolean newAnim) {
-        return (!newVis && !newAnim) ? StatusBarManager.WINDOW_STATE_HIDDEN
-                : (!oldVis && newVis && newAnim) ? StatusBarManager.WINDOW_STATE_SHOWING
-                : (oldVis && newVis && !oldAnim && newAnim) ? StatusBarManager.WINDOW_STATE_HIDING
-                : -1;
-    }
-
-    private void updateState(final int state) {
+    private void updateStateLw(final int state) {
         if (state != mState) {
             mState = state;
             if (DEBUG) Slog.d(mTag, "mState: " + StatusBarManager.windowStateToString(state));
@@ -148,7 +156,7 @@ public class BarController {
     public boolean checkHiddenLw() {
         if (mWin != null && mWin.hasDrawnLw()) {
             if (!mWin.isVisibleLw() && !mWin.isAnimatingLw()) {
-                updateState(StatusBarManager.WINDOW_STATE_HIDDEN);
+                updateStateLw(StatusBarManager.WINDOW_STATE_HIDDEN);
             }
             if (mTransientBarState == TRANSIENT_BAR_HIDING && !mWin.isVisibleLw()) {
                 // Finished animating out, clean up and reset style
