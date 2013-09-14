@@ -161,15 +161,21 @@ public class RootInfo implements Durable, Parcelable {
 
         // TODO: remove these special case icons
         if ("com.android.externalstorage.documents".equals(authority)) {
-            derivedIcon = R.drawable.ic_root_sdcard;
+            if ("documents".equals(rootId)) {
+                derivedIcon = R.drawable.ic_doc_text;
+            } else {
+                derivedIcon = R.drawable.ic_root_sdcard;
+            }
         }
         if ("com.android.providers.downloads.documents".equals(authority)) {
             derivedIcon = R.drawable.ic_root_download;
         }
         if ("com.android.providers.media.documents".equals(authority)) {
-            if ("image".equals(rootId)) {
+            if ("images_root".equals(rootId)) {
                 derivedIcon = R.drawable.ic_doc_image;
-            } else if ("audio".equals(rootId)) {
+            } else if ("videos_root".equals(rootId)) {
+                derivedIcon = R.drawable.ic_doc_video;
+            } else if ("audio_root".equals(rootId)) {
                 derivedIcon = R.drawable.ic_doc_audio;
             }
         }

@@ -188,10 +188,6 @@ public class DocumentInfo implements Durable, Parcelable {
         return (flags & Document.FLAG_DIR_SUPPORTS_CREATE) != 0;
     }
 
-    public boolean isSearchSupported() {
-        return (flags & Document.FLAG_DIR_SUPPORTS_SEARCH) != 0;
-    }
-
     public boolean isThumbnailSupported() {
         return (flags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
     }

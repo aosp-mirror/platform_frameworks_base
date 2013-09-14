@@ -62,7 +62,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
         public String rootId;
         public int rootType;
         public int flags;
-        public int icon;
         public String title;
         public String docId;
     }
@@ -85,10 +84,30 @@ public class ExternalStorageProvider extends DocumentsProvider {
             mIdToPath.put(rootId, path);
 
             final RootInfo root = new RootInfo();
-            root.rootId = "primary";
+            root.rootId = rootId;
             root.rootType = Root.ROOT_TYPE_DEVICE;
-            root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED;
+            root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
+                    | Root.FLAG_SUPPORTS_SEARCH;
             root.title = getContext().getString(R.string.root_internal_storage);
+            root.docId = getDocIdForFile(path);
+            mRoots.add(root);
+            mIdToRoot.put(rootId, root);
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+
+        try {
+            final String rootId = "documents";
+            final File path = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOCUMENTS);
+            mIdToPath.put(rootId, path);
+
+            final RootInfo root = new RootInfo();
+            root.rootId = rootId;
+            root.rootType = Root.ROOT_TYPE_SHORTCUT;
+            root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY
+                    | Root.FLAG_SUPPORTS_SEARCH;
+            root.title = getContext().getString(R.string.root_documents);
             root.docId = getDocIdForFile(path);
             mRoots.add(root);
             mIdToRoot.put(rootId, root);
@@ -146,6 +165,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
         if (target == null) {
             throw new FileNotFoundException("No root for " + tag);
         }
+        if (!target.exists()) {
+            target.mkdirs();
+        }
         target = new File(target, path);
         if (!target.exists()) {
             throw new FileNotFoundException("Missing file for " + docId + " at " + target);
@@ -163,9 +185,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
         int flags = 0;
 
-        if (file.isDirectory()) {
-            flags |= Document.FLAG_DIR_SUPPORTS_SEARCH;
-        }
         if (file.isDirectory() && file.canWrite()) {
             flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
         }
@@ -200,7 +219,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
             row.add(Root.COLUMN_ROOT_ID, root.rootId);
             row.add(Root.COLUMN_ROOT_TYPE, root.rootType);
             row.add(Root.COLUMN_FLAGS, root.flags);
-            row.add(Root.COLUMN_ICON, root.icon);
             row.add(Root.COLUMN_TITLE, root.title);
             row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
             row.add(Root.COLUMN_AVAILABLE_BYTES, path.getFreeSpace());
@@ -260,10 +278,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public Cursor querySearchDocuments(String parentDocumentId, String query, String[] projection)
+    public Cursor querySearchDocuments(String rootId, String query, String[] projection)
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
-        final File parent = getFileForDocId(parentDocumentId);
+        final File parent = mIdToPath.get(rootId);
 
         final LinkedList<File> pending = new LinkedList<File>();
         pending.add(parent);

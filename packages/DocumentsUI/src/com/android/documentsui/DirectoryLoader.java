@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
@@ -41,6 +42,8 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 
 import libcore.io.IoUtils;
+
+import java.io.FileNotFoundException;
 
 class DirectoryResult implements AutoCloseable {
     ContentProviderClient client;
@@ -64,7 +67,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
     private final int mType;
     private final RootInfo mRoot;
-    private final DocumentInfo mDoc;
+    private DocumentInfo mDoc;
     private final Uri mUri;
     private final int mUserSortOrder;
 
@@ -96,6 +99,19 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         final DirectoryResult result = new DirectoryResult();
 
         int userMode = State.MODE_UNKNOWN;
+
+        // Use default document when searching
+        if (mType == DirectoryFragment.TYPE_SEARCH) {
+            final Uri docUri = DocumentsContract.buildDocumentUri(
+                    mRoot.authority, mRoot.documentId);
+            try {
+                mDoc = DocumentInfo.fromUri(resolver, docUri);
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Failed to query", e);
+                result.exception = e;
+                return result;
+            }
+        }
 
         // Pick up any custom modes requested by user
         Cursor cursor = null;
@@ -157,7 +173,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
             result.cursor = cursor;
         } catch (Exception e) {
-            Log.d(TAG, "Failed to query", e);
+            Log.w(TAG, "Failed to query", e);
             result.exception = e;
             ContentProviderClient.closeQuietly(result.client);
         } finally {

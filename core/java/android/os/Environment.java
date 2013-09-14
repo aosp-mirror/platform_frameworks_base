@@ -460,7 +460,13 @@ public class Environment {
      * top-level public directory, as this convention makes no sense elsewhere.
      */
     public static String DIRECTORY_DCIM = "DCIM";
-    
+
+    /**
+     * Standard directory in which to place documents that have been created by
+     * the user.
+     */
+    public static String DIRECTORY_DOCUMENTS = "Documents";
+
     /**
      * Get a top-level public external storage directory for placing files of
      * a particular type.  This is where the user will typically place and
