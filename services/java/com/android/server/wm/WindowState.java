@@ -1142,6 +1142,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // we allow the display to be enabled now.
             mService.enableScreenIfNeededLocked();
             if (mService.mCurrentFocus == this) {
+                if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                        "WindowState.hideLw: setting mFocusMayChange true");
                 mService.mFocusMayChange = true;
             }
         }

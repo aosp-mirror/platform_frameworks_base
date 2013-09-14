@@ -160,6 +160,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
     static final boolean DEBUG_FOCUS = false;
+    static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || true;
     static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_RESIZE = false;
@@ -921,7 +922,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     //apptoken note that the window could be a floating window
                     //that was created later or a window at the top of the list of
                     //windows associated with this token.
-                    if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                    if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
                             "Adding window " + win + " at " + (newIdx + 1) + " of " + N);
                     windows.add(newIdx + 1, win);
                     if (newIdx < 0) {
@@ -1042,7 +1043,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
             }
         }
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+        if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
                 "Adding window " + win + " at " + i + " of " + N);
         windows.add(i, win);
         mWindowsChanged = true;
@@ -1061,7 +1062,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         i++;
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+        if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
                 "Adding window " + win + " at " + i + " of " + windows.size());
         windows.add(i, win);
         mWindowsChanged = true;
@@ -2353,7 +2354,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void removeWindowLocked(Session session, WindowState win) {
 
-        if (localLOGV || DEBUG_FOCUS) Slog.v(
+        if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && win==mCurrentFocus) Slog.v(
             TAG, "Remove " + win + " client="
             + Integer.toHexString(System.identityHashCode(win.mClient.asBinder()))
             + ", surface=" + win.mWinAnimator.mSurfaceControl,
@@ -3771,7 +3772,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             boolean changed = false;
             if (token == null) {
-                if (DEBUG_FOCUS) Slog.v(TAG, "Clearing focused app, was " + mFocusedApp);
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "Clearing focused app, was " + mFocusedApp);
                 changed = mFocusedApp != null;
                 mFocusedApp = null;
                 if (changed) {
@@ -3784,9 +3785,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 changed = mFocusedApp != newFocus;
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "Set focused app to: " + newFocus
+                        + " old focus=" + mFocusedApp + " moveFocusNow=" + moveFocusNow);
                 mFocusedApp = newFocus;
-                if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp
-                        + " moveFocusNow=" + moveFocusNow);
                 if (changed) {
                     mInputMonitor.setFocusedAppLw(newFocus);
                 }
@@ -4508,7 +4509,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 unsetAppFreezingScreenLocked(wtoken, true, true);
                 if (mFocusedApp == wtoken) {
-                    if (DEBUG_FOCUS) Slog.v(TAG, "Removing focused app token:" + wtoken);
+                    if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "Removing focused app token:" + wtoken);
                     mFocusedApp = null;
                     updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
                     mInputMonitor.setFocusedAppLw(null);
@@ -7070,8 +7071,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             return;
                         }
                         mLastFocus = newFocus;
-                        //Slog.i(TAG, "Focus moving from " + lastFocus
-                        //        + " to " + newFocus);
+                        if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Focus moving from " + lastFocus +
+                                " to " + newFocus);
                         if (newFocus != null && lastFocus != null
                                 && !newFocus.isDisplayedLw()) {
                             //Slog.i(TAG, "Delaying loss of focus...");
@@ -7084,13 +7085,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         //System.out.println("Changing focus from " + lastFocus
                         //                   + " to " + newFocus);
                         if (newFocus != null) {
-                            //Slog.i(TAG, "Gaining focus: " + newFocus);
+                            if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Gaining focus: " + newFocus);
                             newFocus.reportFocusChangedSerialized(true, mInTouchMode);
                             notifyFocusChanged();
                         }
 
                         if (lastFocus != null) {
-                            //Slog.i(TAG, "Losing focus: " + lastFocus);
+                            if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Losing focus: " + lastFocus);
                             lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
                         }
                     }
@@ -7106,7 +7107,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     final int N = losers.size();
                     for (int i=0; i<N; i++) {
-                        //Slog.i(TAG, "Losing delayed focus: " + losers.get(i));
+                        if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Losing delayed focus: " +
+                                losers.get(i));
                         losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
                     }
                 } break;
@@ -9709,7 +9711,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 newFocus = computeFocusedWindowLocked();
             }
 
-            if (localLOGV) Slog.v(
+            if (DEBUG_FOCUS_LIGHT || localLOGV) Slog.v(
                 TAG, "Changing focus from " + mCurrentFocus + " to " + newFocus);
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
@@ -9816,10 +9818,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     tokens = tasks.get(taskNdx).mAppTokens;
                     for ( ; tokenNdx >= 0; --tokenNdx) {
                         if (nextApp == mFocusedApp) {
-                            // Whoops, we are below the focused app...  no focus
-                            // for you!
+                            // Whoops, we are below the focused app...  no focus for you!
                             if (localLOGV || DEBUG_FOCUS) Slog.v(
-                                TAG, "Reached focused app: " + mFocusedApp);
+                                TAG, "findFocusedWindow: Reached focused app=" + mFocusedApp);
                             return null;
                         }
                         nextApp = tokens.get(tokenNdx);
@@ -9844,11 +9845,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Dispatch to this window if it is wants key events.
             if (win.canReceiveKeys()) {
-                if (DEBUG_FOCUS) Slog.v(
-                        TAG, "Found focus @ " + i + " = " + win);
+                if (DEBUG_FOCUS_LIGHT) Slog.v(
+                        TAG, "findFocusedWindow: Found new focus @ " + i + " = " + win);
                 return win;
             }
         }
+        if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: No focusable windows.");
         return null;
     }
 
