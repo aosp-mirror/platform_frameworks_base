@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Il est possible que le réseau soit surveillé."</string>
-    <string name="done_button" msgid="1759387181766603361">"OK"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Surveillance du réseau"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Cet appareil est géré par <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nVotre administrateur a la possibilité de surveiller votre activité sur le réseau, y compris les e-mails, les applications et les sites Web sécurisés.\n\nPour en savoir plus, veuillez contacter votre administrateur."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Il est possible qu\'un tiers surveille votre activité sur le réseau,\ny compris les e-mails, les applications et les sites Web sécurisés.\n\nCela est dû à la présence d\'un certificat de confiance installé sur votre appareil."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Vérifier les certificats de confiance"</string>
 </resources>

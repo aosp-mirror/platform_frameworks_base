@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Svetlost"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SAMODEJNO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Omrežje je lahko nadzorovano"</string>
-    <string name="done_button" msgid="1759387181766603361">"Dokončano"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Nadzor omrežja"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"To napravo upravlja: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nSkrbnik lahko nadzoruje vašo omrežno dejavnost, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti.\n\nZa več informacij se obrnite na skrbnika."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Vašo omrežno dejavnost, vključno z e-pošto, aplikacijami\nin varnimi spletnimi mesti, lahko nadzira tretja oseba.\n\nTo omogoča zaupanja vredna poverilnica, nameščena v vaši napravi."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Preveri zaupanja vredne poverilnice"</string>
 </resources>

@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Jas"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Síť může být monitorována"</string>
-    <string name="done_button" msgid="1759387181766603361">"Hotovo"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Monitorování sítě"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Toto zařízení je spravováno doménou <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nSprávce může monitorovat aktivitu v síti, včetně e-mailů, aplikací a zabezpečených webů.\n\nChcete-li získat další informace, kontaktujte svého správce."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Vaše aktivita v síti, včetně e-mailů, aplikací a zabezpečených\nwebových stránek může být monitorována třetí stranou.\n\nUmožňují to důvěryhodné identifikační údaje nainstalované ve vašem zařízení."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Zkontrolovat důvěryhodné identifikační údaje"</string>
 </resources>

@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helderheid"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATISCH"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan worden gecontroleerd"</string>
-    <string name="done_button" msgid="1759387181766603361">"Gereed"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Netwerkcontrole"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Dit apparaat wordt beheerd door: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nUw beheerder kan uw netwerkactiviteit controleren, waaronder e-mails, apps en beveiligde websites.\n\nNeem contact op met uw beheerder voor meer informatie."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Een derde partij kan uw netwerkactiviteit\ncontroleren, waaronder e-mails, apps en beveiligde websites.\n\nDit wordt mogelijk gemaakt door vertrouwde inloggegevens die zijn geïnstalleerd op uw apparaat."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Vertrouwde inloggegevens controleren"</string>
 </resources>

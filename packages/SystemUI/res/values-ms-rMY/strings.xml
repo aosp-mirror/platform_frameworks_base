@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Kecerahan"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Rangkaian mungkin dipantau"</string>
-    <string name="done_button" msgid="1759387181766603361">"Selesai"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Pemantauan Rangkaian"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Peranti ini diuruskan oleh: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nPentadbir anda boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web selamat.\n\nUntuk maklumat lanjut, hubungi pentadbir anda."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Pihak ketiga boleh memantau aktiviti \nrangkaian anda, termasuk e-mel, apl dan tapak web selamat.\n\nBukti kelayakan dipercayai yang dipasang pada peranti anda membolehkan perkara ini."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Semak bukti kelayakan dipercayai"</string>
 </resources>

@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"網絡可能會受到監控"</string>
-    <string name="done_button" msgid="1759387181766603361">"完成"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"網絡監控"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"這部裝置由下列網域管理：<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>。\n\n您的管理員可以監控您的網絡活動，包括收發電郵、使用應用程式及瀏覽安全網站。\n\n詳情請與您的管理員聯絡。"</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"第三方可以監察您的網絡活動，\n包括收發電郵、使用應用程式及瀏覽安全網站。\n\n當裝置安裝了信任的憑證，便可能會出現這種情況。"</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"檢查信任的憑證"</string>
 </resources>
