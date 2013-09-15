@@ -178,6 +178,14 @@ public abstract class PrintService extends Service {
      * For detailed configuration options that can be specified via the meta-data
      * refer to {@link android.R.styleable#PrintService android.R.styleable.PrintService}.
      * </p>
+     * <p>
+     * If you declare a settings or add a printers activity, they have to be exported,
+     * by setting the {@link android.R.attr#exported} activity attribute to <code>true
+     * </code>. Also in case you want only the system to be able to start any of these
+     * activities you can specify that they request the android.permission
+     * .START_PRINT_SERVICE_CONFIG_ACTIVITY permission by setting the
+     * {@link android.R.attr#permission} activity attribute.
+     * </p>
      */
     public static final String SERVICE_META_DATA = "android.printservice";
 
