@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркост"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТ."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежата може да се наблюдава"</string>
-    <string name="done_button" msgid="1759387181766603361">"Готово"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Наблюдение на мрежата"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Това устройство се управлява от: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nАдминистраторът ви може да наблюдава активността ви в мрежата, включително имейлите, приложенията и сигурните уебсайтове.\n\nЗа повече информация се свържете с него."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Трета страна може да наблюдава активността ви в\nмрежата, включително имейлите, приложенията и сигурните уебсайтове.\n\nТова е възможно благодарение на инсталирани на устройството ви надеждни идентификационни данни."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Проверка на надеждните идентификационни данни"</string>
 </resources>

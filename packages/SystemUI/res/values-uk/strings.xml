@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яскравість"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мережу можуть відстежувати"</string>
-    <string name="done_button" msgid="1759387181766603361">"Готово"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Відстеження мережі"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Цим пристроєм керує домен <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nАдміністратор може відстежувати ваші дії в мережі, зокрема електронне листування, роботу в програмах і на захищених веб-сайтах.\n\nЩоб дізнатися більше, зверніться до свого адміністратора."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Третя сторона може відстежувати ваші дії в\nмережі, зокрема електронне листування, роботу в програмах і на захищених веб-сайтах, за допомогою надійних облікових даних, установлених на вашому пристрої.\n\n"</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Переглянути надійні облікові дані"</string>
 </resources>

@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"განათება"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ავტომატურად"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"შესაძლოა ქსელი მონიტორინგის ქვეშ იმყოფება"</string>
-    <string name="done_button" msgid="1759387181766603361">"დასრულდა"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ქსელის მონიტორინგი"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"თქვენ მოწყობილობის მმართველი არის: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nთქვენს ადმინისტრატოს შეუძლია განახორციელოს თქვენი ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტების, აპების და უსაფრთხო ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"მესამე მხარეს შეუძლია განახორციელოდს თქვენი ქსელის \nაქტივობა, მათ შორის ელფოსტები, აპები და უსაფრთხო ვებსაიტები.\n\nეს შესაძლებელია თქვენს მოწყობილობაზე დაყენებული სანდო ავთენტიკაციის მონაცემების საშუალებით."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"სანდო ავთენტიკაციის მონაცემების შემოწმება"</string>
 </resources>

@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"网络可能会受到监控"</string>
-    <string name="done_button" msgid="1759387181766603361">"完成"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"网络监控"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"此设备由以下企业域管理：<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>。\n\n您的管理员可以监控您的网络活动，包括收发电子邮件、使用应用和浏览安全网站。\n\n如要了解详情，请与您的管理员联系。"</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"第三方可以监控您的网络活动，包括\n收发电子邮件、使用应用和浏览安全网站。\n\n如果您在设备上安装受信任的凭据，就可能出现这种情况。"</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"查看受信任的凭据"</string>
 </resources>

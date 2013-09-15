@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÁTICO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada."</string>
-    <string name="done_button" msgid="1759387181766603361">"Listo"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Supervisión de red"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Este dispositivo es administrado por: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nEl administrador puede supervisar la actividad de la red, incluidos los mensajes de correo electrónico, las aplicaciones y los sitios web seguros.\n\nPara obtener más información, comunícate con el administrador."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Un tercero puede supervisar la actividad de la red,\nincluidos los mensajes de correo electrónico, las aplicaciones y los sitios web seguros.\n\nEsto es posible debido a que hay una credencial de confianza instalada en el dispositivo."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Comprobar credenciales de confianza"</string>
 </resources>

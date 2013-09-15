@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Kirkkaus"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Verkkoa saatetaan valvoa"</string>
-    <string name="done_button" msgid="1759387181766603361">"Valmis"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Verkon valvonta"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Tämän laitteen hallinnoija: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nJärjestelmänvalvoja pystyy valvomaan toimiasi verkossa, esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Kolmas osapuoli pystyy valvomaan toimiasi verkossa,\n esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä.\n\nLaitteeseesi asennetut luotetut käyttöoikeustiedot tekevät tämän mahdolliseksi."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Tarkista luotetut käyttöoikeustiedot"</string>
 </resources>
