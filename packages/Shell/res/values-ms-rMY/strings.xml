@@ -16,9 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="3701846017049540910">"Prostředí"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Byla vytvořena zpráva o chybě"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Zprávu o chybě můžete sdílet klepnutím."</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Chybová hlášení obsahují data z různých souborů protokolů systému včetně osobních a soukromých informací. Chybová hlášení sdílejte pouze s aplikacemi a uživateli, kterým důvěřujete."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Zobrazit tuto zprávu příště"</string>
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Laporan pepijat telah ditangkap"</string>
+    <string name="bugreport_finished_text" msgid="3559904746859400732">"Sentuh untuk berkongsi laporan pepijat anda"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"Laporan pepijat mengandungi data dari pelbagai fail log sistem, termasuk maklumat peribadi dan sulit. Kongsikan laporan pepijat hanya dengan apl dan orang yang anda percayai."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Tunjukkan mesej ini pada masa akan datang"</string>
 </resources>
