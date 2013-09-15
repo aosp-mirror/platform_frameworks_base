@@ -131,6 +131,11 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Pārāk daudz <xliff:g id="CONTENT_TYPE">%s</xliff:g> dzēsto vienumu."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planšetdatora atmiņa ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Tālruņa atmiņa ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Iespējams, tīklā veiktās darbības tiek pārraudzītas."</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Tālruņa opcijas"</string>
