@@ -22,6 +22,7 @@ import android.print.IPrintClient;
 import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
+import android.printservice.PrintServiceInfo;
 
 /**
  * Interface for communication with the core print manager service.
@@ -36,6 +37,8 @@ interface IPrintManager {
             int appId, int userId);
     void cancelPrintJob(int printJobId, int appId, int userId);
     void restartPrintJob(int printJobId, int appId, int userId);
+
+    List<PrintServiceInfo> getEnabledPrintServices(int userId);
 
     void createPrinterDiscoverySession(in IPrinterDiscoveryObserver observer, int userId);
     void startPrinterDiscovery(in IPrinterDiscoveryObserver observer,
