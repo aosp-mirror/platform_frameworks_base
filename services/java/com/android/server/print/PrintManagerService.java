@@ -35,6 +35,7 @@ import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
+import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -187,6 +188,22 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 return;
             }
             spooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+
+    @Override
+    public List<PrintServiceInfo> getEnabledPrintServices(int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return userState.getEnabledPrintServices();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

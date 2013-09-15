@@ -145,4 +145,12 @@
     <string name="permdesc_accessAllPrintJobs">Allows the holder to access print jobs
         created by another app. Should never be needed for normal apps.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want
+         to allow the application to do this. -->
+    <string name="permlab_startPrintServiceConfigActivity">start print service configuration activities</string>
+    <!-- Description of an application permission, listed so the user can choose whether they
+         want to allow the application to do this. -->
+    <string name="permdesc_startPrintServiceConfigActivity">Allows the holder to start the
+        configuration activities of a print service. Should never be needed for normal apps.</string>
+
 </resources>

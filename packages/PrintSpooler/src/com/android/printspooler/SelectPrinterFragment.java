@@ -24,20 +24,26 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.print.PrintManager;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,6 +64,8 @@ import java.util.List;
  * This is a fragment for selecting a printer.
  */
 public final class SelectPrinterFragment extends ListFragment {
+
+    private static final String LOG_TAG = "SelectPrinterFragment";
 
     private static final int LOADER_ID_PRINTERS_LOADER = 1;
 
@@ -142,40 +150,45 @@ public final class SelectPrinterFragment extends ListFragment {
     private void updateAddPrintersAdapter() {
         mAddPrinterServices.clear();
 
-        // Get all print services.
-        List<ResolveInfo> resolveInfos = getActivity().getPackageManager().queryIntentServices(
-                new Intent(android.printservice.PrintService.SERVICE_INTERFACE),
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+        // Get all enabled print services.
+        PrintManager printManager = (PrintManager) getActivity()
+                .getSystemService(Context.PRINT_SERVICE);
+        List<PrintServiceInfo> enabledServices = printManager.getEnabledPrintServices();
 
-        // No print services - done.
-        if (resolveInfos.isEmpty()) {
+        // No enabled print services - done.
+        if (enabledServices.isEmpty()) {
             return;
         }
 
         // Find the services with valid add printers activities.
-        final int resolveInfoCount = resolveInfos.size();
-        for (int i = 0; i < resolveInfoCount; i++) {
-            ResolveInfo resolveInfo = resolveInfos.get(i);
-
-            PrintServiceInfo printServiceInfo = PrintServiceInfo.create(
-                    resolveInfo, getActivity());
-            String addPrintersActivity = printServiceInfo.getAddPrintersActivityName();
+        final int enabledServiceCount = enabledServices.size();
+        for (int i = 0; i < enabledServiceCount; i++) {
+            PrintServiceInfo enabledService = enabledServices.get(i);
 
             // No add printers activity declared - done.
-            if (TextUtils.isEmpty(addPrintersActivity)) {
+            if (TextUtils.isEmpty(enabledService.getAddPrintersActivityName())) {
                 continue;
             }
 
+            ServiceInfo serviceInfo = enabledService.getResolveInfo().serviceInfo;
             ComponentName addPrintersComponentName = new ComponentName(
-                    resolveInfo.serviceInfo.packageName,
-                    addPrintersActivity);
-            Intent addPritnersIntent = new Intent(Intent.ACTION_MAIN)
+                    serviceInfo.packageName, enabledService.getAddPrintersActivityName());
+            Intent addPritnersIntent = new Intent()
                 .setComponent(addPrintersComponentName);
 
             // The add printers activity is valid - add it.
-            if (!getActivity().getPackageManager().queryIntentActivities(
-                    addPritnersIntent, 0).isEmpty()) {
-                mAddPrinterServices.add(printServiceInfo);
+            PackageManager pm = getActivity().getPackageManager();
+            List<ResolveInfo> resolvedActivities = pm.queryIntentActivities(addPritnersIntent, 0);
+            if (!resolvedActivities.isEmpty()) {
+                // The activity is a component name, therefore it is one or none.
+                ActivityInfo activityInfo = resolvedActivities.get(0).activityInfo;
+                if (activityInfo.exported
+                        && (activityInfo.permission == null
+                                || pm.checkPermission(activityInfo.permission,
+                                        getActivity().getPackageName())
+                                        == PackageManager.PERMISSION_GRANTED)) {
+                    mAddPrinterServices.add(enabledService);
+                }
             }
         }
     }
@@ -228,7 +241,11 @@ public final class SelectPrinterFragment extends ListFragment {
                             printService.getAddPrintersActivityName());
                     Intent intent = new Intent(Intent.ACTION_MAIN);
                     intent.setComponent(componentName);
-                    startActivity(intent);
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException anfe) {
+                        Log.w(LOG_TAG, "Couldn't start settings activity", anfe);
+                    }
                 }
             });
 
@@ -238,7 +255,11 @@ public final class SelectPrinterFragment extends ListFragment {
                 builder.setPositiveButton(R.string.search_play_store,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            startActivity(marketIntent);
+                            try {
+                                startActivity(marketIntent);
+                            } catch (ActivityNotFoundException anfe) {
+                                Log.w(LOG_TAG, "Couldn't start add printer activity", anfe);
+                            }
                         }
                     });
             }
