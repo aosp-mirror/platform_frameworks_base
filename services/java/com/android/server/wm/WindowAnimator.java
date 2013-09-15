@@ -293,6 +293,8 @@ public class WindowAnimator {
                                 // We are showing on to of the current
                                 // focus, so re-evaluate focus to make
                                 // sure it is correct.
+                                if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.v(TAG,
+                                        "updateWindowsLocked: setting mFocusMayChange true");
                                 mService.mFocusMayChange = true;
                             }
                         }
