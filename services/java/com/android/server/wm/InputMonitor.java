@@ -345,7 +345,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
         mService.mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
     }
-    
+
     /* Provides an opportunity for the window manager policy to intercept early key
      * processing as soon as the key has been read from the device. */
     @Override
@@ -370,7 +370,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
         return mService.mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
     }
-    
+
     /* Provides an opportunity for the window manager policy to process a key that
      * the application did not handle. */
     @Override
@@ -392,7 +392,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      * Layer assignment is assumed to be complete by the time this is called.
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
-        if (WindowManagerService.DEBUG_INPUT) {
+        if (WindowManagerService.DEBUG_FOCUS_LIGHT || WindowManagerService.DEBUG_INPUT) {
             Slog.d(WindowManagerService.TAG, "Input focus has changed to " + newWindow);
         }
 
@@ -412,7 +412,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
         }
     }
-    
+
     public void setFocusedAppLw(AppWindowToken newApp) {
         // Focused app has changed.
         if (newApp == null) {
@@ -425,7 +425,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             mService.mInputManager.setFocusedApplication(handle);
         }
     }
-    
+
     public void pauseDispatchingLw(WindowToken window) {
         if (! window.paused) {
             if (WindowManagerService.DEBUG_INPUT) {
