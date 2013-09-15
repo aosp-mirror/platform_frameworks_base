@@ -340,6 +340,8 @@ class WindowStateAnimator {
             mWin.mDisplayContent.layoutNeeded = true;
             if (!mWin.mPolicyVisibility) {
                 if (mService.mCurrentFocus == mWin) {
+                    if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                            "setAnimationLocked: setting mFocusMayChange true");
                     mService.mFocusMayChange = true;
                 }
                 // Window is no longer visible -- make sure if we were waiting
