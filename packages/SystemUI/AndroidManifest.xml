@@ -189,6 +189,35 @@
             android:taskAffinity="com.android.systemui.net"
             android:excludeFromRecents="true" />
 
+        <!-- platform logo easter egg activity -->
+        <activity
+            android:name=".DessertCase"
+            android:exported="true"
+            android:label="@string/dessert_case"
+            android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.android.internal.category.PLATLOGO" />
+            </intent-filter>
+        </activity>
+
+        <!-- a gallery of delicious treats -->
+        <service
+            android:name=".DessertCaseDream"
+            android:exported="true"
+            android:label="@string/dessert_case"
+            android:enabled="false"
+            >
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"
