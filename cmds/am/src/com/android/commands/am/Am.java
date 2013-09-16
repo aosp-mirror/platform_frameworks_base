@@ -100,6 +100,7 @@ public class Am extends BaseCommand {
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
                 "       am restart\n" +
+                "       am idle-maintenance\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
@@ -188,6 +189,8 @@ public class Am extends BaseCommand {
                 "    --allow-restart: allow watchdog to perform normal system restart\n" +
                 "\n" +
                 "am restart: restart the user-space system.\n" +
+                "\n" +
+                "am idle-maintenance: perform idle maintenance now.\n" +
                 "\n" +
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
@@ -295,6 +298,8 @@ public class Am extends BaseCommand {
             runHang();
         } else if (op.equals("restart")) {
             runRestart();
+        } else if (op.equals("idle-maintenance")) {
+            runIdleMaintenance();
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
         } else if (op.equals("to-uri")) {
@@ -1391,6 +1396,20 @@ public class Am extends BaseCommand {
 
         System.out.println("Restart the system...");
         mAm.restart();
+    }
+
+    private void runIdleMaintenance() throws Exception {
+        String opt;
+        while ((opt=nextOption()) != null) {
+            System.err.println("Error: Unknown option: " + opt);
+            return;
+        }
+
+        System.out.println("Performing idle maintenance...");
+        Intent intent = new Intent(
+                "com.android.server.IdleMaintenanceService.action.FORCE_IDLE_MAINTENANCE");
+        mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
+                android.app.AppOpsManager.OP_NONE, true, false, UserHandle.USER_ALL);
     }
 
     private void runScreenCompat() throws Exception {

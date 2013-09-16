@@ -66,6 +66,8 @@ final class ProcessRecord {
     long lastPssTime;           // Last time we retrieved PSS data
     long nextPssTime;           // Next time we want to request PSS data
     long lastStateTime;         // Last time setProcState changed
+    long initialIdlePss;        // Initial memory pss of process for idle maintenance.
+    long lastPss;               // Last computed memory pss.
     int maxAdj;                 // Maximum OOM adjustment for this process
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
@@ -82,6 +84,7 @@ final class ProcessRecord {
     boolean serviceb;           // Process currently is on the service B list
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
+    boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
     boolean hasActivities;      // Are there any activities running in this process?
     boolean hasClientActivities;  // Are there any client services with activities?
     boolean hasStartedServices; // Are there any started services running in this process?
@@ -92,7 +95,7 @@ final class ProcessRecord {
     boolean pendingUiClean;     // Want to clean up resources from showing UI?
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
     boolean bad;                // True if disabled in the bad process list
-    boolean killedBackground;   // True when proc has been killed due to too many bg
+    boolean killedByAm;         // True when proc has been killed by activity manager, not for RAM
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     String waitingToKill;       // Process is waiting to be killed when in the bg; reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
@@ -216,6 +219,11 @@ final class ProcessRecord {
                 pw.print(" keeping="); pw.print(keeping);
                 pw.print(" cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
+        if (notCachedSinceIdle) {
+            pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(notCachedSinceIdle);
+                    pw.print(" initialIdlePss="); pw.print(initialIdlePss);
+                    pw.print(" lastPss="); pw.println(lastPss);
+        }
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
                 pw.print(" curRaw="); pw.print(curRawAdj);
                 pw.print(" setRaw="); pw.print(setRawAdj);
@@ -280,8 +288,8 @@ final class ProcessRecord {
                 pw.print(" lastLowMemory=");
                 TimeUtils.formatDuration(lastLowMemory, now, pw);
                 pw.print(" reportLowMemory="); pw.println(reportLowMemory);
-        if (killedBackground || waitingToKill != null) {
-            pw.print(prefix); pw.print("killedBackground="); pw.print(killedBackground);
+        if (killedByAm || waitingToKill != null) {
+            pw.print(prefix); pw.print("killedByAm="); pw.print(killedByAm);
                     pw.print(" waitingToKill="); pw.println(waitingToKill);
         }
         if (debugging || crashing || crashDialog != null || notResponding

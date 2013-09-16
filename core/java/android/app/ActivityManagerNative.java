@@ -1995,6 +1995,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeParcelableArray(uris, 0);
             return true;
         }
+
+        case PERFORM_IDLE_MAINTENANCE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            performIdleMaintenance();
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -4576,6 +4583,16 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return uris;
+    }
+
+    public void performIdleMaintenance() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(PERFORM_IDLE_MAINTENANCE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     private IBinder mRemote;
