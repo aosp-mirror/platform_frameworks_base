@@ -16,20 +16,19 @@
 
 package android.media;
 
-import android.graphics.ImageFormat;
 import java.nio.ByteBuffer;
 import java.lang.AutoCloseable;
 
 /**
  * <p>A single complete image buffer to use with a media source such as a
  * {@link MediaCodec} or a
- * {@link android.hardware.camera2.CameraDevice}.</p>
+ * {@link android.hardware.camera2.CameraDevice CameraDevice}.</p>
  *
  * <p>This class allows for efficient direct application access to the pixel
  * data of the Image through one or more
  * {@link java.nio.ByteBuffer ByteBuffers}. Each buffer is encapsulated in a
  * {@link Plane} that describes the layout of the pixel data in that plane. Due
- * to this direct access, and unlike the {@link android.graphics.Bitmap} class,
+ * to this direct access, and unlike the {@link android.graphics.Bitmap Bitmap} class,
  * Images are not directly usable as as UI resources.</p>
  *
  * <p>Since Images are often directly produced or consumed by hardware
@@ -40,19 +39,29 @@ import java.lang.AutoCloseable;
  * from various media sources, not closing old Image objects will prevent the
  * availability of new Images once
  * {@link ImageReader#getMaxImages the maximum outstanding image count} is
- * reached.</p>
+ * reached. When this happens, the function acquiring new Images will typically
+ * throw a
+ * {@link ImageReader.MaxImagesAcquiredException MaxImagesAcquiredException}.</p>
  *
  * @see ImageReader
  */
-public interface Image extends AutoCloseable {
+public abstract class Image implements AutoCloseable {
+    /**
+     * @hide
+     */
+    protected Image() {
+    }
+
     /**
      * Get the format for this image. This format determines the number of
      * ByteBuffers needed to represent the image, and the general layout of the
      * pixel data in each in ByteBuffer.
      *
+     * <p>
      * The format is one of the values from
-     * {@link android.graphics.ImageFormat}. The mapping between the formats and
-     * the planes is as follows:
+     * {@link android.graphics.ImageFormat ImageFormat}. The mapping between the
+     * formats and the planes is as follows:
+     * </p>
      *
      * <table>
      * <tr>
@@ -61,13 +70,14 @@ public interface Image extends AutoCloseable {
      *   <th>Layout details</th>
      * </tr>
      * <tr>
-     *   <td>{@link android.graphics.ImageFormat#JPEG}</td>
+     *   <td>{@link android.graphics.ImageFormat#JPEG JPEG}</td>
      *   <td>1</td>
      *   <td>Compressed data, so row and pixel strides are 0. To uncompress, use
-     *      {@link android.graphics.BitmapFactory#decodeByteArray}.</td>
+     *      {@link android.graphics.BitmapFactory#decodeByteArray BitmapFactory#decodeByteArray}.
+     *   </td>
      * </tr>
      * <tr>
-     *   <td>{@link android.graphics.ImageFormat#YUV_420_888}</td>
+     *   <td>{@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}</td>
      *   <td>3</td>
      *   <td>A luminance plane followed by the Cb and Cr chroma planes.
      *     The chroma planes have half the width and height of the luminance
@@ -75,53 +85,60 @@ public interface Image extends AutoCloseable {
      *     Each plane has its own row stride and pixel stride.</td>
      * </tr>
      * <tr>
-     *   <td>{@link android.graphics.ImageFormat#RAW_SENSOR}</td>
+     *   <td>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</td>
      *   <td>1</td>
      *   <td>A single plane of raw sensor image data, with 16 bits per color
      *     sample. The details of the layout need to be queried from the source of
      *     the raw sensor data, such as
-     *     {@link android.hardware.camera2.CameraDevice}.
+     *     {@link android.hardware.camera2.CameraDevice CameraDevice}.
      *   </td>
      * </tr>
      * </table>
      *
      * @see android.graphics.ImageFormat
      */
-    public int getFormat();
+    public abstract int getFormat();
 
     /**
      * The width of the image in pixels. For formats where some color channels
      * are subsampled, this is the width of the largest-resolution plane.
      */
-    public int getWidth();
+    public abstract int getWidth();
 
     /**
      * The height of the image in pixels. For formats where some color channels
      * are subsampled, this is the height of the largest-resolution plane.
      */
-    public int getHeight();
+    public abstract int getHeight();
 
     /**
-     * Get the timestamp associated with this frame. The timestamp is measured
-     * in nanoseconds, and is monotonically increasing. However, the zero point
-     * and whether the timestamp can be compared against other sources of time
-     * or images depend on the source of this image.
+     * Get the timestamp associated with this frame.
+     * <p>
+     * The timestamp is measured in nanoseconds, and is monotonically
+     * increasing. However, the zero point and whether the timestamp can be
+     * compared against other sources of time or images depend on the source of
+     * this image.
+     * </p>
      */
-    public long getTimestamp();
+    public abstract long getTimestamp();
 
     /**
      * Get the array of pixel planes for this Image. The number of planes is
      * determined by the format of the Image.
      */
-    public Plane[] getPlanes();
+    public abstract Plane[] getPlanes();
 
     /**
-     * Free up this frame for reuse. After calling this method, calling any
-     * methods on this Image will result in an IllegalStateException, and
-     * attempting to read from ByteBuffers returned by an earlier
-     * {@code Plane#getBuffer} call will have undefined behavior.
+     * Free up this frame for reuse.
+     * <p>
+     * After calling this method, calling any methods on this {@code Image} will
+     * result in an {@link IllegalStateException}, and attempting to read from
+     * {@link ByteBuffer ByteBuffers} returned by an earlier
+     * {@link Plane#getBuffer} call will have undefined behavior.
+     * </p>
      */
-    public void close();
+    @Override
+    public abstract void close();
 
     /**
      * <p>A single color plane of image data.</p>
@@ -134,29 +151,41 @@ public interface Image extends AutoCloseable {
      *
      * @see #getFormat
      */
-    public interface Plane {
+    public static abstract class Plane {
         /**
-         * <p>The row stride for this color plane, in bytes.
+         * @hide
+         */
+        protected Plane() {
+        }
+
+        /**
+         * <p>The row stride for this color plane, in bytes.</p>
          *
          * <p>This is the distance between the start of two consecutive rows of
-         * pixels in the image.</p>
+         * pixels in the image. The row stride is always greater than 0.</p>
          */
-        public int getRowStride();
+        public abstract int getRowStride();
         /**
          * <p>The distance between adjacent pixel samples, in bytes.</p>
          *
          * <p>This is the distance between two consecutive pixel values in a row
          * of pixels. It may be larger than the size of a single pixel to
-         * account for interleaved image data or padded formats.</p>
+         * account for interleaved image data or padded formats.
+         * The pixel stride is always greater than 0.</p>
          */
-        public int getPixelStride();
+        public abstract int getPixelStride();
         /**
-         * <p>Get a set of direct {@link java.nio.ByteBuffer byte buffers}
+         * <p>Get a direct {@link java.nio.ByteBuffer ByteBuffer}
          * containing the frame data.</p>
+         *
+         * <p>In particular, the buffer returned will always have
+         * {@link java.nio.ByteBuffer#isDirect isDirect} return {@code true}, so
+         * the underlying data could be mapped as a pointer in JNI without doing
+         * any copies with {@code GetDirectBufferAddress}.</p>
          *
          * @return the byte buffer containing the image data for this plane.
          */
-        public ByteBuffer getBuffer();
+        public abstract ByteBuffer getBuffer();
     }
 
 }
