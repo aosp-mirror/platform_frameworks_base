@@ -172,10 +172,16 @@ public final class WifiService extends IWifiManager.Stub {
                 case WifiManager.CONNECT_NETWORK:
                 case WifiManager.SAVE_NETWORK: {
                     WifiConfiguration config = (WifiConfiguration) msg.obj;
-                    if (config.isValid()) {
+                    int networkId = msg.arg1;
+                    if (config != null && config.isValid()) {
+                        if (DBG) Slog.d(TAG, "Connect with config" + config);
+                        mWifiStateMachine.sendMessage(Message.obtain(msg));
+                    } else if (config == null
+                            && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
+                        if (DBG) Slog.d(TAG, "Connect with networkId" + networkId);
                         mWifiStateMachine.sendMessage(Message.obtain(msg));
                     } else {
-                        Slog.d(TAG, "ClientHandler.handleMessage ignoring msg=" + msg);
+                        Slog.e(TAG, "ClientHandler.handleMessage ignoring invalid msg=" + msg);
                         if (msg.what == WifiManager.CONNECT_NETWORK) {
                             replyFailed(msg, WifiManager.CONNECT_NETWORK_FAILED);
                         } else {
