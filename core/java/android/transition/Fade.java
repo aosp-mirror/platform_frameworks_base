@@ -91,6 +91,9 @@ public class Fade extends Visibility {
             return null;
         }
         final ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", startAlpha, endAlpha);
+        if (DBG) {
+            Log.d(LOG_TAG, "Created animator " + anim);
+        }
         if (listener != null) {
             anim.addListener(listener);
             anim.addPauseListener(listener);
@@ -146,12 +149,41 @@ public class Fade extends Visibility {
         final View endView = endValues.view;
         if (DBG) {
             View startView = (startValues != null) ? startValues.view : null;
-            Log.d(LOG_TAG, "Fade.onDisappear: startView, startVis, endView, endVis = " +
+            Log.d(LOG_TAG, "Fade.onAppear: startView, startVis, endView, endVis = " +
                     startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
         }
         // if alpha < 1, just fade it in from the current value
         if (endView.getAlpha() == 1.0f) {
             endView.setAlpha(0);
+            TransitionListener transitionListener = new TransitionListenerAdapter() {
+                boolean mCanceled = false;
+                float mPausedAlpha;
+
+                @Override
+                public void onTransitionCancel(Transition transition) {
+                    endView.setAlpha(1);
+                    mCanceled = true;
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    if (!mCanceled) {
+                        endView.setAlpha(1);
+                    }
+                }
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+                    mPausedAlpha = endView.getAlpha();
+                    endView.setAlpha(1);
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+                    endView.setAlpha(mPausedAlpha);
+                }
+            };
+            addListener(transitionListener);
         }
         return createAnimation(endView, endView.getAlpha(), 1, null);
     }
