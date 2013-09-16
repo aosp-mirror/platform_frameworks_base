@@ -70,7 +70,6 @@ public class PlatLogoActivity extends Activity {
         letter.setTextSize(300);
         letter.setTextColor(0xFFFFFFFF);
         letter.setGravity(Gravity.CENTER);
-        letter.setShadowLayer(12*metrics.density, 0, 0, 0xC085F985);
         letter.setText(String.valueOf(Build.VERSION.RELEASE).substring(0, 1));
 
         final int p = (int)(4 * metrics.density);
@@ -81,7 +80,6 @@ public class PlatLogoActivity extends Activity {
         tv.setPadding(p, p, p, p);
         tv.setTextColor(0xFFFFFFFF);
         tv.setGravity(Gravity.CENTER);
-        tv.setShadowLayer(4 * metrics.density, 0, 2 * metrics.density, 0x66000000);
         tv.setTransformationMethod(new AllCapsTransformationMethod(this));
         tv.setText("Android " + Build.VERSION.RELEASE);
         tv.setVisibility(View.INVISIBLE);
