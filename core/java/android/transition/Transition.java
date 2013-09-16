@@ -1240,12 +1240,13 @@ public abstract class Transition implements Cloneable {
                     View oldView = oldInfo.view;
                     TransitionValues newValues = mEndValues.viewValues != null ?
                             mEndValues.viewValues.get(oldView) : null;
+                    if (newValues == null) {
+                        newValues = mEndValues.idValues.get(oldView.getId());
+                    }
                     if (oldValues != null) {
                         // if oldValues null, then transition didn't care to stash values,
                         // and won't get canceled
-                        if (newValues == null) {
-                            cancel = true;
-                        } else {
+                        if (newValues != null) {
                             for (String key : oldValues.values.keySet()) {
                                 Object oldValue = oldValues.values.get(key);
                                 Object newValue = newValues.values.get(key);
