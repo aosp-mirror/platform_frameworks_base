@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"चमक"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"नेटवर्क को मॉनिटर किया जा सकता है"</string>
-    <string name="done_button" msgid="1759387181766603361">"पूर्ण"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"नेटवर्क मॉनिटरिंग"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"यह उपकरण <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> के द्वारा प्रबंधित किया जाता है.\n\nआपका व्यवस्थापक आपकी नेटवर्क गतिविधि को, साथ ही ईमेल, एप्स, और सुरक्षित वेबसाइटों को मॉनिटर करने में सक्षम है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"एक तृतीय पक्ष आपकी नेटवर्क\nगतिविधि को, साथ ही ईमेल, एप्स, और सुरक्षित वेबसाइटों को मॉनिटर करने में सक्षम है.\n\nआपके उपकरण पर इंस्टॉल किए गए एक विश्वसनीय क्रेडेंशियल के कारण ऐसा हो रहा है."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"विश्वसनीय क्रेडेंशियल की जांच करें"</string>
 </resources>

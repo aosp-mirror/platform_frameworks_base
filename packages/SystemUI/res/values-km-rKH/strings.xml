@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ពន្លឺ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ស្វ័យប្រវត្តិ"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"បណ្ដាញ​អាច​ត្រូវ​បាន​តាមដាន"</string>
-    <string name="done_button" msgid="1759387181766603361">"រួចរាល់"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ការ​ពិនិត្យ​បណ្ដាញ"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"ឧបករណ៍​នេះ​ត្រូវ​បាន​គ្រប់គ្រង​ដោយ៖ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>។\n\nអ្នក​គ្រប់គ្រង​របស់​អ្នក​អាច​ពិនិត្យ​សកម្មភាព​បណ្ដាញ​របស់​អ្នក​​រួមមាន អ៊ីមែល, កម្មវិធី និង​តំបន់​បណ្ដាញ​មាន​សុវត្ថិភាព។\n\nចំពោះ​ព័ត៌មាន​បន្ថែម​ សូម​ទាក់ទង​អ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"ភាគី​ទី​បី​អាច​​ពិនិត្យ​សកម្មភាព \n បណ្ដាញ​របស់​អ្នក​រួមមាន អ៊ីមែល, កម្មវិធី និង​សុវត្ថិភាព​តំបន់បណ្ដាញ។\n\n ព័ត៌មាន​ដែល​ទុក​ចិត្ត​បាន​ដំឡើង​ក្នុង​ឧបករណ៍​របស់​អ្នក​អាច​ធ្វើ​ការងារ​នេះ​បាន។"</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"ពិនិត្យ​​​ព័ត៌មាន​សម្ងាត់​​ដែល​​​ទុក​ចិត្ត"</string>
 </resources>

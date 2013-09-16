@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Тодрол"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОМАТ"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Сүлжээ хянагдаж байж болзошгүй"</string>
-    <string name="done_button" msgid="1759387181766603361">"Дууссан"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Сүлжээний Хяналт"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Энэ төхөөрөмжийг удирдагч: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nТаны админ имэйл, апп-ууд болон аюулгүй вебсайтуудыг оруулан таны сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээллийг өөрийн админтай холбогдож авна уу."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Гуравдагч талын этгээд таны сүлжээг хянаж байж болзошгүй\nүүнд имэйл, апп-ууд болон аюулгүй вебсайтууд багтана.\n\nТаны төхөөрөмж дээр суулгасан итгэмжлэгдсэн жуух энэ боломжоор хангаж байна."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Итгэмжлэгдсэн жуухуудыг шалгах"</string>
 </resources>

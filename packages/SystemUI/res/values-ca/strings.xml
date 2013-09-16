@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que la xarxa se supervisi."</string>
-    <string name="done_button" msgid="1759387181766603361">"Fet"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Supervisió de xarxes"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> administra aquest dispositiu.\n\nEl teu administrador té capacitat per supervisar la teva activitat de xarxa, inclosos els correus electrònics, les aplicacions i els llocs web segurs.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Un tercer té la capacitat per supervisar la teva activitat de\nxarxa, inclosos els correus electrònics, les aplicacions i els llocs web segurs.\n\nHi ha una credencial de confiança instal·lada que fa que això sigui possible."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Comprova les credencials de confiança"</string>
 </resources>
