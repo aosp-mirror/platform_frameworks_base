@@ -66,7 +66,7 @@ public class ListPreference extends DialogPreference {
     }
 
     public ListPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
 
     public ListPreference(Context context) {

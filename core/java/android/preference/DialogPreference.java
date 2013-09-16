@@ -64,10 +64,6 @@ public abstract class DialogPreference extends Preference implements
 
     /** Which button was clicked. */
     private int mWhichButtonClicked;
-    
-    public DialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
 
     public DialogPreference(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -88,13 +84,20 @@ public abstract class DialogPreference extends Preference implements
         mDialogLayoutResId = a.getResourceId(com.android.internal.R.styleable.DialogPreference_dialogLayout,
                 mDialogLayoutResId);
         a.recycle();
-        
+    }
+
+    public DialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public DialogPreference(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
-    
+
+    public DialogPreference(Context context) {
+        this(context, null);
+    }
+
     /**
      * Sets the title of the dialog. This will be shown on subsequent dialogs.
      * 
