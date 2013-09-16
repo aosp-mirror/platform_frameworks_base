@@ -30,6 +30,8 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -41,6 +43,7 @@ public class PlatLogoActivity extends Activity {
     FrameLayout mContent;
     int mCount;
     final Handler mHandler = new Handler();
+    static final int BGCOLOR = 0xffed1d24;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,7 @@ public class PlatLogoActivity extends Activity {
         Typeface light = Typeface.create("sans-serif-light", Typeface.NORMAL);
 
         mContent = new FrameLayout(this);
+        mContent.setBackgroundColor(0xC0000000);
         
         final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -63,6 +67,10 @@ public class PlatLogoActivity extends Activity {
         logo.setImageResource(com.android.internal.R.drawable.platlogo);
         logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         logo.setVisibility(View.INVISIBLE);
+
+        final View bg = new View(this);
+        bg.setBackgroundColor(BGCOLOR);
+        bg.setAlpha(0f);
 
         final TextView letter = new TextView(this);
 
@@ -84,6 +92,7 @@ public class PlatLogoActivity extends Activity {
         tv.setText("Android " + Build.VERSION.RELEASE);
         tv.setVisibility(View.INVISIBLE);
 
+        mContent.addView(bg);
         mContent.addView(letter, lp);
         mContent.addView(logo, lp);
 
@@ -94,22 +103,52 @@ public class PlatLogoActivity extends Activity {
         mContent.addView(tv, lp2);
 
         mContent.setOnClickListener(new View.OnClickListener() {
+            int clicks;
             @Override
             public void onClick(View v) {
-                if (logo.getVisibility() != View.VISIBLE) {
-                    letter.animate().alpha(0.25f).scaleY(0.75f).scaleX(0.75f).setDuration(2000)
-                            .start();
-                    logo.setAlpha(0f);
-                    logo.setVisibility(View.VISIBLE);
-                    logo.animate().alpha(1f).setDuration(1000).setStartDelay(500).start();
-                    tv.setAlpha(0f);
-                    tv.setVisibility(View.VISIBLE);
-                    tv.animate().alpha(1f).setDuration(1000).setStartDelay(1000).start();
+                clicks++;
+                if (clicks >= 6) {
+                    mContent.performLongClick();
+                    return;
                 }
+                letter.animate().cancel();
+                final float offset = (int)letter.getRotation() % 360;
+                letter.animate()
+                    .rotationBy((Math.random() > 0.5f ? 360 : -360) - offset)
+                    .setInterpolator(new DecelerateInterpolator())
+                    .setDuration(700).start();
             }
         });
 
         mContent.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (logo.getVisibility() != View.VISIBLE) {
+                    bg.setScaleX(0.01f);
+                    bg.animate().alpha(1f).scaleX(1f).setStartDelay(500).start();
+                    letter.animate().alpha(0f).scaleY(0.5f).scaleX(0.5f)
+                            .rotationBy(360)
+                            .setInterpolator(new AccelerateInterpolator())
+                            .setDuration(1000)
+                            .start();
+                    logo.setAlpha(0f);
+                    logo.setVisibility(View.VISIBLE);
+                    logo.setScaleX(0.5f);
+                    logo.setScaleY(0.5f);
+                    logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
+                        .setDuration(1000).setStartDelay(500)
+                        .setInterpolator(new AnticipateOvershootInterpolator())
+                        .start();
+                    tv.setAlpha(0f);
+                    tv.setVisibility(View.VISIBLE);
+                    tv.animate().alpha(1f).setDuration(1000).setStartDelay(1000).start();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        logo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 try {
