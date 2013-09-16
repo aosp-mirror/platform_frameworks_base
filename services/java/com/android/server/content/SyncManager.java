@@ -547,6 +547,7 @@ public class SyncManager {
         if (isLoggable) {
             Log.d(TAG, "one off sync for: " + cname + " " + extras.toString());
         }
+
         Boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
         if (expedited) {
             runtimeMillis = -1; // this means schedule at the front of the queue

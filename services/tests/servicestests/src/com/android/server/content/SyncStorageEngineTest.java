@@ -46,6 +46,7 @@ import com.android.server.content.SyncStorageEngine.EndPoint;
 public class SyncStorageEngineTest extends AndroidTestCase {
 
     protected Account account1;
+    protected Account account2;
     protected ComponentName syncService1;
     protected String authority1 = "testprovider";
     protected Bundle defaultBundle;
@@ -67,6 +68,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
     @Override
     public void setUp() {
         account1 = new Account("a@example.com", "example.type");
+        account2 = new Account("b@example.com", "example.type");
         syncService1 = new ComponentName("com.example", "SyncService");
         // Default bundle.
         defaultBundle = new Bundle();
@@ -98,7 +100,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
                 SyncOperation.REASON_PERIODIC,
                 SyncStorageEngine.SOURCE_LOCAL,
                 authority,
-                null, time0, 0 /* flex*/, 0, 0, true);
+                Bundle.EMPTY, time0, 0 /* flex*/, 0, 0, true);
         long historyId = engine.insertStartSyncEvent(op, time0);
         long time1 = time0 + SyncStorageEngine.MILLIS_IN_4WEEKS * 2;
         engine.stopSyncEvent(historyId, time1 - time0, "yay", 0, 0);
@@ -108,11 +110,11 @@ public class SyncStorageEngineTest extends AndroidTestCase {
      * Test persistence of pending operations.
      */
     @MediumTest
-    public void testPending() throws Exception {
+    public void testAppendPending() throws Exception {
         SyncOperation sop = new SyncOperation(account1,
                 DEFAULT_USER,
                 SyncOperation.REASON_PERIODIC,
-                SyncStorageEngine.SOURCE_LOCAL, authority1, null,
+                SyncStorageEngine.SOURCE_LOCAL, authority1, Bundle.EMPTY,
                 0 /* runtime */, 0 /* flex */, 0 /* backoff */, 0 /* delayuntil */,
                 true /* expedited */);
         engine.insertIntoPending(sop);
@@ -131,6 +133,77 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(sop.syncSource, popRetrieved.syncSource);
         assertEquals(sop.expedited, popRetrieved.expedited);
         assert(android.content.PeriodicSync.syncExtrasEquals(sop.extras, popRetrieved.extras));
+    }
+
+    /**
+     * Verify {@link com.android.server.content.SyncStorageEngine#writePendingOperationsLocked()}
+     */
+    public void testWritePendingOperationsLocked() throws Exception {
+        SyncOperation sop = new SyncOperation(account1,
+                DEFAULT_USER,
+                SyncOperation.REASON_IS_SYNCABLE,
+                SyncStorageEngine.SOURCE_LOCAL, authority1, Bundle.EMPTY,
+                1000L /* runtime */, 57L /* flex */, 0 /* backoff */, 0 /* delayuntil */,
+                true /* expedited */);
+        SyncOperation sop1 = new SyncOperation(account2,
+                DEFAULT_USER,
+                SyncOperation.REASON_PERIODIC,
+                SyncStorageEngine.SOURCE_LOCAL, authority1, defaultBundle,
+                0 /* runtime */, 0 /* flex */, 20L /* backoff */, 100L /* delayuntil */,
+                false /* expedited */);
+        SyncOperation deleted = new SyncOperation(account2,
+                DEFAULT_USER,
+                SyncOperation.REASON_SYNC_AUTO,
+                SyncStorageEngine.SOURCE_LOCAL, authority1, Bundle.EMPTY,
+                0 /* runtime */, 0 /* flex */, 20L /* backoff */, 100L /* delayuntil */,
+                false /* expedited */);
+        engine.insertIntoPending(sop);
+        engine.insertIntoPending(sop1);
+        engine.insertIntoPending(deleted);
+
+        SyncStorageEngine.PendingOperation popDeleted = engine.getPendingOperations().get(2);
+        // Free verifying, going to delete it anyway.
+        assertEquals(deleted.target.account, popDeleted.target.account);
+        assertEquals(deleted.target.provider, popDeleted.target.provider);
+        assertEquals(deleted.target.service, popDeleted.target.service);
+        assertEquals(deleted.target.userId, popDeleted.target.userId);
+        assertEquals(deleted.reason, popDeleted.reason);
+        assertEquals(deleted.syncSource, popDeleted.syncSource);
+        assertEquals(deleted.expedited, popDeleted.expedited);
+        assert(android.content.PeriodicSync.syncExtrasEquals(deleted.extras, popDeleted.extras));
+        // Delete one to force write-all
+        engine.deleteFromPending(popDeleted);
+        assertEquals("Delete of pending op failed.", 2, engine.getPendingOperationCount());
+        // If there's dirty pending data (which there is because we deleted a pending op) this
+        // re-writes the entire file.
+        engine.writeAllState();
+
+        engine.clearAndReadState();
+
+        // Validate state read back out.
+        assertEquals("Delete of pending op failed.", 2, engine.getPendingOperationCount());
+
+        List<SyncStorageEngine.PendingOperation> pops = engine.getPendingOperations();
+
+        SyncStorageEngine.PendingOperation popRetrieved = pops.get(0);
+        assertEquals(sop.target.account, popRetrieved.target.account);
+        assertEquals(sop.target.provider, popRetrieved.target.provider);
+        assertEquals(sop.target.service, popRetrieved.target.service);
+        assertEquals(sop.target.userId, popRetrieved.target.userId);
+        assertEquals(sop.reason, popRetrieved.reason);
+        assertEquals(sop.syncSource, popRetrieved.syncSource);
+        assertEquals(sop.expedited, popRetrieved.expedited);
+        assert(android.content.PeriodicSync.syncExtrasEquals(sop.extras, popRetrieved.extras));
+
+        popRetrieved = pops.get(1);
+        assertEquals(sop1.target.account, popRetrieved.target.account);
+        assertEquals(sop1.target.provider, popRetrieved.target.provider);
+        assertEquals(sop1.target.service, popRetrieved.target.service);
+        assertEquals(sop1.target.userId, popRetrieved.target.userId);
+        assertEquals(sop1.reason, popRetrieved.reason);
+        assertEquals(sop1.syncSource, popRetrieved.syncSource);
+        assertEquals(sop1.expedited, popRetrieved.expedited);
+        assert(android.content.PeriodicSync.syncExtrasEquals(sop1.extras, popRetrieved.extras));
     }
 
     /**
