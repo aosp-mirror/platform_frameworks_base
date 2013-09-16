@@ -481,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Izinkan aplikasi mengontrol fitur tingkat rendah dari tampilan Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"tangkap keluaran audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Memungkinkan aplikasi menangkap dan mengalihkan keluaran audio."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Deteksi kata cepat"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Memungkinkan aplikasi menangkap audio untuk deteksi Kata Cepat. Penangkapan dapat berlangsung di latar belakang namun tidak akan mencegah penangkapan audio yang lain (misalnya Perekam video)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"tangkap keluaran video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Memungkinkan aplikasi menangkap dan mengalihkan keluaran video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"tangkap keluaran video aman"</string>
@@ -552,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Mengizinkan apl mencegah tablet tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Mengizinkan apl mencegah ponsel tidur."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"pancarkan inframerah"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Memungkinkan aplikasi menggunakan pemancar inframerah tablet."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Memungkinkan aplikasi menggunakan pemancar inframerah ponsel."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"hidupkan atau matikan tablet"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"daya ponsel hidup atau mati"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Mengizinkan apl menyalakan atau mematikan tablet."</string>

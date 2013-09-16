@@ -132,10 +132,8 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Prostor za pohranu tabletnog računala pun je. Izbrišite nekoliko datoteka kako biste oslobodili prostor."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Prostor za pohranu na telefonu je pun. Izbrišite nekoliko datoteka kako biste oslobodili prostor."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Mreža se možda nadzire"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Od strane nepoznate treće strane"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Od strane domene <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcije tabletnog uređaja"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opcije telefona"</string>
@@ -481,10 +479,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Omogućuje aplikaciji upravljanje značajkama Wi-Fi zaslona niske razine."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"primanje audioizlaza"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Omogućuje aplikaciji primanje i preusmjeravanje audioizlaza."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Otkrivanje pokretača značajke"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Aplikaciji omogućuje snimanje zvuka radi otkrivanja pokretača značajke. Snimanje se može odvijati u pozadini, ali ne sprječava drugo snimanje zvuka (npr. kameru)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"primanje videoizlaza"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Omogućuje aplikaciji primanje i preusmjeravanje videoizlaza."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"primanje sigurnog videoizlaza"</string>
@@ -552,12 +548,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"sprečava telefon da prijeđe u stanje mirovanja"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Aplikaciji omogućuje sprječavanje prelaska tabletnog računala u mirovanje."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Aplikaciji omogućuje da spriječi prelazak telefona u mirovanje."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"infracrveni prijenos"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača tableta."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača telefona."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"uključivanje ili isključivanje tabletnog uređaja"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"uključivanje ili isključivanje telefona"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Aplikaciji omogućuje uključivanje i isključivanje tabletnog računala."</string>
