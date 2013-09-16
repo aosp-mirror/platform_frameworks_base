@@ -2894,6 +2894,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         @ViewDebug.ExportedProperty
         float mAlpha = 1f;
+
+        /**
+         * The opacity of the view as manipulated by the Fade transition. This is a hidden
+         * property only used by transitions, which is composited with the other alpha
+         * values to calculate the final visual alpha value.
+         */
+        float mTransitionAlpha = 1f;
     }
 
     TransformationInfo mTransformationInfo;
@@ -5335,7 +5342,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 View view = (View) current;
                 // We have attach info so this view is attached and there is no
                 // need to check whether we reach to ViewRootImpl on the way up.
-                if (view.getAlpha() <= 0 || view.getVisibility() != VISIBLE) {
+                if (view.getAlpha() <= 0 || view.getTransitionAlpha() <= 0 ||
+                        view.getVisibility() != VISIBLE) {
                     return false;
                 }
                 current = view.mParent;
@@ -9786,7 +9794,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 invalidateViewProperty(true, false);
                 if (mDisplayList != null) {
-                    mDisplayList.setAlpha(alpha);
+                    mDisplayList.setAlpha(getFinalAlpha());
                 }
             }
         }
@@ -9813,11 +9821,56 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 if (mDisplayList != null) {
-                    mDisplayList.setAlpha(alpha);
+                    mDisplayList.setAlpha(getFinalAlpha());
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * This property is hidden and intended only for use by the Fade transition, which
+     * animates it to produce a visual translucency that does not side-effect (or get
+     * affected by) the real alpha property. This value is composited with the other
+     * alpha value (and the AlphaAnimation value, when that is present) to produce
+     * a final visual translucency result, which is what is passed into the DisplayList.
+     *
+     * @hide
+     */
+    public void setTransitionAlpha(float alpha) {
+        ensureTransformationInfo();
+        if (mTransformationInfo.mTransitionAlpha != alpha) {
+            mTransformationInfo.mTransitionAlpha = alpha;
+            mPrivateFlags &= ~PFLAG_ALPHA_SET;
+            invalidateViewProperty(true, false);
+            if (mDisplayList != null) {
+                mDisplayList.setAlpha(getFinalAlpha());
+            }
+        }
+    }
+
+    /**
+     * Calculates the visual alpha of this view, which is a combination of the actual
+     * alpha value and the transitionAlpha value (if set).
+     */
+    private float getFinalAlpha() {
+        if (mTransformationInfo != null) {
+            return mTransformationInfo.mAlpha * mTransformationInfo.mTransitionAlpha;
+        }
+        return 1;
+    }
+
+    /**
+     * This property is hidden and intended only for use by the Fade transition, which
+     * animates it to produce a visual translucency that does not side-effect (or get
+     * affected by) the real alpha property. This value is composited with the other
+     * alpha value (and the AlphaAnimation value, when that is present) to produce
+     * a final visual translucency result, which is what is passed into the DisplayList.
+     *
+     * @hide
+     */
+    public float getTransitionAlpha() {
+        return mTransformationInfo != null ? mTransformationInfo.mTransitionAlpha : 1;
     }
 
     /**
@@ -10913,7 +10966,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isOpaque() {
         return (mPrivateFlags & PFLAG_OPAQUE_MASK) == PFLAG_OPAQUE_MASK &&
-                ((mTransformationInfo != null ? mTransformationInfo.mAlpha : 1.0f) >= 1.0f);
+                getFinalAlpha() >= 1.0f;
     }
 
     /**
@@ -13868,7 +13921,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
             if (mTransformationInfo != null) {
-                alpha *= mTransformationInfo.mAlpha;
+                alpha *= getFinalAlpha();
                 if (alpha < 1) {
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (onSetAlpha(multipliedAlpha)) {
@@ -14057,8 +14110,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        float alpha = useDisplayListProperties ? 1 : getAlpha();
-        if (transformToApply != null || alpha < 1 || !hasIdentityMatrix() ||
+        float alpha = useDisplayListProperties ? 1 : (getAlpha() * getTransitionAlpha());
+        if (transformToApply != null || alpha < 1 ||  !hasIdentityMatrix() ||
                 (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
             if (transformToApply != null || !childHasIdentityMatrix) {
                 int transX = 0;
@@ -14115,7 +14168,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
                         if (useDisplayListProperties) {
-                            displayList.setAlpha(alpha * getAlpha());
+                            displayList.setAlpha(alpha * getAlpha() * getTransitionAlpha());
                         } else  if (layerType == LAYER_TYPE_NONE) {
                             final int scrollX = hasDisplayList ? 0 : sx;
                             final int scrollY = hasDisplayList ? 0 : sy;

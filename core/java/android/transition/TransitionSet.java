@@ -354,7 +354,7 @@ public class TransitionSet extends Transition {
         clone.mTransitions = new ArrayList<Transition>();
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
-            clone.mTransitions.add((Transition) mTransitions.get(i).clone());
+            clone.addTransition((Transition) mTransitions.get(i).clone());
         }
         return clone;
     }
