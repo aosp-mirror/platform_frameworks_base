@@ -172,7 +172,6 @@ import android.view.WindowManager;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -850,10 +849,39 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mNewNumServiceProcs = 0;
 
     /**
-     * System monitoring: number of processes that died since the last
-     * N procs were started.
+     * Allow the current computed overall memory level of the system to go down?
+     * This is set to false when we are killing processes for reasons other than
+     * memory management, so that the now smaller process list will not be taken as
+     * an indication that memory is tighter.
      */
-    int[] mProcDeaths = new int[20];
+    boolean mAllowLowerMemLevel = false;
+
+    /**
+     * The last computed memory level, for holding when we are in a state that
+     * processes are going away for other reasons.
+     */
+    int mLastMemoryLevel = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+
+    /**
+     * The last total number of process we have, to determine if changes actually look
+     * like a shrinking number of process due to lower RAM.
+     */
+    int mLastNumProcesses;
+
+    /**
+     * The uptime of the last time we performed idle maintenance.
+     */
+    long mLastIdleTime = SystemClock.uptimeMillis();
+
+    /**
+     * Total time spent with RAM that has been added in the past since the last idle time.
+     */
+    long mLowRamTimeSinceLastIdle = 0;
+
+    /**
+     * If RAM is currently low, when that horrible situatin started.
+     */
+    long mLowRamStartTime = 0;
 
     /**
      * This is set if we had to do a delayed dexopt of an app before launching
@@ -978,17 +1006,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
     static final int SHOW_STRICT_MODE_VIOLATION_MSG = 26;
     static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
-    static final int CLEAR_DNS_CACHE = 28;
-    static final int UPDATE_HTTP_PROXY = 29;
+    static final int CLEAR_DNS_CACHE_MSG = 28;
+    static final int UPDATE_HTTP_PROXY_MSG = 29;
     static final int SHOW_COMPAT_MODE_DIALOG_MSG = 30;
     static final int DISPATCH_PROCESSES_CHANGED = 31;
     static final int DISPATCH_PROCESS_DIED = 32;
-    static final int REPORT_MEM_USAGE = 33;
+    static final int REPORT_MEM_USAGE_MSG = 33;
     static final int REPORT_USER_SWITCH_MSG = 34;
     static final int CONTINUE_USER_SWITCH_MSG = 35;
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
-    static final int PERSIST_URI_GRANTS = 38;
+    static final int PERSIST_URI_GRANTS_MSG = 38;
+    static final int REQUEST_ALL_PSS_MSG = 39;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1169,7 +1198,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             } break;
-            case CLEAR_DNS_CACHE: {
+            case CLEAR_DNS_CACHE_MSG: {
                 synchronized (ActivityManagerService.this) {
                     for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                         ProcessRecord r = mLruProcesses.get(i);
@@ -1183,7 +1212,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             } break;
-            case UPDATE_HTTP_PROXY: {
+            case UPDATE_HTTP_PROXY_MSG: {
                 ProxyProperties proxy = (ProxyProperties)msg.obj;
                 String host = "";
                 String port = "";
@@ -1369,7 +1398,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dispatchProcessDied(pid, uid);
                 break;
             }
-            case REPORT_MEM_USAGE: {
+            case REPORT_MEM_USAGE_MSG: {
                 final ArrayList<ProcessMemInfo> memInfos = (ArrayList<ProcessMemInfo>)msg.obj;
                 Thread thread = new Thread() {
                     @Override public void run() {
@@ -1583,8 +1612,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
-            case PERSIST_URI_GRANTS: {
+            case PERSIST_URI_GRANTS_MSG: {
                 writeGrantedUriPermissions();
+                break;
+            }
+            case REQUEST_ALL_PSS_MSG: {
+                requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                 break;
             }
             }
@@ -1630,6 +1663,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 num++;
                                 proc.lastPssTime = SystemClock.uptimeMillis();
                                 proc.baseProcessTracker.addPss(pss, tmp[0], true);
+                                if (proc.initialIdlePss == 0) {
+                                    proc.initialIdlePss = pss;
+                                }
+                                proc.lastPss = pss;
                             }
                         }
                     }
@@ -2250,8 +2287,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    final void updateLruProcessLocked(ProcessRecord app,
-            boolean oomAdj) {
+    final void updateLruProcessLocked(ProcessRecord app, boolean oomAdj) {
         mLruSeq++;
         updateLruProcessInternalLocked(app, 0);
 
@@ -2416,9 +2452,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProcessesOnHold.remove(app);
 
         updateCpuStats();
-
-        System.arraycopy(mProcDeaths, 0, mProcDeaths, 1, mProcDeaths.length-1);
-        mProcDeaths[0] = 0;
 
         try {
             int uid = app.uid;
@@ -3432,7 +3465,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             if (doReport) {
-                Message msg = mHandler.obtainMessage(REPORT_MEM_USAGE, memInfos);
+                Message msg = mHandler.obtainMessage(REPORT_MEM_USAGE_MSG, memInfos);
                 mHandler.sendMessage(msg);
             }
             scheduleAppGcsLocked();
@@ -3442,8 +3475,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void appDiedLocked(ProcessRecord app, int pid,
             IApplicationThread thread) {
 
-        mProcDeaths[0]++;
-
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         synchronized (stats) {
             stats.noteProcessDiedLocked(app.info.uid, pid);
@@ -3452,17 +3483,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
                 app.thread.asBinder() == thread.asBinder()) {
-            if (!app.killedBackground) {
+            boolean doLowMem = app.instrumentationClass == null;
+            boolean doOomAdj = doLowMem;
+            if (!app.killedByAm) {
                 Slog.i(TAG, "Process " + app.processName + " (pid " + pid
                         + ") has died.");
+                mAllowLowerMemLevel = true;
+            } else {
+                // Note that we always want to do oom adj to update our state with the
+                // new number of procs.
+                mAllowLowerMemLevel = false;
+                doLowMem = false;
             }
             EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.userId, app.pid, app.processName);
             if (DEBUG_CLEANUP) Slog.v(
                 TAG, "Dying app: " + app + ", pid: " + pid
                 + ", thread: " + thread.asBinder());
-            boolean doLowMem = app.instrumentationClass == null;
             handleAppDiedLocked(app, false, true);
 
+            if (doOomAdj) {
+                updateOomAdjLocked();
+            }
             if (doLowMem) {
                 doLowMemReportIfNeededLocked(app);
             }
@@ -3795,10 +3836,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized (this) {
             if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
-                Slog.w(TAG, "Killing " + app + ": background ANR");
-                EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                        app.processName, app.setAdj, "background ANR");
-                Process.killProcessQuiet(app.pid);
+                killUnneededProcessLocked(app, "background ANR");
                 return;
             }
 
@@ -3983,6 +4021,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=0; i<N; i++) {
                     removeProcessLocked(procs.get(i), false, true, "kill all background");
                 }
+                mAllowLowerMemLevel = true;
                 updateOomAdjLocked();
                 doLowMemReportIfNeededLocked(null);
             }
@@ -4482,10 +4521,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            Slog.i(TAG, "Killing proc " + app.toShortString() + ": " + reason);
+            killUnneededProcessLocked(app, reason);
             handleAppDiedLocked(app, true, allowRestart);
             mLruProcesses.remove(app);
-            Process.killProcessQuiet(pid);
 
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
@@ -4527,9 +4565,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             checkAppInLaunchingProvidersLocked(app, true);
             // Take care of any services that are waiting for the process.
             mServices.processStartTimedOutLocked(app);
-            EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, pid,
-                    app.processName, app.setAdj, "start timeout");
-            Process.killProcessQuiet(pid);
+            killUnneededProcessLocked(app, "start timeout");
             if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
                 Slog.w(TAG, "Unattached app died before backup, skipping");
                 try {
@@ -5773,8 +5809,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pi.packageName, targetPkg, targetUid, uri);
         final boolean persistChanged = perm.grantModes(modeFlags, persist, owner);
         if (persistChanged) {
-            mHandler.removeMessages(PERSIST_URI_GRANTS);
-            mHandler.obtainMessage(PERSIST_URI_GRANTS).sendToTarget();
+            mHandler.removeMessages(PERSIST_URI_GRANTS_MSG);
+            mHandler.obtainMessage(PERSIST_URI_GRANTS_MSG).sendToTarget();
         }
     }
 
@@ -5998,8 +6034,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (persistChanged) {
-            mHandler.removeMessages(PERSIST_URI_GRANTS);
-            mHandler.obtainMessage(PERSIST_URI_GRANTS).sendToTarget();
+            mHandler.removeMessages(PERSIST_URI_GRANTS_MSG);
+            mHandler.obtainMessage(PERSIST_URI_GRANTS_MSG).sendToTarget();
         }
     }
 
@@ -6083,8 +6119,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (persistChanged) {
-            mHandler.removeMessages(PERSIST_URI_GRANTS);
-            mHandler.obtainMessage(PERSIST_URI_GRANTS).sendToTarget();
+            mHandler.removeMessages(PERSIST_URI_GRANTS_MSG);
+            mHandler.obtainMessage(PERSIST_URI_GRANTS_MSG).sendToTarget();
         }
     }
 
@@ -6512,6 +6548,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private void killUnneededProcessLocked(ProcessRecord pr, String reason) {
+        if (!pr.killedByAm) {
+            Slog.i(TAG, "Killing " + pr.toShortString() + " (adj " + pr.setAdj + "): " + reason);
+            EventLog.writeEvent(EventLogTags.AM_KILL, pr.userId, pr.pid,
+                    pr.processName, pr.setAdj, reason);
+            pr.killedByAm = true;
+            Process.killProcessQuiet(pr.pid);
+        }
+    }
+
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
         mRecentTasks.remove(tr);
         mStackSupervisor.removeTask(tr);
@@ -6550,11 +6596,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<procs.size(); i++) {
                 ProcessRecord pr = procs.get(i);
                 if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
-                    Slog.i(TAG, "Killing " + pr.toShortString() + ": remove task");
-                    EventLog.writeEvent(EventLogTags.AM_KILL, pr.userId, pr.pid,
-                            pr.processName, pr.setAdj, "remove task");
-                    pr.killedBackground = true;
-                    Process.killProcessQuiet(pr.pid);
+                    killUnneededProcessLocked(pr, "remove task");
                 } else {
                     pr.waitingToKill = "remove task";
                 }
@@ -8405,13 +8447,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     continue;
                 }
                 int adj = proc.setAdj;
-                if (adj >= worstType && !proc.killedBackground) {
-                    Slog.w(TAG, "Killing " + proc + " (adj " + adj + "): " + reason);
-                    EventLog.writeEvent(EventLogTags.AM_KILL, proc.userId, proc.pid,
-                            proc.processName, adj, reason);
+                if (adj >= worstType && !proc.killedByAm) {
+                    killUnneededProcessLocked(proc, reason);
                     killed = true;
-                    proc.killedBackground = true;
-                    Process.killProcessQuiet(pids[i]);
                 }
             }
         }
@@ -8453,13 +8491,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (proc == null) continue;
 
                 final int adj = proc.setAdj;
-                if (adj > belowAdj && !proc.killedBackground) {
-                    Slog.w(TAG, "Killing " + proc + " (adj " + adj + "): " + reason);
-                    EventLog.writeEvent(EventLogTags.AM_KILL, proc.userId,
-                            proc.pid, proc.processName, adj, reason);
+                if (adj > belowAdj && !proc.killedByAm) {
+                    killUnneededProcessLocked(proc, reason);
                     killed = true;
-                    proc.killedBackground = true;
-                    Process.killProcessQuiet(pid);
                 }
             }
         }
@@ -8535,6 +8569,61 @@ public final class ActivityManagerService extends ActivityManagerNative
                 UserHandle.ALL, null, br, mHandler, 0, null, null);
         */
         br.onReceive(mContext, intent);
+    }
+
+    private long getLowRamTimeSinceIdle(long now) {
+        return mLowRamTimeSinceLastIdle + (mLowRamStartTime > 0 ? (now-mLowRamStartTime) : 0);
+    }
+
+    @Override
+    public void performIdleMaintenance() {
+        if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+        }
+
+        synchronized (this) {
+            final long now = SystemClock.uptimeMillis();
+            final long timeSinceLastIdle = now - mLastIdleTime;
+            final long lowRamSinceLastIdle = getLowRamTimeSinceIdle(now);
+            mLastIdleTime = now;
+            mLowRamTimeSinceLastIdle = 0;
+            if (mLowRamStartTime != 0) {
+                mLowRamStartTime = now;
+            }
+
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Idle maintenance over ");
+            TimeUtils.formatDuration(timeSinceLastIdle, sb);
+            sb.append(" low RAM for ");
+            TimeUtils.formatDuration(lowRamSinceLastIdle, sb);
+            Slog.i(TAG, sb.toString());
+
+            // If at least 1/3 of our time since the last idle period has been spent
+            // with RAM low, then we want to kill processes.
+            boolean doKilling = lowRamSinceLastIdle > (timeSinceLastIdle/3);
+
+            for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                ProcessRecord proc = mLruProcesses.get(i);
+                if (proc.notCachedSinceIdle) {
+                    if (proc.setProcState > ActivityManager.PROCESS_STATE_TOP
+                            && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
+                        if (doKilling && proc.initialIdlePss != 0
+                                && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
+                            killUnneededProcessLocked(proc, "idle maint (pss " + proc.lastPss
+                                    + " from " + proc.initialIdlePss + ")");
+                        }
+                    }
+                } else if (proc.setProcState < ActivityManager.PROCESS_STATE_HOME) {
+                    proc.notCachedSinceIdle = true;
+                    proc.initialIdlePss = 0;
+                }
+            }
+
+            mHandler.removeMessages(REQUEST_ALL_PSS_MSG);
+            mHandler.sendEmptyMessageDelayed(REQUEST_ALL_PSS_MSG, 2*60*1000);
+        }
     }
 
     public final void startRunning(String pkg, String cls, String action,
@@ -8971,10 +9060,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (app.pid > 0 && app.pid != MY_PID) {
                 handleAppCrashLocked(app);
-                Slog.i(ActivityManagerService.TAG, "Killing " + app + ": user's request");
-                EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                        app.processName, app.setAdj, "user's request after error");
-                Process.killProcessQuiet(app.pid);
+                killUnneededProcessLocked(app, "user request after error");
             }
         }
     }
@@ -10448,6 +10534,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " mNumCachedHiddenProcs=" + mNumCachedHiddenProcs
                         + " mNumServiceProcs=" + mNumServiceProcs
                         + " mNewNumServiceProcs=" + mNewNumServiceProcs);
+                pw.println("  mAllowLowerMemLevel=" + mAllowLowerMemLevel
+                        + " mLastMemoryLevel" + mLastMemoryLevel
+                        + " mLastNumProcesses" + mLastNumProcesses);
+                long now = SystemClock.uptimeMillis();
+                pw.print("  mLastIdleTime=");
+                        TimeUtils.formatDuration(now, mLastIdleTime, pw);
+                        pw.print(" mLowRamSinceLastIdle=");
+                        TimeUtils.formatDuration(getLowRamTimeSinceIdle(now), pw);
+                        pw.println();
             }
         }
 
@@ -11708,13 +11803,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!capp.persistent && capp.thread != null
                         && capp.pid != 0
                         && capp.pid != MY_PID) {
-                    Slog.i(TAG, "Kill " + capp.processName
-                            + " (pid " + capp.pid + "): provider " + cpr.info.name
-                            + " in dying process " + (proc != null ? proc.processName : "??"));
-                    EventLog.writeEvent(EventLogTags.AM_KILL, capp.userId, capp.pid,
-                            capp.processName, capp.setAdj, "dying provider "
-                                    + cpr.name.toShortString());
-                    Process.killProcessQuiet(capp.pid);
+                    killUnneededProcessLocked(capp, "depends on provider "
+                            + cpr.name.flattenToShortString()
+                            + " in dying proc " + (proc != null ? proc.processName : "??"));
                 }
             } else if (capp.thread != null && conn.provider.provider != null) {
                 try {
@@ -12796,12 +12887,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
-            mHandler.sendEmptyMessage(CLEAR_DNS_CACHE);
+            mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
         }
 
         if (Proxy.PROXY_CHANGE_ACTION.equals(intent.getAction())) {
             ProxyProperties proxy = intent.getParcelableExtra("proxy");
-            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY, proxy));
+            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
         }
 
         // Add to the sticky list if requested.
@@ -14532,26 +14623,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                         stats.reportExcessiveWakeLocked(app.info.uid, app.processName,
                                 realtimeSince, wtimeUsed);
                     }
-                    Slog.w(TAG, "Excessive wake lock in " + app.processName
-                            + " (pid " + app.pid + "): held " + wtimeUsed
+                    killUnneededProcessLocked(app, "excessive wake held " + wtimeUsed
                             + " during " + realtimeSince);
-                    EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                            app.processName, app.setAdj, "excessive wake lock");
                     app.baseProcessTracker.reportExcessiveWake(app.pkgList);
-                    Process.killProcessQuiet(app.pid);
                 } else if (doCpuKills && uptimeSince > 0
                         && ((cputimeUsed*100)/uptimeSince) >= 50) {
                     synchronized (stats) {
                         stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
                                 uptimeSince, cputimeUsed);
                     }
-                    Slog.w(TAG, "Excessive CPU in " + app.processName
-                            + " (pid " + app.pid + "): used " + cputimeUsed
+                    killUnneededProcessLocked(app, "excessive cpu " + cputimeUsed
                             + " during " + uptimeSince);
-                    EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                            app.processName, app.setAdj, "excessive cpu");
                     app.baseProcessTracker.reportExcessiveCpu(app.pkgList);
-                    Process.killProcessQuiet(app.pid);
                 } else {
                     app.lastWakeTime = wtime;
                     app.lastCpuTime = app.curCpuTime;
@@ -14595,11 +14678,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + " to " + app.curSchedGroup);
             if (app.waitingToKill != null &&
                     app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
-                Slog.i(TAG, "Killing " + app.toShortString() + ": " + app.waitingToKill);
-                EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                        app.processName, app.setAdj, app.waitingToKill);
-                app.killedBackground = true;
-                Process.killProcessQuiet(app.pid);
+                killUnneededProcessLocked(app, app.waitingToKill);
                 success = false;
             } else {
                 if (true) {
@@ -14659,6 +14738,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "Proc state change of " + app.processName
                     + " to " + app.curProcState);
             app.setProcState = app.curProcState;
+            if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
+                app.notCachedSinceIdle = false;
+            }
             if (!doingAll) {
                 setProcessTrackerState(app, mProcessStats.getMemFactorLocked(), now);
             } else {
@@ -14785,7 +14867,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int nextEmptyAdj = curEmptyAdj+2;
         for (int i=N-1; i>=0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
-            if (!app.killedBackground && app.thread != null) {
+            if (!app.killedByAm && app.thread != null) {
                 app.procStateChanged = false;
                 final boolean wasKeeping = app.keeping;
                 computeOomAdjLocked(app, ProcessList.UNKNOWN_ADJ, TOP_APP, true, now);
@@ -14860,34 +14942,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mNumCachedHiddenProcs++;
                         numCached++;
                         if (numCached > cachedProcessLimit) {
-                            Slog.i(TAG, "No longer want " + app.processName
-                                    + " (pid " + app.pid + "): cached #" + numCached);
-                            EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                                    app.processName, app.setAdj, "too many background");
-                            app.killedBackground = true;
-                            Process.killProcessQuiet(app.pid);
+                            killUnneededProcessLocked(app, "cached #" + numCached);
                         }
                         break;
                     case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
                         if (numEmpty > ProcessList.TRIM_EMPTY_APPS
                                 && app.lastActivityTime < oldTime) {
-                            Slog.i(TAG, "No longer want " + app.processName
-                                    + " (pid " + app.pid + "): empty for "
-                                    + ((oldTime+ProcessList.MAX_EMPTY_TIME-app.lastActivityTime)
-                                            / 1000) + "s");
-                            EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                                    app.processName, app.setAdj, "old background process");
-                            app.killedBackground = true;
-                            Process.killProcessQuiet(app.pid);
+                            killUnneededProcessLocked(app, "empty for "
+                                    + ((oldTime + ProcessList.MAX_EMPTY_TIME - app.lastActivityTime)
+                                    / 1000) + "s");
                         } else {
                             numEmpty++;
                             if (numEmpty > emptyProcessLimit) {
-                                Slog.i(TAG, "No longer want " + app.processName
-                                        + " (pid " + app.pid + "): empty #" + numEmpty);
-                                EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                                        app.processName, app.setAdj, "too many background");
-                                app.killedBackground = true;
-                                Process.killProcessQuiet(app.pid);
+                                killUnneededProcessLocked(app, "empty #" + numEmpty);
                             }
                         }
                         break;
@@ -14903,16 +14970,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
-                    Slog.i(TAG, "Isolated process " + app.processName
-                            + " (pid " + app.pid + ") no longer needed");
-                    EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
-                            app.processName, app.setAdj, "isolated not needed");
-                    app.killedBackground = true;
-                    Process.killProcessQuiet(app.pid);
+                    killUnneededProcessLocked(app, "isolated not needed");
                 }
 
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
-                        && !app.killedBackground) {
+                        && !app.killedByAm) {
                     numTrimming++;
                 }
             }
@@ -14926,31 +14988,60 @@ public final class ActivityManagerService extends ActivityManagerNative
         // are managing to keep around is less than half the maximum we desire;
         // if we are keeping a good number around, we'll let them use whatever
         // memory they want.
-        boolean allChanged;
+        final int numCachedAndEmpty = numCached + numEmpty;
+        int memFactor;
         if (numCached <= ProcessList.TRIM_CACHED_APPS
                 && numEmpty <= ProcessList.TRIM_EMPTY_APPS) {
-            final int numCachedAndEmpty = numCached + numEmpty;
+            if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
+            } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
+            } else {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
+            }
+        } else {
+            memFactor = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+        }
+        // We always allow the memory level to go up (better).  We only allow it to go
+        // down if we are in a state where that is allowed, *and* the total number of processes
+        // has gone down since last time.
+        if (DEBUG_OOM_ADJ) Slog.d(TAG, "oom: memFactor=" + memFactor + " last=" + mLastMemoryLevel
+                + " allowLow=" + mAllowLowerMemLevel + " numProcs=" + mLruProcesses.size()
+                + " last=" + mLastNumProcesses);
+        if (memFactor > mLastMemoryLevel) {
+            if (!mAllowLowerMemLevel || mLruProcesses.size() >= mLastNumProcesses) {
+                memFactor = mLastMemoryLevel;
+                if (DEBUG_OOM_ADJ) Slog.d(TAG, "Keeping last mem factor!");
+            }
+        }
+        mLastMemoryLevel = memFactor;
+        mLastNumProcesses = mLruProcesses.size();
+        boolean allChanged = mProcessStats.setMemFactorLocked(
+                ProcessStats.ADJ_MEM_FACTOR_NORMAL, !mSleeping, now);
+        final int trackerMemFactor = mProcessStats.getMemFactorLocked();
+        if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
+            if (mLowRamStartTime == 0) {
+                mLowRamStartTime = now;
+            }
+            int step = 0;
+            int fgTrimLevel;
+            switch (memFactor) {
+                case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
+                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+                    break;
+                case ProcessStats.ADJ_MEM_FACTOR_LOW:
+                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+                    break;
+                default:
+                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
+                    break;
+            }
             int factor = numTrimming/3;
             int minFactor = 2;
             if (mHomeProcess != null) minFactor++;
             if (mPreviousProcess != null) minFactor++;
             if (factor < minFactor) factor = minFactor;
-            int step = 0;
-            int fgTrimLevel;
-            int memFactor;
-            if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
-                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
-            } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
-                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
-            } else {
-                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
-            }
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-            allChanged = mProcessStats.setMemFactorLocked(memFactor, !mSleeping, now);
-            final int trackerMemFactor = mProcessStats.getMemFactorLocked();
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
@@ -14958,7 +15049,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.procStateChanged = false;
                 }
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
-                        && !app.killedBackground) {
+                        && !app.killedByAm) {
                     if (app.trimMemoryLevel < curLevel && app.thread != null) {
                         try {
                             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
@@ -15038,9 +15129,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         } else {
-            allChanged = mProcessStats.setMemFactorLocked(
-                    ProcessStats.ADJ_MEM_FACTOR_NORMAL, !mSleeping, now);
-            final int trackerMemFactor = mProcessStats.getMemFactorLocked();
+            if (mLowRamStartTime != 0) {
+                mLowRamTimeSinceLastIdle += now - mLowRamStartTime;
+                mLowRamStartTime = 0;
+            }
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
@@ -15109,6 +15201,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (app.pid > 0 && app.pid != MY_PID) {
                         EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
                                 app.processName, app.setAdj, "empty");
+                        app.killedByAm = true;
                         Process.killProcessQuiet(app.pid);
                     } else {
                         try {

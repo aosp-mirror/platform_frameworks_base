@@ -217,8 +217,7 @@ class ServerThread {
             ServiceManager.addService("telephony.registry", telephonyRegistry);
 
             Slog.i(TAG, "Scheduling Policy");
-            ServiceManager.addService(Context.SCHEDULING_POLICY_SERVICE,
-                    new SchedulingPolicyService());
+            ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
 
             AttributeCache.init(context);
 
