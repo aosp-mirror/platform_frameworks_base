@@ -156,8 +156,8 @@
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"闹钟已设置为：<xliff:g id="TIME">%s</xliff:g>。"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 数据网络已停用"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据已停用"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"数据已停用"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据网络已停用"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"数据网络已停用"</string>
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"您已达到指定的数据流量上限。\n\n如果您重新启用数据，运营商可能会收取相应的费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据连接"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
@@ -178,10 +178,10 @@
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"充电完成"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"蓝牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"蓝牙已关闭"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"蓝牙：关闭"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"自动旋转"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"屏幕方向已锁定"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"屏幕方向：锁定"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"输入法"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"位置信息"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置信息服务已关闭"</string>
