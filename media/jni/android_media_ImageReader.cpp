@@ -739,11 +739,9 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     int outputHeight = buffer->height;
 
     // Correct width/height when crop is set.
-    if (buffer->crop.getWidth() > 0) {
-        outputWidth = buffer->crop.getWidth() + 1;
-    }
-    if (buffer->crop.getHeight() > 0) {
-        outputHeight = buffer->crop.getHeight() + 1;
+    if (buffer->crop.isValid()) {
+        outputWidth = buffer->crop.getWidth();
+        outputHeight = buffer->crop.getHeight();
     }
 
     int imageReaderWidth = ctx->getBufferWidth();
