@@ -355,7 +355,15 @@ public class WifiConfiguration implements Parcelable {
      */
     public boolean isValid() {
         if (allowedKeyManagement.cardinality() > 1) {
-            return false;
+            if (allowedKeyManagement.cardinality() != 2) {
+                return false;
+            }
+            if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) == false) {
+                return false;
+            }
+            if (allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false) {
+                return false;
+            }
         }
 
         // TODO: Add more checks
