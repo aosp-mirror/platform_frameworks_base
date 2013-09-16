@@ -12399,8 +12399,8 @@ package android.media {
   }
 
   public class ImageReader implements java.lang.AutoCloseable {
-    method public android.media.Image acquireLatestImage() throws android.media.ImageReader.MaxImagesAcquiredException;
-    method public android.media.Image acquireNextImage() throws android.media.ImageReader.MaxImagesAcquiredException;
+    method public android.media.Image acquireLatestImage();
+    method public android.media.Image acquireNextImage();
     method public void close();
     method public int getHeight();
     method public int getImageFormat();
@@ -12409,13 +12409,6 @@ package android.media {
     method public int getWidth();
     method public static android.media.ImageReader newInstance(int, int, int, int);
     method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
-  }
-
-  public static class ImageReader.MaxImagesAcquiredException extends java.lang.Exception {
-    ctor public ImageReader.MaxImagesAcquiredException();
-    ctor public ImageReader.MaxImagesAcquiredException(java.lang.String);
-    ctor public ImageReader.MaxImagesAcquiredException(java.lang.String, java.lang.Throwable);
-    ctor public ImageReader.MaxImagesAcquiredException(java.lang.Throwable);
   }
 
   public static abstract interface ImageReader.OnImageAvailableListener {
