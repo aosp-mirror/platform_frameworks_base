@@ -671,7 +671,7 @@ class QuickSettings {
         alarmTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startSettingsActivity(AlarmClock.ACTION_SET_ALARM);
+                startSettingsActivity(AlarmClock.ACTION_SHOW_ALARMS);
             }
         });
         mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
