@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -68,8 +69,9 @@ public class TransitionManager {
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
             new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
-    private static ThreadLocal<ArrayMap<ViewGroup, ArrayList<Transition>>> sRunningTransitions =
-            new ThreadLocal<ArrayMap<ViewGroup, ArrayList<Transition>>>();
+    private static ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>
+            sRunningTransitions =
+            new ThreadLocal<WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>>();
     private static ArrayList<ViewGroup> sPendingTransitions = new ArrayList<ViewGroup>();
 
 
@@ -184,20 +186,24 @@ public class TransitionManager {
     }
 
     private static ArrayMap<ViewGroup, ArrayList<Transition>> getRunningTransitions() {
-        ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
+        WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>> runningTransitions =
                 sRunningTransitions.get();
-        if (runningTransitions == null) {
-            runningTransitions = new ArrayMap<ViewGroup, ArrayList<Transition>>();
+        if (runningTransitions == null || runningTransitions.get() == null) {
+            ArrayMap<ViewGroup, ArrayList<Transition>> transitions =
+                    new ArrayMap<ViewGroup, ArrayList<Transition>>();
+            runningTransitions = new WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>(
+                    transitions);
             sRunningTransitions.set(runningTransitions);
         }
-        return runningTransitions;
+        return runningTransitions.get();
     }
 
     private static void sceneChangeRunTransition(final ViewGroup sceneRoot,
             final Transition transition) {
         if (transition != null) {
             final ViewTreeObserver observer = sceneRoot.getViewTreeObserver();
-            observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            final ViewTreeObserver.OnPreDrawListener listener =
+                    new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
                     sPendingTransitions.remove(sceneRoot);
@@ -236,7 +242,8 @@ public class TransitionManager {
                     // values set on them again and avoid artifacts.
                     return false;
                 }
-            });
+            };
+            observer.addOnPreDrawListener(listener);
         }
     }
 
@@ -355,10 +362,10 @@ public class TransitionManager {
 //            if (transition == null) {
 //                transition = sDefaultTransition;
 //            }
-//            final Transition finalTransition = transition.clone();
-//            sceneChangeSetup(sceneRoot, transition);
+//            final Transition transitionClone = transition.clone();
+//            sceneChangeSetup(sceneRoot, transitionClone);
 //            Scene.setCurrentScene(sceneRoot, null);
-//            sceneChangeRunTransition(sceneRoot, finalTransition);
+//            sceneChangeRunTransition(sceneRoot, transitionClone);
 //        }
     }
 }
