@@ -18,12 +18,25 @@ package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * The base class for camera controls and information.
  *
+ * <p>
  * This class defines the basic key/value map used for querying for camera
  * characteristics or capture results, and for setting camera request
  * parameters.
+ * </p>
+ *
+ * <p>
+ * All instances of CameraMetadata are immutable. The list of keys with {@link #getKeys()}
+ * never changes, nor do the values returned by any key with {@link #get} throughout
+ * the lifetime of the object.
+ * </p>
  *
  * @see CameraDevice
  * @see CameraManager
@@ -38,9 +51,14 @@ public abstract class CameraMetadata {
     }
 
     /**
-     * Get a camera metadata field value. The field definitions can be
+     * Get a camera metadata field value.
+     *
+     * <p>The field definitions can be
      * found in {@link CameraProperties}, {@link CaptureResult}, and
-     * {@link CaptureRequest}.
+     * {@link CaptureRequest}.</p>
+     *
+     * <p>Querying the value for the same key more than once will return a value
+     * which is equal to the previous queried value.</p>
      *
      * @throws IllegalArgumentException if the key was not valid
      *
@@ -48,6 +66,54 @@ public abstract class CameraMetadata {
      * @return The value of that key, or {@code null} if the field is not set.
      */
     public abstract <T> T get(Key<T> key);
+
+    /**
+     * Returns a list of the keys contained in this map.
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>All values retrieved by a key from this list with {@link #get} are guaranteed to be
+     * non-{@code null}. Each key is only listed once in the list. The order of the keys
+     * is undefined.</p>
+     *
+     * @return List of the keys contained in this map.
+     */
+    public List<Key<?>> getKeys() {
+        return Collections.unmodifiableList(getKeysStatic(this.getClass(), this));
+    }
+
+    /**
+     * Return a list of all the Key<?> that are declared as a field inside of the class
+     * {@code type}.
+     *
+     * <p>
+     * Optionally, if {@code instance} is not null, then filter out any keys with null values.
+     * </p>
+     */
+    /*package*/ static ArrayList<Key<?>> getKeysStatic(Class<? extends CameraMetadata> type,
+            CameraMetadata instance) {
+        ArrayList<Key<?>> keyList = new ArrayList<Key<?>>();
+
+        Field[] fields = type.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getDeclaringClass().isAssignableFrom(Key.class)) {
+                Key<?> key;
+                try {
+                    key = (Key<?>) field.get(instance);
+                } catch (IllegalAccessException e) {
+                    throw new AssertionError("Can't get IllegalAccessException", e);
+                } catch (IllegalArgumentException e) {
+                    throw new AssertionError("Can't get IllegalArgumentException", e);
+                }
+                if (instance == null || instance.get(key) != null) {
+                    keyList.add(key);
+                }
+            }
+        }
+
+        return keyList;
+    }
 
     public static class Key<T> {
 

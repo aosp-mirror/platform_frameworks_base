@@ -10862,6 +10862,7 @@ package android.hardware.camera2 {
 
   public abstract class CameraMetadata {
     method public abstract T get(android.hardware.camera2.CameraMetadata.Key<T>);
+    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getKeys();
     field public static final int COLOR_CORRECTION_MODE_FAST = 1; // 0x1
     field public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0; // 0x0
@@ -10987,6 +10988,8 @@ package android.hardware.camera2 {
 
   public final class CameraProperties extends android.hardware.camera2.CameraMetadata {
     method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
+    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureRequestKeys();
+    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureResultKeys();
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_RANGE;

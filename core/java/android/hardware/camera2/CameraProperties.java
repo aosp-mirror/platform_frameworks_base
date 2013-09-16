@@ -18,6 +18,9 @@ package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * <p>The properties describing a
  * {@link CameraDevice CameraDevice}.</p>
@@ -32,6 +35,8 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 public final class CameraProperties extends CameraMetadata {
 
     private final CameraMetadataNative mProperties;
+    private List<Key<?>> mAvailableRequestKeys;
+    private List<Key<?>> mAvailableResultKeys;
 
     /**
      * Takes ownership of the passed-in properties object
@@ -44,6 +49,75 @@ public final class CameraProperties extends CameraMetadata {
     @Override
     public <T> T get(Key<T> key) {
         return mProperties.get(key);
+    }
+
+    /**
+     * Returns the list of keys supported by this {@link CameraDevice} for querying
+     * with a {@link CaptureRequest}.
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
+     *
+     * <p>Note that there is no {@code getAvailableCameraPropertiesKeys()} -- use
+     * {@link #getKeys()} instead.</p>
+     *
+     * @return List of keys supported by this CameraDevice for CaptureRequests.
+     */
+    public List<Key<?>> getAvailableCaptureRequestKeys() {
+        if (mAvailableRequestKeys == null) {
+            mAvailableRequestKeys = getAvailableKeyList(CaptureRequest.class);
+        }
+        return mAvailableRequestKeys;
+    }
+
+    /**
+     * Returns the list of keys supported by this {@link CameraDevice} for querying
+     * with a {@link CaptureResult}.
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
+     *
+     * <p>Note that there is no {@code getAvailableCameraPropertiesKeys()} -- use
+     * {@link #getKeys()} instead.</p>
+     *
+     * @return List of keys supported by this CameraDevice for CaptureResults.
+     */
+    public List<Key<?>> getAvailableCaptureResultKeys() {
+        if (mAvailableResultKeys == null) {
+            mAvailableResultKeys = getAvailableKeyList(CaptureResult.class);
+        }
+        return mAvailableResultKeys;
+    }
+
+    /**
+     * Returns the list of keys supported by this {@link CameraDevice} by metadataClass.
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
+     *
+     * @param metadataClass The subclass of CameraMetadata that you want to get the keys for.
+     *
+     * @return List of keys supported by this CameraDevice for metadataClass.
+     *
+     * @throws IllegalArgumentException if metadataClass is not a subclass of CameraMetadata
+     */
+    private <T extends CameraMetadata> List<Key<?>> getAvailableKeyList(Class<T> metadataClass) {
+
+        if (metadataClass.equals(CameraMetadata.class)) {
+            throw new AssertionError(
+                    "metadataClass must be a strict subclass of CameraMetadata");
+        } else if (!CameraMetadata.class.isAssignableFrom(metadataClass)) {
+            throw new AssertionError(
+                    "metadataClass must be a subclass of CameraMetadata");
+        }
+
+        return Collections.unmodifiableList(getKeysStatic(metadataClass, /*instance*/null));
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
