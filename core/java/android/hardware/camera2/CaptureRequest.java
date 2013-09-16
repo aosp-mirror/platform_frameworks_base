@@ -176,7 +176,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      */
     public final static class Builder {
 
-        private CaptureRequest mRequest;
+        private final CaptureRequest mRequest;
 
         /**
          * Initialize the builder using the template; the request takes
