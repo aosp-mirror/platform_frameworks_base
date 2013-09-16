@@ -19,6 +19,7 @@ package android.hardware.camera2.utils;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISABLED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISCONNECTED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+import static android.hardware.camera2.CameraAccessException.MAX_CAMERAS_IN_USE;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DEPRECATED_HAL;
 
 import android.os.DeadObjectException;
@@ -50,6 +51,7 @@ public class CameraBinderDecorator {
     public static final int EBUSY = -16;
     public static final int ENODEV = -19;
     public static final int EOPNOTSUPP = -95;
+    public static final int EDQUOT = -122;
 
     private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
@@ -83,6 +85,9 @@ public class CameraBinderDecorator {
                     case EBUSY:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_IN_USE));
+                    case EDQUOT:
+                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
+                                MAX_CAMERAS_IN_USE));
                     case ENODEV:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_DISCONNECTED));
