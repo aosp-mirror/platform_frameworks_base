@@ -23,7 +23,6 @@ import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
-import android.media.ImageReader.MaxImagesAcquiredException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -67,7 +66,6 @@ public class ImageReaderTest extends AndroidTestCase {
         {
             mock(Plane.class);
             mock(OnImageAvailableListener.class);
-            mock(MaxImagesAcquiredException.class);
         }
 
     }
@@ -83,8 +81,9 @@ public class ImageReaderTest extends AndroidTestCase {
      * Return null when there is nothing in the image queue.
      */
     @SmallTest
-    public void testGetLatestImageEmpty() throws MaxImagesAcquiredException {
+    public void testGetLatestImageEmpty() {
         when(mReader.acquireNextImage()).thenReturn(null);
+        when(mReader.acquireNextImageNoThrowISE()).thenReturn(null);
         assertEquals(null, mReader.acquireLatestImage());
     }
 
@@ -92,8 +91,9 @@ public class ImageReaderTest extends AndroidTestCase {
      * Return the last image from the image queue, close up the rest.
      */
     @SmallTest
-    public void testGetLatestImage1() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(null);
+    public void testGetLatestImage1() {
+        when(mReader.acquireNextImage()).thenReturn(mImage1);
+        when(mReader.acquireNextImageNoThrowISE()).thenReturn(null);
         assertEquals(mImage1, mReader.acquireLatestImage());
         verify(mImage1, never()).close();
     }
@@ -102,8 +102,9 @@ public class ImageReaderTest extends AndroidTestCase {
      * Return the last image from the image queue, close up the rest.
      */
     @SmallTest
-    public void testGetLatestImage2() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(mImage2).thenReturn(null);
+    public void testGetLatestImage2() {
+        when(mReader.acquireNextImage()).thenReturn(mImage1);
+        when(mReader.acquireNextImageNoThrowISE()).thenReturn(mImage2).thenReturn(null);
         assertEquals(mImage2, mReader.acquireLatestImage());
         verify(mImage1, atLeastOnce()).close();
         verify(mImage2, never()).close();
@@ -113,10 +114,11 @@ public class ImageReaderTest extends AndroidTestCase {
      * Return the last image from the image queue, close up the rest.
      */
     @SmallTest
-    public void testGetLatestImage3() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(mImage2).
-                                         thenReturn(mImage3).
-                                         thenReturn(null);
+    public void testGetLatestImage3() {
+        when(mReader.acquireNextImage()).thenReturn(mImage1);
+        when(mReader.acquireNextImageNoThrowISE()).thenReturn(mImage2).
+                                                   thenReturn(mImage3).
+                                                   thenReturn(null);
         assertEquals(mImage3, mReader.acquireLatestImage());
         verify(mImage1, atLeastOnce()).close();
         verify(mImage2, atLeastOnce()).close();
@@ -124,64 +126,27 @@ public class ImageReaderTest extends AndroidTestCase {
     }
 
     /**
-     * Return null if get a MaxImagesAcquiredException with no images in the queue.
+     * Return null if get a IllegalStateException with no images in the queue.
      */
     @SmallTest
-    public void testGetLatestImageTooManyBuffersAcquiredEmpty()  throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenThrow(new MaxImagesAcquiredException());
+    public void testGetLatestImageTooManyBuffersAcquiredEmpty()  {
+        when(mReader.acquireNextImage()).thenThrow(new IllegalStateException());
         try {
             mReader.acquireLatestImage();
-            fail("Expected MaxImagesAcquiredException to be thrown");
-        } catch(MaxImagesAcquiredException e) {
+            fail("Expected IllegalStateException to be thrown");
+        } catch(IllegalStateException e) {
         }
-    }
-
-    /**
-     * Return the last image before we get a MaxImagesAcquiredException. Close up the rest.
-     */
-    @SmallTest
-    public void testGetLatestImageTooManyBuffersAcquired1() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).
-                                         thenThrow(new MaxImagesAcquiredException());
-        assertEquals(mImage1, mReader.acquireLatestImage());
-        verify(mImage1, never()).close();
-    }
-
-    /**
-     * Return the last image before we get a MaxImagesAcquiredException. Close up the rest.
-     */
-    @SmallTest
-    public void testGetLatestImageTooManyBuffersAcquired2() throws MaxImagesAcquiredException {
-
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(mImage2).
-                                         thenThrow(new MaxImagesAcquiredException());
-        assertEquals(mImage2, mReader.acquireLatestImage());
-        verify(mImage1, atLeastOnce()).close();
-        verify(mImage2, never()).close();
-    }
-
-    /**
-     * Return the last image before we get a MaxImagesAcquiredException. Close up the rest.
-     */
-    @SmallTest
-    public void testGetLatestImageTooManyBuffersAcquired3() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(mImage2).
-                                         thenReturn(mImage3).
-                                         thenThrow(new MaxImagesAcquiredException());
-        assertEquals(mImage3, mReader.acquireLatestImage());
-        verify(mImage1, atLeastOnce()).close();
-        verify(mImage2, atLeastOnce()).close();
-        verify(mImage3, never()).close();
     }
 
     /**
      * All images are cleaned up when we get an unexpected Error.
      */
     @SmallTest
-    public void testGetLatestImageExceptionalError() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(mImage2).
-                                         thenReturn(mImage3).
-                                         thenThrow(new OutOfMemoryError());
+    public void testGetLatestImageExceptionalError() {
+        when(mReader.acquireNextImage()).thenReturn(mImage1);
+        when(mReader.acquireNextImageNoThrowISE()).thenReturn(mImage2).
+                                                   thenReturn(mImage3).
+                                                   thenThrow(new OutOfMemoryError());
         try {
             mReader.acquireLatestImage();
             fail("Impossible");
@@ -197,10 +162,12 @@ public class ImageReaderTest extends AndroidTestCase {
      * All images are cleaned up when we get an unexpected RuntimeException.
      */
     @SmallTest
-    public void testGetLatestImageExceptionalRuntime() throws MaxImagesAcquiredException {
-        when(mReader.acquireNextImage()).thenReturn(mImage1).thenReturn(mImage2).
-                                         thenReturn(mImage3).
-                                         thenThrow(new RuntimeException());
+    public void testGetLatestImageExceptionalRuntime() {
+
+        when(mReader.acquireNextImage()).thenReturn(mImage1);
+        when(mReader.acquireNextImageNoThrowISE()).thenReturn(mImage2).
+                                                   thenReturn(mImage3).
+                                                   thenThrow(new RuntimeException());
         try {
             mReader.acquireLatestImage();
             fail("Impossible");
