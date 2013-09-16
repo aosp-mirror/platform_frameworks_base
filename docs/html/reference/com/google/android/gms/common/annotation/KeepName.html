@@ -73,15 +73,17 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>PlusClient.OnPersonLoadedListener | Android Developers</title>
+<title>KeepName | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -624,8 +631,33 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -641,15 +673,20 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div id="jd-header">
     public
-    static 
      
-    
-    interface
-<h1 itemprop="name">PlusClient.OnPersonLoadedListener</h1>
+     
+    abstract
+    @interface
+<h1 itemprop="name">KeepName</h1>
 
 
 
   
+  
+      implements 
+      
+        Annotation 
+      
   
   
 
@@ -664,7 +701,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.PlusClient.OnPersonLoadedListener</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.annotation.KeepName</td>
     </tr>
     
 
@@ -677,12 +714,11 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This interface is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></code>.
 
-  </p>
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">Indicates that the name of this object (class, method, etc) should be retained when proguarding.
+</p>
 
 
 
@@ -736,9 +772,34 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
 
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.annotation.Annotation" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.annotation.Annotation-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  java.lang.annotation.Annotation
+
+<div id="inherited-methods-java.lang.annotation.Annotation">
+  <div id="inherited-methods-java.lang.annotation.Annotation-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.annotation.Annotation-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
 
 
 	 
@@ -749,26 +810,69 @@ onkeyup="return search_changed(event, false, '/')" />
             
             
             
-            void</nobr>
+            Class&lt;?&nbsp;extends&nbsp;Annotation&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPersonLoadedListener.html#onPersonLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.Person)">onPersonLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a> person)</nobr>
+        <span class="sympad">annotationType</span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded(ConnectionResult, PersonBuffer, String)</a></code>.
-</em></div>
-  
   </td></tr>
 
 
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
 
 </table>
+  </div>
+</div>
+</td></tr>
 
 
-
-
-
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -805,45 +909,6 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
-
-<h2>Public Methods</h2>
-
-
-
-<A NAME="onPersonLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.Person)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">onPersonLoaded</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a> person)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded(ConnectionResult, PersonBuffer, String)</a></code>.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
 
 
 

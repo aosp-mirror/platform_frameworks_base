@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GoogleCloudMessaging | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -684,7 +691,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -704,7 +711,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -728,25 +735,49 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody"><p>Google Cloud Messaging for Android.
+<p itemprop="articleBody"><p>The class you use to write a GCM-enabled client application that runs on an Android device.
+ Client applications can receive GCM messages and optionally send messages of their own back to
+ the server.
 
- <p>This class requires Google Play services version 3.1 or higher.
+ <p>This class requires Google Play services version 3.1 or higher. For a
+ detailed discussion of how to write a GCM client app, see
+ <a href="http://developer.android.com/google/gcm/client.html">
+ Implementing GCM Client</a>.
 
- <p>In order to receive GCM messages you need to declare a permission and a BroadcastReceiver
- in your manifest. This is a backward-compatible subset of what was required in previous
- versions.
+ <p>To send or receive messages, your application first needs to get a registration ID. The
+ registration ID identifies the device and application, and also determines which 3rd-party
+ application servers are allowed to send messages to this application instance.
+
+ <p>To get a registration ID, you must supply one or more sender IDs. A sender ID is a project
+ number you acquire from the API console, as described in
+ <a href="http://developer.android.com/google/gcm/gs.html">Getting Started</a>. The sender ID is
+ used in the registration process to identify a 3rd-party application server that is permitted to
+ send messages to the device. The following snippet shows you how to call the
+ <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register(java.lang.String...)">register()</a></code> method. For a more comprehensive example, see
+ <a href="http://developer.android.com/google/gcm/client.html">Implementing GCM Client</a>.
+
+ <pre>
+ String SENDER_ID = "My-Sender-ID";
+ GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+ String registrationId = gcm.register(SENDER_ID);
+ // Upload the registration ID to your own server
+ // The request to your server should be authenticated if your app is using accounts.
+ </pre>
+
+ <p>In order to receive GCM messages, you need to declare a permission and a
+ <code>BroadcastReceiver</code> in your manifest. This is a backward-compatible subset of what was
+ required in previous versions of GCM.
 
  <p>To allow the application to use GCM, add this permission to the manifest:
- <pre>
- &lt;uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" /&gt;</pre>
+
+ <pre>&lt;uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" /&gt;</pre>
 
  <p>GCM delivers messages as a broadcast. The receivers must be registered in the manifest in
  order to wake up the application.
 
- <p>The <code>com.google.android.c2dm.permission.SEND</code> permission is held by
- Google Play services.
- This prevents other code from invoking the broadcast receiver.
- Here is an excerpt from the manifest:
+ <p>The <code>com.google.android.c2dm.permission.SEND permission</code> is held by Google Play
+ services. This prevents other code from invoking the broadcast receiver. Here is an excerpt
+ from a sample manifest:
 
  <pre>
  &lt;receiver android:name=".MyReceiver" android:exported="true"
@@ -757,25 +788,42 @@ Summary:
      &lt;/intent-filter&gt;
  &lt;/receiver&gt;</pre>
 
- <p>To send or receive messages, you first need to get a registration ID. The registration ID
- identifies the device and application, as well as which servers are allowed to send messages.
+ <p>When a GCM connection server delivers the message to your client app, the
+ <code>BroadcastReceiver</code> receives the message as an intent. You can either process the
+ intent in the <code>BroadcastReceiver</code>, or you can pass off the work of processing the
+ intent to a service (typically, an <code>IntentService</code>). If you use a service, your
+ broadcast receiver should be an instance of <code>WakefulBroadcastReceiver</code>, to hold a
+ wake lock while the service is doing its work.
+
+ <p>When processing the intent GCM passes into your app's broadcase receiver, you can determine
+ the message type by calling <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType(intent)</a></code>. For example:
 
  <pre>
- GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-
- String registrationId = gcm.register(sender1, sender2);
- // Upload the registrationId to your own server
- // The request to your server should be authenticated if your app is using accounts.
+ GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+ String messageType = gcm.getMessageType(intent);
+ ...
+ // Filter messages based on message type. It is likely that GCM will be extended in the future
+ // with new message types, so just ignore message types you're not interested in, or that you
+ // don't recognize.
+ if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+    // It's an error.
+ } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+    // Deleted messages on the server.
+ } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+    // It's a regular GCM message, do some work.
+ }
  </pre>
 
- <p>The BroadcastReceiver will be invoked whenever a message is received, as well as for special
- messages generated by GCM. Within the BroadcastReceiver you can call
- <code>getMessageType(Intent)</code>.
+ <p>If you are using the XMPP-based
+ <a href="http://developer.android.com/google/gcm/ccs.html">Cloud Connection Server</a>, your
+ client app can send upstream messages back to the server. For example:
 
- <p>To send messages, call <code>send()</code>:
  <pre>
- gcm.send(to, msgId, data);
+ gcm.send(SENDER_ID + "&#64;gcm.googleapis.com", id, data);
  </pre>
+
+ For a more details, see
+ <a href="http://developer.android.com/google/gcm/client.html">Implementing GCM Client</a>.
 </p>
 
 
@@ -822,14 +870,15 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#ERROR_MAIN_THREAD">ERROR_MAIN_THREAD</a></td>
-        <td class="jd-descrcol" width="100%">GCM methods are blocking.</td>
+        <td class="jd-descrcol" width="100%">The GCM <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register(java.lang.String...)">register()</a></code> and <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#unregister()">unregister()</a></code> methods are
+ blocking.</td>
     </tr>
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#ERROR_SERVICE_NOT_AVAILABLE">ERROR_SERVICE_NOT_AVAILABLE</a></td>
         <td class="jd-descrcol" width="100%">The device can't read the response, or there was a 500/503 from the
  server that can be retried later.</td>
@@ -837,7 +886,7 @@ Summary:
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_DELETED">MESSAGE_TYPE_DELETED</a></td>
         <td class="jd-descrcol" width="100%">Returned by <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType(Intent)</a></code> to indicate that the server deleted
  some pending messages because they were collapsible.</td>
@@ -845,14 +894,14 @@ Summary:
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_MESSAGE">MESSAGE_TYPE_MESSAGE</a></td>
         <td class="jd-descrcol" width="100%">Returned by <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType(Intent)</a></code> to indicate a regular message.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_SEND_ERROR">MESSAGE_TYPE_SEND_ERROR</a></td>
         <td class="jd-descrcol" width="100%">Returned by <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType(Intent)</a></code> to indicate a send error.</td>
     </tr>
@@ -936,7 +985,7 @@ Summary:
             <a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">GoogleCloudMessaging</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getInstance(android.content.Context)">getInstance</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getInstance(android.content.Context)">getInstance</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">Return the singleton instance of GCM.</div>
   
@@ -951,12 +1000,12 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType</a></span>(<a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Return the message type.</div>
+        <div class="jd-descrdiv">Return the message type from an intent passed into a client app's broadcast receiver.</div>
   
   </td></tr>
 
@@ -969,10 +1018,10 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register(java.lang.String...)">register</a></span>(<a href="/reference/java/lang/String.html">String...</a> senderIds)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register(java.lang.String...)">register</a></span>(String... senderIds)</nobr>
         
         <div class="jd-descrdiv">Register the application for GCM and return the registration ID.</div>
   
@@ -990,9 +1039,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#send(java.lang.String, java.lang.String, long, android.os.Bundle)">send</a></span>(<a href="/reference/java/lang/String.html">String</a> to, <a href="/reference/java/lang/String.html">String</a> msgId, long timeToLive, <a href="/reference/android/os/Bundle.html">Bundle</a> data)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#send(java.lang.String, java.lang.String, long, android.os.Bundle)">send</a></span>(String to, String msgId, long timeToLive, Bundle data)</nobr>
         
-        <div class="jd-descrdiv">Send a "device to cloud" message.</div>
+        <div class="jd-descrdiv">Send an upstream ("device to cloud") message.</div>
   
   </td></tr>
 
@@ -1008,9 +1057,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#send(java.lang.String, java.lang.String, android.os.Bundle)">send</a></span>(<a href="/reference/java/lang/String.html">String</a> to, <a href="/reference/java/lang/String.html">String</a> msgId, <a href="/reference/android/os/Bundle.html">Bundle</a> data)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#send(java.lang.String, java.lang.String, android.os.Bundle)">send</a></span>(String to, String msgId, Bundle data)</nobr>
         
-        <div class="jd-descrdiv">Send a "device to cloud" message.</div>
+        <div class="jd-descrdiv">Send an upstream ("device to cloud") message.</div>
   
   </td></tr>
 
@@ -1056,7 +1105,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1075,7 +1124,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1094,7 +1143,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1123,7 +1172,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1187,7 +1236,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1286,7 +1335,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         ERROR_MAIN_THREAD
     </h4>
@@ -1298,8 +1347,8 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>GCM methods are blocking. You should not run them in the main thread or in broadcast
- receivers.
+  <div class="jd-tagdata jd-tagdescr"><p>The GCM <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register(java.lang.String...)">register()</a></code> and <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#unregister()">unregister()</a></code> methods are
+ blocking. You should not run them in the main thread or in broadcast receivers.
 </p></div>
 
     
@@ -1325,7 +1374,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         ERROR_SERVICE_NOT_AVAILABLE
     </h4>
@@ -1365,7 +1414,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         MESSAGE_TYPE_DELETED
     </h4>
@@ -1404,7 +1453,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         MESSAGE_TYPE_MESSAGE
     </h4>
@@ -1442,7 +1491,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         MESSAGE_TYPE_SEND_ERROR
     </h4>
@@ -1573,7 +1622,7 @@ From class
         <a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">GoogleCloudMessaging</a>
       </span>
       <span class="sympad">getInstance</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1599,10 +1648,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getMessageType</span>
-      <span class="normal">(<a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1612,20 +1661,25 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Return the message type. Regular messages from the server have the type
- <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_MESSAGE">GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Return the message type from an intent passed into a client app's broadcast receiver. There
+ are two general categories of messages passed from the server: regular GCM messages,
+ and special GCM status messages.
 
- The server may also send special messages. The possible types are:
-  <ul>
-  <li><code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_MESSAGE">MESSAGE_TYPE_MESSAGE</a></code>&mdash;regular message from your server.
-  </li><li><code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_DELETED">MESSAGE_TYPE_DELETED</a></code>&mdash;if some messages have been collapsed by GCM.
-  </li><li><code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_SEND_ERROR">MESSAGE_TYPE_SEND_ERROR</a></code>&mdash;indicates errors sending one of the messages.
+ The possible types are:
+ <ul>
+   <li><code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_MESSAGE">MESSAGE_TYPE_MESSAGE</a></code>&mdash;regular message from your server.
+   </li><li><code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_DELETED">MESSAGE_TYPE_DELETED</a></code>&mdash;special status message indicating that some
+     messages have been collapsed by GCM.
+   </li><li><code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_SEND_ERROR">MESSAGE_TYPE_SEND_ERROR</a></code>&mdash;special status message indicating that
+     there were errors sending one of the messages.
   </li></ul>
 
-  Additional types may be added later; you should ignore any type you don't handle.</p></div>
+ You can use this method to filter based on message type. Since it is likely that GCM will
+ be extended in the future with new message types, just ignore any message types you're not
+ interested in, or that you don't recognize.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the message type or null if the intent is not a GCM intent
+      <ul class="nolist"><li>The message type or null if the intent is not a GCM intent
 </li></ul>
   </div>
 
@@ -1643,10 +1697,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">register</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String...</a> senderIds)</span>
+      <span class="normal">(String... senderIds)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1684,7 +1738,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td></td>
         </tr>
       </table>
@@ -1707,7 +1761,7 @@ From class
         void
       </span>
       <span class="sympad">send</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> to, <a href="/reference/java/lang/String.html">String</a> msgId, long timeToLive, <a href="/reference/android/os/Bundle.html">Bundle</a> data)</span>
+      <span class="normal">(String to, String msgId, long timeToLive, Bundle data)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1717,11 +1771,13 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Send a "device to cloud" message.
+  <div class="jd-tagdata jd-tagdescr"><p>Send an upstream ("device to cloud") message. You can only use the upstream feature
+ if your GCM implementation uses the XMPP-based
+ <a href="http://developer.android.com/google/gcm/ccs.html">Cloud Connection Server</a>.
 
  The current limits for max storage time and number of outstanding messages per
  application are documented in the
- <a href="/google/gcm/gcm.html">GCM Dev Guide</a>.</p></div>
+ <a href="http://developer.android.com/google/gcm/index.html">GCM Developers Guide</a>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1747,8 +1803,7 @@ From class
         <tr>
           <th>data</td>
           <td>key/value pairs to be sent. Values must be String, any other type will
-   be ignored.
-</td>
+   be ignored.</td>
         </tr>
       </table>
   </div>
@@ -1756,7 +1811,11 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IllegalArgumentException</td>
+            <td></td>
+        </tr>  
+        <tr>
+            <th>IOException</td>
             <td></td>
         </tr>
       </table>
@@ -1779,7 +1838,7 @@ From class
         void
       </span>
       <span class="sympad">send</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> to, <a href="/reference/java/lang/String.html">String</a> msgId, <a href="/reference/android/os/Bundle.html">Bundle</a> data)</span>
+      <span class="normal">(String to, String msgId, Bundle data)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1789,7 +1848,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Send a "device to cloud" message.
+  <div class="jd-tagdata jd-tagdescr"><p>Send an upstream ("device to cloud") message. You can only use the upstream feature
+ if your GCM implementation uses the XMPP-based
+ <a href="http://developer.android.com/google/gcm/ccs.html">Cloud Connection Server</a>.
 
  The message will be queued if we don't have an active connection for the max interval.</p></div>
   <div class="jd-tagdata">
@@ -1817,7 +1878,11 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th></td>
+            <td>IllegalArgumentException</td>
+        </tr>  
+        <tr>
+            <th>IOException</td>
             <td></td>
         </tr>
       </table>
@@ -1856,15 +1921,14 @@ From class
 
  You should rarely (if ever) need to call this method. Not only is it
  expensive in terms of resources, but it invalidates your registration ID,
- which should never change unnecessarily. A better approach is to simply
+ which you should never change unnecessarily. A better approach is to simply
  have your server stop sending messages. Only use unregister if you want
- your application to stop using GCM permanently, or you have a compelling
- reason to recycle your registration ID.</p></div>
+ to change your sender ID.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/io/IOException.html">IOException</a></td>
+            <th>IOException</td>
             <td>if we can't connect to server to unregister.
 </td>
         </tr>
