@@ -4344,9 +4344,7 @@
     <!-- PIN entry dialog tells the user to not enter a PIN for a while. [CHAR LIMIT=none] -->
     <string name="restr_pin_try_later">Try again later</string>
 
-    <!-- Toast bar message when hiding the transient navigation bar [CHAR LIMIT=35] -->
-    <string name="transient_navigation_confirmation">Swipe edge of screen to reveal bar</string>
+    <!-- Toast bar message when hiding the transient navigation bar [CHAR LIMIT=45] -->
+    <string name="transient_navigation_confirmation">Swipe down from the top to exit full screen</string>
 
-    <!-- Longer version of toast bar message when hiding the transient navigation bar (if room) -->
-    <string name="transient_navigation_confirmation_long">Swipe from edge of screen to reveal system bar</string>
 </resources>

@@ -34,7 +34,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -105,7 +104,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashSet;
 
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -531,7 +529,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    ImmersiveModeTesting.ENABLED_SETTING), false, this,
+                    Settings.Secure.TRANSIENT_NAV_CONFIRMATIONS), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -947,9 +945,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     @Override
                     public void onDebug() {
-                        if (ImmersiveModeTesting.enabled) {
-                            ImmersiveModeTesting.toggleForceImmersiveMode(mFocusedWindow, mContext);
-                        }
+                        // no-op
                     }
                 });
         mTransientNavigationConfirmation = new TransientNavigationConfirmation(mContext);
@@ -1168,8 +1164,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHasSoftInput = hasSoftInput;
                 updateRotation = true;
             }
-            ImmersiveModeTesting.enabled = Settings.System.getIntForUser(resolver,
-                    ImmersiveModeTesting.ENABLED_SETTING, 0, UserHandle.USER_CURRENT) != 0;
+            if (mTransientNavigationConfirmation != null) {
+                mTransientNavigationConfirmation.loadSetting();
+            }
         }
         if (updateRotation) {
             updateRotation(true);
@@ -3892,9 +3889,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
-                    if (isScreenOn && isTransientNavigationAllowed(mLastSystemUiFlags)) {
-                        mTransientNavigationConfirmation.unconfirmLastPackage();
-                    }
+                    mTransientNavigationConfirmation.onPowerKeyDown(isScreenOn, event.getDownTime(),
+                            isTransientNavigationAllowed(mLastSystemUiFlags));
                     if (isScreenOn && !mPowerKeyTriggered
                             && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                         mPowerKeyTriggered = true;
@@ -4173,6 +4169,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (sb) mStatusBarController.showTransient();
                 if (nb) mNavigationBarController.showTransient();
+                mTransientNavigationConfirmation.confirmCurrentPrompt();
                 updateSystemUiVisibilityLw();
             }
         }
@@ -5039,10 +5036,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int updateSystemBarsLw(int oldVis, int vis) {
-        if (ImmersiveModeTesting.enabled) {
-            vis = ImmersiveModeTesting.applyForced(mFocusedWindow, vis);
-        }
-
         // prevent status bar interaction from clearing certain flags
         boolean statusBarHasFocus = mFocusedWindow.getAttrs().type == TYPE_STATUS_BAR;
         if (statusBarHasFocus) {
@@ -5086,8 +5079,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean isTransientNav = isTransientNavigationAllowed(vis);
         if (mFocusedWindow != null && oldTransientNav != isTransientNav) {
             final String pkg = mFocusedWindow.getOwningPackage();
-            mTransientNavigationConfirmation.transientNavigationChanged(mCurrentUserId, pkg,
-                    isTransientNav);
+            mTransientNavigationConfirmation.transientNavigationChanged(pkg, isTransientNav);
         }
         vis = mNavigationBarController.updateVisibilityLw(isTransientNav, oldVis, vis);
 
@@ -5102,53 +5094,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
-    }
-
-    // Temporary helper that allows testing immersive mode on existing apps
-    // TODO remove
-    private static final class ImmersiveModeTesting {
-        static String ENABLED_SETTING = "immersive_mode_testing_enabled";
-        static boolean enabled = false;
-        private static final HashSet<String> sForced = new HashSet<String>();
-
-        private static String parseActivity(WindowState win) {
-            if (win != null && win.getAppToken() != null) {
-                String str = win.getAppToken().toString();
-                int end = str.lastIndexOf(' ');
-                if (end > 0) {
-                    int start = str.lastIndexOf(' ', end - 1);
-                    if (start > -1) {
-                        return str.substring(start + 1, end);
-                    }
-                }
-            }
-            return null;
-        }
-
-        public static int applyForced(WindowState focused, int vis) {
-            if (sForced.contains(parseActivity(focused))) {
-                vis |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                       View.SYSTEM_UI_FLAG_FULLSCREEN |
-                       View.SYSTEM_UI_FLAG_IMMERSIVE;
-            }
-            return vis;
-        }
-
-        public static void toggleForceImmersiveMode(WindowState focused, Context context) {
-            String activity = parseActivity(focused);
-            if (activity != null) {
-                String action;
-                if (sForced.contains(activity)) {
-                    sForced.remove(activity);
-                    action = "Force immersive mode disabled";
-                } else {
-                    sForced.add(activity);
-                    action = "Force immersive mode enabled";
-                }
-                android.widget.Toast.makeText(context,
-                        action + " for " + activity, android.widget.Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     // Use this instead of checking config_showNavigationBar so that it can be consistently

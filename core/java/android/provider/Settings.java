@@ -4365,6 +4365,9 @@ public final class Settings {
         /** @hide */
         public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
 
+        /** @hide */
+        public static final String TRANSIENT_NAV_CONFIRMATIONS = "transient_nav_confirmations";
+
         /**
          * This are the settings to be backed up.
          *
