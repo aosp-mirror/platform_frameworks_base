@@ -1378,6 +1378,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
+    private void releaseFocus() {
+        WindowManager.LayoutParams lp =
+                (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
+    }
+
     public void animateCollapsePanels() {
         animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
     }
@@ -1388,6 +1396,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     + " mExpandedVisible=" + mExpandedVisible
                     + " flags=" + flags);
         }
+
+        // release focus immediately to kick off focus change transition
+        releaseFocus();
 
         if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
