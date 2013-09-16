@@ -2853,6 +2853,7 @@ final class Settings {
         ApplicationInfo.FLAG_RESTORE_ANY_VERSION, "RESTORE_ANY_VERSION",
         ApplicationInfo.FLAG_EXTERNAL_STORAGE, "EXTERNAL_STORAGE",
         ApplicationInfo.FLAG_LARGE_HEAP, "LARGE_HEAP",
+        ApplicationInfo.FLAG_PRIVILEGED, "PRIVILEGED",
         ApplicationInfo.FLAG_FORWARD_LOCK, "FORWARD_LOCK",
         ApplicationInfo.FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
     };
