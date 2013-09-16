@@ -2078,6 +2078,12 @@
   <public type="attr" name="requireDeviceUnlock" />
   <public type="attr" name="apduServiceBanner" />
   <public type="attr" name="accessibilityLiveRegion" />
+
+<!-- ===============================================================
+     Resources added in version 20 of the platform
+     =============================================================== -->
+  <eat-comment />
+
   <public type="attr" name="fragmentBreadCrumbsStyle" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
