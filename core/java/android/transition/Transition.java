@@ -1451,6 +1451,8 @@ public abstract class Transition implements Cloneable {
         try {
             clone = (Transition) super.clone();
             clone.mAnimators = new ArrayList<Animator>();
+            clone.mStartValues = new TransitionValuesMaps();
+            clone.mEndValues = new TransitionValuesMaps();
         } catch (CloneNotSupportedException e) {}
 
         return clone;

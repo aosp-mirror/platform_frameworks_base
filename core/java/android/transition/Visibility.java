@@ -65,9 +65,6 @@ public abstract class Visibility extends Transition {
         ViewGroup endParent;
     }
 
-    // Temporary structure, used in calculating state in setup() and play()
-    private VisibilityInfo mTmpVisibilityInfo = new VisibilityInfo();
-
     @Override
     public String[] getTransitionProperties() {
         return sTransitionProperties;
@@ -161,7 +158,7 @@ public abstract class Visibility extends Transition {
 
     private VisibilityInfo getVisibilityChangeInfo(TransitionValues startValues,
             TransitionValues endValues) {
-        final VisibilityInfo visInfo = mTmpVisibilityInfo;
+        final VisibilityInfo visInfo = new VisibilityInfo();
         visInfo.visibilityChange = false;
         visInfo.fadeIn = false;
         if (startValues != null) {
