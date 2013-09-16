@@ -65,7 +65,7 @@ public class AppOpsManager {
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpNames, sOpPerms
+    //  - add rows to sOpToSwitch, sOpNames, sOpPerms, sOpDefaultMode
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -315,6 +315,55 @@ public class AppOpsManager {
     };
 
     /**
+     * This specifies the default mode for each operation.
+     */
+    private static int[] sOpDefaultMode = new int[] {
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_IGNORED, // OP_WRITE_SMS
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+    };
+
+    /**
      * Retrieve the op switch that controls the given operation.
      * @hide
      */
@@ -336,6 +385,14 @@ public class AppOpsManager {
      */
     public static String opToPermission(int op) {
         return sOpPerms[op];
+    }
+
+    /**
+     * Retrieve the default mode for the operation.
+     * @hide
+     */
+    public static int opToDefaultMode(int op) {
+        return sOpDefaultMode[op];
     }
 
     /**

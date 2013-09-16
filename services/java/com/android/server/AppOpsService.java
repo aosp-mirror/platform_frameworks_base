@@ -113,7 +113,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             uid = _uid;
             packageName = _packageName;
             op = _op;
-            mode = AppOpsManager.MODE_ALLOWED;
+            mode = AppOpsManager.opToDefaultMode(op);
         }
     }
 
@@ -191,7 +191,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHandler = new Handler();
         readState();
     }
-    
+
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
@@ -379,7 +379,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                         repCbs.addAll(cbs);
                     }
-                    if (mode == AppOpsManager.MODE_ALLOWED) {
+                    if (mode == AppOpsManager.opToDefaultMode(op.op)) {
                         // If going into the default mode, prune this op
                         // if there is nothing else interesting in it.
                         pruneOp(op, uid, packageName);
@@ -435,8 +435,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Ops pkgOps = ent.getValue();
                     for (int j=pkgOps.size()-1; j>=0; j--) {
                         Op curOp = pkgOps.valueAt(j);
-                        if (curOp.mode != AppOpsManager.MODE_ALLOWED) {
-                            curOp.mode = AppOpsManager.MODE_ALLOWED;
+                        if (curOp.mode != AppOpsManager.opToDefaultMode(curOp.op)) {
+                            curOp.mode = AppOpsManager.opToDefaultMode(curOp.op);
                             changed = true;
                             callbacks = addCallbacks(callbacks, packageName, curOp.op,
                                     mOpModeWatchers.get(curOp.op));
@@ -545,7 +545,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, false);
             if (op == null) {
-                return AppOpsManager.MODE_ALLOWED;
+                return AppOpsManager.opToDefaultMode(code);
             }
             return op.mode;
         }
@@ -947,7 +947,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             AppOpsManager.OpEntry op = ops.get(j);
                             out.startTag(null, "op");
                             out.attribute(null, "n", Integer.toString(op.getOp()));
-                            if (op.getMode() != AppOpsManager.MODE_ALLOWED) {
+                            if (op.getMode() != AppOpsManager.opToDefaultMode(op.getOp())) {
                                 out.attribute(null, "m", Integer.toString(op.getMode()));
                             }
                             long time = op.getTime();
