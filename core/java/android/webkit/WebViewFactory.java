@@ -28,6 +28,19 @@ import android.util.Log;
  * @hide
  */
 public final class WebViewFactory {
+    private static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = true;
+    // REMEMBER: property names must be <= 31 chars total.
+    private static final String EXPERIMENTAL_PROPERTY_DEFAULT_OFF = "persist.sys.webview.exp";
+    private static final String EXPERIMENTAL_PROPERTY_DEFAULT_ON =
+            "persist.sys.webview." + Build.ID;
+
+    // Modify the persisted property name when the new webview is on-by-default, so that any user
+    // setting override only lives as long as that build.
+    private static final String LONG_PROPERTY_NAME = DEFAULT_TO_EXPERIMENTAL_WEBVIEW ?
+            EXPERIMENTAL_PROPERTY_DEFAULT_ON : EXPERIMENTAL_PROPERTY_DEFAULT_OFF;
+    private static final String WEBVIEW_EXPERIMENTAL_PROPERTY =
+            LONG_PROPERTY_NAME.length() > SystemProperties.PROP_NAME_MAX ?
+            LONG_PROPERTY_NAME.substring(0, SystemProperties.PROP_NAME_MAX) : LONG_PROPERTY_NAME;
 
     private static final String FORCE_PROVIDER_PROPERTY = "webview.force_provider";
     private static final String FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM = "chromium";
@@ -60,25 +73,32 @@ public final class WebViewFactory {
     private static final Object sProviderLock = new Object();
 
     public static boolean isExperimentalWebViewAvailable() {
-        // TODO: Remove callers of this method then remove it.
-        return false;  // Hide the toggle in Developer Settings.
+        try {
+            // Pass false so we don't initialize the class at this point, as this will be wasted if
+            // it's not enabled.
+            Class.forName(CHROMIUM_WEBVIEW_FACTORY, false, WebViewFactory.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     /** @hide */
     public static void setUseExperimentalWebView(boolean enable) {
-        // TODO: Remove callers of this method then remove it.
+        SystemProperties.set(WEBVIEW_EXPERIMENTAL_PROPERTY, enable ? "true" : "false");
+        Log.i(LOGTAG, "Use Experimental WebView changed: "
+                + SystemProperties.get(WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY, ""));
     }
 
     /** @hide */
     public static boolean useExperimentalWebView() {
-        // TODO: Remove callers of this method then remove it.
-        return isChromiumWebViewEnabled();
+        return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY,
+            DEFAULT_TO_EXPERIMENTAL_WEBVIEW);
     }
 
     /** @hide */
     public static boolean isUseExperimentalWebViewSet() {
-        // TODO: Remove callers of this method then remove it.
-        return false;  // User has not modifed Developer Settings
+        return !SystemProperties.get(WEBVIEW_EXPERIMENTAL_PROPERTY).isEmpty();
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -120,20 +140,21 @@ public final class WebViewFactory {
 
     // We allow a system property to specify that we should use the experimental Chromium powered
     // WebView. This enables us to switch between implementations at runtime.
-    private static boolean isChromiumWebViewEnabled() {
+    private static boolean isExperimentalWebViewEnabled() {
+        if (!isExperimentalWebViewAvailable()) return false;
         String forceProviderName = SystemProperties.get(FORCE_PROVIDER_PROPERTY);
-        if (forceProviderName.isEmpty()) return true;
+        if (forceProviderName.isEmpty()) return useExperimentalWebView();
 
         Log.i(LOGTAG, String.format("Provider overridden by property: %s=%s",
                 FORCE_PROVIDER_PROPERTY, forceProviderName));
         if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM)) return true;
         if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC)) return false;
         Log.e(LOGTAG, String.format("Unrecognized provider: %s", forceProviderName));
-        return true;
+        return useExperimentalWebView();
     }
 
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
-        if (isChromiumWebViewEnabled()) {
+        if (isExperimentalWebViewEnabled()) {
             return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
         } else  {
             return (Class<WebViewFactoryProvider>) Class.forName(DEFAULT_WEBVIEW_FACTORY);
