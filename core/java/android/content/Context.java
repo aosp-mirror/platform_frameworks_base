@@ -2132,13 +2132,7 @@ public abstract class Context {
     public static final String UPDATE_LOCK_SERVICE = "updatelock";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.NetworkManagementService} for handling management of
-     * system network services
-     *
-     * @hide
-     * @see #getSystemService
-     * @see android.net.NetworkManagementService
+     * Constant for the internal network management service, not really a Context service.
      */
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
@@ -2327,7 +2321,7 @@ public abstract class Context {
      * android.hardware.SerialManager} for access to serial ports.
      *
      * @see #getSystemService
-     * @see android.harware.SerialManager
+     * @see android.hardware.SerialManager
      *
      * @hide
      */
@@ -2350,17 +2344,6 @@ public abstract class Context {
      * @see android.hardware.display.DisplayManager
      */
     public static final String DISPLAY_SERVICE = "display";
-
-    /**
-     * Use with {@link #getSystemService} to retrieve a
-     * {@link android.os.SchedulingPolicyService} for managing scheduling policy.
-     *
-     * @see #getSystemService
-     * @see android.os.SchedulingPolicyService
-     *
-     * @hide
-     */
-    public static final String SCHEDULING_POLICY_SERVICE = "scheduling_policy";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
