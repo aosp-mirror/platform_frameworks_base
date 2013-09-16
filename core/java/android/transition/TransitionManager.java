@@ -349,23 +349,19 @@ public class TransitionManager {
      * value of null causes the TransitionManager to use the default transition.
      */
     public static void beginDelayedTransition(final ViewGroup sceneRoot, Transition transition) {
-
-        // TEMPORARY: disabling delayed transitions until a fix for the various ActionBar-
-        // triggered artifacts is found
-
-//        if (!sPendingTransitions.contains(sceneRoot) && sceneRoot.isLaidOut()) {
-//            if (Transition.DBG) {
-//                Log.d(LOG_TAG, "beginDelayedTransition: root, transition = " +
-//                        sceneRoot + ", " + transition);
-//            }
-//            sPendingTransitions.add(sceneRoot);
-//            if (transition == null) {
-//                transition = sDefaultTransition;
-//            }
-//            final Transition transitionClone = transition.clone();
-//            sceneChangeSetup(sceneRoot, transitionClone);
-//            Scene.setCurrentScene(sceneRoot, null);
-//            sceneChangeRunTransition(sceneRoot, transitionClone);
-//        }
+        if (!sPendingTransitions.contains(sceneRoot) && sceneRoot.isLaidOut()) {
+            if (Transition.DBG) {
+                Log.d(LOG_TAG, "beginDelayedTransition: root, transition = " +
+                        sceneRoot + ", " + transition);
+            }
+            sPendingTransitions.add(sceneRoot);
+            if (transition == null) {
+                transition = sDefaultTransition;
+            }
+            final Transition transitionClone = transition.clone();
+            sceneChangeSetup(sceneRoot, transitionClone);
+            Scene.setCurrentScene(sceneRoot, null);
+            sceneChangeRunTransition(sceneRoot, transitionClone);
+        }
     }
 }
