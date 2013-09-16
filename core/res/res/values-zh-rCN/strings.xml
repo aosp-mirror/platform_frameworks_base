@@ -131,6 +131,11 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"太多<xliff:g id="CONTENT_TYPE">%s</xliff:g>删除项。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"平板电脑存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手机存储空间已满。请删除一些文件以腾出空间。"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"网络可能会受到监控"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板电脑选项"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"手机选项"</string>
@@ -478,10 +483,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制 WLAN 显示设备的基础功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"关键词检测"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用针对关键词检测捕获音频。捕获操作会在后台进行，但不会禁止使用其他音频捕获工具（例如摄像机）。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"捕获视频输出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允许该应用捕获和重定向视频输出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"捕获安全视频输出"</string>
@@ -549,12 +552,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手机休眠"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允许应用阻止平板电脑进入休眠状态。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"允许应用阻止手机进入休眠状态。"</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"发射红外线"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"允许应用使用平板电脑的红外线发射器。"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"允许应用使用手机的红外线发射器。"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"打开或关闭平板电脑"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"开机或关机"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允许应用打开或关闭平板电脑。"</string>
@@ -649,7 +649,7 @@
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"允许应用访问所有用户的外部存储设备。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允许应用读取和写入缓存文件系统。"</string>
-    <string name="permlab_use_sip" msgid="5986952362795870502">"拨打/接听互联网通话"</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"拨打/接听互联网电话"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"允许应用使用 SIP 服务拨打/接听互联网电话。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"读取网络使用情况历史记录"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允许应用读取特定网络和应用的网络使用情况历史记录。"</string>
@@ -692,7 +692,7 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
-    <item msgid="7897544654242874543">"单位电话"</item>
+    <item msgid="7897544654242874543">"单位"</item>
     <item msgid="1103601433382158155">"单位传真"</item>
     <item msgid="1735177144948329370">"住宅传真"</item>
     <item msgid="603878674477207394">"寻呼机"</item>
@@ -700,8 +700,8 @@
     <item msgid="9192514806975898961">"自定义"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"家庭"</item>
-    <item msgid="7084237356602625604">"单位"</item>
+    <item msgid="8073994352956129127">"个人"</item>
+    <item msgid="7084237356602625604">"工作"</item>
     <item msgid="1112044410659011023">"其他"</item>
     <item msgid="2374913952870110618">"自定义"</item>
   </string-array>
@@ -758,8 +758,8 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"周年纪念日"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"其他"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"自定义"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"家用"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"单位"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"个人"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"工作"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"其他"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"手机"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"自定义"</string>
@@ -1179,10 +1179,10 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到 WLAN"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 互联网连接状况不佳。"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动 WLAN Direct。此操作将会关闭 WLAN 客户端/热点。"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动 WLAN Direct。"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用 WLAN Direct"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN 直连"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动 WLAN 直连。此操作将会关闭 WLAN 客户端/热点。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动 WLAN 直连。"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用 WLAN 直连"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"通过触摸进行设置"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒绝"</string>
@@ -1432,9 +1432,9 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"修改"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"流量使用警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"触摸可查看使用情况和设置。"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 数据已停用"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据已停用"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"移动数据已停用"</string>
+    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 数据网络已停用"</string>
+    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据网络已停用"</string>
+    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"移动数据网络已停用"</string>
     <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"WLAN 数据网络已停用"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"触摸可启用。"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超出 2G-3G 数据流量限制"</string>

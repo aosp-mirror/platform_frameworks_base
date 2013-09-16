@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Quá nhiều lần xóa <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Bộ nhớ máy tính bảng đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Bộ nhớ điện thoại đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Mạng có thể được giám sát"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Bởi một bên thứ ba không xác định"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Bởi <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Tôi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tùy chọn máy tính bảng"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Tùy chọn điện thoại"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Cho phép ứng dụng kiểm soát các tính năng cấp thấp của màn hình Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"thu thập dữ liệu đầu ra âm thanh"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Cho phép ứng dụng thu thập và chuyển hướng dữ liệu đầu ra âm thanh."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Phát hiện từ nóng"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Cho phép ứng dụng thu thập dữ liệu âm thanh để phát hiện từ nóng. Quá trình thu thập này có thể diễn ra trong nền nhưng không ngăn các hoạt động thu thập dữ liệu âm thanh khác (ví dụ: máy quay video)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"thu thập dữ liệu đầu ra video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Cho phép ứng dụng thu thập và chuyển hướng dữ liệu đầu ra video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"thu thập dữ liệu đầu ra video an toàn"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Cho phép ứng dụng ngăn điện thoại chuyển sang chế độ ngủ."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"phát hồng ngoại"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Cho phép ứng dụng sử dụng bộ phát hồng ngoại của máy tính bảng."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Cho phép ứng dụng sử dụng bộ phát hồng ngoại của điện thoại."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"bật hoặc tắt máy tính bảng"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"bật hoặc tắt điện thoại"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Cho phép ứng dụng bật hoặc tắt máy tính bảng."</string>

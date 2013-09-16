@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Liikaa <xliff:g id="CONTENT_TYPE">%s</xliff:g>-poistoja."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet-laitteen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puhelimen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Verkkoa saatetaan valvoa"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Valvoja on tuntematon kolmas osapuoli."</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Valvoja on <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Minä"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet-laitteen asetukset"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Puhelimen asetukset"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Antaa sovelluksen hallita wifi-näyttöjen matalan tason ominaisuuksia."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"äänentoiston kaappaus"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Antaa sovellukselle luvan äänentoiston kaappaamiseen ja uudelleenohjaamiseen."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Toimintosanan tunnistus"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Antaa sovelluksen siepata ääntä toimintosanojen tunnistusta varten. Sieppaus voi tapahtua taustalla, mutta se ei estä muita laitteita, kuten videokameraa, käyttämästä ääntä."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"videokuvan kaappaus"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Antaa sovellukselle luvan videokuvan kaappaamiseen ja uudelleenohjaamiseen"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"suojatun videokuvan kaappaus"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Antaa sovelluksen estää tablet-laitetta siirtymästä virransäästötilaan."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Antaa sovelluksen estää puhelinta siirtymästä virransäästötilaan."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"infrapunalähetys"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Antaa sovelluksen käyttää tablet-laitteen infrapunalähetintä."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Antaa sovelluksen käyttää puhelimen infrapunalähetintä."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"käynnistä tai sammuta tablet-laite"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sammutta tai käynnistä puhelin"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Antaa sovelluksen sammuttaa tai käynnistää tablet-laitteen."</string>
