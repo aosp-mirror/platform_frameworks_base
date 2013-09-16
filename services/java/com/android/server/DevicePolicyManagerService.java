@@ -105,6 +105,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -140,6 +141,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     NotificationManager mNotificationManager;
 
     private DeviceOwner mDeviceOwner;
+
+    /**
+     * Whether or not device admin feature is supported. If it isn't return defaults for all
+     * public methods.
+     */
+    private boolean mHasFeature;
 
     public static class DevicePolicyData {
         int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -532,8 +539,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     public DevicePolicyManagerService(Context context) {
         mContext = context;
+        mHasFeature = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_DEVICE_ADMIN);
         mWakeLock = ((PowerManager)context.getSystemService(Context.POWER_SERVICE))
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
+        if (!mHasFeature) {
+            // Skip the rest of the initialization
+            return;
+        }
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction(ACTION_EXPIRED_PASSWORD_NOTIFICATION);
@@ -760,6 +773,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public DeviceAdminInfo findAdmin(ComponentName adminName, int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
         enforceCrossUserPermission(userHandle);
         Intent resolveIntent = new Intent();
         resolveIntent.setComponent(adminName);
@@ -1049,6 +1065,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void systemReady() {
+        if (!mHasFeature) {
+            return;
+        }
         synchronized (this) {
             loadSettingsLocked(getUserData(UserHandle.USER_OWNER), UserHandle.USER_OWNER);
             loadDeviceOwner();
@@ -1137,6 +1156,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @param refreshing true = update an active admin, no error
      */
     public void setActiveAdmin(ComponentName adminReceiver, boolean refreshing, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
         enforceCrossUserPermission(userHandle);
@@ -1180,6 +1202,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public boolean isAdminActive(ComponentName adminReceiver, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             return getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null;
@@ -1187,6 +1212,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public boolean hasGrantedPolicy(ComponentName adminReceiver, int policyId, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             ActiveAdmin administrator = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
@@ -1197,7 +1225,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public List<ComponentName> getActiveAdmins(int userHandle) {
+        if (!mHasFeature) {
+            return Collections.EMPTY_LIST;
+        }
+
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -1214,6 +1247,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public boolean packageHasActiveAdmins(String packageName, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -1228,6 +1264,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void removeActiveAdmin(ComponentName adminReceiver, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
@@ -1253,6 +1292,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordQuality(ComponentName who, int quality, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         validateQualityConstant(quality);
         enforceCrossUserPermission(userHandle);
 
@@ -1270,6 +1312,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordQuality(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int mode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -1292,6 +1337,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumLength(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1307,6 +1355,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumLength(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -1329,6 +1380,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordHistoryLength(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1344,6 +1398,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordHistoryLength(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -1366,6 +1423,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordExpirationTimeout(ComponentName who, long timeout, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1396,6 +1456,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Returns 0 if not configured.
      */
     public long getPasswordExpirationTimeout(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0L;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who != null) {
@@ -1441,6 +1504,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public long getPasswordExpiration(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0L;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             return getPasswordExpirationLocked(who, userHandle);
@@ -1448,6 +1514,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumUpperCase(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1463,6 +1532,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumUpperCase(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int length = 0;
@@ -1500,6 +1572,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumLowerCase(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int length = 0;
@@ -1522,6 +1597,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumLetters(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1537,6 +1615,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumLetters(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int length = 0;
@@ -1559,6 +1640,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumNumeric(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1574,6 +1658,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumNumeric(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int length = 0;
@@ -1596,6 +1683,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumSymbols(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1611,6 +1701,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumSymbols(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int length = 0;
@@ -1633,6 +1726,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumNonLetter(ComponentName who, int length, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1648,6 +1744,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getPasswordMinimumNonLetter(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             int length = 0;
@@ -1670,6 +1769,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public boolean isActivePasswordSufficient(int userHandle) {
+        if (!mHasFeature) {
+            return true;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -1705,6 +1807,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setMaximumFailedPasswordsForWipe(ComponentName who, int num, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -1721,6 +1826,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public int getMaximumFailedPasswordsForWipe(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -1746,6 +1854,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public boolean resetPassword(String password, int flags, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
         enforceCrossUserPermission(userHandle);
         int quality;
         synchronized (this) {
@@ -1867,6 +1978,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setMaximumTimeToLock(ComponentName who, long timeMs, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -1912,6 +2026,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public long getMaximumTimeToLock(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             long time = 0;
@@ -1937,6 +2054,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void lockNow() {
+        if (!mHasFeature) {
+            return;
+        }
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
@@ -2057,6 +2177,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void wipeData(int flags, final int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -2092,6 +2215,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void getRemoveWarning(ComponentName comp, final RemoteCallback result, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
@@ -2122,6 +2248,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     public void setActivePasswordState(int quality, int length, int letters, int uppercase,
             int lowercase, int numbers, int symbols, int nonletter, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
@@ -2188,12 +2317,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 policy.mFailedPasswordAttempts++;
                 saveSettingsLocked(userHandle);
-                int max = getMaximumFailedPasswordsForWipe(null, userHandle);
-                if (max > 0 && policy.mFailedPasswordAttempts >= max) {
-                    wipeDeviceOrUserLocked(0, userHandle);
+                if (mHasFeature) {
+                    int max = getMaximumFailedPasswordsForWipe(null, userHandle);
+                    if (max > 0 && policy.mFailedPasswordAttempts >= max) {
+                        wipeDeviceOrUserLocked(0, userHandle);
+                    }
+                    sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
+                            DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
                 }
-                sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
-                        DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2213,8 +2344,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.mFailedPasswordAttempts = 0;
                     policy.mPasswordOwner = -1;
                     saveSettingsLocked(userHandle);
-                    sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_SUCCEEDED,
-                            DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
+                    if (mHasFeature) {
+                        sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_SUCCEEDED,
+                                DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -2224,6 +2357,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     public ComponentName setGlobalProxy(ComponentName who, String proxySpec,
             String exclusionList, int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized(this) {
             if (who == null) {
@@ -2274,6 +2410,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public ComponentName getGlobalProxyAdmin(int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized(this) {
             DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
@@ -2335,6 +2474,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * status (for all admins).
      */
     public int setStorageEncryption(ComponentName who, boolean encrypt, int userHandle) {
+        if (!mHasFeature) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             // Check for permissions
@@ -2386,6 +2528,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * active admins.
      */
     public boolean getStorageEncryption(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             // Check for permissions if a particular caller is specified
@@ -2412,6 +2557,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Get the current encryption status of the device.
      */
     public int getStorageEncryptionStatus(int userHandle) {
+        if (!mHasFeature) {
+            // Ok to return current status.
+        }
         enforceCrossUserPermission(userHandle);
         return getEncryptionStatus();
     }
@@ -2460,6 +2608,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Disables all device cameras according to the specified admin.
      */
     public void setCameraDisabled(ComponentName who, boolean disabled, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -2480,6 +2631,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * active admins.
      */
     public boolean getCameraDisabled(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
         synchronized (this) {
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
@@ -2503,6 +2657,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Selectively disable keyguard features.
      */
     public void setKeyguardDisabledFeatures(ComponentName who, int which, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
@@ -2523,6 +2680,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * or the aggregate of all active admins if who is null.
      */
     public int getKeyguardDisabledFeatures(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who != null) {
@@ -2544,6 +2704,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean setDeviceOwner(String packageName, String ownerName) {
+        if (!mHasFeature) {
+            return false;
+        }
         if (packageName == null
                 || !DeviceOwner.isInstalled(packageName, mContext.getPackageManager())) {
             throw new IllegalArgumentException("Invalid package name " + packageName
@@ -2564,6 +2727,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isDeviceOwner(String packageName) {
+        if (!mHasFeature) {
+            return false;
+        }
         synchronized (this) {
             return mDeviceOwner != null
                     && mDeviceOwner.getPackageName().equals(packageName);
@@ -2572,6 +2738,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public String getDeviceOwner() {
+        if (!mHasFeature) {
+            return null;
+        }
         synchronized (this) {
             if (mDeviceOwner != null) {
                 return mDeviceOwner.getPackageName();
@@ -2582,6 +2751,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public String getDeviceOwnerName() {
+        if (!mHasFeature) {
+            return null;
+        }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         synchronized (this) {
             if (mDeviceOwner != null) {
