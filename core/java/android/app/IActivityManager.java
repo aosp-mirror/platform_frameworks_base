@@ -403,6 +403,8 @@ public interface IActivityManager extends IInterface {
             String sourcePackage, String targetPackage, int modeFlags, int modeMask)
             throws RemoteException;
 
+    public void performIdleMaintenance() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -685,4 +687,5 @@ public interface IActivityManager extends IInterface {
     int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+176;
     int RESTART_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+177;
     int GET_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+178;
+    int PERFORM_IDLE_MAINTENANCE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+179;
 }
