@@ -86,8 +86,10 @@ public abstract class SyncService extends Service {
             boolean alreadyInProgress = false;
             final int extrasAsKey = extrasToKey(extras);
             synchronized (mSyncThreadLock) {
-                if (mSyncThreads.get(extrasAsKey) != null) {
-                    Log.e(TAG, "starting sync for : " + mServiceComponent);
+                if (mSyncThreads.get(extrasAsKey) == null) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "starting sync for : " + mServiceComponent);
+                    }
                     // Start sync.
                     SyncThread syncThread = new SyncThread(syncContextClient, extras);
                     mSyncThreads.put(extrasAsKey, syncThread);
