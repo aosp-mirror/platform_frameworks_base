@@ -40,8 +40,7 @@ import java.lang.AutoCloseable;
  * availability of new Images once
  * {@link ImageReader#getMaxImages the maximum outstanding image count} is
  * reached. When this happens, the function acquiring new Images will typically
- * throw a
- * {@link ImageReader.MaxImagesAcquiredException MaxImagesAcquiredException}.</p>
+ * throw an {@link IllegalStateException}.</p>
  *
  * @see ImageReader
  */
