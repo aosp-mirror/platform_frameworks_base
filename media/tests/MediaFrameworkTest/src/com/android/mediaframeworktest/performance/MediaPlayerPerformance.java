@@ -61,6 +61,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
     private SurfaceHolder mSurfaceHolder = null;
     private static final int NUM_STRESS_LOOP = 10;
     private static final int NUM_PLAYBACk_IN_EACH_LOOP = 20;
+    private static final int SHORT_WAIT = 2 * 1000; // 2 seconds
     private static final long MEDIA_STRESS_WAIT_TIME = 5000; //5 seconds
     private static final String MEDIA_MEMORY_OUTPUT =
         "/sdcard/mediaMemOutput.txt";
@@ -99,16 +100,17 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        //Insert a 2 second before launching the test activity. This is
+        //the workaround for the race condition of requesting the updated surface.
+        Thread.sleep(SHORT_WAIT);
+        getActivity();
         //Check if the device support the camcorder
-        CamcorderProfile mCamcorderProfile = CamcorderProfile.get(CAMERA_ID);
+        mCamcorderProfile = CamcorderProfile.get(CAMERA_ID);
         if (mCamcorderProfile != null) {
             mVideoWidth = mCamcorderProfile.videoFrameWidth;
             mVideoHeight = mCamcorderProfile.videoFrameHeight;
+            Log.v(TAG, "height = " + mVideoHeight + " width= " + mVideoWidth);
         }
-        //Insert a 2 second before launching the test activity. This is
-        //the workaround for the race condition of requesting the updated surface.
-        Thread.sleep(2000);
-        getActivity();
         if (MediaFrameworkPerfTestRunner.mGetNativeHeapDump)
             MediaTestUtil.getNativeHeapDump(this.getName() + "_before");
 
@@ -246,6 +248,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
                 Thread.sleep(MEDIA_STRESS_WAIT_TIME);
                 mRecorder.stop();
                 mRecorder.release();
+                //Insert 2 seconds to make sure the camera released.
+                Thread.sleep(SHORT_WAIT);
             } catch (Exception e) {
                 Log.v("record video failed ", e.toString());
                 mRecorder.release();
