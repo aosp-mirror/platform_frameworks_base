@@ -51,89 +51,6 @@ public final class CaptureResult extends CameraMetadata {
         return mResults.get(key);
     }
 
-    /**
-     * Describes a face detected in an image.
-     */
-    public static class Face {
-
-        /**
-         * <p>Bounds of the face. A rectangle relative to the sensor's
-         * {@link CameraProperties#SENSOR_INFO_ACTIVE_ARRAY_SIZE}, with (0,0)
-         * representing the top-left corner of the active array rectangle.</p>
-         */
-        public Rect getBounds() {
-            return mBounds;
-        }
-
-        /** <p>The confidence level for the detection of the face. The range is 1 to
-         * 100. 100 is the highest confidence.</p>
-         *
-         * <p>Depending on the device, even very low-confidence faces may be
-         * listed, so applications should filter out faces with low confidence,
-         * depending on the use case. For a typical point-and-shoot camera
-         * application that wishes to display rectangles around detected faces,
-         * filtering out faces with confidence less than 50 is recommended.</p>
-         *
-         */
-        public int getScore() {
-            return mScore;
-        }
-
-        /**
-         * An unique id per face while the face is visible to the tracker. If
-         * the face leaves the field-of-view and comes back, it will get a new
-         * id. This is an optional field, may not be supported on all devices.
-         * If not supported, id will always be set to -1. The optional fields
-         * are supported as a set. Either they are all valid, or none of them
-         * are.
-         */
-        public int getId() {
-            return mId;
-        }
-
-        /**
-         * The coordinates of the center of the left eye. The coordinates are in
-         * the same space as the ones for {@link #getBounds}. This is an
-         * optional field, may not be supported on all devices. If not
-         * supported, the value will always be set to null. The optional fields
-         * are supported as a set. Either they are all valid, or none of them
-         * are.
-         */
-        public Point getLeftEye() {
-            return mLeftEye;
-        }
-
-        /**
-         * The coordinates of the center of the right eye. The coordinates are
-         * in the same space as the ones for {@link #getBounds}.This is an
-         * optional field, may not be supported on all devices. If not
-         * supported, the value will always be set to null. The optional fields
-         * are supported as a set. Either they are all valid, or none of them
-         * are.
-         */
-        public Point getRightEye() {
-            return mRightEye;
-        }
-
-        /**
-         * The coordinates of the center of the mouth.  The coordinates are in
-         * the same space as the ones for {@link #getBounds}. This is an optional
-         * field, may not be supported on all devices. If not supported, the
-         * value will always be set to null. The optional fields are supported
-         * as a set. Either they are all valid, or none of them are.
-         */
-        public Point getMouth() {
-            return mMouth;
-        }
-
-        private Rect mBounds;
-        private int mScore;
-        private int mId;
-        private Point mLeftEye;
-        private Point mRightEye;
-        private Point mMouth;
-    }
-
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * The key entries below this point are generated from metadata
      * definitions in /system/media/camera/docs. Do not modify by hand or
@@ -1003,4 +920,19 @@ public final class CaptureResult extends CameraMetadata {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+    /**
+     * <p>
+     * List of the {@link Face Faces} detected through camera face detection
+     * in this result.
+     * </p>
+     * <p>
+     * Only available if {@link #STATISTICS_FACE_DETECT_MODE} {@code !=}
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_OFF OFF}.
+     * </p>
+     *
+     * @see Face
+     */
+    public static final Key<Face[]> STATISTICS_FACES =
+            new Key<Face[]>("android.statistics.faces", Face[].class);
 }
