@@ -159,17 +159,26 @@ SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream,
 }
 
 
-static SkMemoryStream* adaptor_to_mem_stream(SkStream* adaptor) {
-    SkASSERT(adaptor != NULL);
-    SkDynamicMemoryWStream wStream;
-    const int bufferSize = 256 * 1024; // 256 KB, same as ViewStateSerializer.
-    uint8_t buffer[bufferSize];
-    do {
-        size_t bytesRead = adaptor->read(buffer, bufferSize);
-        wStream.write(buffer, bytesRead);
-    } while (!adaptor->isAtEnd());
-    SkAutoTUnref<SkData> data(wStream.copyToData());
-    return new SkMemoryStream(data.get());
+static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
+    SkASSERT(stream != NULL);
+    size_t bufferSize = 4096;
+    size_t streamLen = 0;
+    size_t len;
+    char* data = (char*)sk_malloc_throw(bufferSize);
+
+    while ((len = stream->read(data + streamLen,
+                               bufferSize - streamLen)) != 0) {
+        streamLen += len;
+        if (streamLen == bufferSize) {
+            bufferSize *= 2;
+            data = (char*)sk_realloc_throw(data, bufferSize);
+        }
+    }
+    data = (char*)sk_realloc_throw(data, streamLen);
+
+    SkMemoryStream* streamMem = new SkMemoryStream();
+    streamMem->setMemoryOwned(data, streamLen);
+    return streamMem;
 }
 
 SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
