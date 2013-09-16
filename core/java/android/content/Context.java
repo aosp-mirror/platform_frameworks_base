@@ -2133,6 +2133,7 @@ public abstract class Context {
 
     /**
      * Constant for the internal network management service, not really a Context service.
+     * @hide
      */
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
