@@ -40,41 +40,90 @@ import java.nio.ByteOrder;
  * <p>The image data is encapsulated in {@link Image} objects, and multiple such
  * objects can be accessed at the same time, up to the number specified by the
  * {@code maxImages} constructor parameter. New images sent to an ImageReader
- * through its Surface are queued until accessed through the
- * {@link #getNextImage} call. Due to memory limits, an image source will
+ * through its {@link Surface} are queued until accessed through the {@link #acquireLatestImage}
+ * or {@link #acquireNextImage} call. Due to memory limits, an image source will
  * eventually stall or drop Images in trying to render to the Surface if the
  * ImageReader does not obtain and release Images at a rate equal to the
  * production rate.</p>
  */
-public final class ImageReader implements AutoCloseable {
+public class ImageReader implements AutoCloseable {
+
+    /**
+     * <p>
+     * This exception is thrown when the user of an {@link ImageReader} tries to acquire a new
+     * {@link Image} when the maximum number of {@link Image Images} have already been acquired.
+     * The maximum number is determined by the {@code maxBuffers} argument of
+     * {@link ImageReader#newInstance newInstance}.
+     * </p>
+     *
+     * <p>
+     * To recover from this exception, release existing {@link Image images} back to the
+     * reader with {@link Image#close}.
+     * </p>
+     *
+     * @see Image#close
+     * @see ImageReader#acquireLatestImage
+     * @see ImageReader#acquireNextImage
+     */
+    public static class MaxImagesAcquiredException extends Exception {
+        /**
+         * Suppress Eclipse warnings
+         */
+        private static final long serialVersionUID = 761231231236L;
+
+        public MaxImagesAcquiredException() {
+        }
+
+        public MaxImagesAcquiredException(String message) {
+            super(message);
+        }
+
+        public MaxImagesAcquiredException(String message, Throwable throwable) {
+            super(message, throwable);
+        }
+
+        public MaxImagesAcquiredException(Throwable throwable) {
+            super(throwable);
+        }
+    }
 
     /**
      * <p>Create a new reader for images of the desired size and format.</p>
      *
-     * <p>The maxImages parameter determines the maximum number of {@link Image}
-     * objects that can be be acquired from the ImageReader
+     * <p>The {@code maxImages} parameter determines the maximum number of {@link Image}
+     * objects that can be be acquired from the {@code ImageReader}
      * simultaneously. Requesting more buffers will use up more memory, so it is
      * important to use only the minimum number necessary for the use case.</p>
      *
      * <p>The valid sizes and formats depend on the source of the image
      * data.</p>
      *
-     * @param width the width in pixels of the Images that this reader will
-     * produce.
-     * @param height the height in pixels of the Images that this reader will
-     * produce.
-     * @param format the format of the Image that this reader will produce. This
-     * must be one of the {@link android.graphics.ImageFormat} or
-     * {@link android.graphics.PixelFormat} constants.
-     * @param maxImages the maximum number of images the user will want to
-     * access simultaneously. This should be as small as possible to limit
-     * memory use. Once maxImages Images are obtained by the user, one of them
-     * has to be released before a new Image will become available for access
-     * through getNextImage(). Must be greater than 0.
+     * @param width
+     *            The width in pixels of the Images that this reader will produce.
+     * @param height
+     *            The height in pixels of the Images that this reader will produce.
+     * @param format
+     *            The format of the Image that this reader will produce. This
+     *            must be one of the {@link android.graphics.ImageFormat} or
+     *            {@link android.graphics.PixelFormat} constants.
+     * @param maxImages
+     *            The maximum number of images the user will want to
+     *            access simultaneously. This should be as small as possible to limit
+     *            memory use. Once maxImages Images are obtained by the user, one of them
+     *            has to be released before a new Image will become available for access
+     *            through {@link #acquireLatestImage()} or {@link #acquireNextImage()}.
+     *            Must be greater than 0.
      *
      * @see Image
      */
-    public ImageReader(int width, int height, int format, int maxImages) {
+    public static ImageReader newInstance(int width, int height, int format, int maxImages) {
+        return new ImageReader(width, height, format, maxImages);
+    }
+
+    /**
+     * @hide
+     */
+    protected ImageReader(int width, int height, int format, int maxImages) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
@@ -96,33 +145,79 @@ public final class ImageReader implements AutoCloseable {
         mSurface = nativeGetSurface();
     }
 
+    /**
+     * The width of each {@link Image}, in pixels.
+     *
+     * <p>ImageReader guarantees that all Images acquired from ImageReader (for example, with
+     * {@link #acquireNextImage}) will have the same dimensions as specified in
+     * {@link #newInstance}.</p>
+     *
+     * @return the width of an Image
+     */
     public int getWidth() {
         return mWidth;
     }
 
+    /**
+     * The height of each {@link Image}, in pixels.
+     *
+     * <p>ImageReader guarantees that all Images acquired from ImageReader (for example, with
+     * {@link #acquireNextImage}) will have the same dimensions as specified in
+     * {@link #newInstance}.</p>
+     *
+     * @return the height of an Image
+     */
     public int getHeight() {
         return mHeight;
     }
 
+    /**
+     * The {@link ImageFormat image format} of each Image.
+     *
+     * <p>ImageReader guarantees that all {@link Image Images} acquired from ImageReader
+     *  (for example, with {@link #acquireNextImage}) will have the same format as specified in
+     * {@link #newInstance}.</p>
+     *
+     * @return the format of an Image
+     *
+     * @see ImageFormat
+     */
     public int getImageFormat() {
         return mFormat;
     }
 
+    /**
+     * Maximum number of images that can be acquired from the ImageReader by any time (for example,
+     * with {@link #acquireNextImage}).
+     *
+     * <p>An image is considered acquired after it's returned by a function from ImageReader, and
+     * until the Image is {@link Image#close closed} to release the image back to the ImageReader.
+     * </p>
+     *
+     * <p>Attempting to acquire more than {@code maxImages} concurrently will result in the
+     * acquire function throwing a {@link MaxImagesAcquiredException}. Furthermore,
+     * while the max number of images have been acquired by the ImageReader user, the producer
+     * enqueueing additional images may stall until at least one image has been released. </p>
+     *
+     * @return Maximum number of images for this ImageReader.
+     *
+     * @see Image#close
+     */
     public int getMaxImages() {
         return mMaxImages;
     }
 
     /**
-     * <p>Get a Surface that can be used to produce Images for this
-     * ImageReader.</p>
+     * <p>Get a {@link Surface} that can be used to produce {@link Image Images} for this
+     * {@code ImageReader}.</p>
      *
-     * <p>Until valid image data is rendered into this Surface, the
-     * {@link #getNextImage} method will return {@code null}. Only one source
+     * <p>Until valid image data is rendered into this {@link Surface}, the
+     * {@link #acquireNextImage} method will return {@code null}. Only one source
      * can be producing data into this Surface at the same time, although the
-     * same Surface can be reused with a different API once the first source is
-     * disconnected from the Surface.</p>
+     * same {@link Surface} can be reused with a different API once the first source is
+     * disconnected from the {@link Surface}.</p>
      *
-     * @return A Surface to use for a drawing target for various APIs.
+     * @return A {@link Surface} to use for a drawing target for various APIs.
      */
     public Surface getSurface() {
         return mSurface;
@@ -130,27 +225,96 @@ public final class ImageReader implements AutoCloseable {
 
     /**
      * <p>
-     * Get the next Image from the ImageReader's queue. Returns {@code null} if
-     * no new image is available.
+     * Acquire the latest {@link Image} from the ImageReader's queue, dropping older
+     * {@link Image images}. Returns {@code null} if no new image is available.
      * </p>
      * <p>
-     * This operation will fail by throwing an
-     * {@link Surface.OutOfResourcesException OutOfResourcesException} if too
-     * many images have been acquired with {@link #getNextImage}. In particular
-     * a sequence of {@link #getNextImage} calls greater than {@link #getMaxImages}
-     * without calling {@link Image#close} or {@link #releaseImage} in-between
-     * will exhaust the underlying queue. At such a time,
-     * {@link Surface.OutOfResourcesException OutOfResourcesException} will be
-     * thrown until more images are released with {@link Image#close} or
-     * {@link #releaseImage}.
+     * This operation will acquire all the images possible from the ImageReader,
+     * but {@link #close} all images that aren't the latest. This function is
+     * recommended to use over {@link #acquireNextImage} for most use-cases, as it's
+     * more suited for real-time processing.
+     * </p>
+     * <p>
+     * Note that {@link #getMaxImages maxImages} should be at least 2 for
+     * {@link #acquireLatestImage} to be any different than {@link #acquireNextImage} -
+     * discarding all-but-the-newest {@link Image} requires temporarily acquiring two
+     * {@link Image Images} at once. Or more generally, calling {@link #acquireLatestImage}
+     * with less than two images of margin, that is
+     * {@code (maxImages - currentAcquiredImages < 2)} will not discard as expected.
+     * </p>
+     * <p>
+     * This operation will fail by throwing an {@link MaxImagesAcquiredException} if
+     * {@code maxImages} have been acquired with {@link #acquireLatestImage} or
+     * {@link #acquireNextImage}. In particular a sequence of {@link #acquireLatestImage}
+     * calls greater than {@link #getMaxImages} without calling {@link Image#close} in-between
+     * will exhaust the underlying queue. At such a time, {@link MaxImagesAcquiredException}
+     * will be thrown until more images are
+     * released with {@link Image#close}.
      * </p>
      *
-     * @return a new frame of image data, or {@code null} if no image data is
-     *         available.
-     * @throws Surface.OutOfResourcesException if too many images are currently
-     *         acquired
+     * @return latest frame of image data, or {@code null} if no image data is available.
+     * @throws MaxImagesAcquiredException if too many images are currently acquired
      */
-    public Image getNextImage() {
+    public Image acquireLatestImage() throws MaxImagesAcquiredException {
+        Image image = acquireNextImage();
+        if (image == null) {
+            return null;
+        }
+        try {
+            for (;;) {
+                Image next = acquireNextImageNoThrow();
+                if (next == null) {
+                    Image result = image;
+                    image = null;
+                    return result;
+                }
+                image.close();
+                image = next;
+            }
+        } finally {
+            if (image != null) {
+                image.close();
+            }
+        }
+    }
+
+    private Image acquireNextImageNoThrow() {
+        try {
+            return acquireNextImage();
+        } catch (MaxImagesAcquiredException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * <p>
+     * Acquire the next Image from the ImageReader's queue. Returns {@code null} if
+     * no new image is available.
+     * </p>
+     *
+     * <p><i>Warning:</i> Consider using {@link #acquireLatestImage()} instead, as it will
+     * automatically release older images, and allow slower-running processing routines to catch
+     * up to the newest frame. Usage of {@link #acquireNextImage} is recommended for
+     * batch/background processing. Incorrectly using this function can cause images to appear
+     * with an ever-increasing delay, followed by a complete stall where no new images seem to
+     * appear.
+     * </p>
+     *
+     * <p>
+     * This operation will fail by throwing an {@link MaxImagesAcquiredException} if
+     * {@code maxImages} have been acquired with {@link #acquireNextImage} or
+     * {@link #acquireLatestImage}. In particular a sequence of {@link #acquireNextImage} or
+     * {@link #acquireLatestImage} calls greater than {@link #getMaxImages maxImages} without
+     * calling {@link Image#close} in-between will exhaust the underlying queue. At such a time,
+     * {@link MaxImagesAcquiredException} will be thrown until more images are released with
+     * {@link Image#close}.
+     * </p>
+     *
+     * @return a new frame of image data, or {@code null} if no image data is available.
+     * @throws MaxImagesAcquiredException if {@code maxImages} images are currently acquired
+     * @see #acquireLatestImage
+     */
+    public Image acquireNextImage() throws MaxImagesAcquiredException {
         SurfaceImage si = new SurfaceImage();
         if (nativeImageSetup(si)) {
             // create SurfacePlane objects
@@ -164,7 +328,7 @@ public final class ImageReader implements AutoCloseable {
     /**
      * <p>Return the frame to the ImageReader for reuse.</p>
      */
-    public void releaseImage(Image i) {
+    private void releaseImage(Image i) {
         if (! (i instanceof SurfaceImage) ) {
             throw new IllegalArgumentException(
                 "This image was not produced by an ImageReader");
@@ -183,13 +347,16 @@ public final class ImageReader implements AutoCloseable {
     /**
      * Register a listener to be invoked when a new image becomes available
      * from the ImageReader.
-     * @param listener the listener that will be run
-     * @param handler The handler on which the listener should be invoked, or null
-     * if the listener should be invoked on the calling thread's looper.
      *
-     * @throws IllegalArgumentException if no handler specified and the calling thread has no looper
+     * @param listener
+     *            The listener that will be run.
+     * @param handler
+     *            The handler on which the listener should be invoked, or null
+     *            if the listener should be invoked on the calling thread's looper.
+     * @throws IllegalArgumentException
+     *            If no handler specified and the calling thread has no looper.
      */
-   public void setImageAvailableListener(OnImageAvailableListener listener, Handler handler) {
+   public void setOnImageAvailableListener(OnImageAvailableListener listener, Handler handler) {
         mImageListener = listener;
 
         Looper looper;
@@ -206,12 +373,16 @@ public final class ImageReader implements AutoCloseable {
 
     /**
      * Callback interface for being notified that a new image is available.
+     *
+     * <p>
      * The onImageAvailable is called per image basis, that is, callback fires for every new frame
      * available from ImageReader.
+     * </p>
      */
     public interface OnImageAvailableListener {
         /**
          * Callback that is called when a new image is available from ImageReader.
+         *
          * @param reader the ImageReader the callback is associated with.
          * @see ImageReader
          * @see Image
@@ -220,12 +391,17 @@ public final class ImageReader implements AutoCloseable {
     }
 
     /**
-     * Free up all the resources associated with this ImageReader. After
-     * Calling this method, this ImageReader can not be used. calling
-     * any methods on this ImageReader and Images previously provided by {@link #getNextImage}
-     * will result in an IllegalStateException, and attempting to read from
-     * ByteBuffers returned by an earlier {@code Plane#getBuffer} call will
+     * Free up all the resources associated with this ImageReader.
+     *
+     * <p>
+     * After calling this method, this ImageReader can not be used. Calling
+     * any methods on this ImageReader and Images previously provided by
+     * {@link #acquireNextImage} or {@link #acquireLatestImage}
+     * will result in an {@link IllegalStateException}, and attempting to read from
+     * {@link ByteBuffer ByteBuffers} returned by an earlier
+     * {@link Image.Plane#getBuffer Plane#getBuffer} call will
      * have undefined behavior.
+     * </p>
      */
     @Override
     public void close() {
@@ -242,11 +418,14 @@ public final class ImageReader implements AutoCloseable {
     }
 
     /**
-     * Only a subset of the formats defined in {@link android.graphics.ImageFormat} and
-     * {@link android.graphics.PixelFormat} are supported by ImageReader. When reading RGB
-     * data from a surface, the formats defined in {@link android.graphics.PixelFormat}
-     * can be used, when reading YUV, JPEG or raw sensor data ( for example, from camera
-     *  or video decoder), formats from {@link android.graphics.ImageFormat} are used.
+     * Only a subset of the formats defined in
+     * {@link android.graphics.ImageFormat ImageFormat} and
+     * {@link android.graphics.PixelFormat PixelFormat} are supported by
+     * ImageReader. When reading RGB data from a surface, the formats defined in
+     * {@link android.graphics.PixelFormat PixelFormat} can be used, when
+     * reading YUV, JPEG or raw sensor data (for example, from camera or video
+     * decoder), formats from {@link android.graphics.ImageFormat ImageFormat}
+     * are used.
      */
     private int getNumPlanesFromFormat() {
         switch (mFormat) {
@@ -308,7 +487,7 @@ public final class ImageReader implements AutoCloseable {
      */
     private long mNativeContext;
 
-    private class SurfaceImage implements android.media.Image {
+    private class SurfaceImage extends android.media.Image {
         public SurfaceImage() {
             mIsImageValid = false;
         }
@@ -404,7 +583,7 @@ public final class ImageReader implements AutoCloseable {
                 mPlanes[i] = nativeCreatePlane(i);
             }
         }
-        private class SurfacePlane implements android.media.Image.Plane {
+        private class SurfacePlane extends android.media.Image.Plane {
             // SurfacePlane instance is created by native code when a new SurfaceImage is created
             private SurfacePlane(int index, int rowStride, int pixelStride) {
                 mIndex = index;
@@ -481,7 +660,7 @@ public final class ImageReader implements AutoCloseable {
     private synchronized native Surface nativeGetSurface();
     private synchronized native boolean nativeImageSetup(Image i);
 
-    /*
+    /**
      * We use a class initializer to allow the native code to cache some
      * field offsets.
      */
