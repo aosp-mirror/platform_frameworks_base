@@ -299,11 +299,17 @@ public final class ActiveServices {
         boolean addToStarting = false;
         if (!callerFg && r.app == null && mAm.mStartedUsers.get(r.userId) != null) {
             ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid);
-            if (proc == null || proc.curProcState >= ActivityManager.PROCESS_STATE_RECEIVER) {
+            if (proc == null || proc.curProcState > ActivityManager.PROCESS_STATE_RECEIVER) {
                 // If this is not coming from a foreground caller, then we may want
                 // to delay the start if there are already other background services
                 // that are starting.  This is to avoid process start spam when lots
                 // of applications are all handling things like connectivity broadcasts.
+                // We only do this for cached processes, because otherwise an application
+                // can have assumptions about calling startService() for a service to run
+                // in its own process, and for that process to not be killed before the
+                // service is started.  This is especially the case for receivers, which
+                // may start a service in onReceive() to do some additional work and have
+                // initialized some global state as part of that.
                 if (DEBUG_DELAYED_SERVICE) Slog.v(TAG, "Potential start delay of " + r + " in "
                         + proc);
                 if (r.delayed) {
@@ -324,7 +330,7 @@ public final class ActiveServices {
             } else if (proc.curProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
                 // We slightly loosen when we will enqueue this new service as a background
                 // starting service we are waiting for, to also include processes that are
-                // currently running other services.
+                // currently running other services or receivers.
                 addToStarting = true;
                 if (DEBUG_DELAYED_STATS) Slog.v(TAG, "Not delaying, but counting as bg: " + r);
             } else if (DEBUG_DELAYED_STATS) {
