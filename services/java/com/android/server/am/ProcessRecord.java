@@ -567,7 +567,8 @@ final class ProcessRecord {
      */
     public boolean addPackage(String pkg, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
-            pkgList.put(pkg, tracker.getProcessStateLocked(pkg, info.uid, processName));
+            pkgList.put(pkg, baseProcessTracker != null
+                    ? tracker.getProcessStateLocked(pkg, info.uid, processName) : null);
             return true;
         }
         return false;
@@ -592,25 +593,30 @@ final class ProcessRecord {
      *  Delete all packages from list except the package indicated in info
      */
     public void resetPackageList(ProcessStatsService tracker) {
-        long now = SystemClock.uptimeMillis();
-        baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
-                tracker.getMemFactorLocked(), now, pkgList);
         final int N = pkgList.size();
-        if (N != 1) {
-            for (int i=0; i<N; i++) {
-                ProcessStats.ProcessState ps = pkgList.valueAt(i);
-                if (ps != null && ps != baseProcessTracker) {
-                    ps.makeInactive();
-                }
+        if (baseProcessTracker != null) {
+            long now = SystemClock.uptimeMillis();
+            baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
+                    tracker.getMemFactorLocked(), now, pkgList);
+            if (N != 1) {
+                for (int i=0; i<N; i++) {
+                    ProcessStats.ProcessState ps = pkgList.valueAt(i);
+                    if (ps != null && ps != baseProcessTracker) {
+                        ps.makeInactive();
+                    }
 
+                }
+                pkgList.clear();
+                ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
+                        info.packageName, info.uid, processName);
+                pkgList.put(info.packageName, ps);
+                if (thread != null && ps != baseProcessTracker) {
+                    ps.makeActive();
+                }
             }
+        } else if (N != 1) {
             pkgList.clear();
-            ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
-                    info.packageName, info.uid, processName);
-            pkgList.put(info.packageName, ps);
-            if (thread != null && ps != baseProcessTracker) {
-                ps.makeActive();
-            }
+            pkgList.put(info.packageName, null);
         }
     }
     
