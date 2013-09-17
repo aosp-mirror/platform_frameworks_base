@@ -30,7 +30,7 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 
-public class RecentsScrollViewPerformanceHelper {
+public class FadedEdgeDrawHelper {
     public static final boolean OPTIMIZE_SW_RENDERED_RECENTS = true;
     public static final boolean USE_DARK_FADE_IN_HW_ACCELERATED_MODE = true;
     private View mScrollView;
@@ -43,18 +43,18 @@ public class RecentsScrollViewPerformanceHelper {
     private Matrix mFadeMatrix;
     private LinearGradient mFade;
 
-    public static RecentsScrollViewPerformanceHelper create(Context context,
+    public static FadedEdgeDrawHelper create(Context context,
             AttributeSet attrs, View scrollView, boolean isVertical) {
         boolean isTablet = context.getResources().
                 getBoolean(R.bool.config_recents_interface_for_tablets);
         if (!isTablet && (OPTIMIZE_SW_RENDERED_RECENTS || USE_DARK_FADE_IN_HW_ACCELERATED_MODE)) {
-            return new RecentsScrollViewPerformanceHelper(context, attrs, scrollView, isVertical);
+            return new FadedEdgeDrawHelper(context, attrs, scrollView, isVertical);
         } else {
             return null;
         }
     }
 
-    public RecentsScrollViewPerformanceHelper(Context context,
+    public FadedEdgeDrawHelper(Context context,
             AttributeSet attrs, View scrollView, boolean isVertical) {
         mScrollView = scrollView;
         TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.View);
@@ -64,7 +64,7 @@ public class RecentsScrollViewPerformanceHelper {
     }
 
     public void onAttachedToWindowCallback(
-            RecentsCallback callback, LinearLayout layout, boolean hardwareAccelerated) {
+            LinearLayout layout, boolean hardwareAccelerated) {
         mSoftwareRendered = !hardwareAccelerated;
         if ((mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS)
                 || USE_DARK_FADE_IN_HW_ACCELERATED_MODE) {
@@ -178,11 +178,11 @@ public class RecentsScrollViewPerformanceHelper {
         }
     }
 
-    public int getVerticalFadingEdgeLengthCallback() {
+    public int getVerticalFadingEdgeLength() {
         return mFadingEdgeLength;
     }
 
-    public int getHorizontalFadingEdgeLengthCallback() {
+    public int getHorizontalFadingEdgeLength() {
         return mFadingEdgeLength;
     }
 
