@@ -1048,6 +1048,11 @@
         tag; often this is one of the {@link android.Manifest.permission standard
         system permissions}. -->
         <attr name="name" />
+        <!-- Optional: specify the maximum version of the Android OS for which the
+             application wishes to request the permission.  When running on a version
+             of Android higher than the number given here, the permission will not
+             be requested.  -->
+        <attr name="maxSdkVersion" format="integer" />
         <!--  Specify whether this permission is required for the application.
               The default is true, meaning the application requires the
               permission, and it must always be granted when it is installed.
@@ -1129,7 +1134,7 @@
              on.  You can use this to ensure your application is filtered out
              of later versions of the platform when you know you have
              incompatibility with them. -->
-        <attr name="maxSdkVersion" format="integer" />
+        <attr name="maxSdkVersion" />
     </declare-styleable>
     
     <!-- The <code>library</code> tag declares that this apk is providing itself

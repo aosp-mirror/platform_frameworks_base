@@ -1441,18 +1441,29 @@ public class PackageParser {
 */
         boolean required = true; // Optional <uses-permission> not supported
 
+        int maxSdkVersion = 0;
+        TypedValue val = sa.peekValue(
+                com.android.internal.R.styleable.AndroidManifestUsesPermission_maxSdkVersion);
+        if (val != null) {
+            if (val.type >= TypedValue.TYPE_FIRST_INT && val.type <= TypedValue.TYPE_LAST_INT) {
+                maxSdkVersion = val.data;
+            }
+        }
+
         sa.recycle();
 
-        if (name != null) {
-            int index = pkg.requestedPermissions.indexOf(name);
-            if (index == -1) {
-                pkg.requestedPermissions.add(name.intern());
-                pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
-            } else {
-                if (pkg.requestedPermissionsRequired.get(index) != required) {
-                    outError[0] = "conflicting <uses-permission> entries";
-                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-                    return false;
+        if ((maxSdkVersion == 0) || (maxSdkVersion >= Build.VERSION.RESOURCES_SDK_INT)) {
+            if (name != null) {
+                int index = pkg.requestedPermissions.indexOf(name);
+                if (index == -1) {
+                    pkg.requestedPermissions.add(name.intern());
+                    pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
+                } else {
+                    if (pkg.requestedPermissionsRequired.get(index) != required) {
+                        outError[0] = "conflicting <uses-permission> entries";
+                        mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                        return false;
+                    }
                 }
             }
         }
