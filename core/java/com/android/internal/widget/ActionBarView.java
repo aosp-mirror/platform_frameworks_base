@@ -1639,6 +1639,8 @@ public class ActionBarView extends AbsActionBarView {
 
         @Override
         public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
+            TransitionManager.beginDelayedTransition(ActionBarView.this, sTransition);
+
             mExpandedActionView = item.getActionView();
             mExpandedHomeLayout.setIcon(mIcon.getConstantState().newDrawable(getResources()));
             mCurrentExpandedItem = item;
@@ -1666,6 +1668,8 @@ public class ActionBarView extends AbsActionBarView {
 
         @Override
         public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
+            TransitionManager.beginDelayedTransition(ActionBarView.this, sTransition);
+
             // Do this before detaching the actionview from the hierarchy, in case
             // it needs to dismiss the soft keyboard, etc.
             if (mExpandedActionView instanceof CollapsibleActionView) {
