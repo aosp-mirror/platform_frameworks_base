@@ -124,6 +124,11 @@ public class PropertyValuesHolder implements Cloneable {
     private Object mAnimatedValue;
 
     /**
+     * Converts from the source Object type to the setter Object type.
+     */
+    private TypeConverter mConverter;
+
+    /**
      * Internal utility constructor, used by the factory methods to set the property name.
      * @param propertyName The name of the property for this holder.
      */
@@ -221,6 +226,34 @@ public class PropertyValuesHolder implements Cloneable {
     public static <V> PropertyValuesHolder ofObject(Property property,
             TypeEvaluator<V> evaluator, V... values) {
         PropertyValuesHolder pvh = new PropertyValuesHolder(property);
+        pvh.setObjectValues(values);
+        pvh.setEvaluator(evaluator);
+        return pvh;
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of Object values. This variant also takes a TypeEvaluator because the system
+     * cannot automatically interpolate between objects of unknown type. This variant also
+     * takes a <code>TypeConverter</code> to convert from animated values to the type
+     * of the property. If only one value is supplied, the <code>TypeConverter</code>
+     * must implement {@link TypeConverter#convertBack(Object)} to retrieve the current
+     * value.
+     *
+     * @param property The property being animated. Should not be null.
+     * @param converter Converts the animated object to the Property type.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see #setConverter(TypeConverter)
+     * @see TypeConverter
+     */
+    public static <T, V> PropertyValuesHolder ofObject(Property<?, V> property,
+            TypeConverter<T, V> converter, TypeEvaluator<T> evaluator, T... values) {
+        PropertyValuesHolder pvh = new PropertyValuesHolder(property);
+        pvh.setConverter(converter);
         pvh.setObjectValues(values);
         pvh.setEvaluator(evaluator);
         return pvh;
@@ -361,6 +394,14 @@ public class PropertyValuesHolder implements Cloneable {
     }
 
     /**
+     * Sets the converter to convert from the values type to the setter's parameter type.
+     * @param converter The converter to use to convert values.
+     */
+    public void setConverter(TypeConverter converter) {
+        mConverter = converter;
+    }
+
+    /**
      * Determine the setter or getter function using the JavaBeans convention of setFoo or
      * getFoo for a property named 'foo'. This function figures out what the name of the
      * function should be and uses reflection to find the Method with that name on the
@@ -389,22 +430,24 @@ public class PropertyValuesHolder implements Cloneable {
         } else {
             args = new Class[1];
             Class typeVariants[];
-            if (mValueType.equals(Float.class)) {
+            if (valueType.equals(Float.class)) {
                 typeVariants = FLOAT_VARIANTS;
-            } else if (mValueType.equals(Integer.class)) {
+            } else if (valueType.equals(Integer.class)) {
                 typeVariants = INTEGER_VARIANTS;
-            } else if (mValueType.equals(Double.class)) {
+            } else if (valueType.equals(Double.class)) {
                 typeVariants = DOUBLE_VARIANTS;
             } else {
                 typeVariants = new Class[1];
-                typeVariants[0] = mValueType;
+                typeVariants[0] = valueType;
             }
             for (Class typeVariant : typeVariants) {
                 args[0] = typeVariant;
                 try {
                     returnVal = targetClass.getMethod(methodName, args);
-                    // change the value type to suit
-                    mValueType = typeVariant;
+                    if (mConverter == null) {
+                        // change the value type to suit
+                        mValueType = typeVariant;
+                    }
                     return returnVal;
                 } catch (NoSuchMethodException e) {
                     // Swallow the error and keep trying other variants
@@ -415,7 +458,7 @@ public class PropertyValuesHolder implements Cloneable {
 
         if (returnVal == null) {
             Log.w("PropertyValuesHolder", "Method " +
-                    getMethodName(prefix, mPropertyName) + "() with type " + mValueType +
+                    getMethodName(prefix, mPropertyName) + "() with type " + valueType +
                     " not found on target class " + targetClass);
         }
 
@@ -465,7 +508,8 @@ public class PropertyValuesHolder implements Cloneable {
      * @param targetClass The Class on which the requested method should exist.
      */
     void setupSetter(Class targetClass) {
-        mSetter = setupSetterOrGetter(targetClass, sSetterPropertyMap, "set", mValueType);
+        Class<?> propertyType = mConverter == null ? mValueType : mConverter.getTargetType();
+        mSetter = setupSetterOrGetter(targetClass, sSetterPropertyMap, "set", propertyType);
     }
 
     /**
@@ -489,10 +533,13 @@ public class PropertyValuesHolder implements Cloneable {
         if (mProperty != null) {
             // check to make sure that mProperty is on the class of target
             try {
-                Object testValue = mProperty.get(target);
+                Object testValue = null;
                 for (Keyframe kf : mKeyframeSet.mKeyframes) {
                     if (!kf.hasValue()) {
-                        kf.setValue(mProperty.get(target));
+                        if (testValue == null) {
+                            testValue = convertBack(mProperty.get(target));
+                        }
+                        kf.setValue(testValue);
                     }
                 }
                 return;
@@ -516,7 +563,8 @@ public class PropertyValuesHolder implements Cloneable {
                     }
                 }
                 try {
-                    kf.setValue(mGetter.invoke(target));
+                    Object value = convertBack(mGetter.invoke(target));
+                    kf.setValue(value);
                 } catch (InvocationTargetException e) {
                     Log.e("PropertyValuesHolder", e.toString());
                 } catch (IllegalAccessException e) {
@@ -524,6 +572,18 @@ public class PropertyValuesHolder implements Cloneable {
                 }
             }
         }
+    }
+
+    private Object convertBack(Object value) {
+        if (mConverter != null) {
+            value = mConverter.convertBack(value);
+            if (value == null) {
+                throw new IllegalArgumentException("Converter "
+                        + mConverter.getClass().getName()
+                        + " must implement convertBack and not return null.");
+            }
+        }
+        return value;
     }
 
     /**
@@ -535,7 +595,8 @@ public class PropertyValuesHolder implements Cloneable {
      */
     private void setupValue(Object target, Keyframe kf) {
         if (mProperty != null) {
-            kf.setValue(mProperty.get(target));
+            Object value = convertBack(mProperty.get(target));
+            kf.setValue(value);
         }
         try {
             if (mGetter == null) {
@@ -546,7 +607,8 @@ public class PropertyValuesHolder implements Cloneable {
                     return;
                 }
             }
-            kf.setValue(mGetter.invoke(target));
+            Object value = convertBack(mGetter.invoke(target));
+            kf.setValue(value);
         } catch (InvocationTargetException e) {
             Log.e("PropertyValuesHolder", e.toString());
         } catch (IllegalAccessException e) {
@@ -657,7 +719,8 @@ public class PropertyValuesHolder implements Cloneable {
      * @param fraction The elapsed, interpolated fraction of the animation.
      */
     void calculateValue(float fraction) {
-        mAnimatedValue = mKeyframeSet.getValue(fraction);
+        Object value = mKeyframeSet.getValue(fraction);
+        mAnimatedValue = mConverter == null ? value : mConverter.convert(value);
     }
 
     /**
