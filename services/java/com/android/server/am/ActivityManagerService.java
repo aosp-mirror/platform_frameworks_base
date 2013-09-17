@@ -14751,7 +14751,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final void setProcessTrackerState(ProcessRecord proc, int memFactor, long now) {
-        if (proc.thread != null) {
+        if (proc.thread != null && proc.baseProcessTracker != null) {
             proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
         }
     }
