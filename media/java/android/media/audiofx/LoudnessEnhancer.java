@@ -25,8 +25,6 @@ import java.util.StringTokenizer;
 
 
 /**
- * @hide
- * CANDIDATE FOR PUBLIC API
  * LoudnessEnhancer is an audio effect for increasing audio loudness.
  * The processing is parametrized by a target gain value, which determines the maximum amount
  * by which an audio signal will be amplified; signals amplified outside of the sample
@@ -45,8 +43,6 @@ public class LoudnessEnhancer extends AudioEffect {
     // These parameter constants must be synchronized with those in
     // /system/media/audio_effects/include/audio_effects/effect_loudnessenhancer.h
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * The maximum gain applied applied to the signal to process.
      * It is expressed in millibels (100mB = 1dB) where 0mB corresponds to no amplification.
      */
@@ -70,7 +66,6 @@ public class LoudnessEnhancer extends AudioEffect {
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
      * Class constructor.
      * @param audioSession system-wide unique audio session identifier. The LoudnessEnhancer
      * will be attached to the MediaPlayer or AudioTrack in the same audio session.
@@ -92,7 +87,7 @@ public class LoudnessEnhancer extends AudioEffect {
 
     /**
      * @hide
-     * Class constructor.
+     * Class constructor for the LoudnessEnhancer audio effect.
      * @param priority the priority level requested by the application for controlling the
      * LoudnessEnhancer engine. As the same engine can be shared by several applications,
      * this parameter indicates how much the requesting application needs control of effect
@@ -117,8 +112,6 @@ public class LoudnessEnhancer extends AudioEffect {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Set the target gain for the audio effect.
      * The target gain is the maximum value by which a sample value will be amplified when the
      * effect is enabled.
@@ -133,8 +126,6 @@ public class LoudnessEnhancer extends AudioEffect {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Return the target gain.
      * @return the effect target gain expressed in mB.
      * @throws IllegalStateException
@@ -155,8 +146,6 @@ public class LoudnessEnhancer extends AudioEffect {
      */
     public interface OnParameterChangeListener  {
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
          * Method called when a parameter value has changed. The method is called only if the
          * parameter was changed by another application having the control of the same
          * LoudnessEnhancer engine.

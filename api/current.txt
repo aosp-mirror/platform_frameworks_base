@@ -13690,6 +13690,12 @@ package android.media.audiofx {
     field public short numBands;
   }
 
+  public class LoudnessEnhancer extends android.media.audiofx.AudioEffect {
+    method public float getTargetGain() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
+    method public void setTargetGain(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
+    field public static final int PARAM_TARGET_GAIN_MB = 0; // 0x0
+  }
+
   public class NoiseSuppressor extends android.media.audiofx.AudioEffect {
     method public static android.media.audiofx.NoiseSuppressor create(int);
     method public static boolean isAvailable();
