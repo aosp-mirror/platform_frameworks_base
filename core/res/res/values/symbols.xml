@@ -878,6 +878,48 @@
   <java-symbol type="string" name="mediaSize_na_junior_legal" />
   <java-symbol type="string" name="mediaSize_na_ledger" />
   <java-symbol type="string" name="mediaSize_na_tabloid" />
+  <java-symbol type="string" name="mediaSize_na_index_3x5" />
+  <java-symbol type="string" name="mediaSize_na_index_4x6" />
+  <java-symbol type="string" name="mediaSize_na_index_5x8" />
+  <java-symbol type="string" name="mediaSize_na_monarch" />
+  <java-symbol type="string" name="mediaSize_na_quarto" />
+  <java-symbol type="string" name="mediaSize_na_foolscap" />
+  <java-symbol type="string" name="mediaSize_chinese_roc_8k" />
+  <java-symbol type="string" name="mediaSize_chinese_roc_16k" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_1" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_2" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_3" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_4" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_5" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_6" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_7" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_8" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_9" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_10" />
+  <java-symbol type="string" name="mediaSize_chinese_prc_16k" />
+  <java-symbol type="string" name="mediaSize_chinese_om_pa_kai" />
+  <java-symbol type="string" name="mediaSize_chinese_om_dai_pa_kai" />
+  <java-symbol type="string" name="mediaSize_chinese_om_jurro_ku_kai" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b10" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b9" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b8" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b7" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b6" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b5" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b4" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b3" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b2" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b1" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_b0" />
+  <java-symbol type="string" name="mediaSize_japanese_jis_exec" />
+  <java-symbol type="string" name="mediaSize_japanese_chou4" />
+  <java-symbol type="string" name="mediaSize_japanese_chou3" />
+  <java-symbol type="string" name="mediaSize_japanese_chou2" />
+  <java-symbol type="string" name="mediaSize_japanese_hagaki" />
+  <java-symbol type="string" name="mediaSize_japanese_oufuku" />
+  <java-symbol type="string" name="mediaSize_japanese_kahu" />
+  <java-symbol type="string" name="mediaSize_japanese_kaku2" />
+  <java-symbol type="string" name="mediaSize_japanese_you4" />
   <java-symbol type="string" name="reason_unknown" />
   <java-symbol type="string" name="restr_pin_enter_admin_pin" />
   <java-symbol type="string" name="restr_pin_enter_pin" />
