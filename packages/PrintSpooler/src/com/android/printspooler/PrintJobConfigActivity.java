@@ -414,12 +414,25 @@ public class PrintJobConfigActivity extends Activity {
             // write anything and wait for the user to fix the range which will
             // trigger an update.
             mRequestedPages = mEditor.getRequestedPages();
-            if (mRequestedPages == null) {
+            if (mRequestedPages == null || mRequestedPages.length == 0) {
                 mEditor.updateUi();
                 if (mEditor.isDone()) {
                     PrintJobConfigActivity.this.finish();
                 }
                 return;
+            } else {
+                // If print is not confirmed we just ask for the first of the
+                // selected pages to emulate a behavior that shows preview
+                // increasing the chances that apps will implement the APIs
+                // correctly.
+                if (!mEditor.isPrintConfirmed()) {
+                    if (ALL_PAGES_ARRAY.equals(mRequestedPages)) {
+                        mRequestedPages = new PageRange[] {new PageRange(0, 0)};
+                    } else {
+                        final int firstPage = mRequestedPages[0].getStart();
+                        mRequestedPages = new PageRange[] {new PageRange(firstPage, firstPage)};
+                    }
+                }
             }
 
             // If the info and the layout did not change and we already have
@@ -1461,8 +1474,12 @@ public class PrintJobConfigActivity extends Activity {
 
                     if (dashIndex > 0) {
                         fromIndex = Integer.parseInt(range.substring(0, dashIndex)) - 1;
-                        toIndex = Integer.parseInt(range.substring(
-                                dashIndex + 1, range.length())) - 1;
+                        // It is possible that the dash is at the end since the input
+                        // verification can has to allow the user to keep entering if
+                        // this would lead to a valid input. So we handle this.
+                        toIndex = (dashIndex < range.length() - 1)
+                                ? Integer.parseInt(range.substring(dashIndex + 1,
+                                        range.length())) - 1 : fromIndex;
                     } else {
                         fromIndex = toIndex = Integer.parseInt(range) - 1;
                     }
