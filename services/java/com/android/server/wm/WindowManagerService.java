@@ -923,7 +923,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     //that was created later or a window at the top of the list of
                     //windows associated with this token.
                     if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
-                            "Adding window " + win + " at " + (newIdx + 1) + " of " + N);
+                            "not Base app: Adding window " + win + " at " + (newIdx + 1) + " of " +
+                            N);
                     windows.add(newIdx + 1, win);
                     if (newIdx < 0) {
                         // No window from token found on win's display.
@@ -1044,7 +1045,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
-                "Adding window " + win + " at " + i + " of " + N);
+                "Based on layer: Adding window " + win + " at " + i + " of " + N);
         windows.add(i, win);
         mWindowsChanged = true;
         return tokenWindowsPos;
@@ -1063,7 +1064,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         i++;
         if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
-                "Adding window " + win + " at " + i + " of " + windows.size());
+                "Free window: Adding window " + win + " at " + i + " of " + windows.size());
         windows.add(i, win);
         mWindowsChanged = true;
     }
@@ -1130,6 +1131,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) {
+        if (DEBUG_FOCUS_LIGHT) Slog.d(TAG, "addWindowToListInOrderLocked: win=" + win +
+                " Callers=" + Debug.getCallers(4));
         if (win.mAttachedWindow == null) {
             final WindowToken token = win.mToken;
             int tokenWindowsPos = 0;
@@ -7081,19 +7084,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
 
-                    if (lastFocus != newFocus) {
-                        //System.out.println("Changing focus from " + lastFocus
-                        //                   + " to " + newFocus);
-                        if (newFocus != null) {
-                            if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Gaining focus: " + newFocus);
-                            newFocus.reportFocusChangedSerialized(true, mInTouchMode);
-                            notifyFocusChanged();
-                        }
+                    //System.out.println("Changing focus from " + lastFocus
+                    //                   + " to " + newFocus);
+                    if (newFocus != null) {
+                        if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Gaining focus: " + newFocus);
+                        newFocus.reportFocusChangedSerialized(true, mInTouchMode);
+                        notifyFocusChanged();
+                    }
 
-                        if (lastFocus != null) {
-                            if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Losing focus: " + lastFocus);
-                            lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
-                        }
+                    if (lastFocus != null) {
+                        if (DEBUG_FOCUS_LIGHT) Slog.i(TAG, "Losing focus: " + lastFocus);
+                        lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
                     }
                 } break;
 
@@ -10277,14 +10278,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
-        int j = 0;
         final int numDisplays = mDisplayContents.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final WindowList windowList = mDisplayContents.valueAt(displayNdx).getWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if (windows == null || windows.contains(w)) {
-                    pw.print("  Window #"); pw.print(j++); pw.print(' ');
+                    pw.print("  Window #"); pw.print(winNdx); pw.print(' ');
                             pw.print(w); pw.println(":");
                     w.dump(pw, "    ", dumpAll || windows != null);
                 }
