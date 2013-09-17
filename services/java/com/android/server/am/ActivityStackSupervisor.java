@@ -1417,8 +1417,8 @@ public final class ActivityStackSupervisor {
                     final ActivityStack lastStack = getLastStack();
                     ActivityRecord curTop = lastStack == null?
                             null : lastStack.topRunningNonDelayedActivityLocked(notTop);
-                    if (curTop != null && (curTop.task != intentActivity.task) ||
-                            curTop.task != lastStack.topTask()) {
+                    if (curTop != null && (curTop.task != intentActivity.task ||
+                            curTop.task != lastStack.topTask())) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                         if (sourceRecord == null || (sourceStack.topActivity() != null &&
                                 sourceStack.topActivity().task == sourceRecord.task)) {
