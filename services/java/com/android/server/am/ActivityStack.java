@@ -1843,16 +1843,17 @@ final class ActivityStack {
                 // bottom of the activity stack.  This also keeps it
                 // correctly ordered with any activities we previously
                 // moved.
-                TaskRecord bottomTask = mTaskHistory.get(0);
-                ActivityRecord p = bottomTask.mActivities.get(0);
-                if (target.taskAffinity != null
-                        && target.taskAffinity.equals(p.task.affinity)) {
+                final ActivityRecord bottom =
+                        !mTaskHistory.isEmpty() && !mTaskHistory.get(0).mActivities.isEmpty() ?
+                        mTaskHistory.get(0).mActivities.get(0) : null;
+                if (bottom != null && target.taskAffinity != null
+                        && target.taskAffinity.equals(bottom.task.affinity)) {
                     // If the activity currently at the bottom has the
                     // same task affinity as the one we are moving,
                     // then merge it into the same task.
-                    target.setTask(p.task, p.thumbHolder, false);
+                    target.setTask(bottom.task, bottom.thumbHolder, false);
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
-                            + " out to bottom task " + p.task);
+                            + " out to bottom task " + bottom.task);
                 } else {
                     target.setTask(createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
                             null, false), null, false);
@@ -1868,7 +1869,7 @@ final class ActivityStack {
                 boolean noOptions = canMoveOptions;
                 final int start = replyChainEnd < 0 ? i : replyChainEnd;
                 for (int srcPos = start; srcPos >= i; --srcPos) {
-                    p = activities.get(srcPos);
+                    final ActivityRecord p = activities.get(srcPos);
                     if (p.finishing) {
                         continue;
                     }
