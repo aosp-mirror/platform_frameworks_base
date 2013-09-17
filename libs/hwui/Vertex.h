@@ -26,6 +26,15 @@ namespace uirenderer {
  * Simple structure to describe a vertex with a position and a texture.
  */
 struct Vertex {
+    /**
+     * Fudge-factor used to disambiguate geometry pixel positioning.
+     *
+     * Used to offset lines and points to avoid ambiguous intersection with pixel centers (see
+     * Program::set()), and used to make geometry damage rect calculation conservative (see
+     * Rect::snapGeometryToPixelBoundaries())
+     */
+    static const float gGeometryFudgeFactor = 0.0656f;
+
     float position[2];
 
     static inline void set(Vertex* vertex, float x, float y) {

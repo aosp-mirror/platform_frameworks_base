@@ -1628,14 +1628,7 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
 
     Rect r(left, top, right, bottom);
     currentTransform().mapRect(r);
-
-    if (snapOut) {
-        // snapOut is generally used to account for 1 pixel ramp (in window coordinates)
-        // outside of the provided rect boundaries in tessellated AA geometry
-        r.snapOutToPixelBoundaries();
-    } else {
-        r.snapToPixelBoundaries();
-    }
+    r.snapGeometryToPixelBoundaries(snapOut);
 
     Rect clipRect(*mSnapshot->clipRect);
     clipRect.snapToPixelBoundaries();
