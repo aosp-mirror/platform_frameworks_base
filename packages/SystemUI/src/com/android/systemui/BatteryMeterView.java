@@ -292,11 +292,7 @@ public class BatteryMeterView extends View implements DemoMode {
         c.drawRect(mFrame, mBatteryPaint);
         c.restore();
 
-        if (level <= EMPTY) {
-            final float x = mWidth * 0.5f;
-            final float y = (mHeight + mWarningTextHeight) * 0.48f;
-            c.drawText(mWarningString, x, y, mWarningTextPaint);
-        } else if (tracker.plugged) {
+        if (tracker.plugged) {
             // draw the bolt
             final int bl = (int)(mFrame.left + width / 4f);
             final int bt = (int)(mFrame.top + height / 6f);
@@ -319,6 +315,10 @@ public class BatteryMeterView extends View implements DemoMode {
                         mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
             }
             c.drawPath(mBoltPath, mBoltPaint);
+        } else if (level <= EMPTY) {
+            final float x = mWidth * 0.5f;
+            final float y = (mHeight + mWarningTextHeight) * 0.48f;
+            c.drawText(mWarningString, x, y, mWarningTextPaint);
         } else if (mShowPercent && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
