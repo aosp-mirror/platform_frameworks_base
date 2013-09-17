@@ -18725,9 +18725,10 @@ package android.preference {
   }
 
   public abstract class DialogPreference extends android.preference.Preference implements android.content.DialogInterface.OnClickListener android.content.DialogInterface.OnDismissListener android.preference.PreferenceManager.OnActivityDestroyListener {
-    ctor public DialogPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public DialogPreference(android.content.Context, android.util.AttributeSet, int, int);
+    ctor public DialogPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public DialogPreference(android.content.Context, android.util.AttributeSet);
+    ctor public DialogPreference(android.content.Context);
     method public android.app.Dialog getDialog();
     method public android.graphics.drawable.Drawable getDialogIcon();
     method public int getDialogLayoutResource();
@@ -18757,8 +18758,8 @@ package android.preference {
   }
 
   public class EditTextPreference extends android.preference.DialogPreference {
-    ctor public EditTextPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public EditTextPreference(android.content.Context, android.util.AttributeSet, int, int);
+    ctor public EditTextPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public EditTextPreference(android.content.Context, android.util.AttributeSet);
     ctor public EditTextPreference(android.content.Context);
     method public android.widget.EditText getEditText();

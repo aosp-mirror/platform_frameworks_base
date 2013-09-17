@@ -49,7 +49,11 @@ public class SeekBarDialogPreference extends DialogPreference {
     }
 
     public SeekBarDialogPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
+    }
+
+    public SeekBarDialogPreference(Context context) {
+        this(context, null);
     }
 
     // Allow subclasses to override the action buttons

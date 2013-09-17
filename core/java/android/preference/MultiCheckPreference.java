@@ -69,7 +69,7 @@ public class MultiCheckPreference extends DialogPreference {
     }
 
     public MultiCheckPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.dialogPreferenceStyle);
     }
 
     public MultiCheckPreference(Context context) {
