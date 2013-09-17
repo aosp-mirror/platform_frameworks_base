@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Хэт олон <xliff:g id="CONTENT_TYPE">%s</xliff:g> устгах."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Таблетийн сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Утасны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Сүлжээ хянагдаж байж болзошгүй"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Тодорхойгүй гуравдагч талаас"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>-с"</string>
     <string name="me" msgid="6545696007631404292">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Утасны сонголт"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Апп нь Wifi дэлгэцний доод-төвшиний функцийг удирдах боломжтой."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"аудио гаралтыг барих"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Апп-т аудио гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Хотворд таних"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Апп-д Хотворд илрүүлэхийн тулд аудиог бичихийг зөвшөөрнө. Бичилт далд хийгдэх бөгөөд бусад аудио бичилтэд (жнь. видео бичлэг) саад болохгүй."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"видео гаралтыг барих"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Апп-т видео гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"найдвартай видео гаралтыг барих"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"утсыг унтуулахгүй байлгах"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Апп нь таблетыг унтахаас сэргийлэх боломжтой"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Апп нь утсыг унтахаас сэргийлэх боломжтой"</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"хэт улаанаар дамжуулах"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Апп-д таблетын хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Апп-д утасны хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"таблетыг унтраах эсвэл асаах"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"утсыг унтраах эсвэл асаах"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Апп нь таблетыг асаах, унтраах боломжтой."</string>

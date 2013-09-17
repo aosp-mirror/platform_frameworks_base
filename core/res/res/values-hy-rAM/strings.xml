@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Չափից շատ <xliff:g id="CONTENT_TYPE">%s</xliff:g> հեռացումներ:"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Գրասալիկի պահոցը լիքն է: Ջնջեք մի քանի ֆայլ` տարածք ազատելու համար:"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Հեռախոսի պահոցը լիքն է: Ջնջեք մի քանի ֆայլեր` տարածություն ազատելու համար:"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Ցանցը կարող է վերահսկվել"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Անհայտ երրորդ կողմի կողմից"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>-ի կողմից"</string>
     <string name="me" msgid="6545696007631404292">"Իմ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Գրասալիկի ընտրանքները"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Հեռախոսի ընտրանքներ"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Թույլ է տալիս հավելվածին կառավարել WiFi ցուցադրիչների ցածր մակարդակի գործառույթները:"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"պահել աուդիո արտածումը"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Թույլ է տալիս ծրագրին պահել և վերահղել աուդիո արտածումը:"</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Թեժ բառի հայտնաբերում"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Հավելվածին թույլ է տալիս որսալ ձայնանյութը՝ թեժ բառի հայտնաբերման համար: Դա կարող է տեղի ունենալ հետնաշերտում, սակայն չի խանգարի այլ աուդիո ձայնագրություններին (օր.՝ Տեսախցիկից):"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"պահել վիդեո արտածումը"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Թույլ է տալիս ծրագրին պահել և վերահղել վիդեո արտածումը:"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"պահել անվտանգ վիդեո արտածումը"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"կանխել հեռախոսի քնի ռեժիմին անցնելը"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Թույլ է տալիս հավելվածին կանխել գրասալիկի` քնի ռեժիմին անցնելը:"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Թույլ է տալիս հավելվածին կանխել հեռախոսի` քնի ռեժիմին անցնելը:"</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"փոխանցել ինֆրակարմիր հաղորդիչով"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Հավելվածին թույլ է տալիս օգտագործել գրասալիկի ինֆրակարմիր հաղորդիչը:"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Հավելվածին թույլ է տալիս օգտագործել հեռախոսի ինֆրակարմիր հաղորդիչը:"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"գրասալիկը միացնել կամ անջատել"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"հեռախոսը միացնել կամ անջատել"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Թույլ է տալիս հավելվածին միացնել կամ անջատել գրասալիկը:"</string>

@@ -131,6 +131,11 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Prea multe ştergeri <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Stocarea pe tabletă este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Stocarea pe telefon este plină. Ștergeţi câteva fişiere pentru a elibera spaţiu."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Rețeaua poate fi monitorizată"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opţiuni tablet PC"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opţiuni telefon"</string>
@@ -478,10 +483,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite aplicaţiei să controleze funcţiile de nivel redus ale afişajelor Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"să intercepteze ieșirea audio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite aplicației să intercepteze și să redirecționeze ieșirea audio."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"detectarea expresiei de activare"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Activează captarea semnalului audio de către aplicație pentru detectarea expresiei de activare. Captarea poate avea loc în fundal, dar nu împiedică altă captare audio (de ex., cameră video)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"să intercepteze ieșirea video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite aplicației să intercepteze și să redirecționeze ieșirea video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"să intercepteze ieșirea video securizată"</string>
@@ -549,12 +552,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"împiedicare intrare telefon în repaus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite aplicaţiei să împiedice intrarea tabletei în stare de repaus."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite aplicaţiei să împiedice intrarea telefonului în stare de repaus."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"transmisie prin infraroșii"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite aplicației să utilizeze transmițătorul prin infraroșii al tabletei."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Permite aplicației să utilizeze transmițătorul prin infraroșii al telefonului."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"pornire sau oprire computer tablet PC"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefon pornit sau oprit"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite aplicaţiei să pornească sau să oprească tableta."</string>

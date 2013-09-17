@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Te veel verwijderen voor <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tabletgeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefoongeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan worden gecontroleerd"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Door een onbekende derde partij"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Door <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletopties"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefoonopties"</string>
@@ -436,12 +439,12 @@
     <string name="permlab_writeContacts" msgid="5107492086416793544">"uw contacten aanpassen"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op uw tablet, inclusief de frequentie waarmee u heeft gebeld, gemaild of op andere manieren heeft gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op uw telefoon, inclusief de frequentie waarmee u heeft gebeld, gemaild of op andere manieren heeft gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"oproeplogboek lezen"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Hiermee kan de app het oproeplogboek van uw tablet lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps uw oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder uw medeweten delen."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Hiermee kan de app het oproeplogboek van uw telefoon lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps uw oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder uw medeweten delen."</string>
-    <string name="permlab_writeCallLog" msgid="8552045664743499354">"oproeplogboek schrijven"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het oproeplogboek van uw tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw oproeplogboek wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het oproeplogboek van uw telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw oproeplogboek wissen of aanpassen."</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekkenlijst lezen"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Hiermee kan de app het gesprekkenlijst van uw tablet lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps uw oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder uw medeweten delen."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Hiermee kan de app het gesprekkenlijst van uw telefoon lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps uw oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder uw medeweten delen."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekkenlijst schrijven"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het gesprekkenlijst van uw tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het gesprekkenlijst van uw telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"uw eigen contactkaart lezen"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Hiermee kan de app persoonlijke profielgegevens lezen die op uw apparaat zijn opgeslagen, zoals uw naam en contactgegevens. Dit betekent dat de app u kan identificeren en uw profielgegevens naar anderen kan verzenden."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"uw eigen contactkaart aanpassen"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"De app toestaan minder belangrijke functies van wifi-displays te beheren."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"audio-uitvoer vastleggen"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Hiermee kan de app audio-uitvoer vastleggen en verwerken."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Detectie van hotwords"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Hiermee kan de app audio opnemen voor het detecteren van hotwords. Het opnemen kan op de achtergrond plaatsvinden, maar voorkomt niet dat andere audio wordt opgenomen (bijvoorbeeld in Camcorder)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"video-uitvoer vastleggen"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Hiermee kan de app video-uitvoer vastleggen en verwerken."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"beveiligde video-uitvoer vastleggen"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Hiermee kan de app voorkomen dat de tablet overschakelt naar de slaapmodus."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Hiermee kan de app voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"infrarood verzenden"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Hiermee kan de app de infraroodzender van de tablet gebruiken."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Hiermee kan de app de infraroodzender van de telefoon gebruiken."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tablet in- of uitschakelen"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefoon in- of uitschakelen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Hiermee kan de app de tablet in- of uitschakelen."</string>

@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"बहुत से <xliff:g id="CONTENT_TYPE">%s</xliff:g> हटाए जाते हैं."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"टेबलेट संग्रहण भर गया है. स्‍थान रिक्त करने के लिए कुछ फ़ाइलें हटाएं."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"फ़ोन संग्रहण भर गया है. स्‍थान रिक्त करने के लिए कुछ फ़ाइलें हटाएं."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"नेटवर्क को मॉनिटर किया जा सकता है"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"किसी अज्ञात तृतीय पक्ष के द्वारा"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> के द्वारा"</string>
     <string name="me" msgid="6545696007631404292">"मैं"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"टेबलेट विकल्‍प"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"फ़ोन विकल्‍प"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"एप्स को Wifi डिस्प्ले की निम्न-स्तर की सुविधाएं नियंत्रित करने देता है."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ऑडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"एप्‍स को ऑडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"हॉटवर्ड पहचान"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"एप्लिकेशन को हॉटवर्ड पहचान के लिए ऑडियो कैप्चर करने देती है. कैप्चर पृष्ठभूमि में हो सकता है लेकिन वह अन्य ऑडियो कैप्चर (उदा. कैमकॉर्डर) को नहीं रोकता."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"वीडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"एप्‍स को वीडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"सुरक्षित वीडियो आउटपुट को कैप्‍चर करें"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"फ़ोन को निष्‍क्रिय होने से रोकें"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"एप्स को टेबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"एप्स को फ़ोन को प्रयोग में नहीं होने से रोकता है."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"इंफ़्रारेड संचारित करें"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"एप्लिकेशन को टेबलेट के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"एप्लिकेशन को फ़ोन के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"टेबलेट चालू या बंद करें"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फ़ोन चालू या बंद करें"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"एप्‍स को टेबलेट चालू या बंद करने देता है."</string>

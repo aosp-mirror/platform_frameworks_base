@@ -131,6 +131,11 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"<xliff:g id="CONTENT_TYPE">%s</xliff:g> 삭제가 너무 많습니다."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"태블릿 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"휴대전화 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장공간을 늘리세요."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"네트워크가 모니터링될 수 있음"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"태블릿 옵션"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"휴대전화 옵션"</string>
@@ -478,10 +483,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"앱이 Wi-Fi 디스플레이의 하위 수준 기능을 제어하도록 허용합니다."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"오디오 출력 캡처"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"앱이 오디오 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"핫워드 감지"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"앱에서 핫워드 감지를 위해 오디오를 캡처하도록 허용합니다. 캡처는 백그라운드에서 수행될 수 있지만 다른 오디오 캡처를 차단하지 않습니다(예: 캠코더)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"동영상 출력 캡처"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"앱이 동영상 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"안전한 동영상 출력 캡처"</string>
@@ -549,12 +552,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"앱이 휴대전화의 절전 모드 전환을 막도록 허용합니다."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"적외선 전송"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"앱에서 태블릿의 적외선 송신기를 사용하도록 허용합니다."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"앱에서 휴대전화의 적외선 송신기를 사용하도록 허용합니다."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"태블릿 전원 켜고 끄기"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"휴대전화 전원 켜고 끄기"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"앱이 태블릿을 켜거나 끌 수 있도록 허용합니다."</string>
@@ -682,7 +682,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"기기 전체 프록시 설정"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 전체 프록시만 유효합니다."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"화면 잠금 비밀번호 만료 설정"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"화면 잠금 비밀번호 변경 빈도 설정"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"화면 잠금 비밀번호 변경 빈도를 설정합니다."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"저장소 암호화 설정"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"저장한 애플리케이션 데이터를 암호화해야 합니다."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"카메라 사용 안함"</string>

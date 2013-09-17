@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"មាន​ការ​លុប <xliff:g id="CONTENT_TYPE">%s</xliff:g> ច្រើន​ពេក។"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ឧបករណ៍​ផ្ទុក​នៃ​​កុំព្យូទ័រ​បន្ទះ​ពេញ។ លុប​ឯកសារ​មួយ​ចំនួន​។"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ឧបករណ៍​ផ្ទុក​ទូរស័ព្ទ​ពេញ! លុប​ឯកសារ​មួយ​ចំនួន​ដើម្បី​បង្កើន​ទំហំ។"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"បណ្ដាញ​អាច​ត្រូវ​បាន​តាមដាន"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ដោយ​ភាគី​ទីបី​ដែល​មិន​ស្គាល់"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"ដោយ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ជម្រើស​ទូរស័ព្ទ"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"ឲ្យ​កម្មវិធី​ពិនិត្យ​លក្ខណៈ​កម្រិត​ទាប​​នៃ​ការ​បង្ហាញ​វ៉ាយហ្វាយ។"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ចាប់​យក​លទ្ធផល​អូឌីយ៉ូ"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"​ឱ្យ​កម្មវិធី​ដើម្បី​ចាប់​យក​ និង​​ប្ដូរ​​ទិស​លទ្ធផល​អូឌីយ៉ូ​។"</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ការ​រក​ឃើញ​ពាក្យ"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ឲ្យ​កម្មវិធី​​ថត​អូឌីយ៉ូ​សម្រាប់​កា​រ​រក​ឃើញ​ពាក្យ។​ ការ​ថត​អាច​កើត​ឡើង​ក្នុង​ផ្ទៃ​ខាងក្រោយ​​ ប៉ុន្តែ​មិន​រារាំង​ការ​ថត​អូឌីយ៉ូ​ផ្សេង​ទេ (ឧ. ម៉ាស៊ីន​ថត​វីដេអូ)។"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ចាប់​យក​លទ្ធផល​វីដេអូ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ឲ្យ​កម្មវិធី​ចាប់​យក​ និង​ប្ដូរ​​ទិស​លទ្ធផល​វីដេអូ​។"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ចាប់​យក​លទ្ធផល​វីដេអូ​សុវត្ថិភាព"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ឲ្យ​​កម្មវិធី​ការពារ​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក។"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ឲ្យ​កម្មវិធី​ការពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក។"</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"បញ្ជូន​អ៊ីនហ្វ្រា​រ៉េ​ដ"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​បញ្ជូន​​អ៊ីនហ្វ្រា​រ៉េ​ដ​​របស់​កុំព្យូទ័រ​បន្ទះ។"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​បញ្ជូន​តាម​អ៊ីនហ្វ្រា​រ៉េ​ដ​​របស់​ទូរស័ព្ទ។"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"បិទ/បើក​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"បិទ/បើក​ទូរស័ព្ទ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ឲ្យ​កម្មវិធី​បិទ/បើក​កុំព្យូទ័រ​បន្ទះ។"</string>

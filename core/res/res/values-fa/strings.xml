@@ -131,6 +131,11 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"تعداد موارد حذف شده <xliff:g id="CONTENT_TYPE">%s</xliff:g> بسیار زیاد است."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"حافظه رایانهٔ لوحی پر است! برخی از فایل‎ها را حذف کنید تا فضا آزاد شود."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"حافظه تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ممکن است شبکه نظارت شده باشد"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"گزینه‌های رایانهٔ لوحی"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"گزینه‌های تلفن"</string>
@@ -478,10 +483,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"به برنامه اجازه می‌دهد که ویژگی‌های سطح پایین صفحه‌های نمایش Wi‑Fi را کنترل کند."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ضبط خروجی صدا"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"به برنامه امکان می‌دهد خروجی صدا را ضبط و هدایت کند."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"تشخیص کلیدگفته"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"به برنامه اجازه می‌دهد تا صدا را برای تشخیص کلیدگفته ضبط کند. ضبط صدا می‌تواند در پس‌زمینه رخ دهد اما از ضبط صداهای دیگر (مثلاً دوربین فیلمبرداری) جلوگیری نمی‌کند."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ضبط خروجی ویدیو"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"به برنامه امکان می‌دهد خروجی ویدیو را ضبط و هدایت کند."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ضبط خروجی ویدیوی ایمن"</string>
@@ -549,12 +552,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ممانعت از به خواب رفتن تلفن"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"به برنامه اجازه می‎دهد تا از غیرفعال شدن رایانهٔ لوحی جلوگیری کند."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"به برنامه اجازه می‎دهد تا از غیرفعال شدن تلفن جلوگیری کند."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"ارسال مادون قرمز"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز رایانه لوحی استفاده کند."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"به برنامه اجازه می‌دهد تا از فرستنده مادون قرمز تلفن استفاده کند."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"روشن/خاموش کردن رایانهٔ لوحی"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"روشن/خاموش کردن تلفن"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"به برنامه اجازه می‎دهد رایانهٔ لوحی را روشن یا خاموش کند."</string>

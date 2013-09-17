@@ -131,6 +131,11 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Massa supressions de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"L\'emmagatzematge de la tauleta és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que la xarxa se supervisi."</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcions de la tauleta"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opcions del telèfon"</string>
@@ -478,10 +483,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet a l\'aplicació controlar les funcions de baix nivell de les pantalles Wi-Fi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"captura la sortida d\'àudio"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permet que l\'aplicació capturi i redirigeixi la sortida d\'àudio."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Detecció de paraules actives"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Permet que l\'aplicació capturi àudio per a la detecció de paraules actives. La captura es pot produir en segon pla però no evita altres captures d\'àudio (per exemple, de càmera de vídeo)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"captura la sortida de vídeo"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permet que l\'aplicació capturi i redirigeixi la sortida de vídeo."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"captura la sortida de vídeo segur"</string>
@@ -549,12 +552,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir que el telèfon entri en mode de repòs"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permet que l\'aplicació impedeixi que el telèfon entri en repòs."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"transmissió d\'infraroigs"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permet que l\'aplicació utilitzi el transmissor d\'infraroigs de la tauleta."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Permet que l\'aplicació utilitzi el transmissor d\'infraroigs del telèfon."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"activa o desactiva la tauleta"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"engegar o apagar el telèfon"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permet que l\'aplicació encengui i apagui la tauleta."</string>

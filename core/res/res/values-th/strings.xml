@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"มีการลบ <xliff:g id="CONTENT_TYPE">%s</xliff:g> มากเกินไป"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม ลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ที่เก็บข้อมูลโทรศัพท์เต็ม ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"เครือข่ายอาจได้รับการตรวจสอบ"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"โดยบุคคลที่สามที่ไม่รู้จัก"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"โดย <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ตัวเลือกของแท็บเล็ต"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ตัวเลือกโทรศัพท์"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"อนุญาตให้แอปควบคุมคุณลักษณะต่างๆ ในระดับล่างของการแสดงผลด้วย WiFi"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"บันทึกเอาต์พุตเสียง"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"อนุญาตให้แอปบันทึกและเปลี่ยนเส้นทางเอาต์พุตเสียง"</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"การตรวจหาคำที่นิยม"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"อนุญาตให้แอปเก็บเสียงสำหรับการตรวจหาคำที่นิยม การเก็บเสียงสามารถดำเนินการอยู่ในพื้นหลัง แต่ไม่เป็นการป้องกันการเก็บเสียงอื่นๆ (เช่น กล้องวิดีโอ)"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"บันทึกเอาต์พุตวิดีโอ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"อนุญาตให้แอปบันทึกและเปลี่ยนเส้นทางเอาต์พุตวิดีโอ"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"บันทึกเอาต์พุตเสียงที่ปลอดภัย"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ป้องกันไม่ให้โทรศัพท์เข้าโหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้โทรศัพท์เข้าสู่โหมดสลีป"</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"ส่งสัญญาณอินฟราเรด"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"อนุญาตให้แอปใช้ตัวส่งสัญญาณอินฟราเรดของแท็บเล็ต"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"อนุญาตให้แอปใช้ตัวส่งสัญญาณอินฟราเรดของโทรศัพท์"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"เปิดหรือปิดเครื่องแท็บเล็ต"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"เปิดหรือปิดโทรศัพท์"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"อนุญาตให้แอปพลิเคชันเปิดหรือปิดแท็บเล็ต"</string>

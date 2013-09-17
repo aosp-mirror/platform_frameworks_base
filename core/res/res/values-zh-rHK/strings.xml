@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"同時刪除太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g>。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"平板電腦的儲存空間已滿。請刪除一些檔案，以騰出可用空間。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手機的儲存空間已滿。請刪除一些檔案，以騰出可用空間。"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"網絡可能會受到監控"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"受到不明的第三方監控"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"受到 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 監控"</string>
     <string name="me" msgid="6545696007631404292">"我本人"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板電腦選項"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"手機選項"</string>
@@ -478,10 +481,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 WiFi Display 的低階功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"擷取音頻輸出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音頻輸出。"</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"啟動字詞偵測"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取啟動字詞偵測的音頻。擷取操作可以在背景執行，但並未阻止其他音頻擷取 (例如攝錄機)。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"擷取視頻輸出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允許應用程式擷取及重新導向視頻輸出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"擷取安全視頻輸出"</string>
@@ -549,12 +550,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手機進入休眠狀態"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允許應用程式防止平板電腦進入休眠狀態。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"允許應用程式防止手機進入休眠狀態。"</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"傳送紅外線"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"允許應用程式使用平板電腦的紅外線傳送器。"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"允許應用程式使用手機的紅外線傳送器。"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"開啟或關閉平板電腦"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"開啟或關閉手機"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允許應用程式開啟或關閉平板電腦。"</string>
