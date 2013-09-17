@@ -38,8 +38,7 @@
     <string name="save_error" msgid="6167009778003223664">"无法保存文档"</string>
     <string name="root_recent" msgid="4470053704320518133">"最近"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"可用空间：<xliff:g id="SIZE">%1$s</xliff:g>"</string>
-    <!-- no translation found for root_type_service (2178854894416775409) -->
-    <skip />
+    <string name="root_type_service" msgid="2178854894416775409">"存储服务"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"捷径"</string>
     <string name="root_type_device" msgid="7121342474653483538">"设备"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"更多应用"</string>
