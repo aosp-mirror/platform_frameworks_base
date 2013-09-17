@@ -445,7 +445,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
-        pw.println("    [--details] [--current] [--commit] [--write] [-h] [<package.name>]");
+        pw.println("    [--details] [--current] [--commit] [--reset] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: perform a checkin: print and delete old committed states.");
         pw.println("  --c: print only state in checkin format.");
         pw.println("  --csv: output data suitable for putting in a spreadsheet.");
@@ -456,6 +456,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  --details: dump all execution details, not just summary.");
         pw.println("  --current: only dump current state.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
+        pw.println("  --reset: reset current stats, without committing.");
         pw.println("  --write: write current in-memory stats to disk.");
         pw.println("  --read: replace current stats with last-written stats.");
         pw.println("  -a: print everything.");
@@ -555,6 +556,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
                         writeStateLocked(true, true);
                         pw.println("Process stats committed.");
+                    }
+                    return;
+                } else if ("--reset".equals(arg)) {
+                    synchronized (mAm) {
+                        mProcessStats.resetSafely();
+                        pw.println("Process stats reset.");
                     }
                     return;
                 } else if ("--write".equals(arg)) {
