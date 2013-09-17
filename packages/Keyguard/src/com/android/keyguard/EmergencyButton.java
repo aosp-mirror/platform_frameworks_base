@@ -102,6 +102,8 @@ public class EmergencyButton extends Button {
                 == TelephonyManager.CALL_STATE_OFFHOOK) {
             mLockPatternUtils.resumeCall();
         } else {
+            final boolean bypassHandler = true;
+            KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(bypassHandler);
             Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);

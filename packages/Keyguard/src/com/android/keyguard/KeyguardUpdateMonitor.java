@@ -91,6 +91,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_SET_CURRENT_CLIENT_ID = 315;
     protected static final int MSG_SET_PLAYBACK_STATE = 316;
     protected static final int MSG_USER_INFO_CHANGED = 317;
+    protected static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
 
 
     private static KeyguardUpdateMonitor sInstance;
@@ -180,6 +181,9 @@ public class KeyguardUpdateMonitor {
                     break;
                 case MSG_USER_INFO_CHANGED:
                     handleUserInfoChanged(msg.arg1);
+                    break;
+                case MSG_REPORT_EMERGENCY_CALL_ACTION:
+                    handleReportEmergencyCallAction();
                     break;
             }
         }
@@ -758,6 +762,18 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    /**
+     * Handle {@link #MSG_REPORT_EMERGENCY_CALL_ACTION}
+     */
+    private void handleReportEmergencyCallAction() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onEmergencyCallAction();
+            }
+        }
+    }
+
     public boolean isKeyguardVisible() {
         return mKeyguardIsVisible;
     }
@@ -900,6 +916,22 @@ public class KeyguardUpdateMonitor {
      */
     public void reportSimUnlocked() {
         handleSimStateChange(new SimArgs(IccCardConstants.State.READY));
+    }
+
+    /**
+     * Report that the emergency call button has been pressed and the emergency dialer is
+     * about to be displayed.
+     *
+     * @param bypassHandler runs immediately.
+     *
+     * NOTE: Must be called from UI thread if bypassHandler == true.
+     */
+    public void reportEmergencyCallAction(boolean bypassHandler) {
+        if (!bypassHandler) {
+            mHandler.obtainMessage(MSG_REPORT_EMERGENCY_CALL_ACTION).sendToTarget();
+        } else {
+            handleReportEmergencyCallAction();
+        }
     }
 
     public CharSequence getTelephonyPlmn() {
