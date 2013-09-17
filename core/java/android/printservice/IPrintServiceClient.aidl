@@ -20,6 +20,8 @@ import android.os.ParcelFileDescriptor;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
+import android.print.PrintJobId;
+import android.content.pm.ParceledListSlice;
 
 /**
  * The top-level interface from a print service to the system.
@@ -28,11 +30,11 @@ import android.print.PrinterInfo;
  */
 interface IPrintServiceClient {
     List<PrintJobInfo> getPrintJobInfos();
-    PrintJobInfo getPrintJobInfo(int printJobId);
-    boolean setPrintJobState(int printJobId, int state, String error);
-    boolean setPrintJobTag(int printJobId, String tag);
-    oneway void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
+    PrintJobInfo getPrintJobInfo(in PrintJobId printJobId);
+    boolean setPrintJobState(in PrintJobId printJobId, int state, String error);
+    boolean setPrintJobTag(in PrintJobId printJobId, String tag);
+    oneway void writePrintJobData(in ParcelFileDescriptor fd, in PrintJobId printJobId);
 
-    void onPrintersAdded(in List<PrinterInfo> printers);
-    void onPrintersRemoved(in List<PrinterId> printerIds);
+    void onPrintersAdded(in ParceledListSlice printers);
+    void onPrintersRemoved(in ParceledListSlice printerIds);
 }

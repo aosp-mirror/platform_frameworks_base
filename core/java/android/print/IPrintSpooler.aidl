@@ -24,6 +24,8 @@ import android.print.IPrintSpoolerClient;
 import android.print.IPrintSpoolerCallbacks;
 import android.print.PrinterInfo;
 import android.print.PrintAttributes;
+import android.print.PrintJobId;
+import android.print.PrintJobInfo;
 
 /**
  * Interface for communication with the print spooler service.
@@ -33,17 +35,18 @@ import android.print.PrintAttributes;
  * @hide
  */
 oneway interface IPrintSpooler {
+    void removeObsoletePrintJobs();
+    void forgetPrintJobs(in List<PrintJobId> printJob);
     void getPrintJobInfos(IPrintSpoolerCallbacks callback, in ComponentName componentName,
             int state, int appId, int sequence);
-    void getPrintJobInfo(int printJobId, IPrintSpoolerCallbacks callback,
+    void getPrintJobInfo(in PrintJobId printJobId, IPrintSpoolerCallbacks callback,
             int appId, int sequence);
-    void createPrintJob(String printJobName, in IPrintClient client,
-            in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
-            IPrintSpoolerCallbacks callback, int appId, int sequence);
-    void setPrintJobState(int printJobId, int status, String error,
+    void createPrintJob(in PrintJobInfo printJob, in IPrintClient client,
+            in IPrintDocumentAdapter printAdapter);
+    void setPrintJobState(in PrintJobId printJobId, int status, String stateReason,
             IPrintSpoolerCallbacks callback, int sequence);
-    void setPrintJobTag(int printJobId, String tag, IPrintSpoolerCallbacks callback,
+    void setPrintJobTag(in PrintJobId printJobId, String tag, IPrintSpoolerCallbacks callback,
             int sequence);
-    void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
+    void writePrintJobData(in ParcelFileDescriptor fd, in PrintJobId printJobId);
     void setClient(IPrintSpoolerClient client);
 }

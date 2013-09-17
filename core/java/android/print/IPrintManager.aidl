@@ -19,6 +19,7 @@ package android.print;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
+import android.print.PrintJobId;
 import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
@@ -31,12 +32,12 @@ import android.printservice.PrintServiceInfo;
  */
 interface IPrintManager {
     List<PrintJobInfo> getPrintJobInfos(int appId, int userId);
-    PrintJobInfo getPrintJobInfo(int printJobId, int appId, int userId);
+    PrintJobInfo getPrintJobInfo(in PrintJobId printJobId, int appId, int userId);
     PrintJobInfo print(String printJobName, in IPrintClient client,
             in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
             int appId, int userId);
-    void cancelPrintJob(int printJobId, int appId, int userId);
-    void restartPrintJob(int printJobId, int appId, int userId);
+    void cancelPrintJob(in PrintJobId printJobId, int appId, int userId);
+    void restartPrintJob(in PrintJobId printJobId, int appId, int userId);
 
     List<PrintServiceInfo> getEnabledPrintServices(int userId);
 

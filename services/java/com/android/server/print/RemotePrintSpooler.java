@@ -31,19 +31,19 @@ import android.print.IPrintDocumentAdapter;
 import android.print.IPrintSpooler;
 import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
-import android.print.PrintAttributes;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
-
-import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+
+import libcore.io.IoUtils;
 
 /**
  * This represents the remote print spooler as a local object to the
@@ -63,8 +63,6 @@ final class RemotePrintSpooler {
     private final Object mLock = new Object();
 
     private final GetPrintJobInfosCaller mGetPrintJobInfosCaller = new GetPrintJobInfosCaller();
-
-    private final CreatePrintJobCaller mCreatePrintJobCaller = new CreatePrintJobCaller();
 
     private final GetPrintJobInfoCaller mGetPrintJobInfoCaller = new GetPrintJobInfoCaller();
 
@@ -132,16 +130,15 @@ final class RemotePrintSpooler {
         return null;
     }
 
-    public final PrintJobInfo createPrintJob(String printJobName, IPrintClient client,
-            IPrintDocumentAdapter documentAdapter, PrintAttributes attributes, int appId) {
+    public final void createPrintJob(PrintJobInfo printJob, IPrintClient client,
+            IPrintDocumentAdapter documentAdapter) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
         try {
-            return mCreatePrintJobCaller.createPrintJob(getRemoteInstanceLazy(),
-                    printJobName, client, documentAdapter, attributes, appId);
+            getRemoteInstanceLazy().createPrintJob(printJob, client, documentAdapter);
         } catch (RemoteException re) {
             Slog.e(LOG_TAG, "Error creating print job.", re);
         } catch (TimeoutException te) {
@@ -155,10 +152,9 @@ final class RemotePrintSpooler {
                 mLock.notifyAll();
             }
         }
-        return null;
     }
 
-    public final void writePrintJobData(ParcelFileDescriptor fd, int printJobId) {
+    public final void writePrintJobData(ParcelFileDescriptor fd, PrintJobId printJobId) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -184,7 +180,7 @@ final class RemotePrintSpooler {
         }
     }
 
-    public final PrintJobInfo getPrintJobInfo(int printJobId, int appId) {
+    public final PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -209,7 +205,7 @@ final class RemotePrintSpooler {
         return null;
     }
 
-    public final boolean setPrintJobState(int printJobId, int state, String error) {
+    public final boolean setPrintJobState(PrintJobId printJobId, int state, String error) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -234,7 +230,7 @@ final class RemotePrintSpooler {
         return false;
     }
 
-    public final boolean setPrintJobTag(int printJobId, String tag) {
+    public final boolean setPrintJobTag(PrintJobId printJobId, String tag) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -259,19 +255,46 @@ final class RemotePrintSpooler {
         return false;
     }
 
-    public final void start() {
+    public final void removeObsoletePrintJobs() {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
         try {
-            getRemoteInstanceLazy();
+            getRemoteInstanceLazy().removeObsoletePrintJobs();
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error removing obsolete print jobs .", re);
         } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error starting the spooler.", te);
+            Slog.e(LOG_TAG, "Error removing obsolete print jobs .", te);
         } finally {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] start()");
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
+                        + "] removeObsoletePrintJobs()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    public final void forgetPrintJobs(List<PrintJobId> printJobIds) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().forgetPrintJobs(printJobIds);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error forgeting print jobs", re);
+        } catch (TimeoutException te) {
+            Slog.e(LOG_TAG, "Error forgeting print jobs", te);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
+                        + "] forgetPrintJobs()");
             }
             synchronized (mLock) {
                 mCanUnbind = true;
@@ -333,6 +356,9 @@ final class RemotePrintSpooler {
     }
 
     private void bindLocked() throws TimeoutException {
+        if (mRemoteInstance != null) {
+            return;
+        }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] bindLocked()");
         }
@@ -362,6 +388,9 @@ final class RemotePrintSpooler {
     }
 
     private void unbindLocked() {
+        if (mRemoteInstance == null) {
+            return;
+        }
         while (true) {
             if (mCanUnbind) {
                 if (DEBUG) {
@@ -452,29 +481,6 @@ final class RemotePrintSpooler {
         }
     }
 
-    private static final class CreatePrintJobCaller extends TimedRemoteCaller<PrintJobInfo> {
-        private final IPrintSpoolerCallbacks mCallback;
-
-        public CreatePrintJobCaller() {
-            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
-            mCallback = new BasePrintSpoolerServiceCallbacks() {
-                @Override
-                public void onCreatePrintJobResult(PrintJobInfo printJob, int sequence) {
-                    onRemoteMethodResult(printJob, sequence);
-                }
-            };
-        }
-
-        public PrintJobInfo createPrintJob(IPrintSpooler target, String printJobName,
-                IPrintClient client, IPrintDocumentAdapter documentAdapter,
-                PrintAttributes attributes, int appId) throws RemoteException, TimeoutException {
-            final int sequence = onBeforeRemoteCall();
-            target.createPrintJob(printJobName, client, documentAdapter, attributes,
-                    mCallback, appId, sequence);
-            return getResultTimed(sequence);
-        }
-    }
-
     private static final class GetPrintJobInfoCaller extends TimedRemoteCaller<PrintJobInfo> {
         private final IPrintSpoolerCallbacks mCallback;
 
@@ -488,7 +494,7 @@ final class RemotePrintSpooler {
             };
         }
 
-        public PrintJobInfo getPrintJobInfo(IPrintSpooler target, int printJobId,
+        public PrintJobInfo getPrintJobInfo(IPrintSpooler target, PrintJobId printJobId,
                 int appId) throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
             target.getPrintJobInfo(printJobId, mCallback, appId, sequence);
@@ -509,7 +515,7 @@ final class RemotePrintSpooler {
             };
         }
 
-        public boolean setPrintJobState(IPrintSpooler target, int printJobId,
+        public boolean setPrintJobState(IPrintSpooler target, PrintJobId printJobId,
                 int status, String error) throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
             target.setPrintJobState(printJobId, status, error, mCallback, sequence);
@@ -530,7 +536,7 @@ final class RemotePrintSpooler {
             };
         }
 
-        public boolean setPrintJobTag(IPrintSpooler target, int printJobId,
+        public boolean setPrintJobTag(IPrintSpooler target, PrintJobId printJobId,
                 String tag) throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
             target.setPrintJobTag(printJobId, tag, mCallback, sequence);
@@ -547,11 +553,6 @@ final class RemotePrintSpooler {
 
         @Override
         public void onGetPrintJobInfoResult(PrintJobInfo printJob, int sequence) {
-            /* do nothing */
-        }
-
-        @Override
-        public void onCreatePrintJobResult(PrintJobInfo printJob, int sequence) {
             /* do nothing */
         }
 

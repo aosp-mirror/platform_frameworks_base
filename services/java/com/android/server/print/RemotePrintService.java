@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,6 +30,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
@@ -690,7 +692,7 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public PrintJobInfo getPrintJobInfo(int printJobId) {
+        public PrintJobInfo getPrintJobInfo(PrintJobId printJobId) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
                 final long identity = Binder.clearCallingIdentity();
@@ -705,7 +707,7 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public boolean setPrintJobState(int printJobId, int state, String error) {
+        public boolean setPrintJobState(PrintJobId printJobId, int state, String error) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
                 final long identity = Binder.clearCallingIdentity();
@@ -719,7 +721,7 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public boolean setPrintJobTag(int printJobId, String tag) {
+        public boolean setPrintJobTag(PrintJobId printJobId, String tag) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
                 final long identity = Binder.clearCallingIdentity();
@@ -733,7 +735,7 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public void writePrintJobData(ParcelFileDescriptor fd, int printJobId) {
+        public void writePrintJobData(ParcelFileDescriptor fd, PrintJobId printJobId) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
                 final long identity = Binder.clearCallingIdentity();
@@ -746,13 +748,15 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public void onPrintersAdded(List<PrinterInfo> printers) {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public void onPrintersAdded(ParceledListSlice printers) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
-                throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
+                List<PrinterInfo> addedPrinters = (List<PrinterInfo>) printers.getList();
+                throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, addedPrinters);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mCallbacks.onPrintersAdded(printers);
+                    service.mCallbacks.onPrintersAdded(addedPrinters);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -760,13 +764,15 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public void onPrintersRemoved(List<PrinterId> printerIds) {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public void onPrintersRemoved(ParceledListSlice printerIds) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
-                throwIfPrinterIdsTampered(service.mComponentName, printerIds);
+                List<PrinterId> removedPrinterIds = (List<PrinterId>) printerIds.getList();
+                throwIfPrinterIdsTampered(service.mComponentName, removedPrinterIds);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mCallbacks.onPrintersRemoved(printerIds);
+                    service.mCallbacks.onPrintersRemoved(removedPrinterIds);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

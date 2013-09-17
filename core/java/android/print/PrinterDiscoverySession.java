@@ -17,6 +17,7 @@
 package android.print;
 
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -270,20 +271,22 @@ public final class PrinterDiscoverySession {
         }
 
         @Override
-        public void onPrintersAdded(List<PrinterInfo> printers) {
+        @SuppressWarnings("rawtypes")
+        public void onPrintersAdded(ParceledListSlice printers) {
             PrinterDiscoverySession session = mWeakSession.get();
             if (session != null) {
                 session.mHandler.obtainMessage(MSG_PRINTERS_ADDED,
-                        printers).sendToTarget();
+                        printers.getList()).sendToTarget();
             }
         }
 
         @Override
-        public void onPrintersRemoved(List<PrinterId> printerIds) {
+        @SuppressWarnings("rawtypes")
+        public void onPrintersRemoved(ParceledListSlice printerIds) {
             PrinterDiscoverySession session = mWeakSession.get();
             if (session != null) {
                 session.mHandler.obtainMessage(MSG_PRINTERS_REMOVED,
-                        printerIds).sendToTarget();
+                        printerIds.getList()).sendToTarget();
             }
         }
     }

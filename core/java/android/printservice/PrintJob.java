@@ -17,6 +17,7 @@
 package android.printservice;
 
 import android.os.RemoteException;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.text.TextUtils;
 import android.util.Log;
@@ -52,7 +53,7 @@ public final class PrintJob {
      *
      * @return The id.
      */
-    public int getId() {
+    public PrintJobId getId() {
         PrintService.throwIfNotCalledOnMainThread();
         return mCachedInfo.getId();
     }
@@ -312,12 +313,12 @@ public final class PrintJob {
             return false;
         }
         PrintJob other = (PrintJob) obj;
-        return (mCachedInfo.getId() == other.mCachedInfo.getId());
+        return (mCachedInfo.getId().equals(other.mCachedInfo.getId()));
     }
 
     @Override
     public int hashCode() {
-        return mCachedInfo.getId();
+        return mCachedInfo.getId().hashCode();
     }
 
     private boolean isInImmutableState() {
