@@ -4284,18 +4284,110 @@
     <!-- ISO (European standard) C10 media (paper) size: 1.10" x 1.57" -->
     <string name="mediaSize_iso_c10">ISO C10</string>
 
-    <!-- North America Letter media (paper) size: 8.5" × 11" -->
+    <!-- North America Letter media (paper) size: 8.5" × 11" (279mm x 216mm) -->
     <string name="mediaSize_na_letter">Letter</string>
-    <!-- North America Government Letter media (paper) size: 8.0" × 10.5" -->
+    <!-- North America Government Letter media (paper) size: 8.0" × 10.5" (203mm x 267mm) -->
     <string name="mediaSize_na_gvrnmt_letter">Government Letter</string>
-    <!-- North America Legal media (paper) size: 8.5" × 14" -->
+    <!-- North America Legal media (paper) size: 8.5" × 14" (216mm x 356mm) -->
     <string name="mediaSize_na_legal">Legal</string>
-    <!-- North America Junior Legal media (paper) size: 8.0" × 5.0" -->
+    <!-- North America Junior Legal media (paper) size: 8.0" × 5.0" (203mm × 127mm) -->
     <string name="mediaSize_na_junior_legal">Junior Legal</string>
-    <!-- North America Ledger media (paper) size: 17" × 11" -->
+    <!-- North America Ledger media (paper) size: 17" × 11" (432mm × 279mm) -->
     <string name="mediaSize_na_ledger">Ledger</string>
-    <!-- North America Tabloid media (paper) size: 11" × 17" -->
+    <!-- North America Tabloid media (paper) size: 11" × 17" (279mm × 432mm) -->
     <string name="mediaSize_na_tabloid">Tabloid</string>
+
+    <!-- North America Index Card 3x5 media (paper) size: 3" x 5" (76mm x 127mm) -->
+    <string name="mediaSize_na_index_3x5">Index Card 3x5</string>
+    <!-- North America Index Card 4x6 media (paper) size: 4" x 6" (102mm x 152mm) -->
+    <string name="mediaSize_na_index_4x6">Index Card 4x6</string>
+    <!-- North America Index Card 5x8 media (paper) size: 5" x 8" (127mm x 203mm) -->
+    <string name="mediaSize_na_index_5x8">Index Card 5x8</string>
+    <!-- North America Monarch media (paper) size: 7.25" x 10.5" (184mm x 267mm) -->
+    <string name="mediaSize_na_monarch">Monarch</string>
+    <!-- North America Quarto media (paper) size: 8" x 10" (203mm x 254mm) -->
+    <string name="mediaSize_na_quarto">Quarto</string>
+    <!-- North America Foolscap media (paper) size: 8" x 13" (203mm x 330mm) -->
+    <string name="mediaSize_na_foolscap">Foolscap</string>
+
+    <!-- Chinese Roc 8k media (paper) size: 270mm x 390mm (10.629" x 15.3543") -->
+    <string name="mediaSize_chinese_roc_8k">ROC 8K</string>
+    <!-- Chinese Roc 16k media (paper) size: 195mm x 270mm (7.677" x 10.629") -->
+    <string name="mediaSize_chinese_roc_16k">ROC 16K</string>
+
+    <!-- Chinese PRC 1 media (paper) size: 102mm x 165mm (4.015" x 6.496") -->
+    <string name="mediaSize_chinese_prc_1">PRC 1</string>
+    <!-- Chinese PRC 2 media (paper) size: 102mm x 176mm (4.015" x 6.929") -->
+    <string name="mediaSize_chinese_prc_2">PRC 2</string>
+    <!-- Chinese PRC 3 media (paper) size: 125mm x 176mm (4.921" x 6.929") -->
+    <string name="mediaSize_chinese_prc_3">PRC 3</string>
+    <!-- Chinese PRC 4 media (paper) size: 110mm x 208mm (4.330" x 8.189") -->
+    <string name="mediaSize_chinese_prc_4">PRC 4</string>
+    <!-- Chinese PRC 5 media (paper) size: 110mm x 220mm (4.330" x 8.661") -->
+    <string name="mediaSize_chinese_prc_5">PRC 5</string>
+    <!-- Chinese PRC 6 media (paper) size: 120mm x 320mm (4.724" x 12.599") -->
+    <string name="mediaSize_chinese_prc_6">PRC 6</string>
+    <!-- Chinese PRC 7 media (paper) size: 160mm x 230mm (6.299" x 9.055") -->
+    <string name="mediaSize_chinese_prc_7">PRC 7</string>
+    <!-- Chinese PRC 8 media (paper) size: 120mm x 309mm (4.724" x 12.165") -->
+    <string name="mediaSize_chinese_prc_8">PRC 8</string>
+    <!-- Chinese PRC 9 media (paper) size: 229mm x 324mm (9.016" x 12.756") -->
+    <string name="mediaSize_chinese_prc_9">PRC 9</string>
+    <!-- Chinese PRC 10 media (paper) size: 324mm x 458mm (12.756" x 18.032") -->
+    <string name="mediaSize_chinese_prc_10">PRC 10</string>
+
+    <!-- Chinese RPC 16K media (paper) size: 146mm x 215mm (5.749" x 8.465") -->
+    <string name="mediaSize_chinese_prc_16k">PRC 16K</string>
+    <!-- Chinese Pa Kai media (paper) size: 146mm x 215mm (5.749" x 8.465") -->
+    <string name="mediaSize_chinese_om_pa_kai">Pa Kai</string>
+    <!-- Chinese Dai Pa Kai media (paper) size: 275mm x 395mm (10.827" x 15.551") -->
+    <string name="mediaSize_chinese_om_dai_pa_kai">Dai Pa Kai</string>
+    <!-- Chinese Jurro Ku Kai media (paper) size: 275mm x 395mm (10.827" x 15.551") -->
+    <string name="mediaSize_chinese_om_jurro_ku_kai">Jurro Ku Kai</string>
+
+    <!-- Japanese JIS B10 media (paper) size: 32mm x 45mm (1.259" x 1.772") -->
+    <string name="mediaSize_japanese_jis_b10">JIS B10</string>
+    <!-- Japanese JIS B9 media (paper) size: 45mm x 64mm (1.772" x 2.52") -->
+    <string name="mediaSize_japanese_jis_b9">JIS B9</string>
+    <!-- Japanese JIS B8 media (paper) size: 64mm x 91mm (2.52" x 3.583") -->
+    <string name="mediaSize_japanese_jis_b8">JIS B8</string>
+    <!-- Japanese JIS B7 media (paper) size: 91mm x 128mm (3.583" x 5.049") -->
+    <string name="mediaSize_japanese_jis_b7">JIS B7</string>
+    <!-- Japanese JIS B6 media (paper) size: 128mm x 182mm (5.049" x 7.165") -->
+    <string name="mediaSize_japanese_jis_b6">JIS B6</string>
+    <!-- Japanese JIS B5 media (paper) size: 182mm x 257mm (7.165" x 10.118") -->
+    <string name="mediaSize_japanese_jis_b5">JIS B5</string>
+    <!-- Japanese JIS B4 media (paper) size: 257mm x 364mm (10.118" x 14.331") -->
+    <string name="mediaSize_japanese_jis_b4">JIS B4</string>
+    <!-- Japanese JIS B3 media (paper) size: 364mm x 515mm (14.331" x 20.276") -->
+    <string name="mediaSize_japanese_jis_b3">JIS B3</string>
+    <!-- Japanese JIS B2 media (paper) size: 515mm x 728mm (20.276" x 28.661") -->
+    <string name="mediaSize_japanese_jis_b2">JIS B2</string>
+    <!-- Japanese JIS B1 media (paper) size: 728mm x 1030mm (28.661" x 40.551") -->
+    <string name="mediaSize_japanese_jis_b1">JIS B1</string>
+    <!-- Japanese JIS B0 media (paper) size: 1030mm x 1456mm (40.551" x 57.323") -->
+    <string name="mediaSize_japanese_jis_b0">JIS B0</string>
+
+    <!-- Japanese JIS Exec media (paper) size: 216mm x 330mm (8.504" x 12.992") -->
+    <string name="mediaSize_japanese_jis_exec">JIS Exec</string>
+
+    <!-- Japanese Chou4 media (paper) size: 90mm x 205mm (3.543" x 8.071") -->
+    <string name="mediaSize_japanese_chou4">Chou4</string>
+    <!-- Japanese Chou3 media (paper) size: 120mm x 235mm (4.724" x 9.252") -->
+    <string name="mediaSize_japanese_chou3">Chou3</string>
+    <!-- Japanese Chou2 media (paper) size: 111.1mm x 146mm (4.374" x 5.748") -->
+    <string name="mediaSize_japanese_chou2">Chou2</string>
+
+    <!-- Japanese Hagaki media (paper) size: 100mm x 148mm (3.937" x 5.827") -->
+    <string name="mediaSize_japanese_hagaki">Hagaki </string>
+    <!-- Japanese Oufuku media (paper) size: 148mm x 200mm (5.827" x 7.874") -->
+    <string name="mediaSize_japanese_oufuku">Oufuku </string>
+    <!-- Japanese Kahu media (paper) size: 240mm x 322.1mm (9.449" x 12.681") -->
+    <string name="mediaSize_japanese_kahu">Kahu</string>
+    <!-- Japanese Kaku2 media (paper) size: 240mm x 332mm (9.449" x 13.071") -->
+    <string name="mediaSize_japanese_kaku2">Kaku2</string>
+    <!-- Japanese You4 media (paper) size: 105mm x 235mm (4.134" x 9.252") -->
+    <string name="mediaSize_japanese_you4">You4</string>
 
     <!-- Write fail reason: printing was cancelled.[CHAR LIMIT=none] -->
     <string name="write_fail_reason_cancelled">Cancelled</string>
