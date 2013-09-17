@@ -323,6 +323,12 @@ public class AudioManager {
     public static final int FLAG_FIXED_VOLUME = 1 << 5;
 
     /**
+     * Indicates the volume set/adjust call is for Bluetooth absolute volume
+     * @hide
+     */
+    public static final int FLAG_BLUETOOTH_ABS_VOLUME = 1 << 6;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -2394,20 +2400,6 @@ public class AudioManager {
             service.avrcpSupportsAbsoluteVolume(address, support);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in avrcpSupportsAbsoluteVolume", e);
-        }
-    }
-
-    /**
-     * @hide
-     * Notifies AudioService of the volume set on the A2DP device as a callback, so AudioService
-     * is able to update the UI.
-     */
-    public void avrcpUpdateVolume(int oldVolume, int volume) {
-        IAudioService service = getService();
-        try {
-            service.avrcpUpdateVolume(oldVolume, volume);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in avrcpUpdateVolume", e);
         }
     }
 
