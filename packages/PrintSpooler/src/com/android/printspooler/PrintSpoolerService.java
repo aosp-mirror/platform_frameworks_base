@@ -37,6 +37,7 @@ import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.print.PrintDocumentInfo;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
@@ -51,6 +52,8 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -63,8 +66,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import libcore.io.IoUtils;
-
 /**
  * Service for exposing some of the {@link PrintSpooler} functionality to
  * another process.
@@ -73,7 +74,7 @@ public final class PrintSpoolerService extends Service {
 
     private static final String LOG_TAG = "PrintSpoolerService";
 
-    private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = false;
+    private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = true;
 
     private static final boolean DEBUG_PERSISTENCE = false;
 
@@ -90,10 +91,6 @@ public final class PrintSpoolerService extends Service {
     private final List<PrintJobInfo> mPrintJobs = new ArrayList<PrintJobInfo>();
 
     private static PrintSpoolerService sInstance;
-
-    private static int sPrintJobIdCounter;
-
-    private Intent mStartPrintJobConfigActivityIntent;
 
     private IPrintSpoolerClient mClient;
 
@@ -112,8 +109,6 @@ public final class PrintSpoolerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mStartPrintJobConfigActivityIntent = new Intent(PrintSpoolerService.this,
-                PrintJobConfigActivity.class);
         mHandlerCaller = new HandlerCaller(this, getMainLooper(),
                 new HandlerCallerCallback(), false);
 
@@ -147,7 +142,7 @@ public final class PrintSpoolerService extends Service {
             }
 
             @Override
-            public void getPrintJobInfo(int printJobId, IPrintSpoolerCallbacks callback,
+            public void getPrintJobInfo(PrintJobId printJobId, IPrintSpoolerCallbacks callback,
                     int appId, int sequence) throws RemoteException {
                 PrintJobInfo printJob = null;
                 try {
@@ -159,38 +154,28 @@ public final class PrintSpoolerService extends Service {
 
             @SuppressWarnings("deprecation")
             @Override
-            public void createPrintJob(String printJobName, IPrintClient client,
-                    IPrintDocumentAdapter printAdapter, PrintAttributes attributes,
-                    IPrintSpoolerCallbacks callback, int appId, int sequence)
-                    throws RemoteException {
-                PrintJobInfo printJob = null;
-                try {
-                    printJob = PrintSpoolerService.this.createPrintJob(
-                            printJobName, client, attributes, appId);
-                    if (printJob != null) {
-                        Intent intent = mStartPrintJobConfigActivityIntent;
-                        intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_DOCUMENT_ADAPTER,
-                                printAdapter.asBinder());
-                        intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_JOB_ID,
-                                printJob.getId());
-                        intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_ATTRIBUTES, attributes);
+            public void createPrintJob(PrintJobInfo printJob, IPrintClient client,
+                    IPrintDocumentAdapter printAdapter) throws RemoteException {
+                    PrintSpoolerService.this.createPrintJob(printJob);
 
-                        IntentSender sender = PendingIntent.getActivity(
-                                PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                                        | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
+                    Intent intent = new Intent(printJob.getId().flattenToString());
+                    intent.setClass(PrintSpoolerService.this, PrintJobConfigActivity.class);
+                    intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_DOCUMENT_ADAPTER,
+                            printAdapter.asBinder());
+                    intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_JOB, printJob);
 
-                        Message message = mHandlerCaller.obtainMessageOO(
-                                HandlerCallerCallback.MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
-                                client, sender);
-                        mHandlerCaller.executeOrSendMessage(message);
-                    }
-                } finally {
-                    callback.onCreatePrintJobResult(printJob, sequence);
-                }
+                    IntentSender sender = PendingIntent.getActivity(
+                            PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
+                            | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
+
+                    Message message = mHandlerCaller.obtainMessageOO(
+                            HandlerCallerCallback.MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
+                            client, sender);
+                    mHandlerCaller.executeOrSendMessage(message);
             }
 
             @Override
-            public void setPrintJobState(int printJobId, int state, String error,
+            public void setPrintJobState(PrintJobId printJobId, int state, String error,
                     IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
                 boolean success = false;
                 try {
@@ -202,7 +187,7 @@ public final class PrintSpoolerService extends Service {
             }
 
             @Override
-            public void setPrintJobTag(int printJobId, String tag,
+            public void setPrintJobTag(PrintJobId printJobId, String tag,
                     IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
                 boolean success = false;
                 try {
@@ -213,7 +198,7 @@ public final class PrintSpoolerService extends Service {
             }
 
             @Override
-            public void writePrintJobData(ParcelFileDescriptor fd, int printJobId) {
+            public void writePrintJobData(ParcelFileDescriptor fd, PrintJobId printJobId) {
                 PrintSpoolerService.this.writePrintJobData(fd, printJobId);
             }
 
@@ -222,6 +207,16 @@ public final class PrintSpoolerService extends Service {
                 Message message = mHandlerCaller.obtainMessageO(
                         HandlerCallerCallback.MSG_SET_CLIENT, client);
                 mHandlerCaller.executeOrSendMessage(message);
+            }
+
+            @Override
+            public void removeObsoletePrintJobs() {
+                PrintSpoolerService.this.removeObsoletePrintJobs();
+            }
+
+            @Override
+            public void forgetPrintJobs(List<PrintJobId> printJobIds) {
+                PrintSpoolerService.this.forgetPrintJobs(printJobIds);
             }
         };
     }
@@ -351,15 +346,16 @@ public final class PrintSpoolerService extends Service {
 
     private boolean isStateVisibleToUser(int state) {
         return (isActiveState(state) && (state == PrintJobInfo.STATE_FAILED
-                || state == PrintJobInfo.STATE_COMPLETED|| state == PrintJobInfo.STATE_CANCELED));
+                || state == PrintJobInfo.STATE_COMPLETED || state == PrintJobInfo.STATE_CANCELED
+                || state == PrintJobInfo.STATE_BLOCKED));
     }
 
-    public PrintJobInfo getPrintJobInfo(int printJobId, int appId) {
+    public PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId) {
         synchronized (mLock) {
             final int printJobCount = mPrintJobs.size();
             for (int i = 0; i < printJobCount; i++) {
                 PrintJobInfo printJob = mPrintJobs.get(i);
-                if (printJob.getId() == printJobId
+                if (printJob.getId().equals(printJobId)
                         && (appId == PrintManager.APP_ID_ANY
                         || appId == printJob.getAppId())) {
                     return printJob;
@@ -369,20 +365,9 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    public PrintJobInfo createPrintJob(String label, IPrintClient client,
-            PrintAttributes attributes, int appId) {
+    public void createPrintJob(PrintJobInfo printJob) {
         synchronized (mLock) {
-            final int printJobId = generatePrintJobIdLocked();
-            PrintJobInfo printJob = new PrintJobInfo();
-            printJob.setId(printJobId);
-            printJob.setAppId(appId);
-            printJob.setLabel(label);
-            printJob.setAttributes(attributes);
-            printJob.setState(PrintJobInfo.STATE_CREATED);
-
             addPrintJobLocked(printJob);
-
-            return printJob;
         }
     }
 
@@ -404,8 +389,7 @@ public final class PrintSpoolerService extends Service {
                     // decide whether to restart the job or just cancel it.
                     setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
                             getString(R.string.no_connection_to_printer));
-                }
-                    break;
+                } break;
             }
         }
     }
@@ -418,26 +402,7 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    private int generatePrintJobIdLocked() {
-        int printJobId = sPrintJobIdCounter++;
-        while (isDuplicatePrintJobId(printJobId)) {
-            printJobId = sPrintJobIdCounter++;
-        }
-        return printJobId;
-    }
-
-    private boolean isDuplicatePrintJobId(int printJobId) {
-        final int printJobCount = mPrintJobs.size();
-        for (int j = 0; j < printJobCount; j++) {
-            PrintJobInfo printJob = mPrintJobs.get(j);
-            if (printJob.getId() == printJobId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void writePrintJobData(final ParcelFileDescriptor fd, final int printJobId) {
+    public void writePrintJobData(final ParcelFileDescriptor fd, final PrintJobId printJobId) {
         final PrintJobInfo printJob;
         synchronized (mLock) {
             printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
@@ -476,9 +441,9 @@ public final class PrintSpoolerService extends Service {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
     }
 
-    public File generateFileForPrintJob(int printJobId) {
+    public File generateFileForPrintJob(PrintJobId printJobId) {
         return new File(getFilesDir(), "print_job_"
-                + printJobId + "." + PRINT_FILE_EXTENSION);
+                + printJobId.flattenToString() + "." + PRINT_FILE_EXTENSION);
     }
 
     private void addPrintJobLocked(PrintJobInfo printJob) {
@@ -488,16 +453,59 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    private void removePrintJobLocked(PrintJobInfo printJob) {
-        if (mPrintJobs.remove(printJob)) {
-            generateFileForPrintJob(printJob.getId()).delete();
-            if (DEBUG_PRINT_JOB_LIFECYCLE) {
-                Slog.i(LOG_TAG, "[REMOVE] " + printJob);
+    private void forgetPrintJobs(List<PrintJobId> printJobIds) {
+        synchronized (mLock) {
+            boolean printJobsRemoved = false;
+            final int removedPrintJobCount = printJobIds.size();
+            for (int i = 0; i < removedPrintJobCount; i++) {
+                PrintJobId removedPrintJobId = printJobIds.get(i);
+                final int printJobCount = mPrintJobs.size();
+                for (int j = printJobCount - 1; j >= 0; j--) {
+                    PrintJobInfo printJob = mPrintJobs.get(j);
+                    if (removedPrintJobId.equals(printJob.getId())) {
+                        mPrintJobs.remove(j);
+                        printJobsRemoved = true;
+                        if (DEBUG_PRINT_JOB_LIFECYCLE) {
+                            Slog.i(LOG_TAG, "[FORGOT] " + printJob.getId().flattenToString());
+                        }
+                        removePrintJobFileLocked(printJob.getId());
+                    }
+                }
+            }
+            if (printJobsRemoved) {
+                mPersistanceManager.writeStateLocked();
             }
         }
     }
 
-    public boolean setPrintJobState(int printJobId, int state, String error) {
+    private void removeObsoletePrintJobs() {
+        synchronized (mLock) {
+            final int printJobCount = mPrintJobs.size();
+            for (int i = printJobCount - 1; i >= 0; i--) {
+                PrintJobInfo printJob = mPrintJobs.get(i);
+                if (isObsoleteState(printJob.getState())) {
+                    mPrintJobs.remove(i);
+                    if (DEBUG_PRINT_JOB_LIFECYCLE) {
+                        Slog.i(LOG_TAG, "[REMOVE] " + printJob.getId().flattenToString());
+                    }
+                    removePrintJobFileLocked(printJob.getId());
+                }
+            }
+            mPersistanceManager.writeStateLocked();
+        }
+    }
+
+    private void removePrintJobFileLocked(PrintJobId printJobId) {
+        File file = generateFileForPrintJob(printJobId);
+        if (file.exists()) {
+            file.delete();
+            if (DEBUG_PRINT_JOB_LIFECYCLE) {
+                Slog.i(LOG_TAG, "[REMOVE FILE FOR] " + printJobId.flattenToString());
+            }
+        }
+    }
+
+    public boolean setPrintJobState(PrintJobId printJobId, int state, String error) {
         boolean success = false;
 
         synchronized (mLock) {
@@ -516,7 +524,11 @@ public final class PrintSpoolerService extends Service {
                 switch (state) {
                     case PrintJobInfo.STATE_COMPLETED:
                     case PrintJobInfo.STATE_CANCELED:
-                        removePrintJobLocked(printJob);
+                        // Just remove the file but keep the print job info since
+                        // the app that created it may be holding onto the PrintJob
+                        // instance and query it for its most recent state. We will
+                        // remove the info for this job when told so by the system.
+                        removePrintJobFileLocked(printJob.getId());
                         // $fall-through$
 
                     case PrintJobInfo.STATE_FAILED: {
@@ -570,6 +582,11 @@ public final class PrintSpoolerService extends Service {
         return false;
     }
 
+    private boolean isObsoleteState(int printJobState) {
+        return (isTeminalState(printJobState)
+                || printJobState == PrintJobInfo.STATE_QUEUED);
+    }
+
     private boolean isActiveState(int printJobState) {
         return printJobState == PrintJobInfo.STATE_CREATED
                 || printJobState == PrintJobInfo.STATE_QUEUED
@@ -577,7 +594,12 @@ public final class PrintSpoolerService extends Service {
                 || printJobState == PrintJobInfo.STATE_BLOCKED;
     }
 
-    public boolean setPrintJobTag(int printJobId, String tag) {
+    private boolean isTeminalState(int printJobState) {
+        return printJobState == PrintJobInfo.STATE_COMPLETED
+                || printJobState == PrintJobInfo.STATE_CANCELED;
+    }
+
+    public boolean setPrintJobTag(PrintJobId printJobId, String tag) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
@@ -599,7 +621,7 @@ public final class PrintSpoolerService extends Service {
         return false;
     }
 
-    public void setPrintJobCopiesNoPersistence(int printJobId, int copies) {
+    public void setPrintJobCopiesNoPersistence(PrintJobId printJobId, int copies) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
@@ -608,7 +630,8 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    public void setPrintJobPrintDocumentInfoNoPersistence(int printJobId, PrintDocumentInfo info) {
+    public void setPrintJobPrintDocumentInfoNoPersistence(PrintJobId printJobId,
+            PrintDocumentInfo info) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
@@ -617,7 +640,8 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    public void setPrintJobAttributesNoPersistence(int printJobId, PrintAttributes attributes) {
+    public void setPrintJobAttributesNoPersistence(PrintJobId printJobId,
+            PrintAttributes attributes) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
@@ -626,7 +650,7 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    public void setPrintJobPrinterNoPersistence(int printJobId, PrinterInfo printer) {
+    public void setPrintJobPrinterNoPersistence(PrintJobId printJobId, PrinterInfo printer) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
@@ -636,7 +660,7 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-    public void setPrintJobPagesNoPersistence(int printJobId, PageRange[] pages) {
+    public void setPrintJobPagesNoPersistence(PrintJobId printJobId, PageRange[] pages) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
@@ -759,15 +783,9 @@ public final class PrintSpoolerService extends Service {
                 for (int j = 0; j < printJobCount; j++) {
                     PrintJobInfo printJob = printJobs.get(j);
 
-                    final int state = printJob.getState();
-                    if (state < PrintJobInfo.STATE_QUEUED
-                            || state > PrintJobInfo.STATE_CANCELED) {
-                        continue;
-                    }
-
                     serializer.startTag(null, TAG_JOB);
 
-                    serializer.attribute(null, ATTR_ID, String.valueOf(printJob.getId()));
+                    serializer.attribute(null, ATTR_ID, printJob.getId().flattenToString());
                     serializer.attribute(null, ATTR_LABEL, printJob.getLabel().toString());
                     serializer.attribute(null, ATTR_STATE, String.valueOf(printJob.getState()));
                     serializer.attribute(null, ATTR_APP_ID, String.valueOf(printJob.getAppId()));
@@ -948,7 +966,8 @@ public final class PrintSpoolerService extends Service {
 
             PrintJobInfo printJob = new PrintJobInfo();
 
-            final int printJobId = Integer.parseInt(parser.getAttributeValue(null, ATTR_ID));
+            PrintJobId printJobId = PrintJobId.unflattenFromString(
+                    parser.getAttributeValue(null, ATTR_ID));
             printJob.setId(printJobId);
             String label = parser.getAttributeValue(null, ATTR_LABEL);
             printJob.setLabel(label);

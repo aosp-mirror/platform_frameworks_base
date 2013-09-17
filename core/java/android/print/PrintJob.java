@@ -22,8 +22,6 @@ package android.print;
  */
 public final class PrintJob {
 
-    private final int mId;
-
     private final PrintManager mPrintManager;
 
     private PrintJobInfo mCachedInfo;
@@ -31,7 +29,6 @@ public final class PrintJob {
     PrintJob(PrintJobInfo info, PrintManager printManager) {
         mCachedInfo = info;
         mPrintManager = printManager;
-        mId = info.getId();
     }
 
     /**
@@ -39,8 +36,8 @@ public final class PrintJob {
      *
      * @return The id.
      */
-    public int getId() {
-        return mId;
+    public PrintJobId getId() {
+        return mCachedInfo.getId();
     }
 
     /**
@@ -57,7 +54,7 @@ public final class PrintJob {
         if (isInImmutableState()) {
             return mCachedInfo;
         }
-        PrintJobInfo info = mPrintManager.getPrintJobInfo(mId);
+        PrintJobInfo info = mPrintManager.getPrintJobInfo(mCachedInfo.getId());
         if (info != null) {
             mCachedInfo = info;
         }
@@ -69,7 +66,7 @@ public final class PrintJob {
      */
     public void cancel() {
         if (!isInImmutableState()) {
-            mPrintManager.cancelPrintJob(mId);
+            mPrintManager.cancelPrintJob(mCachedInfo.getId());
         }
     }
 
@@ -91,11 +88,11 @@ public final class PrintJob {
             return false;
         }
         PrintJob other = (PrintJob) obj;
-        return mId == other.mId;
+        return mCachedInfo.getId().equals(other.mCachedInfo.getId());
     }
 
     @Override
     public int hashCode() {
-        return mId;
+        return mCachedInfo.getId().hashCode();
     }
 }

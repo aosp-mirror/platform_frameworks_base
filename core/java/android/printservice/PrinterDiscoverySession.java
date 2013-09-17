@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
@@ -80,8 +81,6 @@ import java.util.List;
 public abstract class PrinterDiscoverySession {
     private static final String LOG_TAG = "PrinterDiscoverySession";
 
-    private static final int MAX_ITEMS_PER_CALLBACK = 50;
-
     private static int sIdCounter = 0;
 
     private final int mId;
@@ -112,7 +111,11 @@ public abstract class PrinterDiscoverySession {
         // If some printers were added in the method that
         // created the session, send them over.
         if (!mPrinters.isEmpty()) {
-            sendAddedPrinters(mObserver, getPrinters());
+            try {
+                mObserver.onPrintersAdded(new ParceledListSlice<PrinterInfo>(getPrinters()));
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error sending added printers", re);
+            }
         }
     }
 
@@ -184,7 +187,11 @@ public abstract class PrinterDiscoverySession {
 
             // Send the added printers, if such.
             if (addedPrinters != null) {
-                sendAddedPrinters(mObserver, addedPrinters);
+                try {
+                    mObserver.onPrintersAdded(new ParceledListSlice<PrinterInfo>(addedPrinters));
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error sending added printers", re);
+                }
             }
         } else {
             // Remember the last sent printers if needed.
@@ -200,27 +207,6 @@ public abstract class PrinterDiscoverySession {
                     mPrinters.put(addedPrinter.getId(), addedPrinter);
                 }
             }
-        }
-    }
-
-    private static void sendAddedPrinters(IPrintServiceClient observer,
-        List<PrinterInfo> printers) {
-        try {
-            final int printerCount = printers.size();
-            if (printerCount <= MAX_ITEMS_PER_CALLBACK) {
-                observer.onPrintersAdded(printers);
-            } else {
-                // Send the added printers in chunks avoiding the binder transaction limit.
-                final int transactionCount = (printerCount / MAX_ITEMS_PER_CALLBACK) + 1;
-                for (int i = 0; i < transactionCount; i++) {
-                    final int start = i * MAX_ITEMS_PER_CALLBACK;
-                    final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
-                    List<PrinterInfo> subPrinters = printers.subList(start, end);
-                    observer.onPrintersAdded(subPrinters);
-                }
-            }
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error sending added printers", re);
         }
     }
 
@@ -261,7 +247,12 @@ public abstract class PrinterDiscoverySession {
 
             // Send the removed printers, if such.
             if (!removedPrinterIds.isEmpty()) {
-                sendRemovedPrinters(mObserver, removedPrinterIds);
+                try {
+                    mObserver.onPrintersRemoved(new ParceledListSlice<PrinterId>(
+                            removedPrinterIds));
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error sending removed printers", re);
+                }
             }
         } else {
             // Remember the last sent printers if needed.
@@ -275,26 +266,6 @@ public abstract class PrinterDiscoverySession {
                 PrinterId removedPrinterId = printerIds.get(i);
                 mPrinters.remove(removedPrinterId);
             }
-        }
-    }
-
-    private static void sendRemovedPrinters(IPrintServiceClient observer,
-            List<PrinterId> printerIds) {
-        try {
-            final int printerIdCount = printerIds.size();
-            if (printerIdCount <= MAX_ITEMS_PER_CALLBACK) {
-                observer.onPrintersRemoved(printerIds);
-            } else {
-                final int transactionCount = (printerIdCount / MAX_ITEMS_PER_CALLBACK) + 1;
-                for (int i = 0; i < transactionCount; i++) {
-                    final int start = i * MAX_ITEMS_PER_CALLBACK;
-                    final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerIdCount);
-                    List<PrinterId> subPrinterIds = printerIds.subList(start, end);
-                    observer.onPrintersRemoved(subPrinterIds);
-                }
-            }
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error sending removed printers", re);
         }
     }
 
@@ -319,7 +290,11 @@ public abstract class PrinterDiscoverySession {
 
         // Send the added printers, if such.
         if (addedPrinters != null) {
-            sendAddedPrinters(mObserver, addedPrinters);
+            try {
+                mObserver.onPrintersAdded(new ParceledListSlice<PrinterInfo>(addedPrinters));
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error sending added printers", re);
+            }
         }
 
         // Determine the removed printers.
@@ -335,7 +310,11 @@ public abstract class PrinterDiscoverySession {
 
         // Send the removed printers, if such.
         if (removedPrinterIds != null) {
-            sendRemovedPrinters(mObserver, removedPrinterIds);
+            try {
+                mObserver.onPrintersRemoved(new ParceledListSlice<PrinterId>(removedPrinterIds));
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error sending removed printers", re);
+            }
         }
 
         mLastSentPrinters = null;

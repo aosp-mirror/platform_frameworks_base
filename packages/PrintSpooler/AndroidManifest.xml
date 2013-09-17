@@ -44,7 +44,7 @@
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
 
     <application
-            android:allowClearUserData="false"
+            android:allowClearUserData="true"
             android:label="@string/app_label"
             android:allowBackup= "false"
             android:supportsRtl="true">
