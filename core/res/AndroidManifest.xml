@@ -1103,6 +1103,13 @@
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip" />
 
+    <!-- Allows an application to request CallHandlerService implementations. -->
+    <permission android:name="android.permission.BIND_CALL_SERVICE"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_bind_call_service"
+        android:label="@string/permlab_bind_call_service" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->
