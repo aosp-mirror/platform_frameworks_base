@@ -132,10 +132,8 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planšetinio kompiuterio atmintis pilna. Kad atlaisvintumėte vietos, ištrinkite kelis failus."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefono atmintis pilna. Ištrinkite kai kuriuos failus, kad atlaisvintumėte vietos."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Tinklas gali būti stebimas"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Nežinoma trečioji šalis"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Aš"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planšetinio kompiuterio parinktys"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefono parinktys"</string>
@@ -481,10 +479,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Leidžiama programai valdyti „Wi-Fi“ pateikčių žemo lygio funkcijas."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"fiksuoti garso išvestį"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Programai leidžiama fiksuoti ir peradresuoti garso išvestį."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Aktyvinamųjų žodžių aptikimas"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Programai leidžiama įrašyti garsą, kad būtų galima aptikti aktyvinamuosius žodžius. Įrašymas gali būti vykdomas fone, bet tai netrikdo kitų garso įrašymo veiksmų (pvz., įrašymo vaizdo kamera)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"fiksuoti vaizdo išvestį"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Programai leidžiama fiksuoti ir peradresuoti vaizdo išvestį."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"fiksuoti saugią vaizdo išvestį"</string>
@@ -552,12 +548,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"neleisti telefonui snausti"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Leidžiama programai neleisti planšetiniam kompiuteriui užmigti."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Leidžiama programai neleisti telefonui užmigti."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"perduoti duomenis infraraudonaisiais spinduliais"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Programai leidžiama naudoti planšetinio kompiuterio infraraudonųjų spindulių perdavimo įrenginį."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Programai leidžiama naudoti telefono infraraudonųjų spindulių perdavimo įrenginį."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"įjungti arba išjungti planšetinį kompiuterį"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefono įjungimas ir išjungimas"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Leidžiama programai įjungti ar išjungti planšetinį kompiuterį."</string>

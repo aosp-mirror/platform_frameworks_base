@@ -132,10 +132,8 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນໃນແທັບເລັດເຕັມ. ລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ພື້ນທີ່ໃນໂທລະສັບເຕັມແລ້ວ. ກະລຸນາລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ໂດຍບຸກຄົນທີສາມທີ່ບໍ່ຮູ້ຈັກ"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"ໂດຍ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ໂຕເລືອກແທັບເລັດ"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ໂຕເລືອກໂທລະສັບ"</string>
@@ -481,10 +479,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"ອະນຸຍາດໃຫ້ແອັບຯ ຄວບຄຸມຄວາມສາມາດລະດັບຕໍ່າຂອງການສະແດງຜົນ Wifi."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ບັນທຶກສຽງອອກ"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງສຽງ."</string>
-    <!-- no translation found for permlab_captureAudioHotword (1890553935650349808) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioHotword (9151807958153056810) -->
-    <skip />
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ການກວດຫາ Hotword"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ອະນຸຍາດໃຫ້ແອັບຯຈັບຂໍ້ມູນສຽງສຳລັບການກວດຈັບ Hotword. ການຈັບຂໍ້ມູນສາມາດເກີດຂຶ້ນໃນພື້ນຫຼັງໄດ້ ແຕ່ຈະບໍ່ໄປຂັດຂວາງການຈັບຂໍ້ມູນສຽງອື່ນໆ (ເຊັ່ນ: ກ້ອງວິດີໂອ)."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ບັນທຶກວິດີໂອອອກ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງວິດີໂອ."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ບັນທຶກວິດີໂອອອກຢ່າງປອດໄພ"</string>
@@ -552,12 +548,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ຂັດຂວາງບໍ່ໃຫ້ໂທລະສັບປິດໜ້າຈໍ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ອະນຸຍາດໃຫ້ແອັບຯ ປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ອະນຸຍາດໃຫ້ແອັບຯປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍໂທລະສັບ."</string>
-    <!-- no translation found for permlab_transmitIr (7545858504238530105) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (5358308854306529170) -->
-    <skip />
-    <!-- no translation found for permdesc_transmitIr (7957763745020300725) -->
-    <skip />
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"ສົ່ງອິນຟຣາເຣດ"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ການສົ່ງອິນຟຣາເຣດຂອງແທັບເລັດໄດ້."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ການສົ່ງອິນຟຣາເຣດຂອງໂທລະສັບໄດ້."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ເປີດ ຫຼືປິດແທັບເລັດ"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ເປີດ ຫຼືປິດໂທລະສັບ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ອະນຸຍາດໃຫ້ແອັບຯເປີດ ຫຼືປິດແທັບເລັດ."</string>
