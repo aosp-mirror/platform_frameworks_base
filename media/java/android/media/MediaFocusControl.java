@@ -2093,8 +2093,11 @@ public class MediaFocusControl implements OnFinished {
                 if ((mCurrentRcClient != null) && (mCurrentRcClientGen == genId)) {
                     try {
                         switch (key) {
-                            case RemoteControlClient.MetadataEditor.LONG_KEY_RATING_BY_USER:
-                                mCurrentRcClient.updateMetadata(genId, key, value);
+                            case RemoteControlClient.MetadataEditor.RATING_KEY_BY_USER:
+                                // TODO handle rating update, placeholder code here that sends
+                                //      an unrated percent-based rating
+                                mCurrentRcClient.updateMetadata(genId, key,
+                                        Rating.newUnratedRating(Rating.RATING_PERCENTAGE));
                                 break;
                             default:
                                 Log.e(TAG, "unhandled metadata key " + key + " update for RCC "

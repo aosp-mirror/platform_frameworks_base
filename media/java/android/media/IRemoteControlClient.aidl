@@ -17,6 +17,7 @@ package android.media;
 
 import android.graphics.Bitmap;
 import android.media.IRemoteControlDisplay;
+import android.media.Rating;
 
 /**
  * @hide
@@ -49,5 +50,5 @@ oneway interface IRemoteControlClient
     void setBitmapSizeForDisplay(IRemoteControlDisplay rcd, int w, int h);
     void setWantsSyncForDisplay(IRemoteControlDisplay rcd, boolean wantsSync);
     void seekTo(int clientGeneration, long timeMs);
-    void updateMetadata(int clientGeneration, int key, long value);
+    void updateMetadata(int clientGeneration, int key, in Rating value);
 }
