@@ -19,6 +19,7 @@ package android.printservice;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.print.PrintDocumentInfo;
+import android.print.PrintJobId;
 import android.util.Log;
 
 import java.io.IOException;
@@ -35,13 +36,13 @@ public final class PrintDocument {
 
     private static final String LOG_TAG = "PrintDocument";
 
-    private final int mPrintJobId;
+    private final PrintJobId mPrintJobId;
 
     private final IPrintServiceClient mPrintServiceClient;
 
     private final PrintDocumentInfo mInfo;
 
-    PrintDocument(int printJobId, IPrintServiceClient printServiceClient,
+    PrintDocument(PrintJobId printJobId, IPrintServiceClient printServiceClient,
             PrintDocumentInfo info) {
         mPrintJobId = printJobId;
         mPrintServiceClient = printServiceClient;

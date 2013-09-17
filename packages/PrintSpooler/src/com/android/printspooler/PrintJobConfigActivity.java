@@ -47,6 +47,7 @@ import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterCapabilitiesInfo;
@@ -104,8 +105,7 @@ public class PrintJobConfigActivity extends Activity {
     private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
 
     public static final String EXTRA_PRINT_DOCUMENT_ADAPTER = "printDocumentAdapter";
-    public static final String EXTRA_PRINT_ATTRIBUTES = "printAttributes";
-    public static final String EXTRA_PRINT_JOB_ID = "printJobId";
+    public static final String EXTRA_PRINT_JOB = "printJob";
 
     public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
 
@@ -163,7 +163,7 @@ public class PrintJobConfigActivity extends Activity {
     private Document mDocument;
     private PrintController mController;
 
-    private int mPrintJobId;
+    private PrintJobId mPrintJobId;
 
     private IBinder mIPrintDocumentAdapter;
 
@@ -175,17 +175,18 @@ public class PrintJobConfigActivity extends Activity {
 
         Bundle extras = getIntent().getExtras();
 
-        mPrintJobId = extras.getInt(EXTRA_PRINT_JOB_ID, -1);
-        if (mPrintJobId < 0) {
-            throw new IllegalArgumentException("Invalid print job id: " + mPrintJobId);
+        PrintJobInfo printJob = extras.getParcelable(EXTRA_PRINT_JOB);
+        if (printJob == null) {
+            throw new IllegalArgumentException("printJob cannot be null");
         }
 
+        mPrintJobId = printJob.getId();
         mIPrintDocumentAdapter = extras.getBinder(EXTRA_PRINT_DOCUMENT_ADAPTER);
         if (mIPrintDocumentAdapter == null) {
             throw new IllegalArgumentException("PrintDocumentAdapter cannot be null");
         }
 
-        PrintAttributes attributes = getIntent().getParcelableExtra(EXTRA_PRINT_ATTRIBUTES);
+        PrintAttributes attributes = printJob.getAttributes();
         if (attributes != null) {
             mCurrPrintAttributes.copyFrom(attributes);
         }

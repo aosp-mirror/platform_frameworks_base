@@ -21,17 +21,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserManager;
+import android.print.IPrintClient;
+import android.print.IPrintDocumentAdapter;
 import android.print.IPrinterDiscoveryObserver;
+import android.print.PrintAttributes;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
@@ -46,6 +53,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.print.RemotePrintService.PrintServiceCallbacks;
 import com.android.server.print.RemotePrintSpooler.PrintSpoolerCallbacks;
@@ -56,7 +64,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -67,8 +74,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     private static final String LOG_TAG = "UserState";
 
     private static final boolean DEBUG = false;
-
-    private static final int MAX_ITEMS_PER_CALLBACK = 50;
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
@@ -86,6 +91,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
     private final Set<ComponentName> mEnabledServices =
             new ArraySet<ComponentName>();
+
+    private final CreatedPrintJobTracker mCreatedPrintJobTracker =
+            new CreatedPrintJobTracker();
 
     private final Object mLock;
 
@@ -132,6 +140,79 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         if (service != null) {
             service.onAllPrintJobsHandled();
         }
+    }
+
+    public void removeObsoletePrintJobs() {
+        mSpooler.removeObsoletePrintJobs();
+    }
+
+    public PrintJobInfo print(String printJobName, final IPrintClient client,
+            final IPrintDocumentAdapter documentAdapter, PrintAttributes attributes,
+            int appId) {
+        PrintJobId printJobId = new PrintJobId();
+
+        // Track this job so we can forget it when the creator dies.
+        if (!mCreatedPrintJobTracker.onPrintJobCreatedLocked(client.asBinder(), printJobId)) {
+            // Not adding a print job means the client is dead - done.
+            return null;
+        }
+
+        // Create print job place holder.
+        final PrintJobInfo printJob = new PrintJobInfo();
+        printJob.setId(printJobId);
+        printJob.setAppId(appId);
+        printJob.setLabel(printJobName);
+        printJob.setAttributes(attributes);
+        printJob.setState(PrintJobInfo.STATE_CREATED);
+
+        // Spin the spooler to add the job and show the config UI.
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                mSpooler.createPrintJob(printJob, client, documentAdapter);
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+
+        return printJob;
+    }
+
+    public List<PrintJobInfo> getPrintJobInfos(int appId) {
+        return mSpooler.getPrintJobInfos(null, PrintJobInfo.STATE_ANY, appId);
+    }
+
+    public PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId) {
+        return mSpooler.getPrintJobInfo(printJobId, appId);
+    }
+
+    public void cancelPrintJob(PrintJobId printJobId, int appId) {
+        PrintJobInfo printJobInfo = mSpooler.getPrintJobInfo(printJobId, appId);
+        if (printJobInfo == null) {
+            return;
+        }
+        if (printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
+            ComponentName printServiceName = printJobInfo.getPrinterId().getServiceName();
+            RemotePrintService printService = null;
+            synchronized (mLock) {
+                printService = mActiveServices.get(printServiceName);
+            }
+            if (printService == null) {
+                return;
+            }
+            printService.onRequestCancelPrintJob(printJobInfo);
+        } else {
+            // If the print job is failed we do not need cooperation
+            // from the print service.
+            mSpooler.setPrintJobState(printJobId, PrintJobInfo.STATE_CANCELED, null);
+        }
+    }
+
+    public void restartPrintJob(PrintJobId printJobId, int appId) {
+        PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, appId);
+        if (printJobInfo == null || printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
+            return;
+        }
+        mSpooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
     }
 
     public List<PrintServiceInfo> getEnabledPrintServices() {
@@ -325,18 +406,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         throwIfDestroyedLocked();
         if (readConfigurationLocked()) {
             onConfigurationChangedLocked();
-        }
-    }
-
-    public RemotePrintSpooler getSpoolerLocked() {
-        throwIfDestroyedLocked();
-        return mSpooler;
-    }
-
-    public Map<ComponentName, RemotePrintService> getActiveServicesLocked() {
-        synchronized(mLock) {
-            throwIfDestroyedLocked();
-            return mActiveServices;
         }
     }
 
@@ -593,13 +662,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         // just died. Do this off the main thread since we do to allow
         // calls into the spooler on the main thread.
         if (Looper.getMainLooper().isCurrentThread()) {
-            new AsyncTask<Void, Void, Void>() {
+            BackgroundThread.getHandler().post(new Runnable() {
                 @Override
-                protected Void doInBackground(Void... params) {
+                public void run() {
                     failActivePrintJobsForServiceInternal(serviceName);
-                    return null;
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+            });
         } else {
             failActivePrintJobsForServiceInternal(serviceName);
         }
@@ -1088,19 +1156,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         private void handlePrintersAdded(IPrinterDiscoveryObserver observer,
             List<PrinterInfo> printers) {
             try {
-                final int printerCount = printers.size();
-                if (printerCount <= MAX_ITEMS_PER_CALLBACK) {
-                    observer.onPrintersAdded(printers);
-                } else {
-                    // Send the added printers in chunks avoiding the binder transaction limit.
-                    final int transactionCount = (printerCount / MAX_ITEMS_PER_CALLBACK) + 1;
-                    for (int i = 0; i < transactionCount; i++) {
-                        final int start = i * MAX_ITEMS_PER_CALLBACK;
-                        final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
-                        List<PrinterInfo> subPrinters = printers.subList(start, end);
-                        observer.onPrintersAdded(subPrinters); 
-                    }
-                }
+                observer.onPrintersAdded(new ParceledListSlice<PrinterInfo>(printers));
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error sending added printers", re);
             }
@@ -1109,21 +1165,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         private void handlePrintersRemoved(IPrinterDiscoveryObserver observer,
             List<PrinterId> printerIds) {
             try {
-                final int printerCount = printerIds.size();
-                if (printerCount <= MAX_ITEMS_PER_CALLBACK) {
-                    observer.onPrintersRemoved(printerIds);
-                } else {
-                    // Send the added printers in chunks avoiding the binder transaction limit.
-                    final int transactionCount = (printerCount / MAX_ITEMS_PER_CALLBACK) + 1;
-                    for (int i = 0; i < transactionCount; i++) {
-                        final int start = i * MAX_ITEMS_PER_CALLBACK;
-                        final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
-                        List<PrinterId> subPrinterIds = printerIds.subList(start, end);
-                        observer.onPrintersRemoved(subPrinterIds);
-                    }
-               }
+                observer.onPrintersRemoved(new ParceledListSlice<PrinterId>(printerIds));
             } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error sending added printers", re);
+                Log.e(LOG_TAG, "Error sending removed printers", re);
             }
         }
 
@@ -1253,6 +1297,53 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     } break;
                 }
             }
+        }
+    }
+
+    private final class CreatedPrintJobTracker {
+        private final ArrayMap<IBinder, List<PrintJobId>> mCreatedPrintJobs =
+                new ArrayMap<IBinder, List<PrintJobId>>();
+
+        public boolean onPrintJobCreatedLocked(final IBinder creator, PrintJobId printJobId) {
+            try {
+                creator.linkToDeath(new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        creator.unlinkToDeath(this, 0);
+                        UserManager userManager = (UserManager) mContext.getSystemService(
+                                Context.USER_SERVICE);
+                        // If the death is a result of the user being removed, then
+                        // do nothing since the spooler data for this user will be
+                        // wiped and we cannot bind to the spooler at this point.
+                        if (userManager.getUserInfo(mUserId) == null) {
+                            return;
+                        }
+                        List<PrintJobId> printJobIds = null;
+                        synchronized (mLock) {
+                            printJobIds = mCreatedPrintJobs.remove(creator);
+                            if (printJobIds == null) {
+                                return;
+                            }
+                            printJobIds = new ArrayList<PrintJobId>(printJobIds);
+                        }
+                        if (printJobIds != null) {
+                            mSpooler.forgetPrintJobs(printJobIds);
+                        }
+                    }
+                }, 0);
+            } catch (RemoteException re) {
+                /* The process is already dead - we just failed. */
+                return false;
+            }
+            synchronized (mLock) {
+                List<PrintJobId> printJobIds = mCreatedPrintJobs.get(creator);
+                if (printJobIds == null) {
+                    printJobIds = new ArrayList<PrintJobId>();
+                    mCreatedPrintJobs.put(creator, printJobIds);
+                }
+                printJobIds.add(printJobId);
+            }
+            return true;
         }
     }
 }
