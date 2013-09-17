@@ -1573,8 +1573,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
          */
         if (mContext == null) {
             mContext = context;
-            mTransport.mAppOpsManager = (AppOpsManager) mContext.getSystemService(
-                    Context.APP_OPS_SERVICE);
+            if (context != null) {
+                mTransport.mAppOpsManager = (AppOpsManager) context.getSystemService(
+                        Context.APP_OPS_SERVICE);
+            }
             mMyUid = Process.myUid();
             if (info != null) {
                 setReadPermission(info.readPermission);
