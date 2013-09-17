@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ukugqama"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OKUZENZAKALELAYO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Inethiwekhi ingase inganyelwe"</string>
-    <string name="done_button" msgid="1759387181766603361">"Kwenziwe"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Ukwenganyelwa kwenethiwekhi"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Le divayisi iphethwe ngu-: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nUmphathi wakho uyakwazi ukungamela umsebenzi wenethiwekhi yakho, okufaka phakathi ama-imeyili, izinhlelo zokusebenza, namawebhusayithi aphephile.\n\nUkuze uthole olunye ulwazi xhumana nomphathi wakho."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Inkampani  yangaphandle ingakwazi ukungamela umsebenzi wenethiwekhi yakho\n, okufaka phakathi ama-imeyili, izinhlelo zokusebenza namawebhusayithi aphephile.\n\nIsiqinisekiso esethenjwayo kudivayisi yakho senza lokhu kwenzeke."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Hlola ukuqinisekisa okwethenjwayo"</string>
 </resources>

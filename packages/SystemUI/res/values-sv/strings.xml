@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ljusstyrka"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Nätverket kan vara övervakat"</string>
-    <string name="done_button" msgid="1759387181766603361">"Klart"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Nätverksövervakning"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Enheten hanteras av: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nAdministratören kan övervaka dina aktiviteter på nätverket, inklusive e-post, appar och säkra webbplatser.\n\nKontakta din administratör om du vill veta mer."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Dina nätverksaktiviteter kan övervakas av tredje part\n, inklusive e-post, appar och säkra webbplatser.\n\nDetta är möjligt eftersom tillförlitlig autentisering har installerats på enheten."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Kontrollera tillförlitlig autentisering"</string>
 </resources>

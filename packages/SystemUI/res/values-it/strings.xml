@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosità"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"La rete potrebbe essere monitorata"</string>
-    <string name="done_button" msgid="1759387181766603361">"Fine"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Monitoraggio rete"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Questo dispositivo è gestito da: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nIl tuo amministratore è in grado di monitorare l\'attività della rete, inclusi siti web sicuri, email e app.\n\nPer ulteriori informazioni, contatta il tuo amministratore."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Una terza parte è in grado di monitorare l\'attività della\nrete, inclusi siti web sicuri, email e app.\n\nCiò è reso possibile da una credenziale attendibile installata sul dispositivo."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Verifica credenziali attendibili"</string>
 </resources>

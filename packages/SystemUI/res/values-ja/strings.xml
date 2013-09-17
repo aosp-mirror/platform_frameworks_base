@@ -200,9 +200,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"画面の明るさ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ネットワークが監視される場合があります"</string>
-    <string name="done_button" msgid="1759387181766603361">"完了"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ネットワーク監視"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"この端末は<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>によって管理されています。\n\n管理者はあなたのネットワークアクティビティ（メール、アプリ、保護されたウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"第三者があなたのネットワーク\nアクティビティ（メール、アプリ、保護されたウェブサイトなど）を監視できます。\n\nこれは、信頼できる認証情報が端末にインストールされているためです。"</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"信頼できる認証情報を確認"</string>
 </resources>

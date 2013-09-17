@@ -198,9 +198,4 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"روشنایی"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ممکن است شبکه نظارت شده باشد"</string>
-    <string name="done_button" msgid="1759387181766603361">"انجام شد"</string>
-    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"پایش شبکه"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"این دستگاه توسط: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> مدیریت می‌شود.\n\nسرپرست شما می‌تواند فعالیتتان را در شبکه نظارت کند، از جمله ایمیل‌ها، برنامه‌ها، و وب‌سایت‌های ایمن.\n\nبرای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"یک شخص ثالث قادر به نظارت بر فعالیت\nشبکه شما، از جمله ایمیل‌ها، برنامه‌ها، و وب‌سایت‌های ایمن است.\n\nیک اعتبارنامه قابل اعتماد نصب شده بر روی دستگاهتان این کار را امکان‌پذیر می‌کند."</string>
-    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"بررسی اعتبارنامه‌های قابل اعتماد"</string>
 </resources>
