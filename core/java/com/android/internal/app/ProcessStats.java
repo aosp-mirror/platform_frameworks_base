@@ -24,6 +24,7 @@ import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -969,6 +970,7 @@ public final class ProcessStats implements Parcelable {
                 if (ps.isInUse()) {
                     uids.valueAt(iu).resetSafely(now);
                 } else {
+                    uids.valueAt(iu).makeDead();
                     uids.removeAt(iu);
                 }
             }
@@ -986,6 +988,7 @@ public final class ProcessStats implements Parcelable {
                     if (ps.isInUse() || ps.mCommonProcess.isInUse()) {
                         pkgState.mProcesses.valueAt(iproc).resetSafely(now);
                     } else {
+                        pkgState.mProcesses.valueAt(iproc).makeDead();
                         pkgState.mProcesses.removeAt(iproc);
                     }
                 }
@@ -2127,6 +2130,7 @@ public final class ProcessStats implements Parcelable {
         int mNumExcessiveCpu;
 
         boolean mMultiPackage;
+        boolean mDead;
 
         public long mTmpTotalTime;
 
@@ -2230,6 +2234,18 @@ public final class ProcessStats implements Parcelable {
             mNumExcessiveCpu = 0;
         }
 
+        void makeDead() {
+            mDead = true;
+        }
+
+        private void ensureNotDead() {
+            if (!mDead) {
+                return;
+            }
+            throw new IllegalStateException("ProcessState dead: name=" + mName
+                    + " pkg=" + mPackage + " uid=" + mUid + " common.name=" + mCommonProcess.mName);
+        }
+
         void writeToParcel(Parcel out, long now) {
             out.writeInt(mMultiPackage ? 1 : 0);
             out.writeInt(mDurationsTableSize);
@@ -2271,6 +2287,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         public void makeActive() {
+            ensureNotDead();
             mActive = true;
         }
 
@@ -2279,7 +2296,8 @@ public final class ProcessStats implements Parcelable {
         }
 
         public boolean isInUse() {
-            return mActive || mNumActiveServices > 0 || mNumStartedServices > 0;
+            return mActive || mNumActiveServices > 0 || mNumStartedServices > 0
+                    || mCurState != STATE_NOTHING;
         }
 
         /**
@@ -2315,6 +2333,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         void setState(int state, long now) {
+            ensureNotDead();
             if (mCurState != state) {
                 //Slog.i(TAG, "Setting state in " + mName + "/" + mPackage + ": " + state);
                 commitStateTime(now);
@@ -2392,6 +2411,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         public void addPss(long pss, long uss, boolean always) {
+            ensureNotDead();
             if (!always) {
                 if (mLastPssState == mCurState && SystemClock.uptimeMillis()
                         < (mLastPssTime+(30*1000))) {
@@ -2453,6 +2473,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         public void reportExcessiveWake(ArrayMap<String, ProcessState> pkgList) {
+            ensureNotDead();
             mCommonProcess.mNumExcessiveWake++;
             if (!mCommonProcess.mMultiPackage) {
                 return;
@@ -2464,6 +2485,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         public void reportExcessiveCpu(ArrayMap<String, ProcessState> pkgList) {
+            ensureNotDead();
             mCommonProcess.mNumExcessiveCpu++;
             if (!mCommonProcess.mMultiPackage) {
                 return;
@@ -2489,9 +2511,17 @@ public final class ProcessStats implements Parcelable {
             return this;
         }
 
-        private ProcessState pullFixedProc(ArrayMap<String, ProcessState> pkgList,
-                int index) {
+        private ProcessState pullFixedProc(ArrayMap<String, ProcessState> pkgList, int index) {
             ProcessState proc = pkgList.valueAt(index);
+            if (mDead && proc.mCommonProcess != proc) {
+                // Somehow we try to continue to use a process state that is dead, because
+                // it was not being told it was active during the last commit.  We can recover
+                // from this by generating a fresh new state, but this is bad because we
+                // are losing whatever data we had in the old process state.
+                Log.wtf(TAG, "Pulling dead proc: name=" + mName + " pkg=" + mPackage
+                        + " uid=" + mUid + " common.name=" + mCommonProcess.mName);
+                proc = mStats.getProcessStateLocked(proc.mPackage, proc.mUid, proc.mName);
+            }
             if (proc.mMultiPackage) {
                 // The array map is still pointing to a common process state
                 // that is now shared across packages.  Update it to point to

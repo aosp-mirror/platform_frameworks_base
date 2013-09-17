@@ -551,17 +551,23 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 } else if ("--current".equals(arg)) {
                     currentOnly = true;
                 } else if ("--commit".equals(arg)) {
-                    mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
-                    writeStateLocked(true, true);
-                    pw.println("Process stats committed.");
+                    synchronized (mAm) {
+                        mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
+                        writeStateLocked(true, true);
+                        pw.println("Process stats committed.");
+                    }
                     return;
                 } else if ("--write".equals(arg)) {
-                    writeStateSyncLocked();
-                    pw.println("Process stats written.");
+                    synchronized (mAm) {
+                        writeStateSyncLocked();
+                        pw.println("Process stats written.");
+                    }
                     return;
                 } else if ("--read".equals(arg)) {
-                    readLocked(mProcessStats, mFile);
-                    pw.println("Process stats read.");
+                    synchronized (mAm) {
+                        readLocked(mProcessStats, mFile);
+                        pw.println("Process stats read.");
+                    }
                     return;
                 } else if ("-h".equals(arg)) {
                     dumpHelp(pw);
