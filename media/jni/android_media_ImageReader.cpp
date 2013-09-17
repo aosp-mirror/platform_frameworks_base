@@ -737,7 +737,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     int outputHeight = buffer->height;
 
     // Correct width/height when crop is set.
-    if (buffer->crop.isValid()) {
+    if (!buffer->crop.isEmpty()) {
         outputWidth = buffer->crop.getWidth();
         outputHeight = buffer->crop.getHeight();
     }
