@@ -36,7 +36,6 @@ import com.android.internal.os.SomeArgs;
 
 import libcore.io.IoUtils;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,7 +113,7 @@ public final class PrintManager {
         return new PrintManager(mContext, mService, userId, APP_ID_ANY);
     }
 
-    PrintJobInfo getPrintJobInfo(int printJobId) {
+    PrintJobInfo getPrintJobInfo(PrintJobId printJobId) {
         try {
             return mService.getPrintJobInfo(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
@@ -148,30 +147,12 @@ public final class PrintManager {
         return Collections.emptyList();
     }
 
-    void cancelPrintJob(int printJobId) {
+    void cancelPrintJob(PrintJobId printJobId) {
         try {
             mService.cancelPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error cancleing a print job: " + printJobId, re);
         }
-    }
-
-    /**
-     * Creates a print job for printing a file with default print attributes.
-     *
-     * @param printJobName A name for the new print job.
-     * @param pdfFile The PDF file to print.
-     * @param documentInfo Information about the printed document.
-     * @param attributes The default print job attributes.
-     * @return The created print job on success or null on failure.
-     *
-     * @see PrintJob
-     */
-    public PrintJob print(String printJobName, File pdfFile, PrintDocumentInfo documentInfo,
-            PrintAttributes attributes) {
-        PrintFileDocumentAdapter documentAdapter = new PrintFileDocumentAdapter(
-                mContext, pdfFile, documentInfo);
-        return print(printJobName, documentAdapter, attributes);
     }
 
     /**

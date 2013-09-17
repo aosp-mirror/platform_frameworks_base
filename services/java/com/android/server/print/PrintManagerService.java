@@ -33,6 +33,7 @@ import android.print.IPrintDocumentAdapter;
 import android.print.IPrintManager;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
+import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
@@ -70,30 +71,32 @@ public final class PrintManagerService extends IPrintManager.Stub {
         BackgroundThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
+                final UserState userState;
                 synchronized (mLock) {
-                    UserState userState = getCurrentUserStateLocked();
+                    userState = getCurrentUserStateLocked();
                     userState.updateIfNeededLocked();
-                    userState.getSpoolerLocked().start();
                 }
+                // This is the first time we switch to this user after boot, so
+                // now is the time to remove obsolete print jobs since they
+                // are from the last boot and no application would query them.
+                userState.removeObsoletePrintJobs();
             }
         });
     }
 
     @Override
-    public PrintJobInfo print(String printJobName, IPrintClient client,
-            IPrintDocumentAdapter documentAdapter, PrintAttributes attributes, int appId,
-            int userId) {
+    public PrintJobInfo print(String printJobName, final IPrintClient client,
+            final IPrintDocumentAdapter documentAdapter, PrintAttributes attributes,
+            int appId, int userId) {
         final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
         final UserState userState;
-        final RemotePrintSpooler spooler;
         synchronized (mLock) {
             userState = getOrCreateUserStateLocked(resolvedUserId);
-            spooler = userState.getSpoolerLocked();
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return spooler.createPrintJob(printJobName, client, documentAdapter,
+            return userState.print(printJobName, client, documentAdapter,
                     attributes, resolvedAppId);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -105,94 +108,64 @@ public final class PrintManagerService extends IPrintManager.Stub {
         final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
         final UserState userState;
-        final RemotePrintSpooler spooler;
         synchronized (mLock) {
             userState = getOrCreateUserStateLocked(resolvedUserId);
-            spooler = userState.getSpoolerLocked();
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return spooler.getPrintJobInfos(null, PrintJobInfo.STATE_ANY,
-                    resolvedAppId);
+            return userState.getPrintJobInfos(resolvedAppId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public PrintJobInfo getPrintJobInfo(int printJobId, int appId, int userId) {
+    public PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId, int userId) {
         final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
         final UserState userState;
-        final RemotePrintSpooler spooler;
         synchronized (mLock) {
             userState = getOrCreateUserStateLocked(resolvedUserId);
-            spooler = userState.getSpoolerLocked();
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return spooler.getPrintJobInfo(printJobId, resolvedAppId);
+            return userState.getPrintJobInfo(printJobId, resolvedAppId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public void cancelPrintJob(int printJobId, int appId, int userId) {
+    public void cancelPrintJob(PrintJobId printJobId, int appId, int userId) {
         final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
         final UserState userState;
-        final RemotePrintSpooler spooler;
         synchronized (mLock) {
             userState = getOrCreateUserStateLocked(resolvedUserId);
-            spooler = userState.getSpoolerLocked();
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            PrintJobInfo printJobInfo = spooler.getPrintJobInfo(printJobId, resolvedAppId);
-            if (printJobInfo == null) {
-                return;
-            }
-            if (printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
-                ComponentName printServiceName = printJobInfo.getPrinterId().getServiceName();
-                RemotePrintService printService = null;
-                synchronized (mLock) {
-                    printService = userState.getActiveServicesLocked().get(printServiceName);
-                }
-                if (printService == null) {
-                    return;
-                }
-                printService.onRequestCancelPrintJob(printJobInfo);
-            } else {
-                // If the print job is failed we do not need cooperation
-                // from the print service.
-                spooler.setPrintJobState(printJobId, PrintJobInfo.STATE_CANCELED, null);
-            }
+            userState.cancelPrintJob(printJobId, resolvedAppId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public void restartPrintJob(int printJobId, int appId, int userId) {
+    public void restartPrintJob(PrintJobId printJobId, int appId, int userId) {
         final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
-        final RemotePrintSpooler spooler;
+        final UserState userState;
         synchronized (mLock) {
-            spooler = getOrCreateUserStateLocked(resolvedUserId).getSpoolerLocked();
+            userState = getOrCreateUserStateLocked(resolvedUserId);
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, resolvedAppId, resolvedUserId);
-            if (printJobInfo == null || printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
-                return;
-            }
-            spooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
+            userState.restartPrintJob(printJobId, resolvedAppId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
-
 
     @Override
     public List<PrintServiceInfo> getEnabledPrintServices(int userId) {
@@ -443,6 +416,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
         // user changes
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
@@ -471,15 +445,24 @@ public final class PrintManagerService extends IPrintManager.Stub {
     }
 
     private void switchUser(int newUserId) {
+        UserState userState;
         synchronized (mLock) {
             if (newUserId == mCurrentUserId) {
                 return;
             }
             mCurrentUserId = newUserId;
-            UserState userState = getCurrentUserStateLocked();
-            userState.updateIfNeededLocked();
-            userState.getSpoolerLocked().start();
+            userState = mUserStates.get(mCurrentUserId);
+            if (userState == null) {
+                userState = getCurrentUserStateLocked();
+                userState.updateIfNeededLocked();
+            } else {
+                userState.updateIfNeededLocked();
+            }
         }
+        // This is the first time we switch to this user after boot, so
+        // now is the time to remove obsolete print jobs since they
+        // are from the last boot and no application would query them.
+        userState.removeObsoletePrintJobs();
     }
 
     private void removeUser(int removedUserId) {

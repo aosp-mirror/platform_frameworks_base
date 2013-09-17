@@ -56,8 +56,6 @@ public final class PrintJobInfo implements Parcelable {
      * <p>
      * Next valid states: {@link #STATE_QUEUED}
      * </p>
-     *
-     * @hide
      */
     public static final int STATE_CREATED = 1;
 
@@ -117,7 +115,7 @@ public final class PrintJobInfo implements Parcelable {
     public static final int STATE_CANCELED = 7;
 
     /** The unique print job id. */
-    private int mId;
+    private PrintJobId mId;
 
     /** The human readable print job label. */
     private String mLabel;
@@ -178,7 +176,7 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     private PrintJobInfo(Parcel parcel) {
-        mId = parcel.readInt();
+        mId = parcel.readParcelable(null);
         mLabel = parcel.readString();
         mPrinterId = parcel.readParcelable(null);
         mPrinterName = parcel.readString();
@@ -208,7 +206,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The id.
      */
-    public int getId() {
+    public PrintJobId getId() {
         return mId;
     }
 
@@ -219,7 +217,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setId(int id) {
+    public void setId(PrintJobId id) {
         this.mId = id;
     }
 
@@ -485,7 +483,7 @@ public final class PrintJobInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(mId);
+        parcel.writeParcelable(mId, flags);
         parcel.writeString(mLabel);
         parcel.writeParcelable(mPrinterId, flags);
         parcel.writeString(mPrinterName);
