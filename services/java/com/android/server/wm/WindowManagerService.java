@@ -1185,16 +1185,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // same display. Or even when the current IME/target are not on the same screen as the next
         // IME/target. For now only look for input windows on the main screen.
         WindowList windows = getDefaultWindowListLocked();
-        final int N = windows.size();
         WindowState w = null;
-        int i = N;
-        while (i > 0) {
-            i--;
-            w = windows.get(i);
+        int i;
+        for (i = windows.size() - 1; i >= 0; --i) {
+            WindowState win = windows.get(i);
 
             if (DEBUG_INPUT_METHOD && willMove) Slog.i(TAG, "Checking window @" + i
-                    + " " + w + " fl=0x" + Integer.toHexString(w.mAttrs.flags));
-            if (canBeImeTarget(w)) {
+                    + " " + win + " fl=0x" + Integer.toHexString(win.mAttrs.flags));
+            if (canBeImeTarget(win)) {
+                w = win;
                 //Slog.i(TAG, "Putting input method here!");
 
                 // Yet more tricksyness!  If this window is a "starting"
