@@ -295,6 +295,13 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                 }
             }
         }
+
+        @Override
+        public void onEmergencyCallAction() {
+            if (mBiometricUnlock != null) {
+                mBiometricUnlock.stop();
+            }
+        }
     };
 
     @Override

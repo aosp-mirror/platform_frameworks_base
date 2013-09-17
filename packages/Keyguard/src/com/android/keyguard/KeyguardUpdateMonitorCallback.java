@@ -131,4 +131,8 @@ class KeyguardUpdateMonitorCallback {
      */
     public void onMusicPlaybackStateChanged(int playbackState, long eventTime) { }
 
+    /**
+     * Called when the emergency call button is pressed.
+     */
+    void onEmergencyCallAction() { }
 }
