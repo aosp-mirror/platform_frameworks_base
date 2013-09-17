@@ -88,7 +88,7 @@ google.com/android-publisher/v1_1/</a></p>
 <h3 id="quota">Quota</h3>
 
 <p>Applications using the Google Play Android Developer API are limited to an
-initial courtesy usage quota of <strong>15000 requests per day</strong> (per
+initial courtesy usage quota of <strong>200,000 requests per day</strong> (per
 application). This should provide enough access for normal
 subscription-validation needs, assuming that you follow the recommendation in
 this section.</p>
