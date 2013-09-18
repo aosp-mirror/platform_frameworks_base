@@ -275,6 +275,11 @@ public:
         DisplayListLogBuffer& buffer = DisplayListLogBuffer::getInstance();
         buffer.writeCommand(0, "multiDraw");
         buffer.writeCommand(1, op->name());
+
+#if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
+        renderer.eventMark("multiDraw");
+        renderer.eventMark(op->name());
+#endif
         status_t status = op->multiDraw(renderer, dirty, mOps, mBounds);
 
 #if DEBUG_MERGE_BEHAVIOR
