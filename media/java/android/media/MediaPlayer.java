@@ -1606,9 +1606,9 @@ public class MediaPlayer implements SubtitleController.Listener
             } else if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
                 mFormat = MediaFormat.createSubtitleFormat(
                     MEDIA_MIMETYPE_TEXT_VTT, language);
-                mFormat.setInteger(MediaFormat.KEY_AUTOSELECT, in.readInt());
-                mFormat.setInteger(MediaFormat.KEY_DEFAULT, in.readInt());
-                mFormat.setInteger(MediaFormat.KEY_FORCED, in.readInt());
+                mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.readInt());
+                mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.readInt());
+                mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.readInt());
             } else {
                 mFormat = new MediaFormat();
                 mFormat.setString(MediaFormat.KEY_LANGUAGE, language);
@@ -1638,9 +1638,9 @@ public class MediaPlayer implements SubtitleController.Listener
             dest.writeString(getLanguage());
 
             if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
-                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_AUTOSELECT));
-                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_DEFAULT));
-                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_FORCED));
+                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_AUTOSELECT));
+                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_DEFAULT));
+                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE));
             }
         }
 
@@ -1765,15 +1765,21 @@ public class MediaPlayer implements SubtitleController.Listener
     @Override
     public void onSubtitleTrackSelected(SubtitleTrack track) {
         if (mSelectedSubtitleTrackIndex >= 0) {
-            deselectTrack(mSelectedSubtitleTrackIndex);
+            try {
+                selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, false);
+            } catch (IllegalStateException e) {
+            }
+            mSelectedSubtitleTrackIndex = -1;
         }
-        mSelectedSubtitleTrackIndex = -1;
         setOnSubtitleDataListener(null);
         for (int i = 0; i < mInbandSubtitleTracks.length; i++) {
             if (mInbandSubtitleTracks[i] == track) {
                 Log.v(TAG, "Selecting subtitle track " + i);
-                selectTrack(i);
                 mSelectedSubtitleTrackIndex = i;
+                try {
+                    selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
+                } catch (IllegalStateException e) {
+                }
                 setOnSubtitleDataListener(mSubtitleDataListener);
                 break;
             }
@@ -2046,13 +2052,30 @@ public class MediaPlayer implements SubtitleController.Listener
 
     private void selectOrDeselectTrack(int index, boolean select)
             throws IllegalStateException {
-        // ignore out-of-band tracks
-        TrackInfo[] trackInfo = getInbandTrackInfo();
-        if (index >= trackInfo.length &&
-                index < trackInfo.length + mOutOfBandSubtitleTracks.size()) {
+        // handle subtitle track through subtitle controller
+        SubtitleTrack track = null;
+        if (index < mInbandSubtitleTracks.length) {
+            track = mInbandSubtitleTracks[index];
+        } else if (index < mInbandSubtitleTracks.length + mOutOfBandSubtitleTracks.size()) {
+            track = mOutOfBandSubtitleTracks.get(index - mInbandSubtitleTracks.length);
+        }
+
+        if (mSubtitleController != null && track != null) {
+            if (select) {
+                mSubtitleController.selectTrack(track);
+            } else if (mSubtitleController.getSelectedTrack() == track) {
+                mSubtitleController.selectTrack(null);
+            } else {
+                Log.w(TAG, "trying to deselect track that was not selected");
+            }
             return;
         }
 
+        selectOrDeselectInbandTrack(index, select);
+    }
+
+    private void selectOrDeselectInbandTrack(int index, boolean select)
+            throws IllegalStateException {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
