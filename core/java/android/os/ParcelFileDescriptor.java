@@ -564,7 +564,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     @Override
     public void close() throws IOException {
         if (mWrapped != null) {
-            mWrapped.close();
+            try {
+                mWrapped.close();
+            } finally {
+                releaseResources();
+            }
         } else {
             closeWithStatus(Status.OK, null);
         }
@@ -579,7 +583,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public void closeWithError(String msg) throws IOException {
         if (mWrapped != null) {
-            mWrapped.closeWithError(msg);
+            try {
+                mWrapped.closeWithError(msg);
+            } finally {
+                releaseResources();
+            }
         } else {
             if (msg == null) {
                 throw new IllegalArgumentException("Message must not be null");
@@ -588,17 +596,22 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    private void closeWithStatus(int status, String msg) throws IOException {
-        if (mWrapped != null) {
-            mWrapped.closeWithStatus(status, msg);
-        } else {
-            if (mClosed) return;
-            mClosed = true;
-            mGuard.close();
-            // Status MUST be sent before closing actual descriptor
-            writeCommStatusAndClose(status, msg);
-            IoUtils.closeQuietly(mFd);
-        }
+    private void closeWithStatus(int status, String msg) {
+        if (mClosed) return;
+        mClosed = true;
+        mGuard.close();
+        // Status MUST be sent before closing actual descriptor
+        writeCommStatusAndClose(status, msg);
+        IoUtils.closeQuietly(mFd);
+        releaseResources();
+    }
+
+    /**
+     * Called when the fd is being closed, for subclasses to release any other resources
+     * associated with it, such as acquired providers.
+     * @hide
+     */
+    public void releaseResources() {
     }
 
     private byte[] getOrCreateStatusBuffer() {
@@ -793,6 +806,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     @Override
     protected void finalize() throws Throwable {
+        if (mWrapped != null) {
+            releaseResources();
+        }
         if (mGuard != null) {
             mGuard.warnIfOpen();
         }
@@ -824,7 +840,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         // WARNING: This must stay in sync with Parcel::readParcelFileDescriptor()
         // in frameworks/native/libs/binder/Parcel.cpp
         if (mWrapped != null) {
-            mWrapped.writeToParcel(out, flags);
+            try {
+                mWrapped.writeToParcel(out, flags);
+            } finally {
+                releaseResources();
+            }
         } else {
             out.writeFileDescriptor(mFd);
             if (mCommFd != null) {
@@ -834,11 +854,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 out.writeInt(0);
             }
             if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0 && !mClosed) {
-                try {
-                    // Not a real close, so emit no status
-                    closeWithStatus(Status.SILENCE, null);
-                } catch (IOException e) {
-                }
+                // Not a real close, so emit no status
+                closeWithStatus(Status.SILENCE, null);
             }
         }
     }
