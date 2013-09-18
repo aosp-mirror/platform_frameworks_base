@@ -1099,13 +1099,18 @@ public class NumberPicker extends LinearLayout {
     }
 
     @Override
-    public int computeVerticalScrollOffset() {
+    protected int computeVerticalScrollOffset() {
         return mCurrentScrollOffset;
     }
 
     @Override
-    public int computeVerticalScrollRange() {
-        return mSelectorIndices.length * mSelectorElementHeight;
+    protected int computeVerticalScrollRange() {
+        return (mMaxValue - mMinValue + 1) * mSelectorElementHeight;
+    }
+
+    @Override
+    protected int computeVerticalScrollExtent() {
+        return getHeight();
     }
 
     @Override
