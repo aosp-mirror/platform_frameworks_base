@@ -273,7 +273,7 @@ public abstract class MediaMetadataEditor {
      *     <li>{@link Rating} object are {@link #RATING_KEY_BY_OTHERS}
      *         and {@link #RATING_KEY_BY_USER}.</li>
      *     </ul>
-     * @param obj the metadata to add.
+     * @param value the metadata to add.
      * @return Returns a reference to the same MediaMetadataEditor object, so you can chain put
      *      calls together.
      * @throws IllegalArgumentException
