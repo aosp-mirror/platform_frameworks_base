@@ -85,8 +85,8 @@ public final class MediaFormat {
     public static final String KEY_MIME = "mime";
 
     /**
-     * A key describing the language of the content.
-     * The associated value is a string.
+     * A key describing the language of the content, using either ISO 639-1
+     * or 639-2/T codes.  The associated value is a string.
      */
     public static final String KEY_LANGUAGE = "language";
 
@@ -370,9 +370,10 @@ public final class MediaFormat {
     /**
      * Creates a minimal subtitle format.
      * @param mime The mime type of the content.
-     * @param language The language of the content.  Specify "und" if language
-     *        information is only included in the content (similarly, if there
-     *        are multiple language tracks in the content.)
+     * @param language The language of the content, using either ISO 639-1 or 639-2/T
+     *        codes.  Specify null or "und" if language information is only included
+     *        in the content.  (This will also work if there are multiple language
+     *        tracks in the content.)
      */
     public static final MediaFormat createSubtitleFormat(
             String mime,
