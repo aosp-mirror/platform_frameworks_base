@@ -574,10 +574,7 @@ public class BitmapFactory {
                 final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
                 bm = nativeDecodeAsset(asset, outPadding, opts);
             } else {
-                byte [] tempStorage = null;
-                if (opts != null) tempStorage = opts.inTempStorage;
-                if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
-                bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
+                bm = decodeStreamInternal(is, outPadding, opts);
             }
 
             if (bm == null && opts != null && opts.inBitmap != null) {
@@ -590,6 +587,18 @@ public class BitmapFactory {
         }
 
         return bm;
+    }
+
+    /**
+     * Private helper function for decoding an InputStream natively. Buffers the input enough to
+     * do a rewind as needed, and supplies temporary storage if necessary. is MUST NOT be null.
+     */
+    private static Bitmap decodeStreamInternal(InputStream is, Rect outPadding, Options opts) {
+        // ASSERT(is != null);
+        byte [] tempStorage = null;
+        if (opts != null) tempStorage = opts.inTempStorage;
+        if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
+        return nativeDecodeStream(is, tempStorage, outPadding, opts);
     }
 
     /**
@@ -629,13 +638,8 @@ public class BitmapFactory {
                 bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
             } else {
                 FileInputStream fis = new FileInputStream(fd);
-                // FIXME: If nativeDecodeStream grabbed the pointer to tempStorage
-                // from Options, this code would not need to be duplicated.
-                byte [] tempStorage = null;
-                if (opts != null) tempStorage = opts.inTempStorage;
-                if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
                 try {
-                    bm = nativeDecodeStream(fis, tempStorage, outPadding, opts);
+                    bm = decodeStreamInternal(fis, outPadding, opts);
                 } finally {
                     try {
                         fis.close();
