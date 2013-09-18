@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -32,6 +33,8 @@ import android.text.TextUtils;
 import android.text.method.AllCapsTransformationMethod;
 import android.text.method.TransformationMethod2;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
+import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -66,6 +69,8 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#Switch_track
  */
 public class Switch extends CompoundButton {
+    private static final int THUMB_ANIMATION_DURATION = 250;
+
     private static final int TOUCH_MODE_IDLE = 0;
     private static final int TOUCH_MODE_DOWN = 1;
     private static final int TOUCH_MODE_DRAGGING = 2;
@@ -105,6 +110,7 @@ public class Switch extends CompoundButton {
     private Layout mOnLayout;
     private Layout mOffLayout;
     private TransformationMethod2 mSwitchTransformationMethod;
+    private ObjectAnimator mPositionAnimator;
 
     @SuppressWarnings("hiding")
     private final Rect mTempRect = new Rect();
@@ -550,9 +556,12 @@ public class Switch extends CompoundButton {
      * @return true if (x, y) is within the target area of the switch thumb
      */
     private boolean hitThumb(float x, float y) {
+        // Relies on mTempRect, MUST be called first!
+        final int thumbOffset = getThumbOffset();
+
         mThumbDrawable.getPadding(mTempRect);
         final int thumbTop = mSwitchTop - mTouchSlop;
-        final int thumbLeft = mSwitchLeft + (int) (mThumbPosition + 0.5f) - mTouchSlop;
+        final int thumbLeft = mSwitchLeft + thumbOffset - mTouchSlop;
         final int thumbRight = thumbLeft + mThumbWidth +
                 mTempRect.left + mTempRect.right + mTouchSlop;
         final int thumbBottom = mSwitchBottom + mTouchSlop;
@@ -597,13 +606,23 @@ public class Switch extends CompoundButton {
 
                     case TOUCH_MODE_DRAGGING: {
                         final float x = ev.getX();
-                        final float dx = x - mTouchX;
-                        float newPos = Math.max(0,
-                                Math.min(mThumbPosition + dx, getThumbScrollRange()));
+                        final int thumbScrollRange = getThumbScrollRange();
+                        final float thumbScrollOffset = x - mTouchX;
+                        float dPos;
+                        if (thumbScrollRange != 0) {
+                            dPos = thumbScrollOffset / thumbScrollRange;
+                        } else {
+                            // If the thumb scroll range is empty, just use the
+                            // movement direction to snap on or off.
+                            dPos = thumbScrollOffset > 0 ? 1 : -1;
+                        }
+                        if (isLayoutRtl()) {
+                            dPos = -dPos;
+                        }
+                        final float newPos = MathUtils.constrain(mThumbPosition + dPos, 0, 1);
                         if (newPos != mThumbPosition) {
-                            mThumbPosition = newPos;
                             mTouchX = x;
-                            invalidate();
+                            setThumbPosition(newPos);
                         }
                         return true;
                     }
@@ -661,40 +680,52 @@ public class Switch extends CompoundButton {
     }
 
     private void animateThumbToCheckedState(boolean newCheckedState) {
-        // TODO animate!
-        //float targetPos = newCheckedState ? 0 : getThumbScrollRange();
-        //mThumbPosition = targetPos;
-        setChecked(newCheckedState);
+        super.setChecked(newCheckedState);
+
+        final float targetPosition = newCheckedState ? 1 : 0;
+        mPositionAnimator = ObjectAnimator.ofFloat(this, THUMB_POS, targetPosition);
+        mPositionAnimator.setDuration(THUMB_ANIMATION_DURATION);
+        mPositionAnimator.setAutoCancel(true);
+        mPositionAnimator.start();
+    }
+
+    private void cancelPositionAnimator() {
+        if (mPositionAnimator != null) {
+            mPositionAnimator.cancel();
+        }
     }
 
     private boolean getTargetCheckedState() {
-        if (isLayoutRtl()) {
-            return mThumbPosition <= getThumbScrollRange() / 2;
-        } else {
-            return mThumbPosition >= getThumbScrollRange() / 2;
-        }
+        return mThumbPosition > 0.5f;
     }
 
-    private void setThumbPosition(boolean checked) {
-        if (isLayoutRtl()) {
-            mThumbPosition = checked ? 0 : getThumbScrollRange();
-        } else {
-            mThumbPosition = checked ? getThumbScrollRange() : 0;
-        }
+    /**
+     * Sets the thumb position as a decimal value between 0 (off) and 1 (on).
+     *
+     * @param position new position between [0,1]
+     */
+    private void setThumbPosition(float position) {
+        mThumbPosition = position;
+        invalidate();
+    }
+
+    @Override
+    public void toggle() {
+        animateThumbToCheckedState(!isChecked());
     }
 
     @Override
     public void setChecked(boolean checked) {
         super.setChecked(checked);
-        setThumbPosition(isChecked());
-        invalidate();
+
+        // Immediately move the thumb to the new position.
+        cancelPositionAnimator();
+        setThumbPosition(checked ? 1 : 0);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-
-        setThumbPosition(isChecked());
 
         int switchRight;
         int switchLeft;
@@ -756,11 +787,12 @@ public class Switch extends CompoundButton {
         int switchInnerBottom = switchBottom - mTempRect.bottom;
         canvas.clipRect(switchInnerLeft, switchTop, switchInnerRight, switchBottom);
 
+        // Relies on mTempRect, MUST be called first!
+        final int thumbPos = getThumbOffset();
+
         mThumbDrawable.getPadding(mTempRect);
-        final int thumbPos = (int) (mThumbPosition + 0.5f);
         int thumbLeft = switchInnerLeft - mTempRect.left + thumbPos;
         int thumbRight = switchInnerLeft + thumbPos + mThumbWidth + mTempRect.right;
-
         mThumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
         mThumbDrawable.draw(canvas);
 
@@ -803,6 +835,22 @@ public class Switch extends CompoundButton {
             padding += mSwitchPadding;
         }
         return padding;
+    }
+
+    /**
+     * Translates thumb position to offset according to current RTL setting and
+     * thumb scroll range.
+     *
+     * @return thumb offset
+     */
+    private int getThumbOffset() {
+        final float thumbPosition;
+        if (isLayoutRtl()) {
+            thumbPosition = 1 - mThumbPosition;
+        } else {
+            thumbPosition = mThumbPosition;
+        }
+        return (int) (thumbPosition * getThumbScrollRange() + 0.5f);
     }
 
     private int getThumbScrollRange() {
@@ -870,4 +918,16 @@ public class Switch extends CompoundButton {
             }
         }
     }
+
+    private static final FloatProperty<Switch> THUMB_POS = new FloatProperty<Switch>("thumbPos") {
+        @Override
+        public Float get(Switch object) {
+            return object.mThumbPosition;
+        }
+
+        @Override
+        public void setValue(Switch object, float value) {
+            object.setThumbPosition(value);
+        }
+    };
 }
