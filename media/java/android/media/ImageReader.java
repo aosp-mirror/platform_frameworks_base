@@ -83,7 +83,8 @@ public class ImageReader implements AutoCloseable {
      * @param format
      *            The format of the Image that this reader will produce. This
      *            must be one of the {@link android.graphics.ImageFormat} or
-     *            {@link android.graphics.PixelFormat} constants.
+     *            {@link android.graphics.PixelFormat} constants. Note that
+     *            not all formats is supported, like ImageFormat.NV21.
      * @param maxImages
      *            The maximum number of images the user will want to
      *            access simultaneously. This should be as small as possible to limit
@@ -114,6 +115,11 @@ public class ImageReader implements AutoCloseable {
         if (mMaxImages < 1) {
             throw new IllegalArgumentException(
                 "Maximum outstanding image count must be at least 1");
+        }
+
+        if (format == ImageFormat.NV21) {
+            throw new IllegalArgumentException(
+                    "NV21 format is not supported");
         }
 
         mNumPlanes = getNumPlanesFromFormat();
