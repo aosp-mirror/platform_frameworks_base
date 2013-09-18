@@ -255,6 +255,10 @@ public final class ApduServiceInfo implements Parcelable {
         return mRequiresDeviceUnlock;
     }
 
+    public String getDescription() {
+        return mDescription;
+    }
+
     public CharSequence loadLabel(PackageManager pm) {
         return mService.loadLabel(pm);
     }
@@ -285,6 +289,11 @@ public final class ApduServiceInfo implements Parcelable {
         int aidLength = aid.length();
         if (aidLength == 0 || (aidLength % 2) != 0) {
             Log.e(TAG, "AID " + aid + " is not correctly formatted.");
+            return false;
+        }
+        // Minimum AID length is 5 bytes, 10 hex chars
+        if (aidLength < 10) {
+            Log.e(TAG, "AID " + aid + " is shorter than 5 bytes.");
             return false;
         }
         return true;
