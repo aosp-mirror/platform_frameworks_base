@@ -38,6 +38,21 @@ public class SubtitleController {
     private boolean mShowing;
     private CaptioningManager mCaptioningManager;
 
+    private CaptioningManager.CaptioningChangeListener mCaptioningChangeListener =
+        new CaptioningManager.CaptioningChangeListener() {
+            /** @hide */
+            @Override
+            public void onEnabledChanged(boolean enabled) {
+                selectDefaultTrack();
+            }
+
+            /** @hide */
+            @Override
+            public void onLocaleChanged(Locale locale) {
+                selectDefaultTrack();
+            }
+        };
+
     /**
      * Creates a subtitle controller for a media playback object that implements
      * the MediaTimeProvider interface.
@@ -58,15 +73,24 @@ public class SubtitleController {
             (CaptioningManager)context.getSystemService(Context.CAPTIONING_SERVICE);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        mCaptioningManager.removeCaptioningChangeListener(
+                mCaptioningChangeListener);
+        super.finalize();
+    }
+
     /**
      * @return the available subtitle tracks for this media. These include
      * the tracks found by {@link MediaPlayer} as well as any tracks added
      * manually via {@link #addTrack}.
      */
     public SubtitleTrack[] getTracks() {
-        SubtitleTrack[] tracks = new SubtitleTrack[mTracks.size()];
-        mTracks.toArray(tracks);
-        return tracks;
+        synchronized(mTracks) {
+            SubtitleTrack[] tracks = new SubtitleTrack[mTracks.size()];
+            mTracks.toArray(tracks);
+            return tracks;
+        }
     }
 
     /**
@@ -88,6 +112,8 @@ public class SubtitleController {
      * in-band data from the {@link MediaPlayer}.  However, this does
      * not change the subtitle visibility.
      *
+     * Must be called from the UI thread.
+     *
      * @param track The subtitle track to select.  This must be one of the
      *              tracks in {@link #getTracks}.
      * @return true if the track was successfully selected.
@@ -107,7 +133,9 @@ public class SubtitleController {
         }
 
         mSelectedTrack = track;
-        mAnchor.setSubtitleWidget(getRenderingWidget());
+        if (mAnchor != null) {
+            mAnchor.setSubtitleWidget(getRenderingWidget());
+        }
 
         if (mSelectedTrack != null) {
             mSelectedTrack.setTimeProvider(mTimeProvider);
@@ -123,56 +151,123 @@ public class SubtitleController {
     /**
      * @return the default subtitle track based on system preferences, or null,
      * if no such track exists in this manager.
+     *
+     * Supports HLS-flags: AUTOSELECT, FORCED & DEFAULT.
+     *
+     * 1. If captioning is disabled, only consider FORCED tracks. Otherwise,
+     * consider all tracks, but prefer non-FORCED ones.
+     * 2. If user selected "Default" caption language:
+     *   a. If there is a considered track with DEFAULT=yes, returns that track
+     *      (favor the first one in the current language if there are more than
+     *      one default tracks, or the first in general if none of them are in
+     *      the current language).
+     *   b. Otherwise, if there is a track with AUTOSELECT=yes in the current
+     *      language, return that one.
+     *   c. If there are no default tracks, and no autoselectable tracks in the
+     *      current language, return null.
+     * 3. If there is a track with the caption language, select that one.  Prefer
+     * the one with AUTOSELECT=no.
+     *
+     * The default values for these flags are DEFAULT=no, AUTOSELECT=yes
+     * and FORCED=no.
+     *
+     * Must be called from the UI thread.
      */
     public SubtitleTrack getDefaultTrack() {
-        Locale locale = mCaptioningManager.getLocale();
+        SubtitleTrack bestTrack = null;
+        int bestScore = -1;
 
-        for (SubtitleTrack track: mTracks) {
-            MediaFormat format = track.getFormat();
-            String language = format.getString(MediaFormat.KEY_LANGUAGE);
-            // TODO: select track with best renderer.  For now, we select first
-            // track with local's language or first track if locale has none
-            if (locale == null ||
-                locale.getLanguage().equals("") ||
-                locale.getISO3Language().equals(language) ||
-                locale.getLanguage().equals(language)) {
-                return track;
+        Locale selectedLocale = mCaptioningManager.getLocale();
+        Locale locale = selectedLocale;
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        boolean selectForced = !mCaptioningManager.isEnabled();
+
+        synchronized(mTracks) {
+            for (SubtitleTrack track: mTracks) {
+                MediaFormat format = track.getFormat();
+                String language = format.getString(MediaFormat.KEY_LANGUAGE);
+                boolean forced =
+                    format.getInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, 0) != 0;
+                boolean autoselect =
+                    format.getInteger(MediaFormat.KEY_IS_AUTOSELECT, 1) != 0;
+                boolean is_default =
+                    format.getInteger(MediaFormat.KEY_IS_DEFAULT, 0) != 0;
+
+                boolean languageMatches =
+                    (locale == null ||
+                    locale.getLanguage().equals("") ||
+                    locale.getISO3Language().equals(language) ||
+                    locale.getLanguage().equals(language));
+                // is_default is meaningless unless caption language is 'default'
+                int score = (forced ? 0 : 8) +
+                    (((selectedLocale == null) && is_default) ? 4 : 0) +
+                    (autoselect ? 0 : 2) + (languageMatches ? 1 : 0);
+
+                if (selectForced && !forced) {
+                    continue;
+                }
+
+                // we treat null locale/language as matching any language
+                if ((selectedLocale == null && is_default) ||
+                    (languageMatches &&
+                     (autoselect || forced || selectedLocale != null))) {
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestTrack = track;
+                    }
+                }
             }
         }
-        return null;
+        return bestTrack;
     }
 
     private boolean mTrackIsExplicit = false;
     private boolean mVisibilityIsExplicit = false;
 
-    /** @hide */
+    /** @hide - called from UI thread */
     public void selectDefaultTrack() {
         if (mTrackIsExplicit) {
-            return;
-        }
-
-        SubtitleTrack track = getDefaultTrack();
-        if (track != null) {
-            selectTrack(track);
-            mTrackIsExplicit = false;
+            // If track selection is explicit, but visibility
+            // is not, it falls back to the captioning setting
             if (!mVisibilityIsExplicit) {
-                if (mCaptioningManager.isEnabled()) {
+                if (mCaptioningManager.isEnabled() ||
+                    (mSelectedTrack != null &&
+                     mSelectedTrack.getFormat().getInteger(
+                            MediaFormat.KEY_IS_FORCED_SUBTITLE, 0) != 0)) {
                     show();
                 } else {
                     hide();
                 }
                 mVisibilityIsExplicit = false;
             }
+            return;
+        }
+
+        // We can have a default (forced) track even if captioning
+        // is not enabled.  This is handled by getDefaultTrack().
+        // Show this track unless subtitles were explicitly hidden.
+        SubtitleTrack track = getDefaultTrack();
+        if (track != null) {
+            selectTrack(track);
+            mTrackIsExplicit = false;
+            if (!mVisibilityIsExplicit) {
+                show();
+                mVisibilityIsExplicit = false;
+            }
         }
     }
 
-    /** @hide */
+    /** @hide - called from UI thread */
     public void reset() {
         hide();
         selectTrack(null);
         mTracks.clear();
         mTrackIsExplicit = false;
         mVisibilityIsExplicit = false;
+        mCaptioningManager.removeCaptioningChangeListener(
+                mCaptioningChangeListener);
     }
 
     /**
@@ -183,12 +278,20 @@ public class SubtitleController {
      * @return the created {@link SubtitleTrack} object
      */
     public SubtitleTrack addTrack(MediaFormat format) {
-        for (Renderer renderer: mRenderers) {
-            if (renderer.supports(format)) {
-                SubtitleTrack track = renderer.createTrack(format);
-                if (track != null) {
-                    mTracks.add(track);
-                    return track;
+        synchronized(mRenderers) {
+            for (Renderer renderer: mRenderers) {
+                if (renderer.supports(format)) {
+                    SubtitleTrack track = renderer.createTrack(format);
+                    if (track != null) {
+                        synchronized(mTracks) {
+                            if (mTracks.size() == 0) {
+                                mCaptioningManager.addCaptioningChangeListener(
+                                        mCaptioningChangeListener);
+                            }
+                            mTracks.add(track);
+                        }
+                        return track;
+                    }
                 }
             }
         }
@@ -197,6 +300,8 @@ public class SubtitleController {
 
     /**
      * Show the selected (or default) subtitle track.
+     *
+     * Must be called from the UI thread.
      */
     public void show() {
         mShowing = true;
@@ -208,6 +313,8 @@ public class SubtitleController {
 
     /**
      * Hide the selected (or default) subtitle track.
+     *
+     * Must be called from the UI thread.
      */
     public void hide() {
         mVisibilityIsExplicit = true;
@@ -257,10 +364,12 @@ public class SubtitleController {
      *                 support for a subtitle format.
      */
     public void registerRenderer(Renderer renderer) {
-        // TODO how to get available renderers in the system
-        if (!mRenderers.contains(renderer)) {
-            // TODO should added renderers override existing ones (to allow replacing?)
-            mRenderers.add(renderer);
+        synchronized(mRenderers) {
+            // TODO how to get available renderers in the system
+            if (!mRenderers.contains(renderer)) {
+                // TODO should added renderers override existing ones (to allow replacing?)
+                mRenderers.add(renderer);
+            }
         }
     }
 
@@ -279,7 +388,7 @@ public class SubtitleController {
 
     private Anchor mAnchor;
 
-    /** @hide */
+    /** @hide - called from UI thread */
     public void setAnchor(Anchor anchor) {
         if (mAnchor == anchor) {
             return;

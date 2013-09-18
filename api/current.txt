@@ -12807,6 +12807,9 @@ package android.media {
     field public static final java.lang.String KEY_FRAME_RATE = "frame-rate";
     field public static final java.lang.String KEY_HEIGHT = "height";
     field public static final java.lang.String KEY_IS_ADTS = "is-adts";
+    field public static final java.lang.String KEY_IS_AUTOSELECT = "is-autoselect";
+    field public static final java.lang.String KEY_IS_DEFAULT = "is-default";
+    field public static final java.lang.String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
     field public static final java.lang.String KEY_I_FRAME_INTERVAL = "i-frame-interval";
     field public static final java.lang.String KEY_LANGUAGE = "language";
     field public static final java.lang.String KEY_MAX_HEIGHT = "max-height";
