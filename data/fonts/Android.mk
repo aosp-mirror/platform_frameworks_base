@@ -138,7 +138,8 @@ font_src_files += \
     DroidSansHebrew-Regular.ttf \
     DroidSansHebrew-Bold.ttf \
     DroidSansArmenian.ttf \
-    DroidSansGeorgian.ttf
+    DroidSansGeorgian.ttf \
+    AndroidEmoji.ttf
 
 endif # !MINIMAL_FONT
 
