@@ -20,7 +20,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.print.PrintManager;
 import android.print.PrinterDiscoverySession;
 import android.print.PrinterDiscoverySession.OnPrintersChangeListener;
@@ -33,8 +32,6 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
-
-import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -49,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import libcore.io.IoUtils;
 
 /**
  * This class is responsible for loading printers by doing discovery
@@ -86,37 +85,43 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         mPersistenceManager.addPrinterAndWritePrinterHistory(printer);
     }
 
-    private void computeAndDeliverResult() {
+    private void computeAndDeliverResult(Map<PrinterId, PrinterInfo> discoveredPrinters) {
         if (!isStarted()) {
             return;
         }
 
         List<PrinterInfo> printers = new ArrayList<PrinterInfo>();
 
-        // We want the first few favorite printers on top of the list.
-        final int favoriteCount = Math.min(mFavoritePrinters.size(),
-                MAX_FAVORITE_PRINTER_COUNT);
-        for (int i = 0; i < favoriteCount; i++) {
-            printers.add(mFavoritePrinters.get(i));
+        // Add the updated favorite printers.
+        final int favoritePrinterCount = mFavoritePrinters.size();
+        for (int i = 0; i < favoritePrinterCount; i++) {
+            PrinterInfo favoritePrinter = mFavoritePrinters.get(i);
+            PrinterInfo updatedPrinter = discoveredPrinters.remove(
+                    favoritePrinter.getId());
+            if (updatedPrinter != null) {
+                printers.add(updatedPrinter);
+            } else {
+                printers.add(favoritePrinter);
+            }
         }
 
-        // Add discovered printers updating favorites if needed.
+        // Add other updated printers.
         final int printerCount = mPrinters.size();
         for (int i = 0; i < printerCount; i++) {
-            PrinterInfo discoveredPrinter = mPrinters.get(i);
-            boolean printerHandled = false;
-            for (int j = 0; j< favoriteCount; j++) {
-                PrinterInfo favoritePrinter = printers.get(j);
-                if (favoritePrinter.getId().equals(discoveredPrinter.getId())) {
-                    printers.set(j, discoveredPrinter);
-                    printerHandled = true;
-                    break;
-                }
-            }
-            if (!printerHandled) {
-                printers.add(discoveredPrinter);
+            PrinterInfo printer = mPrinters.get(i);
+            PrinterInfo updatedPrinter = discoveredPrinters.remove(
+                    printer.getId());
+            if (updatedPrinter != null) {
+                printers.add(updatedPrinter);
             }
         }
+
+        // Add the new printers, i.e. what is left.
+        printers.addAll(discoveredPrinters.values());
+
+        // Update the list of printers.
+        mPrinters.clear();
+        mPrinters.addAll(printers);
 
         // Deliver the printers.
         deliverResult(printers);
@@ -129,8 +134,8 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         }
         // The contract is that if we already have a valid,
         // result the we have to deliver it immediately.
-        if (!mPrinters.isEmpty() || !mFavoritePrinters.isEmpty()) {
-            computeAndDeliverResult();
+        if (!mPrinters.isEmpty()) {
+            deliverResult(new ArrayList<PrinterInfo>(mPrinters));
         }
         // Always load the data to ensure discovery period is
         // started and to make sure obsolete printers are updated.
@@ -161,17 +166,22 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             mDiscoverySession.setOnPrintersChangeListener(new OnPrintersChangeListener() {
                 @Override
                 public void onPrintersChanged() {
-                    mPrinters.clear();
-                    mPrinters.addAll(mDiscoverySession.getPrinters());
-                    computeAndDeliverResult();
+                    ArrayMap<PrinterId, PrinterInfo> printersMap =
+                            new ArrayMap<PrinterId, PrinterInfo>();
+                    List<PrinterInfo> printers = mDiscoverySession.getPrinters();
+                    final int printerCount = printers.size();
+                    for (int i = 0; i < printerCount; i++) {
+                        PrinterInfo printer = printers.get(i);
+                        printersMap.put(printer.getId(), printer);
+                    }
+                    computeAndDeliverResult(printersMap);
                 }
             });
             mPersistenceManager.readPrinterHistory();
         }
         if (mPersistenceManager.isReadHistoryCompleted()
                 && !mDiscoverySession.isPrinterDiscoveryStarted()) {
-            final int favoriteCount = Math.min(MAX_FAVORITE_PRINTER_COUNT,
-                    mFavoritePrinters.size());
+            final int favoriteCount = mFavoritePrinters.size();
             List<PrinterId> printerIds = new ArrayList<PrinterId>(favoriteCount);
             for (int i = 0; i < favoriteCount; i++) {
                 printerIds.add(mFavoritePrinters.get(i).getId());
@@ -322,7 +332,8 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             Collections.sort(favoriteRecords);
 
             // Write the favorites to the output.
-            final int favoriteCount = favoriteRecords.size();
+            final int favoriteCount = Math.min(favoriteRecords.size(),
+                    MAX_FAVORITE_PRINTER_COUNT);
             List<PrinterInfo> favoritePrinters = new ArrayList<PrinterInfo>(favoriteCount);
             for (int i = 0; i < favoriteCount; i++) {
                 PrinterInfo printer = favoriteRecords.get(i).printer;
@@ -362,13 +373,15 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 mHistoricalPrinters = printers;
 
                 // Compute the favorite printers.
-                mFavoritePrinters.addAll(computeFavoritePrinters(printers));
+                mFavoritePrinters.clear();
+                mFavoritePrinters.addAll(computeFavoritePrinters(mHistoricalPrinters));
 
                 mReadHistoryInProgress = false;
                 mReadHistoryCompleted = true;
 
                 // Deliver the favorites.
-                computeAndDeliverResult();
+                Map<PrinterId, PrinterInfo> discoveredPrinters = Collections.emptyMap();
+                computeAndDeliverResult(discoveredPrinters);
 
                 // Start loading the available printers.
                 loadInternal();
