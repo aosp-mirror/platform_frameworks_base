@@ -1000,7 +1000,8 @@ final class ActivityStack {
         boolean behindFullscreen = !mStackSupervisor.isFrontStack(this) &&
                 !(forceHomeShown && isHomeStack());
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.finishing) {
@@ -1083,7 +1084,7 @@ final class ActivityStack {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
-                    } else if (r.mLaunchHomeTaskNext) {
+                    } else if (task.mOnTopOfHome) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
                         showHomeBehindStack = true;
                         behindFullscreen = true;
@@ -1224,7 +1225,7 @@ final class ActivityStack {
 
         final TaskRecord nextTask = next.task;
         final TaskRecord prevTask = prev != null ? prev.task : null;
-        if (prevTask != null && prev.mLaunchHomeTaskNext && prev.finishing && prev.frontOfTask) {
+        if (prevTask != null && prevTask.mOnTopOfHome && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
             if (prevTask == nextTask) {
                 ArrayList<ActivityRecord> activities = prevTask.mActivities;
@@ -1234,7 +1235,6 @@ final class ActivityStack {
                     // r is usually the same as next, but what if two activities were launched
                     // before prev finished?
                     if (!r.finishing) {
-                        r.mLaunchHomeTaskNext = true;
                         r.frontOfTask = true;
                         break;
                     }
@@ -1243,7 +1243,7 @@ final class ActivityStack {
                 // This task is going away but it was supposed to return to the home task.
                 // Now the task above it has to return to the home task instead.
                 final int taskNdx = mTaskHistory.indexOf(prevTask) + 1;
-                mTaskHistory.get(taskNdx).mActivities.get(0).mLaunchHomeTaskNext = true;
+                mTaskHistory.get(taskNdx).mOnTopOfHome = true;
             } else {
                 if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Launching home next");
                 return mStackSupervisor.resumeHomeActivity(prev);
@@ -2933,7 +2933,7 @@ final class ActivityStack {
             if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
                 // Caller wants the home activity moved with it.  To accomplish this,
                 // we'll just indicate that this task returns to the home task.
-                task.mActivities.get(0).mLaunchHomeTaskNext = true;
+                task.mOnTopOfHome = true;
             }
             moveTaskToFrontLocked(task, null, options);
             return true;
@@ -2994,17 +2994,17 @@ final class ActivityStack {
      * If a watcher is installed, the action is preflighted and the watcher has an opportunity
      * to premeptively cancel the move.
      *
-     * @param task The taskId to collect and move to the bottom.
+     * @param taskId The taskId to collect and move to the bottom.
      * @return Returns true if the move completed, false if not.
      */
-    final boolean moveTaskToBackLocked(int task, ActivityRecord reason) {
-        Slog.i(TAG, "moveTaskToBack: " + task);
+    final boolean moveTaskToBackLocked(int taskId, ActivityRecord reason) {
+        Slog.i(TAG, "moveTaskToBack: " + taskId);
 
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
         if (mStackSupervisor.isFrontStack(this) && mService.mController != null) {
-            ActivityRecord next = topRunningActivityLocked(null, task);
+            ActivityRecord next = topRunningActivityLocked(null, taskId);
             if (next == null) {
                 next = topRunningActivityLocked(null, 0);
             }
@@ -3024,9 +3024,9 @@ final class ActivityStack {
         }
 
         if (DEBUG_TRANSITION) Slog.v(TAG,
-                "Prepare to back transition: task=" + task);
+                "Prepare to back transition: task=" + taskId);
 
-        final TaskRecord tr = taskForIdLocked(task);
+        final TaskRecord tr = taskForIdLocked(taskId);
         if (tr == null) {
             return false;
         }
@@ -3038,28 +3038,15 @@ final class ActivityStack {
         // We make sure here that some activity in the stack will launch home.
         ActivityRecord lastActivity = null;
         int numTasks = mTaskHistory.size();
-        int taskNdx;
-        for (taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            int activityNdx;
-            for (activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                if (r.mLaunchHomeTaskNext) {
-                    break;
-                }
-                if (taskNdx == 1 && activityNdx == 0) {
-                    // Final activity before tr task.
-                    lastActivity = r;
-                }
-            }
-            if (activityNdx >= 0) {
-                // Early exit, we found an activity that will launchHomeTaskNext.
+        for (int taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            if (task.mOnTopOfHome) {
                 break;
             }
-        }
-        if (lastActivity != null) {
-            // No early exit, we did not find an activity that will launchHomeTaskNext, set one.
-            lastActivity.mLaunchHomeTaskNext = true;
+            if (taskNdx == 1) {
+                // Set the last task before tr to go to home.
+                task.mOnTopOfHome = true;
+            }
         }
 
         if (reason != null &&
@@ -3072,15 +3059,15 @@ final class ActivityStack {
         } else {
             mWindowManager.prepareAppTransition(AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
-        mWindowManager.moveTaskToBottom(task);
+        mWindowManager.moveTaskToBottom(taskId);
 
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
 
-        if (numTasks <= 1 || (mResumedActivity != null && mResumedActivity.task == tr &&
-                mResumedActivity.mLaunchHomeTaskNext)) {
-            mResumedActivity.mLaunchHomeTaskNext = false;
+        final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
+        if (task == tr && task.mOnTopOfHome || numTasks <= 1) {
+            task.mOnTopOfHome = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
 
@@ -3427,7 +3414,7 @@ final class ActivityStack {
         }
         final ActivityRecord top = topRunningActivityLocked(null);
         final boolean launchHomeTaskNext =
-                top != null && top.app == app && top.mLaunchHomeTaskNext;
+                top != null && top.app == app && top.task.mOnTopOfHome;
 
         // Remove this application's activities from active lists.
         boolean hasVisibleActivities = removeHistoryRecordsForAppLocked(app);
@@ -3534,6 +3521,11 @@ final class ActivityStack {
     }
 
     boolean removeTask(TaskRecord task) {
+        final int taskNdx = mTaskHistory.indexOf(task);
+        final int topTaskNdx = mTaskHistory.size() - 1;
+        if (task.mOnTopOfHome && taskNdx < topTaskNdx) {
+            mTaskHistory.get(taskNdx + 1).mOnTopOfHome = true;
+        }
         mTaskHistory.remove(task);
         return mTaskHistory.isEmpty();
     }
