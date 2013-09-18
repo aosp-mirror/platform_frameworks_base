@@ -60,6 +60,9 @@ final class TaskRecord extends ThumbnailHolder {
     /** Takes on same set of values as ActivityRecord.mActivityType */
     private int mTaskType;
 
+    /** Launch the home activity when leaving this task. */
+    boolean mOnTopOfHome = false;
+
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;
         affinity = info.taskAffinity;
@@ -411,11 +414,12 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        if (numActivities != 0 || rootWasReset || userId != 0) {
+        if (numActivities != 0 || rootWasReset || userId != 0 || numFullscreen != 0) {
             pw.print(prefix); pw.print("numActivities="); pw.print(numActivities);
                     pw.print(" rootWasReset="); pw.print(rootWasReset);
                     pw.print(" userId="); pw.print(userId);
-                    pw.print(" numFullscreen="); pw.println(numFullscreen);
+                    pw.print(" numFullscreen="); pw.print(numFullscreen);
+                    pw.print(" mOnTopOfHome="); pw.println(mOnTopOfHome);
         }
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);
