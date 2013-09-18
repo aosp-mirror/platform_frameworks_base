@@ -21,12 +21,12 @@ import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
+
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManager;
 import android.util.ArrayMap;
-
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -52,7 +52,6 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.StackBox;
 import com.android.server.wm.WindowManagerService;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -155,7 +154,6 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.Time;
-import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
@@ -519,7 +517,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * This is the process holding what we currently consider to be
      * the "home" activity.
      */
-    ArraySet<ProcessRecord> mHomeProcess = new ArraySet<ProcessRecord>();
+    ProcessRecord mHomeProcess;
 
     /**
      * This is the process holding the activity the user last visited that
@@ -9122,8 +9120,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         // with a home activity running in the process to prevent a repeatedly crashing app
         // from blocking the user to manually clear the list.
         final ArrayList<ActivityRecord> activities = app.activities;
-        if (mHomeProcess.contains(app) && activities.size() > 0
-                    && (app.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+        if (app == mHomeProcess && activities.size() > 0
+                    && (mHomeProcess.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.isHomeActivity()) {
@@ -10400,20 +10398,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print("  mStartedUserArray: "); pw.println(Arrays.toString(mStartedUserArray));
             }
         }
-        if (!mHomeProcess.isEmpty()) {
-            final int size = mHomeProcess.size();
-            ProcessRecord[] processes = new ProcessRecord[size];
-            mHomeProcess.toArray(processes);
-            for (int processNdx = 0; processNdx < size; ++processNdx) {
-                final ProcessRecord app = processes[processNdx];
-                if (dumpPackage == null || app.pkgList.containsKey(dumpPackage)) {
-                    if (needSep) {
-                        pw.println();
-                        needSep = false;
-                    }
-                    pw.println("  mHomeProcess[" + processNdx + "]: " + app);
-                }
+        if (mHomeProcess != null && (dumpPackage == null
+                || mHomeProcess.pkgList.containsKey(dumpPackage))) {
+            if (needSep) {
+                pw.println();
+                needSep = false;
             }
+            pw.println("  mHomeProcess: " + mHomeProcess);
         }
         if (mPreviousProcess != null && (dumpPackage == null
                 || mPreviousProcess.pkgList.containsKey(dumpPackage))) {
@@ -11943,8 +11934,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         mHandler.obtainMessage(DISPATCH_PROCESS_DIED, app.pid, app.info.uid, null).sendToTarget();
 
-        mHomeProcess.remove(app);
-
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
         if (restarting) {
@@ -11974,8 +11963,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "Clean-up removing on hold: " + app);
         mProcessesOnHold.remove(app);
 
-        if (mHomeProcess.contains(app)) {
-            mHomeProcess.remove(app);
+        if (app == mHomeProcess) {
+            mHomeProcess = null;
         }
         if (app == mPreviousProcess) {
             mPreviousProcess = null;
@@ -13904,7 +13893,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        if (mHomeProcess.contains(app)) {
+        if (app == mHomeProcess) {
             if (adj > ProcessList.HOME_APP_ADJ) {
                 // This process is hosting what we currently consider to be the
                 // home app, so we don't want to let it go into the background.
@@ -13971,7 +13960,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (procState > ActivityManager.PROCESS_STATE_SERVICE) {
                     procState = ActivityManager.PROCESS_STATE_SERVICE;
                 }
-                if (app.hasShownUi && !mHomeProcess.contains(app)) {
+                if (app.hasShownUi && app != mHomeProcess) {
                     // If this process has shown some UI, let it immediately
                     // go to the LRU list because it may be pretty heavy with
                     // UI stuff.  We'll tag it with a label just to help
@@ -14034,7 +14023,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
                             // Not doing bind OOM management, so treat
                             // this guy more like a started service.
-                            if (app.hasShownUi && !mHomeProcess.contains(app)) {
+                            if (app.hasShownUi && app != mHomeProcess) {
                                 // If this process has shown some UI, let it immediately
                                 // go to the LRU list because it may be pretty heavy with
                                 // UI stuff.  We'll tag it with a label just to help
@@ -14089,7 +14078,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // about letting this process get into the LRU
                             // list to be killed and restarted if needed for
                             // memory.
-                            if (app.hasShownUi && !mHomeProcess.contains(app)
+                            if (app.hasShownUi && app != mHomeProcess
                                     && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                                 adjType = "cch-bound-ui-services";
                             } else {
@@ -14203,7 +14192,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
                 }
                 if (adj > clientAdj) {
-                    if (app.hasShownUi && !mHomeProcess.contains(app)
+                    if (app.hasShownUi && app != mHomeProcess
                             && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         app.adjType = "cch-ui-provider";
                     } else {
@@ -15065,7 +15054,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // to be good enough at this point that destroying
                             // activities causes more harm than good.
                             if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
-                                    && !mHomeProcess.contains(app) && app != mPreviousProcess) {
+                                    && app != mHomeProcess && app != mPreviousProcess) {
                                 // Need to do this on its own message because the stack may not
                                 // be in a consistent state at this point.
                                 // For these apps we will also finish their activities
