@@ -20,6 +20,7 @@ import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.view.Surface;
 
 import java.lang.ref.WeakReference;
@@ -377,17 +378,21 @@ public class ImageReader implements AutoCloseable {
      * @throws IllegalArgumentException
      *            If no handler specified and the calling thread has no looper.
      */
-   public void setOnImageAvailableListener(OnImageAvailableListener listener, Handler handler) {
-        mImageListener = listener;
-
-        Looper looper;
-        mHandler = handler;
-        if (listener != null && mHandler == null) {
-            if ((looper = Looper.myLooper()) != null) {
-                mHandler = new Handler();
+    public void setOnImageAvailableListener(OnImageAvailableListener listener, Handler handler) {
+        synchronized (mListenerLock) {
+            if (listener != null) {
+                Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
+                if (looper == null) {
+                    throw new IllegalArgumentException(
+                            "handler is null but the current thread is not a looper");
+                }
+                if (mListenerHandler == null || mListenerHandler.getLooper() != looper) {
+                    mListenerHandler = new ListenerHandler(looper);
+                }
+                mListener = listener;
             } else {
-                throw new IllegalArgumentException(
-                        "Looper doesn't exist in the calling thread");
+                mListener = null;
+                mListenerHandler = null;
             }
         }
     }
@@ -426,6 +431,7 @@ public class ImageReader implements AutoCloseable {
      */
     @Override
     public void close() {
+        setOnImageAvailableListener(null, null);
         nativeClose();
     }
 
@@ -474,6 +480,9 @@ public class ImageReader implements AutoCloseable {
 
     /**
      * Called from Native code when an Event happens.
+     *
+     * This may be called from an arbitrary Binder thread, so access to the ImageReader must be
+     * synchronized appropriately.
      */
     private static void postEventFromNative(Object selfRef) {
         @SuppressWarnings("unchecked")
@@ -483,15 +492,15 @@ public class ImageReader implements AutoCloseable {
             return;
         }
 
-        if (ir.mHandler != null && ir.mImageListener != null) {
-            ir.mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ir.mImageListener.onImageAvailable(ir);
-                }
-              });
+        final Handler handler;
+        synchronized (ir.mListenerLock) {
+            handler = ir.mListenerHandler;
+        }
+        if (handler != null) {
+            handler.sendEmptyMessage(0);
         }
     }
+
 
     private final int mWidth;
     private final int mHeight;
@@ -500,13 +509,34 @@ public class ImageReader implements AutoCloseable {
     private final int mNumPlanes;
     private final Surface mSurface;
 
-    private Handler mHandler;
-    private OnImageAvailableListener mImageListener;
+    private final Object mListenerLock = new Object();
+    private OnImageAvailableListener mListener;
+    private ListenerHandler mListenerHandler;
 
     /**
      * This field is used by native code, do not access or modify.
      */
     private long mNativeContext;
+
+    /**
+     * This custom handler runs asynchronously so callbacks don't get queued behind UI messages.
+     */
+    private final class ListenerHandler extends Handler {
+        public ListenerHandler(Looper looper) {
+            super(looper, null, true /*async*/);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            OnImageAvailableListener listener;
+            synchronized (mListenerLock) {
+                listener = mListener;
+            }
+            if (listener != null) {
+                listener.onImageAvailable(ImageReader.this);
+            }
+        }
+    }
 
     private class SurfaceImage extends android.media.Image {
         public SurfaceImage() {
