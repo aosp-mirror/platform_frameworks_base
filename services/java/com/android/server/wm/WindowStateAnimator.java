@@ -1228,7 +1228,9 @@ class WindowStateAnimator {
             // introduce a potential glitch if the window
             // becomes unhidden before it has drawn for the
             // new orientation.
-            if (w.mOrientationChanging) {
+            if (!w.isDrawnLw()) {
+                displayed = true;
+            } else if (w.mOrientationChanging) {
                 w.mOrientationChanging = false;
                 if (DEBUG_ORIENTATION) Slog.v(TAG,
                         "Orientation change skips hidden " + w);
