@@ -641,13 +641,13 @@ package android {
     field public static final int keyPreviewHeight = 16843321; // 0x1010239
     field public static final int keyPreviewLayout = 16843319; // 0x1010237
     field public static final int keyPreviewOffset = 16843320; // 0x1010238
+    field public static final int keySet = 16843739; // 0x10103db
     field public static final int keyTextColor = 16843318; // 0x1010236
     field public static final int keyTextSize = 16843316; // 0x1010234
     field public static final int keyWidth = 16843325; // 0x101023d
     field public static final int keyboardLayout = 16843691; // 0x10103ab
     field public static final int keyboardMode = 16843341; // 0x101024d
     field public static final int keycode = 16842949; // 0x10100c5
-    field public static final int keyset = 16843739; // 0x10103db
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
