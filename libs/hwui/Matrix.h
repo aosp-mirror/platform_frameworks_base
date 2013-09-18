@@ -64,7 +64,8 @@ public:
         kTypeAffine = 0x4,
         kTypePerspective = 0x8,
         kTypeRectToRect = 0x10,
-        kTypeUnknown = 0x20,
+        kTypePositiveScale = 0x20,
+        kTypeUnknown = 0x40,
     };
 
     static const int sGeometryMask = 0xf;
@@ -183,6 +184,7 @@ public:
     bool isIdentity() const;
     bool isPerspective() const;
     bool rectToRect() const;
+    bool positiveScale() const;
 
     bool changesBounds() const;
 
