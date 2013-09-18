@@ -2058,7 +2058,7 @@
     =============================================================== -->
   <eat-comment />
 
-  <public type="attr" name="keyset" />
+  <public type="attr" name="keySet" />
   <public type="attr" name="targetId" />
   <public type="attr" name="fromScene" />
   <public type="attr" name="toScene" />
