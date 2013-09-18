@@ -20,9 +20,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.storage.StorageVolume;
 
 /**
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
@@ -737,7 +735,25 @@ public interface IMountService extends IInterface {
                     _data.recycle();
                 }
                 return _result;
+            }
 
+            @Override
+            public int mkdirs(String callingPkg, String path) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(callingPkg);
+                    _data.writeString(path);
+                    mRemote.transact(Stub.TRANSACTION_mkdirs, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
             }
         }
 
@@ -810,6 +826,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_verifyEncryptionPassword = IBinder.FIRST_CALL_TRANSACTION + 32;
 
         static final int TRANSACTION_fixPermissionsSecureContainer = IBinder.FIRST_CALL_TRANSACTION + 33;
+
+        static final int TRANSACTION_mkdirs = IBinder.FIRST_CALL_TRANSACTION + 34;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1154,6 +1172,15 @@ public interface IMountService extends IInterface {
                     reply.writeInt(resultCode);
                     return true;
                 }
+                case TRANSACTION_mkdirs: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String callingPkg = data.readString();
+                    String path = data.readString();
+                    int result = mkdirs(callingPkg, path);
+                    reply.writeNoException();
+                    reply.writeInt(result);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1376,4 +1403,13 @@ public interface IMountService extends IInterface {
      */
     public int fixPermissionsSecureContainer(String id, int gid, String filename)
             throws RemoteException;
+
+    /**
+     * Ensure that all directories along given path exist, creating parent
+     * directories as needed. Validates that given path is absolute and that it
+     * contains no relative "." or ".." paths or symlinks. Also ensures that
+     * path belongs to a volume managed by vold, and that path is either
+     * external storage data or OBB directory belonging to calling app.
+     */
+    public int mkdirs(String callingPkg, String path) throws RemoteException;
 }

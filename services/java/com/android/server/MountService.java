@@ -19,6 +19,7 @@ package com.android.server;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -2128,6 +2129,85 @@ class MountService extends IMountService.Stub
     }
 
     @Override
+    public int mkdirs(String callingPkg, String appPath) {
+        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        final UserEnvironment userEnv = new UserEnvironment(userId);
+
+        // Validate that reported package name belongs to caller
+        final AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(
+                Context.APP_OPS_SERVICE);
+        appOps.checkPackage(Binder.getCallingUid(), callingPkg);
+
+        try {
+            appPath = new File(appPath).getCanonicalPath();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to resolve " + appPath + ": " + e);
+            return -1;
+        }
+
+        // Try translating the app path into a vold path, but require that it
+        // belong to the calling package.
+        String voldPath = maybeTranslatePathForVold(appPath,
+                userEnv.buildExternalStorageAppDataDirs(callingPkg),
+                userEnv.buildExternalStorageAppDataDirsForVold(callingPkg));
+        if (voldPath != null) {
+            try {
+                mConnector.execute("volume", "mkdirs", voldPath);
+                return 0;
+            } catch (NativeDaemonConnectorException e) {
+                return e.getCode();
+            }
+        }
+
+        voldPath = maybeTranslatePathForVold(appPath,
+                userEnv.buildExternalStorageAppObbDirs(callingPkg),
+                userEnv.buildExternalStorageAppObbDirsForVold(callingPkg));
+        if (voldPath != null) {
+            try {
+                mConnector.execute("volume", "mkdirs", voldPath);
+                return 0;
+            } catch (NativeDaemonConnectorException e) {
+                return e.getCode();
+            }
+        }
+
+        throw new SecurityException("Invalid mkdirs path: " + appPath);
+    }
+
+    /**
+     * Translate the given path from an app-visible path to a vold-visible path,
+     * but only if it's under the given whitelisted paths.
+     *
+     * @param path a canonicalized app-visible path.
+     * @param appPaths list of app-visible paths that are allowed.
+     * @param voldPaths list of vold-visible paths directly corresponding to the
+     *            allowed app-visible paths argument.
+     * @return a vold-visible path representing the original path, or
+     *         {@code null} if the given path didn't have an app-to-vold
+     *         mapping.
+     */
+    @VisibleForTesting
+    public static String maybeTranslatePathForVold(
+            String path, File[] appPaths, File[] voldPaths) {
+        if (appPaths.length != voldPaths.length) {
+            throw new IllegalStateException("Paths must be 1:1 mapping");
+        }
+
+        for (int i = 0; i < appPaths.length; i++) {
+            final String appPath = appPaths[i].getAbsolutePath();
+            if (path.startsWith(appPath)) {
+                path = new File(voldPaths[i], path.substring(appPath.length() + 1))
+                        .getAbsolutePath();
+                if (!path.endsWith("/")) {
+                    path = path + "/";
+                }
+                return path;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public StorageVolume[] getVolumeList() {
         final int callingUserId = UserHandle.getCallingUserId();
         final boolean accessAll = (mContext.checkPermission(
@@ -2651,7 +2731,7 @@ class MountService extends IMountService.Stub
         if (forVold) {
             return new File(Environment.getEmulatedStorageSource(userId), path).getAbsolutePath();
         } else {
-            return new File(userEnv.getExternalDirs()[0], path).getAbsolutePath();
+            return new File(userEnv.getExternalDirsForApp()[0], path).getAbsolutePath();
         }
     }
 

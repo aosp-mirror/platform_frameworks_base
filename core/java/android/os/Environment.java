@@ -109,29 +109,36 @@ public class Environment {
         // TODO: generalize further to create package-specific environment
         // TODO: add support for secondary external storage
 
-        private final File[] mExternalDirs;
-        private final File mMediaDir;
+        /** External storage dirs, as visible to vold */
+        private final File[] mExternalDirsForVold;
+        /** External storage dirs, as visible to apps */
+        private final File[] mExternalDirsForApp;
+        /** Primary emulated storage dir for direct access */
+        private final File mEmulatedDirForDirect;
 
         public UserEnvironment(int userId) {
             // See storage config details at http://source.android.com/tech/storage/
             String rawExternalStorage = System.getenv(ENV_EXTERNAL_STORAGE);
-            String rawEmulatedStorageTarget = System.getenv(ENV_EMULATED_STORAGE_TARGET);
+            String rawEmulatedSource = System.getenv(ENV_EMULATED_STORAGE_SOURCE);
+            String rawEmulatedTarget = System.getenv(ENV_EMULATED_STORAGE_TARGET);
             String rawMediaStorage = System.getenv(ENV_MEDIA_STORAGE);
             if (TextUtils.isEmpty(rawMediaStorage)) {
                 rawMediaStorage = "/data/media";
             }
 
-            if (!TextUtils.isEmpty(rawEmulatedStorageTarget)) {
+            if (!TextUtils.isEmpty(rawEmulatedTarget)) {
                 // Device has emulated storage; external storage paths should have
                 // userId burned into them.
                 final String rawUserId = Integer.toString(userId);
-                final File emulatedBase = new File(rawEmulatedStorageTarget);
+                final File emulatedSourceBase = new File(rawEmulatedSource);
+                final File emulatedTargetBase = new File(rawEmulatedTarget);
                 final File mediaBase = new File(rawMediaStorage);
 
                 // /storage/emulated/0
-                mExternalDirs = new File[] { buildPath(emulatedBase, rawUserId) };
+                mExternalDirsForVold = new File[] { buildPath(emulatedSourceBase, rawUserId) };
+                mExternalDirsForApp = new File[] { buildPath(emulatedTargetBase, rawUserId) };
                 // /data/media/0
-                mMediaDir = buildPath(mediaBase, rawUserId);
+                mEmulatedDirForDirect = buildPath(mediaBase, rawUserId);
 
             } else {
                 // Device has physical external storage; use plain paths.
@@ -141,15 +148,16 @@ public class Environment {
                 }
 
                 // /storage/sdcard0
-                mExternalDirs = new File[] { new File(rawExternalStorage) };
+                mExternalDirsForVold = new File[] { new File(rawExternalStorage) };
+                mExternalDirsForApp = new File[] { new File(rawExternalStorage) };
                 // /data/media
-                mMediaDir = new File(rawMediaStorage);
+                mEmulatedDirForDirect = new File(rawMediaStorage);
             }
         }
 
         @Deprecated
         public File getExternalStorageDirectory() {
-            return mExternalDirs[0];
+            return mExternalDirsForApp[0];
         }
 
         @Deprecated
@@ -157,44 +165,56 @@ public class Environment {
             return buildExternalStoragePublicDirs(type)[0];
         }
 
-        public File[] getExternalDirs() {
-            return mExternalDirs;
+        public File[] getExternalDirsForVold() {
+            return mExternalDirsForVold;
+        }
+
+        public File[] getExternalDirsForApp() {
+            return mExternalDirsForApp;
         }
 
         public File getMediaDir() {
-            return mMediaDir;
+            return mEmulatedDirForDirect;
         }
 
         public File[] buildExternalStoragePublicDirs(String type) {
-            return buildPaths(mExternalDirs, type);
+            return buildPaths(mExternalDirsForApp, type);
         }
 
         public File[] buildExternalStorageAndroidDataDirs() {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_DATA);
         }
 
         public File[] buildExternalStorageAndroidObbDirs() {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_OBB);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_OBB);
         }
 
         public File[] buildExternalStorageAppDataDirs(String packageName) {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA, packageName);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_DATA, packageName);
+        }
+
+        public File[] buildExternalStorageAppDataDirsForVold(String packageName) {
+            return buildPaths(mExternalDirsForVold, DIR_ANDROID, DIR_DATA, packageName);
         }
 
         public File[] buildExternalStorageAppMediaDirs(String packageName) {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_MEDIA, packageName);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_MEDIA, packageName);
         }
 
         public File[] buildExternalStorageAppObbDirs(String packageName) {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_OBB, packageName);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_OBB, packageName);
+        }
+
+        public File[] buildExternalStorageAppObbDirsForVold(String packageName) {
+            return buildPaths(mExternalDirsForVold, DIR_ANDROID, DIR_OBB, packageName);
         }
 
         public File[] buildExternalStorageAppFilesDirs(String packageName) {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA, packageName, DIR_FILES);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_DATA, packageName, DIR_FILES);
         }
 
         public File[] buildExternalStorageAppCacheDirs(String packageName) {
-            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA, packageName, DIR_CACHE);
+            return buildPaths(mExternalDirsForApp, DIR_ANDROID, DIR_DATA, packageName, DIR_CACHE);
         }
     }
 
@@ -344,7 +364,7 @@ public class Environment {
      */
     public static File getExternalStorageDirectory() {
         throwIfUserRequired();
-        return sCurrentUser.getExternalDirs()[0];
+        return sCurrentUser.getExternalDirsForApp()[0];
     }
 
     /** {@hide} */

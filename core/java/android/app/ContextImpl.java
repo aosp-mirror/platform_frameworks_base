@@ -92,6 +92,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.SystemVibrator;
 import android.os.UserManager;
+import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
@@ -864,7 +865,9 @@ class ContextImpl extends Context {
             if (mExternalObbDirs == null) {
                 mExternalObbDirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
             }
-            return mExternalObbDirs;
+
+            // Create dirs if needed
+            return ensureDirsExistOrFilter(mExternalObbDirs);
         }
     }
 
@@ -2127,14 +2130,25 @@ class ContextImpl extends Context {
      * Ensure that given directories exist, trying to create them if missing. If
      * unable to create, they are filtered by replacing with {@code null}.
      */
-    private static File[] ensureDirsExistOrFilter(File[] dirs) {
+    private File[] ensureDirsExistOrFilter(File[] dirs) {
         File[] result = new File[dirs.length];
         for (int i = 0; i < dirs.length; i++) {
             File dir = dirs[i];
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
-                    Log.w(TAG, "Failed to ensure directory: " + dir);
-                    dir = null;
+                    // Failing to mkdir() may be okay, since we might not have
+                    // enough permissions; ask vold to create on our behalf.
+                    final IMountService mount = IMountService.Stub.asInterface(
+                            ServiceManager.getService("mount"));
+                    int res = -1;
+                    try {
+                        res = mount.mkdirs(getPackageName(), dir.getAbsolutePath());
+                    } catch (RemoteException e) {
+                    }
+                    if (res != 0) {
+                        Log.w(TAG, "Failed to ensure directory: " + dir);
+                        dir = null;
+                    }
                 }
             }
             result[i] = dir;
