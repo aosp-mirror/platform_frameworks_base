@@ -280,6 +280,9 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     }
 
     void startSelected(int which, boolean always) {
+        if (isFinishing()) {
+            return;
+        }
         ResolveInfo ri = mAdapter.resolveInfoForPosition(which);
         Intent intent = mAdapter.intentForPosition(which);
         onIntentSelected(ri, intent, always);
