@@ -24,4 +24,6 @@
         <item>@integer/page_option_value_page_range</item>
     </integer-array>
 
+    <dimen name="print_dialog_frame_max_width_dip">400dip</dimen>
+
 </resources>

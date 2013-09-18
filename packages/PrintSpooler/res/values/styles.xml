@@ -26,22 +26,14 @@
     <style name="PrintOptionSpinnerStyle">
         <item name="android:paddingTop">0dip</item>
         <item name="android:paddingBottom">0dip</item>
-        <item name="android:minWidth">150dip</item>
-        <item name="android:maxWidth">200dip</item>
         <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
     </style>
 
     <style name="PrintOptionEditTextStyle">
          <item name="android:selectAllOnFocus">true</item>
          <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
-         <item name="android:maxWidth">200dip</item>
          <item name="android:singleLine">true</item>
          <item name="android:ellipsize">end</item>
-    </style>
-
-    <style name="PrintOptionTextViewStyle">
-         <item name="android:textAppearance">@style/PrintOptionTitleTextAppearance</item>
-         <item name="android:maxWidth">200dip</item>
     </style>
 
 </resources>

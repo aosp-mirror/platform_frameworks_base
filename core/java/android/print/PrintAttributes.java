@@ -391,7 +391,7 @@ public final class PrintAttributes implements Parcelable {
         public static final MediaSize NA_LEDGER =
                 new MediaSize("NA_LEDGER", "android", R.string.mediaSize_na_ledger, 17000, 11000);
         /** North America Tabloid media size: 11" x 17" (279mm × 432mm) */
-        public static final MediaSize NA_TBLOID =
+        public static final MediaSize NA_TABLOID =
                 new MediaSize("NA_TABLOID", "android",
                         R.string.mediaSize_na_tabloid, 11000, 17000);
         /** North America Index Card 3x5 media size: 3" x 5" (76mm x 127mm) */
