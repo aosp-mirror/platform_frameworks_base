@@ -2316,8 +2316,7 @@ public abstract class ContentResolver {
         }
 
         @Override
-        public void close() throws IOException {
-            super.close();
+        public void releaseResources() {
             if (!mProviderReleased) {
                 ContentResolver.this.releaseProvider(mContentProvider);
                 mProviderReleased = true;
