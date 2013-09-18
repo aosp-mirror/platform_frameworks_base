@@ -252,7 +252,7 @@ public class PacManager {
         Intent intent = new Intent();
         intent.setClassName(PAC_PACKAGE, PAC_SERVICE);
         // Already bound no need to bind again.
-        if (mProxyConnection != null) {
+        if ((mProxyConnection != null) && (mConnection != null)) {
             if (mLastPort != -1) {
                 sendPacBroadcast(new ProxyProperties(mPacUrl, mLastPort));
             } else {
@@ -332,10 +332,15 @@ public class PacManager {
     }
 
     private void unbind() {
-        mContext.unbindService(mConnection);
-        mContext.unbindService(mProxyConnection);
-        mConnection = null;
-        mProxyConnection = null;
+        if (mConnection != null) {
+            mContext.unbindService(mConnection);
+            mConnection = null;
+        }
+        if (mProxyConnection != null) {
+            mContext.unbindService(mProxyConnection);
+            mProxyConnection = null;
+        }
+        mProxyService = null;
     }
 
     private void sendPacBroadcast(ProxyProperties proxy) {
