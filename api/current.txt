@@ -5987,7 +5987,6 @@ package android.content {
     field public static final int MODE_PRIVATE = 0; // 0x0
     field public static final deprecated int MODE_WORLD_READABLE = 1; // 0x1
     field public static final deprecated int MODE_WORLD_WRITEABLE = 2; // 0x2
-    field public static final java.lang.String NETWORKMANAGEMENT_SERVICE = "network_management";
     field public static final java.lang.String NFC_SERVICE = "nfc";
     field public static final java.lang.String NOTIFICATION_SERVICE = "notification";
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
