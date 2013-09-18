@@ -30,6 +30,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 import com.android.internal.app.IProcessStats;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
@@ -39,6 +40,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -313,7 +315,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return true;
     }
 
-    private ArrayList<String> getCommittedFiles(int minNum, boolean inclAll) {
+    private ArrayList<String> getCommittedFiles(int minNum, boolean inclCurrent,
+            boolean inclCheckedIn) {
         File[] files = mBaseDir.listFiles();
         if (files == null || files.length <= minNum) {
             return null;
@@ -325,11 +328,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             File file = files[i];
             String fileStr = file.getPath();
             if (DEBUG) Slog.d(TAG, "Collecting: " + fileStr);
-            if (!inclAll && fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX)) {
+            if (!inclCheckedIn && fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX)) {
                 if (DEBUG) Slog.d(TAG, "Skipping: already checked in");
                 continue;
             }
-            if (fileStr.equals(currentFile)) {
+            if (!inclCurrent && fileStr.equals(currentFile)) {
                 if (DEBUG) Slog.d(TAG, "Skipping: current stats");
                 continue;
             }
@@ -340,7 +343,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public void trimHistoricStatesWriteLocked() {
-        ArrayList<String> filesArray = getCommittedFiles(MAX_HISTORIC_STATES, true);
+        ArrayList<String> filesArray = getCommittedFiles(MAX_HISTORIC_STATES, false, true);
         if (filesArray == null) {
             return;
         }
@@ -409,6 +412,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
+        mAm.mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         Parcel current = Parcel.obtain();
         mWriteLock.lock();
         try {
@@ -417,7 +422,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 mProcessStats.writeToParcel(current, 0);
             }
             if (historic != null) {
-                ArrayList<String> files = getCommittedFiles(0, true);
+                ArrayList<String> files = getCommittedFiles(0, false, true);
                 if (files != null) {
                     for (int i=files.size()-1; i>=0; i--) {
                         try {
@@ -436,6 +441,76 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return current.marshall();
     }
 
+    public ParcelFileDescriptor getStatsOverTime(long minTime) {
+        mAm.mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+        mWriteLock.lock();
+        try {
+            Parcel current = Parcel.obtain();
+            long curTime;
+            synchronized (mAm) {
+                mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
+                mProcessStats.writeToParcel(current, 0);
+                curTime = mProcessStats.mTimePeriodEndRealtime
+                        - mProcessStats.mTimePeriodStartRealtime;
+            }
+            if (curTime < minTime) {
+                // Need to add in older stats to reach desired time.
+                ArrayList<String> files = getCommittedFiles(0, false, true);
+                if (files.size() > 0) {
+                    current.setDataPosition(0);
+                    ProcessStats stats = ProcessStats.CREATOR.createFromParcel(current);
+                    current.recycle();
+                    int i = 0;
+                    while (i < files.size() && (stats.mTimePeriodEndRealtime
+                            - stats.mTimePeriodStartRealtime) < minTime) {
+                        AtomicFile file = new AtomicFile(new File(files.get(i)));
+                        i++;
+                        ProcessStats moreStats = new ProcessStats(false);
+                        readLocked(moreStats, file);
+                        if (moreStats.mReadError == null) {
+                            stats.add(moreStats);
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Added stats: ");
+                            sb.append(moreStats.mTimePeriodStartClockStr);
+                            sb.append(", over ");
+                            TimeUtils.formatDuration(moreStats.mTimePeriodEndRealtime
+                                    - moreStats.mTimePeriodStartRealtime, sb);
+                            Slog.i(TAG, sb.toString());
+                        } else {
+                            Slog.w(TAG, "Failure reading " + files.get(i) + "; "
+                                    + moreStats.mReadError);
+                            continue;
+                        }
+                    }
+                    current = Parcel.obtain();
+                    stats.writeToParcel(current, 0);
+                }
+            }
+            final byte[] outData = current.marshall();
+            current.recycle();
+            final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
+            Thread thr = new Thread("ProcessStats pipe output") {
+                public void run() {
+                    FileOutputStream fout = new ParcelFileDescriptor.AutoCloseOutputStream(fds[1]);
+                    try {
+                        fout.write(outData);
+                        fout.close();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Failure writing pipe", e);
+                    }
+                }
+            };
+            thr.start();
+            return fds[0];
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed building output pipe", e);
+        } finally {
+            mWriteLock.unlock();
+        }
+        return null;
+    }
+
     public int getCurrentMemoryState() {
         synchronized (mAm) {
             return mLastMemOnlyState;
@@ -445,7 +520,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
-        pw.println("    [--details] [--current] [--commit] [--reset] [--write] [-h] [<package.name>]");
+        pw.println("    [--details] [--full-details] [--current] [--one-day]");
+        pw.println("    [--commit] [--reset] [--clear] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: perform a checkin: print and delete old committed states.");
         pw.println("  --c: print only state in checkin format.");
         pw.println("  --csv: output data suitable for putting in a spreadsheet.");
@@ -454,9 +530,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  --csv-proc: pers, top, fore, vis, precept, backup,");
         pw.println("    service, home, prev, cached");
         pw.println("  --details: dump all execution details, not just summary.");
+        pw.println("  --full-details: dump only detail information, for all saved state.");
         pw.println("  --current: only dump current state.");
+        pw.println("  --one-day: dump stats aggregated across about one day.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
         pw.println("  --reset: reset current stats, without committing.");
+        pw.println("  --clear: clear all stats; does both --reset and deletes old stats.");
         pw.println("  --write: write current in-memory stats to disk.");
         pw.println("  --read: replace current stats with last-written stats.");
         pw.println("  -a: print everything.");
@@ -481,7 +560,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         boolean isCsv = false;
         boolean currentOnly = false;
         boolean dumpDetails = false;
+        boolean dumpFullDetails = false;
         boolean dumpAll = false;
+        boolean oneDay = false;
         String reqPackage = null;
         boolean csvSepScreenStats = false;
         int[] csvScreenStats = new int[] { ProcessStats.ADJ_SCREEN_OFF, ProcessStats.ADJ_SCREEN_ON};
@@ -549,6 +630,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     csvSepProcStats = sep[0];
                 } else if ("--details".equals(arg)) {
                     dumpDetails = true;
+                } else if ("--full-details".equals(arg)) {
+                    dumpFullDetails = true;
+                } else if ("--one-day".equals(arg)) {
+                    oneDay = true;
                 } else if ("--current".equals(arg)) {
                     currentOnly = true;
                 } else if ("--commit".equals(arg)) {
@@ -562,6 +647,18 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
                         pw.println("Process stats reset.");
+                    }
+                    return;
+                } else if ("--clear".equals(arg)) {
+                    synchronized (mAm) {
+                        mProcessStats.resetSafely();
+                        ArrayList<String> files = getCommittedFiles(0, true, true);
+                        if (files != null) {
+                            for (int fi=0; fi<files.size(); fi++) {
+                                (new File(files.get(fi))).delete();
+                            }
+                        }
+                        pw.println("All process stats cleared.");
                     }
                     return;
                 } else if ("--write".equals(arg)) {
@@ -653,13 +750,36 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 */
             }
             return;
+        } else if (oneDay) {
+            ParcelFileDescriptor pfd = getStatsOverTime(24*60*60*1000);
+            if (pfd == null) {
+                pw.println("Unable to build stats!");
+                return;
+            }
+            ProcessStats stats = new ProcessStats(false);
+            InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+            stats.read(stream);
+            if (stats.mReadError != null) {
+                pw.print("Failure reading: "); pw.println(stats.mReadError);
+                return;
+            }
+            if (isCompact) {
+                stats.dumpCheckinLocked(pw, reqPackage);
+            } else {
+                if (dumpDetails || dumpFullDetails) {
+                    stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll);
+                } else {
+                    stats.dumpSummaryLocked(pw, reqPackage, now);
+                }
+            }
+            return;
         }
 
         boolean sepNeeded = false;
         if (!currentOnly || isCheckin) {
             mWriteLock.lock();
             try {
-                ArrayList<String> files = getCommittedFiles(0, !isCheckin);
+                ArrayList<String> files = getCommittedFiles(0, false, !isCheckin);
                 if (files != null) {
                     for (int i=0; i<files.size(); i++) {
                         if (DEBUG) Slog.d(TAG, "Retrieving state: " + files.get(i));
@@ -693,7 +813,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                 // Don't really need to lock because we uniquely own this object.
                                 // Always dump summary here, dumping all details is just too
                                 // much crud.
-                                processStats.dumpSummaryLocked(pw, reqPackage, now);
+                                if (dumpFullDetails) {
+                                    mProcessStats.dumpLocked(pw, reqPackage, now, false, false);
+                                } else {
+                                    processStats.dumpSummaryLocked(pw, reqPackage, now);
+                                }
                             }
                             if (isCheckin) {
                                 // Rename file suffix to mark that it has checked in.
@@ -719,8 +843,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         pw.println();
                         pw.println("CURRENT STATS:");
                     }
-                    if (dumpDetails) {
-                        mProcessStats.dumpLocked(pw, reqPackage, now, dumpAll);
+                    if (dumpDetails || dumpFullDetails) {
+                        mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll);
                         if (dumpAll) {
                             pw.print("  mFile="); pw.println(mFile.getBaseFile());
                         }
