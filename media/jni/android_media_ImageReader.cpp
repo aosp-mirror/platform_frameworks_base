@@ -721,13 +721,18 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         return ACQUIRE_NO_BUFFERS;
     }
 
+    if (buffer->format == HAL_PIXEL_FORMAT_YCrCb_420_SP) {
+        jniThrowException(env, "java/lang/UnsupportedOperationException",
+                "NV21 format is not supported by ImageReader");
+        return -1;
+    }
+
     // Check if the left-top corner of the crop rect is origin, we currently assume this point is
     // zero, will revist this once this assumption turns out problematic.
     Point lt = buffer->crop.leftTop();
     if (lt.x != 0 || lt.y != 0) {
-        ALOGE("crop left: %d, top = %d", lt.x, lt.y);
-        jniThrowException(env, "java/lang/UnsupportedOperationException",
-                          "crop left top corner need to at origin");
+        jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
+                "crop left top corner [%d, %d] need to be at origin", lt.x, lt.y);
         return -1;
     }
 
