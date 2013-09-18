@@ -358,7 +358,7 @@ public class PrintJobConfigActivity extends Activity {
                 PrintSpoolerService.peekInstance().setPrintJobAttributesNoPersistence(
                         mPrintJobId, mCurrPrintAttributes);
 
-                mMetadata.putBoolean(PrintDocumentAdapter.METADATA_KEY_PRINT_PREVIEW,
+                mMetadata.putBoolean(PrintDocumentAdapter.EXTRA_PRINT_PREVIEW,
                         !mEditor.isPrintConfirmed());
 
                 mControllerState = CONTROLLER_STATE_LAYOUT_STARTED;

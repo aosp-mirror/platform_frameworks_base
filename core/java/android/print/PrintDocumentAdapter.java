@@ -74,10 +74,10 @@ import android.os.ParcelFileDescriptor;
 public abstract class PrintDocumentAdapter {
 
     /**
-     * Meta-data key: mapped to a boolean value that is <code>true</code> if
+     * Extra: mapped to a boolean value that is <code>true</code> if
      * the current layout is for a print preview, <code>false</code> otherwise.
      */
-    public static final String METADATA_KEY_PRINT_PREVIEW = "KEY_METADATA_PRINT_PREVIEW";
+    public static final String EXTRA_PRINT_PREVIEW = "EXTRA_PRINT_PREVIEW";
 
     /**
      * Called when printing starts. You can use this callback to allocate
@@ -112,15 +112,15 @@ public abstract class PrintDocumentAdapter {
      * @param newAttributes The new print attributes.
      * @param cancellationSignal Signal for observing cancel layout requests.
      * @param callback Callback to inform the system for the layout result.
-     * @param metadata Additional information about how layout the content.
+     * @param extras Additional information about how to layout the content.
      *
      * @see LayoutResultCallback
      * @see CancellationSignal
-     * @see #METADATA_KEY_PRINT_PREVIEW
+     * @see #EXTRA_PRINT_PREVIEW
      */
     public abstract void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
             CancellationSignal cancellationSignal, LayoutResultCallback callback,
-            Bundle metadata);
+            Bundle extras);
 
     /**
      * Called when specific pages of the content should be written in the

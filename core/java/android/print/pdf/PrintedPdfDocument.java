@@ -18,67 +18,81 @@ package android.print.pdf;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.pdf.PdfDocument;
+import android.graphics.pdf.PdfDocument.Page;
+import android.graphics.pdf.PdfDocument.PageInfo;
 import android.print.PrintAttributes;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
-import android.print.pdf.PdfDocument;
-import android.print.pdf.PdfDocument.Page;
-import android.print.pdf.PdfDocument.PageInfo;
-
-import java.io.OutputStream;
-import java.util.List;
 
 /**
- * This class is a helper for printing content to a different media
- * size. This class is responsible for computing a correct page size
- * given some print constraints, i.e. {@link PrintAttributes}. It is
- * an adapter around a {@link PdfDocument}.
+ * This class is a helper for creating a PDF file for given print
+ * attributes. It is useful for implementing printing via the native
+ * Android graphics APIs.
+ * <p>
+ * This class computes the page width, page height, and content rectangle
+ * from the provided print attributes and these precomputed values can be
+ * accessed via {@link #getPageWidth()}, {@link #getPageHeight()}, and
+ * {@link #getPageContentRect()}, respectively. The {@link #startPage(int)}
+ * methods creates pages whose {@link PageInfo} is initialized with the
+ * precomputed values for width, height, and content rectangle.
+ * <p>
+ * A typical use of the APIs looks like this:
+ * </p>
+ * <pre>
+ * // open a new document
+ * PrintedPdfDocument document = new PrintedPdfDocument(context,
+ *         printAttributes);
+ *
+ * // start a page
+ * Page page = document.startPage(0);
+ *
+ * // draw something on the page
+ * View content = getContentView();
+ * content.draw(page.getCanvas());
+ *
+ * // finish the page
+ * document.finishPage(page);
+ * . . .
+ * // add more pages
+ * . . .
+ * // write the document content
+ * document.writeTo(getOutputStream());
+ *
+ * //close the document
+ * document.close();
+ * </pre>
  */
-public final class PrintedPdfDocument {
+public class PrintedPdfDocument extends PdfDocument {
     private static final int MILS_PER_INCH = 1000;
     private static final int POINTS_IN_INCH = 72;
 
-    private final PdfDocument mDocument = PdfDocument.open();
-    private final Rect mPageSize = new Rect();
-    private final Rect mContentSize = new Rect();
+    private final int mPageWidth;
+    private final int mPageHeight;
+    private final Rect mContentRect;
 
     /**
-     * Opens a new document. The document pages are computed based on
-     * the passes in {@link PrintAttributes}.
+     * Creates a new document.
      * <p>
      * <strong>Note:</strong> You must close the document after you are
-     * done by calling {@link #close()}
+     * done by calling {@link #close()}.
      * </p>
      *
      * @param context Context instance for accessing resources.
      * @param attributes The print attributes.
-     * @return The document.
-     *
-     * @see #close()
      */
-    public static PrintedPdfDocument open(Context context, PrintAttributes attributes) {
-        return new PrintedPdfDocument(context, attributes);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param context Context instance for accessing resources and services.
-     * @param attributes The {@link PrintAttributes} to user.
-     */
-    private PrintedPdfDocument(Context context, PrintAttributes attributes) {
+    public PrintedPdfDocument(Context context, PrintAttributes attributes) {
         MediaSize mediaSize = attributes.getMediaSize();
 
         // Compute the size of the target canvas from the attributes.
-        final int pageWidth = (int) (((float) mediaSize.getWidthMils() / MILS_PER_INCH)
+        mPageWidth = (int) (((float) mediaSize.getWidthMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
-        final int pageHeight = (int) (((float) mediaSize.getHeightMils() / MILS_PER_INCH)
+        mPageHeight = (int) (((float) mediaSize.getHeightMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
-        mPageSize.set(0, 0, pageWidth, pageHeight);
 
         // Compute the content size from the attributes.
         Margins minMargins = attributes.getMinMargins();
-        final int marginLeft = (int) (((float) minMargins.getLeftMils() /MILS_PER_INCH)
+        final int marginLeft = (int) (((float) minMargins.getLeftMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
         final int marginTop = (int) (((float) minMargins.getTopMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
@@ -86,14 +100,14 @@ public final class PrintedPdfDocument {
                 * POINTS_IN_INCH);
         final int marginBottom = (int) (((float) minMargins.getBottomMils() / MILS_PER_INCH)
                 * POINTS_IN_INCH);
-        mContentSize.set(mPageSize.left + marginLeft, mPageSize.top + marginTop,
-                mPageSize.right - marginRight, mPageSize.bottom - marginBottom);
+        mContentRect = new Rect(marginLeft, marginTop, mPageWidth - marginRight,
+                mPageHeight - marginBottom);
     }
 
     /**
-     * Starts a page using a page size computed from the print attributes
-     * passed in {@link #open(Context, PrintAttributes)} and the given page
-     * number to create appropriate {@link PageInfo}.
+     * Starts a new page. The page is created using width, height  and content
+     * rectangle computed from the print attributes passed in the constructor
+     * and the given page number to create an appropriate {@link PageInfo}.
      * <p>
      * After the page is created you can draw arbitrary content on the page's
      * canvas which you can get by calling {@link Page#getCanvas() Page.getCanvas()}.
@@ -103,63 +117,48 @@ public final class PrintedPdfDocument {
      * </p>
      * <p>
      * <strong>Note:</strong> Do not call this method after {@link #close()}.
+     * Also do not call this method if the last page returned by this method
+     * is not finished by calling {@link #finishPage(Page)}.
      * </p>
      *
-     * @param pageNumber The page number.
+     * @param pageNumber The page number. Must be a positive value.
      * @return A blank page.
      *
      * @see #finishPage(Page)
      */
     public Page startPage(int pageNumber) {
         PageInfo pageInfo = new PageInfo
-                .Builder(mPageSize, 0)
-                .setContentSize(mContentSize)
+                .Builder(mPageWidth, mPageHeight, pageNumber)
+                .setContentRect(mContentRect)
                 .create();
-        Page page = mDocument.startPage(pageInfo);
-        return page;
+        return startPage(pageInfo);
     }
 
     /**
-     * Finishes a started page. You should always finish the last started page.
-     * <p>
-     * <strong>Note:</strong> Do not call this method after {@link #close()}.
-     * </p>
+     * Gets the page width.
      *
-     * @param page The page.
-     *
-     * @see #startPage(int)
+     * @return The page width in PostScript points (1/72th of an inch).
      */
-    public void finishPage(Page page) {
-        mDocument.finishPage(page);
+    public int getPageWidth() {
+        return mPageWidth;
     }
 
     /**
-     * Writes the document to an output stream.
-     * <p>
-     * <strong>Note:</strong> Do not call this method after {@link #close()}.
-     * </p>
+     * Gets the page height.
      *
-     * @param out The output stream.
+     * @return The page height in PostScript points (1/72th of an inch).
      */
-    public void writeTo(OutputStream out) {
-        mDocument.writeTo(out);
+    public int getPageHeight() {
+        return mPageHeight;
     }
 
     /**
-     * Gets the pages of the document.
+     * Gets the content rectangle. This is the area of the page that
+     * contains printed data and is relative to the page top left.
      *
-     * @return The pages.
+     * @return The content rectangle.
      */
-    public List<PageInfo> getPages() {
-        return mDocument.getPages();
-    }
-
-    /**
-     * Closes this document. This method should be called after you
-     * are done working with the document. After this call the document
-     * is considered closed and none of its methods should be called.
-     */
-    public void close() {
-        mDocument.close();
+    public Rect getPageContentRect() {
+        return mContentRect;
     }
 }
