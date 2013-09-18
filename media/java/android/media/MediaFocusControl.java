@@ -138,7 +138,7 @@ public class MediaFocusControl implements OnFinished {
     private static final int MSG_PROMOTE_RCC = 6;
     private static final int MSG_RCC_NEW_PLAYBACK_STATE = 7;
     private static final int MSG_RCC_SEEK_REQUEST = 8;
-    private static final int MSG_RCC_UPDATE_METADATA_LONG = 9;
+    private static final int MSG_RCC_UPDATE_METADATA = 9;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -206,9 +206,9 @@ public class MediaFocusControl implements OnFinished {
                             msg.arg1 /* generationId */, ((Long)msg.obj).longValue() /* timeMs */);
                     break;
 
-                case MSG_RCC_UPDATE_METADATA_LONG:
-                    onUpdateRemoteControlClientMetadataLong(msg.arg1 /*genId*/, msg.arg2 /*key*/,
-                            ((Long)msg.obj).longValue() /* value */);
+                case MSG_RCC_UPDATE_METADATA:
+                    onUpdateRemoteControlClientMetadata(msg.arg1 /*genId*/, msg.arg2 /*key*/,
+                            (Rating) msg.obj /* value */);
                     break;
 
                 case MSG_PROMOTE_RCC:
@@ -720,11 +720,7 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
-    private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
-        if (keyEvent == null) {
-            return false;
-        }
-        final int keyCode = keyEvent.getKeyCode();
+    protected static boolean isMediaKeyCode(int keyCode) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_HEADSETHOOK:
@@ -740,11 +736,17 @@ public class MediaFocusControl implements OnFinished {
             case KeyEvent.KEYCODE_MEDIA_CLOSE:
             case KeyEvent.KEYCODE_MEDIA_EJECT:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
-                break;
+                return true;
             default:
                 return false;
         }
-        return true;
+    }
+
+    private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
+        if (keyEvent == null) {
+            return false;
+        }
+        return MediaFocusControl.isMediaKeyCode(keyEvent.getKeyCode());
     }
 
     /**
@@ -2080,24 +2082,21 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
-    protected void updateRemoteControlClientMetadata(int genId, int key, long value) {
-        sendMsg(mEventHandler, MSG_RCC_UPDATE_METADATA_LONG, SENDMSG_QUEUE,
-                genId /* arg1 */, key /* arg2 */, Long.valueOf(value) /* obj */, 0 /* delay */);
+    protected void updateRemoteControlClientMetadata(int genId, int key, Rating value) {
+        sendMsg(mEventHandler, MSG_RCC_UPDATE_METADATA, SENDMSG_QUEUE,
+                genId /* arg1 */, key /* arg2 */, value /* obj */, 0 /* delay */);
     }
 
-    private void onUpdateRemoteControlClientMetadataLong(int genId, int key, long value) {
-        if(DEBUG_RC) Log.d(TAG, "onUpdateRemoteControlClientMetadataLong(genId=" + genId +
-                ", what=" + key + ",val=" + value + ")");
+    private void onUpdateRemoteControlClientMetadata(int genId, int key, Rating value) {
+        if(DEBUG_RC) Log.d(TAG, "onUpdateRemoteControlClientMetadata(genId=" + genId +
+                ", what=" + key + ",rating=" + value + ")");
         synchronized(mRCStack) {
             synchronized(mCurrentRcLock) {
                 if ((mCurrentRcClient != null) && (mCurrentRcClientGen == genId)) {
                     try {
                         switch (key) {
-                            case RemoteControlClient.MetadataEditor.RATING_KEY_BY_USER:
-                                // TODO handle rating update, placeholder code here that sends
-                                //      an unrated percent-based rating
-                                mCurrentRcClient.updateMetadata(genId, key,
-                                        Rating.newUnratedRating(Rating.RATING_PERCENTAGE));
+                            case MediaMetadataEditor.RATING_KEY_BY_USER:
+                                mCurrentRcClient.updateMetadata(genId, key, value);
                                 break;
                             default:
                                 Log.e(TAG, "unhandled metadata key " + key + " update for RCC "

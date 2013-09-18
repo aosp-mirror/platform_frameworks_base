@@ -4143,8 +4143,17 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // RemoteControlDisplay / RemoteControlClient / Remote info
     //==========================================================================================
-    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
-        mMediaFocusControl.registerRemoteControlDisplay(rcd, w, h);
+    public boolean registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
+        if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MEDIA_CONTENT_CONTROL)) {
+            mMediaFocusControl.registerRemoteControlDisplay(rcd, w, h);
+            return true;
+        } else {
+            Log.w(TAG, "Access denied to process: " + Binder.getCallingPid() +
+                    ", must have permission " + android.Manifest.permission.MEDIA_CONTENT_CONTROL +
+                    " to register IRemoteControlDisplay");
+            return false;
+        }
     }
 
     public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {
@@ -4190,7 +4199,7 @@ public class AudioService extends IAudioService.Stub {
         mMediaFocusControl.setRemoteControlClientPlaybackPosition(generationId, timeMs);
     }
 
-    public void updateRemoteControlClientMetadata(int generationId, int key, long value) {
+    public void updateRemoteControlClientMetadata(int generationId, int key, Rating value) {
         mMediaFocusControl.updateRemoteControlClientMetadata(generationId, key, value);
     }
 
