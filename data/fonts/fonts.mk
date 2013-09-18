@@ -43,6 +43,7 @@ PRODUCT_PACKAGES := \
     DroidSansMono.ttf \
     DroidSansArmenian.ttf \
     DroidSansGeorgian.ttf \
+    AndroidEmoji.ttf \
     Clockopia.ttf \
     AndroidClock.ttf \
     AndroidClock_Highlight.ttf \
