@@ -1099,6 +1099,16 @@ public class NumberPicker extends LinearLayout {
     }
 
     @Override
+    public int computeVerticalScrollOffset() {
+        return mCurrentScrollOffset;
+    }
+
+    @Override
+    public int computeVerticalScrollRange() {
+        return mSelectorIndices.length * mSelectorElementHeight;
+    }
+
+    @Override
     public int getSolidColor() {
         return mSolidColor;
     }
