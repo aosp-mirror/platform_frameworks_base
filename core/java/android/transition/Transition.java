@@ -353,7 +353,7 @@ public abstract class Transition implements Cloneable {
                 if (endValues.viewValues.get(view) != null) {
                     end = endValues.viewValues.get(view);
                     endCopy.remove(view);
-                } else {
+                } else if (id != View.NO_ID) {
                     end = endValues.idValues.get(id);
                     View removeView = null;
                     for (View viewToRemove : endCopy.keySet()) {
