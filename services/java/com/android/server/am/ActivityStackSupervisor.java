@@ -906,7 +906,8 @@ public final class ActivityStackSupervisor {
                         r.task.taskId, r.shortComponentName);
             }
             if (r.isHomeActivity() && r.isNotResolverActivity()) {
-                mService.mHomeProcess.add(app);
+                // Home process is the root process of the task.
+                mService.mHomeProcess = r.task.mActivities.get(0).app;
             }
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             r.sleeping = false;
@@ -1949,7 +1950,7 @@ public final class ActivityStackSupervisor {
         // makes sense to.
         if (r.app != null && fgApp != null && r.app != fgApp
                 && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
-                && !mService.mHomeProcess.contains(r.app)) {
+                && r.app != mService.mHomeProcess) {
             mService.mPreviousProcess = r.app;
             mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
         }
