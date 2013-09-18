@@ -1903,8 +1903,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     private ActivityManagerService() {
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
 
-        mFgBroadcastQueue = new BroadcastQueue(this, "foreground", BROADCAST_FG_TIMEOUT);
-        mBgBroadcastQueue = new BroadcastQueue(this, "background", BROADCAST_BG_TIMEOUT);
+        mFgBroadcastQueue = new BroadcastQueue(this, "foreground", BROADCAST_FG_TIMEOUT, false);
+        mBgBroadcastQueue = new BroadcastQueue(this, "background", BROADCAST_BG_TIMEOUT, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
 
@@ -4910,6 +4910,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         final int userId = mStartedUsers.keyAt(i);
                         Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                        intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
                         broadcastIntentLocked(null, null, intent, null,
                                 new IIntentReceiver.Stub() {
                                     @Override
@@ -4924,7 +4925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 },
                                 0, null, null,
                                 android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                                AppOpsManager.OP_NONE, false, false, MY_PID, Process.SYSTEM_UID,
+                                AppOpsManager.OP_NONE, true, false, MY_PID, Process.SYSTEM_UID,
                                 userId);
                     }
                 }
@@ -12578,14 +12579,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean doTrim = false;
 
             synchronized(this) {
-                ReceiverList rl
-                = (ReceiverList)mRegisteredReceivers.get(receiver.asBinder());
+                ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
                 if (rl != null) {
                     if (rl.curBroadcast != null) {
                         BroadcastRecord r = rl.curBroadcast;
                         final boolean doNext = finishReceiverLocked(
                                 receiver.asBinder(), r.resultCode, r.resultData,
-                                r.resultExtras, r.resultAbort, true);
+                                r.resultExtras, r.resultAbort);
                         if (doNext) {
                             doTrim = true;
                             r.queue.processNextBroadcast(false);
@@ -13212,16 +13212,20 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean finishReceiverLocked(IBinder receiver, int resultCode,
-            String resultData, Bundle resultExtras, boolean resultAbort,
-            boolean explicit) {
+            String resultData, Bundle resultExtras, boolean resultAbort) {
         final BroadcastRecord r = broadcastRecordForReceiverLocked(receiver);
         if (r == null) {
             Slog.w(TAG, "finishReceiver called but not found on queue");
             return false;
         }
 
-        return r.queue.finishReceiverLocked(r, resultCode, resultData, resultExtras, resultAbort,
-                explicit);
+        return r.queue.finishReceiverLocked(r, resultCode, resultData, resultExtras, resultAbort, false);
+    }
+
+    void backgroundServicesFinishedLocked(int userId) {
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.backgroundServicesFinishedLocked(userId);
+        }
     }
 
     public void finishReceiver(IBinder who, int resultCode, String resultData,
@@ -13236,7 +13240,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final long origId = Binder.clearCallingIdentity();
         try {
             boolean doNext = false;
-            BroadcastRecord r = null;
+            BroadcastRecord r;
 
             synchronized(this) {
                 r = broadcastRecordForReceiverLocked(who);
@@ -15704,10 +15708,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final int userId = uss.mHandle.getIdentifier();
                 Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED, AppOpsManager.OP_NONE,
-                        false, false, MY_PID, Process.SYSTEM_UID, userId);
+                        true, false, MY_PID, Process.SYSTEM_UID, userId);
             }
             int num = mUserLru.size();
             int i = 0;
