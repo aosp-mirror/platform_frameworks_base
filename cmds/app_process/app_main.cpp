@@ -7,7 +7,6 @@
 
 #define LOG_TAG "appproc"
 
-#include <cutils/properties.h>
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
@@ -15,7 +14,6 @@
 #include <cutils/memory.h>
 #include <cutils/trace.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <sys/personality.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -137,33 +135,6 @@ static void setArgv0(const char *argv0, const char *newArgv0)
 
 int main(int argc, char* const argv[])
 {
-#ifdef __arm__
-    /*
-     * b/7188322 - Temporarily revert to the compat memory layout
-     * to avoid breaking third party apps.
-     *
-     * THIS WILL GO AWAY IN A FUTURE ANDROID RELEASE.
-     *
-     * http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=7dbaa466
-     * changes the kernel mapping from bottom up to top-down.
-     * This breaks some programs which improperly embed
-     * an out of date copy of Android's linker.
-     */
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.kernel.qemu", value, "");
-    bool is_qemu = (strcmp(value, "1") == 0);
-    if ((getenv("NO_ADDR_COMPAT_LAYOUT_FIXUP") == NULL) && !is_qemu) {
-        int current = personality(0xFFFFFFFF);
-        if ((current & ADDR_COMPAT_LAYOUT) == 0) {
-            personality(current | ADDR_COMPAT_LAYOUT);
-            setenv("NO_ADDR_COMPAT_LAYOUT_FIXUP", "1", 1);
-            execv("/system/bin/app_process", argv);
-            return -1;
-        }
-    }
-    unsetenv("NO_ADDR_COMPAT_LAYOUT_FIXUP");
-#endif
-
     // These are global variables in ProcessState.cpp
     mArgC = argc;
     mArgV = argv;
