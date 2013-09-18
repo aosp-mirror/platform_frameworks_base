@@ -715,7 +715,7 @@ public class RemoteControlClient
      * Implement this interface to receive metadata updates after registering your listener
      * through {@link RemoteControlClient#setMetadataUpdateListener(OnMetadataUpdateListener)}.
      */
-    public interface OnMetadataUpdateListener  {
+    public interface OnMetadataUpdateListener {
         /**
          * Called on the implementer to notify that the metadata field for the given key has
          * been updated to the new value.

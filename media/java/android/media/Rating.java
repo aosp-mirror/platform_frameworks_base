@@ -75,6 +75,16 @@ public final class Rating implements Parcelable {
         mRatingValue = rating;
     }
 
+
+    /**
+     * @hide
+     */
+    @Override
+    public String toString () {
+        return "Rating:style=" + mRatingStyle + " rating="
+                + (mRatingValue < 0.0f ? "unrated" : String.valueOf(mRatingValue));
+    }
+
     @Override
     public int describeContents() {
         return mRatingStyle;

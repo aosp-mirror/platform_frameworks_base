@@ -26,6 +26,7 @@ import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
 import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
+import android.media.Rating;
 import android.net.Uri;
 import android.view.KeyEvent;
 
@@ -140,7 +141,7 @@ interface IAudioService {
      * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
      *   display doesn't need to receive artwork.
      */
-    oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd, int w, int h);
+    boolean registerRemoteControlDisplay(in IRemoteControlDisplay rcd, int w, int h);
     /**
      * Unregister an IRemoteControlDisplay.
      * No effect if the IRemoteControlDisplay hasn't been successfully registered.
@@ -178,13 +179,14 @@ interface IAudioService {
      */
      void setRemoteControlClientPlaybackPosition(int generationId, long timeMs);
      /**
-      * Notify the user of a RemoteControlClient that it should update its metadata
+      * Notify the user of a RemoteControlClient that it should update its metadata with the
+      * new value for the given key.
       * @param generationId the RemoteControlClient generation counter for which this request is
       *         issued. Requests for an older generation than current one will be ignored.
       * @param key the metadata key for which a new value exists
       * @param value the new metadata value
       */
-     void updateRemoteControlClientMetadata(int generationId, int key, long value);
+     void updateRemoteControlClientMetadata(int generationId, int key, in Rating value);
 
     /**
      * Do not use directly, use instead

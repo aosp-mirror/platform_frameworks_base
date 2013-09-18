@@ -2114,6 +2114,13 @@
         android:description="@string/permdesc_captureSecureVideoOutput"
         android:protectionLevel="signature|system" />
 
+    <!--@hide Allows an application to know what content is playing and control its playback.
+         <p>Not for use by third-party applications due to privacy of media consumption</p>  -->
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
+        android:label="@string/permlab_mediaContentControl"
+        android:description="@string/permdesc_mediaContentControl"
+        android:protectionLevel="signature|system" />
+
     <!-- Required to be able to disable the device (very dangerous!).
     <p>Not for use by third-party applications.. -->
     <permission android:name="android.permission.BRICK"
