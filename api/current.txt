@@ -6543,6 +6543,7 @@ package android.content {
     field public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 32; // 0x20
     field public static final int FLAG_PERSIST_GRANT_URI_PERMISSION = 64; // 0x40
     field public static final int FLAG_RECEIVER_FOREGROUND = 268435456; // 0x10000000
+    field public static final int FLAG_RECEIVER_NO_ABORT = 134217728; // 0x8000000
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY = 1073741824; // 0x40000000
     field public static final int FLAG_RECEIVER_REPLACE_PENDING = 536870912; // 0x20000000
     field public static final java.lang.String METADATA_DOCK_HOME = "android.dock_home";
@@ -31708,6 +31709,8 @@ package android.widget {
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int, int);
+    method public int computeVerticalScrollOffset();
+    method public int computeVerticalScrollRange();
     method public java.lang.String[] getDisplayedValues();
     method public int getMaxValue();
     method public int getMinValue();

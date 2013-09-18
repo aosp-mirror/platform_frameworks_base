@@ -70,6 +70,7 @@ final class BroadcastRecord extends Binder {
     static final int APP_RECEIVE = 1;
     static final int CALL_IN_RECEIVE = 2;
     static final int CALL_DONE_RECEIVE = 3;
+    static final int WAITING_SERVICES = 4;
 
     // The following are set when we are calling a receiver (one that
     // was found in our list of registered receivers).
@@ -153,6 +154,7 @@ final class BroadcastRecord extends Binder {
                 case APP_RECEIVE:       stateStr=" (APP_RECEIVE)"; break;
                 case CALL_IN_RECEIVE:   stateStr=" (CALL_IN_RECEIVE)"; break;
                 case CALL_DONE_RECEIVE: stateStr=" (CALL_DONE_RECEIVE)"; break;
+                case WAITING_SERVICES:  stateStr=" (WAITING_SERVICES)"; break;
             }
             pw.print(prefix); pw.print("state="); pw.print(state); pw.println(stateStr);
         }
