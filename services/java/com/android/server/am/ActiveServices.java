@@ -143,6 +143,7 @@ public final class ActiveServices {
      * Information about services for a single user.
      */
     class ServiceMap extends Handler {
+        final int mUserId;
         final ArrayMap<ComponentName, ServiceRecord> mServicesByName
                 = new ArrayMap<ComponentName, ServiceRecord>();
         final ArrayMap<Intent.FilterComparison, ServiceRecord> mServicesByIntent
@@ -164,6 +165,10 @@ public final class ActiveServices {
                 = new ArrayList<ServiceRecord>();
 
         static final int MSG_BG_START_TIMEOUT = 1;
+
+        ServiceMap(int userId) {
+            mUserId = userId;
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -224,6 +229,9 @@ public final class ActiveServices {
                 Message msg = obtainMessage(MSG_BG_START_TIMEOUT);
                 sendMessageAtTime(msg, when);
             }
+            if (mStartingBackground.size() < mMaxStartingBackground) {
+                mAm.backgroundServicesFinishedLocked(mUserId);
+            }
         }
     }
 
@@ -239,10 +247,15 @@ public final class ActiveServices {
         return getServiceMap(callingUser).mServicesByName.get(name);
     }
 
+    boolean hasBackgroundServices(int callingUser) {
+        ServiceMap smap = mServiceMap.get(callingUser);
+        return smap != null ? smap.mStartingBackground.size() >= mMaxStartingBackground : false;
+    }
+
     private ServiceMap getServiceMap(int callingUser) {
         ServiceMap smap = mServiceMap.get(callingUser);
         if (smap == null) {
-            smap = new ServiceMap();
+            smap = new ServiceMap(callingUser);
             mServiceMap.put(callingUser, smap);
         }
         return smap;

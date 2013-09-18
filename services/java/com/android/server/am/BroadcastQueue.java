@@ -54,8 +54,9 @@ public final class BroadcastQueue {
     static final boolean DEBUG_BROADCAST_LIGHT = ActivityManagerService.DEBUG_BROADCAST_LIGHT;
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
 
-    static final int MAX_BROADCAST_HISTORY = 25;
-    static final int MAX_BROADCAST_SUMMARY_HISTORY = 100;
+    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 25;
+    static final int MAX_BROADCAST_SUMMARY_HISTORY
+            = ActivityManager.isLowRamDeviceStatic() ? 25 : 100;
 
     final ActivityManagerService mService;
 
@@ -70,14 +71,20 @@ public final class BroadcastQueue {
     final long mTimeoutPeriod;
 
     /**
+     * If true, we can delay broadcasts while waiting services to finish in the previous
+     * receiver's process.
+     */
+    final boolean mDelayBehindServices;
+
+    /**
      * Lists of all active broadcasts that are to be executed immediately
      * (without waiting for another broadcast to finish).  Currently this only
      * contains broadcasts to registered receivers, to avoid spinning up
      * a bunch of processes to execute IntentReceiver components.  Background-
      * and foreground-priority broadcasts are queued separately.
      */
-    final ArrayList<BroadcastRecord> mParallelBroadcasts
-            = new ArrayList<BroadcastRecord>();
+    final ArrayList<BroadcastRecord> mParallelBroadcasts = new ArrayList<BroadcastRecord>();
+
     /**
      * List of all active broadcasts that are to be executed one at a time.
      * The object at the top of the list is the currently activity broadcasts;
@@ -85,20 +92,17 @@ public final class BroadcastQueue {
      * broadcasts, separate background- and foreground-priority queues are
      * maintained.
      */
-    final ArrayList<BroadcastRecord> mOrderedBroadcasts
-            = new ArrayList<BroadcastRecord>();
+    final ArrayList<BroadcastRecord> mOrderedBroadcasts = new ArrayList<BroadcastRecord>();
 
     /**
      * Historical data of past broadcasts, for debugging.
      */
-    final BroadcastRecord[] mBroadcastHistory
-            = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+    final BroadcastRecord[] mBroadcastHistory = new BroadcastRecord[MAX_BROADCAST_HISTORY];
 
     /**
      * Summary of historical data of past broadcasts, for debugging.
      */
-    final Intent[] mBroadcastSummaryHistory
-            = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
+    final Intent[] mBroadcastSummaryHistory = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
 
     /**
      * Set when we current have a BROADCAST_INTENT_MSG in flight.
@@ -128,10 +132,6 @@ public final class BroadcastQueue {
     static final int BROADCAST_TIMEOUT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 1;
 
     final Handler mHandler = new Handler() {
-        //public Handler() {
-        //    if (localLOGV) Slog.v(TAG, "Handler started!");
-        //}
-
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case BROADCAST_INTENT_MSG: {
@@ -163,10 +163,12 @@ public final class BroadcastQueue {
         }
     }
 
-    BroadcastQueue(ActivityManagerService service, String name, long timeoutPeriod) {
+    BroadcastQueue(ActivityManagerService service, String name, long timeoutPeriod,
+            boolean allowDelayBehindServices) {
         mService = service;
         mQueueName = name;
         mTimeoutPeriod = timeoutPeriod;
+        mDelayBehindServices = allowDelayBehindServices;
     }
 
     public boolean isPendingBroadcastProcessLocked(int pid) {
@@ -260,7 +262,7 @@ public final class BroadcastQueue {
                         + br.curComponent.flattenToShortString(), e);
                 logBroadcastReceiverDiscardLocked(br);
                 finishReceiverLocked(br, br.resultCode, br.resultData,
-                        br.resultExtras, br.resultAbort, true);
+                        br.resultExtras, br.resultAbort, false);
                 scheduleBroadcastsLocked();
                 // We need to reset the state if we failed to start the receiver.
                 br.state = BroadcastRecord.IDLE;
@@ -289,7 +291,7 @@ public final class BroadcastQueue {
             // let the broadcast continue.
             logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r, r.resultCode, r.resultData,
-                    r.resultExtras, r.resultAbort, true);
+                    r.resultExtras, r.resultAbort, false);
             reschedule = true;
         }
 
@@ -299,7 +301,7 @@ public final class BroadcastQueue {
                     "[" + mQueueName + "] skip & discard pending app " + r);
             logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r, r.resultCode, r.resultData,
-                    r.resultExtras, r.resultAbort, true);
+                    r.resultExtras, r.resultAbort, false);
             reschedule = true;
         }
         if (reschedule) {
@@ -330,14 +332,11 @@ public final class BroadcastQueue {
     }
 
     public boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
-            String resultData, Bundle resultExtras, boolean resultAbort,
-            boolean explicit) {
-        int state = r.state;
+            String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
+        final int state = r.state;
         r.state = BroadcastRecord.IDLE;
         if (state == BroadcastRecord.IDLE) {
-            if (explicit) {
-                Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
-            }
+            Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
         }
         r.receiver = null;
         r.intent.setComponent(null);
@@ -348,21 +347,53 @@ public final class BroadcastQueue {
             r.curFilter.receiverList.curBroadcast = null;
         }
         r.curFilter = null;
-        r.curApp = null;
-        r.curComponent = null;
         r.curReceiver = null;
+        r.curApp = null;
         mPendingBroadcast = null;
 
         r.resultCode = resultCode;
         r.resultData = resultData;
         r.resultExtras = resultExtras;
-        r.resultAbort = resultAbort;
+        if (resultAbort && (r.intent.getFlags()&Intent.FLAG_RECEIVER_NO_ABORT) == 0) {
+            r.resultAbort = resultAbort;
+        } else {
+            r.resultAbort = false;
+        }
+
+        if (waitForServices && r.curComponent != null && r.queue.mDelayBehindServices
+                && r.queue.mOrderedBroadcasts.size() > 0
+                && r.queue.mOrderedBroadcasts.get(0) == r) {
+            // In this case, we are ready to process the next receiver for the current broadcast,
+            // but are on a queue that would like to wait for services to finish before moving
+            // on.  If there are background services currently starting, then we will go into a
+            // special state where we hold off on continuing this broadcast until they are done.
+            if (mService.mServices.hasBackgroundServices(r.userId)) {
+                Slog.i(ActivityManagerService.TAG, "Delay finish: "
+                        + r.curComponent.flattenToShortString());
+                r.state = BroadcastRecord.WAITING_SERVICES;
+                return false;
+            }
+        }
+
+        r.curComponent = null;
 
         // We will process the next receiver right now if this is finishing
         // an app receiver (which is always asynchronous) or after we have
         // come back from calling a receiver.
         return state == BroadcastRecord.APP_RECEIVE
                 || state == BroadcastRecord.CALL_DONE_RECEIVE;
+    }
+
+    public void backgroundServicesFinishedLocked(int userId) {
+        if (mOrderedBroadcasts.size() > 0) {
+            BroadcastRecord br = mOrderedBroadcasts.get(0);
+            if (br.userId == userId && br.state == BroadcastRecord.WAITING_SERVICES) {
+                Slog.i(ActivityManagerService.TAG, "Resuming delayed broadcast");
+                br.curComponent = null;
+                br.state = BroadcastRecord.IDLE;
+                processNextBroadcast(false);
+            }
+        }
     }
 
     private static void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
@@ -821,7 +852,7 @@ public final class BroadcastQueue {
                     // sent the broadcast.
                     logBroadcastReceiverDiscardLocked(r);
                     finishReceiverLocked(r, r.resultCode, r.resultData,
-                            r.resultExtras, r.resultAbort, true);
+                            r.resultExtras, r.resultAbort, false);
                     scheduleBroadcastsLocked();
                     // We need to reset the state if we failed to start the receiver.
                     r.state = BroadcastRecord.IDLE;
@@ -850,7 +881,7 @@ public final class BroadcastQueue {
                         + r.intent + ": process is bad");
                 logBroadcastReceiverDiscardLocked(r);
                 finishReceiverLocked(r, r.resultCode, r.resultData,
-                        r.resultExtras, r.resultAbort, true);
+                        r.resultExtras, r.resultAbort, false);
                 scheduleBroadcastsLocked();
                 r.state = BroadcastRecord.IDLE;
                 return;
@@ -917,7 +948,21 @@ public final class BroadcastQueue {
             }
         }
 
-        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
+        BroadcastRecord br = mOrderedBroadcasts.get(0);
+        if (br.state == BroadcastRecord.WAITING_SERVICES) {
+            // In this case the broadcast had already finished, but we had decided to wait
+            // for started services to finish as well before going on.  So if we have actually
+            // waited long enough time timeout the broadcast, let's give up on the whole thing
+            // and just move on to the next.
+            Slog.i(ActivityManagerService.TAG, "Waited long enough for: " + (br.curComponent != null
+                    ? br.curComponent.flattenToShortString() : "(null)"));
+            br.curComponent = null;
+            br.state = BroadcastRecord.IDLE;
+            processNextBroadcast(false);
+            return;
+        }
+
+        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r. receiver
                 + ", started " + (now - r.receiverTime) + "ms ago");
         r.receiverTime = now;
         r.anrCount++;
@@ -957,7 +1002,7 @@ public final class BroadcastQueue {
 
         // Move on to the next receiver.
         finishReceiverLocked(r, r.resultCode, r.resultData,
-                r.resultExtras, r.resultAbort, true);
+                r.resultExtras, r.resultAbort, false);
         scheduleBroadcastsLocked();
 
         if (anrMessage != null) {
