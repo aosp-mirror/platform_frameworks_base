@@ -298,8 +298,8 @@ public class RemoteControlClient
      * Flag indicating a RemoteControlClient supports ratings.
      * This flag must be set in order for components that display the RemoteControlClient
      * information, to display ratings information, and, if ratings are declared editable
-     * (by calling {@link MetadataEditor#addEditableKey(int)} with the
-     * {@link MetadataEditor#LONG_KEY_RATING_BY_USER} key), it will enable the user to rate
+     * (by calling {@link MediaMetadataEditor#addEditableKey(int)} with the
+     * {@link MediaMetadataEditor#RATING_KEY_BY_USER} key), it will enable the user to rate
      * the media, with values being received through the interface set with
      * {@link #setMetadataUpdateListener(OnMetadataUpdateListener)}.
      * @see #setTransportControlFlags(int)
