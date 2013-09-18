@@ -80,7 +80,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     private byte[] mStatusBuf;
 
     /**
-     * Status read by {@link #checkError(boolean)}, or null if not read yet.
+     * Status read by {@link #checkError()}, or null if not read yet.
      */
     private Status mStatus;
 
@@ -371,7 +371,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * <p>
      * The write end has the ability to deliver an error message through
      * {@link #closeWithError(String)} which can be handled by the read end
-     * calling {@link #checkError(boolean)}, usually after detecting an EOF.
+     * calling {@link #checkError()}, usually after detecting an EOF.
      * This can also be used to detect remote crashes.
      */
     public static ParcelFileDescriptor[] createReliablePipe() throws IOException {
@@ -409,7 +409,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * <p>
      * Both ends have the ability to deliver an error message through
      * {@link #closeWithError(String)} which can be detected by the other end
-     * calling {@link #checkError(boolean)}, usually after detecting an EOF.
+     * calling {@link #checkError()}, usually after detecting an EOF.
      * This can also be used to detect remote crashes.
      */
     public static ParcelFileDescriptor[] createReliableSocketPair() throws IOException {
@@ -698,7 +698,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Indicates if this ParcelFileDescriptor can communicate and detect remote
      * errors/crashes.
      *
-     * @see #checkError(boolean)
+     * @see #checkError()
      */
     public boolean canDetectErrors() {
         if (mWrapped != null) {
@@ -716,17 +716,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * If this ParcelFileDescriptor is unable to detect remote errors, it will
      * return silently.
      *
-     * @param throwIfDetached requests that an exception be thrown if the remote
-     *            side called {@link #detachFd()}. Once detached, the remote
+     * @throws IOException for normal errors.
+     * @throws FileDescriptorDetachedException
+     *            if the remote side called {@link #detachFd()}. Once detached, the remote
      *            side is unable to communicate any errors through
-     *            {@link #closeWithError(String)}. An application may pass true
-     *            if it needs a stronger guarantee that the stream was closed
-     *            normally and was not merely detached.
+     *            {@link #closeWithError(String)}.
      * @see #canDetectErrors()
      */
-    public void checkError(boolean throwIfDetached) throws IOException {
+    public void checkError() throws IOException {
         if (mWrapped != null) {
-            mWrapped.checkError(throwIfDetached);
+            mWrapped.checkError();
         } else {
             if (mStatus == null) {
                 if (mCommFd == null) {
@@ -739,8 +738,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 mStatus = readCommStatus(mCommFd, getOrCreateStatusBuffer());
             }
 
-            if (mStatus == null || mStatus.status == Status.OK
-                    || (mStatus.status == Status.DETACHED && !throwIfDetached)) {
+            if (mStatus == null || mStatus.status == Status.OK) {
                 // No status yet, or everything is peachy!
                 return;
             } else {
@@ -885,13 +883,26 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
          * attached has been closed.
          *
          * @param e error state, or {@code null} if closed cleanly.
-         * @param fromDetach indicates if close event was result of
-         *            {@link ParcelFileDescriptor#detachFd()}. After detach the
-         *            remote side may continue reading/writing to the underlying
-         *            {@link FileDescriptor}, but they can no longer deliver
-         *            reliable close/error events.
+         *        If the close event was the result of
+         *        {@link ParcelFileDescriptor#detachFd()}, this will be a
+         *        {@link FileDescriptorDetachedException}. After detach the
+         *        remote side may continue reading/writing to the underlying
+         *        {@link FileDescriptor}, but they can no longer deliver
+         *        reliable close/error events.
          */
-        public void onClose(IOException e, boolean fromDetach);
+        public void onClose(IOException e);
+    }
+
+    /**
+     * Exception that indicates that the file descriptor was detached.
+     */
+    public static class FileDescriptorDetachedException extends IOException {
+
+        private static final long serialVersionUID = 0xDe7ac4edFdL;
+
+        public FileDescriptorDetachedException() {
+            super("Remote side is detached");
+        }
     }
 
     /**
@@ -934,7 +945,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 case ERROR:
                     return new IOException("Remote error: " + msg);
                 case DETACHED:
-                    return new IOException("Remote side is detached");
+                    return new FileDescriptorDetachedException();
                 case LEAKED:
                     return new IOException("Remote side was leaked");
                 default:
@@ -959,13 +970,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 @Override
                 public void handleMessage(Message msg) {
                     final Status s = (Status) msg.obj;
-                    if (s.status == Status.DETACHED) {
-                        listener.onClose(null, true);
-                    } else if (s.status == Status.OK) {
-                        listener.onClose(null, false);
-                    } else {
-                        listener.onClose(s.asIOException(), false);
-                    }
+                    listener.onClose(s != null ? s.asIOException() : null);
                 }
             };
         }
