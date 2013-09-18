@@ -19179,7 +19179,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_MONARCH;
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
-    field public static final android.print.PrintAttributes.MediaSize NA_TBLOID;
+    field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;

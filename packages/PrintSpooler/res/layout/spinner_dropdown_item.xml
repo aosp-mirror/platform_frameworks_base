@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingStart="8dip"
@@ -32,7 +32,8 @@
         android:ellipsize="end"
         android:textIsSelectable="false"
         android:gravity="top|left"
-        android:textColor="@color/important_text">
+        android:textColor="@color/item_text_color"
+        android:duplicateParentState="true">
     </TextView>
 
     <TextView
@@ -44,7 +45,8 @@
         android:ellipsize="end"
         android:textIsSelectable="false"
         android:visibility="gone"
-        android:textColor="@color/important_text">
+        android:textColor="@color/item_text_color"
+        android:duplicateParentState="true">
 
     </TextView>
 
