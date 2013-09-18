@@ -143,9 +143,6 @@ final class ActivityRecord {
     private boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
 
-    /** Launch the home activity rather than the activity at the top of stack */
-    boolean mLaunchHomeTaskNext;
-
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
@@ -243,6 +240,8 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
                 pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
+        pw.print(prefix); pw.print("mActivityType=");
+                pw.println(activityTypeToString(mActivityType));
         pw.print(prefix); pw.print("thumbHolder: ");
                 pw.print(Integer.toHexString(System.identityHashCode(thumbHolder)));
                 if (thumbHolder != null) {
@@ -1038,6 +1037,15 @@ final class ActivityRecord {
             return r.task.stack;
         }
         return null;
+    }
+
+    private String activityTypeToString(int type) {
+        switch (type) {
+            case APPLICATION_ACTIVITY_TYPE: return "APPLICATION_ACTIVITY_TYPE";
+            case HOME_ACTIVITY_TYPE: return "HOME_ACTIVITY_TYPE";
+            case RECENTS_ACTIVITY_TYPE: return "RECENTS_ACTIVITY_TYPE";
+            default: return Integer.toString(type);
+        }
     }
 
     @Override
