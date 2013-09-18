@@ -166,7 +166,7 @@ public final class ProcessStats implements Parcelable {
     static final String CSV_SEP = "\t";
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 11;
+    private static final int PARCEL_VERSION = 12;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535453;
 
@@ -1076,10 +1076,8 @@ public final class ProcessStats implements Parcelable {
         return table;
     }
 
-    private void writeCompactedLongArray(Parcel out, long[] array) {
-        final int N = array.length;
-        out.writeInt(N);
-        for (int i=0; i<N; i++) {
+    private void writeCompactedLongArray(Parcel out, long[] array, int num) {
+        for (int i=0; i<num; i++) {
             long val = array[i];
             if (val < 0) {
                 Slog.w(TAG, "Time val negative: " + val);
@@ -1096,16 +1094,17 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
-    private void readCompactedLongArray(Parcel in, int version, long[] array) {
+    private void readCompactedLongArray(Parcel in, int version, long[] array, int num) {
         if (version <= 10) {
             in.readLongArray(array);
             return;
         }
-        final int N = in.readInt();
-        if (N != array.length) {
-            throw new RuntimeException("bad array lengths");
+        final int alen = array.length;
+        if (num > alen) {
+            throw new RuntimeException("bad array lengths: got " + num + " array is " + alen);
         }
-        for (int i=0; i<N; i++) {
+        int i;
+        for (i=0; i<num; i++) {
             int val = in.readInt();
             if (val >= 0) {
                 array[i] = val;
@@ -1113,6 +1112,10 @@ public final class ProcessStats implements Parcelable {
                 int bottom = in.readInt();
                 array[i] = (((long)~val)<<32) | bottom;
             }
+        }
+        while (i < alen) {
+            array[i] = 0;
+            i++;
         }
     }
 
@@ -1203,19 +1206,17 @@ public final class ProcessStats implements Parcelable {
         out.writeInt(mLongs.size());
         out.writeInt(mNextLong);
         for (int i=0; i<(mLongs.size()-1); i++) {
-            writeCompactedLongArray(out, mLongs.get(i));
+            long[] array = mLongs.get(i);
+            writeCompactedLongArray(out, array, array.length);
         }
         long[] lastLongs = mLongs.get(mLongs.size() - 1);
-        for (int i=0; i<mNextLong; i++) {
-            out.writeLong(lastLongs[i]);
-            if (DEBUG) Slog.d(TAG, "Writing last long #" + i + ": " + lastLongs[i]);
-        }
+        writeCompactedLongArray(out, lastLongs, mNextLong);
 
         if (mMemFactor != STATE_NOTHING) {
             mMemFactorDurations[mMemFactor] += now - mStartTime;
             mStartTime = now;
         }
-        writeCompactedLongArray(out, mMemFactorDurations);
+        writeCompactedLongArray(out, mMemFactorDurations, mMemFactorDurations.length);
 
         out.writeInt(NPROC);
         for (int ip=0; ip<NPROC; ip++) {
@@ -1276,23 +1277,25 @@ public final class ProcessStats implements Parcelable {
         return true;
     }
 
-    static byte[] readFully(InputStream stream) throws IOException {
+    static byte[] readFully(InputStream stream, int[] outLen) throws IOException {
         int pos = 0;
-        int avail = stream.available();
-        byte[] data = new byte[avail];
+        final int initialAvail = stream.available();
+        byte[] data = new byte[initialAvail > 0 ? (initialAvail+1) : 16384];
         while (true) {
             int amt = stream.read(data, pos, data.length-pos);
-            //Log.i("foo", "Read " + amt + " bytes at " + pos
-            //        + " of avail " + data.length);
-            if (amt <= 0) {
-                //Log.i("foo", "**** FINISHED READING: pos=" + pos
-                //        + " len=" + data.length);
+            if (DEBUG) Slog.i("foo", "Read " + amt + " bytes at " + pos
+                    + " of avail " + data.length);
+            if (amt < 0) {
+                if (DEBUG) Slog.i("foo", "**** FINISHED READING: pos=" + pos
+                        + " len=" + data.length);
+                outLen[0] = pos;
                 return data;
             }
             pos += amt;
-            avail = stream.available();
-            if (avail > data.length-pos) {
-                byte[] newData = new byte[pos+avail];
+            if (pos >= data.length) {
+                byte[] newData = new byte[pos+16384];
+                if (DEBUG) Slog.i(TAG, "Copying " + pos + " bytes to new array len "
+                        + newData.length);
                 System.arraycopy(data, 0, newData, 0, pos);
                 data = newData;
             }
@@ -1301,9 +1304,10 @@ public final class ProcessStats implements Parcelable {
 
     public void read(InputStream stream) {
         try {
-            byte[] raw = readFully(stream);
+            int[] len = new int[1];
+            byte[] raw = readFully(stream, len);
             Parcel in = Parcel.obtain();
-            in.unmarshall(raw, 0, raw.length);
+            in.unmarshall(raw, 0, len[0]);
             in.setDataPosition(0);
             stream.close();
 
@@ -1358,17 +1362,14 @@ public final class ProcessStats implements Parcelable {
             while (i >= mLongs.size()) {
                 mLongs.add(new long[LONGS_SIZE]);
             }
-            readCompactedLongArray(in, version, mLongs.get(i));
+            readCompactedLongArray(in, version, mLongs.get(i), LONGS_SIZE);
         }
         long[] longs = new long[LONGS_SIZE];
         mNextLong = NEXTLONG;
-        for (int i=0; i<NEXTLONG; i++) {
-            longs[i] = in.readLong();
-            if (DEBUG) Slog.d(TAG, "Reading last long #" + i + ": " + longs[i]);
-        }
+        readCompactedLongArray(in, version, longs, NEXTLONG);
         mLongs.add(longs);
 
-        readCompactedLongArray(in, version, mMemFactorDurations);
+        readCompactedLongArray(in, version, mMemFactorDurations, mMemFactorDurations.length);
 
         int NPROC = in.readInt();
         if (NPROC < 0) {
@@ -1669,7 +1670,8 @@ public final class ProcessStats implements Parcelable {
         return ss;
     }
 
-    public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpAll) {
+    public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
+            boolean dumpAll) {
         long totalTime = dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
         ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
@@ -1693,7 +1695,7 @@ public final class ProcessStats implements Parcelable {
                     pw.print("  * "); pw.print(pkgName); pw.print(" / ");
                             UserHandle.formatUid(pw, uid); pw.println(":");
                 }
-                if (dumpAll) {
+                if (!dumpSummary || dumpAll) {
                     for (int iproc=0; iproc<NPROCS; iproc++) {
                         ProcessState proc = pkgState.mProcesses.valueAt(iproc);
                         pw.print("      Process ");
@@ -1730,16 +1732,16 @@ public final class ProcessStats implements Parcelable {
                     ServiceState svc = pkgState.mServices.valueAt(isvc);
                     dumpServiceStats(pw, "        ", "          ", "    ", "Running", svc,
                             svc.mRunCount, ServiceState.SERVICE_RUN, svc.mRunState,
-                            svc.mRunStartTime, now, totalTime, dumpAll);
+                            svc.mRunStartTime, now, totalTime, !dumpSummary || dumpAll);
                     dumpServiceStats(pw, "        ", "          ", "    ", "Started", svc,
                             svc.mStartedCount, ServiceState.SERVICE_STARTED, svc.mStartedState,
-                            svc.mStartedStartTime, now, totalTime, dumpAll);
+                            svc.mStartedStartTime, now, totalTime, !dumpSummary || dumpAll);
                     dumpServiceStats(pw, "        ", "          ", "      ", "Bound", svc,
                             svc.mBoundCount, ServiceState.SERVICE_BOUND, svc.mBoundState,
-                            svc.mBoundStartTime, now, totalTime, dumpAll);
+                            svc.mBoundStartTime, now, totalTime, !dumpSummary || dumpAll);
                     dumpServiceStats(pw, "        ", "          ", "  ", "Executing", svc,
                             svc.mExecCount, ServiceState.SERVICE_EXEC, svc.mExecState,
-                            svc.mExecStartTime, now, totalTime, dumpAll);
+                            svc.mExecStartTime, now, totalTime, !dumpSummary || dumpAll);
                     if (dumpAll) {
                         pw.print("        mActive="); pw.println(svc.mActive);
                     }
@@ -1783,8 +1785,12 @@ public final class ProcessStats implements Parcelable {
             }
 
             pw.println();
-            pw.println("Summary:");
-            dumpSummaryLocked(pw, reqPackage, now);
+            if (dumpSummary) {
+                pw.println("Summary:");
+                dumpSummaryLocked(pw, reqPackage, now);
+            } else {
+                dumpTotalsLocked(pw, now);
+            }
         } else {
             pw.println();
             dumpTotalsLocked(pw, now);
@@ -2514,7 +2520,7 @@ public final class ProcessStats implements Parcelable {
         private ProcessState pullFixedProc(ArrayMap<String, ProcessState> pkgList, int index) {
             ProcessState proc = pkgList.valueAt(index);
             if (mDead && proc.mCommonProcess != proc) {
-                // Somehow we try to continue to use a process state that is dead, because
+                // Somehow we are contining to use a process state that is dead, because
                 // it was not being told it was active during the last commit.  We can recover
                 // from this by generating a fresh new state, but this is bad because we
                 // are losing whatever data we had in the old process state.
@@ -2529,7 +2535,7 @@ public final class ProcessStats implements Parcelable {
                 PackageState pkg = mStats.mPackages.get(pkgList.keyAt(index), proc.mUid);
                 if (pkg == null) {
                     throw new IllegalStateException("No existing package "
-                            + pkgList.keyAt(index) + " for multi-proc" + proc.mName);
+                            + pkgList.keyAt(index) + " for multi-proc " + proc.mName);
                 }
                 proc = pkg.mProcesses.get(proc.mName);
                 if (proc == null) {
