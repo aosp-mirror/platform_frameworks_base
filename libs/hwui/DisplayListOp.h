@@ -813,12 +813,15 @@ public:
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
-        deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
+        deferInfo.mergeId = getAtlasEntry() ?
+                (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
 
+        // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
         // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
         // MergingDrawBatch::canMergeWith()
         // TODO: support clipped bitmaps by handling them in SET_TEXTURE
-        deferInfo.mergeable = state.mMatrix.isSimple() && !state.mClipSideFlags &&
+        deferInfo.mergeable = state.mMatrix.isSimple() && state.mMatrix.positiveScale() &&
+                !state.mClipSideFlags &&
                 OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode &&
                 (mBitmap->getConfig() != SkBitmap::kA8_Config);
     }

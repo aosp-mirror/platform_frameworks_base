@@ -110,6 +110,10 @@ uint8_t Matrix4::getType() const {
                 mType |= kTypeRectToRect;
             }
         }
+
+        if (m00 > 0.0f && m11 > 0.0f) {
+            mType |= kTypePositiveScale;
+        }
     }
     return mType;
 }
@@ -120,6 +124,10 @@ uint8_t Matrix4::getGeometryType() const {
 
 bool Matrix4::rectToRect() const {
     return getType() & kTypeRectToRect;
+}
+
+bool Matrix4::positiveScale() const {
+    return getType() & kTypePositiveScale;
 }
 
 bool Matrix4::changesBounds() const {
