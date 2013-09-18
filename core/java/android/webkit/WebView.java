@@ -1108,7 +1108,7 @@ public class WebView extends AbsoluteLayout
      * returned object.
      *
      * @deprecated Use {@link #onDraw} to obtain a bitmap snapshot of the WebView, or
-     * {@link #saveWebArchive} or {@link #exportToPdf} to save the content to a file.
+     * {@link #saveWebArchive} to save the content to a file.
      *
      * @return a picture that captures the current contents of this WebView
      */
