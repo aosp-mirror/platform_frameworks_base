@@ -407,9 +407,9 @@ final class ProcessRecord {
     }
 
     public void makeInactive(ProcessStatsService tracker) {
-        if (thread != null) {
-            thread = null;
-            final ProcessStats.ProcessState origBase = baseProcessTracker;
+        thread = null;
+        final ProcessStats.ProcessState origBase = baseProcessTracker;
+        if (origBase != null) {
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
@@ -567,8 +567,16 @@ final class ProcessRecord {
      */
     public boolean addPackage(String pkg, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
-            pkgList.put(pkg, baseProcessTracker != null
-                    ? tracker.getProcessStateLocked(pkg, info.uid, processName) : null);
+            if (baseProcessTracker != null) {
+                ProcessStats.ProcessState state = tracker.getProcessStateLocked(
+                        pkg, info.uid, processName);
+                pkgList.put(pkg, state);
+                if (state != baseProcessTracker) {
+                    state.makeActive();
+                }
+            } else {
+                pkgList.put(pkg, null);
+            }
             return true;
         }
         return false;
@@ -610,7 +618,7 @@ final class ProcessRecord {
                 ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
                         info.packageName, info.uid, processName);
                 pkgList.put(info.packageName, ps);
-                if (thread != null && ps != baseProcessTracker) {
+                if (ps != baseProcessTracker) {
                     ps.makeActive();
                 }
             }
