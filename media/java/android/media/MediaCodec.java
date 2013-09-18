@@ -20,7 +20,9 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaCrypto;
 import android.media.MediaFormat;
+import android.os.Bundle;
 import android.view.Surface;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
@@ -576,7 +578,7 @@ final public class MediaCodec {
      * Change a video encoder's target bitrate on the fly. The value is an
      * Integer object containing the new bitrate in bps.
      */
-    public static final String PARAMETER_KEY_VIDEO_BITRATE = "videoBitrate";
+    public static final String PARAMETER_KEY_VIDEO_BITRATE = "video-bitrate";
 
     /**
      * Temporarily suspend/resume encoding of input data. While suspended
@@ -598,7 +600,7 @@ final public class MediaCodec {
     /**
      * Communicate additional parameter changes to the component instance.
      */
-    public final void setParameters(Map<String, Object> params) {
+    public final void setParameters(Bundle params) {
         if (params == null) {
             return;
         }
@@ -607,9 +609,9 @@ final public class MediaCodec {
         Object[] values = new Object[params.size()];
 
         int i = 0;
-        for (Map.Entry<String, Object> entry: params.entrySet()) {
-            keys[i] = entry.getKey();
-            values[i] = entry.getValue();
+        for (final String key: params.keySet()) {
+            keys[i] = key;
+            values[i] = params.get(key);
             ++i;
         }
 
