@@ -524,10 +524,20 @@ public class MediaFocusControl implements OnFinished {
     //==========================================================================================
     // RemoteControl
     //==========================================================================================
+    /**
+     * No-op if the key code for keyEvent is not a valid media key
+     * (see {@link #isValidMediaKeyEvent(KeyEvent)})
+     * @param keyEvent the key event to send
+     */
     protected void dispatchMediaKeyEvent(KeyEvent keyEvent) {
         filterMediaKeyEvent(keyEvent, false /*needWakeLock*/);
     }
 
+    /**
+     * No-op if the key code for keyEvent is not a valid media key
+     * (see {@link #isValidMediaKeyEvent(KeyEvent)})
+     * @param keyEvent the key event to send
+     */
     protected void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
         filterMediaKeyEvent(keyEvent, true /*needWakeLock*/);
     }
