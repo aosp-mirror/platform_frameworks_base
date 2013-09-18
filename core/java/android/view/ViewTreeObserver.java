@@ -990,10 +990,10 @@ public final class ViewTreeObserver {
             mStart = false;
             if (mDataCopy != null) {
                 mData = mDataCopy;
+                mAccess.mData.clear();
+                mAccess.mSize = 0;
             }
             mDataCopy = null;
-            mAccess.mData.clear();
-            mAccess.mSize = 0;
         }
 
         int size() {
