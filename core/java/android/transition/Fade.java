@@ -41,7 +41,6 @@ public class Fade extends Visibility {
     private static boolean DBG = Transition.DBG && false;
 
     private static final String LOG_TAG = "Fade";
-    private static final String PROPNAME_ALPHA = "android:fade:alpha";
     private static final String PROPNAME_SCREEN_X = "android:fade:screenX";
     private static final String PROPNAME_SCREEN_Y = "android:fade:screenY";
 
@@ -90,7 +89,8 @@ public class Fade extends Visibility {
             }
             return null;
         }
-        final ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", startAlpha, endAlpha);
+        final ObjectAnimator anim = ObjectAnimator.ofFloat(view, "transitionAlpha", startAlpha,
+                endAlpha);
         if (DBG) {
             Log.d(LOG_TAG, "Created animator " + anim);
         }
@@ -102,8 +102,6 @@ public class Fade extends Visibility {
     }
 
     private void captureValues(TransitionValues transitionValues) {
-        float alpha = transitionValues.view.getAlpha();
-        transitionValues.values.put(PROPNAME_ALPHA, alpha);
         int[] loc = new int[2];
         transitionValues.view.getLocationOnScreen(loc);
         transitionValues.values.put(PROPNAME_SCREEN_X, loc[0]);
@@ -114,29 +112,6 @@ public class Fade extends Visibility {
     public void captureStartValues(TransitionValues transitionValues) {
         super.captureStartValues(transitionValues);
         captureValues(transitionValues);
-    }
-
-
-    @Override
-    public void captureEndValues(TransitionValues transitionValues) {
-        super.captureEndValues(transitionValues);
-    }
-
-    @Override
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
-        Animator animator = super.createAnimator(sceneRoot, startValues, endValues);
-        if (animator == null && startValues != null && endValues != null) {
-            boolean endVisible = isVisible(endValues);
-            final View endView = endValues.view;
-            float endAlpha = endView.getAlpha();
-            float startAlpha = (Float) startValues.values.get(PROPNAME_ALPHA);
-            if ((endVisible && startAlpha < endAlpha && (mFadingMode & Fade.IN) != 0) ||
-                    (!endVisible && startAlpha > endAlpha && (mFadingMode & Fade.OUT) != 0)) {
-                animator = createAnimation(endView, startAlpha, endAlpha, null);
-            }
-        }
-        return animator;
     }
 
     @Override
@@ -152,40 +127,37 @@ public class Fade extends Visibility {
             Log.d(LOG_TAG, "Fade.onAppear: startView, startVis, endView, endVis = " +
                     startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
         }
-        // if alpha < 1, just fade it in from the current value
-        if (endView.getAlpha() == 1.0f) {
-            endView.setAlpha(0);
-            TransitionListener transitionListener = new TransitionListenerAdapter() {
-                boolean mCanceled = false;
-                float mPausedAlpha;
+        endView.setTransitionAlpha(0);
+        TransitionListener transitionListener = new TransitionListenerAdapter() {
+            boolean mCanceled = false;
+            float mPausedAlpha;
 
-                @Override
-                public void onTransitionCancel(Transition transition) {
-                    endView.setAlpha(1);
-                    mCanceled = true;
-                }
+            @Override
+            public void onTransitionCancel(Transition transition) {
+                endView.setTransitionAlpha(1);
+                mCanceled = true;
+            }
 
-                @Override
-                public void onTransitionEnd(Transition transition) {
-                    if (!mCanceled) {
-                        endView.setAlpha(1);
-                    }
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                if (!mCanceled) {
+                    endView.setTransitionAlpha(1);
                 }
+            }
 
-                @Override
-                public void onTransitionPause(Transition transition) {
-                    mPausedAlpha = endView.getAlpha();
-                    endView.setAlpha(1);
-                }
+            @Override
+            public void onTransitionPause(Transition transition) {
+                mPausedAlpha = endView.getTransitionAlpha();
+                endView.setTransitionAlpha(1);
+            }
 
-                @Override
-                public void onTransitionResume(Transition transition) {
-                    endView.setAlpha(mPausedAlpha);
-                }
-            };
-            addListener(transitionListener);
-        }
-        return createAnimation(endView, endView.getAlpha(), 1, null);
+            @Override
+            public void onTransitionResume(Transition transition) {
+                endView.setTransitionAlpha(mPausedAlpha);
+            }
+        };
+        addListener(transitionListener);
+        return createAnimation(endView, 0, 1, null);
     }
 
     @Override
@@ -236,7 +208,7 @@ public class Fade extends Visibility {
             overlayView.offsetTopAndBottom((screenY - loc[1]) - overlayView.getTop());
             sceneRoot.getOverlay().add(overlayView);
             // TODO: add automatic facility to Visibility superclass for keeping views around
-            final float startAlpha = view.getAlpha();
+            final float startAlpha = 1;
             float endAlpha = 0;
             final View finalView = view;
             final View finalOverlayView = overlayView;
@@ -245,7 +217,7 @@ public class Fade extends Visibility {
             final AnimatorListenerAdapter endListener = new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    finalView.setAlpha(startAlpha);
+                    finalView.setTransitionAlpha(startAlpha);
                     // TODO: restore view offset from overlay repositioning
                     if (finalViewToKeep != null) {
                         finalViewToKeep.setVisibility(finalVisibility);
@@ -276,7 +248,7 @@ public class Fade extends Visibility {
             // VISIBLE for the duration of the transition
             viewToKeep.setVisibility((View.VISIBLE));
             // TODO: add automatic facility to Visibility superclass for keeping views around
-            final float startAlpha = view.getAlpha();
+            final float startAlpha = 1;
             float endAlpha = 0;
             final View finalView = view;
             final View finalOverlayView = overlayView;
@@ -291,8 +263,8 @@ public class Fade extends Visibility {
                     if (finalViewToKeep != null && !mCanceled) {
                         finalViewToKeep.setVisibility(finalVisibility);
                     }
-                    mPausedAlpha = finalView.getAlpha();
-                    finalView.setAlpha(startAlpha);
+                    mPausedAlpha = finalView.getTransitionAlpha();
+                    finalView.setTransitionAlpha(startAlpha);
                 }
 
                 @Override
@@ -300,21 +272,21 @@ public class Fade extends Visibility {
                     if (finalViewToKeep != null && !mCanceled) {
                         finalViewToKeep.setVisibility(View.VISIBLE);
                     }
-                    finalView.setAlpha(mPausedAlpha);
+                    finalView.setTransitionAlpha(mPausedAlpha);
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     mCanceled = true;
                     if (mPausedAlpha >= 0) {
-                        finalView.setAlpha(mPausedAlpha);
+                        finalView.setTransitionAlpha(mPausedAlpha);
                     }
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     if (!mCanceled) {
-                        finalView.setAlpha(startAlpha);
+                        finalView.setTransitionAlpha(startAlpha);
                     }
                     // TODO: restore view offset from overlay repositioning
                     if (finalViewToKeep != null && !mCanceled) {
