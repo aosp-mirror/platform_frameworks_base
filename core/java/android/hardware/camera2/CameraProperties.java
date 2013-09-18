@@ -415,6 +415,14 @@ public final class CameraProperties extends CameraMetadata {
      * platform opaque YUV/RGB streams to the GPU or video
      * encoders. Listed as width, height
      * </p>
+     * <p>
+     * The actual supported resolution list may be limited by
+     * consumer end points for different use cases. For example, for
+     * recording use case, the largest supported resolution may be
+     * limited by max supported size from encoder, for preview use
+     * case, the largest supported resolution may be limited by max
+     * resolution SurfaceTexture/SurfaceView can support.
+     * </p>
      */
     public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
             new Key<android.hardware.camera2.Size[]>("android.scaler.availableProcessedSizes", android.hardware.camera2.Size[].class);
