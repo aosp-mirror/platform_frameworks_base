@@ -1,4 +1,5 @@
 #include "ScopedLocalRef.h"
+#include "SkFrontBufferedStream.h"
 #include "SkMovie.h"
 #include "SkStream.h"
 #include "GraphicsJNI.h"
@@ -81,23 +82,33 @@ static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
     c->drawBitmap(b, sx, sy, p);
 }
 
+static jobject movie_decodeAsset(JNIEnv* env, jobject clazz, jint native_asset) {
+    android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
+    if (asset == NULL) return NULL;
+    SkAutoTUnref<SkStreamRewindable> stream (new android::AssetStreamAdaptor(asset));
+    SkMovie* moov = SkMovie::DecodeStream(stream.get());
+    return create_jmovie(env, moov);
+}
+
 static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
 
     NPE_CHECK_RETURN_ZERO(env, istream);
 
-    SkStreamRewindable* strm = CheckForAssetStream(env, istream);
-    jbyteArray byteArray = NULL;
-    ScopedLocalRef<jbyteArray> scoper(env, NULL);
-    if (NULL == strm) {
-        byteArray = env->NewByteArray(16*1024);
-        scoper.reset(byteArray);
-        strm = GetRewindableStream(env, istream, byteArray);
-    }
+    jbyteArray byteArray = env->NewByteArray(16*1024);
+    ScopedLocalRef<jbyteArray> scoper(env, byteArray);
+    SkStream* strm = CreateJavaInputStreamAdaptor(env, istream, byteArray);
     if (NULL == strm) {
         return 0;
     }
 
-    SkMovie* moov = SkMovie::DecodeStream(strm);
+    // Need to buffer enough input to be able to rewind as much as might be read by a decoder
+    // trying to determine the stream's format. The only decoder for movies is GIF, which
+    // will only read 6.
+    // FIXME: Get this number from SkImageDecoder
+    SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
+    SkASSERT(bufferedStream.get() != NULL);
+
+    SkMovie* moov = SkMovie::DecodeStream(bufferedStream);
     strm->unref();
     return create_jmovie(env, moov);
 }
@@ -135,7 +146,9 @@ static JNINativeMethod gMethods[] = {
     {   "setTime",  "(I)Z", (void*)movie_setTime  },
     {   "draw",     "(Landroid/graphics/Canvas;FFLandroid/graphics/Paint;)V",
                             (void*)movie_draw  },
-    { "decodeStream", "(Ljava/io/InputStream;)Landroid/graphics/Movie;",
+    { "nativeDecodeAsset", "(I)Landroid/graphics/Movie;",
+                            (void*)movie_decodeAsset },
+    { "nativeDecodeStream", "(Ljava/io/InputStream;)Landroid/graphics/Movie;",
                             (void*)movie_decodeStream },
     { "nativeDestructor","(I)V", (void*)movie_destructor },
     { "decodeByteArray", "([BII)Landroid/graphics/Movie;",
