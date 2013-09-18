@@ -21,6 +21,8 @@
 
 #include <utils/Log.h>
 
+#include "Vertex.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -171,17 +173,37 @@ public:
     }
 
     /**
-     * Similar to snapToPixelBoundaries, but used for AA geometry with a ramp perimeter.
+     * Similar to snapToPixelBoundaries, but estimates bounds conservatively to handle GL rounding
+     * errors.
      *
-     * We inset the data by a fudge factor of slightly over 1/16 (similar to when drawing non-AA
-     * lines) before rounding out so that insignificant amounts of ramp geometry (esp. from rounding
-     * errors) are ignored.
+     * This function should be used whenever estimating the damage rect of geometry already mapped
+     * into layer space.
      */
-    void snapOutToPixelBoundaries() {
-        left = floorf(left + 0.065f);
-        top = floorf(top + 0.065f);
-        right = ceilf(right - 0.065f);
-        bottom = ceilf(bottom - 0.065f);
+    void snapGeometryToPixelBoundaries(bool snapOut) {
+        if (snapOut) {
+            /* For AA geometry with a ramp perimeter, don't snap by rounding - AA geometry will have
+             * a 0.5 pixel perimeter not accounted for in its bounds. Instead, snap by
+             * conservatively rounding out the bounds with floor/ceil.
+             *
+             * In order to avoid changing integer bounds with floor/ceil due to rounding errors
+             * inset the bounds first by the fudge factor. Very small fraction-of-a-pixel errors
+             * from this inset will only incur similarly small errors in output, due to transparency
+             * in extreme outside of the geometry.
+             */
+            left = floorf(left + Vertex::gGeometryFudgeFactor);
+            top = floorf(top + Vertex::gGeometryFudgeFactor);
+            right = ceilf(right - Vertex::gGeometryFudgeFactor);
+            bottom = ceilf(bottom - Vertex::gGeometryFudgeFactor);
+        } else {
+            /* For other geometry, we do the regular rounding in order to snap, but also outset the
+             * bounds by a fudge factor. This ensures that ambiguous geometry (e.g. a non-AA Rect
+             * with top left at (0.5, 0.5)) will err on the side of a larger damage rect.
+             */
+            left = floorf(left + 0.5f - Vertex::gGeometryFudgeFactor);
+            top = floorf(top + 0.5f - Vertex::gGeometryFudgeFactor);
+            right = floorf(right + 0.5f + Vertex::gGeometryFudgeFactor);
+            bottom = floorf(bottom + 0.5f + Vertex::gGeometryFudgeFactor);
+        }
     }
 
     void snapToPixelBoundaries() {
