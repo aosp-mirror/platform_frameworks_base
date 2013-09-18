@@ -130,7 +130,7 @@ public class ScaleGestureDetector {
     private float mFocusX;
     private float mFocusY;
 
-    private boolean mDoubleTapScales;
+    private boolean mQuickScaleEnabled;
 
     private float mCurrSpan;
     private float mPrevSpan;
@@ -307,7 +307,7 @@ public class ScaleGestureDetector {
         final int action = event.getActionMasked();
 
         // Forward the event to check for double tap gesture
-        if (mDoubleTapScales) {
+        if (mQuickScaleEnabled) {
             mGestureDetector.onTouchEvent(event);
         }
 
@@ -456,8 +456,8 @@ public class ScaleGestureDetector {
      * @param scales true to enable quick scaling, false to disable
      */
     public void setQuickScaleEnabled(boolean scales) {
-        mDoubleTapScales = scales;
-        if (mDoubleTapScales && mGestureDetector == null) {
+        mQuickScaleEnabled = scales;
+        if (mQuickScaleEnabled && mGestureDetector == null) {
             GestureDetector.SimpleOnGestureListener gestureListener =
                     new GestureDetector.SimpleOnGestureListener() {
                         @Override
@@ -470,6 +470,14 @@ public class ScaleGestureDetector {
                     };
             mGestureDetector = new GestureDetector(mContext, gestureListener, mHandler);
         }
+    }
+
+  /**
+   * Return whether the quick scale gesture, in which the user performs a double tap followed by a
+   * swipe, should perform scaling. {@see #setQuickScaleEnabled(boolean)}.
+   */
+    public boolean isQuickScaleEnabled() {
+        return mQuickScaleEnabled;
     }
 
     /**

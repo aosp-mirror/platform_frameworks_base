@@ -27400,6 +27400,7 @@ package android.view {
     method public float getScaleFactor();
     method public long getTimeDelta();
     method public boolean isInProgress();
+    method public boolean isQuickScaleEnabled();
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public void setQuickScaleEnabled(boolean);
   }
