@@ -20,19 +20,18 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;
-import android.util.Log;
+import android.graphics.drawable.GradientDrawable.Orientation;
 import android.view.View;
 
 import com.android.systemui.R;
 
 public final class PhoneStatusBarTransitions extends BarTransitions {
-    private static final float ALPHA_WHEN_TRANSPARENT = 1;
-    private static final float ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK = 0.5f;
-    private static final float ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK = 0;
+    private static final float ICON_ALPHA_WHEN_TRANSPARENT = 1;
+    private static final float ICON_ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK = 0.5f;
+    private static final float ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK = 0;
 
     private final PhoneStatusBarView mView;
-    private final int mTransparent;
-    private final float mAlphaWhenOpaque;
+    private final float mIconAlphaWhenOpaque;
 
     private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock;
     private Animator mCurrentAnimation;
@@ -41,8 +40,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         super(view);
         mView = view;
         final Resources res = mView.getContext().getResources();
-        mTransparent = res.getColor(R.color.status_bar_background_transparent);
-        mAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
+        mIconAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
     }
 
     public void init() {
@@ -51,13 +49,9 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         mSignalCluster = mView.findViewById(R.id.signal_cluster);
         mBattery = mView.findViewById(R.id.battery);
         mClock = mView.findViewById(R.id.clock);
+        setOrientation(Orientation.TOP_BOTTOM);
+        applyModeBackground(-1, getMode(), false /*animate*/);
         applyMode(getMode(), false /*animate*/);
-    }
-
-    @Override
-    protected Integer getBackgroundColor(int mode) {
-        if (mode == MODE_TRANSPARENT) return mTransparent;
-        return super.getBackgroundColor(mode);
     }
 
     public ObjectAnimator animateTransitionTo(View v, float toAlpha) {
@@ -65,13 +59,13 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     }
 
     private float getNonBatteryClockAlphaFor(int mode) {
-        return mode == MODE_LIGHTS_OUT ? ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK
-                : isTransparent(mode) ? ALPHA_WHEN_TRANSPARENT
-                : mAlphaWhenOpaque;
+        return mode == MODE_LIGHTS_OUT ? ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK
+                : isTransparent(mode) ? ICON_ALPHA_WHEN_TRANSPARENT
+                : mIconAlphaWhenOpaque;
     }
 
     private float getBatteryClockAlpha(int mode) {
-        return mode == MODE_LIGHTS_OUT ? ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK
+        return mode == MODE_LIGHTS_OUT ? ICON_ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK
                 : getNonBatteryClockAlphaFor(mode);
     }
 

@@ -308,6 +308,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
+    private boolean mScreenOn;
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -1894,7 +1895,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
         final boolean imeVisible = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
         final int finalMode = imeVisible ? MODE_OPAQUE : mode;
-        final boolean animate = windowState != WINDOW_STATE_HIDDEN;
+        final boolean animate = mScreenOn && windowState != WINDOW_STATE_HIDDEN;
         transitions.transitionTo(finalMode, animate);
     }
 
@@ -2397,6 +2398,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 animateCollapsePanels(flags);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                mScreenOn = false;
                 // no waiting!
                 makeExpandedInvisible();
                 notifyNavigationBarScreenOn(false);
@@ -2414,6 +2416,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 updateShowSearchHoldoff();
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                mScreenOn = true;
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
