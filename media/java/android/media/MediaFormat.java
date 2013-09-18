@@ -222,26 +222,36 @@ public final class MediaFormat {
     public static final String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
 
     /**
-     * A key for boolean AUTOSELECT field. Tracks with AUTOSELECT=true are
-     * considered when automatically selecting a track without specific user
-     * choice (as defined by HLS).
-     * @hide
+     * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true
+     * are considered when automatically selecting a track without specific user
+     * choice, based on the current locale.
+     * This is currently only used for subtitle tracks, when the user selected
+     * 'Default' for the captioning locale.
+     * The associated value is an integer, where non-0 means TRUE.  This is an optional
+     * field; if not specified, AUTOSELECT defaults to TRUE.
      */
-    public static final String KEY_AUTOSELECT = "autoselect";
+    public static final String KEY_IS_AUTOSELECT = "is-autoselect";
 
     /**
-     * A key for boolean DEFAULT field. The track with DEFAULT=true is selected
-     * in the absence of a specific user choice (as defined by HLS).
-     * @hide
+     * A key for boolean DEFAULT behavior for the track. The track with DEFAULT=true is
+     * selected in the absence of a specific user choice.
+     * This is currently only used for subtitle tracks, when the user selected
+     * 'Default' for the captioning locale.
+     * The associated value is an integer, where non-0 means TRUE.  This is an optional
+     * field; if not specified, DEFAULT is considered to be FALSE.
      */
-    public static final String KEY_DEFAULT = "default";
+    public static final String KEY_IS_DEFAULT = "is-default";
+
 
     /**
-     * A key for boolean FORCED field for subtitle tracks. True if it is a
-     * forced subtitle track.
-     * @hide
+     * A key for the FORCED field for subtitle tracks. True if it is a
+     * forced subtitle track.  Forced subtitle tracks are essential for the
+     * content and are shown even when the user turns off Captions.  They
+     * are used for example to translate foreign/alien dialogs or signs.
+     * The associated value is an integer, where non-0 means TRUE.  This is an
+     * optional field; if not specified, FORCED defaults to FALSE.
      */
-    public static final String KEY_FORCED = "forced";
+    public static final String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
 
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
