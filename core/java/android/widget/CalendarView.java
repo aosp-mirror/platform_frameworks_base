@@ -391,7 +391,7 @@ public class CalendarView extends FrameLayout {
         mWeekSeperatorLineWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 UNSCALED_WEEK_SEPARATOR_LINE_WIDTH, displayMetrics);
 
-        LayoutInflater layoutInflater = (LayoutInflater) mContext
+        LayoutInflater layoutInflater = (LayoutInflater) context
                 .getSystemService(Service.LAYOUT_INFLATER_SERVICE);
         View content = layoutInflater.inflate(R.layout.calendar_view, null, false);
         addView(content);
@@ -874,7 +874,6 @@ public class CalendarView extends FrameLayout {
         }
         mFirstDayOfWeek = firstDayOfWeek;
         mAdapter.init();
-        mAdapter.notifyDataSetChanged();
         setUpHeader();
     }
 
@@ -937,7 +936,7 @@ public class CalendarView extends FrameLayout {
     }
 
     private void updateDateTextSize() {
-        TypedArray dateTextAppearance = getContext().obtainStyledAttributes(
+        TypedArray dateTextAppearance = mContext.obtainStyledAttributes(
                 mDateTextAppearanceResId, R.styleable.TextAppearance);
         mDateTextSize = dateTextAppearance.getDimensionPixelSize(
                 R.styleable.TextAppearance_textSize, DEFAULT_DATE_TEXT_SIZE);
@@ -1004,7 +1003,7 @@ public class CalendarView extends FrameLayout {
      */
     private void setUpAdapter() {
         if (mAdapter == null) {
-            mAdapter = new WeeksAdapter(getContext());
+            mAdapter = new WeeksAdapter();
             mAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
@@ -1333,19 +1332,16 @@ public class CalendarView extends FrameLayout {
      * </p>
      */
     private class WeeksAdapter extends BaseAdapter implements OnTouchListener {
+        private final Calendar mSelectedDate = Calendar.getInstance();
+        private final GestureDetector mGestureDetector;
 
         private int mSelectedWeek;
 
-        private GestureDetector mGestureDetector;
-
         private int mFocusedMonth;
-
-        private final Calendar mSelectedDate = Calendar.getInstance();
 
         private int mTotalWeekCount;
 
-        public WeeksAdapter(Context context) {
-            mContext = context;
+        public WeeksAdapter() {
             mGestureDetector = new GestureDetector(mContext, new CalendarGestureListener());
             init();
         }
@@ -1360,6 +1356,7 @@ public class CalendarView extends FrameLayout {
                 || mMaxDate.get(Calendar.DAY_OF_WEEK) != mFirstDayOfWeek) {
                 mTotalWeekCount++;
             }
+            notifyDataSetChanged();
         }
 
         /**
