@@ -14,9 +14,10 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.DirectoryView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_dir_shadow">
 
     <TextView
         android:id="@android:id/empty"
@@ -40,4 +41,4 @@
         android:listSelector="@android:color/transparent"
         android:visibility="gone" />
 
-</FrameLayout>
+</com.android.documentsui.DirectoryView>
