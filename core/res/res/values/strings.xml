@@ -1433,6 +1433,11 @@
     <string name="permdesc_captureSecureVideoOutput">Allows the app to capture and redirect secure video output.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_mediaContentControl">control media playback and metadata access</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_mediaContentControl">Allows the app to control media playback and access the media information (title, author...).</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_modifyAudioSettings">Allows the app to modify global audio settings such as volume and which speaker is used for output.</string>
