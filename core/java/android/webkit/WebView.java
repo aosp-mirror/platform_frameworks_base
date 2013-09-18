@@ -1099,9 +1099,20 @@ public class WebView extends AbsoluteLayout
      * {@link android.os.Build.VERSION_CODES#HONEYCOMB} and
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} inclusive, the
      * picture does not include fixed position elements or scrollable divs.
+     * <p>
+     * Note that from {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1} the returned picture
+     * should only be drawn into bitmap-backed Canvas - using any other type of Canvas will involve
+     * additional conversion at a cost in memory and performance. Also the
+     * {@link android.graphics.Picture#createFromStream} and
+     * {@link android.graphics.Picture#writeToStream} methods are not supported on the
+     * returned object.
+     *
+     * @deprecated Use {@link #onDraw} to obtain a bitmap snapshot of the WebView, or
+     * {@link #saveWebArchive} or {@link #exportToPdf} to save the content to a file.
      *
      * @return a picture that captures the current contents of this WebView
      */
+    @Deprecated
     public Picture capturePicture() {
         checkThread();
         if (DebugFlags.TRACE_API) Log.d(LOGTAG, "capturePicture");
@@ -1383,7 +1394,10 @@ public class WebView extends AbsoluteLayout
     /**
      * Informs this WebView that memory is low so that it can free any available
      * memory.
+     * @deprecated Memory caches are automatically dropped when no longer needed, and in response
+     *             to system memory pressure.
      */
+    @Deprecated
     public void freeMemory() {
         checkThread();
         if (DebugFlags.TRACE_API) Log.d(LOGTAG, "freeMemory");
