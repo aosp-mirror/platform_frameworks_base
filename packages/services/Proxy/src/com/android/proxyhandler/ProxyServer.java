@@ -25,6 +25,7 @@ import com.google.android.collect.Lists;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
@@ -198,9 +199,15 @@ public class ProxyServer extends Thread {
 
                 while (mIsRunning) {
                     try {
-                        ProxyConnection parser = new ProxyConnection(serverSocket.accept());
+                        Socket socket = serverSocket.accept();
+                        // Only receive local connections.
+                        if (socket.getInetAddress().isLoopbackAddress()) {
+                            ProxyConnection parser = new ProxyConnection(socket);
 
-                        threadExecutor.execute(parser);
+                            threadExecutor.execute(parser);
+                        } else {
+                            socket.close();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
