@@ -282,7 +282,7 @@ public final class ActivityStackSupervisor {
     boolean resumeHomeActivity(ActivityRecord prev) {
         moveHomeStack(true);
         if (prev != null) {
-            prev.mLaunchHomeTaskNext = false;
+            prev.task.mOnTopOfHome = false;
         }
         mHomeStack.moveHomeTaskToTop();
         ActivityRecord r = mHomeStack.topRunningActivityLocked(null);
@@ -304,7 +304,7 @@ public final class ActivityStackSupervisor {
                 r = stack.topRunningActivityLocked(null);
             }
             if (r != null && !r.isHomeActivity() && r.isRootActivity()) {
-                r.mLaunchHomeTaskNext = true;
+                r.task.mOnTopOfHome = true;
             }
         }
     }
@@ -1429,7 +1429,7 @@ public final class ActivityStackSupervisor {
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                                 // Caller wants to appear on home activity.
-                                r.mLaunchHomeTaskNext = true;
+                                intentActivity.task.mOnTopOfHome = true;
                             }
                             targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
                             options = null;
@@ -1543,7 +1543,7 @@ public final class ActivityStackSupervisor {
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
                             // Reset flag so it gets correctly reevaluated.
-                            intentActivity.mLaunchHomeTaskNext = false;
+                            intentActivity.task.mOnTopOfHome = false;
                             setLaunchHomeTaskNextFlag(sourceRecord, intentActivity, targetStack);
                             targetStack.resumeTopActivityLocked(null, options);
                         } else {
@@ -1640,7 +1640,7 @@ public final class ActivityStackSupervisor {
                         == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME)) {
                     // Caller wants to appear on home activity, so before starting
                     // their own activity we will bring home to the front.
-                    r.mLaunchHomeTaskNext = true;
+                    r.task.mOnTopOfHome = true;
                 }
             }
         } else if (sourceRecord != null) {
