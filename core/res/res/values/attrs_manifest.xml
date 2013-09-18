@@ -1821,7 +1821,9 @@
         <attr name="value" />
     </declare-styleable>
 
-    <attr name="keyset" />
+    <!-- Groups signing keys into a {@code KeySet} for easier reference in
+            other APIs. However, currently no APIs use this. -->
+    <attr name="keySet" />
     <declare-styleable name="PublicKey">
         <attr name="value" />
     </declare-styleable>
