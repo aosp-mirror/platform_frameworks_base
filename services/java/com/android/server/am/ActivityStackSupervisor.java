@@ -88,7 +88,7 @@ public final class ActivityStackSupervisor {
     static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
     static final boolean DEBUG_APP = DEBUG || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
-    static final boolean DEBUG_STATES = DEBUG || false;
+    static final boolean DEBUG_STATES = DEBUG || true;
     static final boolean DEBUG_IDLE = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
