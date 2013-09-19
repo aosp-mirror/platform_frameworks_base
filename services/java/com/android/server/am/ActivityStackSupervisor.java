@@ -2076,12 +2076,12 @@ public final class ActivityStackSupervisor {
                 mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
             }
         }
+        checkReadyForSleepLocked();
     }
 
     boolean shutdownLocked(int timeout) {
         boolean timedout = false;
         goingToSleepLocked();
-        checkReadyForSleepLocked();
 
         final long endTime = System.currentTimeMillis() + timeout;
         while (true) {
