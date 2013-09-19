@@ -81,6 +81,7 @@ package android {
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
     field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
+    field public static final java.lang.String MEDIA_CONTENT_CONTROL = "android.permission.MEDIA_CONTENT_CONTROL";
     field public static final java.lang.String MODIFY_AUDIO_SETTINGS = "android.permission.MODIFY_AUDIO_SETTINGS";
     field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
@@ -12058,6 +12059,7 @@ package android.media {
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
+    method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int getMode();
     method public java.lang.String getParameters(java.lang.String);
     method public java.lang.String getProperty(java.lang.String);
@@ -12079,6 +12081,7 @@ package android.media {
     method public void registerMediaButtonEventReceiver(android.content.ComponentName);
     method public void registerMediaButtonEventReceiver(android.app.PendingIntent);
     method public void registerRemoteControlClient(android.media.RemoteControlClient);
+    method public boolean registerRemoteController(android.media.RemoteController);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public deprecated void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
@@ -12100,6 +12103,7 @@ package android.media {
     method public void unregisterMediaButtonEventReceiver(android.content.ComponentName);
     method public void unregisterMediaButtonEventReceiver(android.app.PendingIntent);
     method public void unregisterRemoteControlClient(android.media.RemoteControlClient);
+    method public void unregisterRemoteController(android.media.RemoteController);
     field public static final java.lang.String ACTION_AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
     field public static final deprecated java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
     field public static final java.lang.String ACTION_SCO_AUDIO_STATE_UPDATED = "android.media.ACTION_SCO_AUDIO_STATE_UPDATED";
@@ -13327,6 +13331,36 @@ package android.media {
 
   public static abstract interface RemoteControlClient.OnPlaybackPositionUpdateListener {
     method public abstract void onPlaybackPositionUpdate(long);
+  }
+
+  public final class RemoteController {
+    ctor public RemoteController(android.content.Context) throws java.lang.IllegalArgumentException;
+    ctor public RemoteController(android.content.Context, android.os.Looper) throws java.lang.IllegalArgumentException;
+    method public int clearArtworkConfiguration();
+    method public android.media.RemoteController.MetadataEditor editMetadata();
+    method public int seekTo(long);
+    method public int sendMediaKeyEvent(android.view.KeyEvent);
+    method public int setArtworkConfiguration(int, int);
+    method public void setOnClientUpdateListener(android.media.RemoteController.OnClientUpdateListener);
+    method public int setSynchronizationMode(int);
+    field public static final int ERROR = -1; // 0xffffffff
+    field public static final int ERROR_BAD_VALUE = -2; // 0xfffffffe
+    field public static final int POSITION_SYNCHRONIZATION_CHECK = 1; // 0x1
+    field public static final int POSITION_SYNCHRONIZATION_NONE = 0; // 0x0
+    field public static final int SUCCESS = 0; // 0x0
+  }
+
+  public class RemoteController.MetadataEditor extends android.media.MediaMetadataEditor {
+    method public synchronized void apply();
+  }
+
+  public static abstract class RemoteController.OnClientUpdateListener {
+    ctor public RemoteController.OnClientUpdateListener();
+    method public void onClientChange(boolean);
+    method public void onClientMetadataUpdate(android.media.RemoteController.MetadataEditor);
+    method public void onClientPlaybackStateUpdate(int);
+    method public void onClientPlaybackStateUpdate(int, long, long, float);
+    method public void onClientTransportControlUpdate(int);
   }
 
   public final class ResourceBusyException extends android.media.MediaDrmException {

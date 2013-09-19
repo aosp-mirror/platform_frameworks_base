@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
@@ -443,10 +444,29 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * @param KeyEvent
+     * Sends a simulated key event for a media button.
+     * To simulate a key press, you must first send a KeyEvent built with a
+     * {@link KeyEvent#ACTION_DOWN} action, then another event with the {@link KeyEvent#ACTION_UP}
+     * action.
+     * <p>The key event will be sent to the current media key event consumer which registered with
+     * {@link AudioManager#registerMediaButtonEventReceiver(PendingIntent)}.
+     * @param keyEvent a {@link KeyEvent} instance whose key code is one of
+     *     {@link KeyEvent#KEYCODE_MUTE},
+     *     {@link KeyEvent#KEYCODE_HEADSETHOOK},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PAUSE},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE},
+     *     {@link KeyEvent#KEYCODE_MEDIA_STOP},
+     *     {@link KeyEvent#KEYCODE_MEDIA_NEXT},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS},
+     *     {@link KeyEvent#KEYCODE_MEDIA_REWIND},
+     *     {@link KeyEvent#KEYCODE_MEDIA_RECORD},
+     *     {@link KeyEvent#KEYCODE_MEDIA_FAST_FORWARD},
+     *     {@link KeyEvent#KEYCODE_MEDIA_CLOSE},
+     *     {@link KeyEvent#KEYCODE_MEDIA_EJECT},
+     *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
      */
-    protected void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
         IAudioService service = getService();
         try {
             service.dispatchMediaKeyEvent(keyEvent);
@@ -2247,9 +2267,11 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @param rctlr
+     * Registers a {@link RemoteController} instance for it to receive media metadata updates
+     * and playback state information from applications using {@link RemoteControlClient}, and
+     * control their playback.
+     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
+     * @param rctlr the object to register.
      * @return true if the {@link RemoteController} was successfully registered, false if an
      *     error occurred, due to an internal system error, or insufficient permissions.
      */
@@ -2272,9 +2294,9 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @param rctlr
+     * Unregisters a {@link RemoteController}, causing it to no longer receive media metadata and
+     * playback state information, and no longer be capable of controlling playback.
+     * @param rctlr the object to unregister.
      */
     public void unregisterRemoteController(RemoteController rctlr) {
         if (rctlr == null) {
