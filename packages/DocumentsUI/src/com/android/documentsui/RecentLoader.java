@@ -41,6 +41,7 @@ import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -80,8 +81,8 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         return executor;
     }
 
-    private final List<RootInfo> mRoots;
-    private final String[] mAcceptMimes;
+    private final RootsCache mRoots;
+    private final State mState;
 
     private final HashMap<RootInfo, RecentTask> mTasks = Maps.newHashMap();
 
@@ -138,10 +139,10 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         }
     }
 
-    public RecentLoader(Context context, List<RootInfo> roots, String[] acceptMimes) {
+    public RecentLoader(Context context, RootsCache roots, State state) {
         super(context);
         mRoots = roots;
-        mAcceptMimes = acceptMimes;
+        mState = state;
     }
 
     @Override
@@ -150,7 +151,8 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
             // First time through we kick off all the recent tasks, and wait
             // around to see if everyone finishes quickly.
 
-            for (RootInfo root : mRoots) {
+            final Collection<RootInfo> roots = mRoots.getMatchingRootsBlocking(mState);
+            for (RootInfo root : roots) {
                 if ((root.flags & Root.FLAG_SUPPORTS_RECENTS) != 0) {
                     final RecentTask task = new RecentTask(root.authority, root.rootId);
                     mTasks.put(root, task);
@@ -177,7 +179,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
                 try {
                     final Cursor cursor = task.get();
                     final FilteringCursorWrapper filtered = new FilteringCursorWrapper(
-                            cursor, mAcceptMimes, new String[] { Document.MIME_TYPE_DIR }) {
+                            cursor, mState.acceptMimes, new String[] { Document.MIME_TYPE_DIR }) {
                         @Override
                         public void close() {
                             // Ignored, since we manage cursor lifecycle internally

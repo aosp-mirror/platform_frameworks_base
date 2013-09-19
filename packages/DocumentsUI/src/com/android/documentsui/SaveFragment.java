@@ -68,7 +68,6 @@ public class SaveFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
-        final RootsCache roots = DocumentsApplication.getRootsCache(context);
 
         final View view = inflater.inflate(R.layout.fragment_save, container, false);
 
