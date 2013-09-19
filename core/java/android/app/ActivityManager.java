@@ -672,6 +672,12 @@ public class ActivityManager {
          */
         public int numRunning;
 
+        /**
+         * Last time task was run. For sorting.
+         * @hide
+         */
+        public long lastActiveTime;
+
         public RunningTaskInfo() {
         }
 

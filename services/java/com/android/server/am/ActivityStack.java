@@ -3323,11 +3323,10 @@ final class ActivityStack {
         return didSomething;
     }
 
-    ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
+    ActivityRecord getTasksLocked(IThumbnailReceiver receiver,
             PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
         ActivityRecord topRecord = null;
-        for (int taskNdx = mTaskHistory.size() - 1; maxNum > 0 && taskNdx >= 0;
-                --maxNum, --taskNdx) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             ActivityRecord r = null;
             ActivityRecord top = null;
@@ -3358,6 +3357,8 @@ final class ActivityStack {
             ci.id = task.taskId;
             ci.baseActivity = r.intent.getComponent();
             ci.topActivity = top.intent.getComponent();
+            ci.lastActiveTime = task.lastActiveTime;
+
             if (top.thumbHolder != null) {
                 ci.description = top.thumbHolder.lastDescription;
             }
