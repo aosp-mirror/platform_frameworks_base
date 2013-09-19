@@ -319,7 +319,7 @@ public class NavigationBarView extends LinearLayout {
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
 
         // force the low profile & disabled states into compliance
-        mBarTransitions.reapplyMode();
+        mBarTransitions.init(mVertical);
         setDisabledFlags(mDisabledFlags, true /* force */);
         setMenuVisibility(mShowMenu, true /* force */);
 
@@ -328,7 +328,6 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
-        mBarTransitions.setVertical(mVertical);
     }
 
     @Override
