@@ -353,7 +353,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
                 memset(dstR += dstStride, 0, borderSize); // trailing border column
             }
             // write trailing border line
-            memset(dstL, 0, rowSize + 2 * borderSize);
+            memset(dstL += dstStride, 0, rowSize + 2 * borderSize);
             break;
         }
         case SkMask::kBW_Format: {
