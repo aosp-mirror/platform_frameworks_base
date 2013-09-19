@@ -46,6 +46,7 @@ import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarPanel;
+import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 public class SearchPanelView extends FrameLayout implements
@@ -88,11 +89,7 @@ public class SearchPanelView extends FrameLayout implements
 
         if (isKeyguardShowing) {
             // Have keyguard show the bouncer and launch the activity if the user succeeds.
-            try {
-                mWm.showAssistant();
-            } catch (RemoteException e) {
-                // too bad, so sad...
-            }
+            KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
             onAnimationStarted();
         } else {
             // Otherwise, keyguard isn't showing so launch it from here.

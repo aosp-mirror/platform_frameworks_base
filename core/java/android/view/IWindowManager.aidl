@@ -249,12 +249,6 @@ interface IWindowManager
     boolean isSafeModeEnabled();
 
     /**
-     * Tell keyguard to show the assistant (Intent.ACTION_ASSIST) after asking for the user's
-     * credentials.
-     */
-    void showAssistant();
-
-    /**
      * Sets the display magnification callbacks. These callbacks notify
      * the client for contextual changes related to display magnification.
      *

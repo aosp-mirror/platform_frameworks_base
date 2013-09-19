@@ -23,7 +23,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
+import android.util.Slog;
 import android.view.MotionEvent;
 
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -41,7 +41,9 @@ public class KeyguardTouchDelegate {
     static final String KEYGUARD_PACKAGE = "com.android.keyguard";
     static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
 
-    IKeyguardService mService;
+    private static KeyguardTouchDelegate sInstance;
+
+    private volatile IKeyguardService mService;
 
     protected static final boolean DEBUG = false;
     protected static final String TAG = "KeyguardTouchDelegate";
@@ -49,83 +51,121 @@ public class KeyguardTouchDelegate {
     private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.v(TAG, "Connected to keyguard");
+            Slog.v(TAG, "Connected to keyguard");
             mService = IKeyguardService.Stub.asInterface(service);
 
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.v(TAG, "Disconnected from keyguard");
+            Slog.v(TAG, "Disconnected from keyguard");
             mService = null;
+            sInstance = null; // force reconnection if this goes away
         }
 
     };
 
-    public KeyguardTouchDelegate(Context context) {
+    private KeyguardTouchDelegate(Context context) {
         Intent intent = new Intent();
         intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
-            if (DEBUG) Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
+            if (DEBUG) Slog.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
         } else {
-            if (DEBUG) Log.v(TAG, "*** Keyguard started");
+            if (DEBUG) Slog.v(TAG, "*** Keyguard started");
         }
+    }
+
+    public static KeyguardTouchDelegate getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new KeyguardTouchDelegate(context);
+        }
+        return sInstance;
     }
 
     public boolean isSecure() {
-        boolean secure = false;
-        if (mService != null) {
+        final IKeyguardService service = mService;
+        if (service != null) {
             try {
-                secure = mService.isSecure();
+                return service.isSecure();
             } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException calling keyguard.isSecure()!", e);
+                Slog.e(TAG, "RemoteException calling keyguard.isSecure()!", e);
             }
         } else {
-            Log.w(TAG, "isSecure(): NO SERVICE!");
+            Slog.w(TAG, "isSecure(): NO SERVICE!");
         }
-        return secure;
+        return false;
     }
 
     public boolean dispatch(MotionEvent event) {
-        if (mService != null) {
+        final IKeyguardService service = mService;
+        if (service != null) {
             try {
-                mService.dispatch(event);
+                service.dispatch(event);
+                return true;
             } catch (RemoteException e) {
                 // What to do?
-                Log.e(TAG, "RemoteException sending event to keyguard!", e);
-                return false;
+                Slog.e(TAG, "RemoteException sending event to keyguard!", e);
             }
-            return true;
         } else {
-            Log.w(TAG, "dispatch(event): NO SERVICE!");
+            Slog.w(TAG, "dispatch(event): NO SERVICE!");
+        }
+        return false;
+    }
+
+    public boolean isInputRestricted() {
+        final IKeyguardService service = mService;
+        if (service != null) {
+            try {
+                return service.isInputRestricted();
+            } catch (RemoteException e) {
+                Slog.w(TAG , "Remote Exception", e);
+            }
+        } else {
+            Slog.w(TAG, "isInputRestricted(): NO SERVICE!");
+        }
+        return false;
+    }
+
+    public boolean isShowingAndNotHidden() {
+        final IKeyguardService service = mService;
+        if (service != null) {
+            try {
+                return service.isShowingAndNotHidden();
+            } catch (RemoteException e) {
+                Slog.w(TAG , "Remote Exception", e);
+            }
+        } else {
+            Slog.w(TAG, "isShowingAndNotHidden(): NO SERVICE!");
         }
         return false;
     }
 
     public void showAssistant() {
-        if (mService != null) {
+        final IKeyguardService service = mService;
+        if (service != null) {
             try {
-                mService.showAssistant();
+                service.showAssistant();
             } catch (RemoteException e) {
                 // What to do?
-                Log.e(TAG, "RemoteException launching assistant!", e);
+                Slog.e(TAG, "RemoteException launching assistant!", e);
             }
         } else {
-            Log.w(TAG, "dispatch(event): NO SERVICE!");
+            Slog.w(TAG, "showAssistant(event): NO SERVICE!");
         }
     }
 
     public void launchCamera() {
-        if (mService != null) {
+        final IKeyguardService service = mService;
+        if (service != null) {
             try {
-                mService.launchCamera();
+                service.launchCamera();
             } catch (RemoteException e) {
                 // What to do?
-                Log.e(TAG, "RemoteException launching camera!", e);
+                Slog.e(TAG, "RemoteException launching camera!", e);
             }
         } else {
-            Log.w(TAG, "dispatch(event): NO SERVICE!");
+            Slog.w(TAG, "dispatch(event): NO SERVICE!");
         }
     }
 
