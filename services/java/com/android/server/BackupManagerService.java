@@ -2117,6 +2117,7 @@ class BackupManagerService extends IBackupManager.Stub {
             mSavedStateName = new File(mStateDir, packageName);
             mBackupDataName = new File(mDataDir, packageName + ".data");
             mNewStateName = new File(mStateDir, packageName + ".new");
+            if (MORE_DEBUG) Slog.d(TAG, "data file: " + mBackupDataName);
 
             mSavedState = null;
             mBackupData = null;
