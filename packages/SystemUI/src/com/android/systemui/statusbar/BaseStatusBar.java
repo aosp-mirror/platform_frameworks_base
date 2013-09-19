@@ -93,14 +93,14 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
-    private static final int INTERRUPTION_THRESHOLD = 11;
+    protected static final int INTERRUPTION_THRESHOLD = 11;
+    protected static final String SETTING_HEADS_UP = "heads_up_enabled";
 
     // Should match the value in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
-    private static final String SETTING_HEADS_UP = "heads_up_enabled";
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -125,7 +125,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mLayoutDirection;
     private Locale mLocale;
-    protected boolean mUseHeadsUp = true;
+    protected boolean mUseHeadsUp = false;
 
     protected IDreamManager mDreamManager;
     KeyguardManager mKeyguardManager;
@@ -166,19 +166,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (provisioned != mDeviceProvisioned) {
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
-            }
-        }
-    };
-
-    final private ContentObserver mHeadsUpObserver = new ContentObserver(mHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            mUseHeadsUp = ENABLE_HEADS_UP && 0 != Settings.Global.getInt(
-                    mContext.getContentResolver(), SETTING_HEADS_UP, 0);
-            Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
-            if (!mUseHeadsUp) {
-                Log.d(TAG, "dismissing any existing heads up notification on disable event");
-                mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
             }
         }
     };
@@ -241,11 +228,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
-
-        mHeadsUpObserver.onChange(false); // set up
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(SETTING_HEADS_UP), true,
-                mHeadsUpObserver);
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
