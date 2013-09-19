@@ -132,10 +132,8 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"平板电脑存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手机存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"网络可能会受到监控"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"受到不明第三方的监控"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"受到 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 监控"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板电脑选项"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"手机选项"</string>
@@ -483,12 +481,14 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制 WLAN 显示设备的基础功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"关键词检测"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用针对关键词检测捕获音频。捕获操作会在后台进行，但不会禁止使用其他音频捕获工具（例如摄像机）。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"检测关键词"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音指令的关键词。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"捕获视频输出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允许该应用捕获和重定向视频输出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"捕获安全视频输出"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"允许该应用捕获和重定向安全视频输出。"</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"控制媒体播放和元数据访问权限"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"允许应用控制媒体播放及访问媒体信息（标题、作者…）"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"更改您的音频设置"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允许该应用修改全局音频设置，例如音量和用于输出的扬声器。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"录音"</string>
@@ -651,6 +651,8 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允许应用读取和写入缓存文件系统。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"拨打/接听互联网电话"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"允许应用使用 SIP 服务拨打/接听互联网电话。"</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"与通话屏幕互动"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"允许应用控制用户看到通话屏幕的时机和方式。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"读取网络使用情况历史记录"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允许应用读取特定网络和应用的网络使用情况历史记录。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理网络政策"</string>
@@ -1577,6 +1579,48 @@
     <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
+    <string name="mediaSize_na_index_3x5" msgid="5509252063066211975">"Index Card 3x5"</string>
+    <string name="mediaSize_na_index_4x6" msgid="5332684390971594005">"Index Card 4x6"</string>
+    <string name="mediaSize_na_index_5x8" msgid="7362968775341960675">"Index Card 5x8"</string>
+    <string name="mediaSize_na_monarch" msgid="2611460830082139112">"Monarch"</string>
+    <string name="mediaSize_na_quarto" msgid="8558822460902251206">"Quarto"</string>
+    <string name="mediaSize_na_foolscap" msgid="6811578726392779281">"Foolscap"</string>
+    <string name="mediaSize_chinese_roc_8k" msgid="7942303883156291469">"ROC 8K"</string>
+    <string name="mediaSize_chinese_roc_16k" msgid="2745572672585924098">"ROC 16K"</string>
+    <string name="mediaSize_chinese_prc_1" msgid="3646991879114652952">"PRC 1"</string>
+    <string name="mediaSize_chinese_prc_2" msgid="7865751933861063950">"PRC 2"</string>
+    <string name="mediaSize_chinese_prc_3" msgid="2191403634831383491">"PRC 3"</string>
+    <string name="mediaSize_chinese_prc_4" msgid="1668330914079060946">"PRC 4"</string>
+    <string name="mediaSize_chinese_prc_5" msgid="5582106000840114524">"PRC 5"</string>
+    <string name="mediaSize_chinese_prc_6" msgid="6494010606796018657">"PRC 6"</string>
+    <string name="mediaSize_chinese_prc_7" msgid="8969337865390766678">"PRC 7"</string>
+    <string name="mediaSize_chinese_prc_8" msgid="3536551044672938810">"PRC 8"</string>
+    <string name="mediaSize_chinese_prc_9" msgid="8634580007511762631">"PRC 9"</string>
+    <string name="mediaSize_chinese_prc_10" msgid="8328076187466300392">"PRC 10"</string>
+    <string name="mediaSize_chinese_prc_16k" msgid="4269000513139333995">"PRC 16K"</string>
+    <string name="mediaSize_chinese_om_pa_kai" msgid="6185675362929041927">"Pa Kai"</string>
+    <string name="mediaSize_chinese_om_dai_pa_kai" msgid="7198096842028551039">"Dai Pa Kai"</string>
+    <string name="mediaSize_chinese_om_jurro_ku_kai" msgid="7564410107636844408">"Jurro Ku Kai"</string>
+    <string name="mediaSize_japanese_jis_b10" msgid="2489516647031216922">"JIS B10"</string>
+    <string name="mediaSize_japanese_jis_b9" msgid="2456851527269276849">"JIS B9"</string>
+    <string name="mediaSize_japanese_jis_b8" msgid="6720642142141459506">"JIS B8"</string>
+    <string name="mediaSize_japanese_jis_b7" msgid="1755600547799300151">"JIS B7"</string>
+    <string name="mediaSize_japanese_jis_b6" msgid="3348983162492455718">"JIS B6"</string>
+    <string name="mediaSize_japanese_jis_b5" msgid="8032250160903676801">"JIS B5"</string>
+    <string name="mediaSize_japanese_jis_b4" msgid="8061659428102997259">"JIS B4"</string>
+    <string name="mediaSize_japanese_jis_b3" msgid="5979993515912851631">"JIS B3"</string>
+    <string name="mediaSize_japanese_jis_b2" msgid="6535274368766761954">"JIS B2"</string>
+    <string name="mediaSize_japanese_jis_b1" msgid="3987500298387583545">"JIS B1"</string>
+    <string name="mediaSize_japanese_jis_b0" msgid="4082174870939687315">"JIS B0"</string>
+    <string name="mediaSize_japanese_jis_exec" msgid="3947301020900063432">"JIS Exec"</string>
+    <string name="mediaSize_japanese_chou4" msgid="1748030454239084021">"Chou4"</string>
+    <string name="mediaSize_japanese_chou3" msgid="7695518628727583683">"Chou3"</string>
+    <string name="mediaSize_japanese_chou2" msgid="7357479425526521883">"Chou2"</string>
+    <string name="mediaSize_japanese_hagaki" msgid="3825801392451517118">"Hagaki"</string>
+    <string name="mediaSize_japanese_oufuku" msgid="4158464668471924979">"Oufuku"</string>
+    <string name="mediaSize_japanese_kahu" msgid="5685248230654591167">"Kahu"</string>
+    <string name="mediaSize_japanese_kaku2" msgid="1501885015895614531">"Kaku2"</string>
+    <string name="mediaSize_japanese_you4" msgid="1355503522299228375">"You4"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"已取消"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"写入内容时出错"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"未知"</string>
@@ -1594,6 +1638,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒后重试"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"从边缘向里滑可显示系统栏"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"从屏幕边缘向里滑可显示系统栏"</string>
+    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"从顶部向下滑动即可退出全屏模式"</string>
 </resources>

@@ -487,6 +487,10 @@
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Autoriser l\'application à enregistrer et à rediriger les sorties vidéo"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"enregistrer les sorties vidéo sécurisées"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Autoriser l\'application à enregistrer et à rediriger les sorties vidéo sécurisées"</string>
+    <!-- no translation found for permlab_mediaContentControl (8749790560720562511) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaContentControl (1637478200272062) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrer des fichiers audio"</string>
@@ -649,6 +653,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permet à l\'application d\'obtenir des droits en lecture/écriture concernant le système de fichiers du cache."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"effectuer/recevoir des appels Internet"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"Permet à l\'application d\'utiliser le service SIP pour émettre ou recevoir des appels Internet."</string>
+    <!-- no translation found for permlab_bind_call_service (6724009726671246551) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_call_service (8732547662442572435) -->
+    <skip />
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"lire l\'historique d\'utilisation du réseau"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Permet à l\'application de lire l\'historique d\'utilisation de réseaux et d\'applications spécifiques."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"gérer les règles du réseau"</string>
@@ -669,7 +677,7 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Choisir le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Contrôle le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouille le téléphone ou efface toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le téléphone ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Verrouiller l\'écran"</string>
@@ -1575,6 +1583,90 @@
     <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloïd"</string>
+    <!-- no translation found for mediaSize_na_index_3x5 (5509252063066211975) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_index_4x6 (5332684390971594005) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_index_5x8 (7362968775341960675) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_monarch (2611460830082139112) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_quarto (8558822460902251206) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_foolscap (6811578726392779281) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_roc_8k (7942303883156291469) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_roc_16k (2745572672585924098) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_1 (3646991879114652952) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_2 (7865751933861063950) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_3 (2191403634831383491) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_4 (1668330914079060946) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_5 (5582106000840114524) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_6 (6494010606796018657) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_7 (8969337865390766678) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_8 (3536551044672938810) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_9 (8634580007511762631) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_10 (8328076187466300392) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_16k (4269000513139333995) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_om_pa_kai (6185675362929041927) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_om_dai_pa_kai (7198096842028551039) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_om_jurro_ku_kai (7564410107636844408) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b10 (2489516647031216922) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b9 (2456851527269276849) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b8 (6720642142141459506) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b7 (1755600547799300151) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b6 (3348983162492455718) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b5 (8032250160903676801) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b4 (8061659428102997259) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b3 (5979993515912851631) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b2 (6535274368766761954) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b1 (3987500298387583545) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b0 (4082174870939687315) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_exec (3947301020900063432) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_chou4 (1748030454239084021) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_chou3 (7695518628727583683) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_chou2 (7357479425526521883) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_hagaki (3825801392451517118) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_oufuku (4158464668471924979) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_kahu (5685248230654591167) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_kaku2 (1501885015895614531) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_you4 (1355503522299228375) -->
+    <skip />
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Tâche annulée."</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erreur lors de la modification du contenu."</string>
     <string name="reason_unknown" msgid="6048913880184628119">"inconnu"</string>
@@ -1592,6 +1684,5 @@
     <item quantity="other" msgid="4730868920742952817">"Réessayer dans <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Veuillez réessayer ultérieurement."</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Faire glisser côté pour voir barre."</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Faites glisser le doigt à partir d\'un côté de l\'écran pour afficher la barre système."</string>
+    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Balayer vers le bas pour quitter le plein écran"</string>
 </resources>
