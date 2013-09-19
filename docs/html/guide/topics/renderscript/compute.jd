@@ -10,7 +10,7 @@ parent.link=index.html
 
     <ol>
       <li><a href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a></li>
-      <li><a href="#access-rs-apis">Accessing RenderScript Java APIs</a>
+      <li><a href="#access-rs-apis">Accessing RenderScript APIs</a>
         <ol>
           <li><a href="#ide-setup">Setting Up Your Development Environment</a></li>
         </ol>
@@ -150,19 +150,24 @@ beneficial on some architectures due to additional optimizations only available 
 precision (such as SIMD CPU instructions).</p>
 
 
-<h2 id="access-rs-apis">Accessing RenderScript Java APIs</h2>
+<h2 id="access-rs-apis">Accessing RenderScript APIs</h2>
 
-<p>When developing an Android application that uses RenderScript, you can access its Java API in
-  one of two ways. The APIs are available in the {@link android.renderscript} package
-  on devices running Android 3.0 (API level 11) and higher. These are the original APIs for
-  RenderScript. The APIs are also available as a Support Library in the
-  {@link android.support.v8.renderscript} package, which allow you to use them on devices running
-  Android 2.2 (API level 8) and higher.</p>
+<p>When developing an Android application that uses RenderScript, you can access its API in
+  one of two ways:</p>
+
+<ul>
+  <li><strong>{@link android.renderscript}</strong> - The APIs in this class package are
+    available on devices running Android 3.0 (API level 11) and higher. These are the original APIs
+    for RenderScript and are not currently being updated.</li>
+  <li><strong>{@link android.support.v8.renderscript}</strong> - The APIs in this package are
+    available through a <a href="{@docRoot}tools/support-library/features.html#v8">Support
+    Library</a>, which allows you to use them on devices running Android 2.2 (API level 8) and
+    higher.</li>
+</ul>
 
 <p>We strongly recommend using the Support Library APIs for accessing RenderScript because they
   include the latest improvements to the RenderScript compute framework and provide a wider range
-  of device compatibility. Using the RenderScript APIs in the Support Library requires specific
-  setup procedures for your development environment, which is described in the next section.</p>
+  of device compatibility.</p>
 
 
 <h3 id="ide-setup">Using the RenderScript Support Library APIs</h3>
@@ -218,9 +223,9 @@ import android.support.v8.renderscript.*;
     back to a compatible version if the device it is running on does not support the target version.
     </li>
   <li>{@code sdk.buildtools} - The version of the Android SDK build tools to use. This value
-    should be set to 18.1.0 or higher. If this option is not specified, the highest installed build
-    tools version is used. You should always set this value to ensure the consistency of builds
-    across development machines with different configurations.</li>
+    should be set to {@code 18.1.0} or higher. If this option is not specified, the highest
+    installed build tools version is used. You should always set this value to ensure the
+    consistency of builds across development machines with different configurations.</li>
 </ul>
 
 
