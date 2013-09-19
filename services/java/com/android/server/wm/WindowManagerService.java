@@ -158,7 +158,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 DisplayManagerService.WindowManagerFuncs, DisplayManager.DisplayListener {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = false;
+    static final boolean DEBUG_ADD_REMOVE = true;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || false;
     static final boolean DEBUG_ANIM = false;
@@ -4764,7 +4764,6 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 Task task = mTaskIdToTask.get(taskId);
                 if (task == null) {
-                    Slog.e(TAG, "moveTaskToTop: taskId=" + taskId + " not found in mTaskIdToTask");
                     return;
                 }
                 final TaskStack stack = task.mStack;
@@ -9711,8 +9710,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 newFocus = computeFocusedWindowLocked();
             }
 
-            if (DEBUG_FOCUS_LIGHT || localLOGV) Slog.v(
-                TAG, "Changing focus from " + mCurrentFocus + " to " + newFocus);
+            if (true || DEBUG_FOCUS_LIGHT || localLOGV) Slog.v(TAG, "Changing focus from " +
+                    mCurrentFocus + " to " + newFocus + " Callers=" + Debug.getCallers(4));
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
