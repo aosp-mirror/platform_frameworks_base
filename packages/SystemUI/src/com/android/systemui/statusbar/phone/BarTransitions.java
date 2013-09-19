@@ -23,6 +23,9 @@ import android.app.ActivityManager;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.GradientDrawable.Orientation;
+import android.graphics.drawable.TransitionDrawable;
 import android.util.Log;
 import android.view.View;
 
@@ -30,37 +33,74 @@ import com.android.systemui.R;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_COLORS = false;
 
     public static final int MODE_OPAQUE = 0;
     public static final int MODE_SEMI_TRANSPARENT = 1;
     public static final int MODE_TRANSPARENT = 2;
     public static final int MODE_LIGHTS_OUT = 3;
 
-    protected static final int LIGHTS_IN_DURATION = 250;
-    protected static final int LIGHTS_OUT_DURATION = 750;
+    public static final int LIGHTS_IN_DURATION = 250;
+    public static final int LIGHTS_OUT_DURATION = 750;
+    public static final int BACKGROUND_DURATION = 200;
 
     private final String mTag;
-    protected final View mTarget;
-    protected final int mOpaque;
-    protected final int mSemiTransparent;
+    private final View mView;
+    private final boolean mSupportsTransitions = ActivityManager.isHighEndGfx();
 
-    protected Drawable mTransparent;
+    private final int mOpaque;
+    private final int mSemiTransparent;
+    private final int mGradientStart;
+    private final int mGradientEnd;
+
     private int mMode;
-    private ValueAnimator mBackgroundColorAnimator;
+    private ValueAnimator mColorDrawableAnimator;
+    private boolean mColorDrawableShowing;
 
-    private final AnimatorUpdateListener mBackgroundColorListener = new AnimatorUpdateListener() {
+    private final ColorDrawable mColorDrawable;
+    private final GradientDrawable mGradientDrawable;
+    private final TransitionDrawable mTransitionDrawable;
+    private final AnimatorUpdateListener mAnimatorListener = new AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animator) {
-            mTarget.setBackgroundColor((Integer) animator.getAnimatedValue());
+            mColorDrawable.setColor((Integer) animator.getAnimatedValue());
         }
     };
 
-    public BarTransitions(View target) {
-        mTag = "BarTransitions." + target.getClass().getSimpleName();
-        mTarget = target;
-        final Resources res = target.getContext().getResources();
-        mOpaque = res.getColor(R.drawable.status_bar_background);
-        mSemiTransparent = res.getColor(R.color.status_bar_background_semi_transparent);
+    public BarTransitions(View view) {
+        mTag = "BarTransitions." + view.getClass().getSimpleName();
+        mView = view;
+        final Resources res = mView.getContext().getResources();
+
+        if (DEBUG_COLORS) {
+            mOpaque = 0xff0000ff;
+            mSemiTransparent = 0x7f0000ff;
+            mGradientStart = 0x7fff0000;
+            mGradientEnd = 0x7f00ff00;
+        } else {
+            mOpaque = res.getColor(R.drawable.system_bar_background);
+            mSemiTransparent = res.getColor(R.color.system_bar_background_semi_transparent);
+            mGradientStart = res.getColor(R.color.system_bar_background_gradient_start);
+            mGradientEnd = res.getColor(R.color.system_bar_background_gradient_end);
+        }
+
+        mColorDrawable = new ColorDrawable(mOpaque);
+        mGradientDrawable = new GradientDrawable(Orientation.BOTTOM_TOP,
+                new int[] { mGradientStart, mGradientEnd });
+        mTransitionDrawable = new TransitionDrawable(
+                new Drawable[] { mGradientDrawable, mColorDrawable });
+        mTransitionDrawable.setCrossFadeEnabled(true);
+        mTransitionDrawable.resetTransition();
+        if (mSupportsTransitions) {
+            mView.setBackground(mTransitionDrawable);
+        }
+    }
+
+    protected void setOrientation(GradientDrawable.Orientation orientation) {
+        if (orientation.equals(mGradientDrawable.getOrientation())) return; // GD doesn't check
+        if (DEBUG) Log.d(mTag, "setOrientation " + orientation);
+        mGradientDrawable.mutate();
+        mGradientDrawable.setOrientation(orientation);
     }
 
     public int getMode() {
@@ -71,12 +111,14 @@ public class BarTransitions {
         if (mMode == mode) return;
         int oldMode = mMode;
         mMode = mode;
-        if (!ActivityManager.isHighEndGfx()) return;
-        if (DEBUG) Log.d(mTag, modeToString(oldMode) + " -> " + modeToString(mode));
-        onTransition(oldMode, mMode, animate);
+        if (DEBUG) Log.d(mTag, String.format("%s -> %s animate=%s",
+                modeToString(oldMode), modeToString(mode),  animate));
+        if (mSupportsTransitions) {
+            onTransition(oldMode, mMode, animate);
+        }
     }
 
-    protected Integer getBackgroundColor(int mode) {
+    private Integer getBackgroundColor(int mode) {
         if (mode == MODE_SEMI_TRANSPARENT) return mSemiTransparent;
         if (mode == MODE_OPAQUE) return mOpaque;
         if (mode == MODE_LIGHTS_OUT) return mOpaque;
@@ -84,32 +126,50 @@ public class BarTransitions {
     }
 
     protected void onTransition(int oldMode, int newMode, boolean animate) {
-        cancelBackgroundColorAnimation();
+        applyModeBackground(oldMode, newMode, animate);
+    }
+
+    protected void applyModeBackground(int oldMode, int newMode, boolean animate) {
+        if (DEBUG) Log.d(mTag, String.format("applyModeBackground %s animate=%s",
+                modeToString(newMode), animate));
+        cancelColorAnimation();
         Integer oldColor = getBackgroundColor(oldMode);
         Integer newColor = getBackgroundColor(newMode);
-        if (oldColor != null && newColor != null) {
-            if (animate) {
-                startBackgroundColorAnimation(oldColor, newColor);
-            } else {
-                mTarget.setBackgroundColor(newColor);
+        if (newColor != null) {
+            if (animate && oldColor != null && !oldColor.equals(newColor)) {
+                startColorAnimation(oldColor, newColor);
+            } else if (!newColor.equals(mColorDrawable.getColor())) {
+                if (DEBUG) Log.d(mTag, String.format("setColor = %08x", newColor));
+                mColorDrawable.setColor(newColor);
             }
-        } else {
-            mTarget.setBackground(newMode == MODE_TRANSPARENT ? mTransparent
-                    : newMode == MODE_SEMI_TRANSPARENT ? new ColorDrawable(mSemiTransparent)
-                    : new ColorDrawable(mOpaque));
+        }
+        if (oldColor != null && newColor == null && mColorDrawableShowing) {
+            if (DEBUG) Log.d(mTag, "Hide color layer");
+            if (animate) {
+                mTransitionDrawable.reverseTransition(BACKGROUND_DURATION);
+            } else {
+                mTransitionDrawable.resetTransition();
+            }
+            mColorDrawableShowing = false;
+        } else if (oldColor == null && newColor != null && !mColorDrawableShowing) {
+            if (DEBUG) Log.d(mTag, "Show color layer");
+            mTransitionDrawable.setCrossFadeEnabled(!animate);
+            mTransitionDrawable.startTransition(animate ? BACKGROUND_DURATION : 0);
+            mColorDrawableShowing = true;
         }
     }
 
-    private void startBackgroundColorAnimation(int from, int to) {
-        mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
-        mBackgroundColorAnimator.addUpdateListener(mBackgroundColorListener);
-        mBackgroundColorAnimator.start();
+    private void startColorAnimation(int from, int to) {
+        if (DEBUG) Log.d(mTag, String.format("startColorAnimation %08x -> %08x", from, to));
+        mColorDrawableAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
+        mColorDrawableAnimator.addUpdateListener(mAnimatorListener);
+        mColorDrawableAnimator.start();
     }
 
-    private void cancelBackgroundColorAnimation() {
-        if (mBackgroundColorAnimator != null && mBackgroundColorAnimator.isStarted()) {
-            mBackgroundColorAnimator.cancel();
-            mBackgroundColorAnimator = null;
+    private void cancelColorAnimation() {
+        if (mColorDrawableAnimator != null && mColorDrawableAnimator.isStarted()) {
+            mColorDrawableAnimator.cancel();
+            mColorDrawableAnimator = null;
         }
     }
 
