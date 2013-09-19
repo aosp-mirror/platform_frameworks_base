@@ -171,7 +171,8 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран паварочваецца аўтаматычна."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Экран заблакiраваны ў альбомнай арыентацыі."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Экран заблакiраваны ў партрэтнай арыентацыі."</string>
-    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <!-- no translation found for dessert_case (1295161776223959221) -->
+    <skip />
     <string name="start_dreams" msgid="7219575858348719790">"Мроi"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Рэжым палёту"</string>
