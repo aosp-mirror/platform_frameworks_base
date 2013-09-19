@@ -139,7 +139,7 @@ public class PrintJobConfigActivity extends Activity {
     private static final int MIN_COPIES = 1;
     private static final String MIN_COPIES_STRING = String.valueOf(MIN_COPIES);
 
-    private static final Pattern PATTERN_DIGITS = Pattern.compile("\\d");
+    private static final Pattern PATTERN_DIGITS = Pattern.compile("[\\d]+");
 
     private static final Pattern PATTERN_ESCAPE_SPECIAL_CHARS = Pattern.compile(
             "(?=[]\\[+&|!(){}^\"~*?:\\\\])");
@@ -1484,7 +1484,8 @@ public class PrintJobConfigActivity extends Activity {
                         fromIndex = toIndex = Integer.parseInt(range) - 1;
                     }
 
-                    PageRange pageRange = new PageRange(fromIndex, toIndex);
+                    PageRange pageRange = new PageRange(Math.min(fromIndex, toIndex),
+                            Math.max(fromIndex, toIndex));
                     pageRanges.add(pageRange);
                 }
 
@@ -2166,6 +2167,11 @@ public class PrintJobConfigActivity extends Activity {
                 return false;
             }
 
+            if (ourPageRanges.length == 1
+                    && PageRange.ALL_PAGES.equals(ourPageRanges[0])) {
+                return true;
+            }
+
             otherPageRanges = normalize(otherPageRanges);
 
             int otherPageIdx = 0;
@@ -2197,28 +2203,28 @@ public class PrintJobConfigActivity extends Activity {
             if (pageRanges == null) {
                 return null;
             }
-            final int oldPageCount = pageRanges.length;
-            if (oldPageCount <= 1) {
+            final int oldRangeCount = pageRanges.length;
+            if (oldRangeCount <= 1) {
                 return pageRanges;
             }
             Arrays.sort(pageRanges, sComparator);
-            int newRangeCount = 0;
-            for (int i = 0; i < oldPageCount - 1; i++) {
+            int newRangeCount = 1;
+            for (int i = 0; i < oldRangeCount - 1; i++) {
                 newRangeCount++;
                 PageRange currentRange = pageRanges[i];
                 PageRange nextRange = pageRanges[i + 1];
-                if (currentRange.getEnd() >= nextRange.getStart()) {
+                if (currentRange.getEnd() + 1 >= nextRange.getStart()) {
                     newRangeCount--;
                     pageRanges[i] = null;
                     pageRanges[i + 1] = new PageRange(currentRange.getStart(),
-                            nextRange.getEnd());
+                            Math.max(currentRange.getEnd(), nextRange.getEnd()));
                 }
             }
-            if (newRangeCount == oldPageCount) {
+            if (newRangeCount == oldRangeCount) {
                 return pageRanges;
             }
-            return Arrays.copyOfRange(pageRanges, oldPageCount - newRangeCount,
-                    oldPageCount - 1);
+            return Arrays.copyOfRange(pageRanges, oldRangeCount - newRangeCount,
+                    oldRangeCount);
         }
 
         public static void offsetStart(PageRange[] pageRanges, int offset) {
