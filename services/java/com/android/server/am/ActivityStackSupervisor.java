@@ -912,7 +912,7 @@ public final class ActivityStackSupervisor {
         if (idx < 0) {
             app.activities.add(r);
         }
-        mService.updateLruProcessLocked(app, true);
+        mService.updateLruProcessLocked(app, true, true);
 
         final ActivityStack stack = r.task.stack;
         try {
@@ -1052,7 +1052,7 @@ public final class ActivityStackSupervisor {
             boolean andResume, boolean checkConfig) {
         // Is this activity's application already running?
         ProcessRecord app = mService.getProcessRecordLocked(r.processName,
-                r.info.applicationInfo.uid);
+                r.info.applicationInfo.uid, true);
 
         r.task.stack.setLaunchTime(r);
 
@@ -1071,7 +1071,7 @@ public final class ActivityStackSupervisor {
         }
 
         mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
-                "activity", r.intent.getComponent(), false, false);
+                "activity", r.intent.getComponent(), false, false, true);
     }
 
     final int startActivityLocked(IApplicationThread caller,
