@@ -9884,7 +9884,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.addCategory(Intent.CATEGORY_HOME);
 
         final int callingUserId = UserHandle.getCallingUserId();
-        List<ResolveInfo> list = queryIntentActivities(intent, null, 0, callingUserId);
+        List<ResolveInfo> list = queryIntentActivities(intent, null,
+                PackageManager.GET_META_DATA, callingUserId);
         ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
                 true, false, callingUserId);
 
