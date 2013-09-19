@@ -308,7 +308,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
-    private boolean mScreenOn;
+    private Boolean mScreenOn;
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -1895,8 +1895,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
         final boolean imeVisible = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
         final int finalMode = imeVisible ? MODE_OPAQUE : mode;
-        final boolean animate = mScreenOn && windowState != WINDOW_STATE_HIDDEN;
-        transitions.transitionTo(finalMode, animate);
+        final boolean anim = (mScreenOn == null || mScreenOn) && windowState != WINDOW_STATE_HIDDEN;
+        transitions.transitionTo(finalMode, anim);
     }
 
     private final Runnable mCheckBarModes = new Runnable() {
