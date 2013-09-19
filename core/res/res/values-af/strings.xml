@@ -132,10 +132,8 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Foon se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan dalk gemonitor word"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Deur \'n onbekende derde party"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Deur <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Ek"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet-opsies"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Foonopsies"</string>
@@ -487,6 +485,8 @@
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Laat die program video-uitset vasvang en herlei."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"vang veilige video-uitset vas"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Laat die program veilige video-uitset vasvang en herlei."</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"beheer mediaspelery en toegang tot metadata"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Laat die program mediaspelery beheer en by die mediainligting ingaan (titel, outeur, ens)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"neem klank op"</string>
@@ -649,6 +649,8 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Laat die program toe om die kaslêerstelsel te lees en skryf."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"maak/ontvang internetoproepe"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"Laat die program toe om die SIP-diens te gebruik om internetoproepe te maak of te ontvang."</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"beleef interaksie met in-oproep-skerm"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Laat die program beheer wanneer en hoe die gebruik die in-oproep-skerm sien."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"lees netwerkgebruik-geskiedenis"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Laat die program toe om historiese netwerkgebruik vir spesifieke netwerke en programme te lees."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"bestuur netwerkbeleid"</string>
@@ -1575,6 +1577,48 @@
     <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
+    <string name="mediaSize_na_index_3x5" msgid="5509252063066211975">"Indekskaart 3x5"</string>
+    <string name="mediaSize_na_index_4x6" msgid="5332684390971594005">"Indekskaart 4x6"</string>
+    <string name="mediaSize_na_index_5x8" msgid="7362968775341960675">"Indekskaart 5x8"</string>
+    <string name="mediaSize_na_monarch" msgid="2611460830082139112">"Monarg"</string>
+    <string name="mediaSize_na_quarto" msgid="8558822460902251206">"Quarto"</string>
+    <string name="mediaSize_na_foolscap" msgid="6811578726392779281">"Foolscap"</string>
+    <string name="mediaSize_chinese_roc_8k" msgid="7942303883156291469">"ROC 8K"</string>
+    <string name="mediaSize_chinese_roc_16k" msgid="2745572672585924098">"ROC 16K"</string>
+    <string name="mediaSize_chinese_prc_1" msgid="3646991879114652952">"PRC 1"</string>
+    <string name="mediaSize_chinese_prc_2" msgid="7865751933861063950">"PRC 2"</string>
+    <string name="mediaSize_chinese_prc_3" msgid="2191403634831383491">"PRC 3"</string>
+    <string name="mediaSize_chinese_prc_4" msgid="1668330914079060946">"PRC 4"</string>
+    <string name="mediaSize_chinese_prc_5" msgid="5582106000840114524">"PRC 5"</string>
+    <string name="mediaSize_chinese_prc_6" msgid="6494010606796018657">"PRC 6"</string>
+    <string name="mediaSize_chinese_prc_7" msgid="8969337865390766678">"PRC 7"</string>
+    <string name="mediaSize_chinese_prc_8" msgid="3536551044672938810">"PRC 8"</string>
+    <string name="mediaSize_chinese_prc_9" msgid="8634580007511762631">"PRC 9"</string>
+    <string name="mediaSize_chinese_prc_10" msgid="8328076187466300392">"PRC 10"</string>
+    <string name="mediaSize_chinese_prc_16k" msgid="4269000513139333995">"PRC 16K"</string>
+    <string name="mediaSize_chinese_om_pa_kai" msgid="6185675362929041927">"Pa Kai"</string>
+    <string name="mediaSize_chinese_om_dai_pa_kai" msgid="7198096842028551039">"Dai Pa Kai"</string>
+    <string name="mediaSize_chinese_om_jurro_ku_kai" msgid="7564410107636844408">"Jurro Ku Kai"</string>
+    <string name="mediaSize_japanese_jis_b10" msgid="2489516647031216922">"JIS B10"</string>
+    <string name="mediaSize_japanese_jis_b9" msgid="2456851527269276849">"JIS B9"</string>
+    <string name="mediaSize_japanese_jis_b8" msgid="6720642142141459506">"JIS B8"</string>
+    <string name="mediaSize_japanese_jis_b7" msgid="1755600547799300151">"JIS B7"</string>
+    <string name="mediaSize_japanese_jis_b6" msgid="3348983162492455718">"JIS B6"</string>
+    <string name="mediaSize_japanese_jis_b5" msgid="8032250160903676801">"JIS B5"</string>
+    <string name="mediaSize_japanese_jis_b4" msgid="8061659428102997259">"JIS B4"</string>
+    <string name="mediaSize_japanese_jis_b3" msgid="5979993515912851631">"JIS B3"</string>
+    <string name="mediaSize_japanese_jis_b2" msgid="6535274368766761954">"JIS B2"</string>
+    <string name="mediaSize_japanese_jis_b1" msgid="3987500298387583545">"JIS B1"</string>
+    <string name="mediaSize_japanese_jis_b0" msgid="4082174870939687315">"JIS B0"</string>
+    <string name="mediaSize_japanese_jis_exec" msgid="3947301020900063432">"JIS Exec"</string>
+    <string name="mediaSize_japanese_chou4" msgid="1748030454239084021">"Chou4"</string>
+    <string name="mediaSize_japanese_chou3" msgid="7695518628727583683">"Chou3"</string>
+    <string name="mediaSize_japanese_chou2" msgid="7357479425526521883">"Chou2"</string>
+    <string name="mediaSize_japanese_hagaki" msgid="3825801392451517118">"Hagaki"</string>
+    <string name="mediaSize_japanese_oufuku" msgid="4158464668471924979">"Oufuku"</string>
+    <string name="mediaSize_japanese_kahu" msgid="5685248230654591167">"Kahu"</string>
+    <string name="mediaSize_japanese_kaku2" msgid="1501885015895614531">"Kaku2"</string>
+    <string name="mediaSize_japanese_you4" msgid="1355503522299228375">"You4"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Gekanselleer"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Kon nie inhoud skryf nie"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"onbekend"</string>
@@ -1592,6 +1636,5 @@
     <item quantity="other" msgid="4730868920742952817">"Probeer weer oor <xliff:g id="COUNT">%d</xliff:g> sekondes"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Probeer later weer"</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Sleep rand van skerm om balk te wys"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sleep van rand van skerm af om stelselbalk te wys"</string>
+    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Sleep van bo af na onder om volskerm te verlaat"</string>
 </resources>
