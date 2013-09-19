@@ -68,6 +68,13 @@ public class ActivityManager {
     private final Handler mHandler;
 
     /**
+     * <meta-data> string for a 'home' Activity that names a package that is to be
+     * uninstalled in lieu of the declaring one.  The package named here must be
+     * signed with the same certificate as the one declaring the <meta-data>.
+     */
+    public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
+
+    /**
      * Result for IActivityManager.startActivity: an error where the
      * start had to be canceled.
      * @hide
