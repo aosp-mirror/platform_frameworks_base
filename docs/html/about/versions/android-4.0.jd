@@ -619,12 +619,14 @@ Beam Demo</a>.</p>
 
 <h3 id="WiFiDirect">Wi-Fi P2P</h3>
 
-<p>Android now supports Wi-Fi peer-to-peer (P2P) connections between Android-powered
-devices and other device types (in compliance with the Wi-Fi
-Alliance's Wi-Fi Direct&trade; certification program) without a hotspot or Internet connection. The Android framework
-provides a set of Wi-Fi P2P APIs that allow you to discover and connect to other devices when each
-device supports Wi-Fi P2P, then communicate over a speedy connection across distances much longer
-than a Bluetooth connection.</p>
+<p>Android now supports Wi-Fi peer-to-peer (P2P) connections between Android-powered devices and
+other device types (in compliance with the Wi-Fi Alliance's <a href=
+"http://www.wi-fi.org/discover-and-learn/wi-fi-direct" class="external-link">Wi-Fi Direct&trade;</a>
+certification program) without a hotspot or Internet connection. The Android framework provides a
+set of Wi-Fi P2P APIs that allow you to discover and connect to other devices when each device
+supports Wi-Fi P2P, then communicate over a speedy connection across distances much longer than a
+Bluetooth connection.</p>
+
 
 <p>A new package, {@link android.net.wifi.p2p}, contains all the APIs for performing peer-to-peer
 connections with Wi-Fi. The primary class you need to work with is {@link
