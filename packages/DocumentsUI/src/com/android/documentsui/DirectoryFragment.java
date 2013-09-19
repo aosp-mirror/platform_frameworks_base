@@ -781,7 +781,8 @@ public class DirectoryFragment extends Fragment {
                     iconMime.setImageDrawable(
                             IconUtils.loadPackageIcon(context, docAuthority, docIcon));
                 } else {
-                    iconMime.setImageDrawable(IconUtils.loadMimeIcon(context, docMimeType));
+                    iconMime.setImageDrawable(IconUtils.loadMimeIcon(
+                            context, docMimeType, docAuthority, docId, state.derivedMode));
                 }
             }
 

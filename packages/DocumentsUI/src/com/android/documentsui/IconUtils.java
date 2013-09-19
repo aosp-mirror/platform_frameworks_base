@@ -22,6 +22,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
+import android.util.Log;
 
 import com.google.android.collect.Maps;
 
@@ -206,6 +207,27 @@ public class IconUtils {
         return null;
     }
 
+    public static Drawable loadMimeIcon(
+            Context context, String mimeType, String authority, String docId, int mode) {
+        final Resources res = context.getResources();
+
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            // TODO: eventually move these hacky assets into that package
+            if ("com.android.providers.media.documents".equals(authority)
+                    && docId.startsWith("album")) {
+                return res.getDrawable(R.drawable.ic_doc_album);
+            }
+
+            if (mode == DocumentsActivity.State.MODE_GRID) {
+                return res.getDrawable(R.drawable.ic_grid_folder);
+            } else {
+                return res.getDrawable(R.drawable.ic_root_folder);
+            }
+        }
+
+        return loadMimeIcon(context, mimeType);
+    }
+
     public static Drawable loadMimeIcon(Context context, String mimeType) {
         final Resources res = context.getResources();
 
@@ -236,8 +258,7 @@ public class IconUtils {
         } else if ("video".equals(typeOnly)) {
             return res.getDrawable(R.drawable.ic_doc_video);
         } else {
-            // TODO: generic icon?
-            return null;
+            return res.getDrawable(R.drawable.ic_doc_generic);
         }
     }
 }
