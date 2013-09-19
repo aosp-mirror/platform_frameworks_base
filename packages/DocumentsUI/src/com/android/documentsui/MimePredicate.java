@@ -80,10 +80,10 @@ public class MimePredicate implements Predicate<DocumentInfo> {
     }
 
     public static boolean mimeMatches(String filter, String test) {
-        if (filter == null || "*/*".equals(filter)) {
-            return true;
-        } else if (test == null) {
+        if (test == null) {
             return false;
+        } else if (filter == null || "*/*".equals(filter)) {
+            return true;
         } else if (filter.equals(test)) {
             return true;
         } else if (filter.endsWith("/*")) {
