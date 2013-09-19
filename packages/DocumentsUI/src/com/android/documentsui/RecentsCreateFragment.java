@@ -206,7 +206,7 @@ public class RecentsCreateFragment extends Fragment {
             title.setText(builder);
             title.setEllipsize(TruncateAt.MIDDLE);
 
-            line2.setVisibility(View.GONE);
+            if (line2 != null) line2.setVisibility(View.GONE);
 
             return convertView;
         }
