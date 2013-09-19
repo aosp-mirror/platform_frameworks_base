@@ -19,9 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.ServiceManager;
 import android.view.MotionEvent;
@@ -33,12 +30,8 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
 public final class NavigationBarTransitions extends BarTransitions {
-    private static final boolean ENABLE_GRADIENT = false;  // until we can smooth transition
 
     private final NavigationBarView mView;
-    private final Drawable mTransparentBottom;
-    private final Drawable mTransparentRight;
-    private final int mTransparentColor;
     private final IStatusBarService mBarService;
 
     private boolean mLightsOut;
@@ -46,37 +39,24 @@ public final class NavigationBarTransitions extends BarTransitions {
     public NavigationBarTransitions(NavigationBarView view) {
         super(view);
         mView = view;
-        final Resources res = mView.getContext().getResources();
-        final int[] gradientColors = new int[] {
-                res.getColor(R.color.navigation_bar_background_transparent_start),
-                res.getColor(R.color.navigation_bar_background_transparent_end)
-        };
-        mTransparentBottom = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
-        mTransparentRight = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
-        mTransparentColor = res.getColor(R.color.status_bar_background_transparent);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
-    public void setVertical(boolean isVertical) {
-        if (!ENABLE_GRADIENT) return;
-        mTransparent = isVertical ? mTransparentRight : mTransparentBottom;
+    public void init(boolean isVertical) {
+        setVertical(isVertical);
+        applyModeBackground(-1, getMode(), false /*animate*/);
+        applyMode(getMode(), false /*animate*/, true /*force*/);
     }
 
-    @Override
-    protected Integer getBackgroundColor(int mode) {
-        if (!ENABLE_GRADIENT && mode == MODE_TRANSPARENT) return mTransparentColor;
-        return super.getBackgroundColor(mode);
+    public void setVertical(boolean isVertical) {
+        setOrientation(isVertical ? Orientation.RIGHT_LEFT : Orientation.BOTTOM_TOP);
     }
 
     @Override
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         super.onTransition(oldMode, newMode, animate);
         applyMode(newMode, animate, false /*force*/);
-    }
-
-    public void reapplyMode() {
-        applyMode(getMode(), false /*animate*/, true /*force*/);
     }
 
     private void applyMode(int mode, boolean animate, boolean force) {

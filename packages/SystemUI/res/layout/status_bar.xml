@@ -23,7 +23,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/status_bar"
-    android:background="@drawable/status_bar_background"
+    android:background="@drawable/system_bar_background"
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
