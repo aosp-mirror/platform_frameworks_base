@@ -16,6 +16,10 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
+import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
+import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
+import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
@@ -44,6 +48,7 @@ import android.graphics.drawable.InsetDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -51,6 +56,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,12 +79,14 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.google.common.collect.Maps;
 
 import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
@@ -93,6 +101,8 @@ public class DocumentsActivity extends Activity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private View mRootsContainer;
+
+    private DirectoryContainerView mDirectoryContainer;
 
     private boolean mIgnoreNextNavigation;
     private boolean mIgnoreNextClose;
@@ -165,6 +175,8 @@ public class DocumentsActivity extends Activity {
             mRootsContainer = findViewById(R.id.container_roots);
         }
 
+        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
+
         if (icicle != null) {
             mState = icicle.getParcelable(EXTRA_STATE);
         } else {
@@ -195,7 +207,7 @@ public class DocumentsActivity extends Activity {
             RootsFragment.show(getFragmentManager(), null);
         }
 
-        onCurrentDirectoryChanged();
+        onCurrentDirectoryChanged(ANIM_NONE);
     }
 
     private void buildDefaultState() {
@@ -397,7 +409,7 @@ public class DocumentsActivity extends Activity {
             public boolean onQueryTextSubmit(String query) {
                 mState.currentSearch = query;
                 mSearchView.clearFocus();
-                onCurrentDirectoryChanged();
+                onCurrentDirectoryChanged(ANIM_NONE);
                 return true;
             }
 
@@ -421,7 +433,7 @@ public class DocumentsActivity extends Activity {
                 }
 
                 mState.currentSearch = null;
-                onCurrentDirectoryChanged();
+                onCurrentDirectoryChanged(ANIM_NONE);
                 return true;
             }
         });
@@ -435,7 +447,7 @@ public class DocumentsActivity extends Activity {
                 }
 
                 mState.currentSearch = null;
-                onCurrentDirectoryChanged();
+                onCurrentDirectoryChanged(ANIM_NONE);
                 return false;
             }
         });
@@ -595,7 +607,7 @@ public class DocumentsActivity extends Activity {
         final int size = mState.stack.size();
         if (size > 1) {
             mState.stack.pop();
-            onCurrentDirectoryChanged();
+            onCurrentDirectoryChanged(ANIM_UP);
         } else if (size == 1 && !isRootsDrawerOpen()) {
             // TODO: open root drawer once we can capture back key
             super.onBackPressed();
@@ -690,7 +702,7 @@ public class DocumentsActivity extends Activity {
                 mState.stackTouched = true;
                 mState.stack.pop();
             }
-            onCurrentDirectoryChanged();
+            onCurrentDirectoryChanged(ANIM_UP);
             return true;
         }
     };
@@ -711,17 +723,19 @@ public class DocumentsActivity extends Activity {
         return mState;
     }
 
-    private void onCurrentDirectoryChanged() {
+    private void onCurrentDirectoryChanged(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
+
+        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
 
         if (cwd == null) {
             // No directory means recents
             if (mState.action == ACTION_CREATE) {
                 RecentsCreateFragment.show(fm);
             } else {
-                DirectoryFragment.showRecentsOpen(fm);
+                DirectoryFragment.showRecentsOpen(fm, anim);
 
                 // Start recents in relevant mode
                 final boolean acceptImages = MimePredicate.mimeMatches(
@@ -732,10 +746,10 @@ public class DocumentsActivity extends Activity {
         } else {
             if (mState.currentSearch != null) {
                 // Ongoing search
-                DirectoryFragment.showSearch(fm, root, mState.currentSearch);
+                DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
             } else {
                 // Normal boring directory
-                DirectoryFragment.showNormal(fm, root, cwd);
+                DirectoryFragment.showNormal(fm, root, cwd, anim);
             }
         }
 
@@ -760,7 +774,7 @@ public class DocumentsActivity extends Activity {
     public void onStackPicked(DocumentStack stack) {
         mState.stack = stack;
         mState.stackTouched = true;
-        onCurrentDirectoryChanged();
+        onCurrentDirectoryChanged(ANIM_SIDE);
     }
 
     public void onRootPicked(RootInfo root, boolean closeDrawer) {
@@ -772,11 +786,14 @@ public class DocumentsActivity extends Activity {
         if (!mRoots.isRecentsRoot(root)) {
             try {
                 final Uri uri = DocumentsContract.buildDocumentUri(root.authority, root.documentId);
-                onDocumentPicked(DocumentInfo.fromUri(getContentResolver(), uri));
+                final DocumentInfo doc = DocumentInfo.fromUri(getContentResolver(), uri);
+                mState.stack.push(doc);
+                mState.stackTouched = true;
+                onCurrentDirectoryChanged(ANIM_SIDE);
             } catch (FileNotFoundException e) {
             }
         } else {
-            onCurrentDirectoryChanged();
+            onCurrentDirectoryChanged(ANIM_SIDE);
         }
 
         if (closeDrawer) {
@@ -798,7 +815,7 @@ public class DocumentsActivity extends Activity {
         if (doc.isDirectory()) {
             mState.stack.push(doc);
             mState.stackTouched = true;
-            onCurrentDirectoryChanged();
+            onCurrentDirectoryChanged(ANIM_DOWN);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
             onFinished(doc.derivedUri);
@@ -924,6 +941,9 @@ public class DocumentsActivity extends Activity {
         /** Currently active search, overriding any stack. */
         public String currentSearch;
 
+        /** Instance state for every shown directory */
+        public HashMap<String, SparseArray<Parcelable>> dirState = Maps.newHashMap();
+
         public static final int ACTION_OPEN = 1;
         public static final int ACTION_CREATE = 2;
         public static final int ACTION_GET_CONTENT = 3;
@@ -956,6 +976,7 @@ public class DocumentsActivity extends Activity {
             out.writeInt(stackTouched ? 1 : 0);
             DurableUtils.writeToParcel(out, stack);
             out.writeString(currentSearch);
+            out.writeMap(dirState);
         }
 
         public static final Creator<State> CREATOR = new Creator<State>() {
@@ -973,6 +994,7 @@ public class DocumentsActivity extends Activity {
                 state.stackTouched = in.readInt() != 0;
                 DurableUtils.readFromParcel(in, state.stack);
                 state.currentSearch = in.readString();
+                in.readMap(state.dirState, null);
                 return state;
             }
 
