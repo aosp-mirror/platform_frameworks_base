@@ -166,7 +166,7 @@ public final class ProcessStats implements Parcelable {
     static final String CSV_SEP = "\t";
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 12;
+    private static final int PARCEL_VERSION = 13;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535453;
 
@@ -645,6 +645,13 @@ public final class ProcessStats implements Parcelable {
         if (proc.mNumExcessiveCpu != 0) {
             pw.print(prefix); pw.print("Killed for excessive CPU use: ");
                     pw.print(proc.mNumExcessiveCpu); pw.println(" times");
+        }
+        if (proc.mNumCachedKill != 0) {
+            pw.print(prefix); pw.print("Killed from cached state: ");
+                    pw.print(proc.mNumCachedKill); pw.print(" times from pss ");
+                    printSizeValue(pw, proc.mMinCachedKillPss * 1024); pw.print("-");
+                    printSizeValue(pw, proc.mAvgCachedKillPss * 1024); pw.print("-");
+                    printSizeValue(pw, proc.mMaxCachedKillPss * 1024); pw.println();
         }
     }
 
@@ -2033,7 +2040,8 @@ public final class ProcessStats implements Parcelable {
                         dumpAllProcessPssCheckin(pw, proc);
                         pw.println();
                     }
-                    if (proc.mNumExcessiveWake > 0 || proc.mNumExcessiveCpu > 0) {
+                    if (proc.mNumExcessiveWake > 0 || proc.mNumExcessiveCpu > 0
+                            || proc.mNumCachedKill > 0) {
                         pw.print("pkgkills,");
                         pw.print(pkgName);
                         pw.print(",");
@@ -2044,6 +2052,14 @@ public final class ProcessStats implements Parcelable {
                         pw.print(proc.mNumExcessiveWake);
                         pw.print(",");
                         pw.print(proc.mNumExcessiveCpu);
+                        pw.print(",");
+                        pw.print(proc.mNumCachedKill);
+                        pw.print(",");
+                        pw.print(proc.mMinCachedKillPss);
+                        pw.print(":");
+                        pw.print(proc.mAvgCachedKillPss);
+                        pw.print(":");
+                        pw.print(proc.mMaxCachedKillPss);
                         pw.println();
                     }
                 }
@@ -2090,7 +2106,8 @@ public final class ProcessStats implements Parcelable {
                     dumpAllProcessPssCheckin(pw, procState);
                     pw.println();
                 }
-                if (procState.mNumExcessiveWake > 0 || procState.mNumExcessiveCpu > 0) {
+                if (procState.mNumExcessiveWake > 0 || procState.mNumExcessiveCpu > 0
+                        || procState.mNumCachedKill > 0) {
                     pw.print("kills,");
                     pw.print(procName);
                     pw.print(",");
@@ -2099,6 +2116,14 @@ public final class ProcessStats implements Parcelable {
                     pw.print(procState.mNumExcessiveWake);
                     pw.print(",");
                     pw.print(procState.mNumExcessiveCpu);
+                    pw.print(",");
+                    pw.print(procState.mNumCachedKill);
+                    pw.print(",");
+                    pw.print(procState.mMinCachedKillPss);
+                    pw.print(":");
+                    pw.print(procState.mAvgCachedKillPss);
+                    pw.print(":");
+                    pw.print(procState.mMaxCachedKillPss);
                     pw.println();
                 }
             }
@@ -2134,6 +2159,11 @@ public final class ProcessStats implements Parcelable {
 
         int mNumExcessiveWake;
         int mNumExcessiveCpu;
+
+        int mNumCachedKill;
+        long mMinCachedKillPss;
+        long mAvgCachedKillPss;
+        long mMaxCachedKillPss;
 
         boolean mMultiPackage;
         boolean mDead;
@@ -2200,6 +2230,10 @@ public final class ProcessStats implements Parcelable {
             }
             pnew.mNumExcessiveWake = mNumExcessiveWake;
             pnew.mNumExcessiveCpu = mNumExcessiveCpu;
+            pnew.mNumCachedKill = mNumCachedKill;
+            pnew.mMinCachedKillPss = mMinCachedKillPss;
+            pnew.mAvgCachedKillPss = mAvgCachedKillPss;
+            pnew.mMaxCachedKillPss = mMaxCachedKillPss;
             pnew.mActive = mActive;
             pnew.mNumStartedServices = mNumStartedServices;
             return pnew;
@@ -2226,6 +2260,10 @@ public final class ProcessStats implements Parcelable {
             }
             mNumExcessiveWake += other.mNumExcessiveWake;
             mNumExcessiveCpu += other.mNumExcessiveCpu;
+            if (other.mNumCachedKill > 0) {
+                addCachedKill(other.mNumCachedKill, other.mMinCachedKillPss,
+                        other.mAvgCachedKillPss, other.mMaxCachedKillPss);
+            }
         }
 
         void resetSafely(long now) {
@@ -2238,6 +2276,8 @@ public final class ProcessStats implements Parcelable {
             mPssTableSize = 0;
             mNumExcessiveWake = 0;
             mNumExcessiveCpu = 0;
+            mNumCachedKill = 0;
+            mMinCachedKillPss = mAvgCachedKillPss = mMaxCachedKillPss = 0;
         }
 
         void makeDead() {
@@ -2268,6 +2308,12 @@ public final class ProcessStats implements Parcelable {
             }
             out.writeInt(mNumExcessiveWake);
             out.writeInt(mNumExcessiveCpu);
+            out.writeInt(mNumCachedKill);
+            if (mNumCachedKill > 0) {
+                out.writeLong(mMinCachedKillPss);
+                out.writeLong(mAvgCachedKillPss);
+                out.writeLong(mMaxCachedKillPss);
+            }
         }
 
         boolean readFromParcel(Parcel in, boolean fully) {
@@ -2289,6 +2335,14 @@ public final class ProcessStats implements Parcelable {
             mPssTableSize = mPssTable != null ? mPssTable.length : 0;
             mNumExcessiveWake = in.readInt();
             mNumExcessiveCpu = in.readInt();
+            mNumCachedKill = in.readInt();
+            if (mNumCachedKill > 0) {
+                mMinCachedKillPss = in.readLong();
+                mAvgCachedKillPss = in.readLong();
+                mMaxCachedKillPss = in.readLong();
+            } else {
+                mMinCachedKillPss = mAvgCachedKillPss = mMaxCachedKillPss = 0;
+            }
             return true;
         }
 
@@ -2499,6 +2553,37 @@ public final class ProcessStats implements Parcelable {
 
             for (int ip=pkgList.size()-1; ip>=0; ip--) {
                 pullFixedProc(pkgList, ip).mNumExcessiveCpu++;
+            }
+        }
+
+        private void addCachedKill(int num, long minPss, long avgPss, long maxPss) {
+            if (mNumCachedKill <= 0) {
+                mNumCachedKill = num;
+                mMinCachedKillPss = minPss;
+                mAvgCachedKillPss = avgPss;
+                mMaxCachedKillPss = maxPss;
+            } else {
+                if (minPss < mMinCachedKillPss) {
+                    mMinCachedKillPss = minPss;
+                }
+                if (maxPss > mMaxCachedKillPss) {
+                    mMaxCachedKillPss = maxPss;
+                }
+                mAvgCachedKillPss = (long)( ((mAvgCachedKillPss*(double)mNumCachedKill) + avgPss)
+                        / (mNumCachedKill+num) );
+                mNumCachedKill += num;
+            }
+        }
+
+        public void reportCachedKill(ArrayMap<String, ProcessState> pkgList, long pss) {
+            ensureNotDead();
+            mCommonProcess.addCachedKill(1, pss, pss, pss);
+            if (!mCommonProcess.mMultiPackage) {
+                return;
+            }
+
+            for (int ip=pkgList.size()-1; ip>=0; ip--) {
+                pullFixedProc(pkgList, ip).addCachedKill(1, pss, pss, pss);
             }
         }
 
