@@ -548,14 +548,43 @@ public final class ActivityStackSupervisor {
     ActivityRecord getTasksLocked(int maxNum, IThumbnailReceiver receiver,
             PendingThumbnailsRecord pending, List<RunningTaskInfo> list) {
         ActivityRecord r = null;
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+
+        // Gather all of the running tasks for each stack into runningTaskLists.
+        final int numStacks = mStacks.size();
+        ArrayList<RunningTaskInfo>[] runningTaskLists = new ArrayList[numStacks];
+        for (int stackNdx = numStacks - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            final ActivityRecord ar =
-                    stack.getTasksLocked(maxNum - list.size(), receiver, pending, list);
+            ArrayList<RunningTaskInfo> stackTaskList = new ArrayList<RunningTaskInfo>();
+            runningTaskLists[stackNdx] = stackTaskList;
+            final ActivityRecord ar = stack.getTasksLocked(receiver, pending, stackTaskList);
             if (isFrontStack(stack)) {
                 r = ar;
             }
         }
+
+        // The lists are already sorted from most recent to oldest. Just pull the most recent off
+        // each list and add it to list. Stop when all lists are empty or maxNum reached.
+        while (maxNum > 0) {
+            long mostRecentActiveTime = Long.MIN_VALUE;
+            ArrayList<RunningTaskInfo> selectedStackList = null;
+            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+                ArrayList<RunningTaskInfo> stackTaskList = runningTaskLists[stackNdx];
+                if (!stackTaskList.isEmpty()) {
+                    final long lastActiveTime = stackTaskList.get(0).lastActiveTime;
+                    if (lastActiveTime > mostRecentActiveTime) {
+                        mostRecentActiveTime = lastActiveTime;
+                        selectedStackList = stackTaskList;
+                    }
+                }
+            }
+            if (selectedStackList != null) {
+                list.add(selectedStackList.remove(0));
+                --maxNum;
+            } else {
+                break;
+            }
+        }
+
         return r;
     }
 
