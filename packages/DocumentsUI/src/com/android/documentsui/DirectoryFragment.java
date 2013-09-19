@@ -43,12 +43,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -96,7 +98,13 @@ public class DirectoryFragment extends Fragment {
     public static final int TYPE_SEARCH = 2;
     public static final int TYPE_RECENT_OPEN = 3;
 
+    public static final int ANIM_NONE = 1;
+    public static final int ANIM_SIDE = 2;
+    public static final int ANIM_DOWN = 3;
+    public static final int ANIM_UP = 4;
+
     private int mType = TYPE_NORMAL;
+    private String mStateKey;
 
     private int mLastMode = MODE_UNKNOWN;
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
@@ -113,37 +121,59 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_ROOT = "root";
     private static final String EXTRA_DOC = "doc";
     private static final String EXTRA_QUERY = "query";
+    private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
     private static AtomicInteger sLoaderId = new AtomicInteger(4000);
 
     private final int mLoaderId = sLoaderId.incrementAndGet();
 
-    public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc) {
-        show(fm, TYPE_NORMAL, root, doc, null);
+    public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
+        show(fm, TYPE_NORMAL, root, doc, null, anim);
     }
 
-    public static void showSearch(FragmentManager fm, RootInfo root, String query) {
-        show(fm, TYPE_SEARCH, root, null, query);
+    public static void showSearch(FragmentManager fm, RootInfo root, String query, int anim) {
+        show(fm, TYPE_SEARCH, root, null, query, anim);
     }
 
-    public static void showRecentsOpen(FragmentManager fm) {
-        show(fm, TYPE_RECENT_OPEN, null, null, null);
+    public static void showRecentsOpen(FragmentManager fm, int anim) {
+        show(fm, TYPE_RECENT_OPEN, null, null, null, anim);
     }
 
-    private static void show(
-            FragmentManager fm, int type, RootInfo root, DocumentInfo doc, String query) {
+    private static void show(FragmentManager fm, int type, RootInfo root, DocumentInfo doc,
+            String query, int anim) {
         final Bundle args = new Bundle();
         args.putInt(EXTRA_TYPE, type);
         args.putParcelable(EXTRA_ROOT, root);
         args.putParcelable(EXTRA_DOC, doc);
         args.putString(EXTRA_QUERY, query);
 
+        final FragmentTransaction ft = fm.beginTransaction();
+        switch (anim) {
+            case ANIM_SIDE:
+                args.putBoolean(EXTRA_IGNORE_STATE, true);
+                break;
+            case ANIM_DOWN:
+                args.putBoolean(EXTRA_IGNORE_STATE, true);
+                ft.setCustomAnimations(R.animator.dir_down, R.animator.dir_frozen);
+                break;
+            case ANIM_UP:
+                ft.setCustomAnimations(R.animator.dir_frozen, R.animator.dir_up);
+                break;
+        }
+
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
 
-        final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.container_directory, fragment);
         ft.commitAllowingStateLoss();
+    }
+
+    private static String buildStateKey(RootInfo root, DocumentInfo doc) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(root != null ? root.authority : "null").append(';');
+        builder.append(root != null ? root.rootId : "null").append(';');
+        builder.append(doc != null ? doc.documentId : "null");
+        return builder.toString();
     }
 
     public static DirectoryFragment get(FragmentManager fm) {
@@ -184,6 +214,7 @@ public class DirectoryFragment extends Fragment {
 
         mAdapter = new DocumentsAdapter();
         mType = getArguments().getInt(EXTRA_TYPE);
+        mStateKey = buildStateKey(root, doc);
 
         if (mType == TYPE_RECENT_OPEN) {
             // Hide titles when showing recents for picking images/videos
@@ -241,11 +272,16 @@ public class DirectoryFragment extends Fragment {
 
                 updateDisplayState();
 
-                if (mLastSortOrder != state.derivedSortOrder) {
-                    mLastSortOrder = state.derivedSortOrder;
+                // Restore any previous instance state
+                final SparseArray<Parcelable> container = state.dirState.remove(mStateKey);
+                if (container != null && !getArguments().getBoolean(EXTRA_IGNORE_STATE, false)) {
+                    getView().restoreHierarchyState(container);
+                } else if (mLastSortOrder != state.derivedSortOrder) {
                     mListView.smoothScrollToPosition(0);
                     mGridView.smoothScrollToPosition(0);
                 }
+
+                mLastSortOrder = state.derivedSortOrder;
             }
 
             @Override
@@ -258,6 +294,17 @@ public class DirectoryFragment extends Fragment {
         getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
 
         updateDisplayState();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // Remember last scroll location
+        final SparseArray<Parcelable> container = new SparseArray<Parcelable>();
+        getView().saveHierarchyState(container);
+        final State state = getDisplayState(this);
+        state.dirState.put(mStateKey, container);
     }
 
     @Override
