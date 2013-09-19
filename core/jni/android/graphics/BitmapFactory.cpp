@@ -297,6 +297,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             (SkBitmap::Allocator*)&recyclingAllocator : (SkBitmap::Allocator*)&javaAllocator;
     if (decodeMode != SkImageDecoder::kDecodeBounds_Mode) {
         if (!willScale) {
+            // If the java allocator is being used to allocate the pixel memory, the decoder
+            // need not write zeroes, since the memory is initialized to 0.
+            decoder->setSkipWritingZeroes(outputAllocator == &javaAllocator);
             decoder->setAllocator(outputAllocator);
         } else if (javaBitmap != NULL) {
             // check for eventual scaled bounds at allocation time, so we don't decode the bitmap
@@ -403,7 +406,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
-        outputBitmap->eraseColor(0);
+
+        // If outputBitmap's pixels are newly allocated by Java, there is no need
+        // to erase to 0, since the pixels were initialized to 0.
+        if (outputAllocator != &javaAllocator) {
+            outputBitmap->eraseColor(0);
+        }
 
         SkPaint paint;
         paint.setFilterBitmap(true);
