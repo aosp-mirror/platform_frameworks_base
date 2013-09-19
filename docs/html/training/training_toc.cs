@@ -418,7 +418,7 @@ include the action bar on devices running Android 2.1 or higher."
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/nsd-wifi-direct.html">
-            Using Wi-Fi Direct for Service Discovery
+            Using Wi-Fi P2P for Service Discovery
           </a>
           </li>
         </ul>
