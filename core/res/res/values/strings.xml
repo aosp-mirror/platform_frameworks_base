@@ -4438,7 +4438,7 @@
     <!-- PIN entry dialog error when PIN is too short [CHAR LIMIT=none] -->
     <string name="restr_pin_error_too_short">PIN is too short. Must be at least 4 digits.</string>
     <!-- PIN entry dialog countdown message for next chance to enter the PIN [CHAR LIMIT=none] -->
-    <!-- Phrase describing a time duration using seconds [CHAR LIMIT=16] -->
+    <!-- Phrase describing a time duration using seconds [CHAR LIMIT=none] -->
     <plurals name="restr_pin_countdown">
         <item quantity="one">Try again in 1 second</item>
         <item quantity="other">Try again in <xliff:g id="count">%d</xliff:g> seconds</item>
