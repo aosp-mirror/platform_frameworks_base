@@ -40,6 +40,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -80,11 +81,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String LOCK_PASSWORD_FILE = "password.key";
 
     private final Context mContext;
+    private LockPatternUtils mLockPatternUtils;
 
     public LockSettingsService(Context context) {
         mContext = context;
         // Open the database
         mOpenHelper = new DatabaseHelper(mContext);
+
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     public void systemReady() {
@@ -255,15 +259,42 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new File(getLockPatternFilename(userId)).length() > 0;
     }
 
+    private void maybeUpdateKeystore(String password, int userId) {
+        if (userId == UserHandle.USER_OWNER) {
+            final KeyStore keyStore = KeyStore.getInstance();
+            // Conditionally reset the keystore if empty. If non-empty, we are just
+            // switching key guard type
+            if (TextUtils.isEmpty(password) && keyStore.isEmpty()) {
+                keyStore.reset();
+            } else {
+                // Update the keystore password
+                keyStore.password(password);
+            }
+        }
+    }
+
     @Override
-    public void setLockPattern(byte[] hash, int userId) throws RemoteException {
+    public void setLockPattern(String pattern, int userId) throws RemoteException {
         checkWritePermission(userId);
 
+        maybeUpdateKeystore(pattern, userId);
+
+        final byte[] hash = LockPatternUtils.patternToHash(
+                LockPatternUtils.stringToPattern(pattern));
         writeFile(getLockPatternFilename(userId), hash);
     }
 
     @Override
-    public boolean checkPattern(byte[] hash, int userId) throws RemoteException {
+    public void setLockPassword(String password, int userId) throws RemoteException {
+        checkWritePermission(userId);
+
+        maybeUpdateKeystore(password, userId);
+
+        writeFile(getLockPasswordFilename(userId), mLockPatternUtils.passwordToHash(password));
+    }
+
+    @Override
+    public boolean checkPattern(String pattern, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
         try {
             // Read all the bytes from the file
@@ -275,25 +306,23 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return true;
             }
             // Compare the hash from the file with the entered pattern's hash
-            return Arrays.equals(stored, hash);
+            final byte[] hash = LockPatternUtils.patternToHash(
+                    LockPatternUtils.stringToPattern(pattern));
+            final boolean matched = Arrays.equals(stored, hash);
+            if (matched && !TextUtils.isEmpty(pattern)) {
+                maybeUpdateKeystore(pattern, userId);
+            }
+            return matched;
         } catch (FileNotFoundException fnfe) {
             Slog.e(TAG, "Cannot read file " + fnfe);
-            return true;
         } catch (IOException ioe) {
             Slog.e(TAG, "Cannot read file " + ioe);
-            return true;
         }
+        return true;
     }
 
     @Override
-    public void setLockPassword(byte[] hash, int userId) throws RemoteException {
-        checkWritePermission(userId);
-
-        writeFile(getLockPasswordFilename(userId), hash);
-    }
-
-    @Override
-    public boolean checkPassword(byte[] hash, int userId) throws RemoteException {
+    public boolean checkPassword(String password, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
 
         try {
@@ -306,14 +335,18 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return true;
             }
             // Compare the hash from the file with the entered password's hash
-            return Arrays.equals(stored, hash);
+            final byte[] hash = mLockPatternUtils.passwordToHash(password);
+            final boolean matched = Arrays.equals(stored, hash);
+            if (matched && !TextUtils.isEmpty(password)) {
+                maybeUpdateKeystore(password, userId);
+            }
+            return matched;
         } catch (FileNotFoundException fnfe) {
             Slog.e(TAG, "Cannot read file " + fnfe);
-            return true;
         } catch (IOException ioe) {
             Slog.e(TAG, "Cannot read file " + ioe);
-            return true;
         }
+        return true;
     }
 
     @Override
@@ -445,13 +478,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         private void maybeEnableWidgetSettingForUsers(SQLiteDatabase db) {
             final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
             final ContentResolver cr = mContext.getContentResolver();
-            final LockPatternUtils utils = new LockPatternUtils(mContext);
             final List<UserInfo> users = um.getUsers();
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
-                final boolean enabled = utils.hasWidgetsEnabledInKeyguard(userId);
+                final boolean enabled = mLockPatternUtils.hasWidgetsEnabledInKeyguard(userId);
                 Log.v(TAG, "Widget upgrade uid=" + userId + ", enabled="
-                        + enabled + ", w[]=" + utils.getAppWidgets());
+                        + enabled + ", w[]=" + mLockPatternUtils.getAppWidgets());
                 loadSetting(db, LockPatternUtils.LOCKSCREEN_WIDGETS_ENABLED, userId, enabled);
             }
         }
