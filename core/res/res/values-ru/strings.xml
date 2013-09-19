@@ -132,10 +132,8 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Память планшетного ПК заполнена. Удалите какие-нибудь файлы, чтобы освободить место."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Память телефона заполнена. Удалите какие-нибудь файлы, чтобы освободить место."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Действия в сети могут отслеживаться"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"администратором"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"администратором домена <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Настройки планшетного ПК"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Параметры телефона"</string>
@@ -487,6 +485,10 @@
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Приложение сможет захватывать и перенаправлять видеосигнал."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"захват защищенного видеосигнала"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Приложение сможет захватывать и перенаправлять защищенный видеосигнал."</string>
+    <!-- no translation found for permlab_mediaContentControl (8749790560720562511) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaContentControl (1637478200272062) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Изменение настроек аудио"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Приложение сможет изменять системные настройки звука, например уровень громкости и активный динамик."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Запись аудио"</string>
@@ -649,6 +651,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Приложение сможет выполнять чтение и запись в файловую систему кэша."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Осуществление/прием интернет-вызовов"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"Приложение сможет использовать службу SIP для интернет-вызовов."</string>
+    <!-- no translation found for permlab_bind_call_service (6724009726671246551) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_call_service (8732547662442572435) -->
+    <skip />
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"Просмотр журнала использования сети"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Приложение сможет считывать сохраненную историю использования определенных сетей и приложений."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"Управление сетевой политикой"</string>
@@ -1575,6 +1581,90 @@
     <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal (203 х 127 мм)"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger (432 х 279 мм)"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid (279 х 432 мм)"</string>
+    <!-- no translation found for mediaSize_na_index_3x5 (5509252063066211975) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_index_4x6 (5332684390971594005) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_index_5x8 (7362968775341960675) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_monarch (2611460830082139112) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_quarto (8558822460902251206) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_foolscap (6811578726392779281) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_roc_8k (7942303883156291469) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_roc_16k (2745572672585924098) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_1 (3646991879114652952) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_2 (7865751933861063950) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_3 (2191403634831383491) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_4 (1668330914079060946) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_5 (5582106000840114524) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_6 (6494010606796018657) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_7 (8969337865390766678) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_8 (3536551044672938810) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_9 (8634580007511762631) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_10 (8328076187466300392) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_prc_16k (4269000513139333995) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_om_pa_kai (6185675362929041927) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_om_dai_pa_kai (7198096842028551039) -->
+    <skip />
+    <!-- no translation found for mediaSize_chinese_om_jurro_ku_kai (7564410107636844408) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b10 (2489516647031216922) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b9 (2456851527269276849) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b8 (6720642142141459506) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b7 (1755600547799300151) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b6 (3348983162492455718) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b5 (8032250160903676801) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b4 (8061659428102997259) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b3 (5979993515912851631) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b2 (6535274368766761954) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b1 (3987500298387583545) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_b0 (4082174870939687315) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_jis_exec (3947301020900063432) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_chou4 (1748030454239084021) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_chou3 (7695518628727583683) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_chou2 (7357479425526521883) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_hagaki (3825801392451517118) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_oufuku (4158464668471924979) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_kahu (5685248230654591167) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_kaku2 (1501885015895614531) -->
+    <skip />
+    <!-- no translation found for mediaSize_japanese_you4 (1355503522299228375) -->
+    <skip />
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Печать отменена"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Ошибка записи"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"неизвестно"</string>
@@ -1592,6 +1682,5 @@
     <item quantity="other" msgid="4730868920742952817">"Повтор через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Повторите попытку позже."</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Провести от края к центру – открыть панель"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Чтобы открыть панель навигации, проведите пальцем от края к центру экрана"</string>
+    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Чтобы вернуться в обычный режим, проведите пальцем вниз"</string>
 </resources>

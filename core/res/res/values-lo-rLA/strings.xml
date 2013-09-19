@@ -485,6 +485,8 @@
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງວິດີໂອ."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ບັນທຶກວິດີໂອອອກຢ່າງປອດໄພ"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງວິດີໂອທີ່ປອດໄພ."</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"ຄວບຄຸມການຫຼິ້ນ ແລະເຂົ້າເຖິງໄຟລ໌ມີເດຍ"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມການຫຼິ້ນໄຟລ໌ມີເດຍ ແລະເຂົ້າເຖິງຂໍ້ມູນໄຟລ໌ມີເດຍໄດ້ (ຊື່, ນັກປະພັນ, ...)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ປ່ຽນການຕັ້ງຄ່າສຽງຂອງທ່ານ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂການຕັ້ງຄ່າສຽງສ່ວນກາງ ເຊັ່ນ: ລະດັບສຽງ ແລະລຳໂພງໃດທີ່ຖືກໃຊ້ສົ່ງສຽງອອກ."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ບັນທຶກສຽງ"</string>
@@ -647,6 +649,8 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານ ແລະຂຽນ ລະບົບໄຟລ໌ແຄດ."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"ສົ່ງ/ຮັບ ການໂທຜ່ານອິນເຕີເນັດ"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"ອະນຸຍາດໃຫ້ແອັບຯ ໃຊ້ບໍລິການ SIP ເພື່ອ ໂທອອກ/ຮັບສາຍ ການໂທຜ່ານອິນເຕີເນັດ."</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"ໂຕ້ຕອບກັບໜ້າຈໍການໂທ"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ອະນຸຍາດໃຫ້ແອັບຯ ຄວບຄຸມເວລາ ແລະວິທີການທີ່ຜູ່ໃຊ້ເຫັນໜ້າຈໍການໂທໄດ້."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ອ່ານປະຫວັດການນຳໃຊ້ເຄືອຂ່າຍ"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານປະຫວັດການນຳໃຊ້ເຄືອຂ່າຍຂອງແອັບຯ ແລະເຄືອຂ່າຍໃດນຶ່ງ."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ຈັດການນະໂຍບາຍເຄືອຂ່າຍ"</string>
@@ -1573,6 +1577,48 @@
     <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"ກົດໝາຍຂັ້ນຕ່ຳ"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"ບັນ​ຊີ"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"ແຖບບລອຍ"</string>
+    <string name="mediaSize_na_index_3x5" msgid="5509252063066211975">"Index Card 3x5"</string>
+    <string name="mediaSize_na_index_4x6" msgid="5332684390971594005">"Index Card 4x6"</string>
+    <string name="mediaSize_na_index_5x8" msgid="7362968775341960675">"Index Card 5x8"</string>
+    <string name="mediaSize_na_monarch" msgid="2611460830082139112">"Monarch"</string>
+    <string name="mediaSize_na_quarto" msgid="8558822460902251206">"Quarto"</string>
+    <string name="mediaSize_na_foolscap" msgid="6811578726392779281">"Foolscap"</string>
+    <string name="mediaSize_chinese_roc_8k" msgid="7942303883156291469">"ROC 8K"</string>
+    <string name="mediaSize_chinese_roc_16k" msgid="2745572672585924098">"ROC 16K"</string>
+    <string name="mediaSize_chinese_prc_1" msgid="3646991879114652952">"PRC 1"</string>
+    <string name="mediaSize_chinese_prc_2" msgid="7865751933861063950">"PRC 2"</string>
+    <string name="mediaSize_chinese_prc_3" msgid="2191403634831383491">"PRC 3"</string>
+    <string name="mediaSize_chinese_prc_4" msgid="1668330914079060946">"PRC 4"</string>
+    <string name="mediaSize_chinese_prc_5" msgid="5582106000840114524">"PRC 5"</string>
+    <string name="mediaSize_chinese_prc_6" msgid="6494010606796018657">"PRC 6"</string>
+    <string name="mediaSize_chinese_prc_7" msgid="8969337865390766678">"PRC 7"</string>
+    <string name="mediaSize_chinese_prc_8" msgid="3536551044672938810">"PRC 8"</string>
+    <string name="mediaSize_chinese_prc_9" msgid="8634580007511762631">"PRC 9"</string>
+    <string name="mediaSize_chinese_prc_10" msgid="8328076187466300392">"PRC 10"</string>
+    <string name="mediaSize_chinese_prc_16k" msgid="4269000513139333995">"PRC 16K"</string>
+    <string name="mediaSize_chinese_om_pa_kai" msgid="6185675362929041927">"Pa Kai"</string>
+    <string name="mediaSize_chinese_om_dai_pa_kai" msgid="7198096842028551039">"Dai Pa Kai"</string>
+    <string name="mediaSize_chinese_om_jurro_ku_kai" msgid="7564410107636844408">"Jurro Ku Kai"</string>
+    <string name="mediaSize_japanese_jis_b10" msgid="2489516647031216922">"JIS B10"</string>
+    <string name="mediaSize_japanese_jis_b9" msgid="2456851527269276849">"JIS B9"</string>
+    <string name="mediaSize_japanese_jis_b8" msgid="6720642142141459506">"JIS B8"</string>
+    <string name="mediaSize_japanese_jis_b7" msgid="1755600547799300151">"JIS B7"</string>
+    <string name="mediaSize_japanese_jis_b6" msgid="3348983162492455718">"JIS B6"</string>
+    <string name="mediaSize_japanese_jis_b5" msgid="8032250160903676801">"JIS B5"</string>
+    <string name="mediaSize_japanese_jis_b4" msgid="8061659428102997259">"JIS B4"</string>
+    <string name="mediaSize_japanese_jis_b3" msgid="5979993515912851631">"JIS B3"</string>
+    <string name="mediaSize_japanese_jis_b2" msgid="6535274368766761954">"JIS B2"</string>
+    <string name="mediaSize_japanese_jis_b1" msgid="3987500298387583545">"JIS B1"</string>
+    <string name="mediaSize_japanese_jis_b0" msgid="4082174870939687315">"JIS B0"</string>
+    <string name="mediaSize_japanese_jis_exec" msgid="3947301020900063432">"JIS Exec"</string>
+    <string name="mediaSize_japanese_chou4" msgid="1748030454239084021">"Chou4"</string>
+    <string name="mediaSize_japanese_chou3" msgid="7695518628727583683">"Chou3"</string>
+    <string name="mediaSize_japanese_chou2" msgid="7357479425526521883">"Chou2"</string>
+    <string name="mediaSize_japanese_hagaki" msgid="3825801392451517118">"Hagaki"</string>
+    <string name="mediaSize_japanese_oufuku" msgid="4158464668471924979">"Oufuku"</string>
+    <string name="mediaSize_japanese_kahu" msgid="5685248230654591167">"Kahu"</string>
+    <string name="mediaSize_japanese_kaku2" msgid="1501885015895614531">"Kaku2"</string>
+    <string name="mediaSize_japanese_you4" msgid="1355503522299228375">"You4"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ຍົກເລີກແລ້ວ"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ເນື້ອ​ໃນ​ການຂຽນຜິດພາດ"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"ບໍ່ຮູ້ຈັກ"</string>
@@ -1590,6 +1636,5 @@
     <item quantity="other" msgid="4730868920742952817">"ລອງໃໝ່ໃນອີກ <xliff:g id="COUNT">%d</xliff:g> ວິນາທີ"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"ປັດຢູ່ຂອບຂອງໜ້າຈໍເພື່ອສະແດງແຖບ"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"ປັດຢູ່ຂອບຂອງໜ້າຈໍເພື່ອສະແດງແຖບຂອງລະບົບ"</string>
+    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"ປັດລົງຈາກເທິງສຸດເພື່ອອກຈາກໂໝດເຕັມໜ້າຈໍ"</string>
 </resources>
