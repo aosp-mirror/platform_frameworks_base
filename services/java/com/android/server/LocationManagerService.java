@@ -1472,7 +1472,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 + " " + name + " " + request + " from " + packageName + "(" + uid + ")");
         LocationProviderInterface provider = mProvidersByName.get(name);
         if (provider == null) {
-            throw new IllegalArgumentException("provider doesn't exisit: " + provider);
+            throw new IllegalArgumentException("provider doesn't exist: " + provider);
         }
 
         UpdateRecord record = new UpdateRecord(name, request, receiver);
