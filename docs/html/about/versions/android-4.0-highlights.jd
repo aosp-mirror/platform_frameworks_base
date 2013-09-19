@@ -610,14 +610,17 @@ unlocking the device. Users just hold their devices in front of their faces to
 unlock, or use a backup PIN or pattern. </p>
 
 
-<p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi Direct and Bluetooth HDP</strong></p>
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi P2P and Bluetooth HDP</strong></p>
 
-<p>Support for <strong>Wi-Fi Direct</strong> lets users connect directly to
-nearby peer devices over Wi-Fi, for more reliable, higher-speed communication.
-No internet connection or tethering is needed. Through third-party apps, users
-can connect to compatible devices to take advantage of new features such as
-instant sharing of files, photos, or other media; streaming video or audio from
-another device; or connecting to compatible printers or other devices.</p>
+<p>Support for <strong>Wi-Fi peer-to-peer (P2P)</strong> lets users connect directly to nearby peer
+devices over Wi-Fi, for more reliable, higher-speed communication (in compliance with the Wi-Fi
+Alliance's <a href="http://www.wi-fi.org/discover-and-learn/wi-fi-direct"
+ class="external-link">Wi-Fi Direct&trade;</a>
+certification program). No internet connection or tethering is needed. Through third-party apps,
+users can connect to compatible devices to take advantage of new features such as instant sharing
+of files, photos, or other media; streaming video or audio from another device; or connecting to
+compatible printers or other devices.</p>
+
 
 <p>Android 4.0 also introduces built-in support for connecting to <strong>Bluetooth Health Device Profile (HDP)</strong> devices. With support from third-party apps, users can connect to wireless medical devices and sensors in hospitals, fitness centers, homes, and elsewhere.</p>
 
@@ -868,16 +871,19 @@ VP8 content.</p>
 
 <h3 id="connectivity-dev">New types of connectivity</h3>
 
-<p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi Direct</strong></p>
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi P2P</strong></p>
 
-<p>Developers can use a framework API to discover and connect directly to nearby
-devices over a high-performance, secure Wi-Fi Direct connection. No internet
-connection or hotspot is needed.</p>
+<p>Developers can use a framework API to discover and connect directly to nearby devices over a
+high-performance, secure Wi-Fi peer-to-peer (P2P) connection. No internet connection or hotspot is
+needed. Android's Wi-Fi P2P framework complies with the Wi-Fi Alliance's <a href=
+"http://www.wi-fi.org/discover-and-learn/wi-fi-direct" class="external-link">Wi-Fi Direct&trade;</a>
+certification program.</p>
 
-<p>Wi-Fi Direct opens new opportunities for developers to add innovative
-features to their applications. Applications can use Wi-Fi Direct to share
+
+<p>Wi-Fi peer-to-peer (P2P) opens new opportunities for developers to add innovative
+features to their applications. Applications can use Wi-Fi P2P to share
 files, photos, or other media between devices or between a desktop computer and
-an Android-powered device. Applications could also use Wi-Fi Direct to stream
+an Android-powered device. Applications could also use Wi-Fi P2P to stream
 media content from a peer device such as a digital television or audio player,
 connect a group of users for gaming, print files, and more.</p>
 
