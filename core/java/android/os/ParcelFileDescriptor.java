@@ -462,6 +462,39 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     /**
+     * Converts a string representing a file mode, such as "rw", into a bitmask suitable for use
+     * with {@link #open}.
+     * <p>
+     * @param mode The string representation of the file mode.
+     * @return A bitmask representing the given file mode.
+     * @throws IllegalArgumentException if the given string does not match a known file mode.
+     */
+    public static int parseMode(String mode) {
+        final int modeBits;
+        if ("r".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
+        } else if ("w".equals(mode) || "wt".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_TRUNCATE;
+        } else if ("wa".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_APPEND;
+        } else if ("rw".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
+                    | ParcelFileDescriptor.MODE_CREATE;
+        } else if ("rwt".equals(mode)) {
+            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_TRUNCATE;
+        } else {
+            throw new IllegalArgumentException("Bad mode '" + mode + "'");
+        }
+        return modeBits;
+    }
+
+    /**
      * Retrieve the actual FileDescriptor associated with this object.
      *
      * @return Returns the FileDescriptor associated with this object.
