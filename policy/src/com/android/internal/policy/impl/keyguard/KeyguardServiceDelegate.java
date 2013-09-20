@@ -29,8 +29,10 @@ import com.android.internal.widget.LockPatternUtils;
  * local or remote instances of keyguard.
  */
 public class KeyguardServiceDelegate {
-    private static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    private static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+    // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
+    public static final String KEYGUARD_PACKAGE = "com.android.keyguard";
+    public static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
+
     private static final String TAG = "KeyguardServiceDelegate";
     private static final boolean DEBUG = true;
     protected KeyguardServiceWrapper mKeyguardService;

@@ -23,6 +23,7 @@ public class KeyguardViewStateManager implements
         SlidingChallengeLayout.OnChallengeScrolledListener,
         ChallengeLayout.OnBouncerStateChangedListener {
 
+    private static final int WARP_FADE_DURATION = 250;
     private KeyguardWidgetPager mKeyguardWidgetPager;
     private ChallengeLayout mChallengeLayout;
     private KeyguardHostView mKeyguardHostView;
@@ -32,6 +33,7 @@ public class KeyguardViewStateManager implements
     private KeyguardSecurityView mKeyguardSecurityContainer;
     private static final int SCREEN_ON_HINT_DURATION = 1000;
     private static final int SCREEN_ON_RING_HINT_DELAY = 300;
+    private static final boolean SHOW_INITIAL_PAGE_HINTS = false;
     Handler mMainQueue = new Handler(Looper.myLooper());
 
     int mLastScrollState = SlidingChallengeLayout.SCROLL_STATE_IDLE;
@@ -167,6 +169,16 @@ public class KeyguardViewStateManager implements
         mCurrentPage = newPageIndex;
     }
 
+    public void onPageBeginWarp() {
+        // fadeOutSecurity(WARP_FADE_DURATION);
+        // mKeyguardWidgetPager.showNonWarpViews(WARP_FADE_DURATION, false);
+    }
+
+    public void onPageEndWarp() {
+        // fadeInSecurity(WARP_FADE_DURATION);
+        // mKeyguardWidgetPager.showNonWarpViews(WARP_FADE_DURATION, true);
+    }
+
     private int getChallengeTopRelativeToFrame(KeyguardWidgetFrame frame, int top) {
         mTmpPoint[0] = 0;
         mTmpPoint[1] = top;
@@ -296,7 +308,9 @@ public class KeyguardViewStateManager implements
                 mKeyguardSecurityContainer.showUsabilityHint();
             }
         } , SCREEN_ON_RING_HINT_DELAY);
-        mKeyguardWidgetPager.showInitialPageHints();
+        if (SHOW_INITIAL_PAGE_HINTS) {
+            mKeyguardWidgetPager.showInitialPageHints();
+        }
         if (mHideHintsRunnable != null) {
             mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
         }

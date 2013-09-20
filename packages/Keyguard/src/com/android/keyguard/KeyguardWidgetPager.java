@@ -186,6 +186,16 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     @Override
+    public void onPageBeginWarp() {
+        mViewStateManager.onPageBeginWarp();
+    }
+
+    @Override
+    public void onPageEndWarp() {
+        mViewStateManager.onPageEndWarp();
+    }
+
+    @Override
     public void sendAccessibilityEvent(int eventType) {
         if (eventType != AccessibilityEvent.TYPE_VIEW_SCROLLED || isPageMoving()) {
             super.sendAccessibilityEvent(eventType);
@@ -923,4 +933,27 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         return flags;
     }
+
+    public void handleExternalCameraEvent(MotionEvent event) {
+        beginCameraEvent();
+        int cameraPage = getPageCount() - 1;
+        boolean endWarp = false;
+        if (isCameraPage(cameraPage)) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    userActivity();
+                    startWarp(cameraPage);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    endWarp = true;
+                    break;
+            }
+            dispatchTouchEvent(event);
+            // This has to happen after the event has been handled by the real widget pager
+            if (endWarp) endWarp();
+        }
+        endCameraEvent();
+    }
+
 }

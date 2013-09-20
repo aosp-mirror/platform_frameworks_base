@@ -15,6 +15,8 @@
  */
 package com.android.internal.policy;
 
+import android.view.MotionEvent;
+
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 
@@ -39,4 +41,5 @@ interface IKeyguardService {
     oneway void doKeyguardTimeout(in Bundle options);
     oneway void setCurrentUser(int userId);
     oneway void showAssistant();
+    oneway void dispatch(in MotionEvent event);
 }
