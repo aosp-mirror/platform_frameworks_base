@@ -69,7 +69,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -1342,7 +1341,7 @@ final class ActivityStack {
             if (next.app != null && next.app.thread != null) {
                 // No reason to do full oom adj update here; we'll let that
                 // happen whenever it needs to later.
-                mService.updateLruProcessLocked(next.app, false);
+                mService.updateLruProcessLocked(next.app, false, true);
             }
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return true;
@@ -1470,7 +1469,7 @@ final class ActivityStack {
             mResumedActivity = next;
             next.task.touchActiveTime();
             mService.addRecentTaskLocked(next.task);
-            mService.updateLruProcessLocked(next.app, true);
+            mService.updateLruProcessLocked(next.app, true, true);
             updateLRUListLocked(next);
 
             // Have the window manager re-evaluate the orientation of
@@ -2707,7 +2706,8 @@ final class ActivityStack {
                             ActivityManagerService.CANCEL_HEAVY_NOTIFICATION_MSG);
                 }
                 if (r.app.activities.isEmpty()) {
-                    // No longer have activities, so update oom adj.
+                    // No longer have activities, so update LRU list and oom adj.
+                    mService.updateLruProcessLocked(r.app, false, false);
                     mService.updateOomAdjLocked();
                 }
             }

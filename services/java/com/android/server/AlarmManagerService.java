@@ -470,7 +470,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
         
         mTimeTickSender = PendingIntent.getBroadcastAsUser(context, 0,
                 new Intent(Intent.ACTION_TIME_TICK).addFlags(
-                        Intent.FLAG_RECEIVER_REGISTERED_ONLY), 0,
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND), 0,
                         UserHandle.ALL);
         Intent intent = new Intent(Intent.ACTION_DATE_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);

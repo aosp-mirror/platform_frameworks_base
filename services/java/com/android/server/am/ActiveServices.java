@@ -311,7 +311,7 @@ public final class ActiveServices {
         final ServiceMap smap = getServiceMap(r.userId);
         boolean addToStarting = false;
         if (!callerFg && r.app == null && mAm.mStartedUsers.get(r.userId) != null) {
-            ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid);
+            ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid, false);
             if (proc == null || proc.curProcState > ActivityManager.PROCESS_STATE_RECEIVER) {
                 // If this is not coming from a foreground caller, then we may want
                 // to delay the start if there are already other background services
@@ -562,7 +562,7 @@ public final class ActiveServices {
                     if (r.isForeground) {
                         r.isForeground = false;
                         if (r.app != null) {
-                            mAm.updateLruProcessLocked(r.app, false);
+                            mAm.updateLruProcessLocked(r.app, false, false);
                             updateServiceForegroundLocked(r.app, true);
                         }
                     }
@@ -1241,9 +1241,9 @@ public final class ActiveServices {
         ProcessRecord app;
 
         if (!isolated) {
-            app = mAm.getProcessRecordLocked(procName, r.appInfo.uid);
-            if (DEBUG_MU)
-                Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid + " app=" + app);
+            app = mAm.getProcessRecordLocked(procName, r.appInfo.uid, false);
+            if (DEBUG_MU) Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid
+                        + " app=" + app);
             if (app != null && app.thread != null) {
                 try {
                     app.addPackage(r.appInfo.packageName, mAm.mProcessStats);
@@ -1270,7 +1270,7 @@ public final class ActiveServices {
         // to be executed when the app comes up.
         if (app == null) {
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                    "service", r.name, false, isolated)) == null) {
+                    "service", r.name, false, isolated, false)) == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
@@ -1322,7 +1322,7 @@ public final class ActiveServices {
 
         app.services.add(r);
         bumpServiceExecutingLocked(r, execInFg, "create");
-        mAm.updateLruProcessLocked(app, true);
+        mAm.updateLruProcessLocked(app, true, false);
 
         boolean created = false;
         try {

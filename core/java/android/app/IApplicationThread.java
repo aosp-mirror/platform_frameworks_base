@@ -118,7 +118,6 @@ public interface IApplicationThread extends IInterface {
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
-    void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException;
     static final int PACKAGE_REMOVED = 0;
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
@@ -128,7 +127,7 @@ public interface IApplicationThread extends IInterface {
     void setCoreSettings(Bundle coreSettings) throws RemoteException;
     void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) throws RemoteException;
     void scheduleTrimMemory(int level) throws RemoteException;
-    Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin, boolean dumpInfo,
+    void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin, boolean dumpInfo,
             boolean dumpDalvik, String[] args) throws RemoteException;
     void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void dumpDbInfo(FileDescriptor fd, String[] args) throws RemoteException;
@@ -171,7 +170,7 @@ public interface IApplicationThread extends IInterface {
     int SET_SCHEDULING_GROUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
-    int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
+
     int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int SCHEDULE_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;

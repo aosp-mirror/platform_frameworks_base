@@ -62,12 +62,12 @@ final class ProcessRecord {
     int pid;                    // The process of this application; 0 if none
     boolean starting;           // True if the process is being started
     long lastActivityTime;      // For managing the LRU list
-    long lruWeight;             // Weight for ordering in LRU list
     long lastPssTime;           // Last time we retrieved PSS data
     long nextPssTime;           // Next time we want to request PSS data
     long lastStateTime;         // Last time setProcState changed
     long initialIdlePss;        // Initial memory pss of process for idle maintenance.
     long lastPss;               // Last computed memory pss.
+    long lastCachedPss;         // Last computed pss when in cached state.
     int maxAdj;                 // Maximum OOM adjustment for this process
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
@@ -214,15 +214,22 @@ final class ProcessRecord {
                 pw.println(starting);
         pw.print(prefix); pw.print("lastActivityTime=");
                 TimeUtils.formatDuration(lastActivityTime, now, pw);
-                pw.print(" lruWeight="); pw.println(lruWeight);
+                pw.print(" lastPssTime=");
+                TimeUtils.formatDuration(lastPssTime, now, pw);
+                pw.print(" nextPssTime=");
+                TimeUtils.formatDuration(nextPssTime, now, pw);
+                pw.println();
+        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
+                pw.print(" lruSeq="); pw.print(lruSeq);
+                pw.print(" lastPss="); pw.print(lastPss);
+                pw.print(" lastCachedPss="); pw.println(lastCachedPss);
         pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
                 pw.print(" keeping="); pw.print(keeping);
                 pw.print(" cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
         if (notCachedSinceIdle) {
             pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(notCachedSinceIdle);
-                    pw.print(" initialIdlePss="); pw.print(initialIdlePss);
-                    pw.print(" lastPss="); pw.println(lastPss);
+                    pw.print(" initialIdlePss="); pw.println(initialIdlePss);
         }
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
                 pw.print(" curRaw="); pw.print(curRawAdj);
@@ -239,13 +246,6 @@ final class ProcessRecord {
                 pw.print(" setProcState="); pw.print(setProcState);
                 pw.print(" lastStateTime=");
                 TimeUtils.formatDuration(lastStateTime, now, pw);
-                pw.println();
-        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
-                pw.print(" lruSeq="); pw.print(lruSeq);
-                pw.print(" lastPssTime=");
-                TimeUtils.formatDuration(lastPssTime, now, pw);
-                pw.print(" nextPssTime=");
-                TimeUtils.formatDuration(nextPssTime, now, pw);
                 pw.println();
         if (hasShownUi || pendingUiClean || hasAboveClient) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);

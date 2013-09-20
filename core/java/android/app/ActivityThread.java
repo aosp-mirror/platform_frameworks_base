@@ -855,10 +855,6 @@ public final class ActivityThread {
             }
         }
 
-        public void getMemoryInfo(Debug.MemoryInfo outInfo) {
-            Debug.getMemoryInfo(outInfo);
-        }
-
         public void dispatchPackageBroadcast(int cmd, String[] packages) {
             queueOrSendMessage(H.DISPATCH_PACKAGE_BROADCAST, packages, cmd);
         }
@@ -895,29 +891,22 @@ public final class ActivityThread {
         }
 
         @Override
-        public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin,
+        public void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin,
                 boolean dumpInfo, boolean dumpDalvik, String[] args) {
             FileOutputStream fout = new FileOutputStream(fd);
             PrintWriter pw = new FastPrintWriter(fout);
             try {
-                return dumpMemInfo(pw, checkin, dumpInfo, dumpDalvik);
+                dumpMemInfo(pw, mem, checkin, dumpInfo, dumpDalvik);
             } finally {
                 pw.flush();
             }
         }
 
-        private Debug.MemoryInfo dumpMemInfo(PrintWriter pw, boolean checkin, boolean dumpInfo,
-                boolean dumpDalvik) {
+        private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
+                boolean dumpInfo, boolean dumpDalvik) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
-
-            Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
-            Debug.getMemoryInfo(memInfo);
-
-            if (!dumpInfo) {
-                return memInfo;
-            }
 
             Runtime runtime = Runtime.getRuntime();
 
@@ -1043,7 +1032,7 @@ public final class ActivityThread {
                 }
                 pw.println();
 
-                return memInfo;
+                return;
             }
 
             // otherwise, show human-readable format
@@ -1168,8 +1157,6 @@ public final class ActivityThread {
                 pw.println(" Asset Allocations");
                 pw.print(assetAlloc);
             }
-
-            return memInfo;
         }
 
         @Override

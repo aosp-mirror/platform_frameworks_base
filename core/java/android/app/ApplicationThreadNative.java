@@ -450,16 +450,6 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
-        case GET_MEMORY_INFO_TRANSACTION:
-        {
-            data.enforceInterface(IApplicationThread.descriptor);
-            Debug.MemoryInfo mi = new Debug.MemoryInfo();
-            getMemoryInfo(mi);
-            reply.writeNoException();
-            mi.writeToParcel(reply, 0);
-            return true;
-        }
-
         case DISPATCH_PACKAGE_BROADCAST_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -530,14 +520,14 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             ParcelFileDescriptor fd = data.readFileDescriptor();
+            Debug.MemoryInfo mi = Debug.MemoryInfo.CREATOR.createFromParcel(data);
             boolean checkin = data.readInt() != 0;
             boolean dumpInfo = data.readInt() != 0;
             boolean dumpDalvik = data.readInt() != 0;
             String[] args = data.readStringArray();
-            Debug.MemoryInfo mi = null;
             if (fd != null) {
                 try {
-                    mi = dumpMemInfo(fd.getFileDescriptor(), checkin, dumpInfo, dumpDalvik, args);
+                    dumpMemInfo(fd.getFileDescriptor(), mi, checkin, dumpInfo, dumpDalvik, args);
                 } finally {
                     try {
                         fd.close();
@@ -547,7 +537,6 @@ public abstract class ApplicationThreadNative extends Binder
                 }
             }
             reply.writeNoException();
-            mi.writeToParcel(reply, 0);
             return true;
         }
 
@@ -1108,17 +1097,6 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
     
-    public void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IApplicationThread.descriptor);
-        mRemote.transact(GET_MEMORY_INFO_TRANSACTION, data, reply, 0);
-        reply.readException();
-        outInfo.readFromParcel(reply);
-        data.recycle();
-        reply.recycle();
-    }
-    
     public void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1194,23 +1172,21 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
     }
 
-    public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin, boolean dumpInfo,
-            boolean dumpDalvik, String[] args) throws RemoteException {
+    public void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin,
+            boolean dumpInfo, boolean dumpDalvik, String[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeFileDescriptor(fd);
+        mem.writeToParcel(data, 0);
         data.writeInt(checkin ? 1 : 0);
         data.writeInt(dumpInfo ? 1 : 0);
         data.writeInt(dumpDalvik ? 1 : 0);
         data.writeStringArray(args);
         mRemote.transact(DUMP_MEM_INFO_TRANSACTION, data, reply, 0);
         reply.readException();
-        Debug.MemoryInfo info = new Debug.MemoryInfo();
-        info.readFromParcel(reply);
         data.recycle();
         reply.recycle();
-        return info;
     }
 
     public void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException {

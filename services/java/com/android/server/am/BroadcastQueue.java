@@ -220,7 +220,7 @@ public final class BroadcastQueue {
         r.curApp = app;
         app.curReceiver = r;
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
-        mService.updateLruProcessLocked(app, true);
+        mService.updateLruProcessLocked(app, true, false);
 
         // Tell the application to launch this receiver.
         r.intent.setComponent(r.curComponent);
@@ -334,6 +334,7 @@ public final class BroadcastQueue {
     public boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
         final int state = r.state;
+        final ActivityInfo receiver = r.curReceiver;
         r.state = BroadcastRecord.IDLE;
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -363,15 +364,27 @@ public final class BroadcastQueue {
         if (waitForServices && r.curComponent != null && r.queue.mDelayBehindServices
                 && r.queue.mOrderedBroadcasts.size() > 0
                 && r.queue.mOrderedBroadcasts.get(0) == r) {
-            // In this case, we are ready to process the next receiver for the current broadcast,
-            // but are on a queue that would like to wait for services to finish before moving
-            // on.  If there are background services currently starting, then we will go into a
-            // special state where we hold off on continuing this broadcast until they are done.
-            if (mService.mServices.hasBackgroundServices(r.userId)) {
-                Slog.i(ActivityManagerService.TAG, "Delay finish: "
-                        + r.curComponent.flattenToShortString());
-                r.state = BroadcastRecord.WAITING_SERVICES;
-                return false;
+            ActivityInfo nextReceiver;
+            if (r.nextReceiver < r.receivers.size()) {
+                Object obj = r.receivers.get(r.nextReceiver);
+                nextReceiver = (obj instanceof ActivityInfo) ? (ActivityInfo)obj : null;
+            } else {
+                nextReceiver = null;
+            }
+            // Don't do this if the next receive is in the same process as the current one.
+            if (receiver == null || nextReceiver == null
+                    || receiver.applicationInfo.uid != nextReceiver.applicationInfo.uid
+                    || !receiver.processName.equals(nextReceiver.processName)) {
+                // In this case, we are ready to process the next receiver for the current broadcast,
+                // but are on a queue that would like to wait for services to finish before moving
+                // on.  If there are background services currently starting, then we will go into a
+                // special state where we hold off on continuing this broadcast until they are done.
+                if (mService.mServices.hasBackgroundServices(r.userId)) {
+                    Slog.i(ActivityManagerService.TAG, "Delay finish: "
+                            + r.curComponent.flattenToShortString());
+                    r.state = BroadcastRecord.WAITING_SERVICES;
+                    return false;
+                }
             }
         }
 
@@ -833,7 +846,7 @@ public final class BroadcastQueue {
 
             // Is this receiver's application already running?
             ProcessRecord app = mService.getProcessRecordLocked(targetProcess,
-                    info.activityInfo.applicationInfo.uid);
+                    info.activityInfo.applicationInfo.uid, false);
             if (app != null && app.thread != null) {
                 try {
                     app.addPackage(info.activityInfo.packageName, mService.mProcessStats);
@@ -871,7 +884,7 @@ public final class BroadcastQueue {
                     info.activityInfo.applicationInfo, true,
                     r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                     "broadcast", r.curComponent,
-                    (r.intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false))
+                    (r.intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false, false))
                             == null) {
                 // Ah, this recipient is unavailable.  Finish it if necessary,
                 // and mark the broadcast record as ready for the next.

@@ -499,6 +499,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ArrayList<ProcessRecord> mLruProcesses = new ArrayList<ProcessRecord>();
 
     /**
+     * Where in mLruProcesses that the processes hosting activities start.
+     */
+    int mLruProcessActivityStart = 0;
+
+    /**
      * List of processes that should gc as soon as things are idle.
      */
     final ArrayList<ProcessRecord> mProcessesToGc = new ArrayList<ProcessRecord>();
@@ -1638,7 +1643,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     int pid;
                     synchronized (ActivityManagerService.this) {
                         if (i >= mPendingPssProcesses.size()) {
-                            if (DEBUG_PSS) Slog.i(TAG, "Collected PSS of " + num + " of " + i
+                            if (DEBUG_PSS) Slog.d(TAG, "Collected PSS of " + num + " of " + i
                                     + " processes in " + (SystemClock.uptimeMillis()-start) + "ms");
                             mPendingPssProcesses.clear();
                             return;
@@ -1661,10 +1666,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 num++;
                                 proc.lastPssTime = SystemClock.uptimeMillis();
                                 proc.baseProcessTracker.addPss(pss, tmp[0], true);
+                                if (DEBUG_PSS) Slog.d(TAG, "PSS of " + proc.toShortString()
+                                        + ": " + pss + " lastPss=" + proc.lastPss
+                                        + " state=" + ProcessList.makeProcStateString(procState));
                                 if (proc.initialIdlePss == 0) {
                                     proc.initialIdlePss = pss;
                                 }
                                 proc.lastPss = pss;
+                                if (procState >= ActivityManager.PROCESS_STATE_HOME) {
+                                    proc.lastCachedPss = pss;
+                                }
                             }
                         }
                     }
@@ -1704,7 +1715,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (mSelf.mPidsSelfLocked) {
                     mSelf.mPidsSelfLocked.put(app.pid, app);
                 }
-                mSelf.updateLruProcessLocked(app, true);
+                mSelf.updateLruProcessLocked(app, true, false);
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(
@@ -2219,52 +2230,76 @@ public final class ActivityManagerService extends ActivityManagerNative
         mHandler.sendMessage(msg);
     }
 
-    private final void updateLruProcessInternalLocked(ProcessRecord app, int bestPos) {
-        // put it on the LRU to keep track of when it should be exited.
-        int lrui = mLruProcesses.indexOf(app);
-        if (lrui >= 0) mLruProcesses.remove(lrui);
+    private final int updateLruProcessInternalLocked(ProcessRecord app, long now, int index) {
+        app.lastActivityTime = now;
 
-        int i = mLruProcesses.size()-1;
-        int skipTop = 0;
-
-        app.lruSeq = mLruSeq;
-
-        // compute the new weight for this process.
-        app.lastActivityTime = SystemClock.uptimeMillis();
         if (app.activities.size() > 0) {
-            // If this process has activities, we more strongly want to keep
-            // it around.
-            app.lruWeight = app.lastActivityTime;
-        } else if (app.pubProviders.size() > 0) {
-            // If this process contains content providers, we want to keep
-            // it a little more strongly.
-            app.lruWeight = app.lastActivityTime - ProcessList.CONTENT_APP_IDLE_OFFSET;
-            // Also don't let it kick out the first few "real" cached processes.
-            skipTop = ProcessList.MIN_CACHED_APPS;
-        } else {
-            // If this process doesn't have activities, we less strongly
-            // want to keep it around, and generally want to avoid getting
-            // in front of any very recently used activities.
-            app.lruWeight = app.lastActivityTime - ProcessList.EMPTY_APP_IDLE_OFFSET;
-            // Also don't let it kick out the first few "real" cached processes.
-            skipTop = ProcessList.MIN_CACHED_APPS;
+            // Don't want to touch dependent processes that are hosting activities.
+            return index;
         }
 
-        while (i >= 0) {
-            ProcessRecord p = mLruProcesses.get(i);
-            // If this app shouldn't be in front of the first N background
-            // apps, then skip over that many that are currently cached.
-            if (skipTop > 0 && p.setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
-                skipTop--;
-            }
-            if (p.lruWeight <= app.lruWeight || i < bestPos) {
-                mLruProcesses.add(i+1, app);
-                break;
-            }
-            i--;
+        int lrui = mLruProcesses.lastIndexOf(app);
+        if (lrui < 0) {
+            throw new IllegalStateException("Adding dependent process " + app
+                    + " not on LRU list!");
         }
-        if (i < 0) {
-            mLruProcesses.add(0, app);
+
+        if (lrui >= mLruProcessActivityStart) {
+            // Don't want to touch dependent processes that are hosting activities.
+            return index;
+        }
+
+        mLruProcesses.remove(lrui);
+        if (index > 0) {
+            index--;
+        }
+        mLruProcesses.add(index, app);
+        return index;
+    }
+
+    final void removeLruProcessLocked(ProcessRecord app) {
+        int lrui = mLruProcesses.lastIndexOf(app);
+        if (lrui >= 0) {
+            if (lrui <= mLruProcessActivityStart) {
+                mLruProcessActivityStart--;
+            }
+            mLruProcesses.remove(lrui);
+        }
+    }
+
+    final void updateLruProcessLocked(ProcessRecord app, boolean oomAdj, boolean activityChange) {
+        final boolean hasActivity = app.activities.size() > 0;
+        if (!activityChange && hasActivity) {
+            // The process has activties, so we are only going to allow activity-based
+            // adjustments move it.  It should be kept in the front of the list with other
+            // processes that have activities, and we don't want those to change their
+            // order except due to activity operations.
+            return;
+        }
+
+        mLruSeq++;
+        final long now = SystemClock.uptimeMillis();
+        app.lastActivityTime = now;
+
+        int lrui = mLruProcesses.lastIndexOf(app);
+
+        if (lrui >= 0) {
+            if (lrui < mLruProcessActivityStart) {
+                mLruProcessActivityStart--;
+            }
+            mLruProcesses.remove(lrui);
+        }
+
+        int nextIndex;
+        if (!hasActivity) {
+            // Process doesn't have activities, it goes to the top of the non-activity area.
+            mLruProcesses.add(mLruProcessActivityStart, app);
+            nextIndex = mLruProcessActivityStart-1;
+            mLruProcessActivityStart++;
+        } else {
+            // Process does have activities, put it at the very tipsy-top.
+            mLruProcesses.add(app);
+            nextIndex = mLruProcessActivityStart;
         }
 
         // If the app is currently using a content provider or service,
@@ -2274,20 +2309,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (cr.binding != null && cr.binding.service != null
                     && cr.binding.service.app != null
                     && cr.binding.service.app.lruSeq != mLruSeq) {
-                updateLruProcessInternalLocked(cr.binding.service.app, i+1);
+                nextIndex = updateLruProcessInternalLocked(cr.binding.service.app, now, nextIndex);
             }
         }
         for (int j=app.conProviders.size()-1; j>=0; j--) {
             ContentProviderRecord cpr = app.conProviders.get(j).provider;
             if (cpr.proc != null && cpr.proc.lruSeq != mLruSeq) {
-                updateLruProcessInternalLocked(cpr.proc, i+1);
+                nextIndex = updateLruProcessInternalLocked(cpr.proc, now, nextIndex);
             }
         }
-    }
-
-    final void updateLruProcessLocked(ProcessRecord app, boolean oomAdj) {
-        mLruSeq++;
-        updateLruProcessInternalLocked(app, 0);
 
         //Slog.i(TAG, "Putting proc to front: " + app.processName);
         if (oomAdj) {
@@ -2295,14 +2325,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    final ProcessRecord getProcessRecordLocked(
-            String processName, int uid) {
+    final ProcessRecord getProcessRecordLocked(String processName, int uid, boolean keepIfLarge) {
         if (uid == Process.SYSTEM_UID) {
             // The system gets to run in any process.  If there are multiple
             // processes with the same uid, just pick the first (this
             // should never happen).
-            SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(
-                    processName);
+            SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(processName);
             if (procs == null) return null;
             final int N = procs.size();
             for (int i = 0; i < N; i++) {
@@ -2310,6 +2338,26 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         ProcessRecord proc = mProcessNames.get(processName, uid);
+        if (false && proc != null && !keepIfLarge
+                && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY
+                && proc.lastCachedPss >= 4000) {
+            // Turn this condition on to cause killing to happen regularly, for testing.
+            if (proc.baseProcessTracker != null) {
+                proc.baseProcessTracker.reportCachedKill(proc.pkgList, proc.lastCachedPss);
+            }
+            killUnneededProcessLocked(proc, Long.toString(proc.lastCachedPss)
+                    + "k from cached");
+        } else if (proc != null && !keepIfLarge && mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
+                && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
+            if (DEBUG_PSS) Slog.d(TAG, "May not keep " + proc + ": pss=" + proc.lastCachedPss);
+            if (proc.lastCachedPss >= mProcessList.getCachedRestoreThreshold()) {
+                if (proc.baseProcessTracker != null) {
+                    proc.baseProcessTracker.reportCachedKill(proc.pkgList, proc.lastCachedPss);
+                }
+                killUnneededProcessLocked(proc, Long.toString(proc.lastCachedPss)
+                        + "k from cached");
+            }
+        }
         return proc;
     }
 
@@ -2333,10 +2381,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             String hostingType, ComponentName hostingName, boolean allowWhileBooting,
-            boolean isolated) {
+            boolean isolated, boolean keepIfLarge) {
         ProcessRecord app;
         if (!isolated) {
-            app = getProcessRecordLocked(processName, info.uid);
+            app = getProcessRecordLocked(processName, info.uid, keepIfLarge);
         } else {
             // If this is an isolated process, it can't re-use an existing process.
             app = null;
@@ -2647,7 +2695,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             aInfo = new ActivityInfo(aInfo);
             aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
             ProcessRecord app = getProcessRecordLocked(aInfo.processName,
-                    aInfo.applicationInfo.uid);
+                    aInfo.applicationInfo.uid, true);
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mStackSupervisor.startHomeActivity(intent, aInfo);
@@ -3365,7 +3413,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int pid = app.pid;
         cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1);
         if (!restarting) {
-            mLruProcesses.remove(app);
+            removeLruProcessLocked(app);
             if (pid > 0) {
                 ProcessList.remove(pid);
             }
@@ -4216,7 +4264,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Only the system server can kill an application
         if (callerUid == Process.SYSTEM_UID) {
             synchronized (this) {
-                ProcessRecord app = getProcessRecordLocked(processName, uid);
+                ProcessRecord app = getProcessRecordLocked(processName, uid, true);
                 if (app != null && app.thread != null) {
                     try {
                         app.thread.scheduleSuicide();
@@ -4521,7 +4569,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             killUnneededProcessLocked(app, reason);
             handleAppDiedLocked(app, true, allowRestart);
-            mLruProcesses.remove(app);
+            removeLruProcessLocked(app);
 
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
@@ -4716,7 +4764,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     isRestrictedBackupMode || !normalMode, app.persistent,
                     new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
-            updateLruProcessLocked(app, false);
+            updateLruProcessLocked(app, false, false);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {
             // todo: Yikes!  What should we do?  For now we will try to
@@ -7179,7 +7227,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
                         // content providers are often expensive to start.
-                        updateLruProcessLocked(cpr.proc, false);
+                        updateLruProcessLocked(cpr.proc, false, false);
                     }
                 }
 
@@ -7329,7 +7377,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         ProcessRecord proc = startProcessLocked(cpi.processName,
                                 cpr.appInfo, false, 0, "content provider",
                                 new ComponentName(cpi.applicationInfo.packageName,
-                                        cpi.name), false, false);
+                                        cpi.name), false, false, false);
                         if (proc == null) {
                             Slog.w(TAG, "Unable to launch app "
                                     + cpi.applicationInfo.packageName + "/"
@@ -7738,7 +7786,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
         ProcessRecord app;
         if (!isolated) {
-            app = getProcessRecordLocked(info.processName, info.uid);
+            app = getProcessRecordLocked(info.processName, info.uid, true);
         } else {
             app = null;
         }
@@ -7749,7 +7797,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (isolated) {
                 mIsolatedProcesses.put(app.uid, app);
             }
-            updateLruProcessLocked(app, true);
+            updateLruProcessLocked(app, true, false);
         }
 
         // This package really, really can not be stopped.
@@ -8617,6 +8665,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } else if (proc.setProcState < ActivityManager.PROCESS_STATE_HOME) {
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
+                    proc.nextPssTime = ProcessList.computeNextPssTime(proc.curProcState, true,
+                            mSleeping, now);
                 }
             }
 
@@ -10234,13 +10284,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (mLruProcesses.size() > 0) {
-            boolean printed = dumpProcessOomList(pw, this, mLruProcesses, "    ",
-                    "Proc", "PERS", false, dumpPackage, needSep,
-                    "  Process LRU list (sorted by oom_adj):");
-            if (printed) {
-                needSep = true;
-                printedAnything = true;
+            if (needSep) {
+                pw.println();
             }
+            pw.print("  Process LRU list (sorted by oom_adj, "); pw.print(mLruProcesses.size());
+                    pw.print(" total, non-activities at ");
+                    pw.print(mLruProcesses.size()-mLruProcessActivityStart);
+                    pw.println("):");
+            dumpProcessOomList(pw, this, mLruProcesses, "    ", "Proc", "PERS", false, dumpPackage);
+            needSep = true;
+            printedAnything = true;
         }
 
         if (dumpAll || dumpPackage != null) {
@@ -10611,14 +10664,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             printOomLevel(pw, "CACHED_APP_MAX_ADJ", ProcessList.CACHED_APP_MAX_ADJ);
 
             if (needSep) pw.println();
-            needSep = true;
-            pw.println("  Process OOM control:");
-            dumpProcessOomList(pw, this, mLruProcesses, "    ",
-                    "Proc", "PERS", true, null, false, null);
+            pw.print("  Process OOM control ("); pw.print(mLruProcesses.size());
+                    pw.print(" total, non-activities at ");
+                    pw.print(mLruProcesses.size()-mLruProcessActivityStart);
+                    pw.println("):");
+            dumpProcessOomList(pw, this, mLruProcesses, "    ", "Proc", "PERS", true, null);
             needSep = true;
         }
 
-        needSep = dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll, null);
+        dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll, null);
 
         pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
@@ -11038,7 +11092,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final boolean dumpProcessOomList(PrintWriter pw,
             ActivityManagerService service, List<ProcessRecord> origList,
             String prefix, String normalLabel, String persistentLabel,
-            boolean inclDetails, String dumpPackage, boolean needSep, String header) {
+            boolean inclDetails, String dumpPackage) {
 
         ArrayList<Pair<ProcessRecord, Integer>> list
                 = new ArrayList<Pair<ProcessRecord, Integer>>(origList.size());
@@ -11052,13 +11106,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (list.size() <= 0) {
             return false;
-        }
-
-        if (header != null) {
-            if (needSep) {
-                pw.println();
-            }
-            pw.println(header);
         }
 
         Comparator<Pair<ProcessRecord, Integer>> comparator
@@ -11158,6 +11205,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print(" setRaw="); pw.print(r.setRawAdj);
                 pw.print(" cur="); pw.print(r.curAdj);
                 pw.print(" set="); pw.println(r.setAdj);
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print("state: cur="); pw.print(ProcessList.makeProcStateString(r.curProcState));
+                pw.print(" set="); pw.print(ProcessList.makeProcStateString(r.setProcState));
+                pw.print(" lastPss="); pw.print(r.lastPss);
+                pw.print(" lastCachedPss="); pw.println(r.lastCachedPss);
                 pw.print(prefix);
                 pw.print("    ");
                 pw.print("keeping="); pw.print(r.keeping);
@@ -11509,26 +11562,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!isCheckinRequest && dumpDetails) {
                     pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
                 }
+                if (mi == null) {
+                    mi = new Debug.MemoryInfo();
+                }
+                if (dumpDetails || (!brief && !oomOnly)) {
+                    Debug.getMemoryInfo(pid, mi);
+                } else {
+                    mi.dalvikPss = (int)Debug.getPss(pid, tmpLong);
+                    mi.dalvikPrivateDirty = (int)tmpLong[0];
+                }
                 if (dumpDetails) {
                     try {
                         pw.flush();
-                        mi = null;
-                        mi = thread.dumpMemInfo(fd, isCheckinRequest, true, dumpDalvik, innerArgs);
+                        thread.dumpMemInfo(fd, mi, isCheckinRequest, true, dumpDalvik, innerArgs);
                     } catch (RemoteException e) {
                         if (!isCheckinRequest) {
                             pw.println("Got RemoteException!");
                             pw.flush();
                         }
-                    }
-                } else {
-                    if (mi == null) {
-                        mi = new Debug.MemoryInfo();
-                    }
-                    if (!brief && !oomOnly) {
-                        Debug.getMemoryInfo(pid, mi);
-                    } else {
-                        mi.dalvikPss = (int)Debug.getPss(pid, tmpLong);
-                        mi.dalvikPrivateDirty = (int)tmpLong[0];
                     }
                 }
 
@@ -11825,7 +11876,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final void cleanUpApplicationRecordLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart, int index) {
         if (index >= 0) {
-            mLruProcesses.remove(index);
+            removeLruProcessLocked(app);
             ProcessList.remove(app.pid);
         }
 
@@ -12283,7 +12334,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     : new ComponentName("android", "FullBackupAgent");
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
-                    false, 0, "backup", hostingName, false, false);
+                    false, 0, "backup", hostingName, false, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -14713,17 +14764,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (app.setProcState < 0 || ProcessList.procStatesDifferForMem(app.curProcState,
                 app.setProcState)) {
-            if (DEBUG_PSS) Slog.d(TAG, "Process state change from " + app.setProcState
-                    + " to " + app.curProcState + ": " + app);
             app.lastStateTime = now;
             app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
                     mSleeping, now);
+            if (DEBUG_PSS) Slog.d(TAG, "Process state change from "
+                    + ProcessList.makeProcStateString(app.setProcState) + " to "
+                    + ProcessList.makeProcStateString(app.curProcState) + " next pss in "
+                    + (app.nextPssTime-now) + ": " + app);
         } else {
             if (now > app.nextPssTime || (now > (app.lastPssTime+ProcessList.PSS_MAX_INTERVAL)
                     && now > (app.lastStateTime+ProcessList.PSS_MIN_TIME_FROM_STATE_CHANGE))) {
                 requestPssLocked(app, app.setProcState);
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
                         mSleeping, now);
+            } else if (false && DEBUG_PSS) {
+                Slog.d(TAG, "Not requesting PSS of " + app + ": next=" + (app.nextPssTime-now));
             }
         }
         if (app.setProcState != app.curProcState) {
