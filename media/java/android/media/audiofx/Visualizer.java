@@ -93,6 +93,24 @@ public class Visualizer {
      */
     public static final int SCALING_MODE_AS_PLAYED = 1;
 
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Defines a measurement mode with no requested measurement.
+     */
+    public static final int MEASUREMENT_MODE_NONE = 0;
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Defines a measurement mode which computes the peak and RMS value in mB, where 0mB is the
+     * maximum sample value, and -9600mB is the minimum value.
+     * Values for peak and RMS can be retrieved with {@link #getIntMeasurements(int, int[])}, where
+     * the array holds the peak value at index {@link #MEASUREMENT_INDEX_PEAK} in the measurement
+     * array, and the RMS value at index {@link #MEASUREMENT_INDEX_RMS}.
+     */
+    public static final int MEASUREMENT_MODE_PEAK_RMS = 1 << 0;
+
     // to keep in sync with frameworks/base/media/jni/audioeffect/android_media_Visualizer.cpp
     private static final int NATIVE_EVENT_PCM_CAPTURE = 0;
     private static final int NATIVE_EVENT_FFT_CAPTURE = 1;
@@ -350,6 +368,47 @@ public class Visualizer {
     }
 
     /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Sets the combination of measurement modes to be performed by this audio effect.
+     * @param mode a mask of the measurements to perform. The valid values are
+     *     {@link #MEASUREMENT_MODE_NONE} (to cancel any measurement)
+     *     or {@link #MEASUREMENT_MODE_PEAK_RMS}.
+     * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE} in case of failure.
+     * @throws IllegalStateException
+     */
+    public int setMeasurementMode(int mode)
+            throws IllegalStateException {
+        synchronized (mStateLock) {
+            if (mState == STATE_UNINITIALIZED) {
+                throw(new IllegalStateException("setMeasurementMode() called in wrong state: "
+                        + mState));
+            }
+            return native_setMeasurementMode(mode);
+        }
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Returns the current measurement modes performed by this audio effect
+     * @return the mask of the measurements,
+     *     {@link #MEASUREMENT_MODE_NONE} (when no measurements are performed)
+     *     or {@link #MEASUREMENT_MODE_PEAK_RMS}.
+     * @throws IllegalStateException
+     */
+    public int getMeasurementMode()
+            throws IllegalStateException {
+        synchronized (mStateLock) {
+            if (mState == STATE_UNINITIALIZED) {
+                throw(new IllegalStateException("getMeasurementMode() called in wrong state: "
+                        + mState));
+            }
+            return native_getMeasurementMode();
+        }
+    }
+
+    /**
      * Returns the sampling rate of the captured audio.
      * @return the sampling rate in milliHertz.
      */
@@ -434,6 +493,51 @@ public class Visualizer {
                 throw(new IllegalStateException("getFft() called in wrong state: "+mState));
             }
             return native_getFft(fft);
+        }
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * A class to store peak and RMS values.
+     * Peak and RMS are expressed in mB, as described in the
+     * {@link Visualizer#MEASUREMENT_MODE_PEAK_RMS} measurement mode.
+     */
+    public static final class MeasurementPeakRms {
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         */
+        public int mPeak;
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         */
+        public int mRms;
+    }
+
+    /**
+     * @hide
+     * Retrieves the latest peak and RMS measurement.
+     * Sets the peak and RMS fields of the {@link Visualizer.MeasurementPeakRms} to the latest
+     * measured values.
+     * @param measurement a non-null {@link Visualizer.MeasurementPeakRms} instance to store
+     *    the measurement values.
+     * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE},
+     *    {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
+     *    in case of failure.
+     */
+    public int getMeasurementPeakRms(MeasurementPeakRms measurement) {
+        if (measurement == null) {
+            Log.e(TAG, "Cannot store measurements in a null object");
+            return ERROR_BAD_VALUE;
+        }
+        synchronized (mStateLock) {
+            if (mState != STATE_ENABLED) {
+                throw (new IllegalStateException("getMeasurementPeakRms() called in wrong state: "
+                        + mState));
+            }
+            return native_getPeakRms(measurement);
         }
     }
 
@@ -640,11 +744,17 @@ public class Visualizer {
 
     private native final int native_getScalingMode();
 
+    private native final int native_setMeasurementMode(int mode);
+
+    private native final int native_getMeasurementMode();
+
     private native final int native_getSamplingRate();
 
     private native final int native_getWaveForm(byte[] waveform);
 
     private native final int native_getFft(byte[] fft);
+
+    private native final int native_getPeakRms(MeasurementPeakRms measurement);
 
     private native final int native_setPeriodicCapture(int rate, boolean waveForm, boolean fft);
 
