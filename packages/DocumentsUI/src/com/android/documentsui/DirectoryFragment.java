@@ -249,8 +249,7 @@ public class DirectoryFragment extends Fragment {
                                 context, mType, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_RECENT_OPEN:
                         final RootsCache roots = DocumentsApplication.getRootsCache(context);
-                        final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
-                        return new RecentLoader(context, matchingRoots, state.acceptMimes);
+                        return new RecentLoader(context, roots, state);
                     default:
                         throw new IllegalStateException("Unknown type " + mType);
                 }
@@ -797,7 +796,9 @@ public class DirectoryFragment extends Fragment {
 
             Drawable iconDrawable = null;
             if (mType == TYPE_RECENT_OPEN) {
-                final RootInfo root = roots.getRoot(docAuthority, docRootId);
+                // We've already had to enumerate roots before any results can
+                // be shown, so this will never block.
+                final RootInfo root = roots.getRootBlocking(docAuthority, docRootId);
                 iconDrawable = root.loadIcon(context);
 
                 if (summary != null) {
@@ -808,7 +809,7 @@ public class DirectoryFragment extends Fragment {
                         summary.setVisibility(View.VISIBLE);
                         hasLine2 = true;
                     } else {
-                        if (iconDrawable != null && roots.isIconUnique(root)) {
+                        if (iconDrawable != null && roots.isIconUniqueBlocking(root)) {
                             // No summary needed if icon speaks for itself
                             summary.setVisibility(View.INVISIBLE);
                         } else {

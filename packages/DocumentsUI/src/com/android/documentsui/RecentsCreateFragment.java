@@ -176,7 +176,6 @@ public class RecentsCreateFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
-            final RootsCache roots = DocumentsApplication.getRootsCache(context);
 
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);

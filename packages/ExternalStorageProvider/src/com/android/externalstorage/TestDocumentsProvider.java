@@ -17,6 +17,8 @@
 package com.android.externalstorage;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -52,7 +54,10 @@ import java.lang.ref.WeakReference;
 public class TestDocumentsProvider extends DocumentsProvider {
     private static final String TAG = "TestDocuments";
 
+    private static final boolean LAG_ROOTS = false;
     private static final boolean CRASH_ROOTS = false;
+    private static final boolean REFRESH_ROOTS = false;
+
     private static final boolean CRASH_DOCUMENT = false;
 
     private static final String MY_ROOT_ID = "myRoot";
@@ -78,9 +83,33 @@ public class TestDocumentsProvider extends DocumentsProvider {
         return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
     }
 
+    private String mAuthority;
+
+    @Override
+    public void attachInfo(Context context, ProviderInfo info) {
+        mAuthority = info.authority;
+        super.attachInfo(context, info);
+    }
+
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+        Log.d(TAG, "Someone asked for our roots!");
+
+        if (LAG_ROOTS) SystemClock.sleep(3000);
         if (CRASH_ROOTS) System.exit(12);
+
+        if (REFRESH_ROOTS) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    SystemClock.sleep(3000);
+                    Log.d(TAG, "Notifying that something changed!!");
+                    final Uri uri = DocumentsContract.buildRootsUri(mAuthority);
+                    getContext().getContentResolver().notifyChange(uri, null, false);
+                    return null;
+                }
+            }.execute();
+        }
 
         final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
         final RowBuilder row = result.newRow();
@@ -88,7 +117,8 @@ public class TestDocumentsProvider extends DocumentsProvider {
         row.add(Root.COLUMN_ROOT_TYPE, Root.ROOT_TYPE_SERVICE);
         row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_RECENTS);
         row.add(Root.COLUMN_TITLE, "_Test title which is really long");
-        row.add(Root.COLUMN_SUMMARY, "_Summary which is also super long text");
+        row.add(Root.COLUMN_SUMMARY,
+                SystemClock.elapsedRealtime() + " summary which is also super long text");
         row.add(Root.COLUMN_DOCUMENT_ID, MY_DOC_ID);
         row.add(Root.COLUMN_AVAILABLE_BYTES, 1024);
         return result;

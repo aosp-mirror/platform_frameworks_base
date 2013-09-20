@@ -46,6 +46,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -87,6 +88,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
@@ -207,7 +209,16 @@ public class DocumentsActivity extends Activity {
             RootsFragment.show(getFragmentManager(), null);
         }
 
-        onCurrentDirectoryChanged(ANIM_NONE);
+        if (!mState.restored) {
+            if (mState.action == ACTION_MANAGE) {
+                final Uri rootUri = getIntent().getData();
+                new RestoreRootTask(rootUri).execute();
+            } else {
+                new RestoreStackTask().execute();
+            }
+        } else {
+            onCurrentDirectoryChanged(ANIM_NONE);
+        }
     }
 
     private void buildDefaultState() {
@@ -241,22 +252,41 @@ public class DocumentsActivity extends Activity {
 
         mState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
         mState.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(this);
+    }
 
-        if (mState.action == ACTION_MANAGE) {
-            final Uri uri = intent.getData();
-            final String rootId = DocumentsContract.getRootId(uri);
-            final RootInfo root = mRoots.getRoot(uri.getAuthority(), rootId);
+    private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
+        private Uri mRootUri;
+
+        public RestoreRootTask(Uri rootUri) {
+            mRootUri = rootUri;
+        }
+
+        @Override
+        protected RootInfo doInBackground(Void... params) {
+            final String rootId = DocumentsContract.getRootId(mRootUri);
+            return mRoots.getRootOneshot(mRootUri.getAuthority(), rootId);
+        }
+
+        @Override
+        protected void onPostExecute(RootInfo root) {
+            if (isDestroyed()) return;
+            mState.restored = true;
+
             if (root != null) {
                 onRootPicked(root, true);
             } else {
-                Log.w(TAG, "Failed to find root: " + uri);
+                Log.w(TAG, "Failed to find root: " + mRootUri);
                 finish();
             }
+        }
+    }
 
-        } else {
+    private class RestoreStackTask extends AsyncTask<Void, Void, Void> {
+        private volatile boolean mRestoredStack;
+
+        @Override
+        protected Void doInBackground(Void... params) {
             // Restore last stack for calling package
-            // TODO: move into async loader
-            boolean restoredStack = false;
             final String packageName = getCallingPackage();
             final Cursor cursor = getContentResolver()
                     .query(RecentsProvider.buildResume(packageName), null, null, null, null);
@@ -265,7 +295,7 @@ public class DocumentsActivity extends Activity {
                     final byte[] rawStack = cursor.getBlob(
                             cursor.getColumnIndex(ResumeColumns.STACK));
                     DurableUtils.readFromArray(rawStack, mState.stack);
-                    restoredStack = true;
+                    mRestoredStack = true;
                 }
             } catch (IOException e) {
                 Log.w(TAG, "Failed to resume", e);
@@ -275,18 +305,28 @@ public class DocumentsActivity extends Activity {
 
             // If restored root isn't valid, fall back to recents
             final RootInfo root = getCurrentRoot();
-            final List<RootInfo> matchingRoots = mRoots.getMatchingRoots(mState);
+            final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
             if (!matchingRoots.contains(root)) {
                 mState.stack.reset();
-                restoredStack = false;
+                mRestoredStack = false;
             }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (isDestroyed()) return;
+            mState.restored = true;
 
             // Only open drawer when not restoring stack, and when not showing
             // visual content.
-            if (!restoredStack
+            if (!mRestoredStack
                     && !MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
                 setRootsDrawerOpen(true);
             }
+
+            onCurrentDirectoryChanged(ANIM_NONE);
         }
     }
 
@@ -935,6 +975,7 @@ public class DocumentsActivity extends Activity {
         public boolean localOnly = false;
         public boolean showAdvanced = false;
         public boolean stackTouched = false;
+        public boolean restored = false;
 
         /** Current user navigation stack; empty implies recents. */
         public DocumentStack stack = new DocumentStack();
@@ -974,6 +1015,7 @@ public class DocumentsActivity extends Activity {
             out.writeInt(localOnly ? 1 : 0);
             out.writeInt(showAdvanced ? 1 : 0);
             out.writeInt(stackTouched ? 1 : 0);
+            out.writeInt(restored ? 1 : 0);
             DurableUtils.writeToParcel(out, stack);
             out.writeString(currentSearch);
             out.writeMap(dirState);
@@ -992,6 +1034,7 @@ public class DocumentsActivity extends Activity {
                 state.localOnly = in.readInt() != 0;
                 state.showAdvanced = in.readInt() != 0;
                 state.stackTouched = in.readInt() != 0;
+                state.restored = in.readInt() != 0;
                 DurableUtils.readFromParcel(in, state.stack);
                 state.currentSearch = in.readString();
                 in.readMap(state.dirState, null);
