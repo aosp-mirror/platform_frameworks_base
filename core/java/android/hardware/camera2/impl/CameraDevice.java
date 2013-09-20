@@ -55,7 +55,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Object mLock = new Object();
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
-    private CameraDeviceListener mDeviceListener;
+    private StateListener mDeviceListener;
     private Handler mDeviceHandler;
 
     private final SparseArray<CaptureListenerHolder> mCaptureListenerMap =
@@ -292,7 +292,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public void setDeviceListener(CameraDeviceListener listener, Handler handler) {
+    public void setDeviceListener(StateListener listener, Handler handler) {
         synchronized (mLock) {
             mDeviceListener = listener;
             mDeviceHandler = handler;
@@ -314,7 +314,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
         // TODO: every method should throw IllegalStateException after close has been called
 
@@ -325,7 +325,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                     mRemoteDevice.disconnect();
                 }
             } catch (CameraRuntimeException e) {
-                throw e.asChecked();
+                Log.e(TAG, "Exception while closing: ", e.asChecked());
             } catch (RemoteException e) {
                 // impossible
             }
@@ -339,8 +339,6 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     protected void finalize() throws Throwable {
         try {
             close();
-        } catch (CameraRuntimeException e) {
-            Log.e(TAG, "Got error while trying to finalize, ignoring: " + e.getMessage());
         }
         finally {
             super.finalize();
