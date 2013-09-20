@@ -58,9 +58,6 @@ import java.util.Map;
  * It uses the WebKit rendering engine to display
  * web pages and includes methods to navigate forward and backward
  * through a history, zoom in and out, perform text searches and more.</p>
- * <p>To enable the built-in zoom, set
- * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
- * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).
  * <p>Note that, in order for your Activity to access the Internet and load web pages
  * in a WebView, you must add the {@code INTERNET} permissions to your
  * Android Manifest file:</p>
@@ -161,8 +158,17 @@ import java.util.Map;
  *   }
  * });
  *
- * webview.loadUrl("http://slashdot.org/");
+ * webview.loadUrl("http://developer.android.com/");
  * </pre>
+ *
+ * <h3>Zoom</h3>
+ *
+ * <p>To enable the built-in zoom, set
+ * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
+ * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).</p>
+ * <p>NOTE: Using zoom if either the height or width is set to
+ * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} may lead to undefined behavior
+ * and should be avoided.</p>
  *
  * <h3>Cookie and window management</h3>
  *
@@ -222,6 +228,7 @@ import java.util.Map;
  * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ration of 1.5,
  * which is the high density pixel ratio.</p>
  * </li>
+ * </ul>
  *
  * <h3>HTML5 Video support</h3>
  *
