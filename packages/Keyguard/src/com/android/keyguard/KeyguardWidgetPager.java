@@ -90,6 +90,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     // Background worker thread: used here for persistence, also made available to widget frames
     private final HandlerThread mBackgroundWorkerThread;
     private final Handler mBackgroundWorkerHandler;
+    private boolean mCameraEventInProgress;
 
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -941,14 +942,18 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         beginCameraEvent();
         int cameraPage = getPageCount() - 1;
         boolean endWarp = false;
-        if (isCameraPage(cameraPage)) {
+        if (isCameraPage(cameraPage) || mCameraEventInProgress) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    // Once we start dispatching camera events, we must continue to do so
+                    // to keep event dispatch happy.
+                    mCameraEventInProgress = true;
                     userActivity();
                     startWarp(cameraPage);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    mCameraEventInProgress = false;
                     endWarp = true;
                     break;
             }
