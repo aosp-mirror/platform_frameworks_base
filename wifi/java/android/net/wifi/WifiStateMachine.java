@@ -229,6 +229,7 @@ public class WifiStateMachine extends StateMachine {
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
     private DhcpStateMachine mDhcpStateMachine;
+    private boolean mDhcpActive = false;
 
     private class InterfaceObserver extends BaseNetworkObserver {
         private WifiStateMachine mWifiStateMachine;
@@ -849,6 +850,11 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void startBatchedScan() {
+        if (mDhcpActive) {
+            if (DBG) log("not starting Batched Scans due to DHCP");
+            return;
+        }
+
         // first grab any existing data
         retrieveBatchedScanData();
 
@@ -916,8 +922,10 @@ public class WifiStateMachine extends StateMachine {
 
     private void stopBatchedScan() {
         mAlarmManager.cancel(mBatchedScanIntervalIntent);
-        retrieveBatchedScanData();
-        mWifiNative.setBatchedScanSettings(null);
+        if (mBatchedScanSettings != null) {
+            retrieveBatchedScanData();
+            mWifiNative.setBatchedScanSettings(null);
+        }
     }
 
     private void setNextBatchedAlarm(int scansExpected) {
@@ -2203,6 +2211,7 @@ public class WifiStateMachine extends StateMachine {
     }
 
     void handlePreDhcpSetup() {
+        mDhcpActive = true;
         if (!mBluetoothConnectionActive) {
             /*
              * There are problems setting the Wi-Fi driver's power
@@ -2231,6 +2240,8 @@ public class WifiStateMachine extends StateMachine {
         // TODO: Remove this comment when the driver is fixed.
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, false);
         mWifiNative.setPowerSave(false);
+
+        stopBatchedScan();
 
         /* P2p discovery breaks dhcp, shut it down in order to get through this */
         Message msg = new Message();
@@ -2270,6 +2281,12 @@ public class WifiStateMachine extends StateMachine {
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
                 mWifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
+
+        mDhcpActive = false;
+
+        if (mBatchedScanSettings != null) {
+            startBatchedScan();
+        }
     }
 
     private void handleSuccessfulIpConfiguration(DhcpResults dhcpResults) {
@@ -2917,6 +2934,8 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.stopFilteringMulticastV4Packets();
             }
 
+            mDhcpActive = false;
+
             if (mBatchedScanSettings != null) {
                 startBatchedScan();
             }
@@ -3486,6 +3505,14 @@ public class WifiStateMachine extends StateMachine {
         }
 
         @Override
+        public void exit() {
+            // if we're leaving before this is done, cleanup
+            if (mDhcpActive) {
+                handlePostDhcpSetup();
+            }
+        }
+
+        @Override
         public boolean processMessage(Message message) {
             switch (message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
@@ -3677,7 +3704,7 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mCaptivePortalCheckState);
                     break;
                 default:
-                    log(getName() + " what=" + message.what + " NOT_HANDLED");
+                    if (DBG) log(getName() + " what=" + message.what + " NOT_HANDLED");
                     return NOT_HANDLED;
             }
             return HANDLED;
