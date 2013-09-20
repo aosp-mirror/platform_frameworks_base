@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -102,7 +101,7 @@ public class PrintJobConfigActivity extends Activity {
 
     private static final String LOG_TAG = "PrintJobConfigActivity";
 
-    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG = false;
 
     public static final String EXTRA_PRINT_DOCUMENT_ADAPTER = "printDocumentAdapter";
     public static final String EXTRA_PRINT_JOB = "printJob";
@@ -344,7 +343,9 @@ public class PrintJobConfigActivity extends Activity {
             if (!mController.hasStarted()) {
                 mController.start();
             }
-            if (!printAttributesChanged()) {
+            // If print is confirmed we always do a layout since the previous
+            // ones were for preview and this one is for printing.
+            if (!printAttributesChanged() && !mEditor.isPrintConfirmed()) {
                 if (mDocument.info == null) {
                     // We are waiting for the result of a layout, so do nothing.
                     return;
@@ -391,8 +392,12 @@ public class PrintJobConfigActivity extends Activity {
 
             mControllerState = CONTROLLER_STATE_LAYOUT_COMPLETED;
 
+            // For layout purposes we care only whether the type or the page
+            // count changed. We still do not have the size since we did not
+            // call write. We use "layoutChanged" set by the application to
+            // know whether something else changed about the document.
+            final boolean infoChanged = !equalsIgnoreSize(info, mDocument.info);
             // If the info changed, we update the document and the print job.
-            final boolean infoChanged = !info.equals(mDocument.info);
             if (infoChanged) {
                 mDocument.info = info;
                 // Set the info.
@@ -482,6 +487,10 @@ public class PrintJobConfigActivity extends Activity {
                     .generateFileForPrintJob(mPrintJobId);
             mDocument.info.setDataSize(file.length());
 
+            // Update the print job with the updated info.
+            PrintSpoolerService.peekInstance().setPrintJobPrintDocumentInfoNoPersistence(
+                    mPrintJobId, mDocument.info);
+
             // Update which pages we have fetched.
             mDocument.pages = PageRangeUtils.normalize(pages);
 
@@ -554,6 +563,26 @@ public class PrintJobConfigActivity extends Activity {
             mControllerState = CONTROLLER_STATE_FAILED;
             Log.e(LOG_TAG, "Error during write: " + error);
             PrintJobConfigActivity.this.finish();
+        }
+
+        private boolean equalsIgnoreSize(PrintDocumentInfo lhs, PrintDocumentInfo rhs) {
+            if (lhs == rhs) {
+                return true;
+            }
+            if (lhs == null) {
+                if (rhs != null) {
+                    return false;
+                }
+            } else {
+                if (rhs == null) {
+                    return false;
+                }
+                if (lhs.getContentType() != rhs.getContentType()
+                        || lhs.getPageCount() != rhs.getPageCount()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private final class ControllerHandler extends Handler {
