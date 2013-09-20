@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
+import android.net.Uri;
 
 public class DocumentsApplication extends Application {
     private RootsCache mRoots;
@@ -49,6 +50,8 @@ public class DocumentsApplication extends Application {
         final int memoryClassBytes = am.getMemoryClass() * 1024 * 1024;
 
         mRoots = new RootsCache(this);
+        mRoots.updateAsync();
+
         mThumbnails = new ThumbnailCache(memoryClassBytes / 4);
 
         final IntentFilter packageFilter = new IntentFilter();
@@ -77,8 +80,13 @@ public class DocumentsApplication extends Application {
     private BroadcastReceiver mCacheReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO: narrow changed/removed to only packages that have backends
-            mRoots.update();
+            final Uri data = intent.getData();
+            if (data != null) {
+                final String packageName = data.getSchemeSpecificPart();
+                mRoots.updatePackageAsync(packageName);
+            } else {
+                mRoots.updateAsync();
+            }
         }
     };
 }

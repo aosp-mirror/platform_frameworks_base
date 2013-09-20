@@ -19,8 +19,10 @@ package com.android.documentsui;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -44,6 +46,7 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Objects;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -54,6 +57,8 @@ public class RootsFragment extends Fragment {
 
     private ListView mList;
     private SectionedRootsAdapter mAdapter;
+
+    private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
 
     private static final String EXTRA_INCLUDE_APPS = "includeApps";
 
@@ -87,25 +92,49 @@ public class RootsFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        updateRootsAdapter();
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        final Context context = getActivity();
+        final RootsCache roots = DocumentsApplication.getRootsCache(context);
+        final State state = ((DocumentsActivity) context).getDisplayState();
+
+        mCallbacks = new LoaderCallbacks<Collection<RootInfo>>() {
+            @Override
+            public Loader<Collection<RootInfo>> onCreateLoader(int id, Bundle args) {
+                return new RootsLoader(context, roots, state);
+            }
+
+            @Override
+            public void onLoadFinished(
+                    Loader<Collection<RootInfo>> loader, Collection<RootInfo> result) {
+                if (!isAdded()) return;
+
+                final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
+
+                mAdapter = new SectionedRootsAdapter(context, result, includeApps);
+                mList.setAdapter(mAdapter);
+
+                onCurrentRootChanged();
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Collection<RootInfo>> loader) {
+                mAdapter = null;
+                mList.setAdapter(null);
+            }
+        };
     }
 
-    private void updateRootsAdapter() {
-        final Context context = getActivity();
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        final Context context = getActivity();
         final State state = ((DocumentsActivity) context).getDisplayState();
         state.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(context);
 
-        final RootsCache roots = DocumentsApplication.getRootsCache(context);
-        final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
-        final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
-
-        mAdapter = new SectionedRootsAdapter(context, matchingRoots, includeApps);
-        mList.setAdapter(mAdapter);
-
-        onCurrentRootChanged();
+        getLoaderManager().restartLoader(2, null, mCallbacks);
     }
 
     public void onCurrentRootChanged() {
@@ -229,7 +258,8 @@ public class RootsFragment extends Fragment {
         private final RootsAdapter mDevices;
         private final AppsAdapter mApps;
 
-        public SectionedRootsAdapter(Context context, List<RootInfo> roots, Intent includeApps) {
+        public SectionedRootsAdapter(
+                Context context, Collection<RootInfo> roots, Intent includeApps) {
             mServices = new RootsAdapter(context);
             mShortcuts = new RootsAdapter(context);
             mDevices = new RootsAdapter(context);
