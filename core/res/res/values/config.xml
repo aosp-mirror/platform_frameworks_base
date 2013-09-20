@@ -828,6 +828,13 @@
                cell broadcasting sms, and MMS. -->
     <bool name="config_sms_capable">true</bool>
 
+    <!-- Default SMS Application. This will be the default SMS application when
+         the phone first boots. The user can then change the default app to oe
+         of their choosing.
+         This can be overridden for devices where a different default SMS
+         application is desired. -->
+    <string name="default_sms_application" translatable="false">com.android.mms</string>
+
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
     <bool name="config_bluetooth_default_profiles">true</bool>
