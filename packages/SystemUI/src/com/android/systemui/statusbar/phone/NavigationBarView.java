@@ -17,14 +17,20 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.LayoutTransition;
+import android.app.ActivityManagerNative;
 import android.app.StatusBarManager;
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -77,6 +83,17 @@ public class NavigationBarView extends LinearLayout {
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
     final static int MSG_CHECK_INVALID_LAYOUT = 8686;
 
+    // used to disable the camera icon in navbar when disabled by DPM
+    private boolean mCameraDisabledByDpm;
+    KeyguardTouchDelegate mTouchDelegate;
+
+    private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            return mTouchDelegate.dispatch(event);
+        }
+    };
+
     private class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
@@ -115,6 +132,26 @@ public class NavigationBarView extends LinearLayout {
         getIcons(res);
 
         mBarTransitions = new NavigationBarTransitions(this);
+
+        mTouchDelegate = new KeyguardTouchDelegate(mContext);
+
+        mCameraDisabledByDpm = isCameraDisabledByDpm();
+        watchForDevicePolicyChanges();
+    }
+
+    private void watchForDevicePolicyChanges() {
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCameraDisabledByDpm = isCameraDisabledByDpm();
+                    }
+                });
+            }
+        }, filter);
     }
 
     public BarTransitions getBarTransitions() {
@@ -171,6 +208,11 @@ public class NavigationBarView extends LinearLayout {
     // for when home is disabled, but search isn't
     public View getSearchLight() {
         return mCurrentView.findViewById(R.id.search_light);
+    }
+
+    // shown when keyguard is visible and camera is available
+    public View getCameraButton() {
+        return mCurrentView.findViewById(R.id.camera_button);
     }
 
     private void getIcons(Resources res) {
@@ -259,7 +301,31 @@ public class NavigationBarView extends LinearLayout {
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
 
-        getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
+        final boolean shouldShowSearch = disableHome && !disableSearch;
+        getSearchLight().setVisibility(shouldShowSearch ? View.VISIBLE : View.GONE);
+        final View cameraButton = getCameraButton();
+        if (cameraButton != null) {
+            cameraButton.setVisibility(
+                    shouldShowSearch && !mCameraDisabledByDpm ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private boolean isCameraDisabledByDpm() {
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+            try {
+                final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+                final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
+                final  boolean disabledBecauseKeyguardSecure =
+                        (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
+                        && mTouchDelegate.isSecure();
+                return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Can't get userId", e);
+            }
+        }
+        return false;
     }
 
     public void setSlippery(boolean newSlippery) {
@@ -302,6 +368,14 @@ public class NavigationBarView extends LinearLayout {
                                                 : findViewById(R.id.rot270);
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
+
+        // Add a touch handler for camera icon for all view orientations.
+        for (int i = 0; i < mRotatedViews.length; i++) {
+            View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
+            if (cameraButton != null) {
+                cameraButton.setOnTouchListener(mCameraTouchListener);
+            }
+        }
     }
 
     public boolean isVertical() {
