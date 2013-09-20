@@ -4988,10 +4988,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int updateSystemUiVisibilityLw() {
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
-        if (mFocusedWindow == null) {
+        WindowState win = mFocusedWindow != null ? mFocusedWindow : mTopFullscreenOpaqueWindowState;
+        if (win == null) {
             return 0;
         }
-        if (mFocusedWindow.getAttrs().type == TYPE_KEYGUARD && mHideLockScreen == true) {
+        if (win.getAttrs().type == TYPE_KEYGUARD && mHideLockScreen == true) {
             // We are updating at a point where the keyguard has gotten
             // focus, but we were last in a state where the top window is
             // hiding it.  This is probably because the keyguard as been
@@ -5001,22 +5002,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         }
 
-        int tmpVisibility = mFocusedWindow.getSystemUiVisibility()
+        int tmpVisibility = win.getSystemUiVisibility()
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;
-        if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
+        if (mForcingShowNavBar && win.getSurfaceLayer() < mForcingShowNavBarLayer) {
             tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
         }
-        final int visibility = updateSystemBarsLw(mLastSystemUiFlags, tmpVisibility);
+        final int visibility = updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int diff = visibility ^ mLastSystemUiFlags;
-        final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
+        final boolean needsMenu = win.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
         if (diff == 0 && mLastFocusNeedsMenu == needsMenu
-                && mFocusedApp == mFocusedWindow.getAppToken()) {
+                && mFocusedApp == win.getAppToken()) {
             return 0;
         }
         mLastSystemUiFlags = visibility;
         mLastFocusNeedsMenu = needsMenu;
-        mFocusedApp = mFocusedWindow.getAppToken();
+        mFocusedApp = win.getAppToken();
         mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -5035,9 +5036,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return diff;
     }
 
-    private int updateSystemBarsLw(int oldVis, int vis) {
+    private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
         // prevent status bar interaction from clearing certain flags
-        boolean statusBarHasFocus = mFocusedWindow.getAttrs().type == TYPE_STATUS_BAR;
+        boolean statusBarHasFocus = win.getAttrs().type == TYPE_STATUS_BAR;
         if (statusBarHasFocus) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -5051,7 +5052,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean transientAllowed =
                 (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
         boolean hideStatusBarWM =
-                (mFocusedWindow.getAttrs().flags
+                (win.getAttrs().flags
                         & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
         boolean hideStatusBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
@@ -5077,8 +5078,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // update navigation bar
         boolean oldTransientNav = isTransientNavigationAllowed(oldVis);
         boolean isTransientNav = isTransientNavigationAllowed(vis);
-        if (mFocusedWindow != null && oldTransientNav != isTransientNav) {
-            final String pkg = mFocusedWindow.getOwningPackage();
+        if (win != null && oldTransientNav != isTransientNav) {
+            final String pkg = win.getOwningPackage();
             mTransientNavigationConfirmation.transientNavigationChanged(pkg, isTransientNav);
         }
         vis = mNavigationBarController.updateVisibilityLw(isTransientNav, oldVis, vis);
