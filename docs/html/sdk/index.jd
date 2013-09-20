@@ -36,8 +36,8 @@ sdk.mac_bytes=74859877
 sdk.mac_checksum=727a51affa2af733eca1aa307c73c3bd
 
 sdk.win_download=android-sdk_r22.2.1-windows.zip
-sdk.win_bytes=108676651
-sdk.win_checksum=3b3f63ae00cf946d1174fa08b37d8542
+sdk.win_bytes=108797377
+sdk.win_checksum=bea5d28cfb6c073b32643dd3ed0bc1e0
 
 sdk.win_installer=installer_r22.2.1-windows.exe
 sdk.win_installer_bytes=88795776
