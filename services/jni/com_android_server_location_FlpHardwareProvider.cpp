@@ -938,6 +938,7 @@ static void RemoveGeofences(
   }
 
   sFlpGeofencingInterface->remove_geofences(geofenceIdsCount, geofenceIds);
+  env->ReleaseIntArrayElements(geofenceIdsArray, geofenceIds, 0 /*mode*/);
 }
 
 static JNINativeMethod sMethods[] = {
