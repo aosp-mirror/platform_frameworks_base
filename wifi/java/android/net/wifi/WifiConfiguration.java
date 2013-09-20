@@ -361,7 +361,8 @@ public class WifiConfiguration implements Parcelable {
             if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) == false) {
                 return false;
             }
-            if (allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false) {
+            if ((allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false)
+                    && (allowedKeyManagement.get(KeyMgmt.WPA_PSK) == false)) {
                 return false;
             }
         }
