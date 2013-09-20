@@ -299,7 +299,6 @@ public class Binder implements IBinder {
                 try {
                     dump(fd, pw, args);
                 } catch (SecurityException e) {
-                    pw.println();
                     pw.println("Security exception: " + e.getMessage());
                     throw e;
                 } catch (Throwable e) {
