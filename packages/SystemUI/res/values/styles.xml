@@ -116,6 +116,10 @@
         <item name="android:textColor">#ff3a3b39</item>
     </style>
 
+    <style name="TextAppearance.QuickSettings.CaCertWarning" parent="@style/TextAppearance.QuickSettings.TileView">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
     <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
         <item name="android:background">#CC000000</item>
         <item name="android:padding">4dp</item>
