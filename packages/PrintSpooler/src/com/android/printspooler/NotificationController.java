@@ -89,7 +89,7 @@ public class NotificationController {
 
     private void createPrintingNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.stat_notify_print)
+                .setSmallIcon(com.android.internal.R.drawable.ic_print)
                 .setContentTitle(mContext.getString(R.string.printing_notification_title_template,
                         printJob.getLabel()))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),

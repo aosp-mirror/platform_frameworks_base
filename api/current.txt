@@ -19265,6 +19265,8 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize PRC_9;
     field public static final android.print.PrintAttributes.MediaSize ROC_16K;
     field public static final android.print.PrintAttributes.MediaSize ROC_8K;
+    field public static final android.print.PrintAttributes.MediaSize UNKNOWN_LANDSCAPE;
+    field public static final android.print.PrintAttributes.MediaSize UNKNOWN_PORTRAIT;
   }
 
   public static final class PrintAttributes.Resolution {
