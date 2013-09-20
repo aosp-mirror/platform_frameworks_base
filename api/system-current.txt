@@ -409,8 +409,9 @@ package android.app.backup {
     field public static final java.lang.String EXTRA_LOG_CANCEL_ALL = "android.app.backup.extra.LOG_CANCEL_ALL";
     field public static final java.lang.String EXTRA_LOG_EVENT_CATEGORY = "android.app.backup.extra.LOG_EVENT_CATEGORY";
     field public static final java.lang.String EXTRA_LOG_EVENT_ID = "android.app.backup.extra.LOG_EVENT_ID";
+    field public static final java.lang.String EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION = "android.app.backup.extra.LOG_EVENT_PACKAGE_FULL_VERSION";
     field public static final java.lang.String EXTRA_LOG_EVENT_PACKAGE_NAME = "android.app.backup.extra.LOG_EVENT_PACKAGE_NAME";
-    field public static final java.lang.String EXTRA_LOG_EVENT_PACKAGE_VERSION = "android.app.backup.extra.LOG_EVENT_PACKAGE_VERSION";
+    field public static final deprecated java.lang.String EXTRA_LOG_EVENT_PACKAGE_VERSION = "android.app.backup.extra.LOG_EVENT_PACKAGE_VERSION";
     field public static final java.lang.String EXTRA_LOG_EXCEPTION_FULL_BACKUP = "android.app.backup.extra.LOG_EXCEPTION_FULL_BACKUP";
     field public static final java.lang.String EXTRA_LOG_ILLEGAL_KEY = "android.app.backup.extra.LOG_ILLEGAL_KEY";
     field public static final java.lang.String EXTRA_LOG_MANIFEST_PACKAGE_NAME = "android.app.backup.extra.LOG_MANIFEST_PACKAGE_NAME";
@@ -777,13 +778,15 @@ package android.content.pm {
 
   public final class InstantAppResolveInfo implements android.os.Parcelable {
     ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, int);
+    ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, long);
     ctor public InstantAppResolveInfo(java.lang.String, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>);
     method public int describeContents();
     method public byte[] getDigestBytes();
     method public int getDigestPrefix();
     method public java.util.List<android.content.pm.InstantAppIntentFilter> getIntentFilters();
+    method public long getLongVersionCode();
     method public java.lang.String getPackageName();
-    method public int getVersionCode();
+    method public deprecated int getVersionCode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo> CREATOR;
   }

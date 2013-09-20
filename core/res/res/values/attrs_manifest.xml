@@ -317,6 +317,13 @@
          as multiple split APKs, each APK must have the exact same versionCode. -->
     <attr name="versionCode" format="integer" />
 
+    <!-- Internal major version code.  This is essentially additional high bits
+         for the base version code; it has no other meaning than
+         that higher numbers are more recent.  This is not a version
+         number generally shown to the user, that is usually supplied
+         with {@link android.R.attr#versionName}. -->
+    <attr name="versionCodeMajor" format="integer" />
+
     <!-- Internal revision code.  This number is the number used to determine
          whether one APK is more recent than another: it has no other meaning
          than that higher numbers are more recent.  This value is only meaningful
@@ -1386,6 +1393,7 @@
          {@link #AndroidManifestUsesFeature uses-feature}.  -->
     <declare-styleable name="AndroidManifest">
         <attr name="versionCode" />
+        <attr name="versionCodeMajor" />
         <attr name="versionName" />
         <attr name="revisionCode" />
         <attr name="sharedUserId" />
@@ -1784,6 +1792,10 @@
         <attr name="name" />
         <!-- Required specific library version. -->
         <attr name="version" />
+        <!-- Required specific library major version code.  This matches
+             android:versionCodeMajor of the library. -->
+        <!-- Required specific library version. -->
+        <attr name="versionMajor" format="integer" />
     </declare-styleable>
 
     <!-- The <code>uses-libraries</code> specifies a shared library that this

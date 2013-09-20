@@ -63,7 +63,7 @@ public class KeyAttestationApplicationIdProviderService
                 PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageNames[i],
                         PackageManager.GET_SIGNATURES, userId);
                 keyAttestationPackageInfos[i] = new KeyAttestationPackageInfo(packageNames[i],
-                        packageInfo.versionCode, packageInfo.signatures);
+                        packageInfo.getLongVersionCode(), packageInfo.signatures);
             }
         } catch (NameNotFoundException nnfe) {
             throw new RemoteException(nnfe.getMessage());

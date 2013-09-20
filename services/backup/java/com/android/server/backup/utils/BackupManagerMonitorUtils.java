@@ -56,6 +56,8 @@ public class BackupManagerMonitorUtils {
                             pkg.packageName);
                     bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
                             pkg.versionCode);
+                    bundle.putLong(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION,
+                            pkg.getLongVersionCode());
                 }
                 if (extras != null) {
                     bundle.putAll(extras);

@@ -26,7 +26,7 @@ import android.content.pm.PackageManager;
  */
 interface PackageManagerHelper {
 
-    int getInstalledPackageVersion(String packageName)
+    long getInstalledPackageVersion(String packageName)
             throws PackageManager.NameNotFoundException;
 
     boolean isPrivilegedApp(String packageName) throws PackageManager.NameNotFoundException;

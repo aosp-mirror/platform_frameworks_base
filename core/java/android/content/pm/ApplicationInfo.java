@@ -888,7 +888,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * The app's declared version code.
      * @hide
      */
-    public int versionCode;
+    public long versionCode;
 
     /**
      * The user-visible SDK version (ex. 26) of the framework against which the application claims
@@ -1315,7 +1315,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(uid);
         dest.writeInt(minSdkVersion);
         dest.writeInt(targetSdkVersion);
-        dest.writeInt(versionCode);
+        dest.writeLong(versionCode);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(enabledSetting);
         dest.writeInt(installLocation);
@@ -1384,7 +1384,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = source.readInt();
         minSdkVersion = source.readInt();
         targetSdkVersion = source.readInt();
-        versionCode = source.readInt();
+        versionCode = source.readLong();
         enabled = source.readInt() != 0;
         enabledSetting = source.readInt();
         installLocation = source.readInt();

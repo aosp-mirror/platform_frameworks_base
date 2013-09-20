@@ -593,10 +593,10 @@ public final class Settings {
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
-            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, int vc, int
+            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc, int
             pkgFlags, int pkgPrivateFlags, String parentPackageName,
             List<String> childPackageNames, String[] usesStaticLibraries,
-            int[] usesStaticLibraryNames) {
+            long[] usesStaticLibraryNames) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -673,11 +673,11 @@ public final class Settings {
     static @NonNull PackageSetting createNewSetting(String pkgName, PackageSetting originalPkg,
             PackageSetting disabledPkg, String realPkgName, SharedUserSetting sharedUser,
             File codePath, File resourcePath, String legacyNativeLibraryPath, String primaryCpuAbi,
-            String secondaryCpuAbi, int versionCode, int pkgFlags, int pkgPrivateFlags,
+            String secondaryCpuAbi, long versionCode, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, String parentPkgName, List<String> childPkgNames,
             UserManagerService userManager,
-            String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
+            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -788,7 +788,7 @@ public final class Settings {
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi,
             int pkgFlags, int pkgPrivateFlags, @Nullable List<String> childPkgNames,
             @NonNull UserManagerService userManager, @Nullable String[] usesStaticLibraries,
-            @Nullable int[] usesStaticLibrariesVersions) throws PackageManagerException {
+            @Nullable long[] usesStaticLibrariesVersions) throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -949,8 +949,8 @@ public final class Settings {
         p.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         p.cpuAbiOverrideString = pkg.cpuAbiOverride;
         // Update version code if needed
-        if (pkg.mVersionCode != p.versionCode) {
-            p.versionCode = pkg.mVersionCode;
+        if (pkg.getLongVersionCode() != p.versionCode) {
+            p.versionCode = pkg.getLongVersionCode();
         }
         // Update signatures if needed.
         if (p.signatures.mSignatures == null) {
@@ -2287,9 +2287,9 @@ public final class Settings {
             String libName = parser.getAttributeValue(null, ATTR_NAME);
             String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
 
-            int libVersion = -1;
+            long libVersion = -1;
             try {
-                libVersion = Integer.parseInt(libVersionStr);
+                libVersion = Long.parseLong(libVersionStr);
             } catch (NumberFormatException e) {
                 // ignore
             }
@@ -2297,7 +2297,7 @@ public final class Settings {
             if (libName != null && libVersion >= 0) {
                 outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
                         outPs.usesStaticLibraries, libName);
-                outPs.usesStaticLibrariesVersions = ArrayUtils.appendInt(
+                outPs.usesStaticLibrariesVersions = ArrayUtils.appendLong(
                         outPs.usesStaticLibrariesVersions, libVersion);
             }
 
@@ -2306,7 +2306,7 @@ public final class Settings {
     }
 
     void writeUsesStaticLibLPw(XmlSerializer serializer, String[] usesStaticLibraries,
-            int[] usesStaticLibraryVersions) throws IOException {
+            long[] usesStaticLibraryVersions) throws IOException {
         if (ArrayUtils.isEmpty(usesStaticLibraries) || ArrayUtils.isEmpty(usesStaticLibraryVersions)
                 || usesStaticLibraries.length != usesStaticLibraryVersions.length) {
             return;
@@ -2314,10 +2314,10 @@ public final class Settings {
         final int libCount = usesStaticLibraries.length;
         for (int i = 0; i < libCount; i++) {
             final String libName = usesStaticLibraries[i];
-            final int libVersion = usesStaticLibraryVersions[i];
+            final long libVersion = usesStaticLibraryVersions[i];
             serializer.startTag(null, TAG_USES_STATIC_LIB);
             serializer.attribute(null, ATTR_NAME, libName);
-            serializer.attribute(null, ATTR_VERSION, Integer.toString(libVersion));
+            serializer.attribute(null, ATTR_VERSION, Long.toString(libVersion));
             serializer.endTag(null, TAG_USES_STATIC_LIB);
         }
     }
@@ -3561,10 +3561,10 @@ public final class Settings {
             resourcePathStr = codePathStr;
         }
         String version = parser.getAttributeValue(null, "version");
-        int versionCode = 0;
+        long versionCode = 0;
         if (version != null) {
             try {
-                versionCode = Integer.parseInt(version);
+                versionCode = Long.parseLong(version);
             } catch (NumberFormatException e) {
             }
         }
@@ -3677,7 +3677,7 @@ public final class Settings {
         long lastUpdateTime = 0;
         PackageSetting packageSetting = null;
         String version = null;
-        int versionCode = 0;
+        long versionCode = 0;
         String parentPackageName;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
@@ -3705,7 +3705,7 @@ public final class Settings {
             version = parser.getAttributeValue(null, "version");
             if (version != null) {
                 try {
-                    versionCode = Integer.parseInt(version);
+                    versionCode = Long.parseLong(version);
                 } catch (NumberFormatException e) {
                 }
             }

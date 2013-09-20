@@ -102,7 +102,7 @@ message UidMapping {
     message PackageInfo {
       optional string name = 1;
 
-      optional int32 version = 2;
+      optional int64 version = 2;
 
       optional int32 uid = 3;
     }
@@ -119,7 +119,7 @@ message UidMapping {
     optional string app = 3;
     optional int32 uid = 4;
 
-    optional int32 version = 5;
+    optional int64 version = 5;
   }
   repeated Change changes = 2;
 }

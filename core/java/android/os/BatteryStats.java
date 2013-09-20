@@ -1180,7 +1180,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final class PackageChange {
         public String mPackageName;
         public boolean mUpdate;
-        public int mVersionCode;
+        public long mVersionCode;
     }
 
     public static final class DailyItem {

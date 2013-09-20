@@ -99,10 +99,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // For compactness we store the SHA-256 hash of each app's Signatures
     // rather than the Signature blocks themselves.
     public class Metadata {
-        public int versionCode;
+        public long versionCode;
         public ArrayList<byte[]> sigHashes;
 
-        Metadata(int version, ArrayList<byte[]> hashes) {
+        Metadata(long version, ArrayList<byte[]> hashes) {
             versionCode = version;
             sigHashes = hashes;
         }
@@ -206,7 +206,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 homeInfo = mPackageManager.getPackageInfo(home.getPackageName(),
                         PackageManager.GET_SIGNATURES);
                 homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
-                homeVersion = homeInfo.versionCode;
+                homeVersion = homeInfo.getLongVersionCode();
                 homeSigHashes = BackupUtils.hashSignatureArray(homeInfo.signatures);
             } catch (NameNotFoundException e) {
                 Slog.w(TAG, "Can't access preferred home info");
@@ -287,7 +287,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         // metadata again.  In either case, take it out of mExisting so that
                         // we don't consider it deleted later.
                         mExisting.remove(packName);
-                        if (info.versionCode == mStateVersions.get(packName).versionCode) {
+                        if (info.getLongVersionCode() == mStateVersions.get(packName).versionCode) {
                             continue;
                         }
                     }
@@ -309,13 +309,18 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
                     // marshal the version code in a canonical form
                     outputBuffer.reset();
-                    outputBufferStream.writeInt(info.versionCode);
+                    if (info.versionCodeMajor != 0) {
+                        outputBufferStream.writeInt(Integer.MIN_VALUE);
+                        outputBufferStream.writeLong(info.getLongVersionCode());
+                    } else {
+                        outputBufferStream.writeInt(info.versionCode);
+                    }
                     writeSignatureHashArray(outputBufferStream,
                             BackupUtils.hashSignatureArray(info.signatures));
 
                     if (DEBUG) {
                         Slog.v(TAG, "+ writing metadata for " + packName
-                                + " version=" + info.versionCode
+                                + " version=" + info.getLongVersionCode()
                                 + " entityLen=" + outputBuffer.size());
                     }
                     
@@ -409,7 +414,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 }
             } else {
                 // it's a file metadata record
-                int versionCode = inputBufferStream.readInt();
+                int versionCodeInt = inputBufferStream.readInt();
+                long versionCode;
+                if (versionCodeInt == Integer.MIN_VALUE) {
+                    versionCode = inputBufferStream.readLong();
+                } else {
+                    versionCode = versionCodeInt;
+                }
                 ArrayList<byte[]> sigs = readSignatureHashArray(inputBufferStream);
                 if (DEBUG) {
                     Slog.i(TAG, "   read metadata for " + key
@@ -561,7 +572,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // The global metadata was last; now read all the apps
             while (true) {
                 pkg = in.readUTF();
-                int versionCode = in.readInt();
+                int versionCodeInt = in.readInt();
+                long versionCode;
+                if (versionCodeInt == Integer.MIN_VALUE) {
+                    versionCode = in.readLong();
+                } else {
+                    versionCode = versionCodeInt;
+                }
 
                 if (!ignoreExisting) {
                     mExisting.add(pkg);
@@ -609,7 +626,12 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // now write all the app names + versions
             for (PackageInfo pkg : pkgs) {
                 out.writeUTF(pkg.packageName);
-                out.writeInt(pkg.versionCode);
+                if (pkg.versionCodeMajor != 0) {
+                    out.writeInt(Integer.MIN_VALUE);
+                    out.writeLong(pkg.getLongVersionCode());
+                } else {
+                    out.writeInt(pkg.versionCode);
+                }
             }
 
             out.flush();

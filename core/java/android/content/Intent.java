@@ -4456,9 +4456,17 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * The version code of the app to install components from.
+     * @deprecated Use {@link #EXTRA_LONG_VERSION_CODE).
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_VERSION_CODE = "android.intent.extra.VERSION_CODE";
+
+    /**
+     * The version code of the app to install components from.
+     * @hide
+     */
+    public static final String EXTRA_LONG_VERSION_CODE = "android.intent.extra.LONG_VERSION_CODE";
 
     /**
      * The app that triggered the ephemeral installation.

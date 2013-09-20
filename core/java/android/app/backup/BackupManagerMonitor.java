@@ -40,9 +40,14 @@ public class BackupManagerMonitor {
   /** string : the package name */
   public static final String EXTRA_LOG_EVENT_PACKAGE_NAME =
           "android.app.backup.extra.LOG_EVENT_PACKAGE_NAME";
-  /** int : the versionCode of the package named by EXTRA_LOG_EVENT_PACKAGE_NAME */
+  /** int : the versionCode of the package named by EXTRA_LOG_EVENT_PACKAGE_NAME
+   * @deprecated Use {@link #EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION} */
+  @Deprecated
   public static final String EXTRA_LOG_EVENT_PACKAGE_VERSION =
           "android.app.backup.extra.LOG_EVENT_PACKAGE_VERSION";
+  /** long : the full versionCode of the package named by EXTRA_LOG_EVENT_PACKAGE_NAME */
+  public static final String EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION =
+          "android.app.backup.extra.LOG_EVENT_PACKAGE_FULL_VERSION";
   /** int : the id of the log message, will be a unique identifier */
   public static final String EXTRA_LOG_EVENT_ID = "android.app.backup.extra.LOG_EVENT_ID";
   /**

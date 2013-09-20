@@ -495,14 +495,14 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 return;
             }
 
-            if (metaInfo.versionCode > mCurrentPackage.versionCode) {
+            if (metaInfo.versionCode > mCurrentPackage.getLongVersionCode()) {
                 // Data is from a "newer" version of the app than we have currently
                 // installed.  If the app has not declared that it is prepared to
                 // handle this case, we do not attempt the restore.
                 if ((mCurrentPackage.applicationInfo.flags
                         & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) == 0) {
                     String message = "Source version " + metaInfo.versionCode
-                            + " > installed version " + mCurrentPackage.versionCode;
+                            + " > installed version " + mCurrentPackage.getLongVersionCode();
                     Slog.w(TAG, "Package " + pkgName + ": " + message);
                     Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
@@ -522,7 +522,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 } else {
                     if (DEBUG) {
                         Slog.v(TAG, "Source version " + metaInfo.versionCode
-                                + " > installed version " + mCurrentPackage.versionCode
+                                + " > installed version " + mCurrentPackage.getLongVersionCode()
                                 + " but restoreAnyVersion");
                     }
                     Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
@@ -543,7 +543,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 Slog.v(TAG, "Package " + pkgName
                         + " restore version [" + metaInfo.versionCode
                         + "] is compatible with installed version ["
-                        + mCurrentPackage.versionCode + "]");
+                        + mCurrentPackage.getLongVersionCode() + "]");
             }
 
             // Reset per-package preconditions and fire the appropriate next state
@@ -635,7 +635,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     }
 
     // Guts of a key/value restore operation
-    void initiateOneRestore(PackageInfo app, int appVersionCode) {
+    void initiateOneRestore(PackageInfo app, long appVersionCode) {
         final String packageName = app.packageName;
 
         if (DEBUG) {

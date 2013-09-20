@@ -61,7 +61,7 @@ TEST(UidMapTest, TestIsolatedUID) {
 TEST(UidMapTest, TestMatching) {
     UidMap m;
     vector<int32_t> uids;
-    vector<int32_t> versions;
+    vector<int64_t> versions;
     vector<String16> apps;
 
     uids.push_back(1000);
@@ -79,7 +79,7 @@ TEST(UidMapTest, TestMatching) {
 TEST(UidMapTest, TestAddAndRemove) {
     UidMap m;
     vector<int32_t> uids;
-    vector<int32_t> versions;
+    vector<int64_t> versions;
     vector<String16> apps;
 
     uids.push_back(1000);
@@ -107,7 +107,7 @@ TEST(UidMapTest, TestClearingOutput) {
     m.OnConfigUpdated(config1);
 
     vector<int32_t> uids;
-    vector<int32_t> versions;
+    vector<int64_t> versions;
     vector<String16> apps;
     uids.push_back(1000);
     uids.push_back(1000);
@@ -161,7 +161,7 @@ TEST(UidMapTest, TestMemoryComputed) {
 
     size_t startBytes = m.mBytesUsed;
     vector<int32_t> uids;
-    vector<int32_t> versions;
+    vector<int64_t> versions;
     vector<String16> apps;
     uids.push_back(1000);
     apps.push_back(String16(kApp1.c_str()));
@@ -191,7 +191,7 @@ TEST(UidMapTest, TestMemoryGuardrail) {
 
     size_t startBytes = m.mBytesUsed;
     vector<int32_t> uids;
-    vector<int32_t> versions;
+    vector<int64_t> versions;
     vector<String16> apps;
     for (int i = 0; i < 100; i++) {
         uids.push_back(1);

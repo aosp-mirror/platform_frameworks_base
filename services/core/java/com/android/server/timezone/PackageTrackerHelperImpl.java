@@ -81,11 +81,11 @@ final class PackageTrackerHelperImpl implements ClockHelper, ConfigHelper, Packa
     }
 
     @Override
-    public int getInstalledPackageVersion(String packageName)
+    public long getInstalledPackageVersion(String packageName)
             throws PackageManager.NameNotFoundException {
         int flags = PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
         PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName, flags);
-        return packageInfo.versionCode;
+        return packageInfo.getLongVersionCode();
     }
 
     @Override

@@ -361,7 +361,7 @@ public abstract class RegisteredServicesCache<V> {
         }
         IntArray updatedUids = null;
         for (ServiceInfo<V> service : allServices) {
-            int versionCode = service.componentInfo.applicationInfo.versionCode;
+            long versionCode = service.componentInfo.applicationInfo.versionCode;
             String pkg = service.componentInfo.packageName;
             ApplicationInfo newAppInfo = null;
             try {

@@ -23,6 +23,8 @@
 #include <binder/IServiceManager.h>
 #include <utils/Errors.h>
 
+#include <inttypes.h>
+
 using namespace android;
 
 namespace android {
@@ -46,7 +48,7 @@ bool UidMap::hasApp(int uid, const string& packageName) const {
     return false;
 }
 
-int UidMap::getAppVersion(int uid, const string& packageName) const {
+int64_t UidMap::getAppVersion(int uid, const string& packageName) const {
     lock_guard<mutex> lock(mMutex);
 
     auto range = mMap.equal_range(uid);
@@ -58,13 +60,13 @@ int UidMap::getAppVersion(int uid, const string& packageName) const {
     return 0;
 }
 
-void UidMap::updateMap(const vector<int32_t>& uid, const vector<int32_t>& versionCode,
+void UidMap::updateMap(const vector<int32_t>& uid, const vector<int64_t>& versionCode,
                        const vector<String16>& packageName) {
     updateMap(time(nullptr) * NS_PER_SEC, uid, versionCode, packageName);
 }
 
 void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
-                       const vector<int32_t>& versionCode, const vector<String16>& packageName) {
+                       const vector<int64_t>& versionCode, const vector<String16>& packageName) {
     lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
 
     mMap.clear();
@@ -87,12 +89,12 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
     ensureBytesUsedBelowLimit();
 }
 
-void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t& versionCode) {
+void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int64_t& versionCode) {
     updateApp(time(nullptr) * NS_PER_SEC, app_16, uid, versionCode);
 }
 
 void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid,
-                       const int32_t& versionCode) {
+                       const int64_t& versionCode) {
     lock_guard<mutex> lock(mMutex);
 
     string app = string(String8(app_16).string());
@@ -116,7 +118,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
     auto range = mMap.equal_range(int(uid));
     for (auto it = range.first; it != range.second; ++it) {
         if (it->second.packageName == app) {
-            it->second.versionCode = int(versionCode);
+            it->second.versionCode = versionCode;
             return;
         }
         VLOG("updateApp failed to find the app %s with uid %i to update", app.c_str(), uid);
@@ -124,7 +126,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
     }
 
     // Otherwise, we need to add an app at this uid.
-    mMap.insert(make_pair(uid, AppData(app, int(versionCode))));
+    mMap.insert(make_pair(uid, AppData(app, versionCode)));
 }
 
 void UidMap::ensureBytesUsedBelowLimit() {
@@ -298,8 +300,8 @@ void UidMap::printUidMap(FILE* out) {
     lock_guard<mutex> lock(mMutex);
 
     for (auto it : mMap) {
-        fprintf(out, "%s, v%d (%i)\n", it.second.packageName.c_str(), it.second.versionCode,
-                it.first);
+        fprintf(out, "%s, v%" PRId64 " (%i)\n", it.second.packageName.c_str(),
+                it.second.versionCode, it.first);
     }
 }
 

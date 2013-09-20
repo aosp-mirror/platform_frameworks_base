@@ -37,11 +37,54 @@ public class PackageInfo implements Parcelable {
     public String[] splitNames;
 
     /**
+     * @deprecated Use {@link #getLongVersionCode()} instead, which includes both
+     * this and the additional
+     * {@link android.R.styleable#AndroidManifest_versionCodeMajor versionCodeMajor} attribute.
      * The version number of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_versionCode versionCode}
      * attribute.
+     * @see #getLongVersionCode()
      */
+    @Deprecated
     public int versionCode;
+
+    /**
+     * @hide
+     * The major version number of this package, as specified by the &lt;manifest&gt;
+     * tag's {@link android.R.styleable#AndroidManifest_versionCode versionCodeMajor}
+     * attribute.
+     * @see #getLongVersionCode()
+     */
+    public int versionCodeMajor;
+
+    /**
+     * Return {@link android.R.styleable#AndroidManifest_versionCode versionCode} and
+     * {@link android.R.styleable#AndroidManifest_versionCodeMajor versionCodeMajor} combined
+     * together as a single long value.  The
+     * {@link android.R.styleable#AndroidManifest_versionCodeMajor versionCodeMajor} is placed in
+     * the upper 32 bits.
+     */
+    public long getLongVersionCode() {
+        return composeLongVersionCode(versionCodeMajor, versionCode);
+    }
+
+    /**
+     * Set the full version code in this PackageInfo, updating {@link #versionCode}
+     * with the lower bits.
+     * @see #getLongVersionCode()
+     */
+    public void setLongVersionCode(long longVersionCode) {
+        versionCodeMajor = (int) (longVersionCode>>32);
+        versionCode = (int) longVersionCode;
+    }
+
+    /**
+     * @hide Internal implementation for composing a minor and major version code in to
+     * a single long version code.
+     */
+    public static long composeLongVersionCode(int major, int minor) {
+        return (((long) major) << 32) | (((long) minor) & 0xffffffffL);
+    }
 
     /**
      * The version name of this package, as specified by the &lt;manifest&gt;
@@ -333,6 +376,7 @@ public class PackageInfo implements Parcelable {
         dest.writeString(packageName);
         dest.writeStringArray(splitNames);
         dest.writeInt(versionCode);
+        dest.writeInt(versionCodeMajor);
         dest.writeString(versionName);
         dest.writeInt(baseRevisionCode);
         dest.writeIntArray(splitRevisionCodes);
@@ -389,6 +433,7 @@ public class PackageInfo implements Parcelable {
         packageName = source.readString();
         splitNames = source.createStringArray();
         versionCode = source.readInt();
+        versionCodeMajor = source.readInt();
         versionName = source.readString();
         baseRevisionCode = source.readInt();
         splitRevisionCodes = source.createIntArray();

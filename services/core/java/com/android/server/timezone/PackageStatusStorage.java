@@ -76,7 +76,7 @@ final class PackageStatusStorage {
      */
     private static final String ATTRIBUTE_DATA_APP_VERSION = "dataAppPackageVersion";
 
-    private static final int UNKNOWN_PACKAGE_VERSION = -1;
+    private static final long UNKNOWN_PACKAGE_VERSION = -1;
 
     private final AtomicFile mPackageStatusFile;
 
@@ -320,14 +320,14 @@ final class PackageStatusStorage {
             serializer.attribute(namespace, ATTRIBUTE_CHECK_STATUS, statusAttributeValue);
             serializer.attribute(namespace, ATTRIBUTE_OPTIMISTIC_LOCK_ID,
                     Integer.toString(optimisticLockId));
-            int updateAppVersion = status == null
+            long updateAppVersion = status == null
                     ? UNKNOWN_PACKAGE_VERSION : packageVersions.mUpdateAppVersion;
             serializer.attribute(namespace, ATTRIBUTE_UPDATE_APP_VERSION,
-                    Integer.toString(updateAppVersion));
-            int dataAppVersion = status == null
+                    Long.toString(updateAppVersion));
+            long dataAppVersion = status == null
                     ? UNKNOWN_PACKAGE_VERSION : packageVersions.mDataAppVersion;
             serializer.attribute(namespace, ATTRIBUTE_DATA_APP_VERSION,
-                    Integer.toString(dataAppVersion));
+                    Long.toString(dataAppVersion));
             serializer.endTag(namespace, TAG_PACKAGE_STATUS);
             serializer.endDocument();
             serializer.flush();

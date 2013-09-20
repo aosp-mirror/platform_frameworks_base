@@ -28,7 +28,7 @@ import android.os.Parcelable;
  */
 public class KeyAttestationPackageInfo implements Parcelable {
     private final String mPackageName;
-    private final int mPackageVersionCode;
+    private final long mPackageVersionCode;
     private final Signature[] mPackageSignatures;
 
     /**
@@ -37,7 +37,7 @@ public class KeyAttestationPackageInfo implements Parcelable {
      * @param mPackageSignatures
      */
     public KeyAttestationPackageInfo(
-            String mPackageName, int mPackageVersionCode, Signature[] mPackageSignatures) {
+            String mPackageName, long mPackageVersionCode, Signature[] mPackageSignatures) {
         super();
         this.mPackageName = mPackageName;
         this.mPackageVersionCode = mPackageVersionCode;
@@ -52,7 +52,7 @@ public class KeyAttestationPackageInfo implements Parcelable {
     /**
      * @return the mPackageVersionCode
      */
-    public int getPackageVersionCode() {
+    public long getPackageVersionCode() {
         return mPackageVersionCode;
     }
     /**
@@ -70,7 +70,7 @@ public class KeyAttestationPackageInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mPackageName);
-        dest.writeInt(mPackageVersionCode);
+        dest.writeLong(mPackageVersionCode);
         dest.writeTypedArray(mPackageSignatures, flags);
     }
 
@@ -89,7 +89,7 @@ public class KeyAttestationPackageInfo implements Parcelable {
 
     private KeyAttestationPackageInfo(Parcel source) {
         mPackageName = source.readString();
-        mPackageVersionCode = source.readInt();
+        mPackageVersionCode = source.readLong();
         mPackageSignatures = source.createTypedArray(Signature.CREATOR);
     }
 }

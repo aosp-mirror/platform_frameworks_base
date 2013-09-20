@@ -41,9 +41,9 @@ namespace statsd {
 
 struct AppData {
     const string packageName;
-    int versionCode;
+    int64_t versionCode;
 
-    AppData(const string& a, const int v) : packageName(a), versionCode(v){};
+    AppData(const string& a, const int64_t v) : packageName(a), versionCode(v){};
 };
 
 // UidMap keeps track of what the corresponding app name (APK name) and version code for every uid
@@ -57,16 +57,16 @@ public:
      * All three inputs must be the same size, and the jth element in each array refers to the same
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].
      */
-    void updateMap(const vector<int32_t>& uid, const vector<int32_t>& versionCode,
+    void updateMap(const vector<int32_t>& uid, const vector<int64_t>& versionCode,
                    const vector<String16>& packageName);
 
-    void updateApp(const String16& packageName, const int32_t& uid, const int32_t& versionCode);
+    void updateApp(const String16& packageName, const int32_t& uid, const int64_t& versionCode);
     void removeApp(const String16& packageName, const int32_t& uid);
 
     // Returns true if the given uid contains the specified app (eg. com.google.android.gms).
     bool hasApp(int uid, const string& packageName) const;
 
-    int getAppVersion(int uid, const string& packageName) const;
+    int64_t getAppVersion(int uid, const string& packageName) const;
 
     // Helper for debugging contents of this uid map. Can be triggered with:
     // adb shell cmd stats print-uid-map
@@ -104,10 +104,10 @@ public:
 
 private:
     void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
-                   const vector<int32_t>& versionCode, const vector<String16>& packageName);
+                   const vector<int64_t>& versionCode, const vector<String16>& packageName);
 
     void updateApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid,
-                   const int32_t& versionCode);
+                   const int64_t& versionCode);
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
     UidMapping getOutput(const int64_t& timestamp, const ConfigKey& key);

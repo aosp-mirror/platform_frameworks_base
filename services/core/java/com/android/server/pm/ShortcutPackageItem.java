@@ -108,7 +108,7 @@ abstract class ShortcutPackageItem {
             return; // Not installed, no need to restore yet.
         }
         int restoreBlockReason;
-        int currentVersionCode = ShortcutInfo.VERSION_CODE_UNKNOWN;
+        long currentVersionCode = ShortcutInfo.VERSION_CODE_UNKNOWN;
 
         if (!mPackageInfo.hasSignatures()) {
             s.wtf("Attempted to restore package " + mPackageName + "/u" + mPackageUserId
@@ -116,7 +116,7 @@ abstract class ShortcutPackageItem {
             restoreBlockReason = ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH;
         } else {
             final PackageInfo pi = s.getPackageInfoWithSignatures(mPackageName, mPackageUserId);
-            currentVersionCode = pi.versionCode;
+            currentVersionCode = pi.getLongVersionCode();
             restoreBlockReason = mPackageInfo.canRestoreTo(s, pi, canRestoreAnyVersion());
         }
 

@@ -159,7 +159,7 @@ public abstract class InstantAppResolver {
                     long startTime) {
                 final String packageName;
                 final String splitName;
-                final int versionCode;
+                final long versionCode;
                 final Intent failureIntent;
                 if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
@@ -241,7 +241,7 @@ public abstract class InstantAppResolver {
             @NonNull String instantAppPackageName,
             @Nullable String instantAppSplitName,
             @Nullable ComponentName installFailureActivity,
-            int versionCode,
+            long versionCode,
             @Nullable String token,
             boolean needsPhaseTwo) {
         // Construct the intent that launches the instant installer
@@ -307,7 +307,8 @@ public abstract class InstantAppResolver {
 
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, instantAppPackageName);
             intent.putExtra(Intent.EXTRA_SPLIT_NAME, instantAppSplitName);
-            intent.putExtra(Intent.EXTRA_VERSION_CODE, versionCode);
+            intent.putExtra(Intent.EXTRA_VERSION_CODE, (int) (versionCode & 0x7fffffff));
+            intent.putExtra(Intent.EXTRA_LONG_VERSION_CODE, versionCode);
             intent.putExtra(Intent.EXTRA_CALLING_PACKAGE, callingPackage);
             if (verificationBundle != null) {
                 intent.putExtra(Intent.EXTRA_VERIFICATION_BUNDLE, verificationBundle);

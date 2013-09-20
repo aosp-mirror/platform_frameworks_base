@@ -394,6 +394,7 @@ public class PackageParser {
     public static class PackageLite {
         public final String packageName;
         public final int versionCode;
+        public final int versionCodeMajor;
         public final int installLocation;
         public final VerifierInfo[] verifiers;
 
@@ -436,6 +437,7 @@ public class PackageParser {
                 String[] splitCodePaths, int[] splitRevisionCodes) {
             this.packageName = baseApk.packageName;
             this.versionCode = baseApk.versionCode;
+            this.versionCodeMajor = baseApk.versionCodeMajor;
             this.installLocation = baseApk.installLocation;
             this.verifiers = baseApk.verifiers;
             this.splitNames = splitNames;
@@ -476,6 +478,7 @@ public class PackageParser {
         public final String configForSplit;
         public final String usesSplitName;
         public final int versionCode;
+        public final int versionCodeMajor;
         public final int revisionCode;
         public final int installLocation;
         public final VerifierInfo[] verifiers;
@@ -489,11 +492,11 @@ public class PackageParser {
         public final boolean isolatedSplits;
 
         public ApkLite(String codePath, String packageName, String splitName, boolean isFeatureSplit,
-                String configForSplit, String usesSplitName, int versionCode, int revisionCode,
-                int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
-                Certificate[][] certificates, boolean coreApp, boolean debuggable,
-                boolean multiArch, boolean use32bitAbi, boolean extractNativeLibs,
-                boolean isolatedSplits) {
+                String configForSplit, String usesSplitName, int versionCode, int versionCodeMajor,
+                int revisionCode, int installLocation, List<VerifierInfo> verifiers,
+                Signature[] signatures, Certificate[][] certificates, boolean coreApp,
+                boolean debuggable, boolean multiArch, boolean use32bitAbi,
+                boolean extractNativeLibs, boolean isolatedSplits) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -501,6 +504,7 @@ public class PackageParser {
             this.configForSplit = configForSplit;
             this.usesSplitName = usesSplitName;
             this.versionCode = versionCode;
+            this.versionCodeMajor = versionCodeMajor;
             this.revisionCode = revisionCode;
             this.installLocation = installLocation;
             this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
@@ -512,6 +516,10 @@ public class PackageParser {
             this.use32bitAbi = use32bitAbi;
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
+        }
+
+        public long getLongVersionCode() {
+            return PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode);
         }
     }
 
@@ -663,6 +671,7 @@ public class PackageParser {
         pi.packageName = p.packageName;
         pi.splitNames = p.splitNames;
         pi.versionCode = p.mVersionCode;
+        pi.versionCodeMajor = p.mVersionCodeMajor;
         pi.baseRevisionCode = p.baseRevisionCode;
         pi.splitRevisionCodes = p.splitRevisionCodes;
         pi.versionName = p.mVersionName;
@@ -1880,6 +1889,7 @@ public class PackageParser {
 
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         int versionCode = 0;
+        int versionCodeMajor = 0;
         int revisionCode = 0;
         boolean coreApp = false;
         boolean debuggable = false;
@@ -1898,6 +1908,8 @@ public class PackageParser {
                         PARSE_DEFAULT_INSTALL_LOCATION);
             } else if (attr.equals("versionCode")) {
                 versionCode = attrs.getAttributeIntValue(i, 0);
+            } else if (attr.equals("versionCodeMajor")) {
+                versionCodeMajor = attrs.getAttributeIntValue(i, 0);
             } else if (attr.equals("revisionCode")) {
                 revisionCode = attrs.getAttributeIntValue(i, 0);
             } else if (attr.equals("coreApp")) {
@@ -1963,9 +1975,9 @@ public class PackageParser {
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
-                configForSplit, usesSplitName, versionCode, revisionCode, installLocation,
-                verifiers, signatures, certificates, coreApp, debuggable, multiArch, use32bitAbi,
-                extractNativeLibs, isolatedSplits);
+                configForSplit, usesSplitName, versionCode, versionCodeMajor, revisionCode,
+                installLocation, verifiers, signatures, certificates, coreApp, debuggable,
+                multiArch, use32bitAbi, extractNativeLibs, isolatedSplits);
     }
 
     /**
@@ -2086,8 +2098,11 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifest);
 
-        pkg.mVersionCode = pkg.applicationInfo.versionCode = sa.getInteger(
+        pkg.mVersionCode = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_versionCode, 0);
+        pkg.mVersionCodeMajor = sa.getInteger(
+                com.android.internal.R.styleable.AndroidManifest_versionCodeMajor, 0);
+        pkg.applicationInfo.versionCode = pkg.getLongVersionCode();
         pkg.baseRevisionCode = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_revisionCode, 0);
         pkg.mVersionName = sa.getNonConfigurationString(
@@ -2912,7 +2927,7 @@ public class PackageParser {
                 1, additionalCertSha256Digests.length);
 
         pkg.usesStaticLibraries = ArrayUtils.add(pkg.usesStaticLibraries, lname);
-        pkg.usesStaticLibrariesVersions = ArrayUtils.appendInt(
+        pkg.usesStaticLibrariesVersions = ArrayUtils.appendLong(
                 pkg.usesStaticLibrariesVersions, version, true);
         pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
                 pkg.usesStaticLibrariesCertDigests, certSha256Digests, true);
@@ -3867,6 +3882,9 @@ public class PackageParser {
                         com.android.internal.R.styleable.AndroidManifestStaticLibrary_name);
                 final int version = sa.getInt(
                         com.android.internal.R.styleable.AndroidManifestStaticLibrary_version, -1);
+                final int versionMajor = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestStaticLibrary_versionMajor,
+                        0);
 
                 sa.recycle();
 
@@ -3894,7 +3912,12 @@ public class PackageParser {
                 }
 
                 owner.staticSharedLibName = lname.intern();
-                owner.staticSharedLibVersion = version;
+                if (version >= 0) {
+                    owner.staticSharedLibVersion =
+                            PackageInfo.composeLongVersionCode(versionMajor, version);
+                } else {
+                    owner.staticSharedLibVersion = version;
+                }
                 ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY;
 
                 XmlUtils.skipCurrentTag(parser);
@@ -5895,11 +5918,11 @@ public class PackageParser {
         public ArrayList<Package> childPackages;
 
         public String staticSharedLibName = null;
-        public int staticSharedLibVersion = 0;
+        public long staticSharedLibVersion = 0;
         public ArrayList<String> libraryNames = null;
         public ArrayList<String> usesLibraries = null;
         public ArrayList<String> usesStaticLibraries = null;
-        public int[] usesStaticLibrariesVersions = null;
+        public long[] usesStaticLibrariesVersions = null;
         public String[][] usesStaticLibrariesCertDigests = null;
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
@@ -5915,6 +5938,14 @@ public class PackageParser {
 
         // The version code declared for this package.
         public int mVersionCode;
+
+        // The major version code declared for this package.
+        public int mVersionCodeMajor;
+
+        // Return long containing mVersionCode and mVersionCodeMajor.
+        public long getLongVersionCode() {
+            return PackageInfo.composeLongVersionCode(mVersionCodeMajor, mVersionCode);
+        }
 
         // The version name declared for this package.
         public String mVersionName;
@@ -6385,7 +6416,7 @@ public class PackageParser {
             if (staticSharedLibName != null) {
                 staticSharedLibName = staticSharedLibName.intern();
             }
-            staticSharedLibVersion = dest.readInt();
+            staticSharedLibVersion = dest.readLong();
             libraryNames = dest.createStringArrayList();
             internStringArrayList(libraryNames);
             usesLibraries = dest.createStringArrayList();
@@ -6399,8 +6430,8 @@ public class PackageParser {
                 usesStaticLibraries = new ArrayList<>(libCount);
                 dest.readStringList(usesStaticLibraries);
                 internStringArrayList(usesStaticLibraries);
-                usesStaticLibrariesVersions = new int[libCount];
-                dest.readIntArray(usesStaticLibrariesVersions);
+                usesStaticLibrariesVersions = new long[libCount];
+                dest.readLongArray(usesStaticLibrariesVersions);
                 usesStaticLibrariesCertDigests = new String[libCount][];
                 for (int i = 0; i < libCount; i++) {
                     usesStaticLibrariesCertDigests[i] = dest.createStringArray();
@@ -6540,7 +6571,7 @@ public class PackageParser {
             dest.writeParcelableList(childPackages, flags);
 
             dest.writeString(staticSharedLibName);
-            dest.writeInt(staticSharedLibVersion);
+            dest.writeLong(staticSharedLibVersion);
             dest.writeStringList(libraryNames);
             dest.writeStringList(usesLibraries);
             dest.writeStringList(usesOptionalLibraries);
@@ -6551,7 +6582,7 @@ public class PackageParser {
             } else {
                 dest.writeInt(usesStaticLibraries.size());
                 dest.writeStringList(usesStaticLibraries);
-                dest.writeIntArray(usesStaticLibrariesVersions);
+                dest.writeLongArray(usesStaticLibrariesVersions);
                 for (String[] usesStaticLibrariesCertDigest : usesStaticLibrariesCertDigests) {
                     dest.writeStringArray(usesStaticLibrariesCertDigest);
                 }

@@ -50,9 +50,9 @@ public final class PackageSetting extends PackageSettingBase {
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
+            long pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
             List<String> childPackageNames, int sharedUserId, String[] usesStaticLibraries,
-            int[] usesStaticLibrariesVersions) {
+            long[] usesStaticLibrariesVersions) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                 pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames,
