@@ -117,6 +117,7 @@ extern int register_android_graphics_Rasterizer(JNIEnv* env);
 extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_SurfaceTexture(JNIEnv* env);
 extern int register_android_graphics_Xfermode(JNIEnv* env);
+extern int register_android_graphics_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
 extern int register_android_view_GraphicBuffer(JNIEnv* env);
 extern int register_android_view_GLES20DisplayList(JNIEnv* env);
@@ -144,7 +145,6 @@ extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_FileUtils(JNIEnv *env);
 extern int register_android_os_UEventObserver(JNIEnv* env);
 extern int register_android_os_MemoryFile(JNIEnv* env);
-extern int register_android_print_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
 extern int register_android_net_NetworkUtils(JNIEnv* env);
 extern int register_android_net_TrafficStats(JNIEnv* env);
@@ -1161,6 +1161,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_Xfermode),
     REG_JNI(register_android_graphics_YuvImage),
+    REG_JNI(register_android_graphics_pdf_PdfDocument),
 
     REG_JNI(register_android_database_CursorWindow),
     REG_JNI(register_android_database_SQLiteConnection),
@@ -1173,7 +1174,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_SELinux),
     REG_JNI(register_android_os_Trace),
     REG_JNI(register_android_os_UEventObserver),
-    REG_JNI(register_android_print_pdf_PdfDocument),
     REG_JNI(register_android_net_LocalSocketImpl),
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_TrafficStats),
