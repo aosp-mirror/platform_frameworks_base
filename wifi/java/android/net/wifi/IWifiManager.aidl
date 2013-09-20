@@ -119,7 +119,7 @@ interface IWifiManager
 
     boolean requestBatchedScan(in BatchedScanSettings requested, IBinder binder);
 
-    void stopBatchedScan(in BatchedScanSettings requested, IBinder binder);
+    void stopBatchedScan(in BatchedScanSettings requested);
 
     List<BatchedScanResult> getBatchedScanResults(String callingPackage);
 
