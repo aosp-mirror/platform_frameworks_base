@@ -1310,7 +1310,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             throw new FileNotFoundException("Column _data not found.");
         }
 
-        int modeBits = ContentResolver.modeToMode(uri, mode);
+        int modeBits = ParcelFileDescriptor.parseMode(mode);
         return ParcelFileDescriptor.open(new File(path), modeBits);
     }
 

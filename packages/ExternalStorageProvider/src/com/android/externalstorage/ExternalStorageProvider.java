@@ -310,7 +310,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
         final File file = getFileForDocId(documentId);
-        return ParcelFileDescriptor.open(file, ContentResolver.modeToMode(null, mode));
+        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.parseMode(mode));
     }
 
     @Override
