@@ -554,8 +554,8 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public int getAuthType() {
-        if (allowedKeyManagement.cardinality() > 1) {
-            throw new IllegalStateException("More than one auth type set");
+        if (isValid() == false) {
+            throw new IllegalStateException("Invalid configuration");
         }
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return KeyMgmt.WPA_PSK;
