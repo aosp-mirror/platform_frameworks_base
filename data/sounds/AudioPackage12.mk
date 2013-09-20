@@ -24,4 +24,4 @@ PRODUCT_COPY_FILES += $(foreach fn,$(RINGTONE_FILES),\
 	$(LOCAL_PATH)/ringtones/ogg/$(fn).ogg:system/media/audio/ringtones/$(fn).ogg)
 
 PRODUCT_COPY_FILES += $(foreach fn,$(EFFECT_FILES),\
-	$(LOCAL_PATH)/effects/ogg/$(fn).ogg:system/media/audio/effects/$(fn).ogg)
+	$(LOCAL_PATH)/effects/ogg/$(fn).ogg:system/media/audio/ui/$(fn).ogg)
