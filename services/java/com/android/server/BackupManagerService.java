@@ -1992,6 +1992,15 @@ class BackupManagerService extends IBackupManager.Stub {
                     return;
                 }
 
+                if ((mCurrentPackage.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+                    // The app has been force-stopped or cleared or just installed,
+                    // and not yet launched out of that state, so just as it won't
+                    // receive broadcasts, we won't run it for backup.
+                    addBackupTrace("skipping - stopped");
+                    executeNextState(BackupState.RUNNING_QUEUE);
+                    return;
+                }
+
                 IBackupAgent agent = null;
                 try {
                     mWakelock.setWorkSource(new WorkSource(mCurrentPackage.applicationInfo.uid));
