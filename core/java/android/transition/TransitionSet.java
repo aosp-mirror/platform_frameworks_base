@@ -340,6 +340,15 @@ public class TransitionSet extends Transition {
     }
 
     @Override
+    void setCanRemoveViews(boolean canRemoveViews) {
+        super.setCanRemoveViews(canRemoveViews);
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).setCanRemoveViews(canRemoveViews);
+        }
+    }
+
+    @Override
     String toString(String indent) {
         String result = super.toString(indent);
         for (int i = 0; i < mTransitions.size(); ++i) {

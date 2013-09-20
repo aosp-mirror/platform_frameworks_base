@@ -55,6 +55,7 @@
     <string name="reveal">Reveal</string>
     <string name="crossfade">Crossfade</string>
     <string name="inout">In/Out</string>
-    <string name="textfade1">T1</string>
-    <string name="textfade2">T2</string>
+    <string name="textfade1">CT</string>
+    <string name="textfade2">CTO</string>
+    <string name="textfade3">CTI</string>
 </resources>

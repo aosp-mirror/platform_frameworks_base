@@ -21,7 +21,7 @@ import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
 import android.transition.Crossfade;
-import android.transition.TextChange;
+import android.transition.ChangeText;
 import android.transition.Transition;
 import android.transition.TransitionSet;
 import android.transition.TransitionManager;
@@ -41,7 +41,7 @@ public class CrossfadeMultiple extends Activity {
     Button mButton;
     Crossfade mCrossfade;
     TransitionSet mCrossfadeGroup;
-    TransitionSet mTextChangeGroup1, mTextChangeGroup2;
+    TransitionSet mTextChangeGroup1, mTextChangeGroup2, mTextChangeGroup3;
     TransitionSet mInOutGroup;
 
     @Override
@@ -74,18 +74,21 @@ public class CrossfadeMultiple extends Activity {
         mInOutGroup.addTransition(inOut).addTransition(changeBounds);
 
         mTextChangeGroup1 = new TransitionSet();
-        TextChange textChangeInOut = new TextChange();
-        textChangeInOut.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT_IN);
-        mTextChangeGroup1.addTransition(textChangeInOut).addTransition(new ChangeBounds());
+        ChangeText changeTextInOut = new ChangeText();
+        changeTextInOut.setChangeBehavior(ChangeText.CHANGE_BEHAVIOR_OUT_IN);
+        mTextChangeGroup1.addTransition(changeTextInOut).addTransition(new ChangeBounds());
 
         mTextChangeGroup2 = new TransitionSet();
         mTextChangeGroup2.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-        TextChange textChangeOut = new TextChange();
-        textChangeOut.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT);
-        TextChange textChangeIn = new TextChange();
-        textChangeIn.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_IN);
-        mTextChangeGroup2.addTransition(textChangeOut).addTransition(new ChangeBounds()).
-                addTransition(textChangeIn);
+        ChangeText changeTextOut = new ChangeText();
+        changeTextOut.setChangeBehavior(ChangeText.CHANGE_BEHAVIOR_OUT);
+        mTextChangeGroup2.addTransition(changeTextOut).addTransition(new ChangeBounds());
+
+        mTextChangeGroup3 = new TransitionSet();
+        mTextChangeGroup3.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+        ChangeText changeTextIn = new ChangeText();
+        changeTextIn.setChangeBehavior(ChangeText.CHANGE_BEHAVIOR_IN);
+        mTextChangeGroup3.addTransition(changeTextIn).addTransition(new ChangeBounds());
     }
 
     public void sendMessage(View view) {
@@ -134,6 +137,9 @@ public class CrossfadeMultiple extends Activity {
                 break;
             case R.id.textfade2:
                 mTransition = mTextChangeGroup2;
+                break;
+            case R.id.textfade3:
+                mTransition = mTextChangeGroup3;
                 break;
         }
     }
