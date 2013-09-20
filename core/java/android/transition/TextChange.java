@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -36,6 +37,9 @@ import java.util.Map;
  * @hide
  */
 public class TextChange extends Transition {
+
+    private static final String LOG_TAG = "TextChange";
+
     private static final String PROPNAME_TEXT = "android:textchange:text";
     private static final String PROPNAME_TEXT_COLOR = "android:textchange:textColor";
 
@@ -224,6 +228,9 @@ public class TextChange extends Transition {
                 }
             };
             addListener(transitionListener);
+            if (DBG) {
+                Log.d(LOG_TAG, "createAnimator returning " + anim);
+            }
             return anim;
         }
         return null;
