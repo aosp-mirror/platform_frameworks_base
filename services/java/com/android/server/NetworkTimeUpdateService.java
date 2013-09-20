@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
@@ -35,7 +36,6 @@ import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.TrustedTime;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.telephony.TelephonyIntents;
 
 /**
@@ -113,7 +113,9 @@ public class NetworkTimeUpdateService {
         registerForAlarms();
         registerForConnectivityIntents();
 
-        mHandler = new MyHandler(BackgroundThread.get().getLooper());
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = new MyHandler(thread.getLooper());
         // Check the network time on the new thread
         mHandler.obtainMessage(EVENT_POLL_NETWORK_TIME).sendToTarget();
 

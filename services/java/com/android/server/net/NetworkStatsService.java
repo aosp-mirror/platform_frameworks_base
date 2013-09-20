@@ -96,6 +96,7 @@ import android.os.Binder;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.PowerManager;
@@ -119,7 +120,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
-import com.android.server.IoThread;
 import com.android.server.connectivity.Tethering;
 import com.google.android.collect.Maps;
 
@@ -270,7 +270,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        mHandler = new Handler(IoThread.get().getLooper(), mHandlerCallback);
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = new Handler(thread.getLooper(), mHandlerCallback);
 
         mSystemDir = checkNotNull(systemDir);
         mBaseDir = new File(systemDir, "netstats");
