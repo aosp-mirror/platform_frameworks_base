@@ -5744,11 +5744,10 @@ package android.content {
     method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public static deprecated android.content.SyncInfo getCurrentSync();
     method public static java.util.List<android.content.SyncInfo> getCurrentSyncs();
-    method public android.net.Uri[] getIncomingUriPermissionGrants(int, int);
     method public static int getIsSyncable(android.accounts.Account, java.lang.String);
     method public static boolean getMasterSyncAutomatically();
-    method public android.net.Uri[] getOutgoingUriPermissionGrants(int, int);
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.accounts.Account, java.lang.String);
+    method public java.util.List<android.content.UriPermission> getPersistedUriPermissions();
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String);
     method public static android.content.SyncAdapterType[] getSyncAdapterTypes();
     method public static boolean getSyncAutomatically(android.accounts.Account, java.lang.String);
@@ -5770,6 +5769,7 @@ package android.content {
     method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.os.CancellationSignal);
     method public final void registerContentObserver(android.net.Uri, boolean, android.database.ContentObserver);
+    method public void releasePersistableUriPermission(android.net.Uri, int);
     method public static void removePeriodicSync(android.accounts.Account, java.lang.String, android.os.Bundle);
     method public static void removeStatusChangeListener(java.lang.Object);
     method public static void requestSync(android.accounts.Account, java.lang.String, android.os.Bundle);
@@ -5778,6 +5778,7 @@ package android.content {
     method public static void setMasterSyncAutomatically(boolean);
     method public static void setSyncAutomatically(android.accounts.Account, java.lang.String, boolean);
     method public deprecated void startSync(android.net.Uri, android.os.Bundle);
+    method public void takePersistableUriPermission(android.net.Uri, int);
     method public final android.net.Uri uncanonicalize(android.net.Uri);
     method public final void unregisterContentObserver(android.database.ContentObserver);
     method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
@@ -6515,10 +6516,10 @@ package android.content {
     field public static final int FLAG_DEBUG_LOG_RESOLUTION = 8; // 0x8
     field public static final int FLAG_EXCLUDE_STOPPED_PACKAGES = 16; // 0x10
     field public static final int FLAG_FROM_BACKGROUND = 4; // 0x4
+    field public static final int FLAG_GRANT_PERSISTABLE_URI_PERMISSION = 64; // 0x40
     field public static final int FLAG_GRANT_READ_URI_PERMISSION = 1; // 0x1
     field public static final int FLAG_GRANT_WRITE_URI_PERMISSION = 2; // 0x2
     field public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 32; // 0x20
-    field public static final int FLAG_PERSIST_GRANT_URI_PERMISSION = 64; // 0x40
     field public static final int FLAG_RECEIVER_FOREGROUND = 268435456; // 0x10000000
     field public static final int FLAG_RECEIVER_NO_ABORT = 134217728; // 0x8000000
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY = 1073741824; // 0x40000000
@@ -6909,6 +6910,17 @@ package android.content {
     method public void addURI(java.lang.String, java.lang.String, int);
     method public int match(android.net.Uri);
     field public static final int NO_MATCH = -1; // 0xffffffff
+  }
+
+  public final class UriPermission implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getPersistedTime();
+    method public android.net.Uri getUri();
+    method public boolean isReadPermission();
+    method public boolean isWritePermission();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final long INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
   }
 
 }
@@ -20954,7 +20966,6 @@ package android.provider {
     method public static boolean deleteDocument(android.content.ContentResolver, android.net.Uri);
     method public static java.lang.String getDocumentId(android.net.Uri);
     method public static android.graphics.Bitmap getDocumentThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point, android.os.CancellationSignal);
-    method public static android.net.Uri[] getOpenDocuments(android.content.Context);
     method public static java.lang.String getRootId(android.net.Uri);
     method public static java.lang.String getSearchDocumentsQuery(android.net.Uri);
     field public static final java.lang.String EXTRA_ERROR = "error";

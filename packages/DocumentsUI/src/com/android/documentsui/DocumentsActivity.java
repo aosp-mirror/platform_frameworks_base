@@ -1001,7 +1001,7 @@ public class DocumentsActivity extends Activity {
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         }
 
         setResult(Activity.RESULT_OK, intent);

@@ -931,6 +931,15 @@ public class XmlUtils {
         out.attribute(null, name, Integer.toString(value));
     }
 
+    public static long readLongAttribute(XmlPullParser in, String name, long defaultValue) {
+        final String value = in.getAttributeValue(null, name);
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     public static long readLongAttribute(XmlPullParser in, String name) throws IOException {
         final String value = in.getAttributeValue(null, name);
         try {

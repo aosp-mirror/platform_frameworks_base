@@ -27,9 +27,11 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.UriPermission;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -210,7 +212,10 @@ public interface IActivityManager extends IInterface {
             Uri uri, int mode) throws RemoteException;
     public void revokeUriPermission(IApplicationThread caller, Uri uri,
             int mode) throws RemoteException;
-    
+    public void takePersistableUriPermission(Uri uri, int modeFlags) throws RemoteException;
+    public void releasePersistableUriPermission(Uri uri, int modeFlags) throws RemoteException;
+    public ParceledListSlice<UriPermission> getPersistedUriPermissions() throws RemoteException;
+
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting)
             throws RemoteException;
     
@@ -398,10 +403,6 @@ public interface IActivityManager extends IInterface {
     public void reportActivityFullyDrawn(IBinder token) throws RemoteException;
 
     public void restart() throws RemoteException;
-
-    public Uri[] getGrantedUriPermissions(
-            String sourcePackage, String targetPackage, int modeFlags, int modeMask)
-            throws RemoteException;
 
     public void performIdleMaintenance() throws RemoteException;
 
@@ -686,6 +687,8 @@ public interface IActivityManager extends IInterface {
     int NOTIFY_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+175;
     int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+176;
     int RESTART_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+177;
-    int GET_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+178;
-    int PERFORM_IDLE_MAINTENANCE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+179;
+    int PERFORM_IDLE_MAINTENANCE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+178;
+    int TAKE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+179;
+    int RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+180;
+    int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
 }
