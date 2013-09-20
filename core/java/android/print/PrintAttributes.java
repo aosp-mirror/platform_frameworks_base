@@ -241,7 +241,7 @@ public final class PrintAttributes implements Parcelable {
         return builder.toString();
     }
 
-    /** hide */
+    /** @hide */
     public void clear() {
         mMediaSize = null;
         mResolution = null;

@@ -19177,7 +19177,6 @@ package android.print {
   }
 
   public final class PrintAttributes implements android.os.Parcelable {
-    method public void clear();
     method public int describeContents();
     method public int getColorMode();
     method public android.print.PrintAttributes.MediaSize getMediaSize();
