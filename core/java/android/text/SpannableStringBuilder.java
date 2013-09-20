@@ -1288,6 +1288,47 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return mFilters;
     }
 
+    // Same as SpannableStringInternal
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Spanned &&
+                toString().equals(o.toString())) {
+            // Check span data
+            Object[] otherSpans = ((Spanned) o).getSpans(0,
+                    ((Spanned) o).length(), Object.class);
+            if (mSpanCount == otherSpans.length) {
+                for (int i = 0; i < mSpanCount; ++i) {
+                    Object thisSpan = mSpans[i];
+                    Object otherSpan = otherSpans[i];
+                    if (!thisSpan.equals(otherSpan) ||
+                            getSpanStart(thisSpan) != getSpanStart(otherSpan) ||
+                            getSpanEnd(thisSpan) != getSpanEnd(otherSpan) ||
+                            getSpanFlags(thisSpan) != getSpanFlags(otherSpan)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    // Same as SpannableStringInternal
+    @Override
+    public int hashCode() {
+        int hash = toString().hashCode();
+        hash = hash * 31 + mSpanCount;
+        for (int i = 0; i < mSpanCount; ++i) {
+            Object span = mSpans[i];
+            hash = hash * 31 + span.hashCode();
+            hash = hash * 31 + getSpanStart(span);
+            hash = hash * 31 + getSpanEnd(span);
+            hash = hash * 31 + getSpanFlags(span);
+        }
+        return hash;
+    }
+
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
     private InputFilter[] mFilters = NO_FILTERS;
 
