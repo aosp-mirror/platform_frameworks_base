@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 
 /**
  * Support class for querying the list of available engines
@@ -369,28 +370,34 @@ public class TtsEngines {
     public String getDefaultLocale() {
         final Locale locale = Locale.getDefault();
 
-        // Note that the default locale might have an empty variant
-        // or language, and we take care that the construction is
-        // the same as {@link #getV1Locale} i.e no trailing delimiters
-        // or spaces.
-        String defaultLocale = locale.getISO3Language();
-        if (TextUtils.isEmpty(defaultLocale)) {
-            Log.w(TAG, "Default locale is empty.");
-            return "";
-        }
+        try {
+            // Note that the default locale might have an empty variant
+            // or language, and we take care that the construction is
+            // the same as {@link #getV1Locale} i.e no trailing delimiters
+            // or spaces.
+            String defaultLocale = locale.getISO3Language();
+            if (TextUtils.isEmpty(defaultLocale)) {
+                Log.w(TAG, "Default locale is empty.");
+                return "";
+            }
 
-        if (!TextUtils.isEmpty(locale.getISO3Country())) {
-            defaultLocale += LOCALE_DELIMITER + locale.getISO3Country();
-        } else {
-            // Do not allow locales of the form lang--variant with
-            // an empty country.
+            if (!TextUtils.isEmpty(locale.getISO3Country())) {
+                defaultLocale += LOCALE_DELIMITER + locale.getISO3Country();
+            } else {
+                // Do not allow locales of the form lang--variant with
+                // an empty country.
+                return defaultLocale;
+            }
+            if (!TextUtils.isEmpty(locale.getVariant())) {
+                defaultLocale += LOCALE_DELIMITER + locale.getVariant();
+            }
+
             return defaultLocale;
+        } catch (MissingResourceException e) {
+            // Default locale does not have a ISO 3166 and/or ISO 639-2/T codes. Return the
+            // default "eng-usa" (that would be the result of Locale.getDefault() == Locale.US).
+            return "eng-usa";
         }
-        if (!TextUtils.isEmpty(locale.getVariant())) {
-            defaultLocale += LOCALE_DELIMITER + locale.getVariant();
-        }
-
-        return defaultLocale;
     }
 
     /**
