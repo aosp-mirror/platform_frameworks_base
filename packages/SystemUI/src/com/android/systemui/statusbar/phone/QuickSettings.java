@@ -759,7 +759,8 @@ class QuickSettings {
         */
 
         // SSL CA Cert Warning.
-        final QuickSettingsBasicTile sslCaCertWarningTile = new QuickSettingsBasicTile(mContext);
+        final QuickSettingsBasicTile sslCaCertWarningTile =
+                new QuickSettingsBasicTile(mContext, null, R.layout.quick_settings_tile_monitoring);
         sslCaCertWarningTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
