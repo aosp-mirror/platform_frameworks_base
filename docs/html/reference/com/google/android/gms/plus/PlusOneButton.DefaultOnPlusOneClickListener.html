@@ -73,15 +73,17 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>GooglePlusUtil | Android Developers</title>
+<title>PlusOneButton.DefaultOnPlusOneClickListener | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -631,6 +638,20 @@ onkeyup="return search_changed(event, false, '/')" />
   
   
 
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
 
@@ -640,12 +661,12 @@ Summary:
 
 
 
-  <a href="#constants">Constants</a>
+
+
+
+
+  <a href="#pubctors">Ctors</a>
   
-
-
-
-
 
 
 
@@ -671,12 +692,12 @@ Summary:
 <!-- ======== START OF CLASS DATA ======== -->
 
 <div id="jd-header">
-    public
+    protected
      
      
     
     class
-<h1 itemprop="name">GooglePlusUtil</h1>
+<h1 itemprop="name">PlusOneButton.DefaultOnPlusOneClickListener</h1>
 
 
 
@@ -687,6 +708,13 @@ Summary:
   
 
   
+  
+      implements 
+      
+        View.OnClickListener 
+      
+        <a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> 
+      
   
   
 
@@ -709,7 +737,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.GooglePlusUtil</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.PlusOneButton.DefaultOnPlusOneClickListener</td>
     </tr>
     
 
@@ -725,8 +753,13 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Utility class for verifying that the Google+ app is available and
- up-to-date on this device.
+<p itemprop="articleBody">This is an <code><a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a></code> that will proxy clicks to an
+ attached <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></code>, or default to attempt to start
+ the intent using an <code><a href="/reference/android/app/Activity.html">Activity</a></code> context.
+
+ Important: The implementation of <code><a href="/">ERROR(/OnClickListener#onClick(android.view.View))</a></code>
+ used by DefaultOnPlusOneClickListener relies on the tag of this class'
+ PlusOneButtonView remaining unused.
 </p>
 
 
@@ -767,66 +800,39 @@ Summary:
 
 
 
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-    
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#APP_DISABLED">APP_DISABLED</a></td>
-        <td class="jd-descrcol" width="100%">Status code indicating the Google+ app is installed, but disabled.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#APP_MISSING">APP_MISSING</a></td>
-        <td class="jd-descrcol" width="100%">Status code indicating the Google+ app is not installed.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#APP_UPDATE_REQUIRED">APP_UPDATE_REQUIRED</a></td>
-        <td class="jd-descrcol" width="100%">Status code indicating the Google+ app is installed, but is older than the
- version required.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#GOOGLE_PLUS_PACKAGE">GOOGLE_PLUS_PACKAGE</a></td>
-        <td class="jd-descrcol" width="100%">The package name of the Google+ Android app.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#PLATFORM_LOGGING_TAG">PLATFORM_LOGGING_TAG</a></td>
-        <td class="jd-descrcol" width="100%">Property to enable logging across the Google+ platform for Android.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#SUCCESS">SUCCESS</a></td>
-        <td class="jd-descrcol" width="100%">Status code indicating the Google+ app is installed and up-to-date.</td>
-    </tr>
-    
-    
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.DefaultOnPlusOneClickListener.html#PlusOneButton.DefaultOnPlusOneClickListener(com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)">PlusOneButton.DefaultOnPlusOneClickListener</a></span>(<a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> proxy)</nobr>
+        
+  </td></tr>
+
+
 
 </table>
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -844,15 +850,13 @@ Summary:
             
             
             
-            static
             
-            int</nobr>
+            
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#checkGooglePlusApp(android.content.Context)">checkGooglePlusApp</a></span>(Context context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.DefaultOnPlusOneClickListener.html#onClick(android.view.View)">onClick</a></span>(View view)</nobr>
         
-        <div class="jd-descrdiv">Checks if the version of the Google+ app installed on this device is up-to-date.</div>
-  
   </td></tr>
 
 
@@ -862,14 +866,14 @@ Summary:
             
             
             
-            static
             
-            Dialog</nobr>
+            
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog</a></span>(int errorCode, Activity activity, int requestCode)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.DefaultOnPlusOneClickListener.html#onPlusOneClick(android.content.Intent)">onPlusOneClick</a></span>(Intent intent)</nobr>
         
-        <div class="jd-descrdiv">Returns a dialog to address the provided errorCode.</div>
+        <div class="jd-descrdiv">Called when the +1 button is clicked.</div>
   
   </td></tr>
 
@@ -1090,6 +1094,92 @@ From class
 </td></tr>
 
 
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.view.View.OnClickListener" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-android.view.View.OnClickListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  android.view.View.OnClickListener
+
+<div id="inherited-methods-android.view.View.OnClickListener">
+  <div id="inherited-methods-android.view.View.OnClickListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.view.View.OnClickListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onClick</span>(View arg0)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener</a>
+
+<div id="inherited-methods-com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener">
+  <div id="inherited-methods-com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html#onPlusOneClick(android.content.Intent)">onPlusOneClick</a></span>(Intent intent)</nobr>
+        
+        <div class="jd-descrdiv">Called when the +1 button is clicked.</div>
+  
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
 </table>
 
 
@@ -1113,258 +1203,46 @@ From class
 <!-- Constants -->
 
 
-<!-- ========= ENUM CONSTANTS DETAIL ======== -->
-<h2>Constants</h2>
-
-
-
-
-<A NAME="APP_DISABLED"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        APP_DISABLED
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Status code indicating the Google+ app is installed, but disabled.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                3
-                (0x00000003)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="APP_MISSING"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        APP_MISSING
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Status code indicating the Google+ app is not installed.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                1
-                (0x00000001)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="APP_UPDATE_REQUIRED"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        APP_UPDATE_REQUIRED
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Status code indicating the Google+ app is installed, but is older than the
- version required.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                2
-                (0x00000002)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="GOOGLE_PLUS_PACKAGE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        GOOGLE_PLUS_PACKAGE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The package name of the Google+ Android app.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.apps.plus"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="PLATFORM_LOGGING_TAG"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        PLATFORM_LOGGING_TAG
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Property to enable logging across the Google+ platform for Android.
- <p>
- To enable logging:<br>
-      <code>adb shell setprop <em>log.tag.GooglePlusPlatform</em> <em>VERBOSE</em></code>
- </p>
- <p>
- To disable logging:<br>
-      <code>adb shell setprop <em>log.tag.GooglePlusPlatform</em> <em>""</em></code>
- </p>
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "GooglePlusPlatform"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="SUCCESS"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        SUCCESS
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Status code indicating the Google+ app is installed and up-to-date.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                0
-                (0x00000000)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-
 <!-- Fields -->
 
 
 <!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<A NAME="PlusOneButton.DefaultOnPlusOneClickListener(com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">PlusOneButton.DefaultOnPlusOneClickListener</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> proxy)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 
 
 
@@ -1380,20 +1258,20 @@ From class
 
 
 
-<A NAME="checkGooglePlusApp(android.content.Context)"></A>
+<A NAME="onClick(android.view.View)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-        static 
          
          
          
-        int
+         
+        void
       </span>
-      <span class="sympad">checkGooglePlusApp</span>
-      <span class="normal">(Context context)</span>
+      <span class="sympad">onClick</span>
+      <span class="normal">(View view)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1403,41 +1281,26 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Checks if the version of the Google+ app installed on this device is up-to-date.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>One of the status codes that is defined by this class: <code><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#APP_DISABLED">APP_DISABLED</a></code>,
-         <code><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#APP_MISSING">APP_MISSING</a></code>, <code><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#APP_UPDATE_REQUIRED">APP_UPDATE_REQUIRED</a></code>, or <code><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#SUCCESS">SUCCESS</a></code>
-</li></ul>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
 
 
-<A NAME="getErrorDialog(int, android.app.Activity, int)"></A>
+<A NAME="onPlusOneClick(android.content.Intent)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-        static 
          
          
          
-        Dialog
+         
+        void
       </span>
-      <span class="sympad">getErrorDialog</span>
-      <span class="normal">(int errorCode, Activity activity, int requestCode)</span>
+      <span class="sympad">onPlusOneClick</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1447,25 +1310,15 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a dialog to address the provided errorCode. Upon confirmation, the user is directed
- to either the Google Play Store or the System App Settings screen to resolve the error.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the +1 button is clicked.  Start the intent passed to this method
+ to display the +1 confirmation dialog <code><a href="/reference/android/app/Activity.html">Activity</a></code> with
+ <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>errorCode</td>
-          <td>error code returned by <code><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#checkGooglePlusApp(android.content.Context)">checkGooglePlusApp(Context)</a></code> call. If
-            errorCode is <code><a href="/reference/com/google/android/gms/plus/GooglePlusUtil.html#SUCCESS">SUCCESS</a></code> then null is returned.</td>
-        </tr>
-        <tr>
-          <th>activity</td>
-          <td>parent activity for creating the dialog, also used for identifying language
-            to display dialog in.</td>
-        </tr>
-        <tr>
-          <th>requestCode</td>
-          <td>The non-negative request code given when calling
-            <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>.
+          <th>intent</td>
+          <td>The intent to display the +1 confirmation dialog.
 </td>
         </tr>
       </table>
