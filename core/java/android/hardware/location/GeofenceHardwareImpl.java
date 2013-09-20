@@ -18,17 +18,14 @@ package android.hardware.location;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.FusedBatchOptions;
 import android.location.IFusedGeofenceHardware;
 import android.location.IGpsGeofenceHardware;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -601,12 +598,13 @@ public final class GeofenceHardwareImpl {
                     GeofenceTransition geofenceTransition = (GeofenceTransition)(msg.obj);
                     synchronized (mGeofences) {
                         callback = mGeofences.get(geofenceTransition.mGeofenceId);
-                    }
 
-                    if (DEBUG) Log.d(TAG, "GeofenceTransistionCallback: GPS : GeofenceId: " +
-                            geofenceTransition.mGeofenceId +
-                            " Transition: " + geofenceTransition.mTransition +
-                            " Location: " + geofenceTransition.mLocation + ":" + mGeofences);
+                        // need to keep access to mGeofences synchronized at all times
+                        if (DEBUG) Log.d(TAG, "GeofenceTransistionCallback: GPS : GeofenceId: " +
+                                geofenceTransition.mGeofenceId +
+                                " Transition: " + geofenceTransition.mTransition +
+                                " Location: " + geofenceTransition.mLocation + ":" + mGeofences);
+                    }
 
                     if (callback != null) {
                         try {
