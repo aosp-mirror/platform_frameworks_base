@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>Game | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -693,7 +700,7 @@ Summary:
   
       implements 
       
-        <a href="/reference/android/os/Parcelable.html">Parcelable</a> 
+        Parcelable 
       
         <a href="/reference/com/google/android/gms/common/data/Freezable.html">Freezable</a>&lt;T&gt; 
       
@@ -892,7 +899,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getApplicationId()">getApplicationId</a></span>()</nobr>
@@ -910,7 +917,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDescription()">getDescription</a></span>()</nobr>
@@ -931,7 +938,7 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the description string into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -946,7 +953,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDeveloperName()">getDeveloperName</a></span>()</nobr>
@@ -967,7 +974,7 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDeveloperName(android.database.CharArrayBuffer)">getDeveloperName</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDeveloperName(android.database.CharArrayBuffer)">getDeveloperName</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the developer name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -982,7 +989,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDisplayName()">getDisplayName</a></span>()</nobr>
@@ -1003,7 +1010,7 @@ android.os.Parcelable
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(CharArrayBuffer dataOut)</nobr>
         
         <div class="jd-descrdiv">Loads the display name string into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
   
@@ -1018,7 +1025,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getFeaturedImageUri()">getFeaturedImageUri</a></span>()</nobr>
@@ -1037,7 +1044,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getHiResImageUri()">getHiResImageUri</a></span>()</nobr>
@@ -1055,7 +1062,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/android/net/Uri.html">Uri</a></nobr>
+            Uri</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getIconImageUri()">getIconImageUri</a></span>()</nobr>
@@ -1091,7 +1098,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getPrimaryCategory()">getPrimaryCategory</a></span>()</nobr>
@@ -1109,7 +1116,7 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Game.html#getSecondaryCategory()">getSecondaryCategory</a></span>()</nobr>
@@ -1142,7 +1149,7 @@ android.os.Parcelable
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/android/os/Parcelable.html">android.os.Parcelable</a>
+  android.os.Parcelable
 
 <div id="inherited-methods-android.os.Parcelable">
   <div id="inherited-methods-android.os.Parcelable-list"
@@ -1180,7 +1187,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(<a href="/reference/android/os/Parcel.html">Parcel</a> arg0, int arg1)</nobr>
+        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -1339,7 +1346,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getApplicationId</span>
       <span class="normal">()</span>
@@ -1373,7 +1380,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDescription</span>
       <span class="normal">()</span>
@@ -1410,7 +1417,7 @@ From interface
         void
       </span>
       <span class="sympad">getDescription</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1446,7 +1453,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDeveloperName</span>
       <span class="normal">()</span>
@@ -1483,7 +1490,7 @@ From interface
         void
       </span>
       <span class="sympad">getDeveloperName</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1519,7 +1526,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getDisplayName</span>
       <span class="normal">()</span>
@@ -1556,7 +1563,7 @@ From interface
         void
       </span>
       <span class="sympad">getDisplayName</span>
-      <span class="normal">(<a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a> dataOut)</span>
+      <span class="normal">(CharArrayBuffer dataOut)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1592,7 +1599,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getFeaturedImageUri</span>
       <span class="normal">()</span>
@@ -1630,7 +1637,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getHiResImageUri</span>
       <span class="normal">()</span>
@@ -1668,7 +1675,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/android/net/Uri.html">Uri</a>
+        Uri
       </span>
       <span class="sympad">getIconImageUri</span>
       <span class="normal">()</span>
@@ -1739,7 +1746,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getPrimaryCategory</span>
       <span class="normal">()</span>
@@ -1773,7 +1780,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getSecondaryCategory</span>
       <span class="normal">()</span>
