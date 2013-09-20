@@ -4801,7 +4801,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final TaskStack stack = task.mStack;
                 stack.moveTaskToBottom(task);
-                task.getDisplayContent().moveStack(stack, false);
                 moveStackWindowsLocked(stack);
             }
         } finally {
