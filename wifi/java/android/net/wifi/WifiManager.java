@@ -1867,13 +1867,16 @@ public class WifiManager {
                 boolean changed = true;
                 if (ws == null) {
                     mWorkSource = null;
-                } else if (mWorkSource == null) {
-                    changed = mWorkSource != null;
-                    mWorkSource = new WorkSource(ws);
                 } else {
-                    changed = mWorkSource.diff(ws);
-                    if (changed) {
-                        mWorkSource.set(ws);
+                    ws.clearNames();
+                    if (mWorkSource == null) {
+                        changed = mWorkSource != null;
+                        mWorkSource = new WorkSource(ws);
+                    } else {
+                        changed = mWorkSource.diff(ws);
+                        if (changed) {
+                            mWorkSource.set(ws);
+                        }
                     }
                 }
                 if (changed && mHeld) {
