@@ -878,6 +878,23 @@ static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject cl
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
 
     if (surfaceTexture->updateTexImage() == NO_ERROR) {
+        int64_t frameNumber = surfaceTexture->getFrameNumber();
+        // If the GLConsumer queue is in synchronous mode, need to discard all
+        // but latest frame, using the frame number to tell when we no longer
+        // have newer frames to target. Since we can't tell which mode it is in,
+        // do this unconditionally.
+        int dropCounter = 0;
+        while (surfaceTexture->updateTexImage() == NO_ERROR) {
+            int64_t newFrameNumber = surfaceTexture->getFrameNumber();
+            if (newFrameNumber == frameNumber) break;
+            frameNumber = newFrameNumber;
+            dropCounter++;
+        }
+        #if DEBUG_RENDERER
+        if (dropCounter > 0) {
+            RENDERER_LOGD("Dropped %d frames on texture layer update", dropCounter);
+        }
+        #endif
         surfaceTexture->getTransformMatrix(transform);
         GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
 
