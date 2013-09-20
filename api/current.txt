@@ -2956,6 +2956,7 @@ package android.app {
     method public void moveTaskToFront(int, int);
     method public void moveTaskToFront(int, int, android.os.Bundle);
     method public deprecated void restartPackage(java.lang.String);
+    field public static final java.lang.String META_HOME_ALTERNATE = "android.app.home.alternate";
     field public static final int MOVE_TASK_NO_USER_ACTION = 2; // 0x2
     field public static final int MOVE_TASK_WITH_HOME = 1; // 0x1
     field public static final int RECENT_IGNORE_UNAVAILABLE = 2; // 0x2
