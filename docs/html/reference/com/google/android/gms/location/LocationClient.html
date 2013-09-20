@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>LocationClient | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -694,7 +701,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -719,7 +726,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -835,7 +842,7 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html#KEY_LOCATION_CHANGED">KEY_LOCATION_CHANGED</a></td>
         <td class="jd-descrcol" width="100%">Key used for a Bundle extra holding a Location value when a location change is broadcast
  using a PendingIntent.</td>
@@ -843,7 +850,7 @@ Summary:
     
     
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html#KEY_MOCK_LOCATION">KEY_MOCK_LOCATION</a></td>
         <td class="jd-descrcol" width="100%">Key used for the Bundle extra in Location object holding a boolean indicating whether
  the location was set using <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code>.</td>
@@ -880,7 +887,7 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#LocationClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">LocationClient</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#LocationClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">LocationClient</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
         
         <div class="jd-descrdiv">Creates a <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>.</div>
   
@@ -911,7 +918,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#addGeofences(java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener)">addGeofences</a></span>(<a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, <a href="/reference/android/app/PendingIntent.html">PendingIntent</a> pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#addGeofences(java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener)">addGeofences</a></span>(List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, PendingIntent pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">Sets alerts to be notified when the device enters or exits one of the
  specified geofences.</div>
@@ -966,7 +973,7 @@ Summary:
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getErrorCode(android.content.Intent)">getErrorCode</a></span>(<a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getErrorCode(android.content.Intent)">getErrorCode</a></span>(Intent intent)</nobr>
         
         <div class="jd-descrdiv">Returns the error code that explains the error that triggered this
  intent.</div>
@@ -985,7 +992,7 @@ Summary:
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getGeofenceTransition(android.content.Intent)">getGeofenceTransition</a></span>(<a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getGeofenceTransition(android.content.Intent)">getGeofenceTransition</a></span>(Intent intent)</nobr>
         
         <div class="jd-descrdiv">Returns the transition type of geofence transition alert.</div>
   
@@ -1000,7 +1007,7 @@ Summary:
             
             
             
-            <a href="/reference/android/location/Location.html">Location</a></nobr>
+            Location</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getLastLocation()">getLastLocation</a></span>()</nobr>
@@ -1018,10 +1025,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt;</nobr>
+            List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getTriggeringGeofences(android.content.Intent)">getTriggeringGeofences</a></span>(<a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#getTriggeringGeofences(android.content.Intent)">getTriggeringGeofences</a></span>(Intent intent)</nobr>
         
         <div class="jd-descrdiv">Returns a list of geofences that triggers this geofence transition alert.</div>
   
@@ -1039,7 +1046,7 @@ Summary:
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#hasError(android.content.Intent)">hasError</a></span>(<a href="/reference/android/content/Intent.html">Intent</a> intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#hasError(android.content.Intent)">hasError</a></span>(Intent intent)</nobr>
         
         <div class="jd-descrdiv">Whether an error triggered this intent.</div>
   
@@ -1169,7 +1176,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences</a></span>(<a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; geofenceRequestIds, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences</a></span>(List&lt;String&gt; geofenceRequestIds, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">Removes geofences by their request IDs.</div>
   
@@ -1187,7 +1194,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences</a></span>(<a href="/reference/android/app/PendingIntent.html">PendingIntent</a> pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences</a></span>(PendingIntent pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">Removes all geofences associated with the given <code>pendingIntent</code>.</div>
   
@@ -1223,7 +1230,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeLocationUpdates(android.app.PendingIntent)">removeLocationUpdates</a></span>(<a href="/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#removeLocationUpdates(android.app.PendingIntent)">removeLocationUpdates</a></span>(PendingIntent callbackIntent)</nobr>
         
         <div class="jd-descrdiv">Removes all location updates for the given pending intent.</div>
   
@@ -1241,7 +1248,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, android.app.PendingIntent)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, android.app.PendingIntent)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, PendingIntent callbackIntent)</nobr>
         
         <div class="jd-descrdiv">Requests location updates with a callback on the specified PendingIntent.</div>
   
@@ -1277,7 +1284,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, <a href="/reference/android/os/Looper.html">Looper</a> looper)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</nobr>
         
         <div class="jd-descrdiv">Requests location updates with a callback on the specified Looper thread.</div>
   
@@ -1295,7 +1302,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation</a></span>(<a href="/reference/android/location/Location.html">Location</a> mockLocation)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation</a></span>(Location mockLocation)</nobr>
         
         <div class="jd-descrdiv">Sets the mock location to be used for the location provider.</div>
   
@@ -1379,7 +1386,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1398,7 +1405,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1417,7 +1424,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1446,7 +1453,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1510,7 +1517,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1819,7 +1826,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_LOCATION_CHANGED
     </h4>
@@ -1858,7 +1865,7 @@ From interface
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         KEY_MOCK_LOCATION
     </h4>
@@ -1915,7 +1922,7 @@ From interface
         
       </span>
       <span class="sympad">LocationClient</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
+      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1978,7 +1985,7 @@ From interface
         void
       </span>
       <span class="sympad">addGeofences</span>
-      <span class="normal">(<a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, <a href="/reference/android/app/PendingIntent.html">PendingIntent</a> pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a> listener)</span>
+      <span class="normal">(List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, PendingIntent pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a> listener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2040,23 +2047,23 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>if the app does not have
              <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>
              permission</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
+            <th>IllegalStateException</td>
             <td>if the connection to Google Play Store
              Services hasn't been established</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if <code>geofences</code> is <code>null</code> or
              empty</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/NullPointerException.html">NullPointerException</a></td>
+            <th>NullPointerException</td>
             <td>if <code>intent</code> or <code>listener</code> is
              <code>null</code>
 </td>
@@ -2144,7 +2151,7 @@ From interface
         int
       </span>
       <span class="sympad">getErrorCode</span>
-      <span class="normal">(<a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2189,7 +2196,7 @@ From interface
         int
       </span>
       <span class="sympad">getGeofenceTransition</span>
-      <span class="normal">(<a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2231,7 +2238,7 @@ From interface
          
          
          
-        <a href="/reference/android/location/Location.html">Location</a>
+        Location
       </span>
       <span class="sympad">getLastLocation</span>
       <span class="normal">()</span>
@@ -2268,10 +2275,10 @@ From interface
          
          
          
-        <a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt;
+        List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt;
       </span>
       <span class="sympad">getTriggeringGeofences</span>
-      <span class="normal">(<a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2316,7 +2323,7 @@ From interface
         boolean
       </span>
       <span class="sympad">hasError</span>
-      <span class="normal">(<a href="/reference/android/content/Intent.html">Intent</a> intent)</span>
+      <span class="normal">(Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2622,7 +2629,7 @@ From interface
         void
       </span>
       <span class="sympad">removeGeofences</span>
-      <span class="normal">(<a href="/reference/java/util/List.html">List</a>&lt;<a href="/reference/java/lang/String.html">String</a>&gt; geofenceRequestIds, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</span>
+      <span class="normal">(List&lt;String&gt; geofenceRequestIds, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2660,23 +2667,23 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
+            <th>IllegalArgumentException</td>
             <td>if <code>geofenceRequestIds</code> is
              <code>null</code> or empty</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>if the app does not have
              <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>
              permission</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
+            <th>IllegalStateException</td>
             <td>if the connection to Google Play Store
              Services hasn't been established</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/NullPointerException.html">NullPointerException</a></td>
+            <th>NullPointerException</td>
             <td>if <code>listener</code> is <code>null</code>
 </td>
         </tr>
@@ -2700,7 +2707,7 @@ From interface
         void
       </span>
       <span class="sympad">removeGeofences</span>
-      <span class="normal">(<a href="/reference/android/app/PendingIntent.html">PendingIntent</a> pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</span>
+      <span class="normal">(PendingIntent pendingIntent, <a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a> listener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2743,18 +2750,18 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>if the app does not have
              <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>
              permission</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
+            <th>IllegalStateException</td>
             <td>if the connection to Google Play Store
              Services hasn't been established</td>
         </tr>  
         <tr>
-            <th><a href="/reference/java/lang/NullPointerException.html">NullPointerException</a></td>
+            <th>NullPointerException</td>
             <td>if <code>intent</code> or <code>listener</code> is
              null
 </td>
@@ -2818,7 +2825,7 @@ From interface
         void
       </span>
       <span class="sympad">removeLocationUpdates</span>
-      <span class="normal">(<a href="/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</span>
+      <span class="normal">(PendingIntent callbackIntent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2857,7 +2864,7 @@ From interface
         void
       </span>
       <span class="sympad">requestLocationUpdates</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, PendingIntent callbackIntent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2967,7 +2974,7 @@ From interface
         void
       </span>
       <span class="sympad">requestLocationUpdates</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, <a href="/reference/android/os/Looper.html">Looper</a> looper)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -3026,7 +3033,7 @@ From interface
         void
       </span>
       <span class="sympad">setMockLocation</span>
-      <span class="normal">(<a href="/reference/android/location/Location.html">Location</a> mockLocation)</span>
+      <span class="normal">(Location mockLocation)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -3057,7 +3064,7 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>if the ACCESS_MOCK_LOCATION permission is not present or the
                            <code><a href="/reference/android/provider/Settings.Secure.html#ALLOW_MOCK_LOCATION">Settings.Secure.ALLOW_MOCK_LOCATION</a></code> system setting is
                            not enabled.
@@ -3119,7 +3126,7 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th><a href="/reference/java/lang/SecurityException.html">SecurityException</a></td>
+            <th>SecurityException</td>
             <td>if the ACCESS_MOCK_LOCATION permission is not present or the
                            <code><a href="/reference/android/provider/Settings.Secure.html#ALLOW_MOCK_LOCATION">Settings.Secure.ALLOW_MOCK_LOCATION</a></code> system setting is
                            not enabled.
