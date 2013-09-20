@@ -195,7 +195,9 @@ public class Resources {
             CompatibilityInfo compatInfo, IBinder token) {
         mAssets = assets;
         mMetrics.setToDefaults();
-        mCompatibilityInfo = compatInfo;
+        if (compatInfo != null) {
+            mCompatibilityInfo = compatInfo;
+        }
         mToken = new WeakReference<IBinder>(token);
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
@@ -1536,9 +1538,8 @@ public class Resources {
             // it would be cleaner and more maintainble to just be
             // consistently dealing with a compatible display everywhere in
             // the framework.
-            if (mCompatibilityInfo != null) {
-                mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
-            }
+            mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
+
             int configChanges = 0xfffffff;
             if (config != null) {
                 mTmpConfig.setTo(config);
@@ -1546,9 +1547,9 @@ public class Resources {
                 if (density == Configuration.DENSITY_DPI_UNDEFINED) {
                     density = mMetrics.noncompatDensityDpi;
                 }
-                if (mCompatibilityInfo != null) {
-                    mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
-                }
+
+                mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
+
                 if (mTmpConfig.locale == null) {
                     mTmpConfig.locale = Locale.getDefault();
                     mTmpConfig.setLayoutDirection(mTmpConfig.locale);
@@ -1697,8 +1698,7 @@ public class Resources {
      * @hide
      */
     public CompatibilityInfo getCompatibilityInfo() {
-        return mCompatibilityInfo != null ? mCompatibilityInfo
-                : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+        return mCompatibilityInfo;
     }
 
     /**
@@ -1706,8 +1706,10 @@ public class Resources {
      * @hide
      */
     public void setCompatibilityInfo(CompatibilityInfo ci) {
-        mCompatibilityInfo = ci;
-        updateConfiguration(mConfiguration, mMetrics);
+        if (ci != null) {
+            mCompatibilityInfo = ci;
+            updateConfiguration(mConfiguration, mMetrics);
+        }
     }
     
     /**
@@ -2407,6 +2409,5 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
-        mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     }
 }
