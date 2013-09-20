@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GooglePlayServicesUtil | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -681,7 +688,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -701,7 +708,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -775,7 +782,7 @@ Summary:
 
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_SERVICES_PACKAGE">GOOGLE_PLAY_SERVICES_PACKAGE</a></td>
         <td class="jd-descrcol" width="100%">Package name for Google Play services.</td>
     </tr>
@@ -790,7 +797,7 @@ Summary:
     
     
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><a href="/reference/java/lang/String.html">String</a></td>
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_STORE_PACKAGE">GOOGLE_PLAY_STORE_PACKAGE</a></td>
         <td class="jd-descrcol" width="100%">Package name for Google Play services.</td>
     </tr>
@@ -827,10 +834,10 @@ Summary:
             
             static
             
-            <a href="/reference/android/app/Dialog.html">Dialog</a></nobr>
+            Dialog</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int, android.content.DialogInterface.OnCancelListener)">getErrorDialog</a></span>(int errorCode, <a href="/reference/android/app/Activity.html">Activity</a> activity, int requestCode, <a href="/reference/android/content/DialogInterface.OnCancelListener.html">DialogInterface.OnCancelListener</a> cancelListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int, android.content.DialogInterface.OnCancelListener)">getErrorDialog</a></span>(int errorCode, Activity activity, int requestCode, DialogInterface.OnCancelListener cancelListener)</nobr>
         
         <div class="jd-descrdiv">Returns a dialog to address the provided errorCode.</div>
   
@@ -845,10 +852,10 @@ Summary:
             
             static
             
-            <a href="/reference/android/app/Dialog.html">Dialog</a></nobr>
+            Dialog</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog</a></span>(int errorCode, <a href="/reference/android/app/Activity.html">Activity</a> activity, int requestCode)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog</a></span>(int errorCode, Activity activity, int requestCode)</nobr>
         
         <div class="jd-descrdiv">Returns a dialog to address the provided errorCode.</div>
   
@@ -863,10 +870,10 @@ Summary:
             
             static
             
-            <a href="/reference/android/app/PendingIntent.html">PendingIntent</a></nobr>
+            PendingIntent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorPendingIntent(int, android.content.Context, int)">getErrorPendingIntent</a></span>(int errorCode, <a href="/reference/android/content/Context.html">Context</a> context, int requestCode)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorPendingIntent(int, android.content.Context, int)">getErrorPendingIntent</a></span>(int errorCode, Context context, int requestCode)</nobr>
         
         <div class="jd-descrdiv">Returns a PendingIntent to address the provided errorCode.</div>
   
@@ -881,7 +888,7 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorString(int)">getErrorString</a></span>(int errorCode)</nobr>
@@ -900,10 +907,10 @@ Summary:
             
             static
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getOpenSourceSoftwareLicenseInfo(android.content.Context)">getOpenSourceSoftwareLicenseInfo</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getOpenSourceSoftwareLicenseInfo(android.content.Context)">getOpenSourceSoftwareLicenseInfo</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">Returns the open source software license information for the Google Play services
  application, or null if Google Play services is not available on this device.</div>
@@ -919,10 +926,10 @@ Summary:
             
             static
             
-            <a href="/reference/android/content/Context.html">Context</a></nobr>
+            Context</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getRemoteContext(android.content.Context)">getRemoteContext</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getRemoteContext(android.content.Context)">getRemoteContext</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">This gets the Context object of the Buddy APK.</div>
   
@@ -937,10 +944,10 @@ Summary:
             
             static
             
-            <a href="/reference/android/content/res/Resources.html">Resources</a></nobr>
+            Resources</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getRemoteResource(android.content.Context)">getRemoteResource</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getRemoteResource(android.content.Context)">getRemoteResource</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">This gets the Resources object of the Buddy APK.</div>
   
@@ -958,7 +965,7 @@ Summary:
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable</a></span>(<a href="/reference/android/content/Context.html">Context</a> context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">Verifies that Google Play services is installed and enabled on this device, and that the
  version installed on this device is no older than the one required by this client.</div>
@@ -1007,7 +1014,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1026,7 +1033,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1045,7 +1052,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -1074,7 +1081,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1138,7 +1145,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1237,7 +1244,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         GOOGLE_PLAY_SERVICES_PACKAGE
     </h4>
@@ -1296,8 +1303,8 @@ From class
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                3225000
-                (0x003135a8)
+                3265000
+                (0x0031d1e8)
             
         </span>
         </div>
@@ -1315,7 +1322,7 @@ From class
         public 
         static 
         final 
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
         GOOGLE_PLAY_STORE_PACKAGE
     </h4>
@@ -1375,10 +1382,10 @@ From class
          
          
          
-        <a href="/reference/android/app/Dialog.html">Dialog</a>
+        Dialog
       </span>
       <span class="sympad">getErrorDialog</span>
-      <span class="normal">(int errorCode, <a href="/reference/android/app/Activity.html">Activity</a> activity, int requestCode, <a href="/reference/android/content/DialogInterface.OnCancelListener.html">DialogInterface.OnCancelListener</a> cancelListener)</span>
+      <span class="normal">(int errorCode, Activity activity, int requestCode, DialogInterface.OnCancelListener cancelListener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1432,10 +1439,10 @@ From class
          
          
          
-        <a href="/reference/android/app/Dialog.html">Dialog</a>
+        Dialog
       </span>
       <span class="sympad">getErrorDialog</span>
-      <span class="normal">(int errorCode, <a href="/reference/android/app/Activity.html">Activity</a> activity, int requestCode)</span>
+      <span class="normal">(int errorCode, Activity activity, int requestCode)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1484,10 +1491,10 @@ From class
          
          
          
-        <a href="/reference/android/app/PendingIntent.html">PendingIntent</a>
+        PendingIntent
       </span>
       <span class="sympad">getErrorPendingIntent</span>
-      <span class="normal">(int errorCode, <a href="/reference/android/content/Context.html">Context</a> context, int requestCode)</span>
+      <span class="normal">(int errorCode, Context context, int requestCode)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1534,7 +1541,7 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getErrorString</span>
       <span class="normal">(int errorCode)</span>
@@ -1565,10 +1572,10 @@ From class
          
          
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getOpenSourceSoftwareLicenseInfo</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1596,10 +1603,10 @@ From class
          
          
          
-        <a href="/reference/android/content/Context.html">Context</a>
+        Context
       </span>
       <span class="sympad">getRemoteContext</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1633,10 +1640,10 @@ From class
          
          
          
-        <a href="/reference/android/content/res/Resources.html">Resources</a>
+        Resources
       </span>
       <span class="sympad">getRemoteResource</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1671,7 +1678,7 @@ From class
         int
       </span>
       <span class="sympad">isGooglePlayServicesAvailable</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context)</span>
+      <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
         <div></div>

@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>PlusClient.Builder | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -681,7 +688,7 @@ Summary:
 
 
   
-    extends <a href="/reference/java/lang/Object.html">Object</a><br/>
+    extends Object<br/>
   
   
   
@@ -701,7 +708,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/java/lang/Object.html">java.lang.Object</a></td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -792,7 +799,7 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#PlusClient.Builder(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">PlusClient.Builder</a></span>(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#PlusClient.Builder(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">PlusClient.Builder</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
         
         <div class="jd-descrdiv">Builder to help construct the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object.</div>
   
@@ -859,7 +866,7 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setAccountName(java.lang.String)">setAccountName</a></span>(<a href="/reference/java/lang/String.html">String</a> accountName)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setAccountName(java.lang.String)">setAccountName</a></span>(String accountName)</nobr>
         
         <div class="jd-descrdiv">Specify an account name on the device that should be used.</div>
   
@@ -877,9 +884,9 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setScopes(java.lang.String...)">setScopes</a></span>(<a href="/reference/java/lang/String.html">String...</a> scopes)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setActions(java.lang.String...)">setActions</a></span>(String... actions)</nobr>
         
-        <div class="jd-descrdiv">Specify the OAuth 2.0 scopes requested by your app.</div>
+        <div class="jd-descrdiv">Specify which user's app activity types can be written to Google.</div>
   
   </td></tr>
 
@@ -895,9 +902,27 @@ Summary:
             <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setVisibleActivities(java.lang.String...)">setVisibleActivities</a></span>(<a href="/reference/java/lang/String.html">String...</a> visibleActivities)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setScopes(java.lang.String...)">setScopes</a></span>(String... scopes)</nobr>
         
-        <div class="jd-descrdiv">Specify which user's app activity types can be written to Google.</div>
+        <div class="jd-descrdiv">Specify the OAuth 2.0 scopes requested by your app.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setVisibleActivities(java.lang.String...)">setVisibleActivities</a></span>(String... actions)</nobr>
+        
+        <div class="jd-descrdiv">See <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setActions(java.lang.String...)">setActions(String)</a></code>.</div>
   
   </td></tr>
 
@@ -925,7 +950,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/java/lang/Object.html">java.lang.Object</a>
+  java.lang.Object
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -944,7 +969,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/Object.html">Object</a></nobr>
+            Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -963,7 +988,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(<a href="/reference/java/lang/Object.html">Object</a> arg0)</nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
         
   </td></tr>
 
@@ -992,7 +1017,7 @@ From class
             final
             
             
-            <a href="/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
+            Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1056,7 +1081,7 @@ From class
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1165,7 +1190,7 @@ From class
         
       </span>
       <span class="sympad">PlusClient.Builder</span>
-      <span class="normal">(<a href="/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
+      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1293,7 +1318,7 @@ From class
         <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
       </span>
       <span class="sympad">setAccountName</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String</a> accountName)</span>
+      <span class="normal">(String accountName)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1322,6 +1347,55 @@ From class
 </div>
 
 
+<A NAME="setActions(java.lang.String...)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
+      </span>
+      <span class="sympad">setActions</span>
+      <span class="normal">(String... actions)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify which user's app activity types can be written to Google.
+ This must be used with the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope.
+
+ <p>
+ See <a href="https://developers.google.com/+/api/moment-types">Types of app
+ activity</a> for the full list of valid app activity types. Example usage:
+ <pre>
+      plusClientBuilder.setActions(
+          "http://schemas.google.com/AddActivity",
+          "http://schemas.google.com/BuyActivity");
+ </pre></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>actions</td>
+          <td>The user's app activity types that can be written to Google.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="setScopes(java.lang.String...)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1335,7 +1409,7 @@ From class
         <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
       </span>
       <span class="sympad">setScopes</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String...</a> scopes)</span>
+      <span class="normal">(String... scopes)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1379,7 +1453,7 @@ From class
         <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
       </span>
       <span class="sympad">setVisibleActivities</span>
-      <span class="normal">(<a href="/reference/java/lang/String.html">String...</a> visibleActivities)</span>
+      <span class="normal">(String... actions)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1389,27 +1463,8 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify which user's app activity types can be written to Google.
- This must be used with the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope.
-
- <p>
- See <a href="https://developers.google.com/+/api/moment-types">Types of app
- activity</a> for the full list of valid app activity types. Example usage:
- <pre>
-      plusClientBuilder.setVisibleActivities(
-          "http://schemas.google.com/AddActivity",
-          "http://schemas.google.com/BuyActivity");
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>visibleActivities</td>
-          <td>The user's app activity types that can be written to Google.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setActions(java.lang.String...)">setActions(String)</a></code>.
+</p></div>
 
     </div>
 </div>

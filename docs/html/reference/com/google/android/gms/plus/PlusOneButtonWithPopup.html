@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>PlusOneButton | Android Developers</title>
+<title>PlusOneButtonWithPopup | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -635,13 +635,6 @@ onkeyup="return search_changed(event, false, '/')" />
    
   
   
-  
-  
-
-  
-   
-  
-  
    
   
   
@@ -705,18 +698,12 @@ onkeyup="return search_changed(event, false, '/')" />
 
 Summary:
 
-  <a href="#nestedclasses">Nested Classes</a>
-  
 
 
 
 
 
-  &#124; <a href="#constants">Constants</a>
-  
-
-
-  &#124; <a href="#inhconstants">Inherited Constants</a>
+  <a href="#inhconstants">Inherited Constants</a>
   
 
 
@@ -760,7 +747,7 @@ Summary:
     final 
     
     class
-<h1 itemprop="name">PlusOneButton</h1>
+<h1 itemprop="name">PlusOneButtonWithPopup</h1>
 
 
 
@@ -773,11 +760,7 @@ Summary:
   
 
   
-  
-  
-
-  
-    extends FrameLayout<br/>
+    extends ViewGroup<br/>
   
   
   
@@ -797,7 +780,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="5" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="4" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -805,7 +788,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="4" class="jd-inheritance-class-cell">android.view.View</td>
+        <td colspan="3" class="jd-inheritance-class-cell">android.view.View</td>
     </tr>
     
 
@@ -815,19 +798,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="3" class="jd-inheritance-class-cell">android.view.ViewGroup</td>
-    </tr>
-    
-
-    <tr>
-        
-            <td class="jd-inheritance-space">&nbsp;</td>
-        
-            <td class="jd-inheritance-space">&nbsp;</td>
-        
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-         	
-        <td colspan="2" class="jd-inheritance-class-cell">android.widget.FrameLayout</td>
+        <td colspan="2" class="jd-inheritance-class-cell">android.view.ViewGroup</td>
     </tr>
     
 
@@ -837,11 +808,9 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;</td>
         
-            <td class="jd-inheritance-space">&nbsp;</td>
-        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.PlusOneButton</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.PlusOneButtonWithPopup</td>
     </tr>
     
 
@@ -857,10 +826,7 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The +1 button to recommend a URL on Google+. The button fetches +1 data from
- Google Play services. The +1 attributes can be set via XML, provided the
- PlusOneButton element has
- <code>xmlns:plus="http://schemas.android.com/apk/lib/com.google.android.gms.plus"</code> set.
+<p itemprop="articleBody">+1 button which shows confirmation messages in a PopupWindow.
 </p>
 
 
@@ -891,37 +857,6 @@ Summary:
 
 
 
-<!-- ======== NESTED CLASS SUMMARY ======== -->
-<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
-
-
-  
-    <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        class</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.DefaultOnPlusOneClickListener.html">PlusOneButton.DefaultOnPlusOneClickListener</a></td>
-      <td class="jd-descrcol" width="100%">This is an <code><a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a></code> that will proxy clicks to an
- attached <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></code>, or default to attempt to start
- the intent using an <code><a href="/reference/android/app/Activity.html">Activity</a></code> context.&nbsp;</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></td>
-      <td class="jd-descrcol" width="100%">A listener for +1 button clicks.&nbsp;</td>
-    </tr>
-    
-    
 
 
 
@@ -930,75 +865,6 @@ Summary:
 
 
 
-
-
-
-
-
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
-
-
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></td>
-        <td class="jd-descrcol" width="100%">Display the number of users who have +1'd the URL in a graphic next to the button (default).</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_INLINE">ANNOTATION_INLINE</a></td>
-        <td class="jd-descrcol" width="100%">Display profile pictures of connected users who have +1'd the URL and a count of users who
- have +1'd the URL.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_NONE">ANNOTATION_NONE</a></td>
-        <td class="jd-descrcol" width="100%">Do not render any additional annotations.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#DEFAULT_ACTIVITY_REQUEST_CODE">DEFAULT_ACTIVITY_REQUEST_CODE</a></td>
-        <td class="jd-descrcol" width="100%">An empty ActivityRequestCode to serve as the default before the code has been assigned.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_MEDIUM">SIZE_MEDIUM</a></td>
-        <td class="jd-descrcol" width="100%">The medium button size.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_SMALL">SIZE_SMALL</a></td>
-        <td class="jd-descrcol" width="100%">The small button size.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></td>
-        <td class="jd-descrcol" width="100%">The standard button size.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_TALL">SIZE_TALL</a></td>
-        <td class="jd-descrcol" width="100%">The tall button size.</td>
-    </tr>
-    
-    
-
-</table>
 
 
 
@@ -1008,8 +874,6 @@ Summary:
 <table id="inhconstants" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Constants</div></th></tr>
-
-
 
 
 <tr class="api apilevel-" >
@@ -1528,8 +1392,6 @@ android.view.View
 
 
 
-
-
 <tr class="api apilevel-" >
 <td colspan="12">
 
@@ -2037,10 +1899,9 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#PlusOneButton(android.content.Context)">PlusOneButton</a></span>(Context context)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#PlusOneButtonWithPopup(android.content.Context)">PlusOneButtonWithPopup</a></span>(Context context)</nobr>
         
-        <div class="jd-descrdiv">Creates a +1 button of <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></code> size with an
- <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></code> annotation.</div>
+        <div class="jd-descrdiv">Constructor to create from code.</div>
   
   </td></tr>
 
@@ -2056,10 +1917,9 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#PlusOneButton(android.content.Context, android.util.AttributeSet)">PlusOneButton</a></span>(Context context, AttributeSet attrs)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#PlusOneButtonWithPopup(android.content.Context, android.util.AttributeSet)">PlusOneButtonWithPopup</a></span>(Context context, AttributeSet attrs)</nobr>
         
-        <div class="jd-descrdiv">Creates a +1 button of <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></code> size with an
- <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></code> annotation.</div>
+        <div class="jd-descrdiv">Constructor called when inflating from XML.</div>
   
   </td></tr>
 
@@ -2088,9 +1948,9 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#initialize(java.lang.String, com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)">initialize</a></span>(String url, <a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> plusOneClickListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#cancelClick()">cancelClick</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Updates the +1 button with a client and URL.</div>
+        <div class="jd-descrdiv">Restore the original +1 button state.</div>
   
   </td></tr>
 
@@ -2103,12 +1963,13 @@ android.view.View
             
             
             
-            void</nobr>
+            PendingIntent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#initialize(java.lang.String, int)">initialize</a></span>(String url, int activityRequestCode)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#getResolution()">getResolution</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Updates the +1 button with a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> and URL.</div>
+        <div class="jd-descrdiv">Returns a pending intent to resolve the connection failure or <code>null</code> if there
+ was none.</div>
   
   </td></tr>
 
@@ -2124,9 +1985,9 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#setAnnotation(int)">setAnnotation</a></span>(int annotation)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#initialize(java.lang.String, java.lang.String)">initialize</a></span>(String url, String accountName)</nobr>
         
-        <div class="jd-descrdiv">Sets the annotation to display next to the +1 button.</div>
+        <div class="jd-descrdiv">Updates the +1 button for the argument URL and account.</div>
   
   </td></tr>
 
@@ -2142,9 +2003,9 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#setOnPlusOneClickListener(com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)">setOnPlusOneClickListener</a></span>(<a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#reinitialize()">reinitialize</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Sets the <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></code> to handle clicks.</div>
+        <div class="jd-descrdiv">Reload the +1 button state.</div>
   
   </td></tr>
 
@@ -2160,9 +2021,45 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#setSize(int)">setSize</a></span>(int size)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#setAnnotation(int)">setAnnotation</a></span>(int annotation)</nobr>
         
-        <div class="jd-descrdiv">Sets the size of the +1 button.</div>
+        <div class="jd-descrdiv">Sets the annotation to display next to the button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#setOnClickListener(android.view.View.OnClickListener)">setOnClickListener</a></span>(View.OnClickListener onClickListener)</nobr>
+        
+        <div class="jd-descrdiv">Sets the <code><a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a></code> to handle clicks.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#setSize(int)">setSize</a></span>(int size)</nobr>
+        
+        <div class="jd-descrdiv">Sets the size of the +1 button image.</div>
   
   </td></tr>
 
@@ -2184,12 +2081,12 @@ android.view.View
             
             
             
-            static
             
-            int</nobr>
+            
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#getAnnotation(android.content.Context, android.util.AttributeSet)">getAnnotation</a></span>(Context context, AttributeSet attrs)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#onLayout(boolean, int, int, int, int)">onLayout</a></span>(boolean changed, int left, int top, int right, int bottom)</nobr>
         
   </td></tr>
 
@@ -2200,12 +2097,12 @@ android.view.View
             
             
             
-            static
             
-            int</nobr>
+            
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#getSize(android.content.Context, android.util.AttributeSet)">getSize</a></span>(Context context, AttributeSet attrs)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusOneButtonWithPopup.html#onMeasure(int, int)">onMeasure</a></span>(int widthMeasureSpec, int heightMeasureSpec)</nobr>
         
   </td></tr>
 
@@ -2221,384 +2118,6 @@ android.view.View
 <table id="inhmethods" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.widget.FrameLayout" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.widget.FrameLayout-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  android.widget.FrameLayout
-
-<div id="inherited-methods-android.widget.FrameLayout">
-  <div id="inherited-methods-android.widget.FrameLayout-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.widget.FrameLayout-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">draw</span>(Canvas arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">drawableStateChanged</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">gatherTransparentRegion</span>(Region arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            ViewGroup.LayoutParams</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateDefaultLayoutParams</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            ViewGroup.LayoutParams</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateLayoutParams</span>(AttributeSet arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            ViewGroup.LayoutParams</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">generateLayoutParams</span>(ViewGroup.LayoutParams arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getConsiderGoneChildrenWhenMeasuring</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            Drawable</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getForeground</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getForegroundGravity</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getMeasureAllChildren</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">jumpDrawablesToCurrentState</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInitializeAccessibilityEvent</span>(AccessibilityEvent arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onInitializeAccessibilityNodeInfo</span>(AccessibilityNodeInfo arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onLayout</span>(boolean arg0, int arg1, int arg2, int arg3, int arg4)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onMeasure</span>(int arg0, int arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onSizeChanged</span>(int arg0, int arg1, int arg2, int arg3)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setForeground</span>(Drawable arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setForegroundGravity</span>(int arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setMeasureAllChildren</span>(boolean arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">shouldDelayChildPressedState</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">verifyDrawable</span>(Drawable arg0)</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
 
 
 <tr class="api apilevel-" >
@@ -12287,334 +11806,6 @@ From interface
 <!-- Constants -->
 
 
-<!-- ========= ENUM CONSTANTS DETAIL ======== -->
-<h2>Constants</h2>
-
-
-
-
-<A NAME="ANNOTATION_BUBBLE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        ANNOTATION_BUBBLE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Display the number of users who have +1'd the URL in a graphic next to the button (default).
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                1
-                (0x00000001)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ANNOTATION_INLINE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        ANNOTATION_INLINE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Display profile pictures of connected users who have +1'd the URL and a count of users who
- have +1'd the URL.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                2
-                (0x00000002)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ANNOTATION_NONE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        ANNOTATION_NONE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Do not render any additional annotations.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                0
-                (0x00000000)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="DEFAULT_ACTIVITY_REQUEST_CODE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        DEFAULT_ACTIVITY_REQUEST_CODE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>An empty ActivityRequestCode to serve as the default before the code has been assigned.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                -1
-                (0xffffffff)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="SIZE_MEDIUM"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        SIZE_MEDIUM
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The medium button size. See <a
- href="https://developers.google.com/+/plugins/+1button/#button-sizes">Button sizes</a> for
- more information.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                1
-                (0x00000001)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="SIZE_SMALL"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        SIZE_SMALL
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The small button size. See <a
- href="https://developers.google.com/+/plugins/+1button/#button-sizes">Button sizes</a> for
- more information.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                0
-                (0x00000000)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="SIZE_STANDARD"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        SIZE_STANDARD
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The standard button size. See <a
- href="https://developers.google.com/+/plugins/+1button/#button-sizes">Button sizes</a> for
- more information.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                3
-                (0x00000003)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="SIZE_TALL"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        int
-      </span>
-        SIZE_TALL
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The tall button size. See <a
- href="https://developers.google.com/+/plugins/+1button/#button-sizes">Button sizes</a> for
- more information.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                2
-                (0x00000002)
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-
 <!-- Fields -->
 
 
@@ -12626,7 +11817,7 @@ From interface
 
 
 
-<A NAME="PlusOneButton(android.content.Context)"></A>
+<A NAME="PlusOneButtonWithPopup(android.content.Context)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12638,7 +11829,7 @@ From interface
          
         
       </span>
-      <span class="sympad">PlusOneButton</span>
+      <span class="sympad">PlusOneButtonWithPopup</span>
       <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
@@ -12649,24 +11840,14 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a +1 button of <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></code> size with an
- <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></code> annotation.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use, usually your Activity.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Constructor to create from code.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="PlusOneButton(android.content.Context, android.util.AttributeSet)"></A>
+<A NAME="PlusOneButtonWithPopup(android.content.Context, android.util.AttributeSet)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12678,7 +11859,7 @@ From interface
          
         
       </span>
-      <span class="sympad">PlusOneButton</span>
+      <span class="sympad">PlusOneButtonWithPopup</span>
       <span class="normal">(Context context, AttributeSet attrs)</span>
     </h4>
       <div class="api-level">
@@ -12689,22 +11870,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a +1 button of <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></code> size with an
- <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></code> annotation.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use, usually your Activity.</td>
-        </tr>
-        <tr>
-          <th>attrs</td>
-          <td>The attributes of the XML tag that is inflating the view.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Constructor called when inflating from XML.
+</p></div>
 
     </div>
 </div>
@@ -12725,7 +11892,68 @@ From interface
 
 
 
-<A NAME="initialize(java.lang.String, com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)"></A>
+<A NAME="cancelClick()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">cancelClick</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Restore the original +1 button state.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getResolution()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        PendingIntent
+      </span>
+      <span class="sympad">getResolution</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a pending intent to resolve the connection failure or <code>null</code> if there
+ was none.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="initialize(java.lang.String, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12738,7 +11966,7 @@ From interface
         void
       </span>
       <span class="sympad">initialize</span>
-      <span class="normal">(String url, <a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> plusOneClickListener)</span>
+      <span class="normal">(String url, String accountName)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12748,8 +11976,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Updates the +1 button with a client and URL.  Most apps call this method each time
- the button is in focus (for example, in the Activity onResume method).</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Updates the +1 button for the argument URL and account.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -12758,8 +11985,8 @@ From interface
           <td>The URL to be +1'd.</td>
         </tr>
         <tr>
-          <th>plusOneClickListener</td>
-          <td>A listener for +1 clicks.
+          <th>accountName</td>
+          <td>The the name of the account tied to this +1 button (may be null).
 </td>
         </tr>
       </table>
@@ -12769,7 +11996,7 @@ From interface
 </div>
 
 
-<A NAME="initialize(java.lang.String, int)"></A>
+<A NAME="reinitialize()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12781,8 +12008,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">initialize</span>
-      <span class="normal">(String url, int activityRequestCode)</span>
+      <span class="sympad">reinitialize</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12792,25 +12019,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Updates the +1 button with a <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> and URL.  Most apps call
- this method each time the button is in focus (for example, in the Activity onResume
- method).  To use this method, the PlusOneButton must be placed in an Activity.  Use
- <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#initialize(java.lang.String, com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)">initialize(String, OnPlusOneClickListener)</a></code> otherwise.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>url</td>
-          <td>The URL to be +1'd.</td>
-        </tr>
-        <tr>
-          <th>activityRequestCode</td>
-          <td>The request code to use when opening the +1 Activity.
-        This value must be an unsigned 16 bit integer.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Reload the +1 button state.
+</p></div>
 
     </div>
 </div>
@@ -12839,16 +12049,15 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the annotation to display next to the +1 button. This can also be set
- using the attribute <code>plus:annotation="none|bubble|inline"</code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the annotation to display next to the button.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>annotation</td>
-          <td>The annotation. See <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_NONE">ANNOTATION_NONE</a></code>,
-            <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></code>, and
-            <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_INLINE">ANNOTATION_INLINE</a></code>.
+          <td>The annotation.  See <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_NONE">ANNOTATION_NONE</a></code>,
+            <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_INLINE">ANNOTATION_INLINE</a></code>,
+            and <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#ANNOTATION_BUBBLE">ANNOTATION_BUBBLE</a></code>.
 </td>
         </tr>
       </table>
@@ -12858,7 +12067,7 @@ From interface
 </div>
 
 
-<A NAME="setOnPlusOneClickListener(com.google.android.gms.plus.PlusOneButton.OnPlusOneClickListener)"></A>
+<A NAME="setOnClickListener(android.view.View.OnClickListener)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12870,8 +12079,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">setOnPlusOneClickListener</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a> listener)</span>
+      <span class="sympad">setOnClickListener</span>
+      <span class="normal">(View.OnClickListener onClickListener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12881,14 +12090,12 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.OnPlusOneClickListener.html">PlusOneButton.OnPlusOneClickListener</a></code> to handle clicks. Call this if
- you want to customize launching the +1 confirmation Activity from a
- +1 button click.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the <code><a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a></code> to handle clicks.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>listener</td>
+          <th>onClickListener</td>
           <td>The listener, or null for default behavior.
 </td>
         </tr>
@@ -12922,15 +12129,15 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the size of the +1 button. This can also be set using the
- attribute <code>plus:size="small|medium|tall|standard"</code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the size of the +1 button image.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>size</td>
-          <td>The size. See <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_SMALL">SIZE_SMALL</a></code>, <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_MEDIUM">SIZE_MEDIUM</a></code>,
-            <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_TALL">SIZE_TALL</a></code>, and <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></code>.
+          <td>The size. See <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_STANDARD">SIZE_STANDARD</a></code>,
+            <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_TALL">SIZE_TALL</a></code>, <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_MEDIUM">SIZE_MEDIUM</a></code>, and
+            <code><a href="/reference/com/google/android/gms/plus/PlusOneButton.html#SIZE_SMALL">SIZE_SMALL</a></code>.
 </td>
         </tr>
       </table>
@@ -12949,20 +12156,20 @@ From interface
 
 
 
-<A NAME="getAnnotation(android.content.Context, android.util.AttributeSet)"></A>
+<A NAME="onLayout(boolean, int, int, int, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         protected 
-        static 
          
          
          
-        int
+         
+        void
       </span>
-      <span class="sympad">getAnnotation</span>
-      <span class="normal">(Context context, AttributeSet attrs)</span>
+      <span class="sympad">onLayout</span>
+      <span class="normal">(boolean changed, int left, int top, int right, int bottom)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12978,20 +12185,20 @@ From interface
 </div>
 
 
-<A NAME="getSize(android.content.Context, android.util.AttributeSet)"></A>
+<A NAME="onMeasure(int, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         protected 
-        static 
          
          
          
-        int
+         
+        void
       </span>
-      <span class="sympad">getSize</span>
-      <span class="normal">(Context context, AttributeSet attrs)</span>
+      <span class="sympad">onMeasure</span>
+      <span class="normal">(int widthMeasureSpec, int heightMeasureSpec)</span>
     </h4>
       <div class="api-level">
         <div></div>
