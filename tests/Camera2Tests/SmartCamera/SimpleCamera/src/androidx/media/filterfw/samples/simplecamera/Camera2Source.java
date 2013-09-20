@@ -33,6 +33,8 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.util.Log;
 import android.view.Surface;
+import com.android.ex.camera2.blocking.BlockingCameraManager;
+import com.android.ex.camera2.blocking.BlockingCameraManager.BlockingOpenException;
 import androidx.media.filterfw.Filter;
 import androidx.media.filterfw.Frame;
 import androidx.media.filterfw.FrameImage2D;
@@ -132,10 +134,24 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
 
     @Override
     protected void onOpen() {
+        mLooperThread = new CameraTestThread();
+        Handler mHandler;
+        try {
+            mHandler = mLooperThread.start();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
         try {
             String backCameraId = "0";
-            mCamera = mCameraManager.openCamera(backCameraId);
+            BlockingCameraManager blkManager = new BlockingCameraManager(mCameraManager);
+            mCamera = blkManager.openCamera(backCameraId, /*listener*/null, mHandler);
         } catch (CameraAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (BlockingOpenException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -172,15 +188,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        mLooperThread = new CameraTestThread();
-        Handler mHandler;
-        try {
-            mHandler = mLooperThread.start();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+
         try {
             mCamera.setRepeatingRequest(mCaptureRequest.build(), new MyCaptureListener(),
                     mHandler);

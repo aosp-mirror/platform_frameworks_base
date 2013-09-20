@@ -25,6 +25,8 @@ LOCAL_PROGUARD_ENABLED := disabled
 # comment it out for now since we need use some hidden APIs
 LOCAL_SDK_VERSION := current
 
+LOCAL_STATIC_JAVA_LIBRARIES := android-ex-camera2
+
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src) \
     $(call all-renderscript-files-under, src)
