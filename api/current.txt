@@ -10419,6 +10419,37 @@ package android.graphics.drawable.shapes {
 
 }
 
+package android.graphics.pdf {
+
+  public class PdfDocument {
+    ctor public PdfDocument();
+    method public void close();
+    method public void finishPage(android.graphics.pdf.PdfDocument.Page);
+    method public java.util.List<android.graphics.pdf.PdfDocument.PageInfo> getPages();
+    method public android.graphics.pdf.PdfDocument.Page startPage(android.graphics.pdf.PdfDocument.PageInfo);
+    method public void writeTo(java.io.OutputStream) throws java.io.IOException;
+  }
+
+  public static final class PdfDocument.Page {
+    method public android.graphics.Canvas getCanvas();
+    method public android.graphics.pdf.PdfDocument.PageInfo getInfo();
+  }
+
+  public static final class PdfDocument.PageInfo {
+    method public android.graphics.Rect getContentRect();
+    method public int getPageHeight();
+    method public int getPageNumber();
+    method public int getPageWidth();
+  }
+
+  public static final class PdfDocument.PageInfo.Builder {
+    ctor public PdfDocument.PageInfo.Builder(int, int, int);
+    method public android.graphics.pdf.PdfDocument.PageInfo create();
+    method public android.graphics.pdf.PdfDocument.PageInfo.Builder setContentRect(android.graphics.Rect);
+  }
+
+}
+
 package android.hardware {
 
   public class Camera {
@@ -19313,7 +19344,7 @@ package android.print {
     method public abstract void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
     method public void onStart();
     method public abstract void onWrite(android.print.PageRange[], android.os.ParcelFileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
-    field public static final java.lang.String METADATA_KEY_PRINT_PREVIEW = "KEY_METADATA_PRINT_PREVIEW";
+    field public static final java.lang.String EXTRA_PRINT_PREVIEW = "EXTRA_PRINT_PREVIEW";
   }
 
   public static abstract class PrintDocumentAdapter.LayoutResultCallback {
@@ -19449,41 +19480,12 @@ package android.print {
 
 package android.print.pdf {
 
-  public final class PdfDocument {
-    method public void close();
-    method public void finishPage(android.print.pdf.PdfDocument.Page);
-    method public java.util.List<android.print.pdf.PdfDocument.PageInfo> getPages();
-    method public static android.print.pdf.PdfDocument open();
-    method public android.print.pdf.PdfDocument.Page startPage(android.print.pdf.PdfDocument.PageInfo);
-    method public void writeTo(java.io.OutputStream);
-  }
-
-  public static final class PdfDocument.Page {
-    method public android.graphics.Canvas getCanvas();
-    method public android.print.pdf.PdfDocument.PageInfo getInfo();
-  }
-
-  public static final class PdfDocument.PageInfo {
-    method public android.graphics.Rect getContentSize();
-    method public android.graphics.Matrix getInitialTransform();
-    method public int getPageNumber();
-    method public android.graphics.Rect getPageSize();
-  }
-
-  public static final class PdfDocument.PageInfo.Builder {
-    ctor public PdfDocument.PageInfo.Builder(android.graphics.Rect, int);
-    method public android.print.pdf.PdfDocument.PageInfo create();
-    method public android.print.pdf.PdfDocument.PageInfo.Builder setContentSize(android.graphics.Rect);
-    method public android.print.pdf.PdfDocument.PageInfo.Builder setInitialTransform(android.graphics.Matrix);
-  }
-
-  public final class PrintedPdfDocument {
-    method public void close();
-    method public void finishPage(android.print.pdf.PdfDocument.Page);
-    method public java.util.List<android.print.pdf.PdfDocument.PageInfo> getPages();
-    method public static android.print.pdf.PrintedPdfDocument open(android.content.Context, android.print.PrintAttributes);
-    method public android.print.pdf.PdfDocument.Page startPage(int);
-    method public void writeTo(java.io.OutputStream);
+  public class PrintedPdfDocument extends android.graphics.pdf.PdfDocument {
+    ctor public PrintedPdfDocument(android.content.Context, android.print.PrintAttributes);
+    method public android.graphics.Rect getPageContentRect();
+    method public int getPageHeight();
+    method public int getPageWidth();
+    method public android.graphics.pdf.PdfDocument.Page startPage(int);
   }
 
 }
