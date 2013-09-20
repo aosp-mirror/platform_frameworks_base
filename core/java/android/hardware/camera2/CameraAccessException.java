@@ -29,22 +29,24 @@ import android.util.AndroidException;
 public class CameraAccessException extends AndroidException {
     /**
      * The camera device is in use already
+     * @hide
      */
-    public static final int CAMERA_IN_USE = 1;
+    public static final int CAMERA_IN_USE = 4;
 
     /**
      * The system-wide limit for number of open cameras has been reached,
      * and more camera devices cannot be opened until previous instances are
      * closed.
+     * @hide
      */
-    public static final int MAX_CAMERAS_IN_USE = 2;
+    public static final int MAX_CAMERAS_IN_USE = 5;
 
     /**
      * The camera is disabled due to a device policy, and cannot be opened.
      *
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName, boolean)
      */
-    public static final int CAMERA_DISABLED = 3;
+    public static final int CAMERA_DISABLED = 1;
 
     /**
      * The camera device is removable and has been disconnected from the Android
@@ -52,7 +54,23 @@ public class CameraAccessException extends AndroidException {
      * is no longer valid, or the camera service has shut down the connection due to a
      * higher-priority access request for the camera device.
      */
-    public static final int CAMERA_DISCONNECTED = 4;
+    public static final int CAMERA_DISCONNECTED = 2;
+
+    /**
+     * The camera device is currently in the error state.
+     *
+     * <p>The camera has failed to open or has failed at a later time
+     * as a result of some non-user interaction. Refer to
+     * {@link CameraDevice.StateListener#onError} for the exact
+     * nature of the error.</p>
+     *
+     * <p>No further calls to the camera will succeed. Clean up
+     * the camera with {@link CameraDevice#close} and try
+     * handling the error in order to successfully re-open the camera.
+     * </p>
+     *
+     */
+    public static final int CAMERA_ERROR = 3;
 
     /**
      * A deprecated HAL version is in use.
@@ -68,10 +86,9 @@ public class CameraAccessException extends AndroidException {
     /**
      * The reason for the failure to access the camera.
      *
-     * @see #CAMERA_IN_USE
-     * @see #MAX_CAMERAS_IN_USE
      * @see #CAMERA_DISABLED
      * @see #CAMERA_DISCONNECTED
+     * @see #CAMERA_ERROR
      */
     public final int getReason() {
         return mReason;
@@ -105,12 +122,15 @@ public class CameraAccessException extends AndroidException {
                 return "The system-wide limit for number of open cameras has been reached, " +
                        "and more camera devices cannot be opened until previous instances " +
                        "are closed.";
+            case CAMERA_DISCONNECTED:
+                return "The camera device is removable and has been disconnected from the " +
+                        "Android device, or the camera service has shut down the connection due " +
+                        "to a higher-priority access request for the camera device.";
             case CAMERA_DISABLED:
                 return "The camera is disabled due to a device policy, and cannot be opened.";
-            case CAMERA_DISCONNECTED:
-                return "The camera device is removable and has been disconnected from the Android" +
-                       " device, or the camera service has shut down the connection due to a " +
-                       "higher-priority access request for the camera device.";
+            case CAMERA_ERROR:
+                return "The camera device is currently in the error state; " +
+                       "no further calls to it will succeed.";
         }
         return null;
     }

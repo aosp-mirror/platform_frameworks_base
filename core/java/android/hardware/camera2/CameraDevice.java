@@ -137,7 +137,9 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @return the static properties of the camera
      *
-     * @throws CameraAccessException if the camera device is no longer connected
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
      *
      * @see CameraManager#getCameraProperties
      */
@@ -218,23 +220,31 @@ public interface CameraDevice extends AutoCloseable {
      *
      * <p>To reach an idle state without cancelling any submitted captures, first
      * stop any repeating request/burst with {@link #stopRepeating}, and then
-     * wait for the {@link CameraDeviceListener#onCameraIdle} callback to be
+     * wait for the {@link StateListener#onIdle} callback to be
      * called. To idle as fast as possible, use {@link #flush} and wait for the
      * idle callback.</p>
      *
      * <p>Using larger resolution outputs, or more outputs, can result in slower
      * output rate from the device.</p>
      *
+     * <p>Configuring the outputs with an empty or null list will transition
+     * the camera into an {@link StateListener#onUnconfigured unconfigured state}.
+     * </p>
+     *
+     * <p>Calling configureOutputs with the same arguments as the last call to
+     * configureOutputs has no effect.</p>
+     *
      * @param outputs The new set of Surfaces that should be made available as
      * targets for captured image data.
      *
      * @throws IllegalArgumentException if the set of output Surfaces do not
      * meet the requirements
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device is not idle, or has
-     * encountered a fatal error
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device is not idle, or
+     *                               if the camera device has been closed
      *
-     * @see CameraDeviceListener#onCameraIdle
+     * @see StateListener#onIdle
      * @see #stopRepeating
      * @see #flush
      */
@@ -255,9 +265,9 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @throws IllegalArgumentException if the templateType is not in the list
      * of supported templates.
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed or the
-     * device has encountered a fatal error.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
      *
      * @see #TEMPLATE_PREVIEW
      * @see #TEMPLATE_RECORD
@@ -295,9 +305,10 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed or the
-     * device has encountered a fatal error.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera is currently busy or unconfigured,
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the request targets Surfaces not
      * currently configured as outputs. Or if the handler is null, the listener
      * is not null, and the calling thread has no looper.
@@ -335,9 +346,10 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed or the
-     * device has encountered a fatal error.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera is currently busy or unconfigured,
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests target Surfaces not
      * currently configured as outputs. Or if the handler is null, the listener
      * is not null, and the calling thread has no looper.
@@ -387,10 +399,10 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
-     * @throws CameraAccessException if the camera device is no longer
-     * connected
-     * @throws IllegalStateException if the camera device has been closed or the
-     * device has encountered a fatal error.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera is currently busy or unconfigured,
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference Surfaces not
      * currently configured as outputs. Or if the handler is null, the listener
      * is not null, and the calling thread has no looper.
@@ -442,9 +454,10 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed or the
-     * device has encountered a fatal error.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera is currently busy or unconfigured,
+     *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference Surfaces not
      * currently configured as outputs. Or if the handler is null, the listener
      * is not null, and the calling thread has no looper.
@@ -467,21 +480,17 @@ public interface CameraDevice extends AutoCloseable {
      * <p>Any currently in-flight captures will still complete, as will any
      * burst that is mid-capture. To ensure that the device has finished
      * processing all of its capture requests and is in idle state, wait for the
-     * {@link CameraDeviceListener#onCameraIdle} callback after calling this
+     * {@link StateListener#onIdle} callback after calling this
      * method..</p>
      *
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed or the
-     * device has encountered a fatal error.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera is currently busy or unconfigured,
+     *                               or the camera device has been closed.
      *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
-     * @see CameraDeviceListener#onCameraIdle
-     *
-     * @throws CameraAccessException if the camera device is no longer connected
-     * @throws IllegalStateException if the camera device has been closed, the
-     * device has encountered a fatal error, or if there is an active repeating
-     * request or burst.
+     * @see StateListener#onIdle
      */
     public void stopRepeating() throws CameraAccessException;
 
@@ -519,7 +528,7 @@ public interface CameraDevice extends AutoCloseable {
      * {@link CaptureListener}.</p>
      *
      * <p>If the camera device is idle when the listener is set, then the
-     * {@link CameraDeviceListener#onCameraIdle} method will be immediately called,
+     * {@link StateListener#onIdle} method will be immediately called,
      * even if the device has never been active before.
      * </p>
      *
@@ -530,8 +539,10 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @throws IllegalArgumentException if handler is null, the listener is
      * not null, and the calling thread has no looper
+     *
+     * @hide
      */
-    public void setDeviceListener(CameraDeviceListener listener, Handler handler);
+    public void setDeviceListener(StateListener listener, Handler handler);
 
     /**
      * Flush all captures currently pending and in-progress as fast as
@@ -558,7 +569,11 @@ public interface CameraDevice extends AutoCloseable {
      * configurations, or for cancelling long in-progress requests (such as a
      * multi-second capture).</p>
      *
-     * @throws CameraAccessException if the camera device is no longer connected
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera is not idle/active,
+     *                               or the camera device has been closed.
+     *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #configureOutputs
@@ -569,10 +584,9 @@ public interface CameraDevice extends AutoCloseable {
      * Close the connection to this camera device. After this call, all calls to
      * the camera device interface will throw a {@link IllegalStateException},
      * except for calls to close().
-     * @throws Exception
      */
     @Override
-    public void close() throws Exception;
+    public void close();
     // TODO: We should decide on the behavior of in-flight requests should be on close.
 
     /**
@@ -687,37 +701,190 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @see #setDeviceListener
      */
-    public static abstract class CameraDeviceListener {
+    public static abstract class StateListener {
+       /**
+         * An error code that can be reported by {@link #onError}
+         * indicating that the camera device is in use already.
+         *
+         * <p>
+         * This error can be produced when opening the camera fails.
+         * </p>
+         *
+         * @see #onError
+         */
+        public static final int ERROR_CAMERA_IN_USE = 1;
 
         /**
-         * An error code that can be reported by {@link #onCameraError}
+         * An error code that can be reported by {@link #onError}
+         * indicating that the camera device could not be opened
+         * because there are too many other open camera devices.
+         *
+         * <p>
+         * The system-wide limit for number of open cameras has been reached,
+         * and more camera devices cannot be opened until previous instances are
+         * closed.
+         * </p>
+         *
+         * <p>
+         * This error can be produced when opening the camera fails.
+         * </p>
+         *
+         * @see #onError
+         */
+        public static final int ERROR_MAX_CAMERAS_IN_USE = 2;
+
+        /**
+         * An error code that can be reported by {@link #onError}
+         * indicating that the camera device could not be opened due to a device
+         * policy.
+         *
+         * @see android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName, boolean)
+         * @see #onError
+         */
+        public static final int ERROR_CAMERA_DISABLED = 3;
+
+       /**
+         * An error code that can be reported by {@link #onError}
          * indicating that the camera device has encountered a fatal error.
          *
          * <p>The camera device needs to be re-opened to be used again.</p>
          *
-         * @see #onCameraDeviceError
+         * @see #onError
          */
-        public static final int ERROR_CAMERA_DEVICE = 1;
+        public static final int ERROR_CAMERA_DEVICE = 4;
 
         /**
-         * An error code that can be reported by {@link #onCameraError}
+         * An error code that can be reported by {@link #onError}
          * indicating that the camera service has encountered a fatal error.
          *
          * <p>The Android device may need to be shut down and restarted to restore
          * camera function, or there may be a persistent hardware problem.</p>
          *
-         * @see #onCameraDeviceError
+         * <p>An attempt at recovery <i>may</i> be possible by closing the
+         * CameraDevice and the CameraManager, and trying to acquire all resources
+         * again from scratch.</p>
+         *
+         * @see #onError
          */
-        public static final int ERROR_CAMERA_SERVICE = 2;
+        public static final int ERROR_CAMERA_SERVICE = 5;
+
+        /**
+         * The method called when a camera device has finished opening.
+         *
+         * <p>An opened camera will immediately afterwards transition into
+         * {@link #onUnconfigured}.</p>
+         *
+         * @param camera the camera device that has become opened
+         */
+        public abstract void onOpened(CameraDevice camera); // Must implement
+
+        /**
+         * The method called when a camera device has no outputs configured.
+         *
+         * <p>An unconfigured camera device needs to be configured with
+         * {@link CameraDevice#configureOutputs} before being able to
+         * submit any capture request.</p>
+         *
+         * <p>This state may be entered by a newly opened camera or by
+         * calling {@link CameraDevice#configureOutputs} with a null/empty
+         * list of Surfaces when idle.</p>
+         *
+         * <p>Any attempts to submit a capture request while in this state
+         * will result in an {@link IllegalStateException} being thrown.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param camera the camera device has that become unconfigured
+         */
+        public void onUnconfigured(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when a camera device begins processing
+         * {@link CaptureRequest capture requests}.
+         *
+         * <p>A camera may not be re-configured while in this state. The camera
+         * will transition to the idle state once all pending captures have
+         * completed. If a repeating request is set, the camera will remain active
+         * until it is cleared and the remaining requests finish processing. To
+         * transition to the idle state as quickly as possible, call {@link #flush()},
+         * which will idle the camera device as quickly as possible, likely canceling
+         * most in-progress captures.</p>
+         *
+         * <p>All calls except for {@link CameraDevice#configureOutputs} are
+         * legal while in this state.
+         * </p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param camera the camera device that has become active
+         *
+         * @see CameraDevice#capture
+         * @see CameraDevice#captureBurst
+         * @see CameraDevice#setRepeatingBurst
+         * @see CameraDevice#setRepeatingRequest
+         */
+        public void onActive(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when a camera device is busy.
+         *
+         * <p>A camera becomes busy while it's outputs are being configured
+         * (after a call to {@link CameraDevice#configureOutputs} or while it's
+         * being flushed (after a call to {@link CameraDevice#flush}.</p>
+         *
+         * <p>Once the on-going operations are complete, the camera will automatically
+         * transition into {@link #onIdle} if there is at least one configured output,
+         * or {@link #onUnconfigured} otherwise.</p>
+         *
+         * <p>Any attempts to manipulate the camera while its is busy
+         * will result in an {@link IllegalStateException} being thrown.</p>
+         *
+         * <p>Only the following methods are valid to call while in this state:
+         * <ul>
+         * <li>{@link CameraDevice#getId}</li>
+         * <li>{@link CameraDevice#createCaptureRequest}</li>
+         * <li>{@link CameraDevice#close}</li>
+         * </ul>
+         * </p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param camera the camera device that has become busy
+         *
+         * @see CameraDevice#configureOutputs
+         * @see CameraDevice#flush
+         */
+        public void onBusy(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when a camera device has been closed with
+         * {@link CameraDevice#close}.
+         *
+         * <p>Any attempt to call methods on this CameraDevice in the
+         * future will throw a {@link IllegalStateException}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param camera the camera device that has become closed
+         */
+        public void onClosed(CameraDevice camera) {
+            // Default empty implementation
+        }
 
         /**
          * The method called when a camera device has finished processing all
          * submitted capture requests and has reached an idle state.
          *
-         * <p>An idle camera device can have its outputs changed by calling
-         * {@link CameraDevice#configureOutputs}.</p>
+         * <p>An idle camera device can have its outputs changed by calling {@link
+         * CameraDevice#configureOutputs}, which will transition it into the busy state.</p>
          *
-         * <p>To idle and reconfigure outputs without cancelling any submitted
+         * <p>To idle and reconfigure outputs without canceling any submitted
          * capture requests, the application needs to clear its repeating
          * request/burst, if set, with {@link CameraDevice#stopRepeating}, and
          * then wait for this callback to be called before calling {@link
@@ -725,7 +892,7 @@ public interface CameraDevice extends AutoCloseable {
          *
          * <p>To idle and reconfigure a camera device as fast as possible, the
          * {@link CameraDevice#flush} method can be used, which will discard all
-         * pending and in-progess capture requests. Once the {@link
+         * pending and in-progress capture requests. Once the {@link
          * CameraDevice#flush} method is called, the application must wait for
          * this callback to fire before calling {@link
          * CameraDevice#configureOutputs}.</p>
@@ -738,13 +905,16 @@ public interface CameraDevice extends AutoCloseable {
          * @see CameraDevice#stopRepeating
          * @see CameraDevice#flush
          */
-        public void onCameraIdle(CameraDevice camera) {
+        public void onIdle(CameraDevice camera) {
             // Default empty implementation
         }
 
         /**
          * The method called when a camera device is no longer available for
          * use.
+         *
+         * <p>This callback may be called instead of {@link #onOpened}
+         * if opening the camera fails.</p>
          *
          * <p>Any attempt to call methods on this CameraDevice will throw a
          * {@link CameraAccessException}. The disconnection could be due to a
@@ -759,25 +929,32 @@ public interface CameraDevice extends AutoCloseable {
          * <p>The default implementation logs a notice to the system log
          * about the disconnection.</p>
          *
+         * <p>You should clean up the camera with {@link CameraDevice#close} after
+         * this happens, as it is not recoverable until opening the camera again
+         * after it becomes {@link CameraManager.AvailabilityListener#onCameraAvailable available}.
+         * </p>
+         *
          * @param camera the device that has been disconnected
          */
-        public void onCameraDisconnected(CameraDevice camera) {
-            Log.i("CameraListener",
-                    String.format("Camera device %s disconnected", camera.getId()));
-        }
+        public abstract void onDisconnected(CameraDevice camera); // Must implement
 
         /**
          * The method called when a camera device has encountered a serious error.
          *
+         * <p>This callback may be called instead of {@link #onOpened}
+         * if opening the camera fails.</p>
+         *
          * <p>This indicates a failure of the camera device or camera service in
          * some way. Any attempt to call methods on this CameraDevice in the
-         * future will throw a {@link java.lang.IllegalStateException}.</p>
+         * future will throw a {@link CameraAccessException} with the
+         * {@link CameraAccessException#CAMERA_ERROR CAMERA_ERROR} reason.
+         * </p>
          *
          * <p>There may still be capture completion or camera stream listeners
          * that will be called after this error is received.</p>
          *
-         * <p>The default implementation logs an error to the system log about
-         * the camera failure.</p>
+         * <p>You should clean up the camera with {@link CameraDevice#close} after
+         * this happens. Further attempts at recovery are error-code specific.</p>
          *
          * @param camera The device reporting the error
          * @param error The error code, one of the
@@ -785,11 +962,9 @@ public interface CameraDevice extends AutoCloseable {
          *
          * @see #ERROR_CAMERA_DEVICE
          * @see #ERROR_CAMERA_SERVICE
+         * @see #ERROR_CAMERA_DISABLED
+         * @see #ERROR_CAMERA_IN_USE
          */
-        public void onCameraError(CameraDevice camera, int error) {
-            Log.e("CameraListener",
-                    String.format("Camera device %s has encountered an error: %d",
-                            camera.getId(), error));
-        }
+        public abstract void onError(CameraDevice camera, int error); // Must implement
     }
 }
