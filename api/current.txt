@@ -18412,6 +18412,7 @@ package android.os {
     method public long getStatSize();
     method public static android.os.ParcelFileDescriptor open(java.io.File, int) throws java.io.FileNotFoundException;
     method public static android.os.ParcelFileDescriptor open(java.io.File, int, android.os.Handler, android.os.ParcelFileDescriptor.OnCloseListener) throws java.io.IOException;
+    method public static int parseMode(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int MODE_APPEND = 33554432; // 0x2000000
