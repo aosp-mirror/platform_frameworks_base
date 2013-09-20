@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>Person.Urls | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -800,7 +807,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#getLabel()">getLabel</a></span>()</nobr>
@@ -836,7 +843,7 @@ Summary:
             
             
             
-            <a href="/reference/java/lang/String.html">String</a></nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#getValue()">getValue</a></span>()</nobr>
@@ -875,27 +882,6 @@ Summary:
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#hasPrimary()">hasPrimary</a></span>()</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    Returns false (removed).
-</em></div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#hasType()">hasType</a></span>()</nobr>
         
         <div class="jd-descrdiv">Indicates whether the "type" field is explicitly set to a value.</div>
@@ -904,7 +890,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -917,27 +903,6 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#hasValue()">hasValue</a></span>()</nobr>
         
         <div class="jd-descrdiv">Indicates whether the "value" field is explicitly set to a value.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#isPrimary()">isPrimary</a></span>()</nobr>
-        
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    Returns false (removed).
-</em></div>
   
   </td></tr>
 
@@ -1070,7 +1035,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getLabel</span>
       <span class="normal">()</span>
@@ -1113,11 +1078,11 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The type of URL. Possible values are:
+  <div class="jd-tagdata jd-tagdescr"><p>The type of URL. Possible values include, but are not limited to, the following values:
  - "otherProfile" - URL for another profile.
- - "contributor" - URL for which this person is a contributor to.
+ - "contributor" - URL to a site for which this person is a contributor.
  - "website" - URL for this Google+ Page's primary website.
- - "other" - Other.
+ - "other" - Other URL.
 </p></div>
 
     </div>
@@ -1134,7 +1099,7 @@ From interface
          
         abstract 
          
-        <a href="/reference/java/lang/String.html">String</a>
+        String
       </span>
       <span class="sympad">getValue</span>
       <span class="normal">()</span>
@@ -1179,40 +1144,6 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "label" field is explicitly set to a value.
 </p></div>
-
-    </div>
-</div>
-
-
-<A NAME="hasPrimary()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">hasPrimary</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Returns false (removed).
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1273,40 +1204,6 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "value" field is explicitly set to a value.
 </p></div>
-
-    </div>
-</div>
-
-
-<A NAME="isPrimary()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">isPrimary</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Returns false (removed).
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
