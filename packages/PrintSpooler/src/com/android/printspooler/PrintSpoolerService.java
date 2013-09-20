@@ -1036,8 +1036,9 @@ public final class PrintSpoolerService extends Service {
                     final int heightMils = Integer.parseInt(parser.getAttributeValue(null,
                             ATTR_HEIGHT_MILS));
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                    final int labelResId = Integer.parseInt(parser.getAttributeValue(null,
-                            ATTR_LABEL_RES_ID));
+                    String labelResIdString = parser.getAttributeValue(null, ATTR_LABEL_RES_ID);
+                    final int labelResId = (labelResIdString != null)
+                            ? Integer.parseInt(labelResIdString) : 0;
                     label = parser.getAttributeValue(null, ATTR_LABEL);
                     MediaSize mediaSize = new MediaSize(id, label, packageName, labelResId,
                                 widthMils, heightMils);
