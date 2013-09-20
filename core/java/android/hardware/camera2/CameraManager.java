@@ -58,7 +58,7 @@ public final class CameraManager {
     private final ICameraService mCameraService;
     private ArrayList<String> mDeviceIdList;
 
-    private ArrayMap<AvailabilityListener, Handler> mListenerMap =
+    private final ArrayMap<AvailabilityListener, Handler> mListenerMap =
             new ArrayMap<AvailabilityListener, Handler>();
 
     private final Context mContext;
@@ -201,8 +201,7 @@ public final class CameraManager {
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    public CameraDevice openCamera(String cameraId) throws CameraAccessException {
-
+    private CameraDevice openCamera(String cameraId) throws CameraAccessException {
         try {
 
             synchronized (mLock) {
@@ -237,6 +236,79 @@ public final class CameraManager {
     }
 
     /**
+     * Open a connection to a camera with the given ID.
+     *
+     * <p>Use {@link #getCameraIdList} to get the list of available camera
+     * devices. Note that even if an id is listed, open may fail if the device
+     * is disconnected between the calls to {@link #getCameraIdList} and
+     * {@link #openCamera}.</p>
+     *
+     * <p>If the camera successfully opens after this function call returns,
+     * {@link CameraDevice.StateListener#onOpened} will be invoked with the
+     * newly opened {@link CameraDevice} in the unconfigured state.</p>
+     *
+     * <p>If the camera becomes disconnected during initialization
+     * after this function call returns,
+     * {@link CameraDevice.StateListener#onDisconnected} with a
+     * {@link CameraDevice} in the disconnected state (and
+     * {@link CameraDevice.StateListener#onOpened} will be skipped).</p>
+     *
+     * <p>If the camera fails to initialize after this function call returns,
+     * {@link CameraDevice.StateListener#onError} will be invoked with a
+     * {@link CameraDevice} in the error state (and
+     * {@link CameraDevice.StateListener#onOpened} will be skipped).</p>
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device to open
+     * @param listener
+     *             The listener which is invoked once the camera is opened
+     * @param handler
+     *             The handler on which the listener should be invoked, or
+     *             {@code null} to use the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws CameraAccessException if the camera is disabled by device policy,
+     * or the camera has become or was disconnected.
+     *
+     * @throws IllegalArgumentException if cameraId or the listener was null,
+     * or the cameraId does not match any currently or previously available
+     * camera device.
+     *
+     * @throws SecurityException if the application does not have permission to
+     * access the camera
+     *
+     * @see #getCameraIdList
+     * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+     */
+    public void openCamera(String cameraId, final CameraDevice.StateListener listener,
+            Handler handler)
+            throws CameraAccessException {
+
+        if (cameraId == null) {
+            throw new IllegalArgumentException("cameraId was null");
+        } else if (listener == null) {
+            throw new IllegalArgumentException("listener was null");
+        } else if (handler == null) {
+            if (Looper.myLooper() != null) {
+                handler = new Handler();
+            } else {
+                throw new IllegalArgumentException(
+                        "Looper doesn't exist in the calling thread");
+            }
+        }
+
+        final CameraDevice camera = openCamera(cameraId);
+        camera.setDeviceListener(listener, handler);
+
+        // TODO: make truly async in the camera service
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                listener.onOpened(camera);
+            }
+        });
+    }
+
+    /**
      * Interface for listening to camera devices becoming available or
      * unavailable.
      *
@@ -265,7 +337,7 @@ public final class CameraManager {
          *
          * <p>If an application had an active CameraDevice instance for the
          * now-disconnected camera, that application will receive a
-         * {@link CameraDevice.CameraDeviceListener#onCameraDisconnected disconnection error}.</p>
+         * {@link CameraDevice.StateListener#onDisconnected disconnection error}.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -403,6 +475,7 @@ public final class CameraManager {
                     if (isAvailable(status)) {
                         handler.post(
                             new Runnable() {
+                                @Override
                                 public void run() {
                                     listener.onCameraAvailable(id);
                                 }
@@ -410,6 +483,7 @@ public final class CameraManager {
                     } else {
                         handler.post(
                             new Runnable() {
+                                @Override
                                 public void run() {
                                     listener.onCameraUnavailable(id);
                                 }
