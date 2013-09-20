@@ -25,12 +25,12 @@ PRODUCT_COPY_FILES += $(foreach fn,$(RINGTONE_FILES),\
 	$(LOCAL_PATH)/ringtones/ogg/$(fn)_48k.ogg:system/media/audio/ringtones/$(fn).ogg)
 
 PRODUCT_COPY_FILES += $(foreach fn,$(EFFECT_FILES),\
-	$(LOCAL_PATH)/effects/ogg/$(fn)_48k.ogg:system/media/audio/effects/$(fn).ogg)
+	$(LOCAL_PATH)/effects/ogg/$(fn)_48k.ogg:system/media/audio/ui/$(fn).ogg)
 
 # no gold-plated version yet
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/effects/ogg/camera_focus.ogg:system/media/audio/effects/camera_focus.ogg \
-    $(LOCAL_PATH)/effects/ogg/LowBattery.ogg:system/media/audio/effects/LowBattery.ogg \
-    $(LOCAL_PATH)/effects/ogg/WirelessChargingStarted.ogg:system/media/audio/effects/WirelessChargingStarted.ogg \
-    $(LOCAL_PATH)/effects/ogg/Dock.ogg:system/media/audio/effects/Dock.ogg \
-    $(LOCAL_PATH)/effects/ogg/Undock.ogg:system/media/audio/effects/Undock.ogg
+    $(LOCAL_PATH)/effects/ogg/camera_focus.ogg:system/media/audio/ui/camera_focus.ogg \
+    $(LOCAL_PATH)/effects/ogg/LowBattery.ogg:system/media/audio/ui/LowBattery.ogg \
+    $(LOCAL_PATH)/effects/ogg/WirelessChargingStarted.ogg:system/media/audio/ui/WirelessChargingStarted.ogg \
+    $(LOCAL_PATH)/effects/ogg/Dock.ogg:system/media/audio/ui/Dock.ogg \
+    $(LOCAL_PATH)/effects/ogg/Undock.ogg:system/media/audio/ui/Undock.ogg

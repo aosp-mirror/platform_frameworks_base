@@ -182,6 +182,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/keylayout/frameworks)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/keychars/frameworks)
 $(call add-clean-step, rm -f $(PRODUCT_OUT)/system/media/video/*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/effects/)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
