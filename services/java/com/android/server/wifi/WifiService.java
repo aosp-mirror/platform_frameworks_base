@@ -367,14 +367,14 @@ public final class WifiService extends IWifiManager.Stub {
             this.pid = getCallingPid();
         }
         public void binderDied() {
-            stopBatchedScan(settings, mBinder);
+            stopBatchedScan(settings, uid, pid);
         }
         public String toString() {
             return "BatchedScanRequest{settings=" + settings + ", binder=" + mBinder + "}";
         }
 
-        public boolean isSameApp() {
-            return (this.uid == getCallingUid() && this.pid == getCallingPid());
+        public boolean isSameApp(int uid, int pid) {
+            return (this.uid == uid && this.pid == pid);
         }
     }
 
@@ -429,13 +429,17 @@ public final class WifiService extends IWifiManager.Stub {
     }
 
 
-    public void stopBatchedScan(BatchedScanSettings settings, IBinder binder) {
+    public void stopBatchedScan(BatchedScanSettings settings) {
         enforceChangePermission();
         if (mBatchedScanSupported == false) return;
+        stopBatchedScan(settings, getCallingUid(), getCallingPid());
+    }
+
+    private void stopBatchedScan(BatchedScanSettings settings, int uid, int pid) {
         ArrayList<BatchedScanRequest> found = new ArrayList<BatchedScanRequest>();
         synchronized(mBatchedScanners) {
             for (BatchedScanRequest r : mBatchedScanners) {
-                if (r.isSameApp() && (settings == null || settings.equals(r.settings))) {
+                if (r.isSameApp(uid, pid) && (settings == null || settings.equals(r.settings))) {
                     found.add(r);
                     if (settings != null) break;
                 }
@@ -459,7 +463,6 @@ public final class WifiService extends IWifiManager.Stub {
             mWifiStateMachine.setBatchedScanSettings(null, 0);
             return;
         }
-
         for (BatchedScanRequest r : mBatchedScanners) {
             BatchedScanSettings s = r.settings;
             if (s.maxScansPerBatch != BatchedScanSettings.UNSPECIFIED &&
@@ -468,7 +471,8 @@ public final class WifiService extends IWifiManager.Stub {
                 responsibleUid = r.uid;
             }
             if (s.maxApPerScan != BatchedScanSettings.UNSPECIFIED &&
-                    s.maxApPerScan > setting.maxApPerScan) {
+                    (setting.maxApPerScan == BatchedScanSettings.UNSPECIFIED ||
+                     s.maxApPerScan > setting.maxApPerScan)) {
                 setting.maxApPerScan = s.maxApPerScan;
             }
             if (s.scanIntervalSec != BatchedScanSettings.UNSPECIFIED &&

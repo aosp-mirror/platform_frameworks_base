@@ -826,7 +826,7 @@ public class WifiManager {
      */
     public void stopBatchedScan(BatchedScanSettings requested) {
         try {
-            mService.stopBatchedScan(requested, new Binder());
+            mService.stopBatchedScan(requested);
         } catch (RemoteException e) {}
     }
 
