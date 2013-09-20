@@ -310,18 +310,6 @@ android_media_AudioRecord_stop(JNIEnv *env, jobject thiz)
 
 // ----------------------------------------------------------------------------
 
-// This class is used to destroy a RefBase asynchronously
-class AsyncDestructThread : public Thread
-{
-public:
-    AsyncDestructThread(sp<RefBase> refBase) : mRefBase(refBase) { }
-protected:
-    virtual ~AsyncDestructThread() { }
-private:
-    virtual bool        threadLoop()    { return false; }
-    const   sp<RefBase> mRefBase;
-};
-
 #define CALLBACK_COND_WAIT_TIMEOUT_MS 1000
 static void android_media_AudioRecord_release(JNIEnv *env,  jobject thiz) {
     sp<AudioRecord> lpRecorder = setAudioRecord(env, thiz, 0);
@@ -353,17 +341,6 @@ static void android_media_AudioRecord_release(JNIEnv *env,  jobject thiz) {
         env->DeleteGlobalRef(lpCookie->audioRecord_class);
         env->DeleteGlobalRef(lpCookie->audioRecord_ref);
         delete lpCookie;
-    }
-    // FIXME AudioRecord destruction should not be slow
-    if (lpRecorder != 0) {
-        // must be a raw reference to avoid a race after run()
-        AsyncDestructThread *adt = new AsyncDestructThread(lpRecorder);
-        // guaranteed to not run destructor
-        lpRecorder.clear();
-        // after the run(), adt thread will hold a strong reference to lpRecorder,
-        // and the only strong reference to itself
-        adt->run("AsyncDestruct");
-        // do not delete adt here: adt thread destroys itself, and lpRecorder if needed
     }
 }
 
