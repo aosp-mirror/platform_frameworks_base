@@ -29,14 +29,16 @@ private:
 
 static SkTypeface* Typeface_create(JNIEnv* env, jobject, jstring name,
                                    SkTypeface::Style style) {
-    SkTypeface* face;
+    SkTypeface* face = NULL;
 
-    if (NULL == name) {
-        face = SkTypeface::CreateFromName(NULL, (SkTypeface::Style)style);
-    }
-    else {
+    if (NULL != name) {
         AutoJavaStringToUTF8    str(env, name);
         face = SkTypeface::CreateFromName(str.c_str(), style);
+    }
+
+    // return the default font at the best style if no exact match exists
+    if (NULL == face) {
+        face = SkTypeface::CreateFromName(NULL, style);
     }
     return face;
 }
