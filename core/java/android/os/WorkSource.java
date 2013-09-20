@@ -103,7 +103,21 @@ public class WorkSource implements Parcelable {
      * @hide
      */
     public void clearNames() {
-        mNames = null;
+        if (mNames != null) {
+            mNames = null;
+            // Clear out any duplicate uids now that we don't have names to disambiguate them.
+            int destIndex = 1;
+            int newNum = mNum;
+            for (int sourceIndex = 1; sourceIndex < mNum; sourceIndex++) {
+                if (mUids[sourceIndex] == mUids[sourceIndex - 1]) {
+                    newNum--;
+                } else {
+                    mUids[destIndex] = mUids[sourceIndex];
+                    destIndex++;
+                }
+            }
+            mNum = newNum;
+        }
     }
 
     /**
