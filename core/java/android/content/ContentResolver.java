@@ -886,7 +886,7 @@ public abstract class ContentResolver {
             }
         } else if (SCHEME_FILE.equals(scheme)) {
             ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
-                    new File(uri.getPath()), modeToMode(uri, mode));
+                    new File(uri.getPath()), ParcelFileDescriptor.parseMode(mode));
             return new AssetFileDescriptor(pfd, 0, -1);
         } else {
             if ("r".equals(mode)) {
@@ -1156,33 +1156,6 @@ public abstract class ContentResolver {
         res.r = r;
         res.id = id;
         return res;
-    }
-
-    /** @hide */
-    static public int modeToMode(Uri uri, String mode) throws FileNotFoundException {
-        int modeBits;
-        if ("r".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
-        } else if ("w".equals(mode) || "wt".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
-                    | ParcelFileDescriptor.MODE_CREATE
-                    | ParcelFileDescriptor.MODE_TRUNCATE;
-        } else if ("wa".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_WRITE_ONLY
-                    | ParcelFileDescriptor.MODE_CREATE
-                    | ParcelFileDescriptor.MODE_APPEND;
-        } else if ("rw".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
-                    | ParcelFileDescriptor.MODE_CREATE;
-        } else if ("rwt".equals(mode)) {
-            modeBits = ParcelFileDescriptor.MODE_READ_WRITE
-                    | ParcelFileDescriptor.MODE_CREATE
-                    | ParcelFileDescriptor.MODE_TRUNCATE;
-        } else {
-            throw new FileNotFoundException("Bad mode for " + uri + ": "
-                    + mode);
-        }
-        return modeBits;
     }
 
     /**
