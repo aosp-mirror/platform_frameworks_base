@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -131,6 +132,10 @@ public class KeyguardService extends Service {
         public void showAssistant() {
             checkPermission();
             mKeyguardViewMediator.showAssistant();
+        }
+        public void dispatch(MotionEvent event) {
+            checkPermission();
+            mKeyguardViewMediator.dispatch(event);
         }
     };
 
