@@ -178,6 +178,7 @@ import java.util.Set;
  */
 public final class Parcel {
     private static final boolean DEBUG_RECYCLE = false;
+    private static final boolean DEBUG_ARRAY_MAP = false;
     private static final String TAG = "Parcel";
 
     @SuppressWarnings({"UnusedDeclaration"})
@@ -605,7 +606,14 @@ public final class Parcel {
         }
         final int N = val.size();
         writeInt(N);
+        if (DEBUG_ARRAY_MAP) {
+            RuntimeException here =  new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.d(TAG, "Writing " + N + " ArrayMap entries", here);
+        }
         for (int i=0; i<N; i++) {
+            if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Write #" + i + ": key=0x"
+                    + (val.keyAt(i) != null ? val.keyAt(i).hashCode() : 0) + " " + val.keyAt(i));
             writeValue(val.keyAt(i));
             writeValue(val.valueAt(i));
         }
@@ -2289,10 +2297,34 @@ public final class Parcel {
 
     /* package */ void readArrayMapInternal(ArrayMap outVal, int N,
         ClassLoader loader) {
+        if (DEBUG_ARRAY_MAP) {
+            RuntimeException here =  new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.d(TAG, "Reading " + N + " ArrayMap entries", here);
+        }
         while (N > 0) {
             Object key = readValue(loader);
+            if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Read #" + (N-1) + ": key=0x"
+                    + (key != null ? key.hashCode() : 0) + " " + key);
             Object value = readValue(loader);
             outVal.append(key, value);
+            N--;
+        }
+    }
+
+    /* package */ void readArrayMapSafelyInternal(ArrayMap outVal, int N,
+        ClassLoader loader) {
+        if (DEBUG_ARRAY_MAP) {
+            RuntimeException here =  new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.d(TAG, "Reading safely " + N + " ArrayMap entries", here);
+        }
+        while (N > 0) {
+            Object key = readValue(loader);
+            if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Read safe #" + (N-1) + ": key=0x"
+                    + (key != null ? key.hashCode() : 0) + " " + key);
+            Object value = readValue(loader);
+            outVal.put(key, value);
             N--;
         }
     }

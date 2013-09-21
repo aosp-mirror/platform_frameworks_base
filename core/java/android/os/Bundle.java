@@ -33,6 +33,8 @@ public final class Bundle implements Parcelable, Cloneable {
     private static final String LOG_TAG = "Bundle";
     public static final Bundle EMPTY;
 
+    static final int BUNDLE_MAGIC = 0x4C444E42; // 'B' 'N' 'D' 'L'
+
     static {
         EMPTY = new Bundle();
         EMPTY.mMap = ArrayMap.EMPTY;
@@ -1643,11 +1645,11 @@ public final class Bundle implements Parcelable, Cloneable {
             if (mParcelledData != null) {
                 int length = mParcelledData.dataSize();
                 parcel.writeInt(length);
-                parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
+                parcel.writeInt(BUNDLE_MAGIC);
                 parcel.appendFrom(mParcelledData, 0, length);
             } else {
                 parcel.writeInt(-1); // dummy, will hold length
-                parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
+                parcel.writeInt(BUNDLE_MAGIC);
     
                 int oldPos = parcel.dataPosition();
                 parcel.writeArrayMapInternal(mMap);
@@ -1679,11 +1681,10 @@ public final class Bundle implements Parcelable, Cloneable {
 
     void readFromParcelInner(Parcel parcel, int length) {
         int magic = parcel.readInt();
-        if (magic != 0x4C444E42) {
+        if (magic != BUNDLE_MAGIC) {
             //noinspection ThrowableInstanceNeverThrown
-            String st = Log.getStackTraceString(new RuntimeException());
-            Log.e("Bundle", "readBundle: bad magic number");
-            Log.e("Bundle", "readBundle: trace = " + st);
+            throw new IllegalStateException("Bad magic number for Bundle: 0x"
+                    + Integer.toHexString(magic));
         }
 
         // Advance within this Parcel
@@ -1694,10 +1695,23 @@ public final class Bundle implements Parcelable, Cloneable {
         p.setDataPosition(0);
         p.appendFrom(parcel, offset, length);
         p.setDataPosition(0);
-        
-        mParcelledData = p;
-        mHasFds = p.hasFileDescriptors();
-        mFdsKnown = true;
+
+        if (mMap != null) {
+            // It is not allowed to have a Bundle with both a map and a parcel, so if we
+            // already have a map then we need to immediately unparcel into it.  This also
+            // lets us know we need to go through the slow path of unparceling, since the
+            // map may already contains some data so the two need to be merged.
+            if (mFdsKnown) {
+                mHasFds |= p.hasFileDescriptors();
+            }
+            int N = p.readInt();
+            p.readArrayMapSafelyInternal(mMap, N, mClassLoader);
+            p.recycle();
+        } else {
+            mParcelledData = p;
+            mHasFds = p.hasFileDescriptors();
+            mFdsKnown = true;
+        }
     }
 
     @Override
