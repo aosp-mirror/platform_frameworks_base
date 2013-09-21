@@ -319,6 +319,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private SlidingChallengeLayout mSlidingChallengeLayout;
+    private MultiPaneChallengeLayout mMultiPaneChallengeLayout;
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -372,8 +373,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setViewStateManager(mViewStateManager);
         mAppWidgetContainer.setLockPatternUtils(mLockPatternUtils);
 
+        mMultiPaneChallengeLayout =
+                (MultiPaneChallengeLayout) findViewById(R.id.multi_pane_challenge);
         ChallengeLayout challenge = mSlidingChallengeLayout != null ? mSlidingChallengeLayout :
-            (ChallengeLayout) findViewById(R.id.multi_pane_challenge);
+                mMultiPaneChallengeLayout;
         challenge.setOnBouncerStateChangedListener(mViewStateManager);
         mAppWidgetContainer.setBouncerAnimationDuration(challenge.getBouncerAnimationDuration());
         mViewStateManager.setPagedView(mAppWidgetContainer);
@@ -397,6 +400,11 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
+    }
+
+    public void setScrimView(View scrim) {
+        if (mSlidingChallengeLayout != null) mSlidingChallengeLayout.setScrimView(scrim);
+        if (mMultiPaneChallengeLayout != null) mMultiPaneChallengeLayout.setScrimView(scrim);
     }
 
     private void setBackButtonEnabled(boolean enabled) {
