@@ -1361,6 +1361,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return WebSettingsClassic.getDefaultUserAgentForLocale(context,
                     Locale.getDefault());
         }
+
+        @Override
+        public void setWebContentsDebuggingEnabled(boolean enable) {
+            // no-op for WebViewClassic.
+        }
     }
 
     private void onHandleUiEvent(MotionEvent event, int eventType, int flags) {
