@@ -39,6 +39,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -64,6 +65,7 @@ import android.widget.AbsListView.RecyclerListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -657,7 +659,7 @@ public class DirectoryFragment extends Fragment {
             if (extras != null) {
                 final String info = extras.getString(DocumentsContract.EXTRA_INFO);
                 if (info != null) {
-                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_alert, info));
+                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, info));
                 }
                 final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
                 if (error != null) {
@@ -707,6 +709,13 @@ public class DirectoryFragment extends Fragment {
                     convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
                 } else if (state.derivedMode == MODE_GRID) {
                     convertView = inflater.inflate(R.layout.item_doc_grid, parent, false);
+
+                    // Apply padding to grid items
+                    final FrameLayout grid = (FrameLayout) convertView;
+                    final int gridPadding = getResources()
+                            .getDimensionPixelSize(R.dimen.grid_padding);
+                    grid.setForeground(new InsetDrawable(grid.getForeground(), gridPadding));
+                    grid.setBackground(new InsetDrawable(grid.getBackground(), gridPadding));
                 } else {
                     throw new IllegalStateException();
                 }

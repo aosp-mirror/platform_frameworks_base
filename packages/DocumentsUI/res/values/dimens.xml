@@ -20,6 +20,9 @@
     <dimen name="grid_width">180dp</dimen>
     <dimen name="grid_height">180dp</dimen>
 
+    <dimen name="grid_padding">4dp</dimen>
+    <dimen name="grid_padding_horiz">4dp</dimen>
+
     <bool name="show_as_dialog">false</bool>
     <bool name="always_show_summary">false</bool>
 </resources>

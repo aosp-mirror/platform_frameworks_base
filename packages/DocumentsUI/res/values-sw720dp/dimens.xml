@@ -19,4 +19,6 @@
 
     <item type="dimen" name="dialog_width">85%</item>
     <item type="dimen" name="dialog_height">90%</item>
+
+    <dimen name="grid_padding_horiz">20dp</dimen>
 </resources>
