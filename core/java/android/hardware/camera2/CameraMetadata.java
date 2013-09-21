@@ -1063,7 +1063,7 @@ public abstract class CameraMetadata {
 
     /**
      * <p>
-     * if CONTINUOUS_* modes are supported AF is
+     * if CONTINUOUS_* modes are supported. AF is
      * currently doing an AF scan initiated by a continuous
      * autofocus mode
      * </p>
@@ -1073,7 +1073,7 @@ public abstract class CameraMetadata {
 
     /**
      * <p>
-     * if CONTINUOUS_* modes are supported AF currently
+     * if CONTINUOUS_* modes are supported. AF currently
      * believes it is in focus, but may restart scanning at
      * any time.
      * </p>
@@ -1083,7 +1083,7 @@ public abstract class CameraMetadata {
 
     /**
      * <p>
-     * if AUTO or MACRO modes are supported AF is doing
+     * if AUTO or MACRO modes are supported. AF is doing
      * an AF scan because it was triggered by AF
      * trigger
      * </p>
@@ -1093,7 +1093,7 @@ public abstract class CameraMetadata {
 
     /**
      * <p>
-     * if any AF mode besides OFF is supported AF
+     * if any AF mode besides OFF is supported. AF
      * believes it is focused correctly and is
      * locked
      * </p>
@@ -1103,13 +1103,23 @@ public abstract class CameraMetadata {
 
     /**
      * <p>
-     * if any AF mode besides OFF is supported AF has
+     * if any AF mode besides OFF is supported. AF has
      * failed to focus successfully and is
      * locked
      * </p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_NOT_FOCUSED_LOCKED = 5;
+
+    /**
+     * <p>
+     * if CONTINUOUS_* modes are supported. AF finished a
+     * passive scan without finding focus, and may restart
+     * scanning at any time.
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_PASSIVE_UNFOCUSED = 6;
 
     //
     // Enumeration values for CaptureResult#CONTROL_AWB_STATE
