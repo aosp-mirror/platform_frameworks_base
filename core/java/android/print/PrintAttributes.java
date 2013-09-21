@@ -265,316 +265,336 @@ public final class PrintAttributes implements Parcelable {
     public static final class MediaSize {
         private static final String LOG_TAG = "MediaSize";
 
-        // TODO: Verify media sizes and add more standard ones.
+        /**
+         * Unknown media size in portrait mode.
+         * <p>
+         * <strong>Note: </strong>This is for specifying orientation without media
+         * size. You should not use the dimensions reported by this class.
+         * </p>
+         */
+        public static final MediaSize UNKNOWN_PORTRAIT =
+                new MediaSize("UNKNOWN_PORTRAIT", "android",
+                        R.string.mediasize_unknown_portrait, Integer.MAX_VALUE, 1);
+
+        /**
+         * Unknown media size in landscape mode.
+         * <p>
+         * <strong>Note: </strong>This is for specifying orientation without media
+         * size. You should not use the dimensions reported by this class.
+         * </p>
+         */
+        public static final MediaSize UNKNOWN_LANDSCAPE =
+                new MediaSize("UNKNOWN_LANDSCAPE", "android",
+                        R.string.mediasize_unknown_landscape, 1, Integer.MAX_VALUE);
 
         // ISO sizes
 
         /** ISO A0 media size: 841mm x 1189mm (33.11" x 46.81") */
         public static final MediaSize ISO_A0 =
-                new MediaSize("ISO_A0", "android", R.string.mediaSize_iso_a0, 33110, 46810);
+                new MediaSize("ISO_A0", "android", R.string.mediasize_iso_a0, 33110, 46810);
         /** ISO A1 media size: 594mm x 841mm (23.39" x 33.11") */
         public static final MediaSize ISO_A1 =
-                new MediaSize("ISO_A1", "android", R.string.mediaSize_iso_a1, 23390, 33110);
+                new MediaSize("ISO_A1", "android", R.string.mediasize_iso_a1, 23390, 33110);
         /** ISO A2 media size: 420mm x 594mm (16.54" x 23.39") */
         public static final MediaSize ISO_A2 =
-                new MediaSize("ISO_A2", "android", R.string.mediaSize_iso_a2, 16540, 23390);
+                new MediaSize("ISO_A2", "android", R.string.mediasize_iso_a2, 16540, 23390);
         /** ISO A3 media size: 297mm x 420mm (11.69" x 16.54") */
         public static final MediaSize ISO_A3 =
-                new MediaSize("ISO_A3", "android", R.string.mediaSize_iso_a3, 11690, 16540);
+                new MediaSize("ISO_A3", "android", R.string.mediasize_iso_a3, 11690, 16540);
         /** ISO A4 media size: 210mm x 297mm (8.27" x 11.69") */
         public static final MediaSize ISO_A4 =
-                new MediaSize("ISO_A4", "android", R.string.mediaSize_iso_a4, 8270, 11690);
+                new MediaSize("ISO_A4", "android", R.string.mediasize_iso_a4, 8270, 11690);
         /** ISO A5 media size: 148mm x 210mm (5.83" x 8.27") */
         public static final MediaSize ISO_A5 =
-                new MediaSize("ISO_A5", "android", R.string.mediaSize_iso_a5, 5830, 8270);
+                new MediaSize("ISO_A5", "android", R.string.mediasize_iso_a5, 5830, 8270);
         /** ISO A6 media size: 105mm x 148mm (4.13" x 5.83") */
         public static final MediaSize ISO_A6 =
-                new MediaSize("ISO_A6", "android", R.string.mediaSize_iso_a6, 4130, 5830);
+                new MediaSize("ISO_A6", "android", R.string.mediasize_iso_a6, 4130, 5830);
         /** ISO A7 media size: 74mm x 105mm (2.91" x 4.13") */
         public static final MediaSize ISO_A7 =
-                new MediaSize("ISO_A7", "android", R.string.mediaSize_iso_a7, 2910, 4130);
+                new MediaSize("ISO_A7", "android", R.string.mediasize_iso_a7, 2910, 4130);
         /** ISO A8 media size: 52mm x 74mm (2.05" x 2.91") */
         public static final MediaSize ISO_A8 =
-                new MediaSize("ISO_A8", "android", R.string.mediaSize_iso_a8, 2050, 2910);
+                new MediaSize("ISO_A8", "android", R.string.mediasize_iso_a8, 2050, 2910);
         /** ISO A9 media size: 37mm x 52mm (1.46" x 2.05") */
         public static final MediaSize ISO_A9 =
-                new MediaSize("ISO_A9", "android", R.string.mediaSize_iso_a9, 1460, 2050);
+                new MediaSize("ISO_A9", "android", R.string.mediasize_iso_a9, 1460, 2050);
         /** ISO A10 media size: 26mm x 37mm (1.02" x 1.46") */
         public static final MediaSize ISO_A10 =
-                new MediaSize("ISO_A10", "android", R.string.mediaSize_iso_a10, 1020, 1460);
+                new MediaSize("ISO_A10", "android", R.string.mediasize_iso_a10, 1020, 1460);
 
         /** ISO B0 media size: 1000mm x 1414mm (39.37" x 55.67") */
         public static final MediaSize ISO_B0 =
-                new MediaSize("ISO_B0", "android", R.string.mediaSize_iso_b0, 39370, 55670);
+                new MediaSize("ISO_B0", "android", R.string.mediasize_iso_b0, 39370, 55670);
         /** ISO B1 media size: 707mm x 1000mm (27.83" x 39.37") */
         public static final MediaSize ISO_B1 =
-                new MediaSize("ISO_B1", "android", R.string.mediaSize_iso_b1, 27830, 39370);
+                new MediaSize("ISO_B1", "android", R.string.mediasize_iso_b1, 27830, 39370);
         /** ISO B2 media size: 500mm x 707mm (19.69" x 27.83") */
         public static final MediaSize ISO_B2 =
-                new MediaSize("ISO_B2", "android", R.string.mediaSize_iso_b2, 19690, 27830);
+                new MediaSize("ISO_B2", "android", R.string.mediasize_iso_b2, 19690, 27830);
         /** ISO B3 media size: 353mm x 500mm (13.90" x 19.69") */
         public static final MediaSize ISO_B3 =
-                new MediaSize("ISO_B3", "android", R.string.mediaSize_iso_b3, 13900, 19690);
+                new MediaSize("ISO_B3", "android", R.string.mediasize_iso_b3, 13900, 19690);
         /** ISO B4 media size: 250mm x 353mm (9.84" x 13.90") */
         public static final MediaSize ISO_B4 =
-                new MediaSize("ISO_B4", "android", R.string.mediaSize_iso_b4, 9840, 13900);
+                new MediaSize("ISO_B4", "android", R.string.mediasize_iso_b4, 9840, 13900);
         /** ISO B5 media size: 176mm x 250mm (6.93" x 9.84") */
         public static final MediaSize ISO_B5 =
-                new MediaSize("ISO_B5", "android", R.string.mediaSize_iso_b5, 6930, 9840);
+                new MediaSize("ISO_B5", "android", R.string.mediasize_iso_b5, 6930, 9840);
         /** ISO B6 media size: 125mm x 176mm (4.92" x 6.93") */
         public static final MediaSize ISO_B6 =
-                new MediaSize("ISO_B6", "android", R.string.mediaSize_iso_b6, 4920, 6930);
+                new MediaSize("ISO_B6", "android", R.string.mediasize_iso_b6, 4920, 6930);
         /** ISO B7 media size: 88mm x 125mm (3.46" x 4.92") */
         public static final MediaSize ISO_B7 =
-                new MediaSize("ISO_B7", "android", R.string.mediaSize_iso_b7, 3460, 4920);
+                new MediaSize("ISO_B7", "android", R.string.mediasize_iso_b7, 3460, 4920);
         /** ISO B8 media size: 62mm x 88mm (2.44" x 3.46") */
         public static final MediaSize ISO_B8 =
-                new MediaSize("ISO_B8", "android", R.string.mediaSize_iso_b8, 2440, 3460);
+                new MediaSize("ISO_B8", "android", R.string.mediasize_iso_b8, 2440, 3460);
         /** ISO B9 media size: 44mm x 62mm (1.73" x 2.44") */
         public static final MediaSize ISO_B9 =
-                new MediaSize("ISO_B9", "android", R.string.mediaSize_iso_b9, 1730, 2440);
+                new MediaSize("ISO_B9", "android", R.string.mediasize_iso_b9, 1730, 2440);
         /** ISO B10 media size: 31mm x 44mm (1.22" x 1.73") */
         public static final MediaSize ISO_B10 =
-                new MediaSize("ISO_B10", "android", R.string.mediaSize_iso_b10, 1220, 1730);
+                new MediaSize("ISO_B10", "android", R.string.mediasize_iso_b10, 1220, 1730);
 
         /** ISO C0 media size: 917mm x 1297mm (36.10" x 51.06") */
         public static final MediaSize ISO_C0 =
-                new MediaSize("ISO_C0", "android", R.string.mediaSize_iso_c0, 36100, 51060);
+                new MediaSize("ISO_C0", "android", R.string.mediasize_iso_c0, 36100, 51060);
         /** ISO C1 media size: 648mm x 917mm (25.51" x 36.10") */
         public static final MediaSize ISO_C1 =
-                new MediaSize("ISO_C1", "android", R.string.mediaSize_iso_c1, 25510, 36100);
+                new MediaSize("ISO_C1", "android", R.string.mediasize_iso_c1, 25510, 36100);
         /** ISO C2 media size: 458mm x 648mm (18.03" x 25.51") */
         public static final MediaSize ISO_C2 =
-                new MediaSize("ISO_C2", "android", R.string.mediaSize_iso_c2, 18030, 25510);
+                new MediaSize("ISO_C2", "android", R.string.mediasize_iso_c2, 18030, 25510);
         /** ISO C3 media size: 324mm x 458mm (12.76" x 18.03") */
         public static final MediaSize ISO_C3 =
-                new MediaSize("ISO_C3", "android", R.string.mediaSize_iso_c3, 12760, 18030);
+                new MediaSize("ISO_C3", "android", R.string.mediasize_iso_c3, 12760, 18030);
         /** ISO C4 media size: 229mm x 324mm (9.02" x 12.76") */
         public static final MediaSize ISO_C4 =
-                new MediaSize("ISO_C4", "android", R.string.mediaSize_iso_c4, 9020, 12760);
+                new MediaSize("ISO_C4", "android", R.string.mediasize_iso_c4, 9020, 12760);
         /** ISO C5 media size: 162mm x 229mm (6.38" x 9.02") */
         public static final MediaSize ISO_C5 =
-                new MediaSize("ISO_C5", "android", R.string.mediaSize_iso_c5, 6380, 9020);
+                new MediaSize("ISO_C5", "android", R.string.mediasize_iso_c5, 6380, 9020);
         /** ISO C6 media size: 114mm x 162mm (4.49" x 6.38") */
         public static final MediaSize ISO_C6 =
-                new MediaSize("ISO_C6", "android", R.string.mediaSize_iso_c6, 4490, 6380);
+                new MediaSize("ISO_C6", "android", R.string.mediasize_iso_c6, 4490, 6380);
         /** ISO C7 media size: 81mm x 114mm (3.19" x 4.49") */
         public static final MediaSize ISO_C7 =
-                new MediaSize("ISO_C7", "android", R.string.mediaSize_iso_c7, 3190, 4490);
+                new MediaSize("ISO_C7", "android", R.string.mediasize_iso_c7, 3190, 4490);
         /** ISO C8 media size: 57mm x 81mm (2.24" x 3.19") */
         public static final MediaSize ISO_C8 =
-                new MediaSize("ISO_C8", "android", R.string.mediaSize_iso_c8, 2240, 3190);
+                new MediaSize("ISO_C8", "android", R.string.mediasize_iso_c8, 2240, 3190);
         /** ISO C9 media size: 40mm x 57mm (1.57" x 2.24") */
         public static final MediaSize ISO_C9 =
-                new MediaSize("ISO_C9", "android", R.string.mediaSize_iso_c9, 1570, 2240);
+                new MediaSize("ISO_C9", "android", R.string.mediasize_iso_c9, 1570, 2240);
         /** ISO C10 media size: 28mm x 40mm (1.10" x 1.57") */
         public static final MediaSize ISO_C10 =
-                new MediaSize("ISO_C10", "android", R.string.mediaSize_iso_c10, 1100, 1570);
+                new MediaSize("ISO_C10", "android", R.string.mediasize_iso_c10, 1100, 1570);
 
         // North America
 
         /** North America Letter media size: 8.5" x 11" (279mm x 216mm) */
         public static final MediaSize NA_LETTER =
-                new MediaSize("NA_LETTER", "android", R.string.mediaSize_na_letter, 8500, 11000);
+                new MediaSize("NA_LETTER", "android", R.string.mediasize_na_letter, 8500, 11000);
         /** North America Government-Letter media size: 8.0" x 10.5" (203mm x 267mm) */
         public static final MediaSize NA_GOVT_LETTER =
                 new MediaSize("NA_GOVT_LETTER", "android",
-                        R.string.mediaSize_na_gvrnmt_letter, 8000, 10500);
+                        R.string.mediasize_na_gvrnmt_letter, 8000, 10500);
         /** North America Legal media size: 8.5" x 14" (216mm x 356mm) */
         public static final MediaSize NA_LEGAL =
-                new MediaSize("NA_LEGAL", "android", R.string.mediaSize_na_legal, 8500, 14000);
+                new MediaSize("NA_LEGAL", "android", R.string.mediasize_na_legal, 8500, 14000);
         /** North America Junior Legal media size: 8.0" x 5.0" (203mm × 127mm) */
         public static final MediaSize NA_JUNIOR_LEGAL =
                 new MediaSize("NA_JUNIOR_LEGAL", "android",
-                        R.string.mediaSize_na_junior_legal, 8000, 5000);
+                        R.string.mediasize_na_junior_legal, 8000, 5000);
         /** North America Ledger media size: 17" x 11" (432mm × 279mm) */
         public static final MediaSize NA_LEDGER =
-                new MediaSize("NA_LEDGER", "android", R.string.mediaSize_na_ledger, 17000, 11000);
+                new MediaSize("NA_LEDGER", "android", R.string.mediasize_na_ledger, 17000, 11000);
         /** North America Tabloid media size: 11" x 17" (279mm × 432mm) */
         public static final MediaSize NA_TABLOID =
                 new MediaSize("NA_TABLOID", "android",
-                        R.string.mediaSize_na_tabloid, 11000, 17000);
+                        R.string.mediasize_na_tabloid, 11000, 17000);
         /** North America Index Card 3x5 media size: 3" x 5" (76mm x 127mm) */
         public static final MediaSize NA_INDEX_3X5 =
                 new MediaSize("NA_INDEX_3X5", "android",
-                        R.string.mediaSize_na_index_3x5, 3000, 5000);
+                        R.string.mediasize_na_index_3x5, 3000, 5000);
         /** North America Index Card 4x6 media size: 4" x 6" (102mm x 152mm) */
         public static final MediaSize NA_INDEX_4X6 =
                 new MediaSize("NA_INDEX_4X6", "android",
-                        R.string.mediaSize_na_index_4x6, 4000, 6000);
+                        R.string.mediasize_na_index_4x6, 4000, 6000);
         /** North America Index Card 5x8 media size: 5" x 8" (127mm x 203mm) */
         public static final MediaSize NA_INDEX_5X8 =
                 new MediaSize("NA_INDEX_5X8", "android",
-                        R.string.mediaSize_na_index_5x8, 5000, 8000);
+                        R.string.mediasize_na_index_5x8, 5000, 8000);
         /** North America Monarch media size: 7.25" x 10.5" (184mm x 267mm) */
         public static final MediaSize NA_MONARCH =
                 new MediaSize("NA_MONARCH", "android",
-                        R.string.mediaSize_na_monarch, 7250, 10500);
+                        R.string.mediasize_na_monarch, 7250, 10500);
         /** North America Quarto media size: 8" x 10" (203mm x 254mm) */
         public static final MediaSize NA_QUARTO =
                 new MediaSize("NA_QUARTO", "android",
-                        R.string.mediaSize_na_quarto, 8000, 10000);
+                        R.string.mediasize_na_quarto, 8000, 10000);
         /** North America Foolscap media size: 8" x 13" (203mm x 330mm) */
         public static final MediaSize NA_FOOLSCAP =
                 new MediaSize("NA_FOOLSCAP", "android",
-                        R.string.mediaSize_na_foolscap, 8000, 13000);
+                        R.string.mediasize_na_foolscap, 8000, 13000);
 
         // Chinese
 
         /** Chinese ROC 8K media size: 270mm x 390mm (10.629" x 15.3543") */
         public static final MediaSize ROC_8K =
                 new MediaSize("ROC_8K", "android",
-                        R.string.mediaSize_chinese_roc_8k, 10629, 15354);
+                        R.string.mediasize_chinese_roc_8k, 10629, 15354);
         /** Chinese ROC 16K media size: 195mm x 270mm (7.677" x 10.629") */
         public static final MediaSize ROC_16K =
                 new MediaSize("ROC_16K", "android",
-                        R.string.mediaSize_chinese_roc_16k, 7677, 10629);
+                        R.string.mediasize_chinese_roc_16k, 7677, 10629);
 
         /** Chinese PRC 1 media size: 102mm x 165mm (4.015" x 6.496") */
         public static final MediaSize PRC_1 =
                 new MediaSize("PRC_1", "android",
-                        R.string.mediaSize_chinese_prc_1, 4015, 6496);
+                        R.string.mediasize_chinese_prc_1, 4015, 6496);
         /** Chinese PRC 2 media size: 102mm x 176mm (4.015" x 6.929") */
         public static final MediaSize PRC_2 =
                 new MediaSize("PRC_2", "android",
-                        R.string.mediaSize_chinese_prc_2, 4015, 6929);
+                        R.string.mediasize_chinese_prc_2, 4015, 6929);
         /** Chinese PRC 3 media size: 125mm x 176mm (4.921" x 6.929") */
         public static final MediaSize PRC_3 =
                 new MediaSize("PRC_3", "android",
-                        R.string.mediaSize_chinese_prc_3, 4921, 6929);
+                        R.string.mediasize_chinese_prc_3, 4921, 6929);
         /** Chinese PRC 4 media size: 110mm x 208mm (4.330" x 8.189") */
         public static final MediaSize PRC_4 =
                 new MediaSize("PRC_4", "android",
-                        R.string.mediaSize_chinese_prc_4, 4330, 8189);
+                        R.string.mediasize_chinese_prc_4, 4330, 8189);
         /** Chinese PRC 5 media size: 110mm x 220mm (4.330" x 8.661") */
         public static final MediaSize PRC_5 =
                 new MediaSize("PRC_5", "android",
-                        R.string.mediaSize_chinese_prc_5, 4330, 8661);
+                        R.string.mediasize_chinese_prc_5, 4330, 8661);
         /** Chinese PRC 6 media size: 120mm x 320mm (4.724" x 12.599") */
         public static final MediaSize PRC_6 =
                 new MediaSize("PRC_6", "android",
-                        R.string.mediaSize_chinese_prc_6, 4724, 12599);
+                        R.string.mediasize_chinese_prc_6, 4724, 12599);
         /** Chinese PRC 7 media size: 160mm x 230mm (6.299" x 9.055") */
         public static final MediaSize PRC_7 =
                 new MediaSize("PRC_7", "android",
-                        R.string.mediaSize_chinese_prc_7, 6299, 9055);
+                        R.string.mediasize_chinese_prc_7, 6299, 9055);
         /** Chinese PRC 8 media size: 120mm x 309mm (4.724" x 12.165") */
         public static final MediaSize PRC_8 =
                 new MediaSize("PRC_8", "android",
-                        R.string.mediaSize_chinese_prc_8, 4724, 12165);
+                        R.string.mediasize_chinese_prc_8, 4724, 12165);
         /** Chinese PRC 9 media size: 229mm x 324mm (9.016" x 12.756") */
         public static final MediaSize PRC_9 =
                 new MediaSize("PRC_9", "android",
-                        R.string.mediaSize_chinese_prc_9, 9016, 12756);
+                        R.string.mediasize_chinese_prc_9, 9016, 12756);
         /** Chinese PRC 10 media size: 324mm x 458mm (12.756" x 18.032") */
         public static final MediaSize PRC_10 =
                 new MediaSize("PRC_10", "android",
-                        R.string.mediaSize_chinese_prc_10, 12756, 18032);
+                        R.string.mediasize_chinese_prc_10, 12756, 18032);
 
         /** Chinese PRC 16k media size: 146mm x 215mm (5.749" x 8.465") */
         public static final MediaSize PRC_16k =
                 new MediaSize("PRC_16k", "android",
-                        R.string.mediaSize_chinese_prc_16k, 5749, 8465);
+                        R.string.mediasize_chinese_prc_16k, 5749, 8465);
         /** Chinese Pa Kai media size: 267mm x 389mm (10.512" x 15.315") */
         public static final MediaSize OM_PA_KAI =
                 new MediaSize("OM_PA_KAI", "android",
-                        R.string.mediaSize_chinese_om_pa_kai, 10512, 15315);
+                        R.string.mediasize_chinese_om_pa_kai, 10512, 15315);
         /** Chinese Dai Pa Kai media size: 275mm x 395mm (10.827" x 15.551") */
         public static final MediaSize OM_DAI_PA_KAI =
                 new MediaSize("OM_DAI_PA_KAI", "android",
-                        R.string.mediaSize_chinese_om_dai_pa_kai, 10827, 15551);
+                        R.string.mediasize_chinese_om_dai_pa_kai, 10827, 15551);
         /** Chinese Jurro Ku Kai media size: 198mm x 275mm (7.796" x 10.827") */
         public static final MediaSize OM_JUURO_KU_KAI =
                 new MediaSize("OM_JUURO_KU_KAI", "android",
-                        R.string.mediaSize_chinese_om_jurro_ku_kai, 7796, 10827);
+                        R.string.mediasize_chinese_om_jurro_ku_kai, 7796, 10827);
 
         // Japanese
 
         /** Japanese JIS B10 media size: 32mm x 45mm (1.259" x 1.772") */
         public static final MediaSize JIS_B10 =
                 new MediaSize("JIS_B10", "android",
-                        R.string.mediaSize_japanese_jis_b10, 1259, 1772);
+                        R.string.mediasize_japanese_jis_b10, 1259, 1772);
         /** Japanese JIS B9 media size: 45mm x 64mm (1.772" x 2.52") */
         public static final MediaSize JIS_B9 =
                 new MediaSize("JIS_B9", "android",
-                        R.string.mediaSize_japanese_jis_b9, 1772, 2520);
+                        R.string.mediasize_japanese_jis_b9, 1772, 2520);
         /** Japanese JIS B8 media size: 64mm x 91mm (2.52" x 3.583") */
         public static final MediaSize JIS_B8 =
                 new MediaSize("JIS_B8", "android",
-                        R.string.mediaSize_japanese_jis_b8, 2520, 3583);
+                        R.string.mediasize_japanese_jis_b8, 2520, 3583);
         /** Japanese JIS B7 media size: 91mm x 128mm (3.583" x 5.049") */
         public static final MediaSize JIS_B7 =
                 new MediaSize("JIS_B7", "android",
-                        R.string.mediaSize_japanese_jis_b7, 3583, 5049);
+                        R.string.mediasize_japanese_jis_b7, 3583, 5049);
         /** Japanese JIS B6 media size: 128mm x 182mm (5.049" x 7.165") */
         public static final MediaSize JIS_B6 =
                 new MediaSize("JIS_B6", "android",
-                        R.string.mediaSize_japanese_jis_b6, 5049, 7165);
+                        R.string.mediasize_japanese_jis_b6, 5049, 7165);
         /** Japanese JIS B5 media size: 182mm x 257mm (7.165" x 10.118") */
         public static final MediaSize JIS_B5 =
                 new MediaSize("JIS_B5", "android",
-                        R.string.mediaSize_japanese_jis_b5, 7165, 10118);
+                        R.string.mediasize_japanese_jis_b5, 7165, 10118);
         /** Japanese JIS B4 media size: 257mm x 364mm (10.118" x 14.331") */
         public static final MediaSize JIS_B4 =
                 new MediaSize("JIS_B4", "android",
-                        R.string.mediaSize_japanese_jis_b4, 10118, 14331);
+                        R.string.mediasize_japanese_jis_b4, 10118, 14331);
         /** Japanese JIS B3 media size: 364mm x 515mm (14.331" x 20.276") */
         public static final MediaSize JIS_B3 =
                 new MediaSize("JIS_B3", "android",
-                        R.string.mediaSize_japanese_jis_b3, 14331, 20276);
+                        R.string.mediasize_japanese_jis_b3, 14331, 20276);
         /** Japanese JIS B2 media size: 515mm x 728mm (20.276" x 28.661") */
         public static final MediaSize JIS_B2 =
                 new MediaSize("JIS_B2", "android",
-                        R.string.mediaSize_japanese_jis_b2, 20276, 28661);
+                        R.string.mediasize_japanese_jis_b2, 20276, 28661);
         /** Japanese JIS B1 media size: 728mm x 1030mm (28.661" x 40.551") */
         public static final MediaSize JIS_B1 =
                 new MediaSize("JIS_B1", "android",
-                        R.string.mediaSize_japanese_jis_b1, 28661, 40551);
+                        R.string.mediasize_japanese_jis_b1, 28661, 40551);
         /** Japanese JIS B0 media size: 1030mm x 1456mm (40.551" x 57.323") */
         public static final MediaSize JIS_B0 =
                 new MediaSize("JIS_B0", "android",
-                        R.string.mediaSize_japanese_jis_b0, 40551, 57323);
+                        R.string.mediasize_japanese_jis_b0, 40551, 57323);
 
         /** Japanese JIS Exec media size: 216mm x 330mm (8.504" x 12.992") */
         public static final MediaSize JIS_EXEC =
                 new MediaSize("JIS_EXEC", "android",
-                        R.string.mediaSize_japanese_jis_exec, 8504, 12992);
+                        R.string.mediasize_japanese_jis_exec, 8504, 12992);
 
         /** Japanese Chou4 media size: 90mm x 205mm (3.543" x 8.071") */
         public static final MediaSize JPN_CHOU4 =
                 new MediaSize("JPN_CHOU4", "android",
-                        R.string.mediaSize_japanese_chou4, 3543, 8071);
+                        R.string.mediasize_japanese_chou4, 3543, 8071);
         /** Japanese Chou3 media size: 120mm x 235mm (4.724" x 9.252") */
         public static final MediaSize JPN_CHOU3 =
                 new MediaSize("JPN_CHOU3", "android",
-                        R.string.mediaSize_japanese_chou3, 4724, 9252);
+                        R.string.mediasize_japanese_chou3, 4724, 9252);
         /** Japanese Chou2 media size: 111.1mm x 146mm (4.374" x 5.748") */
         public static final MediaSize JPN_CHOU2 =
                 new MediaSize("JPN_CHOU2", "android",
-                        R.string.mediaSize_japanese_chou2, 4374, 5748);
+                        R.string.mediasize_japanese_chou2, 4374, 5748);
 
         /** Japanese Hagaki media size: 100mm x 148mm (3.937" x 5.827") */
         public static final MediaSize JPN_HAGAKI =
                 new MediaSize("JPN_HAGAKI", "android",
-                        R.string.mediaSize_japanese_hagaki, 3937, 5827);
+                        R.string.mediasize_japanese_hagaki, 3937, 5827);
         /** Japanese Oufuku media size: 148mm x 200mm (5.827" x 7.874") */
         public static final MediaSize JPN_OUFUKU =
                 new MediaSize("JPN_OUFUKU", "android",
-                        R.string.mediaSize_japanese_oufuku, 5827, 7874);
+                        R.string.mediasize_japanese_oufuku, 5827, 7874);
 
         /** Japanese Kahu media size: 240mm x 322.1mm (9.449" x 12.681") */
         public static final MediaSize JPN_KAHU =
                 new MediaSize("JPN_KAHU", "android",
-                        R.string.mediaSize_japanese_kahu, 9449, 12681);
+                        R.string.mediasize_japanese_kahu, 9449, 12681);
         /** Japanese Kaku2 media size: 240mm x 332mm (9.449" x 13.071") */
         public static final MediaSize JPN_KAKU2 =
                 new MediaSize("JPN_KAKU2", "android",
-                        R.string.mediaSize_japanese_kaku2, 9449, 13071);
+                        R.string.mediasize_japanese_kaku2, 9449, 13071);
 
         /** Japanese You4 media size: 105mm x 235mm (4.134" x 9.252") */
         public static final MediaSize JPN_YOU4 =
                 new MediaSize("JPN_YOU4", "android",
-                        R.string.mediaSize_japanese_you4, 4134, 9252);
+                        R.string.mediasize_japanese_you4, 4134, 9252);
 
         private final String mId;
         /**@hide */
