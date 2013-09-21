@@ -817,7 +817,15 @@ public class WebView extends AbsoluteLayout
      */
     public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
         checkThread();
-        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadUrl(extra headers)=" + url);
+        if (DebugFlags.TRACE_API) {
+            StringBuilder headers = new StringBuilder();
+            if (additionalHttpHeaders != null) {
+                for (Map.Entry<String, String> entry : additionalHttpHeaders.entrySet()) {
+                    headers.append(entry.getKey() + ":" + entry.getValue() + "\n");
+                }
+            }
+            Log.d(LOGTAG, "loadUrl(extra headers)=" + url + "\n" + headers);
+        }
         mProvider.loadUrl(url, additionalHttpHeaders);
     }
 
