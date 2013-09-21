@@ -1673,6 +1673,22 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Enables debugging of web contents (HTML / CSS / JavaScript)
+     * loaded into any WebViews of this application. This flag can be enabled
+     * in order to facilitate debugging of web layouts and JavaScript
+     * code running inside WebViews. Please refer to WebView documentation
+     * for the debugging guide.
+     *
+     * The default is false.
+     *
+     * @param enabled whether to enable web contents debugging
+     */
+    public static void setWebContentsDebuggingEnabled(boolean enabled) {
+        checkThread();
+        getFactory().getStatics().setWebContentsDebuggingEnabled(enabled);
+    }
+
+    /**
      * Gets the list of currently loaded plugins.
      *
      * @return the list of currently loaded plugins
