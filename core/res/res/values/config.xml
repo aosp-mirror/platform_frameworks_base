@@ -1245,4 +1245,8 @@
     <!-- Threshold (in ms) under which a screen off / screen on will be considered a reset of the
          transient navigation confirmation prompt.-->
     <integer name="config_transient_navigation_confirmation_panic">5000</integer>
+
+    <!-- For some operators, PDU has garbages. To fix it, need to use valid index -->
+    <integer name="config_valid_wappush_index">-1</integer>
+
 </resources>
