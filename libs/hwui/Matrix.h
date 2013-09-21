@@ -64,8 +64,7 @@ public:
         kTypeAffine = 0x4,
         kTypePerspective = 0x8,
         kTypeRectToRect = 0x10,
-        kTypePositiveScale = 0x20,
-        kTypeUnknown = 0x40,
+        kTypeUnknown = 0x20,
     };
 
     static const int sGeometryMask = 0xf;

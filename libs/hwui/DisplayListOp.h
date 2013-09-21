@@ -772,7 +772,7 @@ public:
         TextureVertex* vertex = &vertices[0];
 
         const bool hasLayer = renderer.hasLayer();
-        bool transformed = false;
+        bool pureTranslate = true;
 
         // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op,
         // and allowing them to be merged in getBatchId()
@@ -782,7 +782,7 @@ public:
             // When we reach multiDraw(), the matrix can be either
             // pureTranslate or simple (translate and/or scale).
             // If the matrix is not pureTranslate, then we have a scale
-            if (state.mMatrix.isPureTranslate()) transformed = true;
+            pureTranslate &= state.mMatrix.isPureTranslate();
 
             Rect texCoords(0, 0, 1, 1);
             ((DrawBitmapOp*) ops[i].op)->mUvMapper.map(texCoords);
@@ -801,7 +801,7 @@ public:
         }
 
         return renderer.drawBitmaps(mBitmap, mEntry, ops.size(), &vertices[0],
-                transformed, bounds, mPaint);
+                pureTranslate, bounds, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const {
