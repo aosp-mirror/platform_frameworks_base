@@ -3834,22 +3834,22 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " " + mAppTransition
                     + " alwaysKeepCurrent=" + alwaysKeepCurrent
                     + " Callers=" + Debug.getCallers(3));
-            if (okToDisplay()) {
-                if (!mAppTransition.isTransitionSet() || mAppTransition.isTransitionNone()) {
+            if (!mAppTransition.isTransitionSet() || mAppTransition.isTransitionNone()) {
+                mAppTransition.setAppTransition(transit);
+            } else if (!alwaysKeepCurrent) {
+                if (transit == AppTransition.TRANSIT_TASK_OPEN
+                        && mAppTransition.isTransitionEqual(
+                                AppTransition.TRANSIT_TASK_CLOSE)) {
+                    // Opening a new task always supersedes a close for the anim.
                     mAppTransition.setAppTransition(transit);
-                } else if (!alwaysKeepCurrent) {
-                    if (transit == AppTransition.TRANSIT_TASK_OPEN
-                            && mAppTransition.isTransitionEqual(
-                                    AppTransition.TRANSIT_TASK_CLOSE)) {
-                        // Opening a new task always supersedes a close for the anim.
-                        mAppTransition.setAppTransition(transit);
-                    } else if (transit == AppTransition.TRANSIT_ACTIVITY_OPEN
-                            && mAppTransition.isTransitionEqual(
-                                AppTransition.TRANSIT_ACTIVITY_CLOSE)) {
-                        // Opening a new activity always supersedes a close for the anim.
-                        mAppTransition.setAppTransition(transit);
-                    }
+                } else if (transit == AppTransition.TRANSIT_ACTIVITY_OPEN
+                        && mAppTransition.isTransitionEqual(
+                            AppTransition.TRANSIT_ACTIVITY_CLOSE)) {
+                    // Opening a new activity always supersedes a close for the anim.
+                    mAppTransition.setAppTransition(transit);
                 }
+            }
+            if (okToDisplay()) {
                 mAppTransition.prepare();
                 mStartingIconInTransition = false;
                 mSkipAppTransitionAnimation = false;
