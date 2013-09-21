@@ -26,6 +26,8 @@ import android.os.RemoteException;
 import android.os.ParcelFileDescriptor;
 import android.content.res.AssetFileDescriptor;
 
+import dalvik.system.CloseGuard;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
@@ -49,6 +51,8 @@ public class ContentProviderClient {
     private final boolean mStable;
     private boolean mReleased;
 
+    private final CloseGuard mGuard = CloseGuard.get();
+
     /**
      * @hide
      */
@@ -58,6 +62,7 @@ public class ContentProviderClient {
         mContentResolver = contentResolver;
         mPackageName = contentResolver.mPackageName;
         mStable = stable;
+        mGuard.open("release");
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
@@ -324,11 +329,19 @@ public class ContentProviderClient {
                 throw new IllegalStateException("Already released");
             }
             mReleased = true;
+            mGuard.close();
             if (mStable) {
                 return mContentResolver.releaseProvider(mContentProvider);
             } else {
                 return mContentResolver.releaseUnstableProvider(mContentProvider);
             }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (mGuard != null) {
+            mGuard.warnIfOpen();
         }
     }
 

@@ -96,25 +96,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
             throw new IllegalStateException(e);
         }
 
-        try {
-            final String rootId = "documents";
-            final File path = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOCUMENTS);
-            mIdToPath.put(rootId, path);
-
-            final RootInfo root = new RootInfo();
-            root.rootId = rootId;
-            root.rootType = Root.ROOT_TYPE_SHORTCUT;
-            root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY
-                    | Root.FLAG_SUPPORTS_SEARCH;
-            root.title = getContext().getString(R.string.root_documents);
-            root.docId = getDocIdForFile(path);
-            mRoots.add(root);
-            mIdToRoot.put(rootId, root);
-        } catch (FileNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
-
         return true;
     }
 
@@ -230,14 +211,23 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public String createDocument(String docId, String mimeType, String displayName)
             throws FileNotFoundException {
         final File parent = getFileForDocId(docId);
-        displayName = validateDisplayName(mimeType, displayName);
+        File file;
 
-        final File file = new File(parent, displayName);
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            file = new File(parent, displayName);
             if (!file.mkdir()) {
                 throw new IllegalStateException("Failed to mkdir " + file);
             }
         } else {
+            displayName = removeExtension(mimeType, displayName);
+            file = new File(parent, addExtension(mimeType, displayName));
+
+            // If conflicting file, try adding counter suffix
+            int n = 0;
+            while (file.exists() && n++ < 32) {
+                file = new File(parent, addExtension(mimeType, displayName + " (" + n + ")"));
+            }
+
             try {
                 if (!file.createNewFile()) {
                     throw new IllegalStateException("Failed to touch " + file);
@@ -354,20 +344,31 @@ public class ExternalStorageProvider extends DocumentsProvider {
         return "application/octet-stream";
     }
 
-    private static String validateDisplayName(String mimeType, String displayName) {
-        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            return displayName;
-        } else {
-            // Try appending meaningful extension if needed
-            if (!mimeType.equals(getTypeForName(displayName))) {
-                final String extension = MimeTypeMap.getSingleton()
-                        .getExtensionFromMimeType(mimeType);
-                if (extension != null) {
-                    displayName += "." + extension;
-                }
+    /**
+     * Remove file extension from name, but only if exact MIME type mapping
+     * exists. This means we can reapply the extension later.
+     */
+    private static String removeExtension(String mimeType, String name) {
+        final int lastDot = name.lastIndexOf('.');
+        if (lastDot >= 0) {
+            final String extension = name.substring(lastDot + 1);
+            final String nameMime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            if (mimeType.equals(nameMime)) {
+                return name.substring(0, lastDot);
             }
-
-            return displayName;
         }
+        return name;
+    }
+
+    /**
+     * Add file extension to name, but only if exact MIME type mapping exists.
+     */
+    private static String addExtension(String mimeType, String name) {
+        final String extension = MimeTypeMap.getSingleton()
+                .getExtensionFromMimeType(mimeType);
+        if (extension != null) {
+            return name + "." + extension;
+        }
+        return name;
     }
 }
