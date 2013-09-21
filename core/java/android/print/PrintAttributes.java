@@ -30,10 +30,9 @@ import com.android.internal.R;
  * This class represents the attributes of a print job.
  */
 public final class PrintAttributes implements Parcelable {
-
-    /** Color mode: Monochrome color scheme, e.g. one color is used. */
+    /** Color mode: Monochrome color scheme, for example one color is used. */
     public static final int COLOR_MODE_MONOCHROME = 1 << 0;
-    /** Color mode: Color color scheme, e.g. many colors are used. */
+    /** Color mode: Color color scheme, for example many colors are used. */
     public static final int COLOR_MODE_COLOR = 1 << 1;
 
     private static final int VALID_COLOR_MODES =
@@ -260,7 +259,10 @@ public final class PrintAttributes implements Parcelable {
     }
 
     /**
-     * This class specifies a supported media size.
+     * This class specifies a supported media size. Media size is the
+     * dimension of the media on which the content is printed. For
+     * example, the {@link #NA_LETTER} media size designates a page
+     * with size 8.5" x 11".
      */
     public static final class MediaSize {
         private static final String LOG_TAG = "MediaSize";
@@ -654,7 +656,8 @@ public final class PrintAttributes implements Parcelable {
         /**
          * Creates a new instance.
          *
-         * @param id The unique media size id.
+         * @param id The unique media size id. It is unique amongst other media sizes
+         *        supported by the printer.
          * @param label The <strong>internationalized</strong> human readable label.
          * @param widthMils The width in mils (thousands of an inch).
          * @param heightMils The height in mils (thousands of an inch).
@@ -699,7 +702,12 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the unique media size id.
+         * Gets the unique media size id. It is unique amongst other media sizes
+         * supported by the printer.
+         * <p>
+         * This id is defined by the client that generated the media size
+         * instance and should not be interpreted by other parties.
+         * </p>
          *
          * @return The unique media size id.
          */
@@ -849,7 +857,11 @@ public final class PrintAttributes implements Parcelable {
     }
 
     /**
-     * This class specifies a supported resolution in dpi (dots per inch).
+     * This class specifies a supported resolution in DPI (dots per inch).
+     * Resolution defines how many points with different color can be placed
+     * on one inch in horizontal or vertical direction of the target media.
+     * For example, a printer with 600DIP can produce higher quality images
+     * the one with 300DPI resolution.
      */
     public static final class Resolution {
         private final String mId;
@@ -860,10 +872,11 @@ public final class PrintAttributes implements Parcelable {
         /**
          * Creates a new instance.
          *
-         * @param id The unique resolution id.
+         * @param id The unique resolution id. It is unique amongst other resolutions
+         *        supported by the printer.
          * @param label The <strong>internationalized</strong> human readable label.
-         * @param horizontalDpi The horizontal resolution in dpi.
-         * @param verticalDpi The vertical resolution in dpi.
+         * @param horizontalDpi The horizontal resolution in DPI (dots per inch).
+         * @param verticalDpi The vertical resolution in DPI (dots per inch).
          *
          * @throws IllegalArgumentException If the id is empty.
          * @throws IllegalArgumentException If the label is empty.
@@ -892,7 +905,12 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the unique resolution id.
+         * Gets the unique resolution id. It is unique amongst other resolutions
+         * supported by the printer.
+         * <p>
+         * This id is defined by the client that generated the resolution
+         * instance and should not be interpreted by other parties.
+         * </p>
          *
          * @return The unique resolution id.
          */
@@ -910,7 +928,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the vertical resolution in dpi.
+         * Gets the horizontal resolution in DPI (dots per inch).
          *
          * @return The horizontal resolution.
          */
@@ -919,7 +937,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the vertical resolution in dpi.
+         * Gets the vertical resolution in DPI (dots per inch).
          *
          * @return The vertical resolution.
          */
@@ -986,7 +1004,9 @@ public final class PrintAttributes implements Parcelable {
     }
 
     /**
-     * This class specifies content margins.
+     * This class specifies content margins. Margins define the white space
+     * around the content where the left margin defines the amount of white
+     * space on the left of the content and so on.
      */
     public static final class Margins {
         public static final Margins NO_MARGINS = new Margins(0,  0,  0,  0);
