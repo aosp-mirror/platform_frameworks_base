@@ -53,6 +53,12 @@ public interface WebViewFactoryProvider {
          * Used for tests only.
          */
          void freeMemoryForTests();
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#setWebContentsDebuggingEnabled(boolean) }
+         */
+        void setWebContentsDebuggingEnabled(boolean enable);
     }
 
     Statics getStatics();
