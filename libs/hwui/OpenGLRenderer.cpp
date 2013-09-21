@@ -2096,7 +2096,7 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
  * The caller is responsible for properly dirtying the current layer.
  */
 status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
-        TextureVertex* vertices, bool transformed, const Rect& bounds, SkPaint* paint) {
+        TextureVertex* vertices, bool pureTranslate, const Rect& bounds, SkPaint* paint) {
     mCaches.activeTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
@@ -2108,7 +2108,7 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry,
     getAlphaAndMode(paint, &alpha, &mode);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(transformed ? FILTER(paint) : GL_NEAREST, true);
+    texture->setFilter(pureTranslate ? GL_NEAREST : FILTER(paint), true);
 
     const float x = (int) floorf(bounds.left + 0.5f);
     const float y = (int) floorf(bounds.top + 0.5f);
