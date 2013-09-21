@@ -137,21 +137,13 @@ final class ProcessList {
 
     // The number of cached at which we don't consider it necessary to do
     // memory trimming.
-    static final int TRIM_CACHED_APPS = (MAX_CACHED_APPS-MAX_EMPTY_APPS)/2;
+    static final int TRIM_CACHED_APPS = ((MAX_CACHED_APPS-MAX_EMPTY_APPS)*2)/3;
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_CRITICAL_THRESHOLD = 3;
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_LOW_THRESHOLD = 5;
-
-    // We put empty content processes after any cached processes that have
-    // been idle for less than 15 seconds.
-    static final long CONTENT_APP_IDLE_OFFSET = 15*1000;
-
-    // We put empty content processes after any cached processes that have
-    // been idle for less than 120 seconds.
-    static final long EMPTY_APP_IDLE_OFFSET = 120*1000;
 
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with the definitions in lmkd.c

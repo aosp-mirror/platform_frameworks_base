@@ -15064,8 +15064,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mLruProcesses.size();
-        boolean allChanged = mProcessStats.setMemFactorLocked(
-                ProcessStats.ADJ_MEM_FACTOR_NORMAL, !mSleeping, now);
+        boolean allChanged = mProcessStats.setMemFactorLocked(memFactor, !mSleeping, now);
         final int trackerMemFactor = mProcessStats.getMemFactorLocked();
         if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
