@@ -17,12 +17,17 @@
 package com.android.server.print;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -40,6 +45,7 @@ import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 
@@ -52,6 +58,9 @@ import java.util.Set;
 public final class PrintManagerService extends IPrintManager.Stub {
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
+
+    private static final String EXTRA_PRINT_SERVICE_COMPONENT_NAME =
+            "EXTRA_PRINT_SERVICE_COMPONENT_NAME";
 
     private final Object mLock = new Object();
 
@@ -395,6 +404,25 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 }
             }
 
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+                Intent intent = new Intent(android.printservice.PrintService.SERVICE_INTERFACE);
+                intent.setPackage(packageName);
+
+                List<ResolveInfo> installedServices = mContext.getPackageManager()
+                        .queryIntentServicesAsUser(intent, PackageManager.GET_SERVICES,
+                                getChangingUserId());
+
+                final int installedServiceCount = installedServices.size();
+                for (int i = 0; i < installedServiceCount; i++) {
+                    ServiceInfo serviceInfo = installedServices.get(i).serviceInfo;
+                    ComponentName component = new ComponentName(serviceInfo.packageName,
+                            serviceInfo.name);
+                    String label = serviceInfo.loadLabel(mContext.getPackageManager()).toString();
+                    showEnableInstalledPrintServiceNotification(component, label);
+                }
+            }
+
             private void persistComponentNamesToSettingLocked(String settingName,
                     Set<ComponentName> componentNames, int userId) {
                 StringBuilder builder = new StringBuilder();
@@ -521,5 +549,29 @@ public final class PrintManagerService extends IPrintManager.Stub {
         }
         throw new IllegalArgumentException("Calling user can be changed to only "
                 + "UserHandle.USER_CURRENT or UserHandle.USER_CURRENT_OR_SELF.");
+    }
+
+    private void showEnableInstalledPrintServiceNotification(ComponentName component,
+            String label) {
+        Intent intent = new Intent(Settings.ACTION_PRINT_SETTINGS);
+        intent.putExtra(EXTRA_PRINT_SERVICE_COMPONENT_NAME, component.flattenToString());
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT, null);
+
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_print)
+                .setContentTitle(mContext.getString(R.string.print_service_installed_title, label))
+                .setContentText(mContext.getString(R.string.print_service_installed_message))
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true)
+                .setShowWhen(true);
+
+        NotificationManager notificationManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String notificationTag = getClass().getName() + ":" + component.flattenToString();
+        notificationManager.notify(notificationTag, 0, builder.build());
     }
 }
