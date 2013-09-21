@@ -1087,7 +1087,9 @@ public class PrintJobConfigActivity extends Activity {
                     }
                 }
 
-                //TODO: Catch the error if start is less grater than the end.
+                // We intentionally do not catch the case of the from page being
+                // greater than the to page. When computing the requested pages
+                // we just swap them if necessary.
 
                 mPageRangeEditText.setError(null);
                 mPrintButton.setEnabled(true);
@@ -1817,8 +1819,7 @@ public class PrintJobConfigActivity extends Activity {
 
                 // Range options
                 PrintDocumentInfo info = mDocument.info;
-                if (info != null && (info.getPageCount() > 0
-                        || info.getPageCount() == PrintDocumentInfo.PAGE_COUNT_UNKNOWN)) {
+                if (info != null && info.getPageCount() > 0) {
                     if (info.getPageCount() == 1) {
                         mRangeOptionsSpinner.setEnabled(false);
                     } else {
