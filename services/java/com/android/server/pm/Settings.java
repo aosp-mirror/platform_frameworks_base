@@ -2158,6 +2158,12 @@ final class Settings {
                 final String name = parser.getAttributeValue(null, ATTR_NAME);
                 final String sourcePackage = parser.getAttributeValue(null, "package");
                 final String ptype = parser.getAttributeValue(null, "type");
+                BasePermission tp = mPermissions.get(name);
+                if (tp != null) {
+                    Log.v(PackageManagerService.TAG, "Permission " + name + " became a builtin " +
+                          "since configuration was generated, skipping it");
+                    continue;
+                }
                 if (name != null && sourcePackage != null) {
                     final boolean dynamic = "dynamic".equals(ptype);
                     final BasePermission bp = new BasePermission(name, sourcePackage,
