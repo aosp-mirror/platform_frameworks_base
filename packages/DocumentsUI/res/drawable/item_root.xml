@@ -15,8 +15,8 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@color/item_root_activated" />
-    <item android:state_activated="true" android:drawable="@color/item_root_activated" />
-    <item android:state_focused="true" android:drawable="@color/item_root_activated" />
+    <item android:state_pressed="true" android:drawable="@color/item_root_pressed" />
+    <item android:state_activated="true" android:drawable="@color/item_root_focused" />
+    <item android:state_focused="true" android:drawable="@color/item_root_focused" />
     <item android:drawable="@android:color/transparent" />
 </selector>
