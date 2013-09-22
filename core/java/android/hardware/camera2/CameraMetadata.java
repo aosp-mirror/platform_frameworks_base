@@ -40,11 +40,19 @@ import java.util.List;
  *
  * @see CameraDevice
  * @see CameraManager
- * @see CameraProperties
+ * @see CameraCharacteristics
  **/
 public abstract class CameraMetadata {
 
     /**
+     * Set a camera metadata field to a value. The field definitions can be
+     * found in {@link CameraCharacteristics}, {@link CaptureResult}, and
+     * {@link CaptureRequest}.
+     *
+     * @param key The metadata field to write.
+     * @param value The value to set the field to, which must be of a matching
+     * type to the key.
+     *
      * @hide
      */
     protected CameraMetadata() {
@@ -54,7 +62,7 @@ public abstract class CameraMetadata {
      * Get a camera metadata field value.
      *
      * <p>The field definitions can be
-     * found in {@link CameraProperties}, {@link CaptureResult}, and
+     * found in {@link CameraCharacteristics}, {@link CaptureResult}, and
      * {@link CaptureRequest}.</p>
      *
      * <p>Querying the value for the same key more than once will return a value
@@ -195,43 +203,43 @@ public abstract class CameraMetadata {
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
     //
-    // Enumeration values for CameraProperties#LENS_FACING
+    // Enumeration values for CameraCharacteristics#LENS_FACING
     //
 
     /**
-     * @see CameraProperties#LENS_FACING
+     * @see CameraCharacteristics#LENS_FACING
      */
     public static final int LENS_FACING_FRONT = 0;
 
     /**
-     * @see CameraProperties#LENS_FACING
+     * @see CameraCharacteristics#LENS_FACING
      */
     public static final int LENS_FACING_BACK = 1;
 
     //
-    // Enumeration values for CameraProperties#LED_AVAILABLE_LEDS
+    // Enumeration values for CameraCharacteristics#LED_AVAILABLE_LEDS
     //
 
     /**
      * <p>
      * android.led.transmit control is used
      * </p>
-     * @see CameraProperties#LED_AVAILABLE_LEDS
+     * @see CameraCharacteristics#LED_AVAILABLE_LEDS
      * @hide
      */
     public static final int LED_AVAILABLE_LEDS_TRANSMIT = 0;
 
     //
-    // Enumeration values for CameraProperties#INFO_SUPPORTED_HARDWARE_LEVEL
+    // Enumeration values for CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
     //
 
     /**
-     * @see CameraProperties#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0;
 
     /**
-     * @see CameraProperties#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
 

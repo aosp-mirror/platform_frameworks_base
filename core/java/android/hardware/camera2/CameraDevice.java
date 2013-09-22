@@ -118,22 +118,22 @@ public interface CameraDevice extends AutoCloseable {
      * this camera device.</p>
      *
      * <p>This ID can be used to query the camera device's {@link
-     * CameraProperties fixed properties} with {@link
-     * CameraManager#getCameraProperties}.</p>
+     * CameraCharacteristics fixed properties} with {@link
+     * CameraManager#getCameraCharacteristics}.</p>
      *
      * <p>This method can be called even if the device has been closed or has encountered
      * a serious error.</p>
      *
      * @return the ID for this camera device
      *
-     * @see CameraManager#getCameraProperties
+     * @see CameraManager#getCameraCharacteristics
      * @see CameraManager#getDeviceIdList
      */
     public String getId();
 
     /**
      * Get the static properties for this camera. These are identical to the
-     * properties returned by {@link CameraManager#getCameraProperties}.
+     * properties returned by {@link CameraManager#getCameraCharacteristics}.
      *
      * @return the static properties of the camera
      *
@@ -141,10 +141,9 @@ public interface CameraDevice extends AutoCloseable {
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
      *
-     * @see CameraManager#getCameraProperties
+     * @see CameraManager#getCameraCharacteristics
      */
-    public CameraProperties getProperties() throws CameraAccessException;
-
+    public CameraCharacteristics getProperties() throws CameraAccessException;
     /**
      * <p>Set up a new output set of Surfaces for the camera device.</p>
      *
@@ -165,7 +164,7 @@ public interface CameraDevice extends AutoCloseable {
      *   the size of the Surface with
      *   {@link android.view.SurfaceHolder#setFixedSize} to be one of the
      *   supported
-     *   {@link CameraProperties#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
      *   before calling {@link android.view.SurfaceHolder#getSurface}.</li>
      *
      * <li>For accessing through an OpenGL texture via a
@@ -173,14 +172,14 @@ public interface CameraDevice extends AutoCloseable {
      *   the SurfaceTexture with
      *   {@link android.graphics.SurfaceTexture#setDefaultBufferSize} to be one
      *   of the supported
-     *   {@link CameraProperties#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
      *   before creating a Surface from the SurfaceTexture with
      *   {@link Surface#Surface}.</li>
      *
      * <li>For recording with {@link android.media.MediaCodec}: Call
      *   {@link android.media.MediaCodec#createInputSurface} after configuring
      *   the media codec to use one of the
-     *   {@link CameraProperties#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}
      *   </li>
      *
      * <li>For recording with {@link android.media.MediaRecorder}: TODO</li>
@@ -189,16 +188,16 @@ public interface CameraDevice extends AutoCloseable {
      *   Create a RenderScript
      *   {@link android.renderscript.Allocation Allocation} with a supported YUV
      *   type, the IO_INPUT flag, and one of the supported
-     *   {@link CameraProperties#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}. Then
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed sizes}. Then
      *   obtain the Surface with
      *   {@link android.renderscript.Allocation#getSurface}.</li>
      *
      * <li>For access to uncompressed or JPEG data in the application: Create a
      *   {@link android.media.ImageReader} object with the desired
-     *   {@link CameraProperties#SCALER_AVAILABLE_FORMATS image format}, and a
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_FORMATS image format}, and a
      *   size from the matching
-     *   {@link CameraProperties#SCALER_AVAILABLE_PROCESSED_SIZES processed},
-     *   {@link CameraProperties#SCALER_AVAILABLE_JPEG_SIZES jpeg}. Then obtain
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_PROCESSED_SIZES processed},
+     *   {@link CameraCharacteristics#SCALER_AVAILABLE_JPEG_SIZES jpeg}. Then obtain
      *   a Surface from it.</li>
      *
      * </ul>
