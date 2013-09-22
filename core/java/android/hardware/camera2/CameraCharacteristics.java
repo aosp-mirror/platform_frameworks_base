@@ -32,7 +32,7 @@ import java.util.List;
  * @see CameraDevice
  * @see CameraManager
  */
-public final class CameraProperties extends CameraMetadata {
+public final class CameraCharacteristics extends CameraMetadata {
 
     private final CameraMetadataNative mProperties;
     private List<Key<?>> mAvailableRequestKeys;
@@ -42,7 +42,7 @@ public final class CameraProperties extends CameraMetadata {
      * Takes ownership of the passed-in properties object
      * @hide
      */
-    public CameraProperties(CameraMetadataNative properties) {
+    public CameraCharacteristics(CameraMetadataNative properties) {
         mProperties = properties;
     }
 
@@ -60,7 +60,7 @@ public final class CameraProperties extends CameraMetadata {
      *
      * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
      *
-     * <p>Note that there is no {@code getAvailableCameraPropertiesKeys()} -- use
+     * <p>Note that there is no {@code getAvailableCameraCharacteristicsKeys()} -- use
      * {@link #getKeys()} instead.</p>
      *
      * @return List of keys supported by this CameraDevice for CaptureRequests.
@@ -81,7 +81,7 @@ public final class CameraProperties extends CameraMetadata {
      *
      * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
      *
-     * <p>Note that there is no {@code getAvailableCameraPropertiesKeys()} -- use
+     * <p>Note that there is no {@code getAvailableCameraCharacteristicsKeys()} -- use
      * {@link #getKeys()} instead.</p>
      *
      * @return List of keys supported by this CameraDevice for CaptureResults.

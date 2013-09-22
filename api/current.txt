@@ -10892,6 +10892,51 @@ package android.hardware.camera2 {
     field public static final int CAMERA_ERROR = 3; // 0x3
   }
 
+  public final class CameraCharacteristics extends android.hardware.camera2.CameraMetadata {
+    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
+    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureRequestKeys();
+    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureResultKeys();
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_STEP;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_EFFECTS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_SCENE_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MAX_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key FLASH_INFO_AVAILABLE;
+    field public static final android.hardware.camera2.CameraMetadata.Key INFO_SUPPORTED_HARDWARE_LEVEL;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_AVAILABLE_THUMBNAIL_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FACING;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_APERTURES;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FILTER_DENSITIES;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_HYPERFOCAL_DISTANCE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_ACTIVE_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_MAX_FRAME_DURATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PHYSICAL_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_SENSITIVITY_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_MAX_ANALOG_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_MAX_FACE_COUNT;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MAX_CURVE_POINTS;
+  }
+
   public abstract interface CameraDevice implements java.lang.AutoCloseable {
     method public abstract int capture(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract int captureBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
@@ -10900,7 +10945,7 @@ package android.hardware.camera2 {
     method public abstract android.hardware.camera2.CaptureRequest.Builder createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
     method public abstract void flush() throws android.hardware.camera2.CameraAccessException;
     method public abstract java.lang.String getId();
-    method public abstract android.hardware.camera2.CameraProperties getProperties() throws android.hardware.camera2.CameraAccessException;
+    method public abstract android.hardware.camera2.CameraCharacteristics getProperties() throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraDevice.CaptureListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void stopRepeating() throws android.hardware.camera2.CameraAccessException;
@@ -10938,8 +10983,8 @@ package android.hardware.camera2 {
 
   public final class CameraManager {
     method public void addAvailabilityListener(android.hardware.camera2.CameraManager.AvailabilityListener, android.os.Handler);
+    method public android.hardware.camera2.CameraCharacteristics getCameraCharacteristics(java.lang.String) throws android.hardware.camera2.CameraAccessException;
     method public java.lang.String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
-    method public android.hardware.camera2.CameraProperties getCameraProperties(java.lang.String) throws android.hardware.camera2.CameraAccessException;
     method public void openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateListener, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public void removeAvailabilityListener(android.hardware.camera2.CameraManager.AvailabilityListener);
   }
@@ -11074,51 +11119,6 @@ package android.hardware.camera2 {
     method public final boolean equals(java.lang.Object);
     method public final java.lang.String getName();
     method public final int hashCode();
-  }
-
-  public final class CameraProperties extends android.hardware.camera2.CameraMetadata {
-    method public T get(android.hardware.camera2.CameraMetadata.Key<T>);
-    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureRequestKeys();
-    method public java.util.List<android.hardware.camera2.CameraMetadata.Key<?>> getAvailableCaptureResultKeys();
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_RANGE;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_STEP;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_AVAILABLE_MODES;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_EFFECTS;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_SCENE_MODES;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_AVAILABLE_MODES;
-    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MAX_REGIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key FLASH_INFO_AVAILABLE;
-    field public static final android.hardware.camera2.CameraMetadata.Key INFO_SUPPORTED_HARDWARE_LEVEL;
-    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_AVAILABLE_THUMBNAIL_SIZES;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FACING;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_APERTURES;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FILTER_DENSITIES;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_HYPERFOCAL_DISTANCE;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
-    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
-    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_ACTIVE_ARRAY_SIZE;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_MAX_FRAME_DURATION;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PHYSICAL_SIZE;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_SENSITIVITY_RANGE;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_MAX_ANALOG_SENSITIVITY;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_MAX_FACE_COUNT;
-    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MAX_CURVE_POINTS;
   }
 
   public class CaptureFailure {

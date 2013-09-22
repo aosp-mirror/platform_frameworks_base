@@ -166,7 +166,7 @@ public final class CameraManager {
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    public CameraProperties getCameraProperties(String cameraId)
+    public CameraCharacteristics getCameraCharacteristics(String cameraId)
             throws CameraAccessException {
 
         synchronized (mLock) {
@@ -179,7 +179,7 @@ public final class CameraManager {
         // TODO: implement and call a service function to get the capabilities on C++ side
 
         // TODO: get properties from service
-        return new CameraProperties(new CameraMetadataNative());
+        return new CameraCharacteristics(new CameraMetadataNative());
     }
 
     /**

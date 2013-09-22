@@ -128,7 +128,7 @@ public final class Face {
      * Bounds of the face.
      *
      * <p>A rectangle relative to the sensor's
-     * {@link CameraProperties#SENSOR_INFO_ACTIVE_ARRAY_SIZE}, with (0,0)
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}, with (0,0)
      * representing the top-left corner of the active array rectangle.</p>
      *
      * <p>There is no constraints on the the Rectangle value other than it
