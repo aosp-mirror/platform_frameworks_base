@@ -58,6 +58,5 @@ public class DirectoryView extends FrameLayout {
     public void setPosition(float position) {
         mPosition = position;
         setX((mWidth > 0) ? (mPosition * mWidth) : 0);
-        setAlpha(1f - position);
     }
 }

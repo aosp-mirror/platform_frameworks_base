@@ -16,5 +16,6 @@
 
 <resources>
     <color name="chip">#ddd</color>
-    <color name="item_root_activated">#cccccc</color>
+    <color name="item_root_pressed">#33cccccc</color>
+    <color name="item_root_focused">#66cccccc</color>
 </resources>
