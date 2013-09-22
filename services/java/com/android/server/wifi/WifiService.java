@@ -455,9 +455,7 @@ public final class WifiService extends IWifiManager.Stub {
 
     private void resolveBatchedScannersLocked() {
         BatchedScanSettings setting = new BatchedScanSettings();
-        setting.scanIntervalSec = BatchedScanSettings.DEFAULT_INTERVAL_SEC;
         int responsibleUid = 0;
-        setting.channelSet = new ArrayList<String>();
 
         if (mBatchedScanners.size() == 0) {
             mWifiStateMachine.setBatchedScanSettings(null, 0);
@@ -472,7 +470,7 @@ public final class WifiService extends IWifiManager.Stub {
             }
             if (s.maxApPerScan != BatchedScanSettings.UNSPECIFIED &&
                     (setting.maxApPerScan == BatchedScanSettings.UNSPECIFIED ||
-                     s.maxApPerScan > setting.maxApPerScan)) {
+                    s.maxApPerScan > setting.maxApPerScan)) {
                 setting.maxApPerScan = s.maxApPerScan;
             }
             if (s.scanIntervalSec != BatchedScanSettings.UNSPECIFIED &&
@@ -481,31 +479,25 @@ public final class WifiService extends IWifiManager.Stub {
                 responsibleUid = r.uid;
             }
             if (s.maxApForDistance != BatchedScanSettings.UNSPECIFIED &&
-                    s.maxApForDistance > setting.maxApForDistance) {
+                    (setting.maxApForDistance == BatchedScanSettings.UNSPECIFIED ||
+                    s.maxApForDistance > setting.maxApForDistance)) {
                 setting.maxApForDistance = s.maxApForDistance;
             }
-            if (s.channelSet != null) {
-                for (String i : s.channelSet) {
-                    if (setting.channelSet.contains(i) == false) setting.channelSet.add(i);
+            if (s.channelSet != null && s.channelSet.size() != 0) {
+                if (setting.channelSet == null || setting.channelSet.size() != 0) {
+                    if (setting.channelSet == null) setting.channelSet = new ArrayList<String>();
+                    for (String i : s.channelSet) {
+                        if (setting.channelSet.contains(i) == false) setting.channelSet.add(i);
+                    }
+                } // else, ignore the constraint - we already use all channels
+            } else {
+                if (setting.channelSet == null || setting.channelSet.size() != 0) {
+                    setting.channelSet = new ArrayList<String>();
                 }
             }
         }
-        if (setting.channelSet.size() == 0) setting.channelSet = null;
-        if (setting.scanIntervalSec < BatchedScanSettings.MIN_INTERVAL_SEC) {
-            setting.scanIntervalSec = BatchedScanSettings.MIN_INTERVAL_SEC;
-        }
-        if (setting.maxScansPerBatch == BatchedScanSettings.UNSPECIFIED) {
-            setting.maxScansPerBatch = BatchedScanSettings.DEFAULT_SCANS_PER_BATCH;
-        }
-        if (setting.maxApPerScan == BatchedScanSettings.UNSPECIFIED) {
-            setting.maxApPerScan = BatchedScanSettings.DEFAULT_AP_PER_SCAN;
-        }
-        if (setting.scanIntervalSec == BatchedScanSettings.UNSPECIFIED) {
-            setting.scanIntervalSec = BatchedScanSettings.DEFAULT_INTERVAL_SEC;
-        }
-        if (setting.maxApForDistance == BatchedScanSettings.UNSPECIFIED) {
-            setting.maxApForDistance = BatchedScanSettings.DEFAULT_AP_FOR_DISTANCE;
-        }
+
+        setting.constrain();
         mWifiStateMachine.setBatchedScanSettings(setting, responsibleUid);
     }
 
