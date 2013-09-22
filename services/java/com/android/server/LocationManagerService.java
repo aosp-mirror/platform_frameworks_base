@@ -223,8 +223,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
 
             // Monitor for app ops mode changes.
-            AppOpsManager.Callback callback = new AppOpsManager.Callback() {
-                public void opChanged(int op, String packageName) {
+            AppOpsManager.OnOpChangedListener callback
+                    = new AppOpsManager.OnOpChangedInternalListener() {
+                public void onOpChanged(int op, String packageName) {
                     synchronized (mLock) {
                         for (Receiver receiver : mReceivers.values()) {
                             receiver.updateMonitoring(true);

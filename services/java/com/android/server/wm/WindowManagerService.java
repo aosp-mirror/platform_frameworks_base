@@ -754,9 +754,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mBatteryStats = BatteryStatsService.getService();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         mAppOps.startWatchingMode(AppOpsManager.OP_SYSTEM_ALERT_WINDOW, null,
-                new AppOpsManager.Callback() {
+                new AppOpsManager.OnOpChangedInternalListener() {
                     @Override
-                    public void opChanged(int op, String packageName) {
+                    public void onOpChanged(int op, String packageName) {
                         updateAppOpsState();
                     }
                 }

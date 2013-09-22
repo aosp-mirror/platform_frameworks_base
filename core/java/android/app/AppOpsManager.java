@@ -23,6 +23,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -32,50 +33,76 @@ import android.os.Process;
 import android.os.RemoteException;
 
 /**
- * API for interacting with "application operation" tracking.  Allows you to:
+ * API for interacting with "application operation" tracking.
  *
- * <ul>
- * <li> Note when operations are happening, and find out if they are allowed for the current
- * caller.</li>
- * <li> Disallow specific apps from doing specific operations.</li>
- * <li> Collect all of the current information about operations that have been executed or are not
- * being allowed.</li>
- * <li> Monitor for changes in whether an operation is allowed.</li>
- * </ul>
- *
- * <p>Each operation is identified by a single integer; these integers are a fixed set of
- * operations, enumerated by the OP_* constants.
- *
- * <p></p>When checking operations, the result is a "mode" integer indicating the current setting
- * for the operation under that caller: MODE_ALLOWED, MODE_IGNORED (don't execute the operation but
- * fake its behavior enough so that the caller doesn't crash), MODE_ERRORED (through a
- * SecurityException back to the caller; the normal operation calls will do this for you).
+ * <p>This API is not generally intended for third party application developers; most
+ * features are only available to system applicatins.  Obtain an instance of it through
+ * {@link Context#getSystemService(String) Context.getSystemService} with
+ * {@link Context#APP_OPS_SERVICE Context.APP_OPS_SERVICE}.</p>
  */
 public class AppOpsManager {
+    /**
+     * <p>App ops allows callers to:</p>
+     *
+     * <ul>
+     * <li> Note when operations are happening, and find out if they are allowed for the current
+     * caller.</li>
+     * <li> Disallow specific apps from doing specific operations.</li>
+     * <li> Collect all of the current information about operations that have been executed or
+     * are not being allowed.</li>
+     * <li> Monitor for changes in whether an operation is allowed.</li>
+     * </ul>
+     *
+     * <p>Each operation is identified by a single integer; these integers are a fixed set of
+     * operations, enumerated by the OP_* constants.
+     *
+     * <p></p>When checking operations, the result is a "mode" integer indicating the current
+     * setting for the operation under that caller: MODE_ALLOWED, MODE_IGNORED (don't execute
+     * the operation but fake its behavior enough so that the caller doesn't crash),
+     * MODE_ERRORED (throw a SecurityException back to the caller; the normal operation calls
+     * will do this for you).
+     */
+
     final Context mContext;
     final IAppOpsService mService;
-    final ArrayMap<Callback, IAppOpsCallback> mModeWatchers
-            = new ArrayMap<Callback, IAppOpsCallback>();
+    final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers
+            = new ArrayMap<OnOpChangedListener, IAppOpsCallback>();
 
     static IBinder sToken;
 
+    /**
+     * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
+     * allowed to perform the given operation.
+     */
     public static final int MODE_ALLOWED = 0;
+
+    /**
+     * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
+     * not allowed to perform the given operation, and this attempt should
+     * <em>silently fail</em> (it should not cause the app to crash).
+     */
     public static final int MODE_IGNORED = 1;
+
+    /**
+     * Result from {@link #checkOpNoThrow}, {@link #noteOpNoThrow}, {@link #startOpNoThrow}: the
+     * given caller is not allowed to perform the given operation, and this attempt should
+     * cause it to have a fatal error, typically a {@link SecurityException}.
+     */
     public static final int MODE_ERRORED = 2;
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpNames, sOpPerms, sOpDefaultMode
+    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
-    /** No operation specified. */
+    /** @hide No operation specified. */
     public static final int OP_NONE = -1;
-    /** Access to coarse location information. */
+    /** @hide Access to coarse location information. */
     public static final int OP_COARSE_LOCATION = 0;
-    /** Access to fine location information. */
+    /** @hide Access to fine location information. */
     public static final int OP_FINE_LOCATION = 1;
-    /** Causing GPS to run. */
+    /** @hide Causing GPS to run. */
     public static final int OP_GPS = 2;
     /** @hide */
     public static final int OP_VIBRATE = 3;
@@ -153,12 +180,25 @@ public class AppOpsManager {
     public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
     /** @hide */
     public static final int OP_WAKE_LOCK = 40;
-    /** Continually monitoring location data. */
+    /** @hide Continually monitoring location data. */
     public static final int OP_MONITOR_LOCATION = 41;
-    /** Continually monitoring location data with a relatively high power request. */
+    /** @hide Continually monitoring location data with a relatively high power request. */
     public static final int OP_MONITOR_HIGH_POWER_LOCATION = 42;
     /** @hide */
     public static final int _NUM_OP = 43;
+
+    /** Access to coarse location information. */
+    public static final String OPSTR_COARSE_LOCATION =
+            "android:coarse_location";
+    /** Access to fine location information. */
+    public static final String OPSTR_FINE_LOCATION =
+            "android:fine_location";
+    /** Continually monitoring location data. */
+    public static final String OPSTR_MONITOR_LOCATION
+            = "android:monitor_location";
+    /** Continually monitoring location data with a relatively high power request. */
+    public static final String OPSTR_MONITOR_HIGH_POWER_LOCATION
+            = "android:monitor_location_high_power";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -212,6 +252,56 @@ public class AppOpsManager {
             OP_WAKE_LOCK,
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
+    };
+
+    /**
+     * This maps each operation to the public string constant for it.
+     * If it doesn't have a public string constant, it maps to null.
+     */
+    private static String[] sOpToString = new String[] {
+            OPSTR_COARSE_LOCATION,
+            OPSTR_FINE_LOCATION,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            OPSTR_MONITOR_LOCATION,
+            OPSTR_MONITOR_HIGH_POWER_LOCATION,
     };
 
     /**
@@ -363,6 +453,36 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
     };
 
+    private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();
+
+    static {
+        if (sOpToSwitch.length != _NUM_OP) {
+            throw new IllegalStateException("sOpStringLength " + sOpToSwitch.length
+                    + " should be " + _NUM_OP);
+        }
+        if (sOpToString.length != _NUM_OP) {
+            throw new IllegalStateException("sOpStringLength " + sOpToString.length
+                    + " should be " + _NUM_OP);
+        }
+        if (sOpNames.length != _NUM_OP) {
+            throw new IllegalStateException("sOpStringLength " + sOpNames.length
+                    + " should be " + _NUM_OP);
+        }
+        if (sOpPerms.length != _NUM_OP) {
+            throw new IllegalStateException("sOpStringLength " + sOpPerms.length
+                    + " should be " + _NUM_OP);
+        }
+        if (sOpDefaultMode.length != _NUM_OP) {
+            throw new IllegalStateException("sOpStringLength " + sOpDefaultMode.length
+                    + " should be " + _NUM_OP);
+        }
+        for (int i=0; i<_NUM_OP; i++) {
+            if (sOpToString[i] != null) {
+                sOpStrToOp.put(sOpToString[i], i);
+            }
+        }
+    }
+
     /**
      * Retrieve the op switch that controls the given operation.
      * @hide
@@ -373,6 +493,7 @@ public class AppOpsManager {
 
     /**
      * Retrieve a non-localized name for the operation, for debugging output.
+     * @hide
      */
     public static String opToName(int op) {
         if (op == OP_NONE) return "NONE";
@@ -537,8 +658,18 @@ public class AppOpsManager {
     /**
      * Callback for notification of changes to operation state.
      */
-    public interface Callback {
-        public void opChanged(int op, String packageName);
+    public interface OnOpChangedListener {
+        public void onOpChanged(String op, String packageName);
+    }
+
+    /**
+     * Callback for notification of changes to operation state.
+     * This allows you to see the raw op codes instead of strings.
+     * @hide
+     */
+    public static class OnOpChangedInternalListener implements OnOpChangedListener {
+        public void onOpChanged(String op, String packageName) { }
+        public void onOpChanged(int op, String packageName) { }
     }
 
     AppOpsManager(Context context, IAppOpsService service) {
@@ -598,13 +729,18 @@ public class AppOpsManager {
      * @param packageName The name of the application to monitor.
      * @param callback Where to report changes.
      */
-    public void startWatchingMode(int op, String packageName, final Callback callback) {
+    public void startWatchingMode(int op, String packageName, final OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb == null) {
                 cb = new IAppOpsCallback.Stub() {
                     public void opChanged(int op, String packageName) {
-                        callback.opChanged(op, packageName);
+                        if (callback instanceof OnOpChangedInternalListener) {
+                            ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
+                        }
+                        if (sOpToString[op] != null) {
+                            callback.onOpChanged(sOpToString[op], packageName);
+                        }
                     }
                 };
                 mModeWatchers.put(callback, cb);
@@ -620,7 +756,7 @@ public class AppOpsManager {
      * Stop monitoring that was previously started with {@link #startWatchingMode}.  All
      * monitoring associated with this callback will be removed.
      */
-    public void stopWatchingMode(Callback callback) {
+    public void stopWatchingMode(OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb != null) {
@@ -634,6 +770,106 @@ public class AppOpsManager {
 
     private String buildSecurityExceptionMsg(int op, int uid, String packageName) {
         return packageName + " from uid " + uid + " not allowed to perform " + sOpNames[op];
+    }
+
+    private int strOpToOp(String op) {
+        Integer val = sOpStrToOp.get(op);
+        if (val == null) {
+            throw new IllegalArgumentException("Unknown operation string: " + op);
+        }
+        return val;
+    }
+
+    /**
+     * Do a quick check for whether an application might be able to perform an operation.
+     * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String)}
+     * or {@link #startOp(String, int, String)} for your actual security checks, which also
+     * ensure that the given uid and package name are consistent.  This function can just be
+     * used for a quick check to see if an operation has been disabled for the application,
+     * as an early reject of some work.  This does not modify the time stamp or other data
+     * about the operation.
+     * @param op The operation to check.  One of the OPSTR_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
+    public int checkOp(String op, int uid, String packageName) {
+        return checkOp(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Like {@link #checkOp but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     */
+    public int checkOpNoThrow(String op, int uid, String packageName) {
+        return checkOpNoThrow(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Make note of an application performing an operation.  Note that you must pass
+     * in both the uid and name of the application to be checked; this function will verify
+     * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+     * succeeds, the last execution time of the operation for this app will be updated to
+     * the current time.
+     * @param op The operation to note.  One of the OPSTR_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
+    public int noteOp(String op, int uid, String packageName) {
+        return noteOp(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     */
+    public int noteOpNoThrow(String op, int uid, String packageName) {
+        return noteOpNoThrow(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Report that an application has started executing a long-running operation.  Note that you
+     * must pass in both the uid and name of the application to be checked; this function will
+     * verify that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+     * succeeds, the last execution time of the operation for this app will be updated to
+     * the current time and the operation will be marked as "running".  In this case you must
+     * later call {@link #finishOp(String, int, String)} to report when the application is no
+     * longer performing the operation.
+     * @param op The operation to start.  One of the OPSTR_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
+    public int startOp(String op, int uid, String packageName) {
+        return startOp(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     */
+    public int startOpNoThrow(String op, int uid, String packageName) {
+        return startOpNoThrow(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Report that an application is no longer performing an operation that had previously
+     * been started with {@link #startOp(String, int, String)}.  There is no validation of input
+     * or result; the parameters supplied here must be the exact same ones previously passed
+     * in when starting the operation.
+     */
+    public void finishOp(String op, int uid, String packageName) {
+        finishOp(strOpToOp(op), uid, packageName);
     }
 
     /**
@@ -651,6 +887,7 @@ public class AppOpsManager {
      * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
      * causing the app to crash).
      * @throws SecurityException If the app has been configured to crash on this op.
+     * @hide
      */
     public int checkOp(int op, int uid, String packageName) {
         try {
@@ -667,6 +904,7 @@ public class AppOpsManager {
     /**
      * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
+     * @hide
      */
     public int checkOpNoThrow(int op, int uid, String packageName) {
         try {
@@ -706,6 +944,7 @@ public class AppOpsManager {
      * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
      * causing the app to crash).
      * @throws SecurityException If the app has been configured to crash on this op.
+     * @hide
      */
     public int noteOp(int op, int uid, String packageName) {
         try {
@@ -722,6 +961,7 @@ public class AppOpsManager {
     /**
      * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
+     * @hide
      */
     public int noteOpNoThrow(int op, int uid, String packageName) {
         try {
@@ -766,6 +1006,7 @@ public class AppOpsManager {
      * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
      * causing the app to crash).
      * @throws SecurityException If the app has been configured to crash on this op.
+     * @hide
      */
     public int startOp(int op, int uid, String packageName) {
         try {
@@ -782,6 +1023,7 @@ public class AppOpsManager {
     /**
      * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
+     * @hide
      */
     public int startOpNoThrow(int op, int uid, String packageName) {
         try {
@@ -801,6 +1043,7 @@ public class AppOpsManager {
      * been started with {@link #startOp(int, int, String)}.  There is no validation of input
      * or result; the parameters supplied here must be the exact same ones previously passed
      * in when starting the operation.
+     * @hide
      */
     public void finishOp(int op, int uid, String packageName) {
         try {
@@ -809,6 +1052,7 @@ public class AppOpsManager {
         }
     }
 
+    /** @hide */
     public void finishOp(int op) {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
     }
