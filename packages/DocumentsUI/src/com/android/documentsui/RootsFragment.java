@@ -253,6 +253,7 @@ public class RootsFragment extends Fragment {
     }
 
     private static class SectionedRootsAdapter extends SectionedListAdapter {
+        private final RootsAdapter mRecent;
         private final RootsAdapter mServices;
         private final RootsAdapter mShortcuts;
         private final RootsAdapter mDevices;
@@ -260,12 +261,18 @@ public class RootsFragment extends Fragment {
 
         public SectionedRootsAdapter(
                 Context context, Collection<RootInfo> roots, Intent includeApps) {
+            mRecent = new RootsAdapter(context);
             mServices = new RootsAdapter(context);
             mShortcuts = new RootsAdapter(context);
             mDevices = new RootsAdapter(context);
             mApps = new AppsAdapter(context);
 
             for (RootInfo root : roots) {
+                if (root.authority == null) {
+                    mRecent.add(root);
+                    continue;
+                }
+
                 switch (root.rootType) {
                     case Root.ROOT_TYPE_SERVICE:
                         mServices.add(root);
@@ -297,14 +304,17 @@ public class RootsFragment extends Fragment {
             mShortcuts.sort(comp);
             mDevices.sort(comp);
 
+            if (mRecent.getCount() > 0) {
+                addSection(mRecent);
+            }
+            if (mServices.getCount() > 0) {
+                addSection(mServices);
+            }
             if (mShortcuts.getCount() > 0) {
                 addSection(mShortcuts);
             }
             if (mDevices.getCount() > 0) {
                 addSection(mDevices);
-            }
-            if (mServices.getCount() > 0) {
-                addSection(mServices);
             }
             if (mApps.getCount() > 0) {
                 addSection(mApps);
@@ -315,12 +325,6 @@ public class RootsFragment extends Fragment {
     public static class RootComparator implements Comparator<RootInfo> {
         @Override
         public int compare(RootInfo lhs, RootInfo rhs) {
-            if (lhs.authority == null) {
-                return -1;
-            } else if (rhs.authority == null) {
-                return 1;
-            }
-
             final int score = DocumentInfo.compareToIgnoreCaseNullable(lhs.title, rhs.title);
             if (score != 0) {
                 return score;

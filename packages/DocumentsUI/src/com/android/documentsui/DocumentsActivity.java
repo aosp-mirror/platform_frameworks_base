@@ -87,14 +87,16 @@ import libcore.io.IoUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
     public static final String TAG = "Documents";
 
     private static final String EXTRA_STATE = "state";
+
+    private static final int CODE_FORWARD = 42;
 
     private boolean mShowAsDialog;
 
@@ -843,11 +845,24 @@ public class DocumentsActivity extends Activity {
 
     public void onAppPicked(ResolveInfo info) {
         final Intent intent = new Intent(getIntent());
-        intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_FORWARD_RESULT);
         intent.setComponent(new ComponentName(
                 info.activityInfo.applicationInfo.packageName, info.activityInfo.name));
-        startActivity(intent);
-        finish();
+        startActivityForResult(intent, CODE_FORWARD);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult() code=" + resultCode);
+
+        // Only relay back results when not canceled; otherwise stick around to
+        // let the user pick another app/backend.
+        if (requestCode == CODE_FORWARD && resultCode != RESULT_CANCELED) {
+            setResult(resultCode, data);
+            finish();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     public void onDocumentPicked(DocumentInfo doc) {
