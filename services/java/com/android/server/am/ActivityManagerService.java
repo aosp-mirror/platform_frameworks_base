@@ -2230,7 +2230,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mHandler.sendMessage(msg);
     }
 
-    private final int updateLruProcessInternalLocked(ProcessRecord app, long now, int index) {
+    private final int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
+            String what, Object obj, ProcessRecord srcApp) {
         app.lastActivityTime = now;
 
         if (app.activities.size() > 0) {
@@ -2241,7 +2242,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui < 0) {
             throw new IllegalStateException("Adding dependent process " + app
-                    + " not on LRU list!");
+                    + " not on LRU list: " + what + obj + " from " + srcApp);
         }
 
         if (lrui >= mLruProcessActivityStart) {
@@ -2309,13 +2310,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (cr.binding != null && cr.binding.service != null
                     && cr.binding.service.app != null
                     && cr.binding.service.app.lruSeq != mLruSeq) {
-                nextIndex = updateLruProcessInternalLocked(cr.binding.service.app, now, nextIndex);
+                nextIndex = updateLruProcessInternalLocked(cr.binding.service.app, now, nextIndex,
+                        "service connection", cr, app);
             }
         }
         for (int j=app.conProviders.size()-1; j>=0; j--) {
             ContentProviderRecord cpr = app.conProviders.get(j).provider;
             if (cpr.proc != null && cpr.proc.lruSeq != mLruSeq) {
-                nextIndex = updateLruProcessInternalLocked(cpr.proc, now, nextIndex);
+                nextIndex = updateLruProcessInternalLocked(cpr.proc, now, nextIndex,
+                        "provider reference", cpr, app);
             }
         }
 
@@ -3867,7 +3870,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // 0 == show dialog, 1 = keep waiting, -1 = kill process immediately
                 int res = mController.appNotResponding(app.processName, app.pid, info.toString());
                 if (res != 0) {
-                    if (res < 0 && app.pid != MY_PID) Process.killProcess(app.pid);
+                    if (res < 0 && app.pid != MY_PID) {
+                        Process.killProcess(app.pid);
+                    } else {
+                        synchronized (this) {
+                            mServices.scheduleServiceTimeoutLocked(app);
+                        }
+                    }
                     return;
                 }
             } catch (RemoteException e) {

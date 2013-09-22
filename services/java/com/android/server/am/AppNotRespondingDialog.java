@@ -128,6 +128,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog {
                         if (app.anrDialog == AppNotRespondingDialog.this) {
                             app.anrDialog = null;
                         }
+                        mService.mServices.scheduleServiceTimeoutLocked(app);
                     }
                     break;
             }

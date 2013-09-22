@@ -253,6 +253,7 @@ final class ServiceRecord extends Binder {
                     pw.print(" executeFg="); pw.print(executeFg);
                     pw.print(" executingStart=");
                     TimeUtils.formatDuration(executingStart, now, pw);
+                    pw.println();
         }
         if (crashCount != 0 || restartCount != 0
                 || restartDelay != 0 || nextRestartTime != 0) {
