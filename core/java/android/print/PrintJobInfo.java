@@ -138,6 +138,9 @@ public final class PrintJobInfo implements Parcelable {
     /** Optional tag assigned by a print service.*/
     private String mTag;
 
+    /** The wall time when the print job was created. */
+    private long mCreationTime;
+
     /** How many copies to print. */
     private int mCopies;
 
@@ -168,6 +171,7 @@ public final class PrintJobInfo implements Parcelable {
         mAppId = other.mAppId;
         mUserId = other.mUserId;
         mTag = other.mTag;
+        mCreationTime = other.mCreationTime;
         mCopies = other.mCopies;
         mStateReason = other.mStateReason;
         mPageRanges = other.mPageRanges;
@@ -184,6 +188,7 @@ public final class PrintJobInfo implements Parcelable {
         mAppId = parcel.readInt();
         mUserId = parcel.readInt();
         mTag = parcel.readString();
+        mCreationTime = parcel.readLong();
         mCopies = parcel.readInt();
         mStateReason = parcel.readString();
         if (parcel.readInt() == 1) {
@@ -368,6 +373,29 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
+     * Gets the wall time in millisecond when this print job was created.
+     *
+     * @return The creation time in milliseconds.
+     */
+    public long getCreationTime() {
+        return mCreationTime;
+    }
+
+    /**
+     * Sets the wall time in milliseconds when this print job was created.
+     *
+     * @param creationTime The creation time in milliseconds.
+     *
+     * @hide
+     */
+    public void setCreationTime(long creationTime) {
+        if (creationTime < 0) {
+            throw new IllegalArgumentException("creationTime must be non-negative.");
+        }
+        mCreationTime = creationTime;
+    }
+
+    /**
      * Gets the number of copies.
      *
      * @return The number of copies or zero if not set.
@@ -491,6 +519,7 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mAppId);
         parcel.writeInt(mUserId);
         parcel.writeString(mTag);
+        parcel.writeLong(mCreationTime);
         parcel.writeInt(mCopies);
         parcel.writeString(mStateReason);
         if (mPageRanges != null) {
@@ -522,6 +551,7 @@ public final class PrintJobInfo implements Parcelable {
         builder.append(", status: ").append(stateToString(mState));
         builder.append(", printer: " + mPrinterId);
         builder.append(", tag: ").append(mTag);
+        builder.append(", creationTime: " + mCreationTime);
         builder.append(", copies: ").append(mCopies);
         builder.append(", attributes: " + (mAttributes != null
                 ? mAttributes.toString() : null));
@@ -537,7 +567,7 @@ public final class PrintJobInfo implements Parcelable {
     public static String stateToString(int state) {
         switch (state) {
             case STATE_CREATED: {
-                return "STATUS_CREATED";
+                return "STATE_CREATED";
             }
             case STATE_QUEUED: {
                 return "STATE_QUEUED";
@@ -546,20 +576,19 @@ public final class PrintJobInfo implements Parcelable {
                 return "STATE_STARTED";
             }
             case STATE_FAILED: {
-                return "STATUS_FAILED";
+                return "STATE_FAILED";
             }
             case STATE_COMPLETED: {
-                return "STATUS_COMPLETED";
+                return "STATE_COMPLETED";
             }
             case STATE_CANCELED: {
-                return "STATUS_CANCELED";
+                return "STATE_CANCELED";
             }
             default: {
-                return "STATUS_UNKNOWN";
+                return "STATE_UNKNOWN";
             }
         }
     }
-
 
     public static final Parcelable.Creator<PrintJobInfo> CREATOR =
             new Creator<PrintJobInfo>() {
