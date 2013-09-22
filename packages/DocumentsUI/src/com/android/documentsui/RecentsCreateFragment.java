@@ -195,12 +195,9 @@ public class RecentsCreateFragment extends Fragment {
 
             final SpannableStringBuilder builder = new SpannableStringBuilder();
             builder.append(stack.root.title);
-            appendDrawable(builder, crumb);
             for (int i = stack.size() - 2; i >= 0; i--) {
+                appendDrawable(builder, crumb);
                 builder.append(stack.get(i).displayName);
-                if (i > 0) {
-                    appendDrawable(builder, crumb);
-                }
             }
             title.setText(builder);
             title.setEllipsize(TruncateAt.MIDDLE);

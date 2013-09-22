@@ -52,6 +52,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
+    private static final boolean LOGD = true;
 
     public static final int MAX_OUTSTANDING_RECENTS = 2;
 
@@ -63,7 +64,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     /**
      * Maximum documents from a single root.
      */
-    public static final int MAX_DOCS_FROM_ROOT = 24;
+    public static final int MAX_DOCS_FROM_ROOT = 64;
 
     private static final ExecutorService sExecutor = buildExecutor();
 
@@ -192,6 +193,11 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
                     Log.w(TAG, "Failed to load " + task.authority + ", " + task.rootId, e);
                 }
             }
+        }
+
+        if (LOGD) {
+            Log.d(TAG, "Found " + cursors.size() + " of " + mTasks.size() + " recent queries done");
+            Log.d(TAG, sExecutor.toString());
         }
 
         final DirectoryResult result = new DirectoryResult();

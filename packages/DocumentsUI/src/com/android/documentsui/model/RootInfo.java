@@ -185,7 +185,7 @@ public class RootInfo implements Durable, Parcelable {
 
     @Override
     public String toString() {
-        return "Root{title=" + title + ", rootId=" + rootId + "}";
+        return "Root{authority=" + authority + ", rootId=" + rootId + ", title=" + title + "}";
     }
 
     public Drawable loadIcon(Context context) {
