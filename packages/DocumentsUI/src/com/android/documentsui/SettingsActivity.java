@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.view.MenuItem;
 
 public class SettingsActivity extends Activity {
     private static final String KEY_ADVANCED_DEVICES = "advancedDevices";
@@ -47,7 +48,17 @@ public class SettingsActivity extends Activity {
         final ActionBar bar = getActionBar();
         if (bar != null) {
             bar.setDisplayShowHomeEnabled(false);
+            bar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static class SettingsFragment extends PreferenceFragment {

@@ -179,6 +179,8 @@ public class RootsCache {
             final Multimap<String, RootInfo> roots = ArrayListMultimap.create();
             final HashSet<String> stoppedAuthorities = Sets.newHashSet();
 
+            roots.put(mRecentsRoot.authority, mRecentsRoot);
+
             final ContentResolver resolver = mContext.getContentResolver();
             final PackageManager pm = mContext.getPackageManager();
             final List<ProviderInfo> providers = pm.queryContentProviders(
