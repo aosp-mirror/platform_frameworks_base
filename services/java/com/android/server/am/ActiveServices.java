@@ -1009,23 +1009,15 @@ public final class ActiveServices {
                 stracker.setExecuting(true, mAm.mProcessStats.getMemFactorLocked(), now);
             }
             if (r.app != null) {
-                if (r.app.executingServices.size() == 0) {
-                    Message msg = mAm.mHandler.obtainMessage(
-                            ActivityManagerService.SERVICE_TIMEOUT_MSG);
-                    msg.obj = r.app;
-                    mAm.mHandler.sendMessageAtTime(msg,
-                            fg ? (now+SERVICE_TIMEOUT) : (now+ SERVICE_BACKGROUND_TIMEOUT));
-                }
                 r.app.executingServices.add(r);
                 r.app.execServicesFg |= fg;
+                if (r.app.executingServices.size() == 1) {
+                    scheduleServiceTimeoutLocked(r.app);
+                }
             }
         } else if (r.app != null && fg && !r.app.execServicesFg) {
-            mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_TIMEOUT_MSG);
-            Message msg = mAm.mHandler.obtainMessage(
-                    ActivityManagerService.SERVICE_TIMEOUT_MSG);
-            msg.obj = r.app;
-            mAm.mHandler.sendMessageAtTime(msg,now+SERVICE_TIMEOUT);
             r.app.execServicesFg = true;
+            scheduleServiceTimeoutLocked(r.app);
         }
         r.executeFg |= fg;
         r.executeNesting++;
@@ -2144,13 +2136,25 @@ public final class ActiveServices {
                         ActivityManagerService.SERVICE_TIMEOUT_MSG);
                 msg.obj = proc;
                 mAm.mHandler.sendMessageAtTime(msg, proc.execServicesFg
-                        ? (nextTime+SERVICE_TIMEOUT) : (nextTime+ SERVICE_BACKGROUND_TIMEOUT));
+                        ? (nextTime+SERVICE_TIMEOUT) : (nextTime + SERVICE_BACKGROUND_TIMEOUT));
             }
         }
 
         if (anrMessage != null) {
             mAm.appNotResponding(proc, null, null, false, anrMessage);
         }
+    }
+
+    void scheduleServiceTimeoutLocked(ProcessRecord proc) {
+        if (proc.executingServices.size() == 0 || proc.thread == null) {
+            return;
+        }
+        long now = SystemClock.uptimeMillis();
+        Message msg = mAm.mHandler.obtainMessage(
+                ActivityManagerService.SERVICE_TIMEOUT_MSG);
+        msg.obj = proc;
+        mAm.mHandler.sendMessageAtTime(msg,
+                proc.execServicesFg ? (now+SERVICE_TIMEOUT) : (now+ SERVICE_BACKGROUND_TIMEOUT));
     }
 
     /**
