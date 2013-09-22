@@ -179,24 +179,24 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public void capture(CaptureRequest request, CaptureListener listener, Handler handler)
+    public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException {
-        submitCaptureRequest(request, listener, handler, /*streaming*/false);
+        return submitCaptureRequest(request, listener, handler, /*streaming*/false);
     }
 
     @Override
-    public void captureBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests.isEmpty()) {
             Log.w(TAG, "Capture burst request list is empty, do nothing!");
-            return;
+            return -1;
         }
         // TODO
         throw new UnsupportedOperationException("Burst capture implemented yet");
 
     }
 
-    private void submitCaptureRequest(CaptureRequest request, CaptureListener listener,
+    private int submitCaptureRequest(CaptureRequest request, CaptureListener listener,
             Handler handler, boolean repeating) throws CameraAccessException {
 
         // Need a valid handler, or current thread needs to have a looper, if
@@ -220,7 +220,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 throw e.asChecked();
             } catch (RemoteException e) {
                 // impossible
-                return;
+                return -1;
             }
             if (listener != null) {
                 mCaptureListenerMap.put(requestId, new CaptureListenerHolder(listener, request,
@@ -231,21 +231,22 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 mRepeatingRequestIdStack.add(requestId);
             }
 
+            return requestId;
         }
     }
 
     @Override
-    public void setRepeatingRequest(CaptureRequest request, CaptureListener listener,
+    public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException {
-        submitCaptureRequest(request, listener, handler, /*streaming*/true);
+        return submitCaptureRequest(request, listener, handler, /*streaming*/true);
     }
 
     @Override
-    public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests.isEmpty()) {
             Log.w(TAG, "Set Repeating burst request list is empty, do nothing!");
-            return;
+            return -1;
         }
         // TODO
         throw new UnsupportedOperationException("Burst capture implemented yet");
@@ -429,14 +430,16 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 return;
             }
 
-            final CaptureResult resultAsCapture = new CaptureResult(result);
+            final CaptureRequest request = holder.getRequest();
+            final CaptureResult resultAsCapture = new CaptureResult(result, request, requestId);
 
             holder.getHandler().post(
                 new Runnable() {
+                    @Override
                     public void run() {
                         holder.getListener().onCaptureCompleted(
                             CameraDevice.this,
-                            holder.getRequest(),
+                            request,
                             resultAsCapture);
                     }
                 });
