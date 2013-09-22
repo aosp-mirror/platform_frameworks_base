@@ -17,11 +17,13 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.CameraDevice.CaptureListener;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 
 /**
@@ -62,30 +64,37 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     private Object mUserTag;
 
     /**
-     * Construct empty request
-     * @hide
+     * Construct empty request.
+     *
+     * Used by Binder to unparcel this object only.
      */
-    public CaptureRequest() {
+    private CaptureRequest() {
         mSettings = new CameraMetadataNative();
         mSurfaceSet = new HashSet<Surface>();
     }
 
     /**
-     * Clone from source capture request
+     * Clone from source capture request.
+     *
+     * Used by the Builder to create an immutable copy.
      */
+    @SuppressWarnings("unchecked")
     private CaptureRequest(CaptureRequest source) {
         mSettings = new CameraMetadataNative(source.mSettings);
         mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
     }
 
     /**
-     * Take ownership of passed-in settings
+     * Take ownership of passed-in settings.
+     *
+     * Used by the Builder to create a mutable CaptureRequest.
      */
     private CaptureRequest(CameraMetadataNative settings) {
         mSettings = settings;
         mSurfaceSet = new HashSet<Surface>();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Key<T> key) {
         return mSettings.get(key);
@@ -106,6 +115,34 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      */
     public Object getTag() {
         return mUserTag;
+    }
+
+    /**
+     * Determine whether this CaptureRequest is equal to another CaptureRequest.
+     *
+     * <p>A request is considered equal to another is if it's set of key/values is equal, it's
+     * list of output surfaces is equal, and the user tag is equal.</p>
+     *
+     * @param other Another instance of CaptureRequest.
+     *
+     * @return True if the requests are the same, false otherwise.
+     */
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof CaptureRequest
+                && equals((CaptureRequest)other);
+    }
+
+    private boolean equals(CaptureRequest other) {
+        return other != null
+                && Objects.equals(mUserTag, other.mUserTag)
+                && mSurfaceSet.equals(other.mSurfaceSet)
+                && mSettings.equals(other.mSettings);
+    }
+
+    @Override
+    public int hashCode() {
+        return mSettings.hashCode();
     }
 
     public static final Parcelable.Creator<CaptureRequest> CREATOR =

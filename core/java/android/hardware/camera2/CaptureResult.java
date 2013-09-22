@@ -37,18 +37,85 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 public final class CaptureResult extends CameraMetadata {
 
     private final CameraMetadataNative mResults;
+    private final CaptureRequest mRequest;
+    private final int mSequenceId;
 
     /**
      * Takes ownership of the passed-in properties object
      * @hide
      */
-    public CaptureResult(CameraMetadataNative results) {
+    public CaptureResult(CameraMetadataNative results, CaptureRequest parent, int sequenceId) {
+        if (results == null) {
+            throw new IllegalArgumentException("results was null");
+        }
+
+        if (parent == null) {
+            throw new IllegalArgumentException("parent was null");
+        }
+
         mResults = results;
+        mRequest = parent;
+        mSequenceId = sequenceId;
     }
 
     @Override
     public <T> T get(Key<T> key) {
         return mResults.get(key);
+    }
+
+    /**
+     * Get the request associated with this result.
+     *
+     * <p>Whenever a request is successfully captured, with
+     * {@link CameraDevice.CaptureListener#onCaptureCompleted},
+     * the {@code result}'s {@code getRequest()} will return that {@code request}.
+     * </p>
+     *
+     * <p>In particular,
+     * <code><pre>cameraDevice.capture(someRequest, new CaptureListener() {
+     *     {@literal @}Override
+     *     void onCaptureCompleted(CaptureRequest myRequest, CaptureResult myResult) {
+     *         assert(myResult.getRequest.equals(myRequest) == true);
+     *     }
+     * };
+     * </code></pre>
+     * </p>
+     *
+     * @return The request associated with this result. Never {@code null}.
+     */
+    public CaptureRequest getRequest() {
+        return mRequest;
+    }
+
+    /**
+     * Get the frame number associated with this result.
+     *
+     * <p>Whenever a request has been processed, regardless of failure or success,
+     * it gets a unique frame number assigned to its future result/failure.</p>
+     *
+     * <p>This value monotonically increments, starting with 0,
+     * for every new result or failure; and the scope is the lifetime of the
+     * {@link CameraDevice}.</p>
+     *
+     * @return int frame number
+     */
+    public int getFrameNumber() {
+        return get(REQUEST_FRAME_COUNT);
+    }
+
+    /**
+     * The sequence ID for this failure that was returned by the
+     * {@link CameraDevice#capture} family of functions.
+     *
+     * <p>The sequence ID is a unique monotonically increasing value starting from 0,
+     * incremented every time a new group of requests is submitted to the CameraDevice.</p>
+     *
+     * @return int The ID for the sequence of requests that this capture result is a part of
+     *
+     * @see CameraDevice.CaptureListener#onCaptureSequenceCompleted
+     */
+    public int getSequenceId() {
+        return mSequenceId;
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
@@ -523,8 +590,9 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>
-     * Number of frames captured since
-     * open()
+     * A frame counter set by the framework. This value monotonically
+     * increases with every new result (that is, each new result has a unique
+     * frameCount value).
      * </p>
      * <p>
      * Reset on release()
