@@ -45,7 +45,7 @@
         android:ellipsize="end"
         android:textIsSelectable="false"
         android:visibility="gone"
-        android:textColor="@color/item_text_color"
+        android:textColor="@color/print_option_title"
         android:duplicateParentState="true">
 
     </TextView>

@@ -62,12 +62,108 @@ public final class PrintJob {
     }
 
     /**
-     * Cancels this print job.
+     * Cancels this print job. You can request cancellation of a
+     * queued, started, blocked, or failed print job.
+     *
+     * @see #isQueued()
+     * @see #isStarted()
+     * @see #isBlocked()
+     * @see #isFailed()
      */
     public void cancel() {
-        if (!isInImmutableState()) {
+        final int state = getInfo().getState();
+        if (state == PrintJobInfo.STATE_QUEUED
+                || state == PrintJobInfo.STATE_STARTED
+                || state == PrintJobInfo.STATE_BLOCKED
+                || state == PrintJobInfo.STATE_FAILED) {
             mPrintManager.cancelPrintJob(mCachedInfo.getId());
         }
+    }
+
+    /**
+     * Restarts this print job. You can request restart of a failed
+     * print job.
+     *
+     * @see #isFailed()
+     */
+    public void restart() {
+        if (isFailed()) {
+            mPrintManager.restartPrintJob(mCachedInfo.getId());
+        }
+    }
+
+    /**
+     * Gets whether this print job is queued. Such a print job is
+     * ready to be printed. You can request a cancellation via
+     * {@link #cancel()}.
+     *
+     * @return Whether the print job is queued.
+     *
+     * @see #cancel()
+     */
+    public boolean isQueued() {
+        return getInfo().getState() == PrintJobInfo.STATE_QUEUED;
+    }
+
+    /**
+     * Gets whether this print job is started. Such a print job is
+     * being printed. You can request a cancellation via
+     * {@link #cancel()}.
+     *
+     * @return Whether the print job is started.
+     *
+     * @see #cancel()
+     */
+    public boolean isStarted() {
+        return getInfo().getState() == PrintJobInfo.STATE_STARTED;
+    }
+
+    /**
+     * Gets whether this print job is blocked. Such a print job is halted
+     * due to an abnormal condition. You can request a cancellation via
+     * {@link #cancel()}.
+     *
+     * @return Whether the print job is blocked.
+     *
+     * @see #cancel()
+     */
+    public boolean isBlocked() {
+        return getInfo().getState() == PrintJobInfo.STATE_BLOCKED;
+    }
+
+    /**
+     * Gets whether this print job is completed. Such a print job
+     * is successfully printed. You can neither cancel nor restart
+     * such a print job.
+     *
+     * @return Whether the print job is completed.
+     */
+    public boolean isCompleted() {
+        return getInfo().getState() == PrintJobInfo.STATE_COMPLETED;
+    }
+
+    /**
+     * Gets whether this print job is failed. Such a print job is
+     * not successfully printed due to an error. You can request
+     * a restart via {@link #restart()}.
+     *
+     * @return Whether the print job is failed.
+     *
+     * @see #restart()
+     */
+    public boolean isFailed() {
+        return getInfo().getState() == PrintJobInfo.STATE_FAILED;
+    }
+
+    /**
+     * Gets whether this print job is cancelled. Such a print job was
+     * cancelled as a result of a user request. This is a final state.
+     * You cannot restart such a print job.
+     *
+     * @return Whether the print job is cancelled.
+     */
+    public boolean isCancelled() {
+        return getInfo().getState() == PrintJobInfo.STATE_CANCELED;
     }
 
     private boolean isInImmutableState() {

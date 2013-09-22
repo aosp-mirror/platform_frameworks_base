@@ -36,6 +36,7 @@ import android.os.RemoteException;
 import android.os.UserManager;
 import android.print.IPrintClient;
 import android.print.IPrintDocumentAdapter;
+import android.print.IPrintJobStateChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
@@ -103,7 +104,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
     private final RemotePrintSpooler mSpooler;
 
+    private final Handler mHandler;
+
     private PrinterDiscoverySessionMediator mPrinterDiscoverySession;
+
+    private List<PrintJobStateChangeListenerRecord> mPrintJobStateChangeListenerRecords;
 
     private boolean mDestroyed;
 
@@ -112,6 +117,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mUserId = userId;
         mLock = lock;
         mSpooler = new RemotePrintSpooler(context, userId, this);
+        mHandler = new UserStateHandler(context.getMainLooper());
         synchronized (mLock) {
             enableSystemPrintServicesOnFirstBootLocked();
         }
@@ -164,6 +170,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         printJob.setLabel(printJobName);
         printJob.setAttributes(attributes);
         printJob.setState(PrintJobInfo.STATE_CREATED);
+        printJob.setCopies(1);
 
         // Spin the spooler to add the job and show the config UI.
         new AsyncTask<Void, Void, Void>() {
@@ -349,6 +356,51 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             // Request stop tracking the printer.
             mPrinterDiscoverySession.stopPrinterStateTrackingLocked(printerId);
         }
+    }
+
+    public void addPrintJobStateChangeListener(IPrintJobStateChangeListener listener,
+            int appId) throws RemoteException {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mPrintJobStateChangeListenerRecords == null) {
+                mPrintJobStateChangeListenerRecords =
+                        new ArrayList<PrintJobStateChangeListenerRecord>();
+            }
+            mPrintJobStateChangeListenerRecords.add(
+                    new PrintJobStateChangeListenerRecord(listener, appId) {
+                @Override
+                public void onBinderDied() {
+                    mPrintJobStateChangeListenerRecords.remove(this);
+                }
+            });
+        }
+    }
+
+    public void removePrintJobStateChangeListener(IPrintJobStateChangeListener listener) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mPrintJobStateChangeListenerRecords == null) {
+                return;
+            }
+            final int recordCount = mPrintJobStateChangeListenerRecords.size();
+            for (int i = 0; i < recordCount; i++) {
+                PrintJobStateChangeListenerRecord record =
+                        mPrintJobStateChangeListenerRecords.get(i);
+                if (record.listener.asBinder().equals(listener.asBinder())) {
+                    mPrintJobStateChangeListenerRecords.remove(i);
+                    break;
+                }
+            }
+            if (mPrintJobStateChangeListenerRecords.isEmpty()) {
+                mPrintJobStateChangeListenerRecords = null;
+            }
+        }
+    }
+
+    @Override
+    public void onPrintJobStateChanged(PrintJobId printJobId, int appId) {
+        mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_JOB_STATE_CHANGED,
+                appId, 0, printJobId).sendToTarget();
     }
 
     @Override
@@ -696,6 +748,65 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         if (mDestroyed) {
             throw new IllegalStateException("Cannot interact with a destroyed instance.");
         }
+    }
+
+    private void handleDispatchPrintJobStateChanged(PrintJobId printJobId, int appId) {
+        final List<PrintJobStateChangeListenerRecord> records;
+        synchronized (mLock) {
+            if (mPrintJobStateChangeListenerRecords == null) {
+                return;
+            }
+            records = new ArrayList<PrintJobStateChangeListenerRecord>(
+                    mPrintJobStateChangeListenerRecords);
+        }
+        final int recordCount = records.size();
+        for (int i = 0; i < recordCount; i++) {
+            PrintJobStateChangeListenerRecord record = records.get(i);
+            if (record.appId == PrintManager.APP_ID_ANY
+                    || record.appId == appId)
+            try {
+                record.listener.onPrintJobStateChanged(printJobId);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error notifying for print job state change", re);
+            }
+        }
+    }
+
+    private final class UserStateHandler extends Handler {
+        public static final int MSG_DISPATCH_PRINT_JOB_STATE_CHANGED = 1;
+
+        public UserStateHandler(Looper looper) {
+            super(looper, null, false);
+        }
+
+        @Override
+        public void handleMessage(Message message) {
+            if (message.what == MSG_DISPATCH_PRINT_JOB_STATE_CHANGED) {
+                PrintJobId printJobId = (PrintJobId) message.obj;
+                final int appId = message.arg1;
+                handleDispatchPrintJobStateChanged(printJobId, appId);
+            }
+        }
+    }
+
+    private abstract class PrintJobStateChangeListenerRecord implements DeathRecipient {
+        final IPrintJobStateChangeListener listener;
+        final int appId;
+
+        public PrintJobStateChangeListenerRecord(IPrintJobStateChangeListener listener,
+                int appId) throws RemoteException {
+            this.listener = listener;
+            this.appId = appId;
+            listener.asBinder().linkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            listener.asBinder().unlinkToDeath(this, 0);
+            onBinderDied();
+        }
+
+        public abstract void onBinderDied();
     }
 
     private class PrinterDiscoverySessionMediator {

@@ -30,6 +30,7 @@ import android.print.PrintDocumentAdapter.LayoutResultCallback;
 import android.print.PrintDocumentAdapter.WriteResultCallback;
 import android.printservice.PrintServiceInfo;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
@@ -40,6 +41,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * System level service for accessing the printing capabilities of the platform.
@@ -69,6 +71,19 @@ public final class PrintManager {
     private final PrintClient mPrintClient;
 
     private final Handler mHandler;
+
+    private Map<PrintJobStateChangeListener, PrintJobStateChangeListenerWrapper> mPrintJobStateChangeListeners;
+
+    /** @hide */
+    public interface PrintJobStateChangeListener {
+
+        /**
+         * Callback notifying that a print job state changed.
+         *
+         * @param printJobId The print job id.
+         */
+        public void onPrintJobsStateChanged(PrintJobId printJobId);
+    }
 
     /**
      * Creates a new instance.
@@ -106,7 +121,6 @@ public final class PrintManager {
      * @param userId The user id for which to get all print jobs.
      * @return An instance if the caller has the permission to access
      * all print jobs, null otherwise.
-     *
      * @hide
      */
     public PrintManager getGlobalPrintManagerForUser(int userId) {
@@ -118,6 +132,75 @@ public final class PrintManager {
             return mService.getPrintJobInfo(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error getting a print job info:" + printJobId, re);
+        }
+        return null;
+    }
+
+    /**
+     * Adds a listener for observing the state of print jobs.
+     *
+     * @param listener The listener to add.
+     *
+     * @hide
+     */
+    public void addPrintJobStateChangeListener(PrintJobStateChangeListener listener) {
+        if (mPrintJobStateChangeListeners == null) {
+            mPrintJobStateChangeListeners = new ArrayMap<PrintJobStateChangeListener,
+                    PrintJobStateChangeListenerWrapper>();
+        }
+        PrintJobStateChangeListenerWrapper wrappedListener =
+                new PrintJobStateChangeListenerWrapper(listener);
+        try {
+            mService.addPrintJobStateChangeListener(wrappedListener, mAppId, mUserId);
+            mPrintJobStateChangeListeners.put(listener, wrappedListener);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error adding print job state change listener", re);
+        }
+    }
+
+    /**
+     * Removes a listener for observing the state of print jobs.
+     *
+     * @param listener The listener to remove.
+     *
+     * @hide
+     */
+    public void removePrintJobStateChangeListener(PrintJobStateChangeListener listener) {
+        if (mPrintJobStateChangeListeners == null) {
+            return;
+        }
+        PrintJobStateChangeListenerWrapper wrappedListener =
+                mPrintJobStateChangeListeners.remove(listener);
+        if (wrappedListener == null) {
+            return;
+        }
+        if (mPrintJobStateChangeListeners.isEmpty()) {
+            mPrintJobStateChangeListeners = null;
+        }
+        try {
+            mService.removePrintJobStateChangeListener(wrappedListener, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error removing print job state change listener", re);
+        }
+    }
+
+    /**
+     * Gets a print job given its id.
+     *
+     * @return The print job list.
+     *
+     * @see PrintJob
+     *
+     * @hide
+     */
+    public PrintJob getPrintJob(PrintJobId printJobId) {
+        try {
+            PrintJobInfo printJob = mService.getPrintJobInfo(printJobId, mAppId, mUserId);
+            if (printJob != null) {
+                return new PrintJob(printJob, this);
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting print job", re);
         }
         return null;
     }
@@ -155,6 +238,14 @@ public final class PrintManager {
         }
     }
 
+    void restartPrintJob(PrintJobId printJobId) {
+        try {
+            mService.restartPrintJob(printJobId, mAppId, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error restarting a print job: " + printJobId, re);
+        }
+    }
+
     /**
      * Creates a print job for printing a {@link PrintDocumentAdapter} with default print
      * attributes.
@@ -163,7 +254,6 @@ public final class PrintManager {
      * @param documentAdapter An adapter that emits the document to print.
      * @param attributes The default print job attributes.
      * @return The created print job on success or null on failure.
-     *
      * @see PrintJob
      */
     public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
@@ -220,11 +310,11 @@ public final class PrintManager {
         }
 
         @Override
-        public void startPrintJobConfigActivity(IntentSender intent)  {
+        public void startPrintJobConfigActivity(IntentSender intent) {
             PrintManager manager = mWeakPrintManager.get();
             if (manager != null) {
                 SomeArgs args = SomeArgs.obtain();
-                args.arg1 =  manager.mContext;
+                args.arg1 = manager.mContext;
                 args.arg2 = intent;
                 manager.mHandler.obtainMessage(0, args).sendToTarget();
             }
@@ -271,7 +361,7 @@ public final class PrintManager {
 
         @Override
         public void write(PageRange[] pages, ParcelFileDescriptor fd,
-            IWriteResultCallback callback, int sequence) {
+                IWriteResultCallback callback, int sequence) {
             synchronized (mLock) {
                 if (mLayoutOrWriteCancellation != null) {
                     mLayoutOrWriteCancellation.cancel();
@@ -489,6 +579,23 @@ public final class PrintManager {
                 IoUtils.closeQuietly(mFd);
                 mCallback = null;
                 mFd = null;
+            }
+        }
+    }
+
+    private static final class PrintJobStateChangeListenerWrapper extends
+            IPrintJobStateChangeListener.Stub {
+        private final WeakReference<PrintJobStateChangeListener> mWeakListener;
+
+        public PrintJobStateChangeListenerWrapper(PrintJobStateChangeListener listener) {
+            mWeakListener = new WeakReference<PrintJobStateChangeListener>(listener);
+        }
+
+        @Override
+        public void onPrintJobStateChanged(PrintJobId printJobId) {
+            PrintJobStateChangeListener listener = mWeakListener.get();
+            if (listener != null) {
+                listener.onPrintJobsStateChanged(printJobId);
             }
         }
     }
