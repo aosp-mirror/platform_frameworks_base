@@ -38,6 +38,11 @@
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingStart="@dimen/grid_padding_horiz"
+        android:paddingEnd="@dimen/grid_padding_horiz"
+        android:paddingTop="@dimen/grid_padding"
+        android:paddingBottom="@dimen/grid_padding"
+        android:scrollbarStyle="outsideOverlay"
         android:listSelector="@android:color/transparent"
         android:visibility="gone" />
 

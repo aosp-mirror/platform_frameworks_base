@@ -171,7 +171,7 @@ public class DocumentsActivity extends Activity {
             mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
             mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                    R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
+                    R.drawable.ic_drawer_glyph, R.string.drawer_open, R.string.drawer_close);
 
             mDrawerLayout.setDrawerListener(mDrawerListener);
             mDrawerLayout.setDrawerShadow(R.drawable.ic_drawer_shadow, GravityCompat.START);
