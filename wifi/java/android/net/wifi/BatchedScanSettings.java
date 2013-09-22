@@ -135,6 +135,42 @@ public class BatchedScanSettings implements Parcelable {
         return false;
     }
 
+    /** @hide */
+    public void constrain() {
+        if (scanIntervalSec == UNSPECIFIED) {
+            scanIntervalSec = DEFAULT_INTERVAL_SEC;
+        } else if (scanIntervalSec < MIN_INTERVAL_SEC) {
+            scanIntervalSec = MIN_INTERVAL_SEC;
+        } else if (scanIntervalSec > MAX_INTERVAL_SEC) {
+            scanIntervalSec = MAX_INTERVAL_SEC;
+        }
+
+        if (maxScansPerBatch == UNSPECIFIED) {
+            maxScansPerBatch = DEFAULT_SCANS_PER_BATCH;
+        } else if (maxScansPerBatch < MIN_SCANS_PER_BATCH) {
+            maxScansPerBatch = MIN_SCANS_PER_BATCH;
+        } else if (maxScansPerBatch > MAX_SCANS_PER_BATCH) {
+            maxScansPerBatch = MAX_SCANS_PER_BATCH;
+        }
+
+        if (maxApPerScan == UNSPECIFIED) {
+            maxApPerScan = DEFAULT_AP_PER_SCAN;
+        } else if (maxApPerScan < MIN_AP_PER_SCAN) {
+            maxApPerScan = MIN_AP_PER_SCAN;
+        } else if (maxApPerScan > MAX_AP_PER_SCAN) {
+            maxApPerScan = MAX_AP_PER_SCAN;
+        }
+
+        if (maxApForDistance == UNSPECIFIED) {
+            maxApForDistance = DEFAULT_AP_FOR_DISTANCE;
+        } else if (maxApForDistance < MIN_AP_FOR_DISTANCE) {
+            maxApForDistance = MIN_AP_FOR_DISTANCE;
+        } else if (maxApForDistance > MAX_AP_FOR_DISTANCE) {
+            maxApForDistance = MAX_AP_FOR_DISTANCE;
+        }
+    }
+
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof BatchedScanSettings == false) return false;
