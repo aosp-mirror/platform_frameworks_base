@@ -20,7 +20,7 @@ import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CameraProperties;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
@@ -88,7 +88,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public CameraProperties getProperties() throws CameraAccessException {
+    public CameraCharacteristics getProperties() throws CameraAccessException {
 
         CameraMetadataNative info = new CameraMetadataNative();
 
@@ -101,7 +101,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             return null;
         }
 
-        CameraProperties properties = new CameraProperties(info);
+        CameraCharacteristics properties = new CameraCharacteristics(info);
         return properties;
     }
 

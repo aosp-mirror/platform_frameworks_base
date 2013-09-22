@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.integration;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CameraProperties;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
@@ -269,7 +269,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
         assertFalse(info.isEmpty());
-        assertNotNull(info.get(CameraProperties.SCALER_AVAILABLE_FORMATS));
+        assertNotNull(info.get(CameraCharacteristics.SCALER_AVAILABLE_FORMATS));
     }
 
     @SmallTest
