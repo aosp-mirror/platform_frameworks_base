@@ -223,7 +223,6 @@ public class WorkSource implements Parcelable {
         }
         mUids[0] = uid;
         mNames[0] = name;
-        mNames = null;
     }
 
     /** @hide */
