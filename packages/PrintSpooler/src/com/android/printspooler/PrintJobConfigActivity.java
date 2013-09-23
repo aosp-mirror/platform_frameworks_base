@@ -831,6 +831,7 @@ public class PrintJobConfigActivity extends Activity {
                         updatePrintAttributes(capabilities);
                         updateUi();
                         mController.update();
+                        refreshCurrentPrinter();
                     }
                 } else if (spinner == mMediaSizeSpinner) {
                     if (mOldMediaSizeSelectionIndex
