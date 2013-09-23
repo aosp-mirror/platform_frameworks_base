@@ -20,6 +20,7 @@
 #include <utils/String8.h>
 #include "utils/misc.h"
 #include "cutils/debugger.h"
+#include <memtrack/memtrack.h>
 
 #include <cutils/log.h>
 #include <fcntl.h>
@@ -57,7 +58,9 @@ enum {
     HEAP_OAT,
     HEAP_ART,
     HEAP_UNKNOWN_MAP,
-    HEAP_GPU,
+    HEAP_GRAPHICS,
+    HEAP_GL,
+    HEAP_OTHER_MEMTRACK,
 
     HEAP_DALVIK_NORMAL,
     HEAP_DALVIK_LARGE,
@@ -66,7 +69,7 @@ enum {
     HEAP_DALVIK_CODE_CACHE,
 
     _NUM_HEAP,
-    _NUM_EXCLUSIVE_HEAP = HEAP_GPU+1,
+    _NUM_EXCLUSIVE_HEAP = HEAP_OTHER_MEMTRACK+1,
     _NUM_CORE_HEAP = HEAP_NATIVE+1
 };
 
@@ -97,6 +100,8 @@ static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
 };
 
 jfieldID otherStats_field;
+
+static bool memtrackLoaded;
 
 struct stats_t {
     int pss;
@@ -139,70 +144,68 @@ static jlong android_os_Debug_getNativeHeapFreeSize(JNIEnv *env, jobject clazz)
 #endif
 }
 
-// XXX Qualcom-specific!
-static jlong read_gpu_mem(int pid)
+// Container used to retrieve graphics memory pss
+struct graphics_memory_pss
 {
-    char line[1024];
-    jlong uss = 0;
-    unsigned temp;
+    int graphics;
+    int gl;
+    int other;
+};
 
-    char tmp[128];
-    FILE *fp;
-
-    sprintf(tmp, "/d/kgsl/proc/%d/mem", pid);
-    fp = fopen(tmp, "r");
-    if (fp == 0) {
-        //ALOGI("Unable to open: %s", tmp);
-        return 0;
+/*
+ * Uses libmemtrack to retrieve graphics memory that the process is using.
+ * Any graphics memory reported in /proc/pid/smaps is not included here.
+ */
+static int read_memtrack_memory(struct memtrack_proc* p, int pid, struct graphics_memory_pss* graphics_mem)
+{
+    int err = memtrack_proc_get(p, pid);
+    if (err != 0) {
+        ALOGE("failed to get memory consumption info: %d", err);
+        return err;
     }
 
-    while (true) {
-        if (fgets(line, 1024, fp) == NULL) {
-            break;
-        }
+    ssize_t pss = memtrack_proc_graphics_pss(p);
+    if (pss < 0) {
+        ALOGE("failed to get graphics pss: %d", pss);
+        return pss;
+    }
+    graphics_mem->graphics = pss / 1024;
 
-        //ALOGI("Read: %s", line);
+    pss = memtrack_proc_gl_pss(p);
+    if (pss < 0) {
+        ALOGE("failed to get gl pss: %d", pss);
+        return pss;
+    }
+    graphics_mem->gl = pss / 1024;
 
-        // Format is:
-        //  gpuaddr useraddr     size    id flags       type            usage sglen
-        // 54676000 54676000     4096     1 ----p     gpumem      arraybuffer     1
-        //
-        // If useraddr is 0, this is gpu mem not otherwise accounted
-        // against the process.
+    pss = memtrack_proc_other_pss(p);
+    if (pss < 0) {
+        ALOGE("failed to get other pss: %d", pss);
+        return pss;
+    }
+    graphics_mem->other = pss / 1024;
 
-        // Make sure line is long enough.
-        int i = 0;
-        while (i < 9) {
-            if (line[i] == 0) {
-                break;
-            }
-            i++;
-        }
-        if (i < 9) {
-            //ALOGI("Early line term!");
-            continue;
-        }
+    return 0;
+}
 
-        // Look to see if useraddr is 00000000.
-        while (i < 17) {
-            if (line[i] != '0') {
-                break;
-            }
-            i++;
-        }
-        if (i < 17) {
-            //ALOGI("useraddr not 0!");
-            continue;
-        }
-
-        uss += atoi(line + i);
-        //ALOGI("Uss now: %ld", uss);
+/*
+ * Retrieves the graphics memory that is unaccounted for in /proc/pid/smaps.
+ */
+static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_mem)
+{
+    if (!memtrackLoaded) {
+        return -1;
     }
 
-    fclose(fp);
+    struct memtrack_proc* p = memtrack_proc_new();
+    if (p == NULL) {
+        ALOGE("failed to create memtrack_proc");
+        return -1;
+    }
 
-    // Convert from bytes to KB.
-    return uss / 1024;
+    int err = read_memtrack_memory(p, pid, graphics_mem);
+    memtrack_proc_destroy(p);
+    return err;
 }
 
 static void read_mapinfo(FILE *fp, stats_t* stats)
@@ -405,12 +408,19 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     stats_t stats[_NUM_HEAP];
     memset(&stats, 0, sizeof(stats));
 
-
     load_maps(pid, stats);
 
-    jlong gpu = read_gpu_mem(pid);
-    stats[HEAP_GPU].pss += gpu;
-    stats[HEAP_GPU].privateDirty += gpu;
+    struct graphics_memory_pss graphics_mem;
+    if (read_memtrack_memory(pid, &graphics_mem) == 0) {
+        stats[HEAP_GRAPHICS].pss = graphics_mem.graphics;
+        stats[HEAP_GRAPHICS].privateDirty = graphics_mem.graphics;
+        stats[HEAP_GL].pss = graphics_mem.gl;
+        stats[HEAP_GL].privateDirty = graphics_mem.gl;
+        stats[HEAP_OTHER_MEMTRACK].pss = graphics_mem.other;
+        stats[HEAP_OTHER_MEMTRACK].privateDirty = graphics_mem.other;
+    } else {
+        ALOGE("Failed to read gpu memory");
+    }
 
     for (int i=_NUM_CORE_HEAP; i<_NUM_EXCLUSIVE_HEAP; i++) {
         stats[HEAP_UNKNOWN].pss += stats[i].pss;
@@ -466,7 +476,10 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
     char tmp[128];
     FILE *fp;
 
-    pss = uss = read_gpu_mem(pid);
+    struct graphics_memory_pss graphics_mem;
+    if (read_memtrack_memory(pid, &graphics_mem) == 0) {
+        pss = uss = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
+    }
 
     sprintf(tmp, "/proc/%d/smaps", pid);
     fp = fopen(tmp, "r");
@@ -891,6 +904,14 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_os_Debug(JNIEnv *env)
 {
+    int err = memtrack_init();
+    if (err != 0) {
+        memtrackLoaded = false;
+        ALOGE("failed to load memtrack module: %d", err);
+    } else {
+        memtrackLoaded = true;
+    }
+
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
     // Sanity check the number of other statistics expected in Java matches here.
