@@ -86,6 +86,9 @@ public class PacManager {
     private int mCurrentDelay;
     private int mLastPort;
 
+    private boolean mHasSentBroadcast;
+    private boolean mHasDownloaded;
+
     /**
      * Used for locking when setting mProxyService and all references to mPacUrl or mCurrentPac.
      */
@@ -110,6 +113,8 @@ public class PacManager {
                         setCurrentProxyScript(file);
                     }
                 }
+                mHasDownloaded = true;
+                sendProxyIfNeeded();
                 longSchedule();
             } else {
                 reschedule();
@@ -155,6 +160,8 @@ public class PacManager {
                 mPacUrl = proxy.getPacFileUrl();
             }
             mCurrentDelay = DELAY_1;
+            mHasSentBroadcast = false;
+            mHasDownloaded = false;
             getAlarmManager().cancel(mPacRefreshIntent);
             bind();
             return true;
@@ -311,10 +318,14 @@ public class PacManager {
                         callbackService.getProxyPort(new IProxyPortListener.Stub() {
                             @Override
                             public void setProxyPort(int port) throws RemoteException {
+                                if (mLastPort != -1) {
+                                    // Always need to send if port changed
+                                    mHasSentBroadcast = false;
+                                }
                                 mLastPort = port;
                                 if (port != -1) {
                                     Log.d(TAG, "Local proxy is bound on " + port);
-                                    sendPacBroadcast(new ProxyProperties(mPacUrl, port));
+                                    sendProxyIfNeeded();
                                 } else {
                                     Log.e(TAG, "Received invalid port from Local Proxy,"
                                             + " PAC will not be operational");
@@ -341,6 +352,7 @@ public class PacManager {
             mProxyConnection = null;
         }
         mProxyService = null;
+        mLastPort = -1;
     }
 
     private void sendPacBroadcast(ProxyProperties proxy) {
@@ -353,6 +365,16 @@ public class PacManager {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private synchronized void sendProxyIfNeeded() {
+        if (!mHasDownloaded || (mLastPort == -1)) {
+            return;
+        }
+        if (!mHasSentBroadcast) {
+            sendPacBroadcast(new ProxyProperties(mPacUrl, mLastPort));
+            mHasSentBroadcast = true;
         }
     }
 }
