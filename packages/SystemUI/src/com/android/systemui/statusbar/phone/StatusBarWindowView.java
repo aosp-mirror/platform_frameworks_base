@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.StatusBarManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -110,6 +111,10 @@ public class StatusBarWindowView extends FrameLayout
         }
         if (!handled) {
             handled = super.onTouchEvent(ev);
+        }
+        final int action = ev.getAction();
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            mService.setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         }
         return handled;
     }

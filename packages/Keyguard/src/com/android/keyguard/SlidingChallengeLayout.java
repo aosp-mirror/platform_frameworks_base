@@ -367,9 +367,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             mScrimView.setOnClickListener(null);
         }
         mScrimView = scrim;
-        mScrimView.setVisibility(mIsBouncing ? VISIBLE : GONE);
-        mScrimView.setFocusable(true);
-        mScrimView.setOnClickListener(mScrimClickListener);
+        if (mScrimView != null) {
+            mScrimView.setVisibility(mIsBouncing ? VISIBLE : GONE);
+            mScrimView.setFocusable(true);
+            mScrimView.setOnClickListener(mScrimClickListener);
+        }
     }
 
     /**
