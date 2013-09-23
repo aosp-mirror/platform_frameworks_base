@@ -315,7 +315,9 @@ public class SyncManager {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "Reconnection detected: clearing all backoffs");
                     }
-                    mSyncStorageEngine.clearAllBackoffs(mSyncQueue);
+                    synchronized(mSyncQueue) {
+                        mSyncStorageEngine.clearAllBackoffsLocked(mSyncQueue);
+                    }
                 }
                 sendCheckAlarmsMessage();
             }
