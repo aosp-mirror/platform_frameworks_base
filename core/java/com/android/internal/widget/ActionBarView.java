@@ -144,8 +144,6 @@ public class ActionBarView extends AbsActionBarView {
 
     Window.Callback mWindowCallback;
 
-    private final static Transition sTransition = ActionBarTransition.getActionBarTransition();
-
     private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
             new AdapterView.OnItemSelectedListener() {
         public void onItemSelected(AdapterView parent, View view, int position, long id) {
@@ -483,7 +481,7 @@ public class ActionBarView extends AbsActionBarView {
     public void setCustomNavigationView(View view) {
         final boolean showCustom = (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0;
         if (showCustom) {
-            TransitionManager.beginDelayedTransition(this, sTransition);
+            ActionBarTransition.beginDelayedTransition(this);
         }
         if (mCustomNavView != null && showCustom) {
             removeView(mCustomNavView);
@@ -522,7 +520,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     private void setTitleImpl(CharSequence title) {
-        TransitionManager.beginDelayedTransition(this, sTransition);
+        ActionBarTransition.beginDelayedTransition(this);
         mTitle = title;
         if (mTitleView != null) {
             mTitleView.setText(title);
@@ -542,7 +540,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setSubtitle(CharSequence subtitle) {
-        TransitionManager.beginDelayedTransition(this, sTransition);
+        ActionBarTransition.beginDelayedTransition(this);
         mSubtitle = subtitle;
         if (mSubtitleView != null) {
             mSubtitleView.setText(subtitle);
@@ -623,7 +621,7 @@ public class ActionBarView extends AbsActionBarView {
         mDisplayOptions = options;
 
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
-            TransitionManager.beginDelayedTransition(this, sTransition);
+            ActionBarTransition.beginDelayedTransition(this);
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                 final boolean setUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
@@ -737,7 +735,7 @@ public class ActionBarView extends AbsActionBarView {
     public void setNavigationMode(int mode) {
         final int oldMode = mNavigationMode;
         if (mode != oldMode) {
-            TransitionManager.beginDelayedTransition(this, sTransition);
+            ActionBarTransition.beginDelayedTransition(this);
             switch (oldMode) {
             case ActionBar.NAVIGATION_MODE_LIST:
                 if (mListNavLayout != null) {
@@ -860,7 +858,7 @@ public class ActionBarView extends AbsActionBarView {
             }
         }
 
-        TransitionManager.beginDelayedTransition(this, sTransition);
+        ActionBarTransition.beginDelayedTransition(this);
         mUpGoerFive.addView(mTitleLayout);
         if (mExpandedActionView != null ||
                 (TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle))) {
@@ -1639,7 +1637,7 @@ public class ActionBarView extends AbsActionBarView {
 
         @Override
         public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
-            TransitionManager.beginDelayedTransition(ActionBarView.this, sTransition);
+            ActionBarTransition.beginDelayedTransition(ActionBarView.this);
 
             mExpandedActionView = item.getActionView();
             mExpandedHomeLayout.setIcon(mIcon.getConstantState().newDrawable(getResources()));
@@ -1668,7 +1666,7 @@ public class ActionBarView extends AbsActionBarView {
 
         @Override
         public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
-            TransitionManager.beginDelayedTransition(ActionBarView.this, sTransition);
+            ActionBarTransition.beginDelayedTransition(ActionBarView.this);
 
             // Do this before detaching the actionview from the hierarchy, in case
             // it needs to dismiss the soft keyboard, etc.
