@@ -2241,8 +2241,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui < 0) {
-            throw new IllegalStateException("Adding dependent process " + app
-                    + " not on LRU list: " + what + obj + " from " + srcApp);
+            Log.wtf(TAG, "Adding dependent process " + app + " not on LRU list: "
+                    + what + " " + obj + " from " + srcApp);
+            return index;
         }
 
         if (lrui >= mLruProcessActivityStart) {
@@ -2307,7 +2308,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // bump those processes as well.
         for (int j=app.connections.size()-1; j>=0; j--) {
             ConnectionRecord cr = app.connections.valueAt(j);
-            if (cr.binding != null && cr.binding.service != null
+            if (cr.binding != null && !cr.serviceDead && cr.binding.service != null
                     && cr.binding.service.app != null
                     && cr.binding.service.app.lruSeq != mLruSeq) {
                 nextIndex = updateLruProcessInternalLocked(cr.binding.service.app, now, nextIndex,
