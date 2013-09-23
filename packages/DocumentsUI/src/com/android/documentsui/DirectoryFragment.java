@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
@@ -887,8 +888,14 @@ public class DirectoryFragment extends Fragment {
                 line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
             }
 
-            final boolean enabled = Document.MIME_TYPE_DIR.equals(docMimeType)
+            boolean enabled = Document.MIME_TYPE_DIR.equals(docMimeType)
                     || MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
+
+            // Read-only files aren't actually enabled when creating
+            if (state.action == ACTION_CREATE && (docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
+                enabled = false;
+            }
+
             if (enabled) {
                 setEnabledRecursive(convertView, true);
                 icon.setAlpha(1f);
