@@ -2616,7 +2616,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
         // Find any earlier preferred or last chosen entries and nuke them
         findPreferredActivity(intent, resolvedType,
-                flags, query, 0, false, true, userId);
+                flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
         addPreferredActivityInternal(filter, match, null, activity, false, userId);
     }
@@ -2627,7 +2627,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
         return findPreferredActivity(intent, resolvedType, flags, query, 0,
-                false, false, userId);
+                false, false, false, userId);
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
@@ -2637,12 +2637,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (N == 1) {
                 return query.get(0);
             } else if (N > 1) {
+                final boolean debug = ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
                 // If there is more than one activity with the same priority,
                 // then let the user decide between them.
                 ResolveInfo r0 = query.get(0);
                 ResolveInfo r1 = query.get(1);
-                if (DEBUG_INTENT_MATCHING) {
-                    Log.d(TAG, r0.activityInfo.name + "=" + r0.priority + " vs "
+                if (DEBUG_INTENT_MATCHING || debug) {
+                    Slog.v(TAG, r0.activityInfo.name + "=" + r0.priority + " vs "
                             + r1.activityInfo.name + "=" + r1.priority);
                 }
                 // If the first activity has a higher priority, or a different
@@ -2655,7 +2656,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
                 ResolveInfo ri = findPreferredActivity(intent, resolvedType,
-                        flags, query, r0.priority, true, false, userId);
+                        flags, query, r0.priority, true, false, debug, userId);
                 if (ri != null) {
                     return ri;
                 }
@@ -2676,7 +2677,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
-            boolean removeMatches, int userId) {
+            boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
         // writer
         synchronized (mPackages) {
@@ -2686,6 +2687,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
             PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
             // Get the list of preferred activities that handle the intent
+            if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Looking for preferred activities...");
             List<PreferredActivity> prefs = pir != null
                     ? pir.queryIntent(intent, resolvedType,
                             (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
@@ -2696,59 +2698,50 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // from the same match quality.
                 int match = 0;
 
-                if (DEBUG_PREFERRED) {
-                    Log.v(TAG, "Figuring out best match...");
-                }
+                if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Figuring out best match...");
 
                 final int N = query.size();
                 for (int j=0; j<N; j++) {
                     final ResolveInfo ri = query.get(j);
-                    if (DEBUG_PREFERRED) {
-                        Log.v(TAG, "Match for " + ri.activityInfo + ": 0x"
-                                + Integer.toHexString(match));
-                    }
+                    if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Match for " + ri.activityInfo
+                            + ": 0x" + Integer.toHexString(match));
                     if (ri.match > match) {
                         match = ri.match;
                     }
                 }
 
-                if (DEBUG_PREFERRED) {
-                    Log.v(TAG, "Best match: 0x" + Integer.toHexString(match));
-                }
+                if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Best match: 0x"
+                        + Integer.toHexString(match));
 
                 match &= IntentFilter.MATCH_CATEGORY_MASK;
                 final int M = prefs.size();
                 for (int i=0; i<M; i++) {
                     final PreferredActivity pa = prefs.get(i);
-                    if (DEBUG_PREFERRED) {
-                        Log.v(TAG, "Checking PreferredActivity ds="
+                    if (DEBUG_PREFERRED || debug) {
+                        Slog.v(TAG, "Checking PreferredActivity ds="
                                 + (pa.countDataSchemes() > 0 ? pa.getDataScheme(0) : "<none>")
                                 + "\n  component=" + pa.mPref.mComponent);
-                        pa.dump(new PrintStreamPrinter(System.out), "  ");
+                        pa.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
                     }
                     if (pa.mPref.mMatch != match) {
-                        if (DEBUG_PREFERRED) {
-                            Log.v(TAG, "Skipping bad match "
-                                    + Integer.toHexString(pa.mPref.mMatch));
-                        }
+                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping bad match "
+                                + Integer.toHexString(pa.mPref.mMatch));
                         continue;
                     }
                     // If it's not an "always" type preferred activity and that's what we're
                     // looking for, skip it.
                     if (always && !pa.mPref.mAlways) {
-                        if (DEBUG_PREFERRED) {
-                            Log.v(TAG, "Skipping lastChosen entry");
-                        }
+                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping mAlways=false entry");
                         continue;
                     }
                     final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
                             flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
-                    if (DEBUG_PREFERRED) {
-                        Log.v(TAG, "Got preferred activity:");
+                    if (DEBUG_PREFERRED || debug) {
+                        Slog.v(TAG, "Found preferred activity:");
                         if (ai != null) {
-                            ai.dump(new LogPrinter(Log.VERBOSE, TAG), "  ");
+                            ai.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
                         } else {
-                            Log.v(TAG, "  null");
+                            Slog.v(TAG, "  null");
                         }
                     }
                     if (ai == null) {
@@ -2775,7 +2768,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (removeMatches) {
                             pir.removeFilter(pa);
                             if (DEBUG_PREFERRED) {
-                                Log.v(TAG, "Removing match " + pa.mPref.mComponent);
+                                Slog.v(TAG, "Removing match " + pa.mPref.mComponent);
                             }
                             break;
                         }
@@ -2788,7 +2781,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Slog.i(TAG, "Result set changed, dropping preferred activity for "
                                     + intent + " type " + resolvedType);
                             if (DEBUG_PREFERRED) {
-                                Log.v(TAG, "Removing preferred activity since set changed "
+                                Slog.v(TAG, "Removing preferred activity since set changed "
                                         + pa.mPref.mComponent);
                             }
                             pir.removeFilter(pa);
@@ -2801,6 +2794,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
 
                         // Yay! Either the set matched or we're looking for the last chosen
+                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Returning preferred activity: "
+                                + ri.activityInfo.packageName + "/" + ri.activityInfo.name);
                         mSettings.writePackageRestrictionsLPr(userId);
                         return ri;
                     }
@@ -2808,6 +2803,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             mSettings.writePackageRestrictionsLPr(userId);
         }
+        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "No preferred activity to return");
         return null;
     }
 
@@ -9886,7 +9882,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         List<ResolveInfo> list = queryIntentActivities(intent, null,
                 PackageManager.GET_META_DATA, callingUserId);
         ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
-                true, false, callingUserId);
+                true, false, false, callingUserId);
 
         allHomeCandidates.clear();
         if (list != null) {
