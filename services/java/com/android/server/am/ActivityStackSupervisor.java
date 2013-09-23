@@ -1246,8 +1246,9 @@ public final class ActivityStackSupervisor {
         mService.doPendingActivityLaunchesLocked(false);
 
         err = startActivityUncheckedLocked(r, sourceRecord, startFlags, true, options);
-        if (stack.mPausingActivity == null) {
-            // Someone asked to have the keyguard dismissed on the next
+
+        if (allPausedActivitiesComplete()) {
+            // If someone asked to have the keyguard dismissed on the next
             // activity start, but we are not actually doing an activity
             // switch...  just dismiss the keyguard now, because we
             // probably want to see whatever is behind it.
@@ -2150,9 +2151,6 @@ public final class ActivityStackSupervisor {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             stack.awakeFromSleepingLocked();
-            if (isFrontStack(stack)) {
-                resumeTopActivitiesLocked();
-            }
         }
         mGoingToSleepActivities.clear();
     }
