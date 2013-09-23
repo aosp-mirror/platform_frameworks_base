@@ -3025,6 +3025,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // And we are resetting to find the next component...
             intent.setComponent(null);
 
+            final boolean debug = ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
+
             ActivityInfo aInfo = null;
             try {
                 List<ResolveInfo> resolves =
@@ -3045,6 +3047,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (i<N) {
                             aInfo = resolves.get(i).activityInfo;
                         }
+                        if (debug) {
+                            Slog.v(TAG, "Next matching activity: found current " + r.packageName
+                                    + "/" + r.info.name);
+                            Slog.v(TAG, "Next matching activity: next is " + aInfo.packageName
+                                    + "/" + aInfo.name);
+                        }
                         break;
                     }
                 }
@@ -3054,6 +3062,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (aInfo == null) {
                 // Nobody who is next!
                 ActivityOptions.abort(options);
+                if (debug) Slog.d(TAG, "Next matching activity: nothing found");
                 return false;
             }
 
