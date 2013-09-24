@@ -56,12 +56,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     // exists in and the offset into the array to find it.  The constants below
     // define the encoding of that data in an integer.
 
-    static final int MAX_HISTORIC_STATES = 6;   // Maximum number of historic states we will keep.
+    static final int MAX_HISTORIC_STATES = 8;   // Maximum number of historic states we will keep.
     static final String STATE_FILE_PREFIX = "state-"; // Prefix to use for state filenames.
     static final String STATE_FILE_SUFFIX = ".bin"; // Suffix to use for state filenames.
     static final String STATE_FILE_CHECKIN_SUFFIX = ".ci"; // State files that have checked in.
     static long WRITE_PERIOD = 30*60*1000;      // Write file every 30 minutes or so.
-    static long COMMIT_PERIOD = 12*60*60*1000;  // Commit current stats every 12 hours.
+    static long COMMIT_PERIOD = 3*60*60*1000;  // Commit current stats every 3 hours.
 
     final ActivityManagerService mAm;
     final File mBaseDir;
