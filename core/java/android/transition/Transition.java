@@ -1094,7 +1094,11 @@ public abstract class Transition implements Cloneable {
         }
         TransitionValues values = new TransitionValues();
         values.view = view;
-        captureStartValues(values);
+        if (start) {
+            captureStartValues(values);
+        } else {
+            captureEndValues(values);
+        }
         if (start) {
             if (!isListViewItem) {
                 mStartValues.viewValues.put(view, values);

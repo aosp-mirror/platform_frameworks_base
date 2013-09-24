@@ -73,8 +73,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
 
-    private static final Transition sTransition = ActionBarTransition.getActionBarTransition();
-
     public ActionMenuPresenter(Context context) {
         super(context, com.android.internal.R.layout.action_menu_layout,
                 com.android.internal.R.layout.action_menu_item_layout);
@@ -213,7 +211,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     public void updateMenuView(boolean cleared) {
         final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
         if (menuViewParent != null) {
-            TransitionManager.beginDelayedTransition(menuViewParent, sTransition);
+            ActionBarTransition.beginDelayedTransition(menuViewParent);
         }
         super.updateMenuView(cleared);
 
