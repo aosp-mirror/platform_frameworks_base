@@ -143,7 +143,7 @@ public abstract class ApplicationThreadNative extends Binder
             boolean isForward = data.readInt() != 0;
             String profileName = data.readString();
             ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean autoStopProfiler = data.readInt() != 0;
             scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo, procState, state,
                     ri, pi, notResumed, isForward, profileName, profileFd, autoStopProfiler);
@@ -267,7 +267,7 @@ public abstract class ApplicationThreadNative extends Binder
                 ? new ComponentName(data) : null;
             String profileName = data.readString();
             ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean autoStopProfiler = data.readInt() != 0;
             Bundle testArgs = data.readBundle();
             IBinder binder = data.readStrongBinder();
@@ -418,7 +418,7 @@ public abstract class ApplicationThreadNative extends Binder
             int profileType = data.readInt();
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             profilerControl(start, path, fd, profileType);
             return true;
         }
@@ -473,7 +473,7 @@ public abstract class ApplicationThreadNative extends Binder
             boolean managed = data.readInt() != 0;
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             dumpHeap(managed, path, fd);
             return true;
         }
