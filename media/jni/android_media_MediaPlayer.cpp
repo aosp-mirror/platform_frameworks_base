@@ -826,16 +826,19 @@ android_media_MediaPlayer_updateProxyConfig(
         jstring exclusionListObj = (jstring)env->CallObjectMethod(
                 proxyProps, fields.proxyConfigGetExclusionList);
 
-        const char *exclusionList =
-            env->GetStringUTFChars(exclusionListObj, NULL);
-
         if (host != NULL && exclusionListObj != NULL) {
-            thisplayer->updateProxyConfig(host, port, exclusionList);
-        }
+            const char *exclusionList = env->GetStringUTFChars(exclusionListObj, NULL);
 
-        if (exclusionList != NULL) {
-            env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
-            exclusionList = NULL;
+            if (exclusionList != NULL) {
+                thisplayer->updateProxyConfig(host, port, exclusionList);
+
+                env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
+                exclusionList = NULL;
+            } else {
+                thisplayer->updateProxyConfig(host, port, "");
+            }
+        } else if (host != NULL) {
+            thisplayer->updateProxyConfig(host, port, "");
         }
 
         if (host != NULL) {
