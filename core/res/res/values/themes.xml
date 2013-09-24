@@ -909,8 +909,8 @@ please see themes_device_defaults.xml.
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
-        <item name="colorPressedHighlight">@color/holo_blue_light</item>
-        <item name="colorLongPressedHighlight">@color/holo_blue_bright</item>
+        <item name="colorPressedHighlight">@color/holo_gray_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
         <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
         <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
         <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
@@ -1225,8 +1225,8 @@ please see themes_device_defaults.xml.
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
-        <item name="colorPressedHighlight">@color/holo_blue_light</item>
-        <item name="colorLongPressedHighlight">@color/holo_blue_bright</item>
+        <item name="colorPressedHighlight">@color/holo_gray_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
         <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
         <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
         <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
