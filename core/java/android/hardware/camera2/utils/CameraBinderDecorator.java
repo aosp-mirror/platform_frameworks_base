@@ -51,7 +51,7 @@ public class CameraBinderDecorator {
     public static final int EBUSY = -16;
     public static final int ENODEV = -19;
     public static final int EOPNOTSUPP = -95;
-    public static final int EDQUOT = -122;
+    public static final int EUSERS = -87;
 
     private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
@@ -85,7 +85,7 @@ public class CameraBinderDecorator {
                     case EBUSY:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_IN_USE));
-                    case EDQUOT:
+                    case EUSERS:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 MAX_CAMERAS_IN_USE));
                     case ENODEV:
