@@ -242,9 +242,11 @@ public class Vpn extends BaseNetworkStateTracker {
             try {
                 mCallback.restore();
                 final int size = mVpnUsers.size();
+                final boolean forwardDns = (mConfig.dnsServers != null &&
+                        mConfig.dnsServers.size() != 0);
                 for (int i = 0; i < size; i++) {
                     int user = mVpnUsers.keyAt(i);
-                    mCallback.clearUserForwarding(mInterface, user);
+                    mCallback.clearUserForwarding(mInterface, user, forwardDns);
                     hideNotification(user);
                 }
 
@@ -443,8 +445,12 @@ public class Vpn extends BaseNetworkStateTracker {
         if (!isRunningLocked()) {
             throw new IllegalStateException("VPN is not active");
         }
+
+        final boolean forwardDns = (mConfig.dnsServers != null &&
+                mConfig.dnsServers.size() != 0);
+
         // add the user
-        mCallback.addUserForwarding(mInterface, user);
+        mCallback.addUserForwarding(mInterface, user, forwardDns);
         mVpnUsers.put(user, true);
 
         // show the notification
@@ -484,7 +490,9 @@ public class Vpn extends BaseNetworkStateTracker {
             if (!isRunningLocked()) {
                 throw new IllegalStateException("VPN is not active");
             }
-            mCallback.clearUserForwarding(mInterface, user);
+            final boolean forwardDns = (mConfig.dnsServers != null &&
+                    mConfig.dnsServers.size() != 0);
+            mCallback.clearUserForwarding(mInterface, user, forwardDns);
             mVpnUsers.delete(user);
             hideNotification(user);
     }
@@ -553,9 +561,11 @@ public class Vpn extends BaseNetworkStateTracker {
                     final long token = Binder.clearCallingIdentity();
                     try {
                         final int size = mVpnUsers.size();
+                        final boolean forwardDns = (mConfig.dnsServers != null &&
+                                mConfig.dnsServers.size() != 0);
                         for (int i = 0; i < size; i++) {
                             int user = mVpnUsers.keyAt(i);
-                            mCallback.clearUserForwarding(mInterface, user);
+                            mCallback.clearUserForwarding(mInterface, user, forwardDns);
                             hideNotification(user);
                         }
                         mVpnUsers = null;

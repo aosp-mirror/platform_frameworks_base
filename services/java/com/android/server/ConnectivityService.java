@@ -2794,7 +2794,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             mNumDnsEntries = last;
         } catch (Exception e) {
-            if (DBG) loge("exception setting default dns interface: " + e);
+            loge("exception setting default dns interface: " + e);
         }
     }
 
@@ -3779,31 +3779,33 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        public void addUserForwarding(String interfaze, int uid) {
+        public void addUserForwarding(String interfaze, int uid, boolean forwardDns) {
             int uidStart = uid * UserHandle.PER_USER_RANGE;
             int uidEnd = uidStart + UserHandle.PER_USER_RANGE - 1;
-            addUidForwarding(interfaze, uidStart, uidEnd);
+            addUidForwarding(interfaze, uidStart, uidEnd, forwardDns);
         }
 
-        public void clearUserForwarding(String interfaze, int uid) {
+        public void clearUserForwarding(String interfaze, int uid, boolean forwardDns) {
             int uidStart = uid * UserHandle.PER_USER_RANGE;
             int uidEnd = uidStart + UserHandle.PER_USER_RANGE - 1;
-            clearUidForwarding(interfaze, uidStart, uidEnd);
+            clearUidForwarding(interfaze, uidStart, uidEnd, forwardDns);
         }
 
-        public void addUidForwarding(String interfaze, int uidStart, int uidEnd) {
+        public void addUidForwarding(String interfaze, int uidStart, int uidEnd,
+                boolean forwardDns) {
             try {
                 mNetd.setUidRangeRoute(interfaze,uidStart, uidEnd);
-                mNetd.setDnsInterfaceForUidRange(interfaze, uidStart, uidEnd);
+                if (forwardDns) mNetd.setDnsInterfaceForUidRange(interfaze, uidStart, uidEnd);
             } catch (RemoteException e) {
             }
 
         }
 
-        public void clearUidForwarding(String interfaze, int uidStart, int uidEnd) {
+        public void clearUidForwarding(String interfaze, int uidStart, int uidEnd,
+                boolean forwardDns) {
             try {
                 mNetd.clearUidRangeRoute(interfaze, uidStart, uidEnd);
-                mNetd.clearDnsInterfaceForUidRange(uidStart, uidEnd);
+                if (forwardDns) mNetd.clearDnsInterfaceForUidRange(uidStart, uidEnd);
             } catch (RemoteException e) {
             }
 
