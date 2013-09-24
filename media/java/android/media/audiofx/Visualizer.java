@@ -57,6 +57,11 @@ import android.os.Message;
  * anymore to free up native resources associated to the Visualizer instance.
  * <p>Creating a Visualizer on the output mix (audio session 0) requires permission
  * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>The Visualizer class can also be used to perform measurements on the audio being played back.
+ * The measurements to perform are defined by setting a mask of the requested measurement modes with
+ * {@link #setMeasurementMode(int)}. Supported values are {@link #MEASUREMENT_MODE_NONE} to cancel
+ * any measurement, and {@link #MEASUREMENT_MODE_PEAK_RMS} for peak and RMS monitoring.
+ * Measurements can be retrieved through {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
  */
 
 public class Visualizer {
@@ -94,20 +99,15 @@ public class Visualizer {
     public static final int SCALING_MODE_AS_PLAYED = 1;
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * Defines a measurement mode with no requested measurement.
+     * Defines a measurement mode in which no measurements are performed.
      */
     public static final int MEASUREMENT_MODE_NONE = 0;
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Defines a measurement mode which computes the peak and RMS value in mB, where 0mB is the
      * maximum sample value, and -9600mB is the minimum value.
-     * Values for peak and RMS can be retrieved with {@link #getIntMeasurements(int, int[])}, where
-     * the array holds the peak value at index {@link #MEASUREMENT_INDEX_PEAK} in the measurement
-     * array, and the RMS value at index {@link #MEASUREMENT_INDEX_RMS}.
+     * Values for peak and RMS can be retrieved with
+     * {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
      */
     public static final int MEASUREMENT_MODE_PEAK_RMS = 1 << 0;
 
@@ -368,8 +368,6 @@ public class Visualizer {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Sets the combination of measurement modes to be performed by this audio effect.
      * @param mode a mask of the measurements to perform. The valid values are
      *     {@link #MEASUREMENT_MODE_NONE} (to cancel any measurement)
@@ -389,8 +387,6 @@ public class Visualizer {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Returns the current measurement modes performed by this audio effect
      * @return the mask of the measurements,
      *     {@link #MEASUREMENT_MODE_NONE} (when no measurements are performed)
@@ -497,30 +493,25 @@ public class Visualizer {
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * A class to store peak and RMS values.
      * Peak and RMS are expressed in mB, as described in the
      * {@link Visualizer#MEASUREMENT_MODE_PEAK_RMS} measurement mode.
      */
     public static final class MeasurementPeakRms {
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
+         * The peak value in mB.
          */
         public int mPeak;
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
+         * The RMS value in mB.
          */
         public int mRms;
     }
 
     /**
-     * @hide
      * Retrieves the latest peak and RMS measurement.
-     * Sets the peak and RMS fields of the {@link Visualizer.MeasurementPeakRms} to the latest
-     * measured values.
+     * Sets the peak and RMS fields of the supplied {@link Visualizer.MeasurementPeakRms} to the
+     * latest measured values.
      * @param measurement a non-null {@link Visualizer.MeasurementPeakRms} instance to store
      *    the measurement values.
      * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE},
