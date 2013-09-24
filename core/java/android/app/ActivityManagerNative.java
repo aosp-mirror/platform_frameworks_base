@@ -152,7 +152,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int startFlags = data.readInt();
             String profileFile = data.readString();
             ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int userId = data.readInt();
@@ -178,7 +178,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int startFlags = data.readInt();
             String profileFile = data.readString();
             ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int userId = data.readInt();
@@ -1354,7 +1354,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int profileType = data.readInt();
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean res = profileControl(process, userId, start, path, fd, profileType);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
@@ -1608,7 +1608,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             boolean managed = data.readInt() != 0;
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             boolean res = dumpHeap(process, userId, managed, path, fd);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
