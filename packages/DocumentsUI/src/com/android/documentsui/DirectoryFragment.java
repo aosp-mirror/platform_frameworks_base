@@ -715,8 +715,16 @@ public class DirectoryFragment extends Fragment {
                     final FrameLayout grid = (FrameLayout) convertView;
                     final int gridPadding = getResources()
                             .getDimensionPixelSize(R.dimen.grid_padding);
-                    grid.setForeground(new InsetDrawable(grid.getForeground(), gridPadding));
-                    grid.setBackground(new InsetDrawable(grid.getBackground(), gridPadding));
+
+                    // Tricksy hobbitses! We need to fully clear the drawable so
+                    // the view doesn't clobber the new InsetDrawable callback
+                    // when setting back later.
+                    final Drawable fg = grid.getForeground();
+                    final Drawable bg = grid.getBackground();
+                    grid.setForeground(null);
+                    grid.setBackground(null);
+                    grid.setForeground(new InsetDrawable(fg, gridPadding));
+                    grid.setBackground(new InsetDrawable(bg, gridPadding));
                 } else {
                     throw new IllegalStateException();
                 }

@@ -16,10 +16,15 @@
 
 package com.android.documentsui.model;
 
+import android.content.ContentResolver;
+import android.provider.DocumentsProvider;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ProtocolException;
+import java.util.Collection;
 import java.util.LinkedList;
 
 /**
@@ -44,6 +49,26 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
 
     public boolean isRecents() {
         return size() == 0;
+    }
+
+    public void updateRoot(Collection<RootInfo> matchingRoots) throws FileNotFoundException {
+        for (RootInfo root : matchingRoots) {
+            if (root.equals(this.root)) {
+                this.root = root;
+                return;
+            }
+        }
+        throw new FileNotFoundException("Failed to find matching root for " + root);
+    }
+
+    /**
+     * Update a possibly stale restored stack against a live
+     * {@link DocumentsProvider}.
+     */
+    public void updateDocuments(ContentResolver resolver) throws FileNotFoundException {
+        for (DocumentInfo info : this) {
+            info.updateSelf(resolver);
+        }
     }
 
     @Override
