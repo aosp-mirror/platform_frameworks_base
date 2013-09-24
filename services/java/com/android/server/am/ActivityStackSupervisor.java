@@ -465,12 +465,18 @@ public final class ActivityStackSupervisor {
         return true;
     }
 
-    boolean pauseBackStacks(boolean userLeaving) {
+    /**
+     * Pause all activities in either all of the stacks or just the back stacks.
+     * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
+     * @param allStacks Whether to pause all the stacks (true), or just the back stacks (false).
+     * @return true if any activity was paused as a result of this call.
+     */
+    boolean pauseStacks(boolean userLeaving, boolean allStacks) {
         boolean someActivityPaused = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if (!isFrontStack(stack) && stack.mResumedActivity != null) {
-                if (DEBUG_STATES) Slog.d(TAG, "pauseBackStacks: stack=" + stack +
+            if ((allStacks || !isFrontStack(stack)) && stack.mResumedActivity != null) {
+                if (DEBUG_STATES) Slog.d(TAG, "pauseStacks: stack=" + stack +
                         " mResumedActivity=" + stack.mResumedActivity);
                 stack.startPausingLocked(userLeaving, false);
                 someActivityPaused = true;

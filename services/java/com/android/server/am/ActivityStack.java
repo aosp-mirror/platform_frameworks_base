@@ -1190,6 +1190,10 @@ final class ActivityStack {
     }
 
     final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
+        if (mService.mLockScreenState == ActivityManagerService.LOCK_SCREEN_FIRST_SHOWN) {
+            return false;
+        }
+
         // Find the first activity that is not finishing.
         ActivityRecord next = topRunningActivityLocked(null);
 
@@ -1325,7 +1329,7 @@ final class ActivityStack {
 
         // We need to start pausing the current activity so the top one
         // can be resumed...
-        boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving);
+        boolean pausing = mStackSupervisor.pauseStacks(userLeaving, false);
         if (mResumedActivity != null) {
             pausing = true;
             startPausingLocked(userLeaving, false);
