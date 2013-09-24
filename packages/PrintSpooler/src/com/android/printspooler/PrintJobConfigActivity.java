@@ -444,6 +444,10 @@ public class PrintJobConfigActivity extends Activity {
             // the requested pages, then nothing else to do.
             if (!infoChanged && !layoutChanged
                     && PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
+                // Nothing interesting changed and we have all requested pages.
+                // Then update the print jobs's pages as we will not do a write
+                // and we usually update the pages in the write complete callback.
+                updatePrintJobPages(mDocument.pages, mRequestedPages);
                 if (mEditor.isDone()) {
                     requestCreatePdfFileOrFinish();
                 }
@@ -499,36 +503,44 @@ public class PrintJobConfigActivity extends Activity {
                         + " and got: " + Arrays.toString(mDocument.pages));
             }
 
+            updatePrintJobPages(mDocument.pages, mRequestedPages);
+
+            if (mEditor.isDone()) {
+                requestCreatePdfFileOrFinish();
+            }
+        }
+
+        private void updatePrintJobPages(PageRange[] writtenPages, PageRange[] requestedPages) {
             // Adjust the print job pages based on what was requested and written.
             // The cases are ordered in the most expected to the least expected.
-            if (Arrays.equals(mDocument.pages, mRequestedPages)) {
+            if (Arrays.equals(writtenPages, requestedPages)) {
                 // We got a document with exactly the pages we wanted. Hence,
                 // the printer has to print all pages in the data.
                 PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
                         ALL_PAGES_ARRAY);
-            } else if (Arrays.equals(mDocument.pages, ALL_PAGES_ARRAY)) {
+            } else if (Arrays.equals(writtenPages, ALL_PAGES_ARRAY)) {
                 // We requested specific pages but got all of them. Hence,
                 // the printer has to print only the requested pages.
                 PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
-                        mRequestedPages);
-            } else if (PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
+                        requestedPages);
+            } else if (PageRangeUtils.contains(writtenPages, requestedPages)) {
                 // We requested specific pages and got more but not all pages.
                 // Hence, we have to offset appropriately the printed pages to
-                // exclude the pages we did not request. Note that pages is
-                // guaranteed to be not null and not empty.
-                final int offset = mDocument.pages[0].getStart() - pages[0].getStart();
-                PageRange[] offsetPages = Arrays.copyOf(mDocument.pages, mDocument.pages.length);
-                PageRangeUtils.offsetStart(offsetPages, offset);
+                // be based off the start of the written ones instead of zero.
+                // The written pages are always non-null and not empty.
+                final int offset = -writtenPages[0].getStart();
+                PageRange[] offsetPages = Arrays.copyOf(requestedPages, requestedPages.length);
+                PageRangeUtils.offset(offsetPages, offset);
                 PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
                         offsetPages);
-            } else if (Arrays.equals(mRequestedPages, ALL_PAGES_ARRAY)
-                    && mDocument.pages.length == 1 && mDocument.pages[0].getStart() == 0
-                    && mDocument.pages[0].getEnd() == mDocument.info.getPageCount() - 1) {
+            } else if (Arrays.equals(requestedPages, ALL_PAGES_ARRAY)
+                    && writtenPages.length == 1 && writtenPages[0].getStart() == 0
+                    && writtenPages[0].getEnd() == mDocument.info.getPageCount() - 1) {
                 // We requested all pages via the special constant and got all
                 // of them as an explicit enumeration. Hence, the printer has
                 // to print only the requested pages.
                 PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
-                        mDocument.pages);
+                        writtenPages);
             } else {
                 // We did not get the pages we requested, then the application
                 // misbehaves, so we fail quickly.
@@ -536,10 +548,6 @@ public class PrintJobConfigActivity extends Activity {
                 mControllerState = CONTROLLER_STATE_FAILED;
                 Log.e(LOG_TAG, "Received invalid pages from the app");
                 PrintJobConfigActivity.this.finish();
-            }
-
-            if (mEditor.isDone()) {
-                requestCreatePdfFileOrFinish();
             }
         }
 
@@ -2191,38 +2199,39 @@ public class PrintJobConfigActivity extends Activity {
             throw new UnsupportedOperationException();
         }
 
-        public static boolean contains(PageRange[] ourPageRanges, PageRange[] otherPageRanges) {
-            if (ourPageRanges == null || otherPageRanges == null) {
+        public static boolean contains(PageRange[] ourRanges, PageRange[] otherRanges) {
+            if (ourRanges == null || otherRanges == null) {
                 return false;
             }
 
-            if (ourPageRanges.length == 1
-                    && PageRange.ALL_PAGES.equals(ourPageRanges[0])) {
+            if (ourRanges.length == 1
+                    && PageRange.ALL_PAGES.equals(ourRanges[0])) {
                 return true;
             }
 
-            otherPageRanges = normalize(otherPageRanges);
+            ourRanges = normalize(ourRanges);
+            otherRanges = normalize(otherRanges);
 
-            int otherPageIdx = 0;
-            final int myPageCount = ourPageRanges.length;
-            final int otherPageCount = otherPageRanges.length;
-            for (int i= 0; i < myPageCount; i++) {
-                PageRange myPage = ourPageRanges[i];
-                for (; otherPageIdx < otherPageCount; otherPageIdx++) {
-                    PageRange otherPage = otherPageRanges[otherPageIdx];
-                    if (otherPage.getStart() > myPage.getStart()) {
+            // Note that the code below relies on the ranges being normalized
+            // which is they contain monotonically increasing non-intersecting
+            // subranges whose start is less that or equal to the end.
+            int otherRangeIdx = 0;
+            final int ourRangeCount = ourRanges.length;
+            final int otherRangeCount = otherRanges.length;
+            for (int ourRangeIdx = 0; ourRangeIdx < ourRangeCount; ourRangeIdx++) {
+                PageRange ourRange = ourRanges[ourRangeIdx];
+                for (; otherRangeIdx < otherRangeCount; otherRangeIdx++) {
+                    PageRange otherRange = otherRanges[otherRangeIdx];
+                    if (otherRange.getStart() > ourRange.getEnd()) {
                         break;
                     }
-                    if ((otherPage.getStart() < myPage.getStart()
-                                    && otherPage.getEnd() > myPage.getStart())
-                            || (otherPage.getEnd() > myPage.getEnd()
-                                    && otherPage.getStart() < myPage.getEnd())
-                            || (otherPage.getEnd() < myPage.getStart())) {
+                    if (otherRange.getStart() < ourRange.getStart()
+                            || otherRange.getEnd() > ourRange.getEnd()) {
                         return false;
                     }
                 }
             }
-            if (otherPageIdx < otherPageCount) {
+            if (otherRangeIdx < otherRangeCount) {
                 return false;
             }
             return true;
@@ -2256,7 +2265,7 @@ public class PrintJobConfigActivity extends Activity {
                     oldRangeCount);
         }
 
-        public static void offsetStart(PageRange[] pageRanges, int offset) {
+        public static void offset(PageRange[] pageRanges, int offset) {
             if (offset == 0) {
                 return;
             }
