@@ -410,6 +410,8 @@ public final class Downloads {
         /** The column that is used to count retries */
         public static final String COLUMN_FAILED_CONNECTIONS = "numfailed";
 
+        public static final String COLUMN_ALLOW_WRITE = "allow_write";
+
         /**
          * default value for {@link #COLUMN_LAST_UPDATESRC}.
          * This value is used when this column's value is not relevant.
