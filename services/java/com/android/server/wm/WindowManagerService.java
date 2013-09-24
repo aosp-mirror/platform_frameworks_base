@@ -158,7 +158,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 DisplayManagerService.WindowManagerFuncs, DisplayManager.DisplayListener {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = true;
+    static final boolean DEBUG_ADD_REMOVE = false;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || false;
     static final boolean DEBUG_ANIM = false;
@@ -9770,21 +9770,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowState findFocusedWindowLocked(DisplayContent displayContent) {
-        // Set nextApp to the first app and set taskNdx and tokenNdx to point to the app following.
-        final ArrayList<Task> tasks = displayContent.getTasks();
-        int taskNdx = tasks.size() - 1;
-        AppTokenList tokens = taskNdx >= 0 ? tasks.get(taskNdx).mAppTokens : null;
-        int tokenNdx = tokens != null ? tokens.size() - 1 : -1;
-        WindowToken nextApp = tokenNdx >= 0 ? tokens.get(tokenNdx) : null;
-        --tokenNdx;
-        if (tokenNdx < 0) {
-            --taskNdx;
-            if (taskNdx >= 0) {
-                tokens = tasks.get(taskNdx).mAppTokens;
-                tokenNdx = tokens.size() - 1;
-            }
-        }
-
         final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
@@ -9795,59 +9780,51 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", flags=" + win.mAttrs.flags
                 + ", canReceive=" + win.canReceiveKeys());
 
-            AppWindowToken thisApp = win.mAppToken;
+            AppWindowToken wtoken = win.mAppToken;
 
             // If this window's application has been removed, just skip it.
-            if (thisApp != null && (thisApp.removed || thisApp.sendingToBottom)) {
-                if (DEBUG_FOCUS) Slog.v(TAG, "Skipping " + thisApp + " because "
-                        + (thisApp.removed ? "removed" : "sendingToBottom"));
+            if (wtoken != null && (wtoken.removed || wtoken.sendingToBottom)) {
+                if (DEBUG_FOCUS) Slog.v(TAG, "Skipping " + wtoken + " because "
+                        + (wtoken.removed ? "removed" : "sendingToBottom"));
                 continue;
             }
 
-            // If there is a focused app, don't allow focus to go to any
-            // windows below it.  If this is an application window, step
-            // through the app tokens until we find its app.
-            if (thisApp != null && nextApp != null && thisApp != nextApp
-                    && win.mAttrs.type != TYPE_APPLICATION_STARTING) {
-                final WindowToken origAppToken = nextApp;
-                final int origTaskNdx = taskNdx;
-                final int origTokenNdx = tokenNdx;
-                for ( ; taskNdx >= 0; --taskNdx) {
-                    tokens = tasks.get(taskNdx).mAppTokens;
+            if (!win.canReceiveKeys()) {
+                continue;
+            }
+
+            // Descend through all of the app tokens and find the first that either matches
+            // win.mAppToken (return win) or mFocusedApp (return null).
+            if (wtoken != null && win.mAttrs.type != TYPE_APPLICATION_STARTING &&
+                    mFocusedApp != null) {
+                ArrayList<Task> tasks = displayContent.getTasks();
+                for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                    AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
+                    int tokenNdx = tokens.size() - 1;
                     for ( ; tokenNdx >= 0; --tokenNdx) {
-                        if (nextApp == mFocusedApp) {
-                            // Whoops, we are below the focused app...  no focus for you!
-                            if (localLOGV || DEBUG_FOCUS) Slog.v(
-                                TAG, "findFocusedWindow: Reached focused app=" + mFocusedApp);
-                            return null;
-                        }
-                        nextApp = tokens.get(tokenNdx);
-                        if (nextApp == thisApp) {
+                        final AppWindowToken token = tokens.get(tokenNdx);
+                        if (wtoken == token) {
                             break;
                         }
+                        if (mFocusedApp == token) {
+                            // Whoops, we are below the focused app...  no focus for you!
+                            if (localLOGV || DEBUG_FOCUS_LIGHT) Slog.v(TAG,
+                                    "findFocusedWindow: Reached focused app=" + mFocusedApp);
+                            return null;
+                        }
                     }
-                    if (thisApp == nextApp) {
+                    if (tokenNdx >= 0) {
+                        // Early exit from loop, must have found the matching token.
                         break;
                     }
                 }
-                if (thisApp != nextApp) {
-                    // Uh oh, the app token doesn't exist!  This shouldn't
-                    // happen, but if it does we can get totally hosed...
-                    // so restart at the original app.
-                    nextApp = origAppToken;
-                    // return indices to same place.
-                    taskNdx = origTaskNdx;
-                    tokenNdx = origTokenNdx;
-                }
             }
 
-            // Dispatch to this window if it is wants key events.
-            if (win.canReceiveKeys()) {
-                if (DEBUG_FOCUS_LIGHT) Slog.v(
-                        TAG, "findFocusedWindow: Found new focus @ " + i + " = " + win);
-                return win;
-            }
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: Found new focus @ " + i +
+                        " = " + win);
+            return win;
         }
+
         if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: No focusable windows.");
         return null;
     }
