@@ -62,6 +62,8 @@
 
     <!-- Toast shown when saving a document failed with an error [CHAR LIMIT=48] -->
     <string name="save_error">Failed to save document</string>
+    <!-- Toast shown when creating a folder failed with an error [CHAR LIMIT=48] -->
+    <string name="create_error">Failed to create folder</string>
 
     <!-- Title of storage root location that contains recently modified or used documents [CHAR LIMIT=24] -->
     <string name="root_recent">Recent</string>
