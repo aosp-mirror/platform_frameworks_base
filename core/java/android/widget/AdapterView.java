@@ -284,7 +284,9 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     /**
-     * Call the OnItemClickListener, if it is defined.
+     * Call the OnItemClickListener, if it is defined. Performs all normal
+     * actions associated with clicking: reporting accessibility event, playing
+     * a sound, etc.
      *
      * @param view The view within the AdapterView that was clicked.
      * @param position The position of the view in the adapter.
