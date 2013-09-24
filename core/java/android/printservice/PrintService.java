@@ -383,6 +383,10 @@ public abstract class PrintService extends Service {
             final int action = message.what;
             switch (action) {
                 case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_CREATE_PRINTER_DISCOVERY_SESSION "
+                                + getPackageName());
+                    }
                     PrinterDiscoverySession session = onCreatePrinterDiscoverySession();
                     if (session == null) {
                         throw new NullPointerException("session cannot be null");
@@ -396,6 +400,10 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_DESTROY_PRINTER_DISCOVERY_SESSION: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_DESTROY_PRINTER_DISCOVERY_SESSION "
+                                + getPackageName());
+                    }
                     if (mDiscoverySession != null) {
                         mDiscoverySession.destroy();
                         mDiscoverySession = null;
@@ -403,6 +411,10 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_START_PRINTER_DISCOVERY: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_START_PRINTER_DISCOVERY "
+                                + getPackageName());
+                    }
                     if (mDiscoverySession != null) {
                         List<PrinterId> priorityList = (ArrayList<PrinterId>) message.obj;
                         mDiscoverySession.startPrinterDiscovery(priorityList);
@@ -410,12 +422,20 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_STOP_PRINTER_DISCOVERY: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_STOP_PRINTER_DISCOVERY "
+                                + getPackageName());
+                    }
                     if (mDiscoverySession != null) {
                         mDiscoverySession.stopPrinterDiscovery();
                     }
                 } break;
 
                 case MSG_VALIDATE_PRINTERS: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_VALIDATE_PRINTERS "
+                                + getPackageName());
+                    }
                     if (mDiscoverySession != null) {
                         List<PrinterId> printerIds = (List<PrinterId>) message.obj;
                         mDiscoverySession.validatePrinters(printerIds);
@@ -423,6 +443,10 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_START_PRINTER_STATE_TRACKING: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_START_PRINTER_STATE_TRACKING "
+                                + getPackageName());
+                    }
                     if (mDiscoverySession != null) {
                         PrinterId printerId = (PrinterId) message.obj;
                         mDiscoverySession.startPrinterStateTracking(printerId);
@@ -430,6 +454,10 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_STOP_PRINTER_STATE_TRACKING: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_STOP_PRINTER_STATE_TRACKING "
+                                + getPackageName());
+                    }
                     if (mDiscoverySession != null) {
                         PrinterId printerId = (PrinterId) message.obj;
                         mDiscoverySession.stopPrinterStateTracking(printerId);
@@ -437,11 +465,19 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_ON_REQUEST_CANCEL_PRINTJOB: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_ON_REQUEST_CANCEL_PRINTJOB "
+                                + getPackageName());
+                    }
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
                     onRequestCancelPrintJob(new PrintJob(printJobInfo, mClient));
                 } break;
 
                 case MSG_ON_PRINTJOB_QUEUED: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_ON_PRINTJOB_QUEUED "
+                                + getPackageName());
+                    }
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
                     if (DEBUG) {
                         Log.i(LOG_TAG, "Queued: " + printJobInfo);
@@ -450,6 +486,10 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_SET_CLEINT: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_SET_CLEINT "
+                                + getPackageName());
+                    }
                     mClient = (IPrintServiceClient) message.obj;
                     if (mClient != null) {
                         onConnected();
