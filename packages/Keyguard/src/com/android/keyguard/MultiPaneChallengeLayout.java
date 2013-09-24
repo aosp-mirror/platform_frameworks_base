@@ -172,10 +172,12 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             mScrimView.setOnClickListener(null);
         }
         mScrimView = scrim;
-        mScrimView.setAlpha(mIsBouncing ? 1.0f : 0.0f);
-        mScrimView.setVisibility(mIsBouncing ? VISIBLE : INVISIBLE);
-        mScrimView.setFocusable(true);
-        mScrimView.setOnClickListener(mScrimClickListener);
+        if (mScrimView != null) {
+            mScrimView.setAlpha(mIsBouncing ? 1.0f : 0.0f);
+            mScrimView.setVisibility(mIsBouncing ? VISIBLE : INVISIBLE);
+            mScrimView.setFocusable(true);
+            mScrimView.setOnClickListener(mScrimClickListener);
+        }
     }
 
     private int getVirtualHeight(LayoutParams lp, int height, int heightUsed) {
