@@ -51,6 +51,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class NavigationBarView extends LinearLayout {
+    private static final int CAMERA_BUTTON_FADE_DURATION = 200;
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
 
@@ -89,7 +90,26 @@ public class NavigationBarView extends LinearLayout {
 
     private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
         @Override
-        public boolean onTouch(View v, MotionEvent event) {
+        public boolean onTouch(View cameraButtonView, MotionEvent event) {
+            View searchLight = getSearchLight();
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // disable search gesture while interacting with camera
+                    mDelegateHelper.setDisabled(true);
+                    cameraButtonView.animate().alpha(0.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
+                    if (searchLight != null) {
+                        searchLight.animate().alpha(0.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mDelegateHelper.setDisabled(false);
+                    cameraButtonView.animate().alpha(1.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
+                    if (searchLight != null) {
+                        searchLight.animate().alpha(1.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
+                    }
+                    break;
+            }
             return mTouchDelegate.dispatch(event);
         }
     };
