@@ -42,6 +42,7 @@
         android:paddingEnd="@dimen/grid_padding_horiz"
         android:paddingTop="@dimen/grid_padding"
         android:paddingBottom="@dimen/grid_padding"
+        android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
         android:listSelector="@android:color/transparent"
         android:visibility="gone" />

@@ -72,6 +72,7 @@ public class RecentsProvider extends ContentProvider {
         public static final String PACKAGE_NAME = "package_name";
         public static final String STACK = "stack";
         public static final String TIMESTAMP = "timestamp";
+        public static final String EXTERNAL = "external";
     }
 
     public static Uri buildRecent() {
@@ -97,9 +98,10 @@ public class RecentsProvider extends ContentProvider {
 
         private static final int VERSION_INIT = 1;
         private static final int VERSION_AS_BLOB = 3;
+        private static final int VERSION_ADD_EXTERNAL = 4;
 
         public DatabaseHelper(Context context) {
-            super(context, DB_NAME, null, VERSION_AS_BLOB);
+            super(context, DB_NAME, null, VERSION_ADD_EXTERNAL);
         }
 
         @Override
@@ -121,9 +123,10 @@ public class RecentsProvider extends ContentProvider {
                     ")");
 
             db.execSQL("CREATE TABLE " + TABLE_RESUME + " (" +
-                    ResumeColumns.PACKAGE_NAME + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
-                    ResumeColumns.STACK + " BLOB," +
-                    ResumeColumns.TIMESTAMP + " INTEGER" +
+                    ResumeColumns.PACKAGE_NAME + " TEXT NOT NULL PRIMARY KEY," +
+                    ResumeColumns.STACK + " BLOB DEFAULT NULL," +
+                    ResumeColumns.TIMESTAMP + " INTEGER," +
+                    ResumeColumns.EXTERNAL + " INTEGER NOT NULL DEFAULT 0" +
                     ")");
         }
 
@@ -176,6 +179,7 @@ public class RecentsProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
+        final ContentValues key = new ContentValues();
         switch (sMatcher.match(uri)) {
             case URI_RECENT:
                 values.put(RecentColumns.TIMESTAMP, System.currentTimeMillis());
@@ -188,7 +192,6 @@ public class RecentsProvider extends ContentProvider {
                 final String rootId = uri.getPathSegments().get(2);
                 final String documentId = uri.getPathSegments().get(3);
 
-                final ContentValues key = new ContentValues();
                 key.put(StateColumns.AUTHORITY, authority);
                 key.put(StateColumns.ROOT_ID, rootId);
                 key.put(StateColumns.DOCUMENT_ID, documentId);
@@ -201,10 +204,15 @@ public class RecentsProvider extends ContentProvider {
 
                 return uri;
             case URI_RESUME:
-                final String packageName = uri.getPathSegments().get(1);
-                values.put(ResumeColumns.PACKAGE_NAME, packageName);
                 values.put(ResumeColumns.TIMESTAMP, System.currentTimeMillis());
-                db.insert(TABLE_RESUME, null, values);
+
+                final String packageName = uri.getPathSegments().get(1);
+                key.put(ResumeColumns.PACKAGE_NAME, packageName);
+
+                // Ensure that row exists, then update with changed values
+                db.insertWithOnConflict(TABLE_RESUME, null, key, SQLiteDatabase.CONFLICT_IGNORE);
+                db.update(TABLE_RESUME, values, ResumeColumns.PACKAGE_NAME + "=?",
+                        new String[] { packageName });
                 return uri;
             default:
                 throw new UnsupportedOperationException("Unsupported Uri " + uri);

@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsProvider;
 import android.provider.DocumentsContract.Document;
 
 import com.android.documentsui.RootCursorWrapper;
@@ -141,23 +142,42 @@ public class DocumentInfo implements Durable, Parcelable {
     }
 
     public static DocumentInfo fromCursor(Cursor cursor, String authority) {
-        final DocumentInfo doc = new DocumentInfo();
-        doc.authority = authority;
-        doc.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
-        doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-        doc.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
-        doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-        doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-        doc.lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
-        doc.flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-        doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-        doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
-        doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
-        doc.deriveFields();
-        return doc;
+        final DocumentInfo info = new DocumentInfo();
+        info.updateFromCursor(cursor, authority);
+        return info;
     }
 
-    public static DocumentInfo fromUri(ContentResolver resolver, Uri uri) throws FileNotFoundException {
+    public void updateFromCursor(Cursor cursor, String authority) {
+        this.authority = authority;
+        this.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
+        this.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        this.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
+        this.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        this.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
+        this.lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
+        this.flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+        this.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
+        this.size = getCursorLong(cursor, Document.COLUMN_SIZE);
+        this.icon = getCursorInt(cursor, Document.COLUMN_ICON);
+        this.deriveFields();
+    }
+
+    public static DocumentInfo fromUri(ContentResolver resolver, Uri uri)
+            throws FileNotFoundException {
+        final DocumentInfo info = new DocumentInfo();
+        info.updateFromUri(resolver, uri);
+        return info;
+    }
+
+    /**
+     * Update a possibly stale restored document against a live
+     * {@link DocumentsProvider}.
+     */
+    public void updateSelf(ContentResolver resolver) throws FileNotFoundException {
+        updateFromUri(resolver, derivedUri);
+    }
+
+    public void updateFromUri(ContentResolver resolver, Uri uri) throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 uri.getAuthority());
         Cursor cursor = null;
@@ -166,7 +186,7 @@ public class DocumentInfo implements Durable, Parcelable {
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException("Missing details for " + uri);
             }
-            return fromCursor(cursor, uri.getAuthority());
+            updateFromCursor(cursor, uri.getAuthority());
         } catch (Throwable t) {
             throw asFileNotFoundException(t);
         } finally {
