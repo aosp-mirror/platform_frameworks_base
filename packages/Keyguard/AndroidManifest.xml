@@ -41,7 +41,8 @@
 
     <application android:label="@string/app_name"
         android:process="com.android.systemui"
-        android:persistent="true" >
+        android:persistent="true"
+        android:supportsRtl="true">
 
         <service android:name=".KeyguardService"
             android:exported="true" />
