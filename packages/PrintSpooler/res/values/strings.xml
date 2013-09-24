@@ -26,24 +26,24 @@
     <string name="save_button">Save</string>
 
     <!-- Label of the destination widget. [CHAR LIMIT=20] -->
-    <string name="label_destination">DESTIINATION</string>
+    <string name="label_destination">Destination</string>
 
     <!-- Label of the copies count widget. [CHAR LIMIT=20] -->
-    <string name="label_copies">COPIES</string>
+    <string name="label_copies">Copies</string>
 
     <!-- Label of the paper size widget. [CHAR LIMIT=20] -->
-    <string name="label_paper_size">PAPER SIZE</string>
+    <string name="label_paper_size">Paper Size</string>
 
     <!-- Label of the color mode widget. [CHAR LIMIT=20] -->
-    <string name="label_color">COLOR</string>
+    <string name="label_color">Color</string>
 
     <!-- Label of the orientation widget. [CHAR LIMIT=20] -->
-    <string name="label_orientation">ORIENTATION</string>
+    <string name="label_orientation">Orientation</string>
 
     <!-- Label of the page selection widget. [CHAR LIMIT=20] -->
-    <string name="label_pages">PAGES (<xliff:g id="page_count" example="5">%1$s</xliff:g>)</string>
+    <string name="label_pages">Pages (<xliff:g id="page_count" example="5">%1$s</xliff:g>)</string>
 
-    <!-- Page range exmple used as a hint of how to specify such. [CHAR LIMIT=15] -->
+    <!-- Page range exmple used as a hint of how to specify such. [CHAR LIMIT=20] -->
     <string name="pages_range_example">e.g. 1&#8211;5, 8, 11&#8211;13</string>
 
     <!-- Title for the pring preview button .[CHAR LIMIT=30] -->
@@ -56,7 +56,7 @@
     <string name="printing_app_crashed">Printing app crashed</string>
 
     <!-- Title if the number of pages in a printed document is unknown. [CHAR LIMIT=20] -->
-    <string name="page_count_unknown">unknown</string>
+    <string name="page_count_unknown">unavailable</string>
 
     <!-- Title for the temporary dialog show while an app is generating a print job. [CHAR LIMIT=30] -->
     <string name="generating_print_job">Generating print job</string>
