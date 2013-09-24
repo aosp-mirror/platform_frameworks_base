@@ -93,7 +93,20 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
         if (mDragListener == null) {
             mDragListener = new ForwardingListener(mAnchor) {
                 @Override
+                protected boolean onForwardingStarted() {
+                    show();
+                    return true;
+                }
+
+                @Override
+                protected boolean onForwardingStopped() {
+                    dismiss();
+                    return true;
+                }
+
+                @Override
                 public ListPopupWindow getPopup() {
+                    // This will be null until show() is called.
                     return mPopup.getPopup();
                 }
             };
