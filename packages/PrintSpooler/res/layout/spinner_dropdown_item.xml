@@ -47,7 +47,6 @@
         android:visibility="gone"
         android:textColor="@color/item_text_color"
         android:duplicateParentState="true">
-
     </TextView>
 
 </LinearLayout>
