@@ -38,6 +38,7 @@ import android.util.Printer;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import com.android.internal.util.FastPrintWriter;
 
 /**
  * {@hide}
@@ -229,8 +230,8 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
                 ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
         if (debug) Slog.v(
-            TAG, "Resolving type " + resolvedType + " scheme " + scheme
-            + " of intent " + intent);
+            TAG, "Resolving type=" + resolvedType + " scheme=" + scheme
+            + " defaultOnly=" + defaultOnly + " userId=" + userId + " of " + intent);
 
         F[] firstTypeCut = null;
         F[] secondTypeCut = null;
@@ -312,8 +313,8 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
 
         if (debug) {
             Slog.v(TAG, "Final result list:");
-            for (R r : finalList) {
-                Slog.v(TAG, "  " + r);
+            for (int i=0; i<finalList.size(); i++) {
+                Slog.v(TAG, "  " + finalList.get(i));
             }
         }
         return finalList;
@@ -521,6 +522,16 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
 
         final boolean excludingStopped = intent.isExcludingStopped();
 
+        final Printer logPrinter;
+        final PrintWriter logPrintWriter;
+        if (debug) {
+            logPrinter = new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM);
+            logPrintWriter = new FastPrintWriter(logPrinter);
+        } else {
+            logPrinter = null;
+            logPrintWriter = null;
+        }
+
         final int N = src != null ? src.length : 0;
         boolean hasNonDefaults = false;
         int i;
@@ -555,11 +566,17 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             match = filter.match(action, resolvedType, scheme, data, categories, TAG);
             if (match >= 0) {
                 if (debug) Slog.v(TAG, "  Filter matched!  match=0x" +
-                        Integer.toHexString(match));
+                        Integer.toHexString(match) + " hasDefault="
+                        + filter.hasCategory(Intent.CATEGORY_DEFAULT));
                 if (!defaultOnly || filter.hasCategory(Intent.CATEGORY_DEFAULT)) {
                     final R oneResult = newResult(filter, match, userId);
                     if (oneResult != null) {
                         dest.add(oneResult);
+                        if (debug) {
+                            dumpFilter(logPrintWriter, "    ", filter);
+                            logPrintWriter.flush();
+                            filter.dump(logPrinter, "    ");
+                        }
                     }
                 } else {
                     hasNonDefaults = true;
@@ -579,8 +596,12 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             }
         }
 
-        if (dest.size() == 0 && hasNonDefaults) {
-            Slog.w(TAG, "resolveIntent failed: found match, but none with Intent.CATEGORY_DEFAULT");
+        if (hasNonDefaults) {
+            if (dest.size() == 0) {
+                Slog.w(TAG, "resolveIntent failed: found match, but none with CATEGORY_DEFAULT");
+            } else if (dest.size() > 1) {
+                Slog.w(TAG, "resolveIntent: multiple matches, only some with CATEGORY_DEFAULT");
+            }
         }
     }
 

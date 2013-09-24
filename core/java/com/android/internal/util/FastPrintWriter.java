@@ -1,5 +1,7 @@
 package com.android.internal.util;
 
+import android.util.Printer;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -41,6 +43,7 @@ public class FastPrintWriter extends PrintWriter {
     final private String mSeparator;
 
     final private Writer mWriter;
+    final private Printer mPrinter;
 
     private CharsetEncoder mCharset;
     final private ByteBuffer mBytes;
@@ -106,6 +109,7 @@ public class FastPrintWriter extends PrintWriter {
         mBytes = ByteBuffer.allocate(mBufferLen);
         mOutputStream = out;
         mWriter = null;
+        mPrinter = null;
         mAutoFlush = autoFlush;
         mSeparator = System.lineSeparator();
         initDefaultEncoder();
@@ -130,7 +134,7 @@ public class FastPrintWriter extends PrintWriter {
     }
 
     /**
-     * Constructs a new {@code PrintWriter} with {@code out} as its target
+     * Constructs a new {@code PrintWriter} with {@code wr} as its target
      * writer. The parameter {@code autoFlush} determines if the print writer
      * automatically flushes its contents to the target writer when a newline is
      * encountered.
@@ -148,7 +152,7 @@ public class FastPrintWriter extends PrintWriter {
     }
 
     /**
-     * Constructs a new {@code PrintWriter} with {@code out} as its target
+     * Constructs a new {@code PrintWriter} with {@code wr} as its target
      * writer and a custom buffer size. The parameter {@code autoFlush} determines
      * if the print writer automatically flushes its contents to the target writer
      * when a newline is encountered.
@@ -174,7 +178,51 @@ public class FastPrintWriter extends PrintWriter {
         mBytes = null;
         mOutputStream = null;
         mWriter = wr;
+        mPrinter = null;
         mAutoFlush = autoFlush;
+        mSeparator = System.lineSeparator();
+        initDefaultEncoder();
+    }
+
+    /**
+     * Constructs a new {@code PrintWriter} with {@code pr} as its target
+     * printer and the default buffer size.  Because a {@link Printer} is line-base,
+     * autoflush is always enabled.
+     *
+     * @param pr
+     *            the target writer.
+     * @throws NullPointerException
+     *             if {@code pr} is {@code null}.
+     */
+    public FastPrintWriter(Printer pr) {
+        this(pr, 512);
+    }
+
+    /**
+     * Constructs a new {@code PrintWriter} with {@code pr} as its target
+     * printer and a custom buffer size.  Because a {@link Printer} is line-base,
+     * autoflush is always enabled.
+     *
+     * @param pr
+     *            the target writer.
+     * @param bufferLen
+     *            specifies the size of the FastPrintWriter's internal buffer; the
+     *            default is 512.
+     * @throws NullPointerException
+     *             if {@code pr} is {@code null}.
+     */
+    public FastPrintWriter(Printer pr, int bufferLen) {
+        super(sDummyWriter, true);
+        if (pr == null) {
+            throw new NullPointerException("pr is null");
+        }
+        mBufferLen = bufferLen;
+        mText = new char[bufferLen];
+        mBytes = null;
+        mOutputStream = null;
+        mWriter = null;
+        mPrinter = pr;
+        mAutoFlush = true;
         mSeparator = System.lineSeparator();
         initDefaultEncoder();
     }
@@ -306,9 +354,22 @@ public class FastPrintWriter extends PrintWriter {
                 }
                 flushBytesLocked();
                 mOutputStream.flush();
-            } else {
+            } else if (mWriter != null) {
                 mWriter.write(mText, 0, mPos);
                 mWriter.flush();
+            } else {
+                int nonEolOff = 0;
+                final int sepLen = mSeparator.length();
+                final int len = sepLen < mPos ? sepLen : mPos;
+                while (nonEolOff < len && mText[mPos-1-nonEolOff]
+                        == mSeparator.charAt(mSeparator.length()-1-nonEolOff)) {
+                    nonEolOff++;
+                }
+                if (nonEolOff >= mPos) {
+                    mPrinter.println("");
+                } else {
+                    mPrinter.println(new String(mText, 0, mPos-nonEolOff));
+                }
             }
             mPos = 0;
         }
@@ -326,7 +387,7 @@ public class FastPrintWriter extends PrintWriter {
                 flushLocked();
                 if (mOutputStream != null) {
                     mOutputStream.flush();
-                } else {
+                } else if (mWriter != null) {
                     mWriter.flush();
                 }
             } catch (IOException e) {
@@ -342,7 +403,7 @@ public class FastPrintWriter extends PrintWriter {
                 flushLocked();
                 if (mOutputStream != null) {
                     mOutputStream.close();
-                } else {
+                } else if (mWriter != null) {
                     mWriter.close();
                 }
             } catch (IOException e) {

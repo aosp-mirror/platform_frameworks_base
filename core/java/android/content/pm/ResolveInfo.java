@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -247,10 +248,23 @@ public class ResolveInfo implements Parcelable {
 
     public String toString() {
         ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
-        return "ResolveInfo{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + ci.name + " p=" + priority + " o="
-            + preferredOrder + " m=0x" + Integer.toHexString(match) + "}";
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ResolveInfo{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        ComponentName.appendShortString(sb, ci.packageName, ci.name);
+        if (priority != 0) {
+            sb.append(" p=");
+            sb.append(priority);
+        }
+        if (preferredOrder != 0) {
+            sb.append(" o=");
+            sb.append(preferredOrder);
+        }
+        sb.append(" m=0x");
+        sb.append(Integer.toHexString(match));
+        sb.append('}');
+        return sb.toString();
     }
 
     public int describeContents() {
