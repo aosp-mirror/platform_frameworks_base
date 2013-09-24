@@ -2355,7 +2355,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             killUnneededProcessLocked(proc, Long.toString(proc.lastCachedPss)
                     + "k from cached");
-        } else if (proc != null && !keepIfLarge && mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
+        } else if (proc != null && !keepIfLarge
+                && mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
             if (DEBUG_PSS) Slog.d(TAG, "May not keep " + proc + ": pss=" + proc.lastCachedPss);
             if (proc.lastCachedPss >= mProcessList.getCachedRestoreThreshold()) {

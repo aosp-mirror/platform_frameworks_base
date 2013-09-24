@@ -80,7 +80,7 @@ public class PreferredComponent {
                 }
                 myPackages[i] = cn.getPackageName().intern();
                 myClasses[i] = cn.getClassName().intern();
-                myComponents[i] = cn.flattenToShortString().intern();
+                myComponents[i] = cn.flattenToShortString();
             }
             mSetPackages = myPackages;
             mSetClasses = myClasses;
@@ -219,9 +219,10 @@ public class PreferredComponent {
         out.print(prefix); out.print(
                 Integer.toHexString(System.identityHashCode(ident)));
                 out.print(' ');
-                out.print(mComponent.flattenToShortString());
-                out.print(" match=0x");
-                out.println( Integer.toHexString(mMatch));
+                out.println(mShortComponent);
+        out.print(prefix); out.print(" mMatch=0x");
+                out.print(Integer.toHexString(mMatch));
+                out.print(" mAlways="); out.println(mAlways);
         if (mSetComponents != null) {
             out.print(prefix); out.println("  Selected from:");
             for (int i=0; i<mSetComponents.length; i++) {
