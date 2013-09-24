@@ -39,6 +39,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -3707,18 +3708,15 @@ public class PackageParser {
             }
             return componentName;
         }
-        
-        public String getComponentShortName() {
-            if (componentShortName != null) {
-                return componentShortName;
-            }
-            ComponentName component = getComponentName();
-            if (component != null) {
-                componentShortName = component.flattenToShortString();
-            }
-            return componentShortName;
+
+        public void appendComponentShortName(StringBuilder sb) {
+            ComponentName.appendShortString(sb, owner.applicationInfo.packageName, className);
         }
-        
+
+        public void printComponentShortName(PrintWriter pw) {
+            ComponentName.printShortString(pw, owner.applicationInfo.packageName, className);
+        }
+
         public void setPackageName(String packageName) {
             componentName = null;
             componentShortName = null;
@@ -3917,9 +3915,13 @@ public class PackageParser {
         }
 
         public String toString() {
-            return "Activity{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + getComponentShortName() + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Activity{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -3954,9 +3956,13 @@ public class PackageParser {
         }
 
         public String toString() {
-            return "Service{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + getComponentShortName() + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Service{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -3999,9 +4005,13 @@ public class PackageParser {
         }
 
         public String toString() {
-            return "Provider{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + info.name + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Provider{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -4040,9 +4050,13 @@ public class PackageParser {
         }
 
         public String toString() {
-            return "Instrumentation{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + getComponentShortName() + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Instrumentation{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -4074,9 +4088,13 @@ public class PackageParser {
         }
 
         public String toString() {
-            return "ActivityIntentInfo{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + activity.info.name + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("ActivityIntentInfo{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            activity.appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -4088,9 +4106,13 @@ public class PackageParser {
         }
 
         public String toString() {
-            return "ServiceIntentInfo{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + service.info.name + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("ServiceIntentInfo{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            service.appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
