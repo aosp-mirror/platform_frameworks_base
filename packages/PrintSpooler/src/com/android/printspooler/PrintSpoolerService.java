@@ -74,7 +74,7 @@ public final class PrintSpoolerService extends Service {
 
     private static final String LOG_TAG = "PrintSpoolerService";
 
-    private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = true;
+    private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = false;
 
     private static final boolean DEBUG_PERSISTENCE = false;
 
