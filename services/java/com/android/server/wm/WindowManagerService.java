@@ -416,6 +416,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mFocusedStackLayer;
 
     final float[] mTmpFloats = new float[9];
+    final Rect mTmpContentRect = new Rect();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -8172,9 +8173,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mScreenRect.set(0, 0, dw, dh);
         }
 
-        Rect contentRect = new Rect();
-        mPolicy.getContentRectLw(contentRect);
-        displayContent.setStackBoxSize(contentRect);
+        mPolicy.getContentRectLw(mTmpContentRect);
+        displayContent.setStackBoxSize(mTmpContentRect);
 
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;
