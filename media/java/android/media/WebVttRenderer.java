@@ -690,6 +690,9 @@ class WebVttParser {
     final private Phase mParseStart = new Phase() { // 5-9
         @Override
         public void parse(String line) {
+            if (line.startsWith("\ufeff")) {
+                line = line.substring(1);
+            }
             if (!line.equals("WEBVTT") &&
                     !line.startsWith("WEBVTT ") &&
                     !line.startsWith("WEBVTT\t")) {
