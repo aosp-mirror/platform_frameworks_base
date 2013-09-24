@@ -76,7 +76,7 @@ public class CreateDirectoryFragment extends DialogFragment {
                     final DocumentInfo childDoc = DocumentInfo.fromUri(resolver, childUri);
                     activity.onDocumentPicked(childDoc);
                 } catch (Exception e) {
-                    Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.create_error, Toast.LENGTH_SHORT).show();
                 }
             }
         });

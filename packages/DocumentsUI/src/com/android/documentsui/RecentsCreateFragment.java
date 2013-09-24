@@ -45,8 +45,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
@@ -55,6 +57,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -89,10 +92,13 @@ public class RecentsCreateFragment extends Fragment {
         mAdapter = new DocumentStackAdapter();
         mListView.setAdapter(mAdapter);
 
+        final RootsCache roots = DocumentsApplication.getRootsCache(context);
+        final State state = ((DocumentsActivity) getActivity()).getDisplayState();
+
         mCallbacks = new LoaderCallbacks<List<DocumentStack>>() {
             @Override
             public Loader<List<DocumentStack>> onCreateLoader(int id, Bundle args) {
-                return new RecentsCreateLoader(context);
+                return new RecentsCreateLoader(context, roots, state);
             }
 
             @Override
@@ -131,12 +137,18 @@ public class RecentsCreateFragment extends Fragment {
     };
 
     public static class RecentsCreateLoader extends UriDerivativeLoader<Uri, List<DocumentStack>> {
-        public RecentsCreateLoader(Context context) {
+        private final RootsCache mRoots;
+        private final State mState;
+
+        public RecentsCreateLoader(Context context, RootsCache roots, State state) {
             super(context, RecentsProvider.buildRecent());
+            mRoots = roots;
+            mState = state;
         }
 
         @Override
         public List<DocumentStack> loadInBackground(Uri uri, CancellationSignal signal) {
+            final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
             final ArrayList<DocumentStack> result = Lists.newArrayList();
 
             final ContentResolver resolver = getContext().getContentResolver();
@@ -149,6 +161,12 @@ public class RecentsCreateFragment extends Fragment {
                     try {
                         final DocumentStack stack = new DocumentStack();
                         stack.read(new DataInputStream(new ByteArrayInputStream(rawStack)));
+
+                        // Only update root here to avoid spinning up all
+                        // providers; we update the stack during the actual
+                        // restore. This also filters away roots that don't
+                        // match current filter.
+                        stack.updateRoot(matchingRoots);
                         result.add(stack);
                     } catch (IOException e) {
                         Log.w(TAG, "Failed to resolve stack: " + e);

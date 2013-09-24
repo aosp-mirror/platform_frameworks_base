@@ -285,6 +285,7 @@ public class DocumentsActivity extends Activity {
 
     private class RestoreStackTask extends AsyncTask<Void, Void, Void> {
         private volatile boolean mRestoredStack;
+        private volatile boolean mExternal;
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -298,6 +299,7 @@ public class DocumentsActivity extends Activity {
                             cursor.getColumnIndex(ResumeColumns.STACK));
                     DurableUtils.readFromArray(rawStack, mState.stack);
                     mRestoredStack = true;
+                    mExternal = cursor.getInt(cursor.getColumnIndex(ResumeColumns.EXTERNAL)) != 0;
                 }
             } catch (IOException e) {
                 Log.w(TAG, "Failed to resume", e);
@@ -305,12 +307,17 @@ public class DocumentsActivity extends Activity {
                 IoUtils.closeQuietly(cursor);
             }
 
-            // If restored root isn't valid, fall back to recents
-            final RootInfo root = getCurrentRoot();
-            final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
-            if (!matchingRoots.contains(root)) {
-                mState.stack.reset();
-                mRestoredStack = false;
+            if (mRestoredStack) {
+                // Update the restored stack to ensure we have freshest data
+                final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
+                try {
+                    mState.stack.updateRoot(matchingRoots);
+                    mState.stack.updateDocuments(getContentResolver());
+                } catch (FileNotFoundException e) {
+                    Log.w(TAG, "Failed to restore stack: " + e);
+                    mState.stack.reset();
+                    mRestoredStack = false;
+                }
             }
 
             return null;
@@ -321,10 +328,22 @@ public class DocumentsActivity extends Activity {
             if (isDestroyed()) return;
             mState.restored = true;
 
-            // Only open drawer when not restoring stack, and when not showing
-            // visual content.
-            if (!mRestoredStack
-                    && !MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
+            // Show drawer when no stack restored, but only when requesting
+            // non-visual content. However, if we last used an external app,
+            // drawer is always shown.
+
+            boolean showDrawer = false;
+            if (!mRestoredStack) {
+                showDrawer = true;
+            }
+            if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
+                showDrawer = false;
+            }
+            if (mExternal && mState.action == ACTION_GET_CONTENT) {
+                showDrawer = true;
+            }
+
+            if (showDrawer) {
                 setRootsDrawerOpen(true);
             }
 
@@ -340,6 +359,7 @@ public class DocumentsActivity extends Activity {
             mState.showSize = true;
         } else {
             mState.showSize = SettingsActivity.getDisplayFileSize(this);
+            invalidateOptionsMenu();
         }
     }
 
@@ -779,10 +799,10 @@ public class DocumentsActivity extends Activity {
             } else {
                 DirectoryFragment.showRecentsOpen(fm, anim);
 
-                // Start recents in relevant mode
-                final boolean acceptImages = MimePredicate.mimeMatches(
-                        "image/*", mState.acceptMimes);
-                mState.userMode = acceptImages ? MODE_GRID : MODE_LIST;
+                // Start recents in grid when requesting visual things
+                final boolean visualMimes = MimePredicate.mimeMatches(
+                        MimePredicate.VISUAL_MIMES, mState.acceptMimes);
+                mState.userMode = visualMimes ? MODE_GRID : MODE_LIST;
                 mState.derivedMode = mState.userMode;
             }
         } else {
@@ -814,9 +834,17 @@ public class DocumentsActivity extends Activity {
     }
 
     public void onStackPicked(DocumentStack stack) {
-        mState.stack = stack;
-        mState.stackTouched = true;
-        onCurrentDirectoryChanged(ANIM_SIDE);
+        try {
+            // Update the restored stack to ensure we have freshest data
+            stack.updateDocuments(getContentResolver());
+
+            mState.stack = stack;
+            mState.stackTouched = true;
+            onCurrentDirectoryChanged(ANIM_SIDE);
+
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, "Failed to restore stack: " + e);
+        }
     }
 
     public void onRootPicked(RootInfo root, boolean closeDrawer) {
@@ -858,6 +886,14 @@ public class DocumentsActivity extends Activity {
         // Only relay back results when not canceled; otherwise stick around to
         // let the user pick another app/backend.
         if (requestCode == CODE_FORWARD && resultCode != RESULT_CANCELED) {
+
+            // Remember that we last picked via external app
+            final String packageName = getCallingPackage();
+            final ContentValues values = new ContentValues();
+            values.put(ResumeColumns.EXTERNAL, 1);
+            getContentResolver().insert(RecentsProvider.buildResume(packageName), values);
+
+            // Pass back result to original caller
             setResult(resultCode, data);
             finish();
         } else {
@@ -945,6 +981,7 @@ public class DocumentsActivity extends Activity {
         final String packageName = getCallingPackage();
         values.clear();
         values.put(ResumeColumns.STACK, rawStack);
+        values.put(ResumeColumns.EXTERNAL, 0);
         resolver.insert(RecentsProvider.buildResume(packageName), values);
 
         final Intent intent = new Intent();

@@ -27,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import libcore.io.IoUtils;
@@ -51,6 +52,9 @@ public class TestActivity extends Activity {
 
         final LinearLayout view = new LinearLayout(context);
         view.setOrientation(LinearLayout.VERTICAL);
+
+        mResult = new TextView(context);
+        view.addView(mResult);
 
         final CheckBox multiple = new CheckBox(context);
         multiple.setText("ALLOW_MULTIPLE");
@@ -156,6 +160,23 @@ public class TestActivity extends Activity {
         view.addView(button);
 
         button = new Button(context);
+        button.setText("CREATE_DOC image/png");
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/png");
+                intent.putExtra(Intent.EXTRA_TITLE, "mypicture.png");
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                }
+                startActivityForResult(intent, CODE_WRITE);
+            }
+        });
+        view.addView(button);
+
+        button = new Button(context);
         button.setText("GET_CONTENT */*");
         button.setOnClickListener(new OnClickListener() {
             @Override
@@ -174,10 +195,10 @@ public class TestActivity extends Activity {
         });
         view.addView(button);
 
-        mResult = new TextView(context);
-        view.addView(mResult);
+        final ScrollView scroll = new ScrollView(context);
+        scroll.addView(view);
 
-        setContentView(view);
+        setContentView(scroll);
     }
 
     @Override
