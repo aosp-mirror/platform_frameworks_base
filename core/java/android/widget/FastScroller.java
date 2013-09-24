@@ -210,7 +210,7 @@ class FastScroller {
     private final Runnable mDeferStartDrag = new Runnable() {
         @Override
         public void run() {
-            if (mList.mIsAttached) {
+            if (mList.isAttachedToWindow()) {
                 beginDrag();
 
                 final float pos = getPosFromMotionEvent(mInitialTouchY);

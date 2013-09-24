@@ -675,11 +675,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mLastAccessibilityScrollEventToIndex;
 
     /**
-     * Track if we are currently attached to a window.
-     */
-    boolean mIsAttached;
-
-    /**
      * Track the item count from the last time we handled a data change.
      */
     private int mLastHandledItemCount;
@@ -1904,7 +1899,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
         if (gainFocus && mSelectedPosition < 0 && !isInTouchMode()) {
-            if (!mIsAttached && mAdapter != null) {
+            if (!isAttachedToWindow() && mAdapter != null) {
                 // Data may have changed while we were detached and it's valid
                 // to change focus while detached. Refresh so we don't die.
                 mDataChanged = true;
@@ -2715,7 +2710,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mOldItemCount = mItemCount;
             mItemCount = mAdapter.getCount();
         }
-        mIsAttached = true;
     }
 
     @Override
@@ -2770,7 +2764,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             removeCallbacks(mTouchModeReset);
             mTouchModeReset.run();
         }
-        mIsAttached = false;
     }
 
     @Override
@@ -3397,7 +3390,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mPositionScroller.stop();
         }
 
-        if (!mIsAttached) {
+        if (!isAttachedToWindow()) {
             // Something isn't right.
             // Since we rely on being attached to get data set change notifications,
             // don't risk doing anything where we might try to resync and find things
@@ -3636,7 +3629,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_REST;
                                     child.setPressed(false);
                                     setPressed(false);
-                                    if (!mDataChanged) {
+                                    if (!mDataChanged && isAttachedToWindow()) {
                                         performClick.run();
                                     }
                                 }
@@ -3911,7 +3904,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mPositionScroller.stop();
         }
 
-        if (!mIsAttached) {
+        if (!isAttachedToWindow()) {
             // Something isn't right.
             // Since we rely on being attached to get data set change notifications,
             // don't risk doing anything where we might try to resync and find things
