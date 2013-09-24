@@ -18,11 +18,6 @@ package com.android.keyguard;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.RemoteException;
@@ -45,7 +40,6 @@ import android.widget.FrameLayout;
  */
 public abstract class KeyguardViewBase extends FrameLayout {
 
-    private static final int BACKGROUND_COLOR = 0x70000000;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
     protected KeyguardViewMediator.ViewMediatorCallback mViewMediatorCallback;
@@ -55,38 +49,12 @@ public abstract class KeyguardViewBase extends FrameLayout {
     // the audio service will bring up the volume dialog.
     private static final boolean KEYGUARD_MANAGES_VOLUME = true;
 
-    // This is a faster way to draw the background on devices without hardware acceleration
-    private static final Drawable mBackgroundDrawable = new Drawable() {
-        @Override
-        public void draw(Canvas canvas) {
-            canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC);
-        }
-
-        @Override
-        public void setAlpha(int alpha) {
-        }
-
-        @Override
-        public void setColorFilter(ColorFilter cf) {
-        }
-
-        @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
-        }
-    };
-
     public KeyguardViewBase(Context context) {
         this(context, null);
     }
 
     public KeyguardViewBase(Context context, AttributeSet attrs) {
         super(context, attrs);
-        resetBackground();
-    }
-
-    public void resetBackground() {
-        setBackground(mBackgroundDrawable);
     }
 
     /**
