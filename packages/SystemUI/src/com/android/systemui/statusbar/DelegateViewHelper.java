@@ -35,6 +35,7 @@ public class DelegateViewHelper {
     RectF mInitialTouch = new RectF();
     private boolean mStarted;
     private boolean mSwapXY = false;
+    private boolean mDisabled;
 
     public DelegateViewHelper(View sourceView) {
         setSourceView(sourceView);
@@ -49,7 +50,7 @@ public class DelegateViewHelper {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mSourceView == null || mDelegateView == null
+        if (mSourceView == null || mDelegateView == null || mDisabled
                 || mBar.shouldDisableNavbarGestures()) {
             return false;
         }
@@ -141,5 +142,9 @@ public class DelegateViewHelper {
      */
     public void setSwapXY(boolean swap) {
         mSwapXY = swap;
+    }
+
+    public void setDisabled(boolean disabled) {
+        mDisabled = disabled;
     }
 }

@@ -23,7 +23,6 @@ public class KeyguardViewStateManager implements
         SlidingChallengeLayout.OnChallengeScrolledListener,
         ChallengeLayout.OnBouncerStateChangedListener {
 
-    private static final int WARP_FADE_DURATION = 250;
     private KeyguardWidgetPager mKeyguardWidgetPager;
     private ChallengeLayout mChallengeLayout;
     private KeyguardHostView mKeyguardHostView;
