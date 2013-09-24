@@ -418,6 +418,12 @@ public final class RemoteController
             mApplied = false;
         }
 
+        private void cleanupBitmapFromBundle(int key) {
+            if (METADATA_KEYS_TYPE.get(key, METADATA_TYPE_INVALID) == METADATA_TYPE_BITMAP) {
+                mEditorMetadata.remove(String.valueOf(key));
+            }
+        }
+
         /**
          * Applies all of the metadata changes that have been set since the MediaMetadataEditor
          * instance was created with {@link RemoteController#editMetadata()}
@@ -529,9 +535,6 @@ public final class RemoteController
 
         public void setArtwork(int genId, Bitmap artwork) {
             if (DEBUG) { Log.v(TAG, "setArtwork("+genId+")"); }
-            if (artwork == null) {
-                return;
-            }
             synchronized(mGenLock) {
                 if (mClientGenerationIdCurrent != genId) {
                     return;
@@ -700,6 +703,10 @@ public final class RemoteController
                     // existing metadata, merge existing and new
                     mMetadataEditor.mEditorMetadata.putAll(metadata);
                 }
+                mMetadataEditor.putBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK,
+                        (Bitmap)metadata.getParcelable(
+                                String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK)));
+                mMetadataEditor.cleanupBitmapFromBundle(MediaMetadataEditor.BITMAP_KEY_ARTWORK);
             } else {
                 mMetadataEditor = new MetadataEditor(metadata, editableKeys);
             }
