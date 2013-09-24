@@ -1974,6 +1974,16 @@ public class PrintJobConfigActivity extends Activity {
             }
 
             @Override
+            public boolean isEnabled(int position) {
+                Object item = getItem(position);
+                if (item instanceof PrinterInfo) {
+                    PrinterInfo printer = (PrinterInfo) item;
+                    return printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE;
+                }
+                return true;
+            }
+
+            @Override
             public Object getItem(int position) {
                 if (mPrinters.isEmpty()) {
                     if (position == 0) {
@@ -2016,7 +2026,9 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public View getDropDownView(int position, View convertView,
                     ViewGroup parent) {
-                return getView(position, convertView, parent);
+                View view = getView(position, convertView, parent);
+                view.setEnabled(isEnabled(position));
+                return view;
             }
 
             @Override
