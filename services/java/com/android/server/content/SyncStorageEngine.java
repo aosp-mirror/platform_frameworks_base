@@ -710,28 +710,31 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public void clearAllBackoffs(SyncQueue syncQueue) {
+    /**
+     * Callers of this function need to hold a lock for syncQueue object passed in. Bear in mind
+     * this function grabs the lock for {@link #mAuthorities}
+     * @param syncQueue queue containing pending sync operations.
+     */
+    public void clearAllBackoffsLocked(SyncQueue syncQueue) {
         boolean changed = false;
         synchronized (mAuthorities) {
-            synchronized (syncQueue) {
-                for (AccountInfo accountInfo : mAccounts.values()) {
-                    for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
-                        if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
-                                || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
-                            if (DEBUG) {
-                                Log.v(TAG, "clearAllBackoffs:"
-                                        + " authority:" + authorityInfo.authority
-                                        + " account:" + accountInfo.accountAndUser.account.name
-                                        + " user:" + accountInfo.accountAndUser.userId
-                                        + " backoffTime was: " + authorityInfo.backoffTime
-                                        + " backoffDelay was: " + authorityInfo.backoffDelay);
-                            }
-                            authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
-                            authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
-                            syncQueue.onBackoffChanged(accountInfo.accountAndUser.account,
-                                    accountInfo.accountAndUser.userId, authorityInfo.authority, 0);
-                            changed = true;
+            for (AccountInfo accountInfo : mAccounts.values()) {
+                for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
+                    if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
+                            || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
+                        if (DEBUG) {
+                            Log.v(TAG, "clearAllBackoffs:"
+                                    + " authority:" + authorityInfo.authority
+                                    + " account:" + accountInfo.accountAndUser.account.name
+                                    + " user:" + accountInfo.accountAndUser.userId
+                                    + " backoffTime was: " + authorityInfo.backoffTime
+                                    + " backoffDelay was: " + authorityInfo.backoffDelay);
                         }
+                        authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
+                        authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
+                        syncQueue.onBackoffChanged(accountInfo.accountAndUser.account,
+                                accountInfo.accountAndUser.userId, authorityInfo.authority, 0);
+                        changed = true;
                     }
                 }
             }
