@@ -41,6 +41,7 @@
             android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/kg_status_date_font_size"
+            android:textAllCaps="@bool/kg_use_all_caps"
             />
 
         <TextView
@@ -53,6 +54,7 @@
             android:textAppearance="?android:attr/textAppearance"
             android:textSize="@dimen/kg_status_line_font_size"
             android:drawablePadding="4dip"
+            android:textAllCaps="@bool/kg_use_all_caps"
             />
     </LinearLayout>
 
