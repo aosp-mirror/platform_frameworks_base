@@ -23,6 +23,7 @@ import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.Map;
@@ -41,6 +42,10 @@ public class TextChange extends Transition {
     private static final String LOG_TAG = "TextChange";
 
     private static final String PROPNAME_TEXT = "android:textchange:text";
+    private static final String PROPNAME_TEXT_SELECTION_START =
+            "android:textchange:textSelectionStart";
+    private static final String PROPNAME_TEXT_SELECTION_END =
+            "android:textchange:textSelectionEnd";
     private static final String PROPNAME_TEXT_COLOR = "android:textchange:textColor";
 
     private int mChangeBehavior = CHANGE_BEHAVIOR_KEEP;
@@ -84,7 +89,9 @@ public class TextChange extends Transition {
     public static final int CHANGE_BEHAVIOR_OUT_IN = 3;
 
     private static final String[] sTransitionProperties = {
-            PROPNAME_TEXT
+            PROPNAME_TEXT,
+            PROPNAME_TEXT_SELECTION_START,
+            PROPNAME_TEXT_SELECTION_END
     };
 
     /**
@@ -122,6 +129,12 @@ public class TextChange extends Transition {
         if (transitionValues.view instanceof TextView) {
             TextView textview = (TextView) transitionValues.view;
             transitionValues.values.put(PROPNAME_TEXT, textview.getText());
+            if (textview instanceof EditText) {
+                transitionValues.values.put(PROPNAME_TEXT_SELECTION_START,
+                        textview.getSelectionStart());
+                transitionValues.values.put(PROPNAME_TEXT_SELECTION_END,
+                        textview.getSelectionEnd());
+            }
             if (mChangeBehavior > CHANGE_BEHAVIOR_KEEP) {
                 transitionValues.values.put(PROPNAME_TEXT_COLOR, textview.getCurrentTextColor());
             }
@@ -152,8 +165,24 @@ public class TextChange extends Transition {
                 (CharSequence) startVals.get(PROPNAME_TEXT) : "";
         final CharSequence endText = endVals.get(PROPNAME_TEXT) != null ?
                 (CharSequence) endVals.get(PROPNAME_TEXT) : "";
+        final int startSelectionStart, startSelectionEnd, endSelectionStart, endSelectionEnd;
+        if (view instanceof EditText) {
+            startSelectionStart = startVals.get(PROPNAME_TEXT_SELECTION_START) != null ?
+                    (Integer) startVals.get(PROPNAME_TEXT_SELECTION_START) : -1;
+            startSelectionEnd = startVals.get(PROPNAME_TEXT_SELECTION_END) != null ?
+                    (Integer) startVals.get(PROPNAME_TEXT_SELECTION_END) : startSelectionStart;
+            endSelectionStart = endVals.get(PROPNAME_TEXT_SELECTION_START) != null ?
+                    (Integer) endVals.get(PROPNAME_TEXT_SELECTION_START) : -1;
+            endSelectionEnd = endVals.get(PROPNAME_TEXT_SELECTION_END) != null ?
+                    (Integer) endVals.get(PROPNAME_TEXT_SELECTION_END) : endSelectionStart;
+        } else {
+            startSelectionStart = startSelectionEnd = endSelectionStart = endSelectionEnd = -1;
+        }
         if (!startText.equals(endText)) {
             view.setText(startText);
+            if (view instanceof EditText) {
+                setSelection(((EditText) view), startSelectionStart, startSelectionEnd);
+            }
             Animator anim;
             if (mChangeBehavior == CHANGE_BEHAVIOR_KEEP) {
                 anim = ValueAnimator.ofFloat(0, 1);
@@ -163,6 +192,9 @@ public class TextChange extends Transition {
                         if (startText.equals(view.getText())) {
                             // Only set if it hasn't been changed since anim started
                             view.setText(endText);
+                            if (view instanceof EditText) {
+                                setSelection(((EditText) view), endSelectionStart, endSelectionEnd);
+                            }
                         }
                     }
                 });
@@ -188,6 +220,10 @@ public class TextChange extends Transition {
                             if (startText.equals(view.getText())) {
                                 // Only set if it hasn't been changed since anim started
                                 view.setText(endText);
+                                if (view instanceof EditText) {
+                                    setSelection(((EditText) view), endSelectionStart,
+                                            endSelectionEnd);
+                                }
                             }
                         }
                     });
@@ -220,11 +256,17 @@ public class TextChange extends Transition {
                 @Override
                 public void onTransitionPause(Transition transition) {
                     view.setText(endText);
+                    if (view instanceof EditText) {
+                        setSelection(((EditText) view), endSelectionStart, endSelectionEnd);
+                    }
                 }
 
                 @Override
                 public void onTransitionResume(Transition transition) {
                     view.setText(startText);
+                    if (view instanceof EditText) {
+                        setSelection(((EditText) view), startSelectionStart, startSelectionEnd);
+                    }
                 }
             };
             addListener(transitionListener);
@@ -234,5 +276,11 @@ public class TextChange extends Transition {
             return anim;
         }
         return null;
+    }
+
+    private void setSelection(EditText editText, int start, int end) {
+        if (start >= 0 && end >= 0) {
+            editText.setSelection(start, end);
+        }
     }
 }

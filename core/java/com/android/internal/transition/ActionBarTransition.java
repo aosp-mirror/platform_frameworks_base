@@ -21,27 +21,38 @@ import android.transition.ChangeBounds;
 import android.transition.Fade;
 import android.transition.TextChange;
 import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.transition.TransitionSet;
+import android.view.ViewGroup;
 
 public class ActionBarTransition {
+
+    private static boolean TRANSITIONS_ENABLED = false;
 
     private static final int TRANSITION_DURATION = 120; // ms
 
     private static final Transition sTransition;
 
     static {
-        final TextChange tc = new TextChange();
-        tc.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT_IN);
-        final TransitionSet inner = new TransitionSet();
-        inner.addTransition(tc).addTransition(new ChangeBounds());
-        final TransitionSet tg = new TransitionSet();
-        tg.addTransition(new Fade(Fade.OUT)).addTransition(inner).addTransition(new Fade(Fade.IN));
-        tg.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
-        tg.setDuration(TRANSITION_DURATION);
-        sTransition = tg;
+        if (TRANSITIONS_ENABLED) {
+            final TextChange tc = new TextChange();
+            tc.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT_IN);
+            final TransitionSet inner = new TransitionSet();
+            inner.addTransition(tc).addTransition(new ChangeBounds());
+            final TransitionSet tg = new TransitionSet();
+            tg.addTransition(new Fade(Fade.OUT)).addTransition(inner).
+                    addTransition(new Fade(Fade.IN));
+            tg.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+            tg.setDuration(TRANSITION_DURATION);
+            sTransition = tg;
+        } else {
+            sTransition = null;
+        }
     }
 
-    public static Transition getActionBarTransition() {
-        return sTransition;
+    public static void beginDelayedTransition(ViewGroup sceneRoot) {
+        if (TRANSITIONS_ENABLED) {
+            TransitionManager.beginDelayedTransition(sceneRoot, sTransition);
+        }
     }
 }
