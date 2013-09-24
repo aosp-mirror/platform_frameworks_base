@@ -85,7 +85,7 @@ final class RemotePrintService implements DeathRecipient {
 
     private boolean mHasPrinterDiscoverySession;
 
-    private boolean mServiceDead;
+    private boolean mServiceDied;
 
     private List<PrinterId> mDiscoveryPriorityList;
 
@@ -107,7 +107,6 @@ final class RemotePrintService implements DeathRecipient {
         mSpooler = spooler;
         mHandler = new MyHandler(context.getMainLooper());
         mPrintServiceClient = new RemotePrintServiceClient(this);
-        mServiceDead = true;
     }
 
     public ComponentName getComponentName() {
@@ -157,7 +156,7 @@ final class RemotePrintService implements DeathRecipient {
     private void handleBinderDied() {
         mPrintService.asBinder().unlinkToDeath(this, 0);
         mPrintService = null;
-        mServiceDead = true;
+        mServiceDied = true;
         mCallbacks.onServiceDied(this);
     }
 
@@ -171,7 +170,7 @@ final class RemotePrintService implements DeathRecipient {
         if (!isBound()) {
             // The service is dead and neither has active jobs nor discovery
             // session, so ensure we are unbound since the service has no work.
-            if (mServiceDead && !mHasPrinterDiscoverySession) {
+            if (mServiceDied && !mHasPrinterDiscoverySession) {
                 ensureUnbound();
                 return;
             }
@@ -286,7 +285,7 @@ final class RemotePrintService implements DeathRecipient {
         if (!isBound()) {
             // The service is dead and neither has active jobs nor discovery
             // session, so ensure we are unbound since the service has no work.
-            if (mServiceDead && !mHasActivePrintJobs) {
+            if (mServiceDied && !mHasActivePrintJobs) {
                 ensureUnbound();
                 return;
             }
@@ -556,15 +555,15 @@ final class RemotePrintService implements DeathRecipient {
                 return;
             }
             // If the service died and there is a discovery session, recreate it.
-            if (mServiceDead && mHasPrinterDiscoverySession) {
+            if (mServiceDied && mHasPrinterDiscoverySession) {
                 handleCreatePrinterDiscoverySession();
             }
             // If the service died and there is discovery started, restart it.
-            if (mServiceDead && mDiscoveryPriorityList != null) {
+            if (mServiceDied && mDiscoveryPriorityList != null) {
                 handleStartPrinterDiscovery(mDiscoveryPriorityList);
             }
             // If the service died and printers were tracked, start tracking.
-            if (mServiceDead && mTrackedPrinterList != null) {
+            if (mServiceDied && mTrackedPrinterList != null) {
                 final int trackedPrinterCount = mTrackedPrinterList.size();
                 for (int i = 0; i < trackedPrinterCount; i++) {
                     handleStartPrinterStateTracking(mTrackedPrinterList.get(i));
@@ -581,7 +580,7 @@ final class RemotePrintService implements DeathRecipient {
             if (!mHasPrinterDiscoverySession && !mHasActivePrintJobs) {
                 ensureUnbound();
             }
-            mServiceDead = false;
+            mServiceDied = false;
         }
 
         @Override

@@ -86,10 +86,6 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     }
 
     private void computeAndDeliverResult(Map<PrinterId, PrinterInfo> discoveredPrinters) {
-        if (!isStarted()) {
-            return;
-        }
-
         List<PrinterInfo> printers = new ArrayList<PrinterInfo>();
 
         // Add the updated favorite printers.
@@ -123,8 +119,10 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         mPrinters.clear();
         mPrinters.addAll(printers);
 
-        // Deliver the printers.
-        deliverResult(printers);
+        if (isStarted()) {
+            // Deliver the printers.
+            deliverResult(printers);
+        }
     }
 
     @Override

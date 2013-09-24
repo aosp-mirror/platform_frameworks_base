@@ -1007,11 +1007,24 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             mHandler.obtainMessage(
                     SessionHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION,
                     service).sendToTarget();
-            // If there are some observers that started discovery - tell the service.
-            if (mDiscoveryObservers.getRegisteredCallbackCount() > 0) {
+            // Start printer discovery if necessary.
+            if (!mStartedPrinterDiscoveryTokens.isEmpty()) {
                 mHandler.obtainMessage(
                         SessionHandler.MSG_START_PRINTER_DISCOVERY,
                         service).sendToTarget();
+            }
+            // Start tracking printers if necessary
+            final int trackedPrinterCount = mStateTrackedPrinters.size();
+            for (int i = 0; i < trackedPrinterCount; i++) {
+                PrinterId printerId = mStateTrackedPrinters.get(i);
+                if (printerId.getServiceName().equals(service.getComponentName())) {
+                    SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = service;
+                    args.arg2 = printerId;
+                    mHandler.obtainMessage(SessionHandler
+                            .MSG_START_PRINTER_STATE_TRACKING, args)
+                            .sendToTarget();
+                }
             }
         }
 
