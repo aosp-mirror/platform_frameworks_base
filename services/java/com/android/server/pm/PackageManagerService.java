@@ -5713,7 +5713,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             out.print(prefix); out.print(
                     Integer.toHexString(System.identityHashCode(filter.activity)));
                     out.print(' ');
-                    out.print(filter.activity.getComponentShortName());
+                    filter.activity.printComponentShortName(out);
                     out.print(" filter ");
                     out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
@@ -5912,7 +5912,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             out.print(prefix); out.print(
                     Integer.toHexString(System.identityHashCode(filter.service)));
                     out.print(' ');
-                    out.print(filter.service.getComponentShortName());
+                    filter.service.printComponentShortName(out);
                     out.print(" filter ");
                     out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
@@ -10423,7 +10423,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             dumpState.getTitlePrinted()
                                 ? "\nPreferred Activities User " + user + ":"
                                 : "Preferred Activities User " + user + ":", "  ",
-                            packageName, dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
+                            packageName, true)) {
                         dumpState.setTitlePrinted(true);
                     }
                 }
@@ -10467,7 +10467,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pw.println("Registered ContentProviders:");
                         printedSomething = true;
                     }
-                    pw.print("  "); pw.print(p.getComponentShortName()); pw.println(":");
+                    pw.print("  "); p.printComponentShortName(pw); pw.println(":");
                     pw.print("    "); pw.println(p.toString());
                 }
                 printedSomething = false;

@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -89,6 +88,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
     private Intent makeMyIntent() {
         Intent intent = new Intent(getIntent());
+        intent.setComponent(null);
         // The resolver activity is set to be hidden from recent tasks.
         // we don't want this attribute to be propagated to the next activity
         // being launched.  Note that if the original Intent also had this
@@ -119,7 +119,6 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         mPm = getPackageManager();
         mAlwaysUseOption = alwaysUseOption;
         mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
-        intent.setComponent(null);
 
         AlertController.AlertParams ap = mAlertParams;
 
@@ -290,7 +289,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     }
 
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
-        if (mAlwaysUseOption) {
+        if (mAlwaysUseOption && mAdapter.mOrigResolveList != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
 
@@ -367,11 +366,11 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             }
 
             if (filter != null) {
-                final int N = mAdapter.mList.size();
+                final int N = mAdapter.mOrigResolveList.size();
                 ComponentName[] set = new ComponentName[N];
                 int bestMatch = 0;
                 for (int i=0; i<N; i++) {
-                    ResolveInfo r = mAdapter.mList.get(i).ri;
+                    ResolveInfo r = mAdapter.mOrigResolveList.get(i);
                     set[i] = new ComponentName(r.activityInfo.packageName,
                             r.activityInfo.name);
                     if (r.match > bestMatch) bestMatch = r.match;
@@ -428,13 +427,14 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         private final int mLaunchedFromUid;
         private final LayoutInflater mInflater;
 
-        private List<DisplayResolveInfo> mList;
+        List<DisplayResolveInfo> mList;
+        List<ResolveInfo> mOrigResolveList;
+
         private int mInitialHighlight = -1;
 
         public ResolveListAdapter(Context context, Intent intent,
                 Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid) {
             mIntent = new Intent(intent);
-            mIntent.setComponent(null);
             mInitialIntents = initialIntents;
             mBaseResolveList = rList;
             mLaunchedFromUid = launchedFromUid;
@@ -472,8 +472,9 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             mList.clear();
             if (mBaseResolveList != null) {
                 currentResolveList = mBaseResolveList;
+                mOrigResolveList = null;
             } else {
-                currentResolveList = mPm.queryIntentActivities(
+                currentResolveList = mOrigResolveList = mPm.queryIntentActivities(
                         mIntent, PackageManager.MATCH_DEFAULT_ONLY
                         | (mAlwaysUseOption ? PackageManager.GET_RESOLVED_FILTER : 0));
                 // Filter out any activities that the launched uid does not
@@ -489,6 +490,9 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
                                 ai.applicationInfo.uid, ai.exported);
                         if (granted != PackageManager.PERMISSION_GRANTED) {
                             // Access not allowed!
+                            if (mOrigResolveList == currentResolveList) {
+                                mOrigResolveList = new ArrayList<ResolveInfo>(mOrigResolveList);
+                            }
                             currentResolveList.remove(i);
                         }
                     }
@@ -510,6 +514,9 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
                     if (r0.priority != ri.priority ||
                         r0.isDefault != ri.isDefault) {
                         while (i < N) {
+                            if (mOrigResolveList == currentResolveList) {
+                                mOrigResolveList = new ArrayList<ResolveInfo>(mOrigResolveList);
+                            }
                             currentResolveList.remove(i);
                             N--;
                         }
