@@ -18,6 +18,7 @@ package com.android.server;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -248,26 +249,28 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
                         // Not a wild card, so we can just look for all filters that
                         // completely match or wildcards whose base type matches.
                         firstTypeCut = mTypeToFilter.get(resolvedType);
-                        if (debug) Slog.v(TAG, "First type cut: " + firstTypeCut);
+                        if (debug) Slog.v(TAG, "First type cut: " + Arrays.toString(firstTypeCut));
                         secondTypeCut = mWildTypeToFilter.get(baseType);
-                        if (debug) Slog.v(TAG, "Second type cut: " + secondTypeCut);
+                        if (debug) Slog.v(TAG, "Second type cut: "
+                                + Arrays.toString(secondTypeCut));
                     } else {
                         // We can match anything with our base type.
                         firstTypeCut = mBaseTypeToFilter.get(baseType);
-                        if (debug) Slog.v(TAG, "First type cut: " + firstTypeCut);
+                        if (debug) Slog.v(TAG, "First type cut: " + Arrays.toString(firstTypeCut));
                         secondTypeCut = mWildTypeToFilter.get(baseType);
-                        if (debug) Slog.v(TAG, "Second type cut: " + secondTypeCut);
+                        if (debug) Slog.v(TAG, "Second type cut: "
+                                + Arrays.toString(secondTypeCut));
                     }
                     // Any */* types always apply, but we only need to do this
                     // if the intent type was not already */*.
                     thirdTypeCut = mWildTypeToFilter.get("*");
-                    if (debug) Slog.v(TAG, "Third type cut: " + thirdTypeCut);
+                    if (debug) Slog.v(TAG, "Third type cut: " + Arrays.toString(thirdTypeCut));
                 } else if (intent.getAction() != null) {
                     // The intent specified any type ({@literal *}/*).  This
                     // can be a whole heck of a lot of things, so as a first
                     // cut let's use the action instead.
                     firstTypeCut = mTypedActionToFilter.get(intent.getAction());
-                    if (debug) Slog.v(TAG, "Typed Action list: " + firstTypeCut);
+                    if (debug) Slog.v(TAG, "Typed Action list: " + Arrays.toString(firstTypeCut));
                 }
             }
         }
@@ -277,7 +280,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         // on the authority and path by directly matching each resulting filter).
         if (scheme != null) {
             schemeCut = mSchemeToFilter.get(scheme);
-            if (debug) Slog.v(TAG, "Scheme list: " + schemeCut);
+            if (debug) Slog.v(TAG, "Scheme list: " + Arrays.toString(schemeCut));
         }
 
         // If the intent does not specify any data -- either a MIME type or
@@ -285,7 +288,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         // data.
         if (resolvedType == null && scheme == null && intent.getAction() != null) {
             firstTypeCut = mActionToFilter.get(intent.getAction());
-            if (debug) Slog.v(TAG, "Action list: " + firstTypeCut);
+            if (debug) Slog.v(TAG, "Action list: " + Arrays.toString(firstTypeCut));
         }
 
         FastImmutableArraySet<String> categories = getFastIntentCategories(intent);

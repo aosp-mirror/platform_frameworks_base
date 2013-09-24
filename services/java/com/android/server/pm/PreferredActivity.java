@@ -71,4 +71,10 @@ class PreferredActivity extends IntentFilter implements PreferredComponent.Callb
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "PreferredActivity{0x" + Integer.toHexString(System.identityHashCode(this))
+                + " " + mPref.mComponent.flattenToShortString() + "}";
+    }
 }
