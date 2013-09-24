@@ -494,6 +494,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     public float getAlphaForPage(int screenCenter, int index, boolean showSidePages) {
+        if (getPageWarpIndex() != -1) {
+            return index == getPageWarpIndex() ? 1.0f : 0.0f;
+        }
         if (showSidePages) {
             return 1f;
         } else {
