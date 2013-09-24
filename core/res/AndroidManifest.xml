@@ -773,6 +773,13 @@
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
 
+    <!-- Allows applications to pair bluetooth devices without user interaction -->
+    <permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_bluetoothPriv"
+        android:label="@string/permlab_bluetoothPriv" />
+
     <!-- Allows bluetooth stack to access files
          @hide This should only be used by Bluetooth apk.
     -->
