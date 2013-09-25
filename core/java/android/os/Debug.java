@@ -1031,7 +1031,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /** @hide */
     public static final int MEMINFO_SLAB = 5;
     /** @hide */
-    public static final int MEMINFO_COUNT = 6;
+    public static final int MEMINFO_SWAP_TOTAL = 6;
+    /** @hide */
+    public static final int MEMINFO_SWAP_FREE = 7;
+    /** @hide */
+    public static final int MEMINFO_ZRAM_TOTAL = 8;
+    /** @hide */
+    public static final int MEMINFO_COUNT = 9;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields

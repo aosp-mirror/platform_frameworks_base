@@ -502,7 +502,7 @@ final class ProcessList {
      * Return the maximum pss size in kb that we consider a process acceptable to
      * restore from its cached state for running in the background when RAM is low.
      */
-    long getCachedRestoreThreshold() {
+    long getCachedRestoreThresholdKb() {
         return mCachedRestoreLevel;
     }
 

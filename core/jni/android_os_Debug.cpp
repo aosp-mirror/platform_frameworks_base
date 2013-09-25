@@ -516,6 +516,19 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL);
 }
 
+enum {
+    MEMINFO_TOTAL,
+    MEMINFO_FREE,
+    MEMINFO_BUFFERS,
+    MEMINFO_CACHED,
+    MEMINFO_SHMEM,
+    MEMINFO_SLAB,
+    MEMINFO_SWAP_TOTAL,
+    MEMINFO_SWAP_FREE,
+    MEMINFO_ZRAM_TOTAL,
+    MEMINFO_COUNT
+};
+
 static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
 {
     char buffer[1024];
@@ -529,15 +542,15 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     int fd = open("/proc/meminfo", O_RDONLY);
 
     if (fd < 0) {
-        printf("Unable to open /proc/meminfo: %s\n", strerror(errno));
+        ALOGW("Unable to open /proc/meminfo: %s\n", strerror(errno));
         return;
     }
 
-    const int len = read(fd, buffer, sizeof(buffer)-1);
+    int len = read(fd, buffer, sizeof(buffer)-1);
     close(fd);
 
     if (len < 0) {
-        printf("Empty /proc/meminfo");
+        ALOGW("Empty /proc/meminfo");
         return;
     }
     buffer[len] = 0;
@@ -549,6 +562,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             "Cached:",
             "Shmem:",
             "Slab:",
+            "SwapTotal:",
+            "SwapFree:",
             NULL
     };
     static const int tagsLen[] = {
@@ -558,12 +573,14 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             7,
             6,
             5,
+            10,
+            9,
             0
     };
-    long mem[] = { 0, 0, 0, 0, 0, 0 };
+    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     char* p = buffer;
-    while (*p && numFound < 6) {
+    while (*p && numFound < 8) {
         int i = 0;
         while (tags[i]) {
             if (strncmp(p, tags[i], tagsLen[i]) == 0) {
@@ -587,7 +604,20 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
         if (*p) p++;
     }
 
+    fd = open("/sys/block/zram0/mem_used_total", O_RDONLY);
+    if (fd >= 0) {
+        len = read(fd, buffer, sizeof(buffer)-1);
+        close(fd);
+        if (len > 0) {
+            buffer[len] = 0;
+            mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer);
+        }
+    }
+
     int maxNum = env->GetArrayLength(out);
+    if (maxNum > MEMINFO_COUNT) {
+        maxNum = MEMINFO_COUNT;
+    }
     jlong* outArray = env->GetLongArrayElements(out, 0);
     if (outArray != NULL) {
         for (int i=0; i<maxNum && tags[i]; i++) {

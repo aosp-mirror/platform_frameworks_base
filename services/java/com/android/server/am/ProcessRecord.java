@@ -82,6 +82,7 @@ final class ProcessRecord {
     int setProcState = -1;      // Last set process state in process tracker
     int pssProcState = -1;      // The proc state we are currently requesting pss for
     boolean serviceb;           // Process currently is on the service B list
+    boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
@@ -223,10 +224,13 @@ final class ProcessRecord {
                 pw.print(" lruSeq="); pw.print(lruSeq);
                 pw.print(" lastPss="); pw.print(lastPss);
                 pw.print(" lastCachedPss="); pw.println(lastCachedPss);
-        pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
-                pw.print(" keeping="); pw.print(keeping);
+        pw.print(prefix); pw.print("keeping="); pw.print(keeping);
                 pw.print(" cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
+        if (serviceb) {
+            pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
+                    pw.print(" serviceHighRam="); pw.println(serviceHighRam);
+        }
         if (notCachedSinceIdle) {
             pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(notCachedSinceIdle);
                     pw.print(" initialIdlePss="); pw.println(initialIdlePss);
