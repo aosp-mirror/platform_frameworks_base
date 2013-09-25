@@ -427,8 +427,12 @@ public class WifiStateMachine extends StateMachine {
     /* An IP address was removed from our interface */
     static final int CMD_IP_ADDRESS_REMOVED               = BASE + 141;
 
+    /* Wifi state machine modes of operation */
+    /* CONNECT_MODE - connect to any 'known' AP when it becomes available */
     public static final int CONNECT_MODE                   = 1;
+    /* SCAN_ONLY_MODE - don't connect to any APs; scan, but only while apps hold lock */
     public static final int SCAN_ONLY_MODE                 = 2;
+    /* SCAN_ONLY_WITH_WIFI_OFF - scan, but don't connect to any APs */
     public static final int SCAN_ONLY_WITH_WIFI_OFF_MODE   = 3;
 
     private static final int SUCCESS = 1;
@@ -2942,6 +2946,8 @@ public class WifiStateMachine extends StateMachine {
 
             if (mOperationalMode != CONNECT_MODE) {
                 mWifiNative.disconnect();
+                mWifiConfigStore.disableAllNetworks();
+                setWifiState(WIFI_STATE_DISABLED);
                 transitionTo(mScanModeState);
             } else {
                 /* Driver stop may have disabled networks, enable right after start */
@@ -2969,7 +2975,15 @@ public class WifiStateMachine extends StateMachine {
             }
             mWifiNative.setPowerSave(true);
 
-            if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
+            if (mP2pSupported) {
+                if (mOperationalMode == CONNECT_MODE) {
+                    mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
+                } else {
+                    // P2P statemachine starts in disabled state, and is not enabled until
+                    // CMD_ENABLE_P2P is sent from here; so, nothing needs to be done to
+                    // keep it disabled.
+                }
+            }
 
             final Intent intent = new Intent(WifiManager.WIFI_SCAN_AVAILABLE);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -3240,31 +3254,26 @@ public class WifiStateMachine extends StateMachine {
         private int mLastOperationMode;
         @Override
         public void enter() {
-            mWifiConfigStore.disableAllNetworks();
             mLastOperationMode = mOperationalMode;
-            if (mLastOperationMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
-                mWifiP2pChannel.sendMessage(CMD_DISABLE_P2P_REQ);
-                setWifiState(WIFI_STATE_DISABLED);
-            }
-        }
-        @Override
-        public void exit() {
-            if (mLastOperationMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
-                setWifiState(WIFI_STATE_ENABLED);
-                // Load and re-enable networks when going back to enabled state
-                // This is essential for networks to show up after restore
-                mWifiConfigStore.loadAndEnableAllNetworks();
-                mWifiP2pChannel.sendMessage(CMD_ENABLE_P2P);
-            } else {
-                mWifiConfigStore.enableAllNetworks();
-            }
-            mWifiNative.reconnect();
         }
         @Override
         public boolean processMessage(Message message) {
             switch(message.what) {
                 case CMD_SET_OPERATIONAL_MODE:
                     if (message.arg1 == CONNECT_MODE) {
+
+                        if (mLastOperationMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
+                            setWifiState(WIFI_STATE_ENABLED);
+                            // Load and re-enable networks when going back to enabled state
+                            // This is essential for networks to show up after restore
+                            mWifiConfigStore.loadAndEnableAllNetworks();
+                            mWifiP2pChannel.sendMessage(CMD_ENABLE_P2P);
+                        } else {
+                            mWifiConfigStore.enableAllNetworks();
+                        }
+
+                        mWifiNative.reconnect();
+
                         mOperationalMode = CONNECT_MODE;
                         transitionTo(mDisconnectedState);
                     } else {
@@ -3890,6 +3899,13 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_OPERATIONAL_MODE:
                     if (message.arg1 != CONNECT_MODE) {
                         mOperationalMode = message.arg1;
+
+                        mWifiConfigStore.disableAllNetworks();
+                        if (mOperationalMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
+                            mWifiP2pChannel.sendMessage(CMD_DISABLE_P2P_REQ);
+                            setWifiState(WIFI_STATE_DISABLED);
+                        }
+
                         transitionTo(mScanModeState);
                     }
                     break;
