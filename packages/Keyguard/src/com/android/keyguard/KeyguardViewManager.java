@@ -506,4 +506,10 @@ public class KeyguardViewManager {
             mKeyguardView.dispatch(event);
         }
     }
+
+    public void launchCamera() {
+        if (mKeyguardView != null) {
+            mKeyguardView.launchCamera();
+        }
+    }
 }
