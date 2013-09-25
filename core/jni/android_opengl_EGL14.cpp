@@ -136,7 +136,7 @@ android_eglGetError
   (JNIEnv *_env, jobject _this) {
     EGLint _returnValue = (EGLint) 0;
     _returnValue = eglGetError();
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* EGLDisplay eglGetDisplay ( EGLNativeDisplayType display_id ) */
@@ -230,7 +230,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglTerminate ( EGLDisplay dpy ) */
@@ -243,7 +243,7 @@ android_eglTerminate
     _returnValue = eglTerminate(
         (EGLDisplay)dpy_native
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* const char * eglQueryString ( EGLDisplay dpy, EGLint name ) */
@@ -331,7 +331,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglChooseConfig ( EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config ) */
@@ -454,7 +454,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglGetConfigAttrib ( EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value ) */
@@ -509,7 +509,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLSurface eglCreateWindowSurface ( EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list ) */
@@ -753,7 +753,7 @@ android_eglDestroySurface
         (EGLDisplay)dpy_native,
         (EGLSurface)surface_native
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglQuerySurface ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value ) */
@@ -808,7 +808,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglBindAPI ( EGLenum api ) */
@@ -819,7 +819,7 @@ android_eglBindAPI
     _returnValue = eglBindAPI(
         (EGLenum)api
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLenum eglQueryAPI ( void ) */
@@ -828,7 +828,7 @@ android_eglQueryAPI
   (JNIEnv *_env, jobject _this) {
     EGLenum _returnValue = (EGLenum) 0;
     _returnValue = eglQueryAPI();
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* EGLBoolean eglWaitClient ( void ) */
@@ -837,7 +837,7 @@ android_eglWaitClient
   (JNIEnv *_env, jobject _this) {
     EGLBoolean _returnValue = (EGLBoolean) 0;
     _returnValue = eglWaitClient();
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglReleaseThread ( void ) */
@@ -846,7 +846,7 @@ android_eglReleaseThread
   (JNIEnv *_env, jobject _this) {
     EGLBoolean _returnValue = (EGLBoolean) 0;
     _returnValue = eglReleaseThread();
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLSurface eglCreatePbufferFromClientBuffer ( EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list ) */
@@ -927,7 +927,7 @@ android_eglSurfaceAttrib
         (EGLint)attribute,
         (EGLint)value
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglBindTexImage ( EGLDisplay dpy, EGLSurface surface, EGLint buffer ) */
@@ -943,7 +943,7 @@ android_eglBindTexImage
         (EGLSurface)surface_native,
         (EGLint)buffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglReleaseTexImage ( EGLDisplay dpy, EGLSurface surface, EGLint buffer ) */
@@ -959,7 +959,7 @@ android_eglReleaseTexImage
         (EGLSurface)surface_native,
         (EGLint)buffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglSwapInterval ( EGLDisplay dpy, EGLint interval ) */
@@ -973,7 +973,7 @@ android_eglSwapInterval
         (EGLDisplay)dpy_native,
         (EGLint)interval
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLContext eglCreateContext ( EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list ) */
@@ -1052,7 +1052,7 @@ android_eglDestroyContext
         (EGLDisplay)dpy_native,
         (EGLContext)ctx_native
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglMakeCurrent ( EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx ) */
@@ -1071,7 +1071,7 @@ android_eglMakeCurrent
         (EGLSurface)read_native,
         (EGLContext)ctx_native
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLContext eglGetCurrentContext ( void ) */
@@ -1155,7 +1155,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglWaitGL ( void ) */
@@ -1164,7 +1164,7 @@ android_eglWaitGL
   (JNIEnv *_env, jobject _this) {
     EGLBoolean _returnValue = (EGLBoolean) 0;
     _returnValue = eglWaitGL();
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglWaitNative ( EGLint engine ) */
@@ -1175,7 +1175,7 @@ android_eglWaitNative
     _returnValue = eglWaitNative(
         (EGLint)engine
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglSwapBuffers ( EGLDisplay dpy, EGLSurface surface ) */
@@ -1190,7 +1190,7 @@ android_eglSwapBuffers
         (EGLDisplay)dpy_native,
         (EGLSurface)surface_native
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglCopyBuffers ( EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target ) */

@@ -1181,7 +1181,7 @@ android_glGetError__
   (JNIEnv *_env, jobject _this) {
     GLenum _returnValue;
     _returnValue = glGetError();
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glGetIntegerv ( GLenum pname, GLint *params ) */
@@ -4017,7 +4017,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent ) */
@@ -4074,7 +4074,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glBindBuffer ( GLenum target, GLuint buffer ) */
@@ -4359,7 +4359,7 @@ android_glColorPointer__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
@@ -4460,7 +4460,7 @@ android_glDrawElements__IIII
         (GLenum)mode,
         (GLsizei)count,
         (GLenum)type,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -6067,7 +6067,7 @@ android_glIsBuffer__I
     _returnValue = glIsBuffer(
         (GLuint)buffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsEnabled ( GLenum cap ) */
@@ -6078,7 +6078,7 @@ android_glIsEnabled__I
     _returnValue = glIsEnabled(
         (GLenum)cap
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsTexture ( GLuint texture ) */
@@ -6089,7 +6089,7 @@ android_glIsTexture__I
     _returnValue = glIsTexture(
         (GLuint)texture
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* void glNormalPointer ( GLenum type, GLsizei stride, GLint offset ) */
@@ -6099,7 +6099,7 @@ android_glNormalPointer__III
     glNormalPointer(
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
@@ -6326,7 +6326,7 @@ android_glTexCoordPointer__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
@@ -6756,7 +6756,7 @@ android_glVertexPointer__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
@@ -7196,7 +7196,7 @@ android_glMatrixIndexPointerOES__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
@@ -7232,7 +7232,7 @@ android_glWeightPointerOES__IIII
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        (GLvoid *)offset
     );
 }
 
@@ -7325,7 +7325,7 @@ android_glCheckFramebufferStatusOES__I
     _returnValue = glCheckFramebufferStatusOES(
         (GLint)target
     );
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* void glDeleteFramebuffersOES ( GLint n, GLuint *framebuffers ) */
@@ -8166,7 +8166,7 @@ android_glIsFramebufferOES__I
     _returnValue = glIsFramebufferOES(
         (GLint)framebuffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* GLboolean glIsRenderbufferOES ( GLint renderbuffer ) */
@@ -8182,7 +8182,7 @@ android_glIsRenderbufferOES__I
     _returnValue = glIsRenderbufferOES(
         (GLint)renderbuffer
     );
-    return _returnValue;
+    return (jboolean)_returnValue;
 }
 
 /* void glRenderbufferStorageOES ( GLint target, GLint internalformat, GLint width, GLint height ) */
