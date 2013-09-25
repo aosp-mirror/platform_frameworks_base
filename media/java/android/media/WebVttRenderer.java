@@ -17,6 +17,7 @@
 package android.media;
 
 import android.content.Context;
+import android.text.Layout.Alignment;
 import android.text.SpannableStringBuilder;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -1583,6 +1584,7 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
             }
 
             final CueLayout cueBox = new CueLayout(getContext(), cue, mCaptionStyle, mFontSize);
+            mRegionCueBoxes.add(cueBox);
             addView(cueBox, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
             if (getChildCount() > mRegion.mLines) {
@@ -1696,12 +1698,27 @@ class WebVttRenderingWidget extends ViewGroup implements SubtitleTrack.Rendering
 
             removeAllViews();
 
+            final int cueAlignment = resolveCueAlignment(getLayoutDirection(), mCue.mAlignment);
+            final Alignment alignment;
+            switch (cueAlignment) {
+                case TextTrackCue.ALIGNMENT_LEFT:
+                    alignment = Alignment.ALIGN_LEFT;
+                    break;
+                case TextTrackCue.ALIGNMENT_RIGHT:
+                    alignment = Alignment.ALIGN_RIGHT;
+                    break;
+                case TextTrackCue.ALIGNMENT_MIDDLE:
+                default:
+                    alignment = Alignment.ALIGN_CENTER;
+            }
+
             final CaptionStyle captionStyle = mCaptionStyle;
             final float fontSize = mFontSize;
             final TextTrackCueSpan[][] lines = mCue.mLines;
             final int lineCount = lines.length;
             for (int i = 0; i < lineCount; i++) {
                 final SpanLayout lineBox = new SpanLayout(getContext(), lines[i]);
+                lineBox.setAlignment(alignment);
                 lineBox.setCaptionStyle(captionStyle, fontSize);
 
                 addView(lineBox, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
