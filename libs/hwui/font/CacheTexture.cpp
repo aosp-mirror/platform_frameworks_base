@@ -119,7 +119,7 @@ CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint3
     // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
     // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
     // With OpenGL ES 2.0 we have to upload entire stripes instead.
-    mHasES3 = Extensions::getInstance().getMajorGlVersion() >= 3;
+    mHasUnpackRowLength = Extensions::getInstance().hasUnpackRowLength();
 }
 
 CacheTexture::~CacheTexture() {
@@ -206,21 +206,21 @@ void CacheTexture::allocateTexture() {
 bool CacheTexture::upload() {
     const Rect& dirtyRect = mDirtyRect;
 
-    uint32_t x = mHasES3 ? dirtyRect.left : 0;
+    uint32_t x = mHasUnpackRowLength ? dirtyRect.left : 0;
     uint32_t y = dirtyRect.top;
-    uint32_t width = mHasES3 ? dirtyRect.getWidth() : mWidth;
+    uint32_t width = mHasUnpackRowLength ? dirtyRect.getWidth() : mWidth;
     uint32_t height = dirtyRect.getHeight();
 
     // The unpack row length only needs to be specified when a new
     // texture is bound
-    if (mHasES3) {
+    if (mHasUnpackRowLength) {
         glPixelStorei(GL_UNPACK_ROW_LENGTH, mWidth);
     }
 
     mTexture->upload(x, y, width, height);
     setDirty(false);
 
-    return mHasES3;
+    return mHasUnpackRowLength;
 }
 
 void CacheTexture::setDirty(bool dirty) {

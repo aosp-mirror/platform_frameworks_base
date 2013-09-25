@@ -190,7 +190,7 @@ private:
     uint32_t mMaxQuadCount;
     Caches& mCaches;
     CacheBlock* mCacheBlocks;
-    bool mHasES3;
+    bool mHasUnpackRowLength;
     Rect mDirtyRect;
 };
 

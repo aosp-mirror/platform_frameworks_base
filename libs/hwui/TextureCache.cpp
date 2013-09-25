@@ -240,20 +240,20 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     switch (bitmap->getConfig()) {
     case SkBitmap::kA8_Config:
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height,
-                GL_UNSIGNED_BYTE, bitmap->getPixels());
+        uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(),
+                texture->width, texture->height, GL_UNSIGNED_BYTE, bitmap->getPixels());
         texture->blend = true;
         break;
     case SkBitmap::kRGB_565_Config:
         glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
-        uploadToTexture(resize, GL_RGB, bitmap->rowBytesAsPixels(), texture->height,
-                GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
+        uploadToTexture(resize, GL_RGB, bitmap->rowBytesAsPixels(),
+                texture->width, texture->height, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         texture->blend = false;
         break;
     case SkBitmap::kARGB_8888_Config:
         glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
-        uploadToTexture(resize, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height,
-                GL_UNSIGNED_BYTE, bitmap->getPixels());
+        uploadToTexture(resize, GL_RGBA, bitmap->rowBytesAsPixels(),
+                texture->width, texture->height, GL_UNSIGNED_BYTE, bitmap->getPixels());
         // Do this after calling getPixels() to make sure Skia's deferred
         // decoding happened
         texture->blend = !bitmap->isOpaque();
@@ -293,16 +293,27 @@ void TextureCache::uploadLoFiTexture(bool resize, SkBitmap* bitmap,
     SkCanvas canvas(rgbaBitmap);
     canvas.drawBitmap(*bitmap, 0.0f, 0.0f, NULL);
 
-    uploadToTexture(resize, GL_RGBA, rgbaBitmap.rowBytesAsPixels(), height,
+    uploadToTexture(resize, GL_RGBA, rgbaBitmap.rowBytesAsPixels(), width, height,
             GL_UNSIGNED_BYTE, rgbaBitmap.getPixels());
 }
 
-void TextureCache::uploadToTexture(bool resize, GLenum format, GLsizei width, GLsizei height,
-        GLenum type, const GLvoid * data) {
+void TextureCache::uploadToTexture(bool resize, GLenum format, GLsizei stride,
+        GLsizei width, GLsizei height, GLenum type, const GLvoid * data) {
+    // TODO: With OpenGL ES 2.0 we need to copy the bitmap in a temporary buffer
+    //       if the stride doesn't match the width
+    const bool useStride = stride != width && Extensions::getInstance().hasUnpackRowLength();
+    if (useStride) {
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+    }
+
     if (resize) {
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
     } else {
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
+    }
+
+    if (useStride) {
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     }
 }
 
