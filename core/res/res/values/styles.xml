@@ -918,6 +918,10 @@ please see styles_device_defaults.xml.
         <item name="android:textSize">30sp</item>
     </style>
 
+    <style name="TextAppearance.Toast">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
     <style name="Widget.ActivityChooserView">
         <item name="android:gravity">center</item>
         <item name="android:background">@android:drawable/ab_share_pack_holo_dark</item>
