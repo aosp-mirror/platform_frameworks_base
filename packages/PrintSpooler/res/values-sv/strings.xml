@@ -21,19 +21,15 @@
     <string name="save_button" msgid="1921310454071758999">"Spara"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destination"</string>
     <string name="label_copies" msgid="3634531042822968308">"Kopior"</string>
-    <!-- no translation found for label_paper_size (8681895607876809323) -->
-    <skip />
-    <!-- no translation found for label_color (1108690305218188969) -->
-    <skip />
+    <string name="label_paper_size" msgid="8681895607876809323">"Pappersstorlek"</string>
+    <string name="label_color" msgid="1108690305218188969">"Färg"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientering"</string>
-    <!-- no translation found for label_pages (6300874667546617333) -->
-    <skip />
+    <string name="label_pages" msgid="6300874667546617333">"Sidor (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
     <string name="pages_range_example" msgid="4069269138547562081">"t.ex. 1–5, 8"</string>
     <string name="print_preview" msgid="8010217796057763343">"Förhandsgranskning"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Installera PDF-läsare för förhandsgranskning"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Utskriftsappen kraschade"</string>
-    <!-- no translation found for page_count_unknown (7412881437770983864) -->
-    <skip />
+    <string name="page_count_unknown" msgid="7412881437770983864">"otillgängligt"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Genererar utskriftsjobb"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Spara som PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Alla skrivare ..."</string>
