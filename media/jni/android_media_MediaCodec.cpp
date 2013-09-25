@@ -122,7 +122,7 @@ status_t JMediaCodec::configure(
         int flags) {
     sp<Surface> client;
     if (bufferProducer != NULL) {
-        mSurfaceTextureClient = new Surface(bufferProducer);
+        mSurfaceTextureClient = new Surface(bufferProducer, true /* controlledByApp */);
     } else {
         mSurfaceTextureClient.clear();
     }
