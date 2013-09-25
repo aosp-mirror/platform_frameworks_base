@@ -48,6 +48,7 @@ import android.widget.TextView;
 import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
@@ -160,7 +161,7 @@ public class RecentsCreateFragment extends Fragment {
                             cursor.getColumnIndex(RecentColumns.STACK));
                     try {
                         final DocumentStack stack = new DocumentStack();
-                        stack.read(new DataInputStream(new ByteArrayInputStream(rawStack)));
+                        DurableUtils.readFromArray(rawStack, stack);
 
                         // Only update root here to avoid spinning up all
                         // providers; we update the stack during the actual
