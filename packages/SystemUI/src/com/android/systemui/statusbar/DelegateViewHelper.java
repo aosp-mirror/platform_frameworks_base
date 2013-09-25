@@ -50,8 +50,7 @@ public class DelegateViewHelper {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mSourceView == null || mDelegateView == null || mDisabled
-                || mBar.shouldDisableNavbarGestures()) {
+        if (mSourceView == null || mDelegateView == null || mBar.shouldDisableNavbarGestures()) {
             return false;
         }
 
@@ -73,7 +72,7 @@ public class DelegateViewHelper {
             return false;
         }
 
-        if (!mPanelShowing && action == MotionEvent.ACTION_MOVE) {
+        if (!mDisabled && !mPanelShowing && action == MotionEvent.ACTION_MOVE) {
             final int historySize = event.getHistorySize();
             for (int k = 0; k < historySize + 1; k++) {
                 float x = k < historySize ? event.getHistoricalX(k) : event.getX();
