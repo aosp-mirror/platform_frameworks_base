@@ -41,7 +41,7 @@ public:
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
     inline bool hasNvSystemTime() const { return mHasNvSystemTime; }
-
+    inline bool hasUnpackRowLength() const { return mVersionMajor >= 3; }
     inline bool hasPixelBufferObjects() const { return mVersionMajor >= 3; }
     inline bool hasOcclusionQueries() const { return mVersionMajor >= 3; }
     inline bool hasFloatTextures() const { return mVersionMajor >= 3; }
