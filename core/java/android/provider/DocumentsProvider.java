@@ -387,7 +387,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                     context.grantUriPermission(getCallingPackage(), newDocumentUri,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                            | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+                            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                 }
 
             } else if (METHOD_DELETE_DOCUMENT.equals(method)) {
@@ -396,7 +396,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 // Document no longer exists, clean up any grants
                 context.revokeUriPermission(documentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
 
             } else {
                 throw new UnsupportedOperationException("Method not supported " + method);
