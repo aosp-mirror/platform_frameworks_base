@@ -1016,12 +1016,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private native int setKernelTimezone(int fd, int minuteswest);
 
     private void triggerAlarmsLocked(ArrayList<Alarm> triggerList, long nowELAPSED, long nowRTC) {
-        Batch batch;
-
         // batches are temporally sorted, so we need only pull from the
         // start of the list until we either empty it or hit a batch
         // that is not yet deliverable
-        while ((batch = mAlarmBatches.get(0)) != null) {
+        while (mAlarmBatches.size() > 0) {
+            Batch batch = mAlarmBatches.get(0);
             if (batch.start > nowELAPSED) {
                 // Everything else is scheduled for the future
                 break;
