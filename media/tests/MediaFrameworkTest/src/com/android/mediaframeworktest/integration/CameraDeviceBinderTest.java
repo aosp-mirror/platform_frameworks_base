@@ -16,6 +16,7 @@
 
 package com.android.mediaframeworktest.integration;
 
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraCharacteristics;
@@ -24,6 +25,10 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.BinderHolder;
+import android.media.Image;
+import android.media.ImageReader;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -43,17 +48,30 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     private static int NUM_CALLBACKS_CHECKED = 10;
     // Wait for capture result timeout value: 1500ms
     private final static int WAIT_FOR_COMPLETE_TIMEOUT_MS = 1500;
+    // Default size is VGA, which is mandatory camera supported image size by CDD.
+    private static final int DEFAULT_IMAGE_WIDTH = 640;
+    private static final int DEFAULT_IMAGE_HEIGHT = 480;
+    private static final int MAX_NUM_IMAGES = 5;
 
     private int mCameraId;
     private ICameraDeviceUser mCameraUser;
     private CameraBinderTestUtils mUtils;
     private ICameraDeviceCallbacks.Stub mMockCb;
     private Surface mSurface;
-    // Need hold a Surfacetexture reference during a test execution, otherwise,
-    // it could be GCed during a test, which causes camera run into bad state.
-    private SurfaceTexture mSurfaceTexture;
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
+    ImageReader mImageReader;
 
     public CameraDeviceBinderTest() {
+    }
+
+    private class ImageDropperListener implements ImageReader.OnImageAvailableListener {
+
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Image image = reader.acquireNextImage();
+            if (image != null) image.close();
+        }
     }
 
     public class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
@@ -75,9 +93,13 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
      }
 
     private void createDefaultSurface() {
-        mSurfaceTexture = new SurfaceTexture(/* ignored */0);
-        mSurfaceTexture.setDefaultBufferSize(640, 480);
-        mSurface = new Surface(mSurfaceTexture);
+        mImageReader =
+                ImageReader.newInstance(DEFAULT_IMAGE_WIDTH,
+                        DEFAULT_IMAGE_HEIGHT,
+                        ImageFormat.YUV_420_888,
+                        MAX_NUM_IMAGES);
+        mImageReader.setOnImageAvailableListener(new ImageDropperListener(), mHandler);
+        mSurface = mImageReader.getSurface();
     }
 
     private CaptureRequest.Builder createDefaultBuilder(boolean needStream) throws Exception {
@@ -134,6 +156,9 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
                 clientPackageName, CameraBinderTestUtils.USE_CALLING_UID, holder);
         mCameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);
+        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
         createDefaultSurface();
 
         Log.v(TAG, String.format("Camera %s connected", mCameraId));
@@ -144,7 +169,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         mCameraUser.disconnect();
         mCameraUser = null;
         mSurface.release();
-        mSurfaceTexture.release();
+        mImageReader.close();
+        mHandlerThread.quitSafely();
     }
 
     @SmallTest
