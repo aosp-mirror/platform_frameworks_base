@@ -187,7 +187,7 @@ This is the Android Software Development Kit License Agreement
 
 <div id="main">
 
-<div class="figure" style="width:400px;margin-top:-50px">
+<div class="figure" style="width:400px;margin-top:-20px">
 <img src="{@docRoot}images/tools/android-studio.png" height="330" width="400" style="margin-bottom:20px" />
 
 <a class="big button subtitle" id="download-ide-button"
@@ -221,6 +221,10 @@ capabilities you expect from IntelliJ, Android Studio offers:</p>
   <li>Template-based wizards to create common Android designs and components.</li>
   <li>A rich layout editor that allows you to drag-and-drop UI components, preview layouts on
   multiple screen configurations, and much more.</li>
+  <li>Built-in support for <a
+  href="http://android-developers.blogspot.com/2013/06/adding-backend-to-your-app-in-android.html"
+  class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
+  Messaging and App Engine as server-side components.
 </ul>
 
 <p class="caution"><strong>Caution:</strong> Android Studio is currently available as
