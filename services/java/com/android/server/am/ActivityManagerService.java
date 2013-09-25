@@ -510,6 +510,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mLruProcessActivityStart = 0;
 
     /**
+     * Where in mLruProcesses that the processes hosting services start.
+     * This is after (lower index) than mLruProcessesActivityStart.
+     */
+    int mLruProcessServiceStart = 0;
+
+    /**
      * List of processes that should gc as soon as things are idle.
      */
     final ArrayList<ProcessRecord> mProcessesToGc = new ArrayList<ProcessRecord>();
@@ -860,6 +866,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * determine on the next iteration which should be B services.
      */
     int mNumServiceProcs = 0;
+    int mNewNumAServiceProcs = 0;
     int mNewNumServiceProcs = 0;
 
     /**
@@ -1547,7 +1554,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                         logBuilder.append(infos[Debug.MEMINFO_BUFFERS]).append(" kB buffers, ");
                         logBuilder.append(infos[Debug.MEMINFO_CACHED]).append(" kB cached, ");
                         logBuilder.append(infos[Debug.MEMINFO_FREE]).append(" kB free\n");
-
+                        if (infos[Debug.MEMINFO_ZRAM_TOTAL] != 0) {
+                            logBuilder.append("  ZRAM: ");
+                            logBuilder.append(infos[Debug.MEMINFO_ZRAM_TOTAL]);
+                            logBuilder.append(" kB RAM, ");
+                            logBuilder.append(infos[Debug.MEMINFO_SWAP_TOTAL]);
+                            logBuilder.append(" kB swap total, ");
+                            logBuilder.append(infos[Debug.MEMINFO_SWAP_FREE]);
+                            logBuilder.append(" kB swap free\n");
+                        }
                         Slog.i(TAG, logBuilder.toString());
 
                         StringBuilder dropBuilder = new StringBuilder(1024);
@@ -2257,6 +2272,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return index;
         }
 
+        if (lrui >= index) {
+            // Don't want to cause this to move dependent processes *back* in the
+            // list as if they were less frequently used.
+            return index;
+        }
+
         if (lrui >= mLruProcessActivityStart) {
             // Don't want to touch dependent processes that are hosting activities.
             return index;
@@ -2276,12 +2297,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (lrui <= mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
             }
+            if (lrui <= mLruProcessServiceStart) {
+                mLruProcessServiceStart--;
+            }
             mLruProcesses.remove(lrui);
         }
     }
 
     final void updateLruProcessLocked(ProcessRecord app, boolean oomAdj, boolean activityChange) {
         final boolean hasActivity = app.activities.size() > 0;
+        final boolean hasService = false; // not impl yet. app.services.size() > 0;
         if (!activityChange && hasActivity) {
             // The process has activties, so we are only going to allow activity-based
             // adjustments move it.  It should be kept in the front of the list with other
@@ -2300,19 +2325,28 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (lrui < mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
             }
+            if (lrui < mLruProcessServiceStart) {
+                mLruProcessServiceStart--;
+            }
             mLruProcesses.remove(lrui);
         }
 
         int nextIndex;
-        if (!hasActivity) {
-            // Process doesn't have activities, it goes to the top of the non-activity area.
-            mLruProcesses.add(mLruProcessActivityStart, app);
-            nextIndex = mLruProcessActivityStart-1;
-            mLruProcessActivityStart++;
-        } else {
-            // Process does have activities, put it at the very tipsy-top.
+        if (hasActivity) {
+            // Process has activities, put it at the very tipsy-top.
             mLruProcesses.add(app);
             nextIndex = mLruProcessActivityStart;
+        } else if (hasService) {
+            // Process has services, put it at the top of the service list.
+            mLruProcesses.add(mLruProcessActivityStart, app);
+            nextIndex = mLruProcessServiceStart;
+            mLruProcessActivityStart++;
+        } else  {
+            // Process not otherwise of interest, it goes to the top of the non-service area.
+            mLruProcesses.add(mLruProcessServiceStart, app);
+            nextIndex = mLruProcessServiceStart-1;
+            mLruProcessActivityStart++;
+            mLruProcessServiceStart++;
         }
 
         // If the app is currently using a content provider or service,
@@ -2366,7 +2400,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 && mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
             if (DEBUG_PSS) Slog.d(TAG, "May not keep " + proc + ": pss=" + proc.lastCachedPss);
-            if (proc.lastCachedPss >= mProcessList.getCachedRestoreThreshold()) {
+            if (proc.lastCachedPss >= mProcessList.getCachedRestoreThresholdKb()) {
                 if (proc.baseProcessTracker != null) {
                     proc.baseProcessTracker.reportCachedKill(proc.pkgList, proc.lastCachedPss);
                 }
@@ -10432,8 +10466,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println();
             }
             pw.print("  Process LRU list (sorted by oom_adj, "); pw.print(mLruProcesses.size());
-                    pw.print(" total, non-activities at ");
+                    pw.print(" total, non-act at ");
                     pw.print(mLruProcesses.size()-mLruProcessActivityStart);
+                    pw.print(", non-svc at ");
+                    pw.print(mLruProcesses.size()-mLruProcessServiceStart);
                     pw.println("):");
             dumpProcessOomList(pw, this, mLruProcesses, "    ", "Proc", "PERS", false, dumpPackage);
             needSep = true;
@@ -10809,8 +10845,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             if (needSep) pw.println();
             pw.print("  Process OOM control ("); pw.print(mLruProcesses.size());
-                    pw.print(" total, non-activities at ");
+                    pw.print(" total, non-act at ");
                     pw.print(mLruProcesses.size()-mLruProcessActivityStart);
+                    pw.print(", non-svc at ");
+                    pw.print(mLruProcesses.size()-mLruProcessServiceStart);
                     pw.println("):");
             dumpProcessOomList(pw, this, mLruProcesses, "    ", "Proc", "PERS", true, null);
             needSep = true;
@@ -11618,6 +11656,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief, PrintWriter categoryPw) {
         boolean dumpDetails = false;
+        boolean dumpFullDetails = false;
         boolean dumpDalvik = false;
         boolean oomOnly = false;
         boolean isCompact = false;
@@ -11631,6 +11670,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             opti++;
             if ("-a".equals(opt)) {
                 dumpDetails = true;
+                dumpFullDetails = true;
                 dumpDalvik = true;
             } else if ("-d".equals(opt)) {
                 dumpDalvik = true;
@@ -11718,7 +11758,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (dumpDetails) {
                     try {
                         pw.flush();
-                        thread.dumpMemInfo(fd, mi, isCheckinRequest, true, dumpDalvik, innerArgs);
+                        thread.dumpMemInfo(fd, mi, isCheckinRequest, dumpFullDetails,
+                                dumpDalvik, innerArgs);
                     } catch (RemoteException e) {
                         if (!isCheckinRequest) {
                             pw.println("Got RemoteException!");
@@ -11859,25 +11900,53 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!isCompact) {
                 pw.println();
             }
+            MemInfoReader memInfo = new MemInfoReader();
+            memInfo.readMemInfo();
             if (!brief) {
-                MemInfoReader memInfo = new MemInfoReader();
-                memInfo.readMemInfo();
                 if (!isCompact) {
-                    pw.print("Total RAM: "); pw.print(memInfo.getTotalSize()/1024);
+                    pw.print("Total RAM: "); pw.print(memInfo.getTotalSizeKb());
                     pw.println(" kB");
-                    pw.print(" Free RAM: "); pw.print(cachedPss + (memInfo.getCachedSize()/1024)
-                            + (memInfo.getFreeSize()/1024)); pw.println(" kB");
+                    pw.print(" Free RAM: "); pw.print(cachedPss + memInfo.getCachedSizeKb()
+                            + memInfo.getFreeSizeKb()); pw.print(" kB (");
+                            pw.print(cachedPss); pw.print(" cached pss + ");
+                            pw.print(memInfo.getCachedSizeKb()); pw.print(" cached + ");
+                            pw.print(memInfo.getFreeSizeKb()); pw.println(" free)");
                 } else {
-                    pw.print("ram,"); pw.print(memInfo.getTotalSize()/1024); pw.print(",");
-                    pw.print(cachedPss + (memInfo.getCachedSize()/1024)
-                            + (memInfo.getFreeSize()/1024)); pw.print(",");
+                    pw.print("ram,"); pw.print(memInfo.getTotalSizeKb()); pw.print(",");
+                    pw.print(cachedPss + memInfo.getCachedSizeKb()
+                            + memInfo.getFreeSizeKb()); pw.print(",");
                     pw.println(totalPss - cachedPss);
                 }
             }
             if (!isCompact) {
-                pw.print(" Used PSS: "); pw.print(totalPss - cachedPss); pw.println(" kB");
+                pw.print(" Used RAM: "); pw.print(totalPss - cachedPss
+                        + memInfo.getBuffersSizeKb() + memInfo.getShmemSizeKb()
+                        + memInfo.getSlabSizeKb()); pw.print(" kB (");
+                        pw.print(totalPss - cachedPss); pw.print(" used pss + ");
+                        pw.print(memInfo.getBuffersSizeKb()); pw.print(" buffers + ");
+                        pw.print(memInfo.getShmemSizeKb()); pw.print(" shmem + ");
+                        pw.print(memInfo.getSlabSizeKb()); pw.println(" slab)");
+                pw.print(" Lost RAM: "); pw.print(memInfo.getTotalSizeKb()
+                        - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                        - memInfo.getBuffersSizeKb() - memInfo.getShmemSizeKb()
+                        - memInfo.getSlabSizeKb()); pw.println(" kB");
             }
             if (!brief) {
+                if (memInfo.getZramTotalSizeKb() != 0) {
+                    if (!isCompact) {
+                        pw.print("     ZRAM: "); pw.print(memInfo.getZramTotalSizeKb());
+                                pw.print(" kB used for ");
+                                pw.print(memInfo.getSwapTotalSizeKb()
+                                        - memInfo.getSwapFreeSizeKb());
+                                pw.print(" kB in swap (");
+                                pw.print(memInfo.getSwapTotalSizeKb());
+                                pw.println(" kB total swap)");
+                    } else {
+                        pw.print("zram,"); pw.print(memInfo.getZramTotalSizeKb()); pw.print(",");
+                                pw.print(memInfo.getSwapTotalSizeKb()); pw.print(",");
+                                pw.println(memInfo.getSwapFreeSizeKb());
+                    }
+                }
                 final int[] SINGLE_LONG_FORMAT = new int[] {
                     Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
                 };
@@ -11911,6 +11980,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.print(ActivityManager.staticGetLargeMemoryClass());
                     pw.print("), oom ");
                     pw.print(mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024);
+                    pw.print(" kB");
+                    pw.print(", restore limit ");
+                    pw.print(mProcessList.getCachedRestoreThresholdKb());
                     pw.print(" kB");
                     if (ActivityManager.isLowRamDeviceStatic()) {
                         pw.print(" (low-ram)");
@@ -14448,14 +14520,30 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (adj == ProcessList.SERVICE_ADJ) {
             if (doingAll) {
-                app.serviceb = mNewNumServiceProcs > (mNumServiceProcs/3);
+                app.serviceb = mNewNumAServiceProcs > (mNumServiceProcs/3);
                 mNewNumServiceProcs++;
+                //Slog.i(TAG, "ADJ " + app + " serviceb=" + app.serviceb);
+                if (!app.serviceb) {
+                    // This service isn't far enough down on the LRU list to
+                    // normally be a B service, but if we are low on RAM and it
+                    // is large we want to force it down since we would prefer to
+                    // keep launcher over it.
+                    if (mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
+                            && app.lastPss >= mProcessList.getCachedRestoreThresholdKb()) {
+                        app.serviceHighRam = true;
+                        app.serviceb = true;
+                        //Slog.i(TAG, "ADJ " + app + " high ram!");
+                    } else {
+                        mNewNumAServiceProcs++;
+                        //Slog.i(TAG, "ADJ " + app + " not high ram!");
+                    }
+                } else {
+                    app.serviceHighRam = false;
+                }
             }
             if (app.serviceb) {
                 adj = ProcessList.SERVICE_B_ADJ;
             }
-        } else {
-            app.serviceb = false;
         }
 
         app.curRawAdj = adj;
@@ -15008,6 +15096,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mAdjSeq++;
         mNewNumServiceProcs = 0;
+        mNewNumAServiceProcs = 0;
 
         final int emptyProcessLimit;
         final int cachedProcessLimit;
