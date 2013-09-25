@@ -1190,10 +1190,6 @@ final class ActivityStack {
     }
 
     final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
-        if (mService.mLockScreenState == ActivityManagerService.LOCK_SCREEN_FIRST_SHOWN) {
-            return false;
-        }
-
         // Find the first activity that is not finishing.
         ActivityRecord next = topRunningActivityLocked(null);
 
@@ -1255,9 +1251,10 @@ final class ActivityStack {
 
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.
-        if ((mService.isSleepingOrShuttingDown())
+        if (mService.mLockScreenState == ActivityManagerService.LOCK_SCREEN_FIRST_SHOWN ||
+                (mService.isSleepingOrShuttingDown()
                 && mLastPausedActivity == next
-                && mStackSupervisor.allPausedActivitiesComplete()) {
+                && mStackSupervisor.allPausedActivitiesComplete())) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             mWindowManager.executeAppTransition();
