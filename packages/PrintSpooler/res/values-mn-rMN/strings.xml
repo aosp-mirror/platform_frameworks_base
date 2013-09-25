@@ -19,17 +19,21 @@
     <string name="app_label" msgid="4469836075319831821">"Хэвлэгчийн буфер"</string>
     <string name="print_button" msgid="645164566271246268">"Хэвлэх"</string>
     <string name="save_button" msgid="1921310454071758999">"Хадгалах"</string>
-    <string name="label_destination" msgid="6075060240021481048">"ХҮЛЭЭН АВАГЧ"</string>
-    <string name="label_copies" msgid="5698942639155909680">"ХУУЛБАРУУД"</string>
-    <string name="label_paper_size" msgid="1627318643752493198">"ЦААСНЫ ХЭМЖЭЭ"</string>
-    <string name="label_color" msgid="4827814351477574272">"ӨНГӨ"</string>
-    <string name="label_orientation" msgid="6193222194739196118">"ЧИГЛЭЛ"</string>
-    <string name="label_pages" msgid="1792056907699583900">"ХУУДСУУД (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_destination" msgid="9132510997381599275">"Хүлээн авагч"</string>
+    <string name="label_copies" msgid="3634531042822968308">"Хуулбарууд"</string>
+    <!-- no translation found for label_paper_size (8681895607876809323) -->
+    <skip />
+    <!-- no translation found for label_color (1108690305218188969) -->
+    <skip />
+    <string name="label_orientation" msgid="2853142581990496477">"Чиглэл"</string>
+    <!-- no translation found for label_pages (6300874667546617333) -->
+    <skip />
     <string name="pages_range_example" msgid="4069269138547562081">"жнь. 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Хэвлэхээр урьдчилан харах"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Урьдчилан харахын тулд PDF харагчийг суулгах"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Хэвлэгч апп гацсан"</string>
-    <string name="page_count_unknown" msgid="6619377643441497719">"тодорхойгүй"</string>
+    <!-- no translation found for page_count_unknown (7412881437770983864) -->
+    <skip />
     <string name="generating_print_job" msgid="3119608742651698916">"Хэвлэх ажил үүсгэж байна"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF болгож хадгалах"</string>
     <string name="all_printers" msgid="5018829726861876202">"Бүх принтерүүд…"</string>
