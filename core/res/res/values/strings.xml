@@ -599,6 +599,22 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_expandStatusBar">Allows the app to expand or collapse the status bar.</string>
 
+    <!-- Title of an application permission, listed so the user can install application shortcuts
+    in their Launcher -->
+    <string name="permlab_install_shortcut">install shortcuts</string>
+    <!-- Description of an application permission, listed so the user can install application shortcuts
+    in their Launcher -->
+    <string name="permdesc_install_shortcut">Allows an application to add
+        Homescreen shortcuts without user intervention.</string>
+
+    <!-- Title of an application permission, listed so the user can uninstall application shortcuts
+    in their Launcher -->
+    <string name="permlab_uninstall_shortcut">uninstall shortcuts</string>
+    <!-- Description of an application permission, listed so the user can install application shortcuts
+    in their Launcher -->
+    <string name="permdesc_uninstall_shortcut">Allows the application to remove
+        Homescreen shortcuts without user intervention.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_processOutgoingCalls">reroute outgoing calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
