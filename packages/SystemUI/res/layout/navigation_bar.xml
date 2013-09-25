@@ -157,6 +157,7 @@
                 android:src="@drawable/search_light"
                 android:scaleType="center"
                 android:visibility="gone"
+                android:contentDescription="@string/accessibility_search_light"
                 />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
@@ -167,6 +168,7 @@
                 android:src="@drawable/ic_sysbar_camera"
                 android:scaleType="center"
                 android:visibility="gone"
+                android:contentDescription="@string/accessibility_camera_button"
                 />
         </FrameLayout>
 
@@ -312,6 +314,7 @@
             android:src="@drawable/search_light"
             android:scaleType="center"
             android:visibility="gone"
+            android:contentDescription="@string/accessibility_search_light"
             />
 
         <!-- No camera button in landscape mode -->

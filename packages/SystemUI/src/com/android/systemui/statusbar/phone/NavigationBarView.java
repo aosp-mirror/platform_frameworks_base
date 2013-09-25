@@ -37,8 +37,10 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -86,7 +88,7 @@ public class NavigationBarView extends LinearLayout {
 
     // used to disable the camera icon in navbar when disabled by DPM
     private boolean mCameraDisabledByDpm;
-    KeyguardTouchDelegate mTouchDelegate;
+    KeyguardTouchDelegate mKeyguardTouchDelegate;
 
     private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
         @Override
@@ -110,7 +112,7 @@ public class NavigationBarView extends LinearLayout {
                     }
                     break;
             }
-            return mTouchDelegate.dispatch(event);
+            return mKeyguardTouchDelegate.dispatch(event);
         }
     };
 
@@ -153,7 +155,7 @@ public class NavigationBarView extends LinearLayout {
 
         mBarTransitions = new NavigationBarTransitions(this);
 
-        mTouchDelegate = new KeyguardTouchDelegate(mContext);
+        mKeyguardTouchDelegate = new KeyguardTouchDelegate(mContext);
 
         mCameraDisabledByDpm = isCameraDisabledByDpm();
         watchForDevicePolicyChanges();
@@ -339,7 +341,7 @@ public class NavigationBarView extends LinearLayout {
                 final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
                 final  boolean disabledBecauseKeyguardSecure =
                         (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                        && mTouchDelegate.isSecure();
+                        && mKeyguardTouchDelegate.isSecure();
                 return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't get userId", e);
@@ -389,12 +391,44 @@ public class NavigationBarView extends LinearLayout {
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
 
-        // Add a touch handler for camera icon for all view orientations.
-        for (int i = 0; i < mRotatedViews.length; i++) {
-            View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
-            if (cameraButton != null) {
-                cameraButton.setOnTouchListener(mCameraTouchListener);
+
+        final AccessibilityManager accessibilityManager =
+                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (accessibilityManager.isEnabled()) {
+            // In accessibility mode, we add a simple click handler since swipe is tough to
+            // trigger near screen edges.
+            View camera = getCameraButton();
+            View searchLight = getSearchLight();
+            if (camera != null || searchLight != null) {
+                OnClickListener listener = new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        launchForAccessibilityClick(v);
+                    }
+                };
+                if (camera != null) {
+                    camera.setOnClickListener(listener);
+                }
+                if (searchLight != null) {
+                    searchLight.setOnClickListener(listener);
+                }
             }
+        } else {
+            // Add a touch handler for camera icon for all view orientations.
+            for (int i = 0; i < mRotatedViews.length; i++) {
+                View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
+                if (cameraButton != null) {
+                    cameraButton.setOnTouchListener(mCameraTouchListener);
+                }
+            }
+        }
+    }
+
+    protected void launchForAccessibilityClick(View v) {
+        if (v == getCameraButton()) {
+            mKeyguardTouchDelegate.launchCamera();
+        } else if (v == getSearchLight()) {
+            mKeyguardTouchDelegate.showAssistant();
         }
     }
 

@@ -149,6 +149,14 @@
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
     <string name="keyguard_accessibility_transport_stop_description">Stop button</string>
 
+    <!-- Accessibility description for when the device prompts the user to dismiss keyguard
+         in order to complete an action. This will be followed by a message about the current
+         security option (e.g. "Pattern unlock."). [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_show_bouncer">Unlock to continue</string>
+
+    <!-- Accessibility description for when the bouncer prompt is dismissed. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_hide_bouncer">Launch canceled</string>
+
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
     <string name="password_keyboard_label_symbol_key">\?123</string>

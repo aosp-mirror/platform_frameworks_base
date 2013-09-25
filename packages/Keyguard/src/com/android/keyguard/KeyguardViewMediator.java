@@ -122,6 +122,7 @@ public class KeyguardViewMediator {
     private static final int KEYGUARD_TIMEOUT = 13;
     private static final int SHOW_ASSISTANT = 14;
     private static final int DISPATCH_EVENT = 15;
+    private static final int LAUNCH_CAMERA = 16;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -1071,6 +1072,9 @@ public class KeyguardViewMediator {
                 case DISPATCH_EVENT:
                     handleDispatchEvent((MotionEvent) msg.obj);
                     break;
+                case LAUNCH_CAMERA:
+                    handleLaunchCamera();
+                    break;
             }
         }
     };
@@ -1105,6 +1109,10 @@ public class KeyguardViewMediator {
 
         handleHide();
         sendUserPresentBroadcast();
+    }
+
+    protected void handleLaunchCamera() {
+        mKeyguardViewManager.launchCamera();
     }
 
     protected void handleDispatchEvent(MotionEvent event) {
@@ -1339,6 +1347,11 @@ public class KeyguardViewMediator {
 
     public void dispatch(MotionEvent event) {
         Message msg = mHandler.obtainMessage(DISPATCH_EVENT, event);
+        mHandler.sendMessage(msg);
+    }
+
+    public void launchCamera() {
+        Message msg = mHandler.obtainMessage(LAUNCH_CAMERA);
         mHandler.sendMessage(msg);
     }
 }
