@@ -103,4 +103,30 @@ public class KeyguardTouchDelegate {
         return false;
     }
 
+    public void showAssistant() {
+        if (mService != null) {
+            try {
+                mService.showAssistant();
+            } catch (RemoteException e) {
+                // What to do?
+                Log.e(TAG, "RemoteException launching assistant!", e);
+            }
+        } else {
+            Log.w(TAG, "dispatch(event): NO SERVICE!");
+        }
+    }
+
+    public void launchCamera() {
+        if (mService != null) {
+            try {
+                mService.launchCamera();
+            } catch (RemoteException e) {
+                // What to do?
+                Log.e(TAG, "RemoteException launching camera!", e);
+            }
+        } else {
+            Log.w(TAG, "dispatch(event): NO SERVICE!");
+        }
+    }
+
 }
