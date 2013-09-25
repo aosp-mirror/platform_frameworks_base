@@ -264,15 +264,26 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 }
 
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
+#ifdef QCOM_HARDWARE
+    mCaches.enableScissor();
+    mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
+    glClear(GL_COLOR_BUFFER_BIT);
+    if (opaque && !mCountOverdraw) {
+        mCaches.resetScissor();
+        return DrawGlInfo::kStatusDone;
+    }
+    return DrawGlInfo::kStatusDrew;  
+#else
     if (!opaque || mCountOverdraw) {
         mCaches.enableScissor();
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
+
         return DrawGlInfo::kStatusDrew;
     }
-
     mCaches.resetScissor();
     return DrawGlInfo::kStatusDone;
+#endif
 }
 
 void OpenGLRenderer::syncState() {
