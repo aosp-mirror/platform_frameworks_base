@@ -72,12 +72,7 @@ public class CarrierText extends TextView {
     }
 
     protected void updateCarrierText(State simState, CharSequence plmn, CharSequence spn) {
-        CharSequence text = getCarrierTextForSimState(simState, plmn, spn);
-        if (KeyguardViewManager.USE_UPPER_CASE) {
-            setText(text != null ? text.toString().toUpperCase() : null);
-        } else {
-            setText(text);
-        }
+        setText(getCarrierTextForSimState(simState, plmn, spn));
     }
 
     @Override

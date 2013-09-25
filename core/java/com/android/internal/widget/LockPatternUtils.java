@@ -1260,7 +1260,7 @@ public class LockPatternUtils {
      * @param upperCase if true, converts button label string to upper case
      */
     public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown,
-            boolean upperCase, boolean showIcon) {
+            boolean showIcon) {
         if (isEmergencyCallCapable() && shown) {
             button.setVisibility(View.VISIBLE);
         } else {
@@ -1279,23 +1279,7 @@ public class LockPatternUtils {
             int emergencyIcon = showIcon ? R.drawable.ic_emergency : 0;
             button.setCompoundDrawablesWithIntrinsicBounds(emergencyIcon, 0, 0, 0);
         }
-        if (upperCase) {
-            CharSequence original = mContext.getResources().getText(textId);
-            String upper = original != null ? original.toString().toUpperCase() : null;
-            button.setText(upper);
-        } else {
-            button.setText(textId);
-        }
-    }
-
-    /**
-     * @deprecated
-     * @param button
-     * @param phoneState
-     * @param shown
-     */
-    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown) {
-        updateEmergencyCallButtonState(button, phoneState, shown, false, true);
+        button.setText(textId);
     }
 
     /**
