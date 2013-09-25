@@ -197,6 +197,5 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Draadlose aansig"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helderheid"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OUTO"</string>
-    <!-- no translation found for ssl_ca_cert_warning (9005954106902053641) -->
-    <skip />
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Netwerk word\ndalk gemonitor"</string>
 </resources>
