@@ -31,7 +31,6 @@ import android.graphics.Typeface;
 import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -52,14 +51,12 @@ public class SubtitleView extends View {
     /** Temporary rectangle used for computing line bounds. */
     private final RectF mLineBounds = new RectF();
 
-    /** Temporary array used for computing line wrapping. */
-    private float[] mTextWidths;
-
     /** Reusable string builder used for holding text. */
     private final StringBuilder mText = new StringBuilder();
-    private final StringBuilder mBreakText = new StringBuilder();
 
-    private TextPaint mPaint;
+    private Alignment mAlignment;
+    private TextPaint mTextPaint;
+    private Paint mPaint;
 
     private int mForegroundColor;
     private int mBackgroundColor;
@@ -125,11 +122,12 @@ public class SubtitleView extends View {
         mShadowOffsetX = res.getDimension(com.android.internal.R.dimen.subtitle_shadow_offset);
         mShadowOffsetY = mShadowOffsetX;
 
-        final TextPaint paint = new TextPaint();
-        paint.setAntiAlias(true);
-        paint.setSubpixelText(true);
+        mTextPaint = new TextPaint();
+        mTextPaint.setAntiAlias(true);
+        mTextPaint.setSubpixelText(true);
 
-        mPaint = paint;
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
 
         setText(text);
         setTextSize(textSize);
@@ -177,21 +175,30 @@ public class SubtitleView extends View {
     public void setTextSize(float size) {
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         final float pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, metrics);
-        if (mPaint.getTextSize() != size) {
-            mHasMeasurements = false;
+        if (mTextPaint.getTextSize() != size) {
+            mTextPaint.setTextSize(size);
             mInnerPaddingX = (int) (size * INNER_PADDING_RATIO + 0.5f);
-            mPaint.setTextSize(size);
 
-            requestLayout();
+            mHasMeasurements = false;
+            forceLayout();
         }
     }
 
     public void setTypeface(Typeface typeface) {
-        if (mPaint.getTypeface() != typeface) {
-            mHasMeasurements = false;
-            mPaint.setTypeface(typeface);
+        if (mTextPaint.getTypeface() != typeface) {
+            mTextPaint.setTypeface(typeface);
 
-            requestLayout();
+            mHasMeasurements = false;
+            forceLayout();
+        }
+    }
+
+    public void setAlignment(Alignment textAlignment) {
+        if (mAlignment != textAlignment) {
+            mAlignment = textAlignment;
+
+            mHasMeasurements = false;
+            forceLayout();
         }
     }
 
@@ -225,63 +232,19 @@ public class SubtitleView extends View {
         }
 
         // Account for padding.
-        final int paddingX = mPaddingLeft + mPaddingRight + mInnerPaddingX;
+        final int paddingX = mPaddingLeft + mPaddingRight + mInnerPaddingX * 2;
         maxWidth -= paddingX;
-
         if (maxWidth <= 0) {
             return false;
         }
 
-        final TextPaint paint = mPaint;
-        final CharSequence text = mText;
-        final int textLength = text.length();
-        if (mTextWidths == null || mTextWidths.length < textLength) {
-            mTextWidths = new float[textLength];
-        }
-
-        final float[] textWidths = mTextWidths;
-        paint.getTextWidths(text, 0, textLength, textWidths);
-
-        // Compute total length.
-        float runLength = 0;
-        for (int i = 0; i < textLength; i++) {
-            runLength += textWidths[i];
-        }
-
-        final int lineCount = (int) (runLength / maxWidth) + 1;
-        final int lineLength = (int) (runLength / lineCount);
-
-        // Build line break buffer.
-        final StringBuilder breakText = mBreakText;
-        breakText.setLength(0);
-
-        int line = 0;
-        int lastBreak = 0;
-        int maxRunLength = 0;
-        runLength = 0;
-        for (int i = 0; i < textLength; i++) {
-            if (runLength > lineLength) {
-                final CharSequence sequence = text.subSequence(lastBreak, i);
-                final int trimmedLength = TextUtils.getTrimmedLength(sequence);
-                breakText.append(sequence, 0, trimmedLength);
-                breakText.append('\n');
-                lastBreak = i;
-                runLength = 0;
-            }
-
-            runLength += textWidths[i];
-
-            if (runLength > maxRunLength) {
-                maxRunLength = (int) Math.ceil(runLength);
-            }
-        }
-        breakText.append(text.subSequence(lastBreak, textLength));
-
+        // TODO: Implement minimum-difference line wrapping. Adding the results
+        // of Paint.getTextWidths() seems to return different values than
+        // StaticLayout.getWidth(), so this is non-trivial.
         mHasMeasurements = true;
         mLastMeasuredWidth = maxWidth;
-
-        mLayout = new StaticLayout(breakText, paint, maxRunLength, Alignment.ALIGN_LEFT,
-                mSpacingMult, mSpacingAdd, true);
+        mLayout = new StaticLayout(
+                mText, mTextPaint, maxWidth, mAlignment, mSpacingMult, mSpacingAdd, true);
 
         return true;
     }
@@ -319,54 +282,50 @@ public class SubtitleView extends View {
         final int innerPaddingX = mInnerPaddingX;
         c.translate(mPaddingLeft + innerPaddingX, mPaddingTop);
 
-        final RectF bounds = mLineBounds;
         final int lineCount = layout.getLineCount();
-        final Paint paint = layout.getPaint();
-        paint.setShadowLayer(0, 0, 0, 0);
+        final Paint textPaint = mTextPaint;
+        final Paint paint = mPaint;
+        final RectF bounds = mLineBounds;
 
-        final int backgroundColor = mBackgroundColor;
-        if (Color.alpha(backgroundColor) > 0) {
-            paint.setColor(backgroundColor);
-            paint.setStyle(Style.FILL);
-
+        if (Color.alpha(mBackgroundColor) > 0) {
             final float cornerRadius = mCornerRadius;
             float previousBottom = layout.getLineTop(0);
 
+            paint.setColor(mBackgroundColor);
+            paint.setStyle(Style.FILL);
+
             for (int i = 0; i < lineCount; i++) {
-                bounds.left = layout.getLineLeft(i) - innerPaddingX;
+                bounds.left = layout.getLineLeft(i) -innerPaddingX;
                 bounds.right = layout.getLineRight(i) + innerPaddingX;
                 bounds.top = previousBottom;
                 bounds.bottom = layout.getLineBottom(i);
-
                 previousBottom = bounds.bottom;
 
                 c.drawRoundRect(bounds, cornerRadius, cornerRadius, paint);
             }
         }
 
-        final int edgeType = mEdgeType;
-        if (edgeType == CaptionStyle.EDGE_TYPE_OUTLINE) {
-            paint.setColor(mEdgeColor);
-            paint.setStyle(Style.FILL_AND_STROKE);
-            paint.setStrokeJoin(Join.ROUND);
-            paint.setStrokeWidth(mOutlineWidth);
+        if (mEdgeType == CaptionStyle.EDGE_TYPE_OUTLINE) {
+            textPaint.setStrokeJoin(Join.ROUND);
+            textPaint.setStrokeWidth(mOutlineWidth);
+            textPaint.setColor(mEdgeColor);
+            textPaint.setStyle(Style.FILL_AND_STROKE);
 
             for (int i = 0; i < lineCount; i++) {
                 layout.drawText(c, i, i);
             }
+        } else if (mEdgeType == CaptionStyle.EDGE_TYPE_DROP_SHADOW) {
+            textPaint.setShadowLayer(mShadowRadius, mShadowOffsetX, mShadowOffsetY, mEdgeColor);
         }
 
-        if (edgeType == CaptionStyle.EDGE_TYPE_DROP_SHADOW) {
-            paint.setShadowLayer(mShadowRadius, mShadowOffsetX, mShadowOffsetY, mEdgeColor);
-        }
-
-        paint.setColor(mForegroundColor);
-        paint.setStyle(Style.FILL);
+        textPaint.setColor(mForegroundColor);
+        textPaint.setStyle(Style.FILL);
 
         for (int i = 0; i < lineCount; i++) {
             layout.drawText(c, i, i);
         }
 
+        textPaint.setShadowLayer(0, 0, 0, 0);
         c.restoreToCount(saveCount);
     }
 }
