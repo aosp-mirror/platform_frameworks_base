@@ -453,27 +453,84 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
     };
 
+    /**
+     * This specifies whether each option is allowed to be reset
+     * when resetting all app preferences.  Disable reset for
+     * app ops that are under strong control of some part of the
+     * system (such as OP_WRITE_SMS, which should be allowed only
+     * for whichever app is selected as the current SMS app).
+     */
+    private static boolean[] sOpDisableReset = new boolean[] {
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,      // OP_WRITE_SMS
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+    };
+
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();
 
     static {
         if (sOpToSwitch.length != _NUM_OP) {
-            throw new IllegalStateException("sOpStringLength " + sOpToSwitch.length
+            throw new IllegalStateException("sOpToSwitch length " + sOpToSwitch.length
                     + " should be " + _NUM_OP);
         }
         if (sOpToString.length != _NUM_OP) {
-            throw new IllegalStateException("sOpStringLength " + sOpToString.length
+            throw new IllegalStateException("sOpToString length " + sOpToString.length
                     + " should be " + _NUM_OP);
         }
         if (sOpNames.length != _NUM_OP) {
-            throw new IllegalStateException("sOpStringLength " + sOpNames.length
+            throw new IllegalStateException("sOpNames length " + sOpNames.length
                     + " should be " + _NUM_OP);
         }
         if (sOpPerms.length != _NUM_OP) {
-            throw new IllegalStateException("sOpStringLength " + sOpPerms.length
+            throw new IllegalStateException("sOpPerms length " + sOpPerms.length
                     + " should be " + _NUM_OP);
         }
         if (sOpDefaultMode.length != _NUM_OP) {
-            throw new IllegalStateException("sOpStringLength " + sOpDefaultMode.length
+            throw new IllegalStateException("sOpDefaultMode length " + sOpDefaultMode.length
+                    + " should be " + _NUM_OP);
+        }
+        if (sOpDisableReset.length != _NUM_OP) {
+            throw new IllegalStateException("sOpDisableReset length " + sOpDisableReset.length
                     + " should be " + _NUM_OP);
         }
         for (int i=0; i<_NUM_OP; i++) {
@@ -514,6 +571,14 @@ public class AppOpsManager {
      */
     public static int opToDefaultMode(int op) {
         return sOpDefaultMode[op];
+    }
+
+    /**
+     * Retrieve whether the op allows itself to be reset.
+     * @hide
+     */
+    public static boolean opAllowsReset(int op) {
+        return !sOpDisableReset[op];
     }
 
     /**
