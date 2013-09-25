@@ -87,6 +87,11 @@ public class KeyguardViewStateManager implements
     }
 
     public void showBouncer(boolean show) {
+        CharSequence what = mKeyguardHostView.getContext().getResources().getText(
+                show ? R.string.keyguard_accessibility_show_bouncer
+                        : R.string.keyguard_accessibility_hide_bouncer);
+        mKeyguardHostView.announceForAccessibility(what);
+        mKeyguardHostView.announceCurrentSecurityMethod();
         mChallengeLayout.showBouncer();
     }
 

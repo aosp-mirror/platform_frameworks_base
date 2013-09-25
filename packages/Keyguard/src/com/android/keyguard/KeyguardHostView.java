@@ -24,7 +24,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
@@ -41,7 +40,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.media.RemoteControlClient;
-import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -49,11 +47,9 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -203,6 +199,13 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         if ((mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0) {
             Log.v(TAG, "Keyguard secure camera disabled by DPM");
+        }
+    }
+
+    public void announceCurrentSecurityMethod() {
+        View v = (View) getSecurityView(mCurrentSecuritySelection);
+        if (v != null) {
+            v.announceForAccessibility(v.getContentDescription());
         }
     }
 
@@ -1661,6 +1664,10 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     public void dispatch(MotionEvent event) {
         mAppWidgetContainer.handleExternalCameraEvent(event);
+    }
+
+    public void launchCamera() {
+        mActivityLauncher.launchCamera(getHandler(), null);
     }
 
 }

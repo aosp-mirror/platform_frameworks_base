@@ -42,4 +42,5 @@ interface IKeyguardService {
     oneway void setCurrentUser(int userId);
     oneway void showAssistant();
     oneway void dispatch(in MotionEvent event);
+    oneway void launchCamera();
 }
