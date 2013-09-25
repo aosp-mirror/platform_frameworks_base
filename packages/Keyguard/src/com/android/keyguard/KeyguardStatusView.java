@@ -116,7 +116,7 @@ public class KeyguardStatusView extends GridLayout {
         // Update Alarm status
         String nextAlarm = mLockPatternUtils.getNextAlarm();
         if (!TextUtils.isEmpty(nextAlarm)) {
-            maybeSetUpperCaseText(mAlarmStatusView, nextAlarm);
+            mAlarmStatusView.setText(nextAlarm);
             mAlarmStatusView.setCompoundDrawablesWithIntrinsicBounds(ALARM_ICON, 0, 0, 0);
             mAlarmStatusView.setVisibility(View.VISIBLE);
         } else {
@@ -125,7 +125,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     void refreshDate() {
-        maybeSetUpperCaseText(mDateView, mDateFormat.format(new Date()));
+        mDateView.setText(mDateFormat.format(new Date()));
     }
 
     @Override
@@ -144,11 +144,4 @@ public class KeyguardStatusView extends GridLayout {
         return LockPatternUtils.ID_DEFAULT_STATUS_WIDGET;
     }
 
-    private void maybeSetUpperCaseText(TextView textView, CharSequence text) {
-        if (KeyguardViewManager.USE_UPPER_CASE) {
-            textView.setText(text != null ? text.toString().toUpperCase() : null);
-        } else {
-            textView.setText(text);
-        }
-    }
 }
