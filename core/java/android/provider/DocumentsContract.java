@@ -21,10 +21,7 @@ import static libcore.io.OsConstants.SEEK_SET;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -37,8 +34,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.RemoteException;
 import android.util.Log;
-
-import com.google.android.collect.Lists;
 
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
@@ -621,37 +616,6 @@ public final class DocumentsContract {
     /** {@hide} */
     public static boolean isManageMode(Uri uri) {
         return uri.getBooleanQueryParameter(PARAM_MANAGE, false);
-    }
-
-    /**
-     * Return list of all documents that the calling package has "open." These
-     * are Uris matching {@link DocumentsContract} to which persistent
-     * read/write access has been granted, usually through
-     * {@link Intent#ACTION_OPEN_DOCUMENT} or
-     * {@link Intent#ACTION_CREATE_DOCUMENT}.
-     *
-     * @see Context#grantUriPermission(String, Uri, int)
-     * @see Context#revokeUriPermission(Uri, int)
-     * @see ContentResolver#getIncomingUriPermissionGrants(int, int)
-     */
-    public static Uri[] getOpenDocuments(Context context) {
-        final int openedFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION;
-        final Uri[] uris = context.getContentResolver()
-                .getIncomingUriPermissionGrants(openedFlags, openedFlags);
-
-        // Filter to only include document providers
-        final PackageManager pm = context.getPackageManager();
-        final List<Uri> result = Lists.newArrayList();
-        for (Uri uri : uris) {
-            final ProviderInfo info = pm.resolveContentProvider(
-                    uri.getAuthority(), PackageManager.GET_META_DATA);
-            if (info.metaData.containsKey(META_DATA_DOCUMENT_PROVIDER)) {
-                result.add(uri);
-            }
-        }
-
-        return result.toArray(new Uri[result.size()]);
     }
 
     /**

@@ -23,9 +23,11 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.UriPermission;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -1130,6 +1132,32 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case TAKE_PERSISTABLE_URI_PERMISSION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Uri uri = Uri.CREATOR.createFromParcel(data);
+            int mode = data.readInt();
+            takePersistableUriPermission(uri, mode);
+            reply.writeNoException();
+            return true;
+        }
+
+        case RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Uri uri = Uri.CREATOR.createFromParcel(data);
+            int mode = data.readInt();
+            releasePersistableUriPermission(uri, mode);
+            reply.writeNoException();
+            return true;
+        }
+
+        case GET_PERSISTED_URI_PERMISSIONS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final ParceledListSlice<UriPermission> perms = getPersistedUriPermissions();
+            reply.writeNoException();
+            perms.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            return true;
+        }
+
         case SHOW_WAITING_FOR_DEBUGGER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
@@ -1980,19 +2008,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             restart();
             reply.writeNoException();
-            return true;
-        }
-
-        case GET_GRANTED_URI_PERMISSIONS_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            final String sourcePackage = data.readString();
-            final String targetPackage = data.readString();
-            final int modeFlags = data.readInt();
-            final int modeMask = data.readInt();
-            final Uri[] uris = getGrantedUriPermissions(
-                    sourcePackage, targetPackage, modeFlags, modeMask);
-            reply.writeNoException();
-            reply.writeParcelableArray(uris, 0);
             return true;
         }
 
@@ -3436,6 +3451,47 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
+
+    @Override
+    public void takePersistableUriPermission(Uri uri, int mode) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        uri.writeToParcel(data, 0);
+        data.writeInt(mode);
+        mRemote.transact(TAKE_PERSISTABLE_URI_PERMISSION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void releasePersistableUriPermission(Uri uri, int mode) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        uri.writeToParcel(data, 0);
+        data.writeInt(mode);
+        mRemote.transact(RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public ParceledListSlice<UriPermission> getPersistedUriPermissions() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_PERSISTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        final ParceledListSlice<UriPermission> perms = ParceledListSlice.CREATOR.createFromParcel(
+                reply);
+        data.recycle();
+        reply.recycle();
+        return perms;
+    }
+
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting)
             throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -4565,24 +4621,6 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
-    }
-
-    public Uri[] getGrantedUriPermissions(
-            String sourcePackage, String targetPackage, int modeFlags, int modeMask)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeString(sourcePackage);
-        data.writeString(targetPackage);
-        data.writeInt(modeFlags);
-        data.writeInt(modeMask);
-        mRemote.transact(GET_GRANTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
-        reply.readException();
-        final Uri[] uris = (Uri[]) reply.readParcelableArray(null);
-        data.recycle();
-        reply.recycle();
-        return uris;
     }
 
     public void performIdleMaintenance() throws RemoteException {

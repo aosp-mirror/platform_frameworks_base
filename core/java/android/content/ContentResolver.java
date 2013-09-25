@@ -266,12 +266,18 @@ public abstract class ContentResolver {
 
     /** @hide */
     protected abstract IContentProvider acquireProvider(Context c, String name);
-    /** Providing a default implementation of this, to avoid having to change
-     * a lot of other things, but implementations of ContentResolver should
-     * implement it. @hide */
+
+    /**
+     * Providing a default implementation of this, to avoid having to change a
+     * lot of other things, but implementations of ContentResolver should
+     * implement it.
+     *
+     * @hide
+     */
     protected IContentProvider acquireExistingProvider(Context c, String name) {
         return acquireProvider(c, name);
     }
+
     /** @hide */
     public abstract boolean releaseProvider(IContentProvider icp);
     /** @hide */
@@ -1616,54 +1622,50 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Return list of all Uri permissions that have been granted <em>to</em> the
-     * calling package, and which exactly match the requested flags. For
-     * example, to return all Uris that the calling application has
-     * <em>non-persistent</em> read access to:
+     * Take a persistable Uri permission grant that has been offered. Once
+     * taken, the permission grant will be remembered across device reboots.
+     * Only Uri permissions granted with
+     * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION} can be persisted. If
+     * the grant has already been persisted, taking it again will touch
+     * {@link UriPermission#getPersistedTime()}.
      *
-     * <pre class="prettyprint">
-     * getIncomingUriPermissionGrants(Intent.FLAG_GRANT_READ_URI_PERMISSION,
-     *         Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
-     * </pre>
-     *
-     * @param modeFlags any combination of
-     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION},
-     *            {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, or
-     *            {@link Intent#FLAG_PERSIST_GRANT_URI_PERMISSION}.
-     * @param modeMask mask indicating which flags must match.
+     * @see #getPersistedUriPermissions()
      */
-    public Uri[] getIncomingUriPermissionGrants(int modeFlags, int modeMask) {
+    public void takePersistableUriPermission(Uri uri, int modeFlags) {
         try {
-            return ActivityManagerNative.getDefault()
-                    .getGrantedUriPermissions(null, getPackageName(), modeFlags, modeMask);
+            ActivityManagerNative.getDefault().takePersistableUriPermission(uri, modeFlags);
         } catch (RemoteException e) {
-            return new Uri[0];
         }
     }
 
     /**
-     * Return list of all Uri permissions that have been granted <em>from</em> the
-     * calling package, and which exactly match the requested flags. For
-     * example, to return all Uris that the calling application has granted
-     * <em>non-persistent</em> read access to:
+     * Relinquish a persisted Uri permission grant. The Uri must have been
+     * previously made persistent with
+     * {@link #takePersistableUriPermission(Uri, int)}. Any non-persistent
+     * grants to the calling package will remain intact.
      *
-     * <pre class="prettyprint">
-     * getOutgoingUriPermissionGrants(Intent.FLAG_GRANT_READ_URI_PERMISSION,
-     *         Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
-     * </pre>
-     *
-     * @param modeFlags any combination of
-     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION},
-     *            {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, or
-     *            {@link Intent#FLAG_PERSIST_GRANT_URI_PERMISSION}.
-     * @param modeMask mask indicating which flags must match.
+     * @see #getPersistedUriPermissions()
      */
-    public Uri[] getOutgoingUriPermissionGrants(int modeFlags, int modeMask) {
+    public void releasePersistableUriPermission(Uri uri, int modeFlags) {
         try {
-            return ActivityManagerNative.getDefault()
-                    .getGrantedUriPermissions(getPackageName(), null, modeFlags, modeMask);
+            ActivityManagerNative.getDefault().releasePersistableUriPermission(uri, modeFlags);
         } catch (RemoteException e) {
-            return new Uri[0];
+        }
+    }
+
+    /**
+     * Return list of all Uri permission grants that have been persisted for the
+     * calling app. Only persistable grants taken with
+     * {@link #takePersistableUriPermission(Uri, int)} are returned.
+     *
+     * @see #takePersistableUriPermission(Uri, int)
+     * @see #releasePersistableUriPermission(Uri, int)
+     */
+    public List<UriPermission> getPersistedUriPermissions() {
+        try {
+            return ActivityManagerNative.getDefault().getPersistedUriPermissions().getList();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Activity manager has died", e);
         }
     }
 

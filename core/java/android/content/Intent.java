@@ -3339,12 +3339,18 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * When combined with {@link #FLAG_GRANT_READ_URI_PERMISSION} and/or
-     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, the grant will be remembered
-     * until explicitly revoked with
-     * {@link Context#revokeUriPermission(Uri, int)}. These grants persist
-     * across device reboots.
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, the Uri permission grant can be
+     * persisted across device reboots until explicitly revoked with
+     * {@link Context#revokeUriPermission(Uri, int)}. This flag only offers the
+     * grant for possible persisting; the receiving application must call
+     * {@link ContentResolver#takePersistableUriPermission(Uri, int)} to
+     * actually persist.
+     *
+     * @see ContentResolver#takePersistableUriPermission(Uri, int)
+     * @see ContentResolver#releasePersistableUriPermission(Uri, int)
+     * @see ContentResolver#getPersistedUriPermissions()
      */
-    public static final int FLAG_PERSIST_GRANT_URI_PERMISSION = 0x00000040;
+    public static final int FLAG_GRANT_PERSISTABLE_URI_PERMISSION = 0x00000040;
 
     /**
      * If set, the new activity is not kept in the history stack.  As soon as
@@ -7173,7 +7179,7 @@ public class Intent implements Parcelable, Cloneable {
                     setClipData(target.getClipData());
                     addFlags(target.getFlags()
                             & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION
-                                    | FLAG_PERSIST_GRANT_URI_PERMISSION));
+                                    | FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
                     return true;
                 } else {
                     return false;
