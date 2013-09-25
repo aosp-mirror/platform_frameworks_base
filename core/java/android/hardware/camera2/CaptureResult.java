@@ -289,6 +289,7 @@ public final class CaptureResult extends CameraMetadata {
      * @see #CONTROL_AF_STATE_ACTIVE_SCAN
      * @see #CONTROL_AF_STATE_FOCUSED_LOCKED
      * @see #CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
+     * @see #CONTROL_AF_STATE_PASSIVE_UNFOCUSED
      */
     public static final Key<Integer> CONTROL_AF_STATE =
             new Key<Integer>("android.control.afState", int.class);
