@@ -104,6 +104,11 @@ public final class BitmapRegionDecoder {
      *                    allowing sharing may degrade the decoding speed.
      * @return BitmapRegionDecoder, or null if the image data could not be decoded.
      * @throws IOException if the image format is not supported or can not be decoded.
+     *
+     * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#KITKAT},
+     * if {@link InputStream#markSupported is.markSupported()} returns true,
+     * <code>is.mark(1024)</code> would be called. As of
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, this is no longer the case.</p>
      */
     public static BitmapRegionDecoder newInstance(InputStream is,
             boolean isShareable) throws IOException {

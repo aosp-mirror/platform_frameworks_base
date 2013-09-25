@@ -553,6 +553,11 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     *
+     * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#KITKAT},
+     * if {@link InputStream#markSupported is.markSupported()} returns true,
+     * <code>is.mark(1024)</code> would be called. As of
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, this is no longer the case.</p>
      */
     public static Bitmap decodeStream(InputStream is, Rect outPadding, Options opts) {
         // we don't throw in this case, thus allowing the caller to only check
