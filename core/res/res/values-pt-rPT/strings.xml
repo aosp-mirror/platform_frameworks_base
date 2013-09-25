@@ -1538,179 +1538,94 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Esta aplicação não suporta contas de perfis restritos"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Não foram encontradas aplicações para executar esta ação"</string>
     <string name="revoke" msgid="5404479185228271586">"Revogar"</string>
-    <!-- no translation found for mediasize_iso_a0 (1994474252931294172) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a1 (3333060421529791786) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a2 (3097535991925798280) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a3 (3023213259314236123) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a4 (231745325296873764) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a5 (3484327407340865411) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a6 (4861908487129577530) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a7 (5890208588072936130) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a8 (4319425041085816612) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a9 (4882220529506432008) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_a10 (2382866026365359391) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b0 (3651827147402009675) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b1 (6072859628278739957) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b2 (1348731852150380378) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b3 (2612510181259261379) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b4 (695151378838115434) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b5 (4863754285582212487) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b6 (5305816292139647241) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b7 (531673542602786624) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b8 (9164474595708850034) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b9 (282102976764774160) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_b10 (4517141714407898976) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c0 (3103521357901591100) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c1 (1231954105985048595) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c2 (927702816980087462) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c3 (835154173518304159) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c4 (5095951985108194011) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c5 (1985397450332305739) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c6 (8147421924174693013) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c7 (8993994925276122950) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c8 (6871178104139598957) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c9 (7983532635227561362) -->
-    <skip />
-    <!-- no translation found for mediasize_iso_c10 (5040764293406765584) -->
-    <skip />
-    <!-- no translation found for mediasize_na_letter (2841414839888344296) -->
-    <skip />
-    <!-- no translation found for mediasize_na_gvrnmt_letter (5295836838862962809) -->
-    <skip />
-    <!-- no translation found for mediasize_na_legal (8621364037680465666) -->
-    <skip />
-    <!-- no translation found for mediasize_na_junior_legal (3309324162155085904) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ledger (5567030340509075333) -->
-    <skip />
-    <!-- no translation found for mediasize_na_tabloid (4571735038501661757) -->
-    <skip />
-    <!-- no translation found for mediasize_na_index_3x5 (5182901917818625126) -->
-    <skip />
-    <!-- no translation found for mediasize_na_index_4x6 (7687620625422312396) -->
-    <skip />
-    <!-- no translation found for mediasize_na_index_5x8 (8834215284646872800) -->
-    <skip />
-    <!-- no translation found for mediasize_na_monarch (213639906956550754) -->
-    <skip />
-    <!-- no translation found for mediasize_na_quarto (835778493593023223) -->
-    <skip />
-    <!-- no translation found for mediasize_na_foolscap (1573911237983677138) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_roc_8k (3626855847189438896) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_roc_16k (9182191577022943355) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_1 (4793232644980170500) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_2 (5404109730975720670) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_3 (1335092253339363526) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_4 (9167997800486569834) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_5 (845875168823541497) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_6 (3220325667692648789) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_7 (1776792138507038527) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_8 (1417176642687456692) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_9 (4785983473123798365) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_10 (7847982299391851899) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_prc_16k (262793383539980677) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_om_pa_kai (5256815579447959814) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_om_dai_pa_kai (7336412963441354407) -->
-    <skip />
-    <!-- no translation found for mediasize_chinese_om_jurro_ku_kai (6324465444100490742) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b10 (1787262845627694376) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b9 (3336035783663287470) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b8 (6195398299104345731) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b7 (1674621886902828884) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b6 (4170576286062657435) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b5 (4899297958100032533) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b4 (4213158129126666847) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b3 (8513715307410310696) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b2 (4777690211897131190) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b1 (4608142385457034603) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_b0 (7587108366572243991) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_jis_exec (5244075432263649068) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_chou4 (4941652015032631361) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_chou3 (6387319169263957010) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_chou2 (1299112025415343982) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_hagaki (8070115620644254565) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_oufuku (6049065587307896564) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_kahu (6872696027560065173) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_kaku2 (2359077233775455405) -->
-    <skip />
-    <!-- no translation found for mediasize_japanese_you4 (2091777168747058008) -->
-    <skip />
-    <!-- no translation found for mediasize_unknown_portrait (3088043641616409762) -->
-    <skip />
-    <!-- no translation found for mediasize_unknown_landscape (4876995327029361552) -->
-    <skip />
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Vertical desconhecido"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Horizontal desconhecido"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erro ao escrever conteúdo"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"desconhecido"</string>
-    <!-- no translation found for print_service_installed_title (2246317169444081628) -->
-    <skip />
-    <!-- no translation found for print_service_installed_message (5897362931070459152) -->
-    <skip />
+    <string name="print_service_installed_title" msgid="2246317169444081628">"Serviço <xliff:g id="NAME">%s</xliff:g> instalado"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Toque para ativar"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introduza o PIN de administrador"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Introduzir PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Incorreto"</string>
