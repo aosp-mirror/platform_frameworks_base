@@ -74,7 +74,7 @@ modify to match your theme, plus source files.</p>
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Action Bar Icons']);"
-    href="{@docRoot}downloads/design/Android_Design_Icons_20120814.zip">Action Bar Icon Pack</a>
+    href="{@docRoot}downloads/design/Android_Design_Icons_20130926.zip">Action Bar Icon Pack</a>
 </p>
 
   </div>
