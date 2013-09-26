@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4469836075319831821">"Spooler de impressão"</string>
+    <string name="app_label" msgid="4469836075319831821">"Sp. de impressão"</string>
     <string name="print_button" msgid="645164566271246268">"Imprimir"</string>
     <string name="save_button" msgid="1921310454071758999">"Salvar"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destino"</string>
@@ -28,7 +28,7 @@
     <string name="label_orientation" msgid="2853142581990496477">"Orientação"</string>
     <!-- no translation found for label_pages (6300874667546617333) -->
     <skip />
-    <string name="pages_range_example" msgid="4069269138547562081">"1–5, 8, 11–13"</string>
+    <string name="pages_range_example" msgid="4069269138547562081">"ex.: 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Visualização de impressão"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Instalar o visualizador de PDF"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"O aplicativo de impressão falhou"</string>
@@ -37,7 +37,7 @@
     <string name="generating_print_job" msgid="3119608742651698916">"Gerando trabalho de impressão"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Salvar como PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Todas as impressoras…"</string>
-    <string name="search" msgid="5421724265322228497">"Pesquisa"</string>
+    <string name="search" msgid="5421724265322228497">"Pesquisar"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Todas as impressoras"</string>
     <string name="choose_print_service" msgid="3740309762324459694">"Selecione o serviço de impressão"</string>
     <string name="search_play_store" msgid="1575218005860538249">"Pesquisar na Play Store"</string>
