@@ -12368,6 +12368,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    /**
+     * This method ensures the hardware renderer is in a valid state
+     * before executing the specified action.
+     *
+     * This method will attempt to set a valid state even if the window
+     * the renderer is attached to was destroyed.
+     *
+     * This method is not guaranteed to work. If the hardware renderer
+     * does not exist or cannot be put in a valid state, this method
+     * will not executed the specified action.
+     *
+     * The specified action is executed synchronously.
+     *
+     * @param action The action to execute after the renderer is in a valid state
+     *
+     * @return True if the specified Runnable was executed, false otherwise
+     *
+     * @hide
+     */
+    public boolean executeHardwareAction(Runnable action) {
+        //noinspection SimplifiableIfStatement
+        if (mAttachInfo != null && mAttachInfo.mHardwareRenderer != null) {
+            return mAttachInfo.mHardwareRenderer.safelyRun(action);
+        }
+        return false;
+    }
+
     void invalidateInheritedLayoutMode(int layoutModeOfRoot) {
     }
 
