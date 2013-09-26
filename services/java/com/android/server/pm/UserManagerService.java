@@ -110,6 +110,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String USER_PHOTO_FILENAME = "photo.png";
 
     private static final String RESTRICTIONS_FILE_PREFIX = "res_";
+    private static final String XML_SUFFIX = ".xml";
 
     private static final int MIN_USER_ID = 10;
 
@@ -622,7 +623,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void writeUserLocked(UserInfo userInfo) {
         FileOutputStream fos = null;
-        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userInfo.id + ".xml"));
+        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userInfo.id + XML_SUFFIX));
         try {
             fos = userFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -751,7 +752,7 @@ public class UserManagerService extends IUserManager.Stub {
         FileInputStream fis = null;
         try {
             AtomicFile userFile =
-                    new AtomicFile(new File(mUsersDir, Integer.toString(id) + ".xml"));
+                    new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
             fis = userFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
@@ -909,7 +910,7 @@ public class UserManagerService extends IUserManager.Stub {
                         if (all) {
                             resFile.delete();
                         } else {
-                            String pkg = fileName.substring(RESTRICTIONS_FILE_PREFIX.length());
+                            String pkg = restrictionsFileNameToPackage(fileName);
                             if (!isPackageInstalled(pkg, userId)) {
                                 resFile.delete();
                             }
@@ -926,7 +927,7 @@ public class UserManagerService extends IUserManager.Stub {
     private void cleanAppRestrictionsForPackage(String pkg, int userId) {
         synchronized (mPackagesLock) {
             File dir = Environment.getUserSystemDirectory(userId);
-            File resFile = new File(dir, RESTRICTIONS_FILE_PREFIX + pkg);
+            File resFile = new File(dir, packageToRestrictionsFileName(pkg));
             if (resFile.exists()) {
                 resFile.delete();
             }
@@ -1072,7 +1073,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         mRestrictionsPinStates.remove(userHandle);
         // Remove user file
-        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
+        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
         userFile.delete();
         // Update the user list
         writeUserListLocked();
@@ -1307,7 +1308,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             AtomicFile restrictionsFile =
                     new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
-                            RESTRICTIONS_FILE_PREFIX + packageName + ".xml"));
+                            packageToRestrictionsFileName(packageName)));
             fis = restrictionsFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
@@ -1368,7 +1369,7 @@ public class UserManagerService extends IUserManager.Stub {
         FileOutputStream fos = null;
         AtomicFile restrictionsFile = new AtomicFile(
                 new File(Environment.getUserSystemDirectory(userId),
-                        RESTRICTIONS_FILE_PREFIX + packageName + ".xml"));
+                        packageToRestrictionsFileName(packageName)));
         try {
             fos = restrictionsFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -1496,6 +1497,15 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return i;
         }
+    }
+
+    private String packageToRestrictionsFileName(String packageName) {
+        return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
+    }
+
+    private String restrictionsFileNameToPackage(String fileName) {
+        return fileName.substring(RESTRICTIONS_FILE_PREFIX.length(),
+                (int) (fileName.length() - XML_SUFFIX.length()));
     }
 
     @Override
