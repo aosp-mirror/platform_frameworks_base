@@ -87,6 +87,9 @@
     <!-- Whether rotation lock shows up in quick settings or not -->
     <bool name="quick_settings_show_rotation_lock">false</bool>
 
+    <!-- Whether or not the RSSI tile is capitalized or not. -->
+    <bool name="quick_settings_rssi_tile_capitalization">true</bool>
+
     <!-- Timeouts for brightness dialog to disappear -->
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
