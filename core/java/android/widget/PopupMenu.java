@@ -22,6 +22,7 @@ import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.SubMenuBuilder;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -64,12 +65,25 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
      *               is room, or above it if there is not.
      */
     public PopupMenu(Context context, View anchor) {
+        this(context, anchor, Gravity.NO_GRAVITY);
+    }
+
+    /**
+     * Construct a new PopupMenu.
+     *
+     * @param context Context for the PopupMenu.
+     * @param anchor Anchor view for this popup. The popup will appear below the anchor if there
+     *               is room, or above it if there is not.
+     * @param gravity The {@link Gravity} value for aligning the popup with its anchor
+     */
+    public PopupMenu(Context context, View anchor, int gravity) {
         // TODO Theme?
         mContext = context;
         mMenu = new MenuBuilder(context);
         mMenu.setCallback(this);
         mAnchor = anchor;
         mPopup = new MenuPopupHelper(context, mMenu, anchor);
+        mPopup.setGravity(gravity);
         mPopup.setCallback(this);
     }
 
