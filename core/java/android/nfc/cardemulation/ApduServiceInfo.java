@@ -159,7 +159,7 @@ public final class ApduServiceInfo implements Parcelable {
                         com.android.internal.R.styleable.OffHostApduService_description);
                 mRequiresDeviceUnlock = false;
                 mBannerResourceId = sa.getResourceId(
-                        com.android.internal.R.styleable.HostApduService_apduServiceBanner, -1);
+                        com.android.internal.R.styleable.OffHostApduService_apduServiceBanner, -1);
                 sa.recycle();
             }
 
