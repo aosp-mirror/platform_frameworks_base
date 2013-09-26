@@ -157,6 +157,12 @@
     <!-- Accessibility description for when the bouncer prompt is dismissed. [CHAR LIMIT=NONE] -->
     <string name="keyguard_accessibility_hide_bouncer">Launch canceled</string>
 
+    <!-- Accessibility description announced when user drags widget over the delete drop target [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_delete_widget_start">Drop <xliff:g id="widget_index">%1$s</xliff:g> to delete.</string>
+
+    <!-- Accessibility description announced when user drags widget away from delete drop target [CHAR LIMIT=NONE] -->
+    <string name="keyguard_accessibility_delete_widget_end"><xliff:g id="widget_index">%1$s</xliff:g> will not be deleted.</string>
+
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
     <string name="password_keyboard_label_symbol_key">\?123</string>
