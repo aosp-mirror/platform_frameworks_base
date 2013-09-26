@@ -16,22 +16,51 @@
 
 package com.android.systemui;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.util.Slog;
+import android.view.animation.DecelerateInterpolator;
 
 public class DessertCase extends Activity {
+    DessertCaseView mView;
 
     @Override
     public void onStart() {
         super.onStart();
 
-        Slog.v("DessertCase", "ACHIEVEMENT UNLOCKED");
         PackageManager pm = getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(this, DessertCaseDream.class),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+        final ComponentName cn = new ComponentName(this, DessertCaseDream.class);
+        if (pm.getComponentEnabledSetting(cn) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            Slog.v("DessertCase", "ACHIEVEMENT UNLOCKED");
+            pm.setComponentEnabledSetting(cn,
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+        }
 
-        finish();
+        mView = new DessertCaseView(this);
+
+        DessertCaseView.RescalingContainer container = new DessertCaseView.RescalingContainer(this);
+
+        container.setView(mView);
+
+        setContentView(container);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mView.postDelayed(new Runnable() {
+            public void run() {
+                mView.start();
+            }
+        }, 1000);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mView.stop();
     }
 }

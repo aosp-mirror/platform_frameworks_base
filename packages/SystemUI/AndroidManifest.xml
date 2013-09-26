@@ -197,9 +197,10 @@
             android:name=".DessertCase"
             android:exported="true"
             android:label="@string/dessert_case"
-            android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
+            android:configChanges="orientation|screenSize"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
