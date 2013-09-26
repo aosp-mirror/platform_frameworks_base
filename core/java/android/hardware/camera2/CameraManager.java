@@ -176,10 +176,17 @@ public final class CameraManager {
             }
         }
 
-        // TODO: implement and call a service function to get the capabilities on C++ side
+        CameraMetadataNative info = new CameraMetadataNative();
+        try {
+            mCameraService.getCameraCharacteristics(Integer.valueOf(cameraId), info);
+        } catch(CameraRuntimeException e) {
+            throw e.asChecked();
+        } catch(RemoteException e) {
+            // impossible
+            return null;
+        }
 
-        // TODO: get properties from service
-        return new CameraCharacteristics(new CameraMetadataNative());
+        return new CameraCharacteristics(info);
     }
 
     /**

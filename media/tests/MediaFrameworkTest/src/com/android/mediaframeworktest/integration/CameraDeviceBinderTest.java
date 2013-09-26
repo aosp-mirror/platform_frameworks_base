@@ -68,6 +68,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     }
 
     class IsMetadataNotEmpty extends ArgumentMatcher<CameraMetadataNative> {
+        @Override
         public boolean matches(Object obj) {
             return !((CameraMetadataNative) obj).isEmpty();
         }
@@ -266,6 +267,17 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         CameraMetadataNative info = new CameraMetadataNative();
 
         int status = mCameraUser.getCameraInfo(/*out*/info);
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        assertFalse(info.isEmpty());
+        assertNotNull(info.get(CameraCharacteristics.SCALER_AVAILABLE_FORMATS));
+    }
+
+    @SmallTest
+    public void testCameraCharacteristics() throws RemoteException {
+        CameraMetadataNative info = new CameraMetadataNative();
+
+        int status = mUtils.getCameraService().getCameraCharacteristics(mCameraId, /*out*/info);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
         assertFalse(info.isEmpty());
