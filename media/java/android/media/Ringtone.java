@@ -280,7 +280,7 @@ public class Ringtone {
     private boolean playFallbackRingtone() {
         if (mAudioManager.getStreamVolume(mStreamType) != 0) {
             int ringtoneType = RingtoneManager.getDefaultType(mUri);
-            if (ringtoneType != -1 &&
+            if (ringtoneType == -1 ||
                     RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) != null) {
                 // Default ringtone, try fallback ringtone.
                 try {
@@ -309,6 +309,8 @@ public class Ringtone {
                 } catch (NotFoundException nfe) {
                     Log.e(TAG, "Fallback ringtone does not exist");
                 }
+            } else {
+                Log.w(TAG, "not playing fallback for " + mUri);
             }
         }
         return false;
