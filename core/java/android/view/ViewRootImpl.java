@@ -2504,28 +2504,35 @@ public final class ViewRootImpl implements ViewParent,
      * @param canvas The canvas on which to draw.
      */
     private void drawAccessibilityFocusedDrawableIfNeeded(Canvas canvas) {
-        AccessibilityManager manager = AccessibilityManager.getInstance(mView.mContext);
+        if (!mAttachInfo.mHasWindowFocus) {
+            return;
+        }
+
+        final AccessibilityManager manager = AccessibilityManager.getInstance(mView.mContext);
         if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
             return;
         }
-        if (mAccessibilityFocusedHost == null || mAccessibilityFocusedHost.mAttachInfo == null) {
+
+        final View host = mAccessibilityFocusedHost;
+        if (host == null || host.mAttachInfo == null) {
             return;
         }
-        Drawable drawable = getAccessibilityFocusedDrawable();
+
+        final Drawable drawable = getAccessibilityFocusedDrawable();
         if (drawable == null) {
             return;
         }
-        AccessibilityNodeProvider provider =
-            mAccessibilityFocusedHost.getAccessibilityNodeProvider();
-        Rect bounds = mView.mAttachInfo.mTmpInvalRect;
+
+        final AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
+        final Rect bounds = mView.mAttachInfo.mTmpInvalRect;
         if (provider == null) {
-            mAccessibilityFocusedHost.getBoundsOnScreen(bounds);
-        } else {
-            if (mAccessibilityFocusedVirtualView == null) {
-                return;
-            }
+            host.getBoundsOnScreen(bounds);
+        } else if (mAccessibilityFocusedVirtualView != null) {
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
+        } else {
+            return;
         }
+
         bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         bounds.intersect(0, 0, mAttachInfo.mViewRootImpl.mWidth, mAttachInfo.mViewRootImpl.mHeight);
         drawable.setBounds(bounds);
@@ -3132,8 +3139,6 @@ public final class ViewRootImpl implements ViewParent,
                                     ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
                         mHasHadWindowFocus = true;
                     }
-
-                    setAccessibilityFocus(null, null);
 
                     if (mView != null && mAccessibilityManager.isEnabled()) {
                         if (hasWindowFocus) {
