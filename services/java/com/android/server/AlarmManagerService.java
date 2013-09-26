@@ -187,7 +187,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             boolean didRemove = false;
             long newStart = 0;  // recalculate endpoints as we go
             long newEnd = Long.MAX_VALUE;
-            for (int i = 0; i < alarms.size(); i++) {
+            for (int i = 0; i < alarms.size(); ) {
                 Alarm alarm = alarms.get(i);
                 if (alarm.operation.equals(operation)) {
                     alarms.remove(i);
@@ -214,7 +214,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             boolean didRemove = false;
             long newStart = 0;  // recalculate endpoints as we go
             long newEnd = Long.MAX_VALUE;
-            for (int i = 0; i < alarms.size(); i++) {
+            for (int i = 0; i < alarms.size(); ) {
                 Alarm alarm = alarms.get(i);
                 if (alarm.operation.getTargetPackage().equals(packageName)) {
                     alarms.remove(i);
@@ -241,7 +241,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             boolean didRemove = false;
             long newStart = 0;  // recalculate endpoints as we go
             long newEnd = Long.MAX_VALUE;
-            for (int i = 0; i < alarms.size(); i++) {
+            for (int i = 0; i < alarms.size(); ) {
                 Alarm alarm = alarms.get(i);
                 if (UserHandle.getUserId(alarm.operation.getCreatorUid()) == userHandle) {
                     alarms.remove(i);
