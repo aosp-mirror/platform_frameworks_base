@@ -22,6 +22,7 @@ import android.hardware.IProCameraUser;
 import android.hardware.IProCameraCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.BinderHolder;
 import android.hardware.ICameraServiceListener;
 import android.hardware.CameraInfo;
@@ -58,4 +59,6 @@ interface ICameraService
 
     int addListener(ICameraServiceListener listener);
     int removeListener(ICameraServiceListener listener);
+
+    int getCameraCharacteristics(int cameraId, out CameraMetadataNative info);
 }
