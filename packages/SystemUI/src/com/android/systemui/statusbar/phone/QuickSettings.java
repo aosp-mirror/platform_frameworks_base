@@ -25,6 +25,7 @@ import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -84,6 +85,7 @@ class QuickSettings {
     static final boolean DEBUG_GONE_TILES = false;
     private static final String TAG = "QuickSettings";
     public static final boolean SHOW_IME_TILE = false;
+    public static final boolean SHOW_ACCESSIBILITY_TILES = true;
 
     public static final boolean LONG_PRESS_TOGGLES = true;
 
@@ -399,6 +401,35 @@ class QuickSettings {
                 new QuickSettingsModel.BasicRefreshCallback(settingsTile));
         parent.addView(settingsTile);
         mDynamicSpannedTiles.add(settingsTile);
+
+        if (SHOW_ACCESSIBILITY_TILES) {
+            // Color inversion tile
+            final SystemSettingTile inversionTile = new SystemSettingTile(mContext);
+            inversionTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+                    SystemSettingTile.TYPE_SECURE);
+            inversionTile.setFragment("Settings$AccessibilityInversionSettingsActivity");
+            mModel.addInversionTile(inversionTile, inversionTile.getRefreshCallback());
+            parent.addView(inversionTile);
+            mDynamicSpannedTiles.add(inversionTile);
+
+            // Contrast enhancement tile
+            final SystemSettingTile contrastTile = new SystemSettingTile(mContext);
+            contrastTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED,
+                    SystemSettingTile.TYPE_SECURE);
+            contrastTile.setFragment("Settings$AccessibilityContrastSettingsActivity");
+            mModel.addContrastTile(contrastTile, contrastTile.getRefreshCallback());
+            parent.addView(contrastTile);
+            mDynamicSpannedTiles.add(contrastTile);
+
+            // Color space adjustment tile
+            final SystemSettingTile colorSpaceTile = new SystemSettingTile(mContext);
+            colorSpaceTile.setUri(Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+                    SystemSettingTile.TYPE_SECURE);
+            colorSpaceTile.setFragment("Settings$AccessibilityDaltonizerSettingsActivity");
+            mModel.addColorSpaceTile(colorSpaceTile, colorSpaceTile.getRefreshCallback());
+            parent.addView(colorSpaceTile);
+            mDynamicSpannedTiles.add(colorSpaceTile);
+        }
     }
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
@@ -931,6 +962,110 @@ class QuickSettings {
                     .alpha(newAlpha)
                     .start();
             }
+        }
+    }
+
+    /**
+     * Quick Setting tile that represents a secure setting. This type of tile
+     * can toggle a URI within Settings.Secure on click and launch a Settings
+     * fragment on long-click.
+     */
+    public class SystemSettingTile extends QuickSettingsBasicTile {
+        private static final int TYPE_GLOBAL = 0;
+        private static final int TYPE_SECURE = 1;
+        private static final int TYPE_SYSTEM = 2;
+
+        private final QuickSettingsModel.BasicRefreshCallback mRefreshCallback;
+
+        private String mFragment;
+        private String mName;
+        private int mType;
+
+        public SystemSettingTile(Context context) {
+            super(context);
+
+            mRefreshCallback = new QuickSettingsModel.BasicRefreshCallback(this);
+            mRefreshCallback.setShowWhenEnabled(true);
+        }
+
+        @Override
+        public boolean performLongClick() {
+            if (mFragment != null) {
+                collapsePanels();
+
+                final Intent intent = new Intent();
+                intent.setComponent(new ComponentName(
+                        "com.android.settings", "com.android.settings." + mFragment));
+                startSettingsActivity(intent);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean performClick() {
+            if (mName != null) {
+                collapsePanels();
+
+                final ContentResolver cr = mContext.getContentResolver();
+                switch (mType) {
+                    case TYPE_GLOBAL: {
+                        final boolean enable = Settings.Global.getInt(cr, mName, 0) == 0;
+                        Settings.Global.putInt(cr, mName, enable ? 1 : 0);
+                    } break;
+                    case TYPE_SECURE: {
+                        final boolean enable = Settings.Secure.getIntForUser(
+                                cr, mName, 0, UserHandle.USER_CURRENT) == 0;
+                        Settings.Secure.putIntForUser(
+                                cr, mName, enable ? 1 : 0, UserHandle.USER_CURRENT);
+                    } break;
+                    case TYPE_SYSTEM: {
+                        final boolean enable = Settings.System.getIntForUser(
+                                cr, mName, 0, UserHandle.USER_CURRENT) == 0;
+                        Settings.System.putIntForUser(
+                                cr, mName, enable ? 1 : 0, UserHandle.USER_CURRENT);
+                    } break;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Specifies the fragment within the com.android.settings package to
+         * launch when this tile is long-clicked.
+         *
+         * @param fragment a fragment name within the com.android.settings
+         *            package
+         */
+        public void setFragment(String fragment) {
+            mFragment = fragment;
+            setLongClickable(fragment != null);
+        }
+
+        /**
+         * Specifies the setting name and type to toggle when this tile is
+         * clicked.
+         *
+         * @param name a setting name
+         * @param type the type of setting, one of:
+         *            <ul>
+         *            <li>{@link #TYPE_GLOBAL}
+         *            <li>{@link #TYPE_SECURE}
+         *            <li>{@link #TYPE_SYSTEM}
+         *            </ul>
+         */
+        public void setUri(String name, int type) {
+            mName = name;
+            mType = type;
+            setClickable(mName != null);
+        }
+
+        /**
+         * @return the refresh callback for this tile
+         */
+        public QuickSettingsModel.BasicRefreshCallback getRefreshCallback() {
+            return mRefreshCallback;
         }
     }
 }
