@@ -20978,6 +20978,7 @@ package android.provider {
     method public static android.graphics.Bitmap getDocumentThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point, android.os.CancellationSignal);
     method public static java.lang.String getRootId(android.net.Uri);
     method public static java.lang.String getSearchDocumentsQuery(android.net.Uri);
+    method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
     field public static final java.lang.String EXTRA_ERROR = "error";
     field public static final java.lang.String EXTRA_INFO = "info";
     field public static final java.lang.String EXTRA_LOADING = "loading";
