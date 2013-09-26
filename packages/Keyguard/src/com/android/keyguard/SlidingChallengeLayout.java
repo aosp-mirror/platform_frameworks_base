@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FloatProperty;
@@ -125,6 +126,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private ObjectAnimator mFrameAnimation;
 
     private boolean mHasGlowpad;
+    private final Rect mInsets = new Rect();
 
     // We have an internal and external version, and we and them together.
     private boolean mChallengeInteractiveExternal = true;
@@ -259,6 +261,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         setWillNotDraw(false);
         setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+
+    public void setInsets(Rect insets) {
+        mInsets.set(insets);
     }
 
     public void setHandleAlpha(float alpha) {
@@ -797,10 +803,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             throw new IllegalArgumentException(
                     "SlidingChallengeLayout must be measured with an exact size");
         }
-
         final int width = MeasureSpec.getSize(widthSpec);
         final int height = MeasureSpec.getSize(heightSpec);
         setMeasuredDimension(width, height);
+
+        final int insetHeight = height - mInsets.top - mInsets.bottom;
+        final int insetHeightSpec = MeasureSpec.makeMeasureSpec(insetHeight, MeasureSpec.EXACTLY);
 
         // Find one and only one challenge view.
         final View oldChallengeView = mChallengeView;
@@ -861,13 +869,13 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             // We base this on the layout_maxHeight on the challenge view. If it comes out
             // negative or zero, either we didn't have a maxHeight or we're totally out of space,
             // so give up and measure as if this rule weren't there.
-            int challengeHeightSpec = heightSpec;
+            int challengeHeightSpec = insetHeightSpec;
             final View root = getRootView();
             if (root != null) {
                 final LayoutParams lp = (LayoutParams) mChallengeView.getLayoutParams();
-                final int specSize = MeasureSpec.getSize(heightSpec);
-                final int windowHeight = mDisplayMetrics.heightPixels - root.getPaddingTop();
-                final int diff = windowHeight - specSize;
+                final int windowHeight = mDisplayMetrics.heightPixels
+                        - root.getPaddingTop() - mInsets.top;
+                final int diff = windowHeight - insetHeight;
                 final int maxChallengeHeight = lp.maxHeight - diff;
                 if (maxChallengeHeight > 0) {
                     challengeHeightSpec = makeChildMeasureSpec(maxChallengeHeight, lp.height);
@@ -887,7 +895,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
             // Measure children. Widget frame measures special, so that we can ignore
             // insets for the IME.
-            int parentWidthSpec = widthSpec, parentHeightSpec = heightSpec;
+            int parentWidthSpec = widthSpec, parentHeightSpec = insetHeightSpec;
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (lp.childType == LayoutParams.CHILD_TYPE_WIDGETS) {
                 final View root = getRootView();
@@ -896,12 +904,17 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     // Specifically that the root of the window will be padded in for insets
                     // and that the window is LAYOUT_IN_SCREEN.
                     final int windowWidth = mDisplayMetrics.widthPixels;
-                    final int windowHeight = mDisplayMetrics.heightPixels - root.getPaddingTop();
+                    final int windowHeight = mDisplayMetrics.heightPixels
+                            - root.getPaddingTop() - mInsets.top;
                     parentWidthSpec = MeasureSpec.makeMeasureSpec(
                             windowWidth, MeasureSpec.EXACTLY);
                     parentHeightSpec = MeasureSpec.makeMeasureSpec(
                             windowHeight, MeasureSpec.EXACTLY);
                 }
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
+                // Allow scrim views to extend into the insets
+                parentWidthSpec = widthSpec;
+                parentHeightSpec = heightSpec;
             }
             measureChildWithMargins(child, parentWidthSpec, 0, parentHeightSpec, 0);
         }
@@ -931,7 +944,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 final int childWidth = child.getMeasuredWidth();
                 final int childHeight = child.getMeasuredHeight();
                 final int left = center - childWidth / 2;
-                final int layoutBottom = height - paddingBottom - lp.bottomMargin;
+                final int layoutBottom = height - paddingBottom - lp.bottomMargin - mInsets.bottom;
                 // We use the top of the challenge view to position the handle, so
                 // we never want less than the handle size showing at the bottom.
                 final int bottom = layoutBottom + (int) ((childHeight - mChallengeBottomBound)
@@ -942,15 +955,18 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 final int center = (paddingLeft + width - paddingRight) / 2;
                 final int left = center - child.getMeasuredWidth() / 2;
                 final int right = left + child.getMeasuredWidth();
-                final int bottom = height - paddingBottom - lp.bottomMargin;
+                final int bottom = height - paddingBottom - lp.bottomMargin - mInsets.bottom;
                 final int top = bottom - child.getMeasuredHeight();
                 child.layout(left, top, right, bottom);
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
+                // Scrim views use the entire area, including padding & insets
+                child.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
             } else {
                 // Non-challenge views lay out from the upper left, layered.
                 child.layout(paddingLeft + lp.leftMargin,
-                        paddingTop + lp.topMargin,
+                        paddingTop + lp.topMargin + mInsets.top,
                         paddingLeft + child.getMeasuredWidth(),
-                        paddingTop + child.getMeasuredHeight());
+                        paddingTop + child.getMeasuredHeight() + mInsets.top);
             }
         }
 
@@ -1076,7 +1092,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         final int layoutBottom = getLayoutBottom();
         final int challengeHeight = mChallengeView.getMeasuredHeight();
-        return layoutBottom - challengeHeight;
+        return layoutBottom - challengeHeight - mInsets.top;
     }
 
     /**
@@ -1125,7 +1141,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final int bottomMargin = (mChallengeView == null)
                 ? 0
                 : ((LayoutParams) mChallengeView.getLayoutParams()).bottomMargin;
-        final int layoutBottom = getMeasuredHeight() - getPaddingBottom() - bottomMargin;
+        final int layoutBottom = getMeasuredHeight() - getPaddingBottom() - bottomMargin
+                - mInsets.bottom;
         return layoutBottom;
     }
 
