@@ -1881,13 +1881,13 @@
       user dictionary.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_sdcardRead" product="nosdcard">test access to protected storage</string>
+    <string name="permlab_sdcardRead" product="nosdcard">read the contents of your USB storage</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardRead" product="default">test access to protected storage</string>
+    <string name="permlab_sdcardRead" product="default">read the contents of your SD card</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to test a permission for USB storage that will be available on future devices. </string>
+    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to read the contents of your USB storage.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sdcardRead" product="default">Allows the app to test a permission for the SD card that will be available on future devices.</string>
+    <string name="permdesc_sdcardRead" product="default">Allows the app to read the contents of your SD card.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
     <string name="permlab_sdcardWrite" product="nosdcard">modify or delete the contents of your USB storage</string>
