@@ -435,7 +435,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Ops pkgOps = ent.getValue();
                     for (int j=pkgOps.size()-1; j>=0; j--) {
                         Op curOp = pkgOps.valueAt(j);
-                        if (curOp.mode != AppOpsManager.opToDefaultMode(curOp.op)) {
+                        if (AppOpsManager.opAllowsReset(curOp.op)
+                                && curOp.mode != AppOpsManager.opToDefaultMode(curOp.op)) {
                             curOp.mode = AppOpsManager.opToDefaultMode(curOp.op);
                             changed = true;
                             callbacks = addCallbacks(callbacks, packageName, curOp.op,
