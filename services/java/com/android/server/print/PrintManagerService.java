@@ -32,9 +32,11 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.print.IPrintClient;
 import android.print.IPrintDocumentAdapter;
+import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintManager;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
@@ -294,6 +296,39 @@ public final class PrintManagerService extends IPrintManager.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             userState.stopPrinterStateTracking(printerId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void addPrintJobStateChangeListener(IPrintJobStateChangeListener listener,
+            int appId, int userId) throws RemoteException {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.addPrintJobStateChangeListener(listener, resolvedAppId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void removePrintJobStateChangeListener(IPrintJobStateChangeListener listener,
+            int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.removePrintJobStateChangeListener(listener);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
