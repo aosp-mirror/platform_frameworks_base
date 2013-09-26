@@ -41,6 +41,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
+import com.android.internal.util.Preconditions;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
@@ -6066,12 +6067,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // Persistable only supported through Intents
-            modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            if (modeFlags == 0) {
-                throw new IllegalArgumentException("Mode flags must be "
-                        + "FLAG_GRANT_READ_URI_PERMISSION and/or FLAG_GRANT_WRITE_URI_PERMISSION");
-            }
+            Preconditions.checkFlagsArgument(modeFlags,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             grantUriPermissionLocked(r.uid, targetPkg, uri, modeFlags,
                     null);
@@ -6412,11 +6409,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void takePersistableUriPermission(Uri uri, int modeFlags) {
         enforceNotIsolatedCaller("takePersistableUriPermission");
 
-        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        if (modeFlags == 0) {
-            return;
-        }
+        Preconditions.checkFlagsArgument(modeFlags,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         synchronized (this) {
             final int callingUid = Binder.getCallingUid();
@@ -6440,11 +6434,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void releasePersistableUriPermission(Uri uri, int modeFlags) {
         enforceNotIsolatedCaller("releasePersistableUriPermission");
 
-        modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        if (modeFlags == 0) {
-            return;
-        }
+        Preconditions.checkFlagsArgument(modeFlags,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         synchronized (this) {
             final int callingUid = Binder.getCallingUid();
