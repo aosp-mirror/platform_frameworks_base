@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -209,6 +210,9 @@ public class TestActivity extends Activity {
         if (requestCode == CODE_READ) {
             final Uri uri = data != null ? data.getData() : null;
             if (uri != null) {
+                if (DocumentsContract.isDocumentUri(this, uri)) {
+                    result += "; DOC_ID";
+                }
                 getContentResolver()
                         .takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 InputStream is = null;
@@ -228,6 +232,9 @@ public class TestActivity extends Activity {
         } else if (requestCode == CODE_WRITE) {
             final Uri uri = data != null ? data.getData() : null;
             if (uri != null) {
+                if (DocumentsContract.isDocumentUri(this, uri)) {
+                    result += "; DOC_ID";
+                }
                 getContentResolver()
                         .takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 OutputStream os = null;
