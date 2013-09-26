@@ -156,31 +156,32 @@ struct graphics_memory_pss
  * Uses libmemtrack to retrieve graphics memory that the process is using.
  * Any graphics memory reported in /proc/pid/smaps is not included here.
  */
-static int read_memtrack_memory(struct memtrack_proc* p, int pid, struct graphics_memory_pss* graphics_mem)
+static int read_memtrack_memory(struct memtrack_proc* p, int pid,
+        struct graphics_memory_pss* graphics_mem)
 {
     int err = memtrack_proc_get(p, pid);
     if (err != 0) {
-        ALOGE("failed to get memory consumption info: %d", err);
+        ALOGW("failed to get memory consumption info: %d", err);
         return err;
     }
 
     ssize_t pss = memtrack_proc_graphics_pss(p);
     if (pss < 0) {
-        ALOGE("failed to get graphics pss: %d", pss);
+        ALOGW("failed to get graphics pss: %d", pss);
         return pss;
     }
     graphics_mem->graphics = pss / 1024;
 
     pss = memtrack_proc_gl_pss(p);
     if (pss < 0) {
-        ALOGE("failed to get gl pss: %d", pss);
+        ALOGW("failed to get gl pss: %d", pss);
         return pss;
     }
     graphics_mem->gl = pss / 1024;
 
     pss = memtrack_proc_other_pss(p);
     if (pss < 0) {
-        ALOGE("failed to get other pss: %d", pss);
+        ALOGW("failed to get other pss: %d", pss);
         return pss;
     }
     graphics_mem->other = pss / 1024;
@@ -199,7 +200,7 @@ static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_me
 
     struct memtrack_proc* p = memtrack_proc_new();
     if (p == NULL) {
-        ALOGE("failed to create memtrack_proc");
+        ALOGW("failed to create memtrack_proc");
         return -1;
     }
 
@@ -418,8 +419,6 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         stats[HEAP_GL].privateDirty = graphics_mem.gl;
         stats[HEAP_OTHER_MEMTRACK].pss = graphics_mem.other;
         stats[HEAP_OTHER_MEMTRACK].privateDirty = graphics_mem.other;
-    } else {
-        ALOGE("Failed to read gpu memory");
     }
 
     for (int i=_NUM_CORE_HEAP; i<_NUM_EXCLUSIVE_HEAP; i++) {
@@ -623,7 +622,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
         close(fd);
         if (len > 0) {
             buffer[len] = 0;
-            mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer);
+            mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer)/1024;
         }
     }
 
@@ -633,7 +632,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     }
     jlong* outArray = env->GetLongArrayElements(out, 0);
     if (outArray != NULL) {
-        for (int i=0; i<maxNum && tags[i]; i++) {
+        for (int i=0; i<maxNum; i++) {
             outArray[i] = mem[i];
         }
     }

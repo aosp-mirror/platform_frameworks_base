@@ -1689,7 +1689,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     && proc.pid == pid) {
                                 num++;
                                 proc.lastPssTime = SystemClock.uptimeMillis();
-                                proc.baseProcessTracker.addPss(pss, tmp[0], true);
+                                proc.baseProcessTracker.addPss(pss, tmp[0], true, proc.pkgList);
                                 if (DEBUG_PSS) Slog.d(TAG, "PSS of " + proc.toShortString()
                                         + ": " + pss + " lastPss=" + proc.lastPss
                                         + " state=" + ProcessList.makeProcStateString(procState));
@@ -4278,7 +4278,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
                         proc.baseProcessTracker.addPss(infos[i].getTotalPss(),
-                                infos[i].getTotalUss(), false);
+                                infos[i].getTotalUss(), false, proc.pkgList);
                     }
                 }
             }
@@ -4305,7 +4305,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
-                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], false);
+                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], false, proc.pkgList);
                     }
                 }
             }
@@ -11748,7 +11748,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                         // Record this for posterity if the process has been stable.
-                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true);
+                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true, r.pkgList);
                     }
                 }
 
@@ -11909,7 +11909,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (memInfo.getZramTotalSizeKb() != 0) {
                     if (!isCompact) {
                         pw.print("     ZRAM: "); pw.print(memInfo.getZramTotalSizeKb());
-                                pw.print(" kB used for ");
+                                pw.print(" kB physical used for ");
                                 pw.print(memInfo.getSwapTotalSizeKb()
                                         - memInfo.getSwapFreeSizeKb());
                                 pw.print(" kB in swap (");
