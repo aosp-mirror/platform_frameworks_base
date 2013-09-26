@@ -21,7 +21,10 @@ import static libcore.io.OsConstants.SEEK_SET;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -570,6 +573,28 @@ public final class DocumentsContract {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
                 .appendPath(PATH_ROOT).appendPath(rootId).appendPath(PATH_SEARCH)
                 .appendQueryParameter(PARAM_QUERY, query).build();
+    }
+
+    /**
+     * Test if the given Uri represents a {@link Document} backed by a
+     * {@link DocumentsProvider}.
+     */
+    public static boolean isDocumentUri(Context context, Uri uri) {
+        final List<String> paths = uri.getPathSegments();
+        if (paths.size() < 2) {
+            return false;
+        }
+        if (!PATH_DOCUMENT.equals(paths.get(0))) {
+            return false;
+        }
+
+        final ProviderInfo info = context.getPackageManager()
+                .resolveContentProvider(uri.getAuthority(), PackageManager.GET_META_DATA);
+        if (info.metaData != null && info.metaData.containsKey(
+                DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
+            return true;
+        }
+        return false;
     }
 
     /**
