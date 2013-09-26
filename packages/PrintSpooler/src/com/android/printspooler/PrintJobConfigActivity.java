@@ -56,6 +56,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -90,6 +91,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -146,6 +148,26 @@ public class PrintJobConfigActivity extends Activity {
     private static final Pattern PATTERN_PAGE_RANGE = Pattern.compile(
             "[\\s]*[0-9]*[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*?(([,])"
             + "[\\s]*[0-9]*[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*|[\\s]*)+");
+
+    // The list of countries where Letter is the default paper size. Culled from
+    // the OpenOffice wiki at http://wiki.openoffice.org/wiki/DefaultPaperSize.
+    private static final Set<String> sLetterDefaultCountries = new ArraySet<String>();
+    static {
+        sLetterDefaultCountries.add("US");
+        sLetterDefaultCountries.add("CA");
+        sLetterDefaultCountries.add("BZ");
+        sLetterDefaultCountries.add("CL");
+        sLetterDefaultCountries.add("CR");
+        sLetterDefaultCountries.add("GT");
+        sLetterDefaultCountries.add("NI");
+        sLetterDefaultCountries.add("PA");
+        sLetterDefaultCountries.add("PR");
+        sLetterDefaultCountries.add("SV");
+        sLetterDefaultCountries.add("VE");
+        sLetterDefaultCountries.add("MX");
+        sLetterDefaultCountries.add("CO");
+        sLetterDefaultCountries.add("PH");
+    }
 
     public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {PageRange.ALL_PAGES};
 
@@ -2136,12 +2158,20 @@ public class PrintJobConfigActivity extends Activity {
             }
 
             private PrinterInfo createFakePdfPrinter() {
+                final MediaSize defaultMediaSize;
+                String currentCountry = getResources().getConfiguration().locale.getCountry();
+                if (sLetterDefaultCountries.contains(currentCountry)) {
+                    defaultMediaSize = MediaSize.NA_LETTER;
+                } else {
+                    defaultMediaSize = MediaSize.ISO_A4;
+                }
+
                 PrinterId printerId = new PrinterId(getComponentName(), "PDF printer");
 
                 PrinterCapabilitiesInfo capabilities =
                         new PrinterCapabilitiesInfo.Builder(printerId)
-                    .addMediaSize(MediaSize.ISO_A4, true)
-                    .addMediaSize(MediaSize.NA_LETTER, false)
+                    .addMediaSize(MediaSize.ISO_A4, MediaSize.ISO_A4 == defaultMediaSize)
+                    .addMediaSize(MediaSize.NA_LETTER, MediaSize.NA_LETTER == defaultMediaSize)
                     .addResolution(new Resolution("PDF resolution", "PDF resolution",
                             300, 300), true)
                     .setColorModes(PrintAttributes.COLOR_MODE_COLOR
