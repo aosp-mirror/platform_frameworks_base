@@ -550,8 +550,8 @@ public final class CaptureResult extends CameraMetadata {
      * fixed depth of field range
      * </p>
      */
-    public static final Key<Float> LENS_FOCUS_RANGE =
-            new Key<Float>("android.lens.focusRange", float.class);
+    public static final Key<float[]> LENS_FOCUS_RANGE =
+            new Key<float[]>("android.lens.focusRange", float[].class);
 
     /**
      * <p>
