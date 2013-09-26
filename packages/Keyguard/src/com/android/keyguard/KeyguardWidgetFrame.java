@@ -147,6 +147,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
         if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
             if (mIsHoveringOverDeleteDropTarget != isHovering) {
                 mIsHoveringOverDeleteDropTarget = isHovering;
+                int resId = isHovering ? R.string.keyguard_accessibility_delete_widget_start
+                        : R.string.keyguard_accessibility_delete_widget_end;
+                String text = getContext().getResources().getString(resId, getContentDescription());
+                announceForAccessibility(text);
                 invalidate();
             }
         }
@@ -326,7 +330,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     /**
      * Depending on whether the security is up, the widget size needs to change
-     * 
+     *
      * @param height The height of the widget, -1 for full height
      */
     private void setWidgetHeight(int height) {

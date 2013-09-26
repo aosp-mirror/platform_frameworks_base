@@ -125,6 +125,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private int[] mChildOffsets;
     private int[] mChildRelativeOffsets;
     private int[] mChildOffsetsWithLayoutScale;
+    private String mDeleteString; // Accessibility announcement when widget is deleted
 
     protected final static int TOUCH_STATE_REST = 0;
     protected final static int TOUCH_STATE_SCROLLING = 1;
@@ -1118,6 +1119,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 // i.e. fall through to the next case (don't break)
                 // (We sometimes miss ACTION_DOWN events in Workspace because it ignores all events
                 // while it's small- this was causing a crash before we checked for INVALID_POINTER)
+
+                break;
             }
 
             case MotionEvent.ACTION_DOWN: {
@@ -2194,8 +2197,13 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     protected void onEndReordering() {
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            announceForAccessibility(mContext.getString(
-                    R.string.keyguard_accessibility_widget_reorder_end));
+            if (mDeleteString != null) {
+                announceForAccessibility(mDeleteString);
+                mDeleteString = null;
+            } else {
+                announceForAccessibility(mContext.getString(
+                        R.string.keyguard_accessibility_widget_reorder_end));
+            }
         }
         mIsReordering = false;
 
@@ -2507,6 +2515,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         AnimatorUpdateListener updateCb = new FlingAlongVectorAnimatorUpdateListener(dragView, vel,
                 from, startTime, FLING_TO_DELETE_FRICTION);
 
+        mDeleteString = getContext().getResources()
+                .getString(R.string.keyguard_accessibility_widget_deleted,
+                        mDragView.getContentDescription());
         final Runnable onAnimationEndRunnable = createPostDeleteAnimationRunnable(dragView);
 
         // Create and start the animation
@@ -2562,6 +2573,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 ObjectAnimator.ofFloat(dragView, "alpha", toAlpha));
         animations.add(alphaAnim);
 
+        mDeleteString = getContext().getResources()
+                .getString(R.string.keyguard_accessibility_widget_deleted,
+                        mDragView.getContentDescription());
         final Runnable onAnimationEndRunnable = createPostDeleteAnimationRunnable(dragView);
 
         AnimatorSet anim = new AnimatorSet();
