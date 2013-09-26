@@ -346,6 +346,7 @@ enum {
     LABEL_ATTR = 0x01010001,
     ICON_ATTR = 0x01010002,
     NAME_ATTR = 0x01010003,
+    PERMISSION_ATTR = 0x01010006,
     DEBUGGABLE_ATTR = 0x0101000f,
     VERSION_CODE_ATTR = 0x0101021b,
     VERSION_NAME_ATTR = 0x0101021c,
@@ -631,12 +632,25 @@ int doDump(Bundle* bundle)
             bool hasOtherServices = false;
             bool hasWallpaperService = false;
             bool hasImeService = false;
+            bool hasAccessibilityService = false;
+            bool hasPrintService = false;
             bool hasWidgetReceivers = false;
+            bool hasDeviceAdminReceiver = false;
             bool hasIntentFilter = false;
             bool actMainActivity = false;
             bool actWidgetReceivers = false;
+            bool actDeviceAdminEnabled = false;
             bool actImeService = false;
             bool actWallpaperService = false;
+            bool actAccessibilityService = false;
+            bool actPrintService = false;
+
+            // These permissions are required by services implementing services
+            // the system binds to (IME, Accessibility, PrintServices, etc.)
+            bool hasBindDeviceAdminPermission = false;
+            bool hasBindInputMethodPermission = false;
+            bool hasBindAccessibilityServicePermission = false;
+            bool hasBindPrintServicePermission = false;
 
             // These two implement the implicit permissions that are granted
             // to pre-1.6 applications.
@@ -760,11 +774,17 @@ int doDump(Bundle* bundle)
                                 hasOtherActivities |= !actMainActivity;
                             } else if (withinReceiver) {
                                 hasWidgetReceivers |= actWidgetReceivers;
-                                hasOtherReceivers |= !actWidgetReceivers;
+                                hasDeviceAdminReceiver |= (actDeviceAdminEnabled &&
+                                        hasBindDeviceAdminPermission);
+                                hasOtherReceivers |= (!actWidgetReceivers && !actDeviceAdminEnabled);
                             } else if (withinService) {
                                 hasImeService |= actImeService;
                                 hasWallpaperService |= actWallpaperService;
-                                hasOtherServices |= (!actImeService && !actWallpaperService);
+                                hasAccessibilityService |= (actAccessibilityService &&
+                                        hasBindAccessibilityServicePermission);
+                                hasPrintService |= (actPrintService && hasBindPrintServicePermission);
+                                hasOtherServices |= (!actImeService && !actWallpaperService &&
+                                        !actAccessibilityService && !actPrintService);
                             }
                         }
                         withinIntentFilter = false;
@@ -1166,6 +1186,16 @@ int doDump(Bundle* bundle)
                                         " %s\n", error.string());
                                 goto bail;
                             }
+
+                            String8 permission = getAttribute(tree, PERMISSION_ATTR, &error);
+                            if (error == "") {
+                                if (permission == "android.permission.BIND_DEVICE_ADMIN") {
+                                    hasBindDeviceAdminPermission = true;
+                                }
+                            } else {
+                                fprintf(stderr, "ERROR getting 'android:permission' attribute for"
+                                        " receiver '%s': %s\n", receiverName.string(), error.string());
+                            }
                         } else if (tag == "service") {
                             withinService = true;
                             serviceName = getAttribute(tree, NAME_ATTR, &error);
@@ -1174,6 +1204,20 @@ int doDump(Bundle* bundle)
                                 fprintf(stderr, "ERROR getting 'android:name' attribute for"
                                         " service: %s\n", error.string());
                                 goto bail;
+                            }
+
+                            String8 permission = getAttribute(tree, PERMISSION_ATTR, &error);
+                            if (error == "") {
+                                if (permission == "android.permission.BIND_INPUT_METHOD") {
+                                    hasBindInputMethodPermission = true;
+                                } else if (permission == "android.permission.BIND_ACCESSIBILITY_SERVICE") {
+                                    hasBindAccessibilityServicePermission = true;
+                                } else if (permission == "android.permission.BIND_PRINT_SERVICE") {
+                                    hasBindPrintServicePermission = true;
+                                }
+                            } else {
+                                fprintf(stderr, "ERROR getting 'android:permission' attribute for"
+                                        " service '%s': %s\n", serviceName.string(), error.string());
                             }
                         }
                     } else if (withinSupportsInput && tag == "input-type") {
@@ -1189,7 +1233,13 @@ int doDump(Bundle* bundle)
                 } else if ((depth == 4) && (tag == "intent-filter")) {
                     hasIntentFilter = true;
                     withinIntentFilter = true;
-                    actMainActivity = actWidgetReceivers = actImeService = actWallpaperService = false;
+                    actMainActivity = false;
+                    actWidgetReceivers = false;
+                    actImeService = false;
+                    actWallpaperService = false;
+                    actAccessibilityService = false;
+                    actPrintService = false;
+                    actDeviceAdminEnabled = false;
                 } else if ((depth == 5) && withinIntentFilter){
                     String8 action;
                     if (tag == "action") {
@@ -1206,12 +1256,18 @@ int doDump(Bundle* bundle)
                         } else if (withinReceiver) {
                             if (action == "android.appwidget.action.APPWIDGET_UPDATE") {
                                 actWidgetReceivers = true;
+                            } else if (action == "android.app.action.DEVICE_ADMIN_ENABLED") {
+                                actDeviceAdminEnabled = true;
                             }
                         } else if (withinService) {
                             if (action == "android.view.InputMethod") {
                                 actImeService = true;
                             } else if (action == "android.service.wallpaper.WallpaperService") {
                                 actWallpaperService = true;
+                            } else if (action == "android.accessibilityservice.AccessibilityService") {
+                                actAccessibilityService = true;
+                            } else if (action == "android.printservice.PrintService") {
+                                actPrintService = true;
                             }
                         }
                         if (action == "android.intent.action.SEARCH") {
@@ -1411,11 +1467,20 @@ int doDump(Bundle* bundle)
             if (hasWidgetReceivers) {
                 printf("app-widget\n");
             }
+            if (hasDeviceAdminReceiver) {
+                printf("device-admin\n");
+            }
             if (hasImeService) {
                 printf("ime\n");
             }
             if (hasWallpaperService) {
                 printf("wallpaper\n");
+            }
+            if (hasAccessibilityService) {
+                printf("accessibility\n");
+            }
+            if (hasPrintService) {
+                printf("print\n");
             }
             if (hasOtherActivities) {
                 printf("other-activities\n");
