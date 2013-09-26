@@ -16,7 +16,6 @@
 
 package com.android.externalstorage;
 
-import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -166,11 +165,12 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
         int flags = 0;
 
-        if (file.isDirectory() && file.canWrite()) {
-            flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
-        }
         if (file.canWrite()) {
-            flags |= Document.FLAG_SUPPORTS_WRITE;
+            if (file.isDirectory()) {
+                flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
+            } else {
+                flags |= Document.FLAG_SUPPORTS_WRITE;
+            }
             flags |= Document.FLAG_SUPPORTS_DELETE;
         }
 
