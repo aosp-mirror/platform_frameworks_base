@@ -448,6 +448,10 @@ public final class PrintManagerService extends IPrintManager.Stub {
                         .queryIntentServicesAsUser(intent, PackageManager.GET_SERVICES,
                                 getChangingUserId());
 
+                if (installedServices == null) {
+                    return;
+                }
+
                 final int installedServiceCount = installedServices.size();
                 for (int i = 0; i < installedServiceCount; i++) {
                     ServiceInfo serviceInfo = installedServices.get(i).serviceInfo;
