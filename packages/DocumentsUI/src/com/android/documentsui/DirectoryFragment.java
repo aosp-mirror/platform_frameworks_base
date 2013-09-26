@@ -77,7 +77,6 @@ import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
-import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
@@ -94,8 +93,6 @@ public class DirectoryFragment extends Fragment {
     private GridView mGridView;
 
     private AbsListView mCurrentView;
-
-    private Predicate<DocumentInfo> mFilter;
 
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
@@ -354,8 +351,6 @@ public class DirectoryFragment extends Fragment {
     private void updateDisplayState() {
         final State state = getDisplayState(this);
 
-        mFilter = new MimePredicate(state.acceptMimes);
-
         if (mLastMode == state.derivedMode && mLastShowSize == state.showSize) return;
         mLastMode = state.derivedMode;
         mLastShowSize = state.showSize;
@@ -399,8 +394,10 @@ public class DirectoryFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Cursor cursor = mAdapter.getItem(position);
             if (cursor != null) {
-                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-                if (mFilter.apply(doc)) {
+                final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+                final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+                if (isDocumentEnabled(docMimeType, docFlags)) {
+                    final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
                     ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
                 }
             }
@@ -479,11 +476,10 @@ public class DirectoryFragment extends Fragment {
                 final Cursor cursor = mAdapter.getItem(position);
                 if (cursor != null) {
                     final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-
-                    // Only valid if non-directory matches filter
-                    final State state = getDisplayState(DirectoryFragment.this);
-                    valid = !Document.MIME_TYPE_DIR.equals(docMimeType)
-                            && MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
+                    final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+                    if (!Document.MIME_TYPE_DIR.equals(docMimeType)) {
+                        valid = isDocumentEnabled(docMimeType, docFlags);
+                    }
                 }
 
                 if (!valid) {
@@ -896,14 +892,7 @@ public class DirectoryFragment extends Fragment {
                 line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
             }
 
-            boolean enabled = Document.MIME_TYPE_DIR.equals(docMimeType)
-                    || MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
-
-            // Read-only files aren't actually enabled when creating
-            if (state.action == ACTION_CREATE && (docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
-                enabled = false;
-            }
-
+            final boolean enabled = isDocumentEnabled(docMimeType, docFlags);
             if (enabled) {
                 setEnabledRecursive(convertView, true);
                 icon.setAlpha(1f);
@@ -1066,5 +1055,21 @@ public class DirectoryFragment extends Fragment {
                 setEnabledRecursive(vg.getChildAt(i), enabled);
             }
         }
+    }
+
+    private boolean isDocumentEnabled(String docMimeType, int docFlags) {
+        final State state = getDisplayState(DirectoryFragment.this);
+
+        // Read-only files are disabled when creating
+        if (state.action == ACTION_CREATE && (docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
+            return false;
+        }
+
+        // Directories are always enabled
+        if (Document.MIME_TYPE_DIR.equals(docMimeType)) {
+            return true;
+        }
+
+        return MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
     }
 }
