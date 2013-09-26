@@ -47,6 +47,8 @@ public class BatteryMeterView extends View implements DemoMode {
     public static final int FULL = 96;
     public static final int EMPTY = 4;
 
+    public static final float SUBPIXEL = 0.4f;  // inset rects for softer edges
+
     int[] mColors;
 
     boolean mShowPercent = true;
@@ -186,8 +188,15 @@ public class BatteryMeterView extends View implements DemoMode {
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mFramePaint.setColor(res.getColor(R.color.batterymeter_frame_color));
+        mFramePaint.setDither(true);
+        mFramePaint.setStrokeWidth(0);
+        mFramePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mFramePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
+
         mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBatteryPaint.setColor(0xFF00FF00); // will be replaced by something from mColors
+        mBatteryPaint.setDither(true);
+        mBatteryPaint.setStrokeWidth(0);
+        mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(0xFFFFFFFF);
@@ -205,9 +214,9 @@ public class BatteryMeterView extends View implements DemoMode {
 
         mBoltPaint = new Paint();
         mBoltPaint.setAntiAlias(true);
-        mBoltPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));  // punch hole
-        setLayerType(LAYER_TYPE_HARDWARE, null);
+        mBoltPaint.setColor(res.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
     }
 
     private static float[] loadBoltPoints(Resources res) {
@@ -264,16 +273,23 @@ public class BatteryMeterView extends View implements DemoMode {
                 mFrame.left + width * 0.25f,
                 mFrame.top,
                 mFrame.right - width * 0.25f,
-                mFrame.top + mButtonHeight);
+                mFrame.top + mButtonHeight + 5 /*cover frame border of intersecting area*/);
+
+        mButtonFrame.top += SUBPIXEL;
+        mButtonFrame.left += SUBPIXEL;
+        mButtonFrame.right -= SUBPIXEL;
 
         mFrame.top += mButtonHeight;
+        mFrame.left += SUBPIXEL;
+        mFrame.top += SUBPIXEL;
+        mFrame.right -= SUBPIXEL;
+        mFrame.bottom -= SUBPIXEL;
 
         // first, draw the battery shape
         c.drawRect(mFrame, mFramePaint);
 
         // fill 'er up
-        final int pct = tracker.level;
-        final int color = tracker.plugged ? mChargeColor : getColorForLevel(pct);
+        final int color = tracker.plugged ? mChargeColor : getColorForLevel(level);
         mBatteryPaint.setColor(color);
 
         if (level >= FULL) {
@@ -294,10 +310,10 @@ public class BatteryMeterView extends View implements DemoMode {
 
         if (tracker.plugged) {
             // draw the bolt
-            final int bl = (int)(mFrame.left + width / 4f);
-            final int bt = (int)(mFrame.top + height / 6f);
-            final int br = (int)(mFrame.right - width / 5f);
-            final int bb = (int)(mFrame.bottom - height / 6f);
+            final int bl = (int)(mFrame.left + mFrame.width() / 4.5f);
+            final int bt = (int)(mFrame.top + mFrame.height() / 6f);
+            final int br = (int)(mFrame.right - mFrame.width() / 7f);
+            final int bb = (int)(mFrame.bottom - mFrame.height() / 10f);
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
                 mBoltFrame.set(bl, bt, br, bb);
@@ -325,7 +341,7 @@ public class BatteryMeterView extends View implements DemoMode {
                             : (tracker.level == 100 ? 0.38f : 0.5f)));
             mTextHeight = -mTextPaint.getFontMetrics().ascent;
 
-            final String str = String.valueOf(SINGLE_DIGIT_PERCENT ? (pct/10) : pct);
+            final String str = String.valueOf(SINGLE_DIGIT_PERCENT ? (level/10) : level);
             final float x = mWidth * 0.5f;
             final float y = (mHeight + mTextHeight) * 0.47f;
             c.drawText(str,
