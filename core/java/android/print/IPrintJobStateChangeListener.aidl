@@ -16,18 +16,13 @@
 
 package android.print;
 
-import android.content.ComponentName;
-import android.print.PrintJobInfo;
 import android.print.PrintJobId;
 
 /**
- * Interface for receiving interesting state updates from the print spooler.
+ * Interface for observing print job state changes.
  *
  * @hide
  */
-oneway interface IPrintSpoolerClient {
-    void onPrintJobQueued(in PrintJobInfo printJob);
-    void onAllPrintJobsForServiceHandled(in ComponentName printService);
-    void onAllPrintJobsHandled();
-    void onPrintJobStateChanged(in PrintJobId printJobId, int appId);
+oneway interface IPrintJobStateChangeListener {
+    void onPrintJobStateChanged(in PrintJobId printJobId);
 }

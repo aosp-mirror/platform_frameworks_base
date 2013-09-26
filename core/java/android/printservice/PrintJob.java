@@ -175,7 +175,7 @@ public final class PrintJob {
      */
     public boolean isCancelled() {
         PrintService.throwIfNotCalledOnMainThread();
-        return getInfo().getState() == PrintJobInfo.STATE_FAILED;
+        return getInfo().getState() == PrintJobInfo.STATE_CANCELED;
     }
 
     /**

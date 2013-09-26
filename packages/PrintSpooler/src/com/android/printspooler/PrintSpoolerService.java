@@ -155,23 +155,33 @@ public final class PrintSpoolerService extends Service {
             @SuppressWarnings("deprecation")
             @Override
             public void createPrintJob(PrintJobInfo printJob, IPrintClient client,
-                    IPrintDocumentAdapter printAdapter) throws RemoteException {
-                    PrintSpoolerService.this.createPrintJob(printJob);
+                IPrintDocumentAdapter printAdapter) throws RemoteException {
+                PrintSpoolerService.this.createPrintJob(printJob);
 
-                    Intent intent = new Intent(printJob.getId().flattenToString());
-                    intent.setClass(PrintSpoolerService.this, PrintJobConfigActivity.class);
-                    intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_DOCUMENT_ADAPTER,
-                            printAdapter.asBinder());
-                    intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_JOB, printJob);
+                Intent intent = new Intent(printJob.getId().flattenToString());
+                intent.setClass(PrintSpoolerService.this, PrintJobConfigActivity.class);
+                intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_DOCUMENT_ADAPTER,
+                        printAdapter.asBinder());
+                intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_JOB, printJob);
 
-                    IntentSender sender = PendingIntent.getActivity(
-                            PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                            | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
+                IntentSender sender = PendingIntent.getActivity(
+                        PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
+                        | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
 
-                    Message message = mHandlerCaller.obtainMessageOO(
-                            HandlerCallerCallback.MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
-                            client, sender);
-                    mHandlerCaller.executeOrSendMessage(message);
+                Message message = mHandlerCaller.obtainMessageIIO(
+                        HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
+                        printJob.getAppId(), 0, printJob.getId());
+                mHandlerCaller.executeOrSendMessage(message);
+
+                message = mHandlerCaller.obtainMessageOO(
+                        HandlerCallerCallback.MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
+                        client, sender);
+                mHandlerCaller.executeOrSendMessage(message);
+
+                printJob.setCreationTime(System.currentTimeMillis());
+                synchronized (mLock) {
+                    mPersistanceManager.writeStateLocked();
+                }
             }
 
             @Override
@@ -240,12 +250,13 @@ public final class PrintSpoolerService extends Service {
     }
 
     private final class HandlerCallerCallback implements HandlerCaller.Callback {
-        public static final int MSG_SET_CLIENT = 9;
-        public static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 10;
-        public static final int MSG_ON_PRINT_JOB_QUEUED = 11;
-        public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 12;
-        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 13;
-        public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 14;
+        public static final int MSG_SET_CLIENT = 1;
+        public static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 2;
+        public static final int MSG_ON_PRINT_JOB_QUEUED = 3;
+        public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 4;
+        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 5;
+        public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 6;
+        public static final int MSG_ON_PRINT_JOB_STATE_CHANGED = 7;
 
         @Override
         public void executeMessage(Message message) {
@@ -309,6 +320,18 @@ public final class PrintSpoolerService extends Service {
 
                 case MSG_CHECK_ALL_PRINTJOBS_HANDLED: {
                     checkAllPrintJobsHandled();
+                } break;
+
+                case MSG_ON_PRINT_JOB_STATE_CHANGED: {
+                    if (mClient != null) {
+                        PrintJobId printJobId = (PrintJobId) message.obj;
+                        final int appId = message.arg1;
+                        try {
+                            mClient.onPrintJobStateChanged(printJobId, appId);
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error notify for print job state change.", re);
+                        }
+                    }
                 } break;
             }
         }
@@ -511,6 +534,11 @@ public final class PrintSpoolerService extends Service {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
+                final int oldState = printJob.getState();
+                if (oldState == state) {
+                    return false;
+                }
+
                 success = true;
 
                 printJob.setState(state);
@@ -553,6 +581,11 @@ public final class PrintSpoolerService extends Service {
                 if (!hasActivePrintJobsLocked()) {
                     notifyOnAllPrintJobsHandled();
                 }
+
+                Message message = mHandlerCaller.obtainMessageIIO(
+                        HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
+                        printJob.getAppId(), 0, printJob.getId());
+                mHandlerCaller.executeOrSendMessage(message);
             }
         }
 
@@ -706,7 +739,10 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_APP_ID = "appId";
         private static final String ATTR_USER_ID = "userId";
         private static final String ATTR_TAG = "tag";
+        private static final String ATTR_CREATION_TIME = "creationTime";
         private static final String ATTR_COPIES = "copies";
+        private static final String ATTR_PRINTER_NAME = "printerName";
+        private static final String ATTR_STATE_REASON = "stateReason";
 
         private static final String TAG_MEDIA_SIZE = "mediaSize";
         private static final String TAG_RESOLUTION = "resolution";
@@ -714,7 +750,7 @@ public final class PrintSpoolerService extends Service {
 
         private static final String ATTR_COLOR_MODE = "colorMode";
 
-        private static final String ATTR_LOCAL_ID = "printerName";
+        private static final String ATTR_LOCAL_ID = "localId";
         private static final String ATTR_SERVICE_NAME = "serviceName";
 
         private static final String ATTR_WIDTH_MILS = "widthMils";
@@ -794,7 +830,17 @@ public final class PrintSpoolerService extends Service {
                     if (tag != null) {
                         serializer.attribute(null, ATTR_TAG, tag);
                     }
+                    serializer.attribute(null, ATTR_CREATION_TIME, String.valueOf(
+                            printJob.getCreationTime()));
                     serializer.attribute(null, ATTR_COPIES, String.valueOf(printJob.getCopies()));
+                    String printerName = printJob.getPrinterName();
+                    if (!TextUtils.isEmpty(printerName)) {
+                        serializer.attribute(null, ATTR_PRINTER_NAME, printerName);
+                    }
+                    String stateReason = printJob.getStateReason();
+                    if (!TextUtils.isEmpty(stateReason)) {
+                        serializer.attribute(null, ATTR_STATE_REASON, stateReason);
+                    }
 
                     PrinterId printerId = printJob.getPrinterId();
                     if (printerId != null) {
@@ -979,8 +1025,14 @@ public final class PrintSpoolerService extends Service {
             printJob.setUserId(userId);
             String tag = parser.getAttributeValue(null, ATTR_TAG);
             printJob.setTag(tag);
+            String creationTime = parser.getAttributeValue(null, ATTR_CREATION_TIME);
+            printJob.setCreationTime(Long.parseLong(creationTime));
             String copies = parser.getAttributeValue(null, ATTR_COPIES);
             printJob.setCopies(Integer.parseInt(copies));
+            String printerName = parser.getAttributeValue(null, ATTR_PRINTER_NAME);
+            printJob.setPrinterName(printerName);
+            String stateReason = parser.getAttributeValue(null, ATTR_STATE_REASON);
+            printJob.setStateReason(stateReason);
 
             parser.next();
 
