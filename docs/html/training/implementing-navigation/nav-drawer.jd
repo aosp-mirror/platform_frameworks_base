@@ -26,9 +26,9 @@ trainingnavtop=true
 </div>
 
 <div class="download-box">
-<a href="http://developer.android.com/downloads/design/Android_Navigation_Drawer_Icon_20130516.zip"
-  class="button">Download the nav drawer icons</a>
-<p class="filename">Android_Navigation_Drawer_Icon_20130516.zip</p>
+<a href="http://developer.android.com/downloads/design/Android_Design_Icons_20130926.zip"
+  class="button">Download the Action Bar Icon Pack</a>
+<p class="filename">Android_Design_Icons_20130926.zip</p>
 </div>
 
 </div>
@@ -304,8 +304,8 @@ it with its constructor, which requires the following arguments:</p>
   <li>The {@link android.app.Activity} hosting the drawer.
   <li>The {@link android.support.v4.widget.DrawerLayout}.
   <li>A drawable resource to use as the drawer indicator.
-   <p><a href="http://developer.android.com/downloads/design/Android_Navigation_Drawer_Icon_20130516.zip"
->Download the standard navigation icons</a> (available for both dark and light themes).</p>
+   <p>The standard navigation drawer icon is available in the <a href="http://developer.android.com/downloads/design/Android_Design_Icons_20130926.zip"
+>Download the Action Bar Icon Pack</a>.</p>
   <li>A String resource to describe the "open drawer" action (for accessibility).
   <li>A String resource to describe the "close drawer" action (for accessibility).
 </ul>
