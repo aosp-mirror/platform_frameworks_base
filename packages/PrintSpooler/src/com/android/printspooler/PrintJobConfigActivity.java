@@ -77,6 +77,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -91,8 +93,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import libcore.io.IoUtils;
 
 /**
  * Activity for configuring a print job.
@@ -144,7 +144,8 @@ public class PrintJobConfigActivity extends Activity {
             "(?=[]\\[+&|!(){}^\"~*?:\\\\])");
 
     private static final Pattern PATTERN_PAGE_RANGE = Pattern.compile(
-            "([0-9]+[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*[,]?[\\s]*)+");
+            "[\\s]*[0-9]*[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*?(([,])"
+            + "[\\s]*[0-9]*[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*|[\\s]*)+");
 
     public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {PageRange.ALL_PAGES};
 
@@ -1076,9 +1077,13 @@ public class PrintJobConfigActivity extends Activity {
                     return;
                 }
 
+                // The range
                 Matcher matcher = PATTERN_DIGITS.matcher(text);
                 while (matcher.find()) {
-                    String numericString = text.substring(matcher.start(), matcher.end());
+                    String numericString = text.substring(matcher.start(), matcher.end()).trim();
+                    if (TextUtils.isEmpty(numericString)) {
+                        continue;
+                    }
                     final int pageIndex = Integer.parseInt(numericString);
                     if (pageIndex < 1 || pageIndex > mDocument.info.getPageCount()) {
                         mPageRangeEditText.setError("");
@@ -1506,18 +1511,21 @@ public class PrintJobConfigActivity extends Activity {
 
                 while (mStringCommaSplitter.hasNext()) {
                     String range = mStringCommaSplitter.next().trim();
+                    if (TextUtils.isEmpty(range)) {
+                        continue;
+                    }
                     final int dashIndex = range.indexOf('-');
                     final int fromIndex;
                     final int toIndex;
 
                     if (dashIndex > 0) {
-                        fromIndex = Integer.parseInt(range.substring(0, dashIndex)) - 1;
+                        fromIndex = Integer.parseInt(range.substring(0, dashIndex).trim()) - 1;
                         // It is possible that the dash is at the end since the input
                         // verification can has to allow the user to keep entering if
                         // this would lead to a valid input. So we handle this.
                         toIndex = (dashIndex < range.length() - 1)
                                 ? Integer.parseInt(range.substring(dashIndex + 1,
-                                        range.length())) - 1 : fromIndex;
+                                        range.length()).trim()) - 1 : fromIndex;
                     } else {
                         fromIndex = toIndex = Integer.parseInt(range) - 1;
                     }
