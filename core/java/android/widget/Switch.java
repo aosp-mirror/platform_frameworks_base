@@ -659,29 +659,28 @@ public class Switch extends CompoundButton {
      */
     private void stopDrag(MotionEvent ev) {
         mTouchMode = TOUCH_MODE_IDLE;
-        // Up and not canceled, also checks the switch has not been disabled during the drag
-        boolean commitChange = ev.getAction() == MotionEvent.ACTION_UP && isEnabled();
 
-        cancelSuperTouch(ev);
-
+        // Commit the change if the event is up and not canceled and the switch
+        // has not been disabled during the drag.
+        final boolean commitChange = ev.getAction() == MotionEvent.ACTION_UP && isEnabled();
+        final boolean newState;
         if (commitChange) {
-            boolean newState;
             mVelocityTracker.computeCurrentVelocity(1000);
-            float xvel = mVelocityTracker.getXVelocity();
+            final float xvel = mVelocityTracker.getXVelocity();
             if (Math.abs(xvel) > mMinFlingVelocity) {
                 newState = isLayoutRtl() ? (xvel < 0) : (xvel > 0);
             } else {
                 newState = getTargetCheckedState();
             }
-            animateThumbToCheckedState(newState);
         } else {
-            animateThumbToCheckedState(isChecked());
+            newState = isChecked();
         }
+
+        setChecked(newState);
+        cancelSuperTouch(ev);
     }
 
     private void animateThumbToCheckedState(boolean newCheckedState) {
-        super.setChecked(newCheckedState);
-
         final float targetPosition = newCheckedState ? 1 : 0;
         mPositionAnimator = ObjectAnimator.ofFloat(this, THUMB_POS, targetPosition);
         mPositionAnimator.setDuration(THUMB_ANIMATION_DURATION);
@@ -711,16 +710,20 @@ public class Switch extends CompoundButton {
 
     @Override
     public void toggle() {
-        animateThumbToCheckedState(!isChecked());
+        setChecked(!isChecked());
     }
 
     @Override
     public void setChecked(boolean checked) {
         super.setChecked(checked);
 
-        // Immediately move the thumb to the new position.
-        cancelPositionAnimator();
-        setThumbPosition(checked ? 1 : 0);
+        if (isAttachedToWindow() && isLaidOut()) {
+            animateThumbToCheckedState(checked);
+        } else {
+            // Immediately move the thumb to the new position.
+            cancelPositionAnimator();
+            setThumbPosition(checked ? 1 : 0);
+        }
     }
 
     @Override
