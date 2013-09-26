@@ -178,6 +178,7 @@ LOCAL_C_INCLUDES += \
 	libcore/include
 
 LOCAL_SHARED_LIBRARIES := \
+	libmemtrack \
 	libandroidfw \
 	libexpat \
 	libnativehelper \
