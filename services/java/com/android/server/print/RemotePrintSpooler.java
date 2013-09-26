@@ -91,6 +91,7 @@ final class RemotePrintSpooler {
     public static interface PrintSpoolerCallbacks {
         public void onPrintJobQueued(PrintJobInfo printJob);
         public void onAllPrintJobsForServiceHandled(ComponentName printService);
+        public void onPrintJobStateChanged(PrintJobId printJobId, int appId);
     }
 
     public RemotePrintSpooler(Context context, int userId,
@@ -343,6 +344,10 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             unbindLocked();
         }
+    }
+
+    private void onPrintJobStateChanged(PrintJobId printJobId, int appId) {
+        mCallbacks.onPrintJobStateChanged(printJobId, appId);
     }
 
     private IPrintSpooler getRemoteInstanceLazy() throws TimeoutException {
@@ -613,6 +618,19 @@ final class RemotePrintSpooler {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     spooler.onAllPrintJobsHandled();
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+
+        @Override
+        public void onPrintJobStateChanged(PrintJobId printJobId, int appId) {
+            RemotePrintSpooler spooler = mWeakSpooler.get();
+            if (spooler != null) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    spooler.onPrintJobStateChanged(printJobId, appId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

@@ -20,6 +20,7 @@ import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
 import android.print.PrintJobId;
+import android.print.IPrintJobStateChangeListener;
 import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
@@ -38,6 +39,11 @@ interface IPrintManager {
             int appId, int userId);
     void cancelPrintJob(in PrintJobId printJobId, int appId, int userId);
     void restartPrintJob(in PrintJobId printJobId, int appId, int userId);
+
+    void addPrintJobStateChangeListener(in IPrintJobStateChangeListener listener,
+            int appId, int userId);
+    void removePrintJobStateChangeListener(in IPrintJobStateChangeListener listener,
+            int userId);
 
     List<PrintServiceInfo> getEnabledPrintServices(int userId);
 

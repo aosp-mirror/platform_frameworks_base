@@ -302,7 +302,7 @@ public final class PrinterInfo implements Parcelable {
 
         private boolean isValidStatus(int status) {
             return (status == STATUS_IDLE
-                    || status == STATUS_IDLE
+                    || status == STATUS_BUSY
                     || status == STATUS_UNAVAILABLE);
         }
     }

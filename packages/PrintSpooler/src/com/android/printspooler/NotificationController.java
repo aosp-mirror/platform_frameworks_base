@@ -32,7 +32,7 @@ import android.print.IPrintManager;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
-import android.text.TextUtils;
+import android.provider.Settings;
 import android.util.Log;
 
 /**
@@ -47,9 +47,9 @@ public class NotificationController {
     private static final String INTENT_ACTION_CANCEL_PRINTJOB = "INTENT_ACTION_CANCEL_PRINTJOB";
     private static final String INTENT_ACTION_RESTART_PRINTJOB = "INTENT_ACTION_RESTART_PRINTJOB";
 
-    private static final String INTENT_EXTRA_PRINTJOB_ID = "INTENT_EXTRA_PRINTJOB_ID";
-    private static final String INTENT_EXTRA_PRINTJOB_LABEL = "INTENT_EXTRA_PRINTJOB_LABEL";
-    private static final String INTENT_EXTRA_PRINTER_NAME = "INTENT_EXTRA_PRINTER_NAME";
+    private static final String EXTRA_PRINT_JOB_ID = "EXTRA_PRINT_JOB_ID";
+    private static final String EXTRA_PRINTJOB_LABEL = "EXTRA_PRINTJOB_LABEL";
+    private static final String EXTRA_PRINTER_NAME = "EXTRA_PRINTER_NAME";
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
@@ -89,6 +89,7 @@ public class NotificationController {
 
     private void createPrintingNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
+                .setContentIntent(createContentIntent(printJob.getId()))
                 .setSmallIcon(com.android.internal.R.drawable.ic_print)
                 .setContentTitle(mContext.getString(R.string.printing_notification_title_template,
                         printJob.getLabel()))
@@ -102,18 +103,16 @@ public class NotificationController {
     }
 
     private void createFailedNotification(PrintJobInfo printJob) {
-        String reason = !TextUtils.isEmpty(printJob.getStateReason())
-                ? printJob.getStateReason() : mContext.getString(R.string.reason_unknown);
-
         Notification.Builder builder = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.stat_notify_error)
+                .setContentIntent(createContentIntent(printJob.getId()))
+                .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
                 .setContentTitle(mContext.getString(R.string.failed_notification_title_template,
                         printJob.getLabel()))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.restart),
                         createRestartIntent(printJob.getId()))
-                .setContentText(reason)
+                .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);
@@ -121,16 +120,14 @@ public class NotificationController {
     }
 
     private void createBlockedNotification(PrintJobInfo printJob) {
-        String reason = !TextUtils.isEmpty(printJob.getStateReason())
-                ? printJob.getStateReason() : mContext.getString(R.string.reason_unknown);
-
         Notification.Builder builder = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.stat_notify_error)
+                .setContentIntent(createContentIntent(printJob.getId()))
+                .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
                 .setContentTitle(mContext.getString(R.string.blocked_notification_title_template,
                         printJob.getLabel()))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
-                .setContentText(reason)
+                .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);
@@ -141,19 +138,25 @@ public class NotificationController {
         mNotificationManager.cancel(printJobId.flattenToString(), 0);
     }
 
+    private PendingIntent createContentIntent(PrintJobId printJobId) {
+        Intent intent = new Intent(Settings.ACTION_PRINT_SETTINGS);
+        intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId.flattenToString());
+        return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+    }
+
     private PendingIntent createCancelIntent(PrintJobInfo printJob) {
         Intent intent = new Intent(mContext, NotificationBroadcastReceiver.class);
         intent.setAction(INTENT_ACTION_CANCEL_PRINTJOB + "_" + printJob.getId().flattenToString());
-        intent.putExtra(INTENT_EXTRA_PRINTJOB_ID, printJob.getId());
-        intent.putExtra(INTENT_EXTRA_PRINTJOB_LABEL, printJob.getLabel());
-        intent.putExtra(INTENT_EXTRA_PRINTER_NAME, printJob.getPrinterName());
+        intent.putExtra(EXTRA_PRINT_JOB_ID, printJob.getId());
+        intent.putExtra(EXTRA_PRINTJOB_LABEL, printJob.getLabel());
+        intent.putExtra(EXTRA_PRINTER_NAME, printJob.getPrinterName());
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 
     private PendingIntent createRestartIntent(PrintJobId printJobId) {
         Intent intent = new Intent(mContext, NotificationBroadcastReceiver.class);
         intent.setAction(INTENT_ACTION_RESTART_PRINTJOB + "_" + printJobId.flattenToString());
-        intent.putExtra(INTENT_EXTRA_PRINTJOB_ID, printJobId);
+        intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId);
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 
@@ -164,12 +167,12 @@ public class NotificationController {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null && action.startsWith(INTENT_ACTION_CANCEL_PRINTJOB)) {
-                PrintJobId printJobId = intent.getExtras().getParcelable(INTENT_EXTRA_PRINTJOB_ID);
-                String printJobLabel = intent.getExtras().getString(INTENT_EXTRA_PRINTJOB_LABEL);
-                String printerName = intent.getExtras().getString(INTENT_EXTRA_PRINTER_NAME);
+                PrintJobId printJobId = intent.getExtras().getParcelable(EXTRA_PRINT_JOB_ID);
+                String printJobLabel = intent.getExtras().getString(EXTRA_PRINTJOB_LABEL);
+                String printerName = intent.getExtras().getString(EXTRA_PRINTER_NAME);
                 handleCancelPrintJob(context, printJobId, printJobLabel, printerName);
             } else if (action != null && action.startsWith(INTENT_ACTION_RESTART_PRINTJOB)) {
-                PrintJobId printJobId = intent.getExtras().getParcelable(INTENT_EXTRA_PRINTJOB_ID);
+                PrintJobId printJobId = intent.getExtras().getParcelable(EXTRA_PRINT_JOB_ID);
                 handleRestartPrintJob(context, printJobId);
             }
         }
