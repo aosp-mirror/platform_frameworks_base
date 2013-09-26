@@ -259,10 +259,9 @@ public class ProgressBar extends View {
         
         Drawable drawable = a.getDrawable(R.styleable.ProgressBar_progressDrawable);
         if (drawable != null) {
-            drawable = tileify(drawable, false);
             // Calling this method can set mMaxHeight, make sure the corresponding
             // XML attribute for mMaxHeight is read after calling this method
-            setProgressDrawable(drawable);
+            setProgressDrawableTiled(drawable);
         }
 
 
@@ -291,8 +290,7 @@ public class ProgressBar extends View {
 
         drawable = a.getDrawable(R.styleable.ProgressBar_indeterminateDrawable);
         if (drawable != null) {
-            drawable = tileifyIndeterminate(drawable);
-            setIndeterminateDrawable(drawable);
+            setIndeterminateDrawableTiled(drawable);
         }
 
         mOnlyIndeterminate = a.getBoolean(
@@ -465,11 +463,9 @@ public class ProgressBar extends View {
     }
 
     /**
-     * <p>Define the drawable used to draw the progress bar in
-     * indeterminate mode.</p>
+     * Define the drawable used to draw the progress bar in indeterminate mode.
      *
      * @param d the new drawable
-     *
      * @see #getIndeterminateDrawable()
      * @see #setIndeterminate(boolean)
      */
@@ -486,6 +482,25 @@ public class ProgressBar extends View {
             postInvalidate();
         }
     }
+
+    /**
+     * Define the tileable drawable used to draw the progress bar in
+     * indeterminate mode.
+     * <p>
+     * If the drawable is a BitmapDrawable or contains BitmapDrawables, a
+     * tiled copy will be generated for display as a progress bar.
+     *
+     * @param d the new drawable
+     * @see #getIndeterminateDrawable()
+     * @see #setIndeterminate(boolean)
+     */
+    public void setIndeterminateDrawableTiled(Drawable d) {
+        if (d != null) {
+            d = tileifyIndeterminate(d);
+        }
+
+        setIndeterminateDrawable(d);
+    }
     
     /**
      * <p>Get the drawable used to draw the progress bar in
@@ -501,11 +516,9 @@ public class ProgressBar extends View {
     }
 
     /**
-     * <p>Define the drawable used to draw the progress bar in
-     * progress mode.</p>
+     * Define the drawable used to draw the progress bar in progress mode.
      *
      * @param d the new drawable
-     *
      * @see #getProgressDrawable()
      * @see #setIndeterminate(boolean)
      */
@@ -543,6 +556,25 @@ public class ProgressBar extends View {
             doRefreshProgress(R.id.progress, mProgress, false, false);
             doRefreshProgress(R.id.secondaryProgress, mSecondaryProgress, false, false);
         }
+    }
+
+    /**
+     * Define the tileable drawable used to draw the progress bar in
+     * progress mode.
+     * <p>
+     * If the drawable is a BitmapDrawable or contains BitmapDrawables, a
+     * tiled copy will be generated for display as a progress bar.
+     *
+     * @param d the new drawable
+     * @see #getProgressDrawable()
+     * @see #setIndeterminate(boolean)
+     */
+    public void setProgressDrawableTiled(Drawable d) {
+        if (d != null) {
+            d = tileify(d, false);
+        }
+
+        setProgressDrawable(d);
     }
     
     /**

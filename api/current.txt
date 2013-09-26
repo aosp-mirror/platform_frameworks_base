@@ -31778,11 +31778,13 @@ package android.widget {
     method public android.os.Parcelable onSaveInstanceState();
     method public synchronized void setIndeterminate(boolean);
     method public void setIndeterminateDrawable(android.graphics.drawable.Drawable);
+    method public void setIndeterminateDrawableTiled(android.graphics.drawable.Drawable);
     method public void setInterpolator(android.content.Context, int);
     method public void setInterpolator(android.view.animation.Interpolator);
     method public synchronized void setMax(int);
     method public synchronized void setProgress(int);
     method public void setProgressDrawable(android.graphics.drawable.Drawable);
+    method public void setProgressDrawableTiled(android.graphics.drawable.Drawable);
     method public synchronized void setSecondaryProgress(int);
   }
 
