@@ -51,6 +51,11 @@
             androidprv:layout_maxHeight="480dp" />
         <include layout="@layout/keyguard_multi_user_selector"/>
 
+        <View android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              androidprv:layout_childType="scrim"
+              android:background="#99000000" />
+
         <com.android.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
