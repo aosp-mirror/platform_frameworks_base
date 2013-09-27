@@ -2797,7 +2797,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.USE_GOOGLE_MAIL);
             MOVED_TO_GLOBAL.add(Settings.Global.WEB_AUTOFILL_QUERY_URL);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_COUNTRY_CODE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_FREQUENCY_BAND);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_IDLE_MS);
@@ -5206,12 +5205,6 @@ public final class Settings {
         */
        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                "wifi_networks_available_repeat_delay";
-
-       /**
-        * 802.11 country code in ISO 3166 format
-        * @hide
-        */
-       public static final String WIFI_COUNTRY_CODE = "wifi_country_code";
 
        /**
         * The interval in milliseconds to issue wake up scans when wifi needs
