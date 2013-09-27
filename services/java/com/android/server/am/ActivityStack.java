@@ -937,6 +937,10 @@ final class ActivityStack {
         next.idle = false;
         next.results = null;
         next.newIntents = null;
+        if (next.nowVisible) {
+            // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
+            mStackSupervisor.dismissKeyguard();
+        }
 
         // schedule an idle timeout in case the app doesn't do it for us.
         mStackSupervisor.scheduleIdleTimeoutLocked(next);
