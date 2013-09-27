@@ -33,7 +33,6 @@ import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
-import android.print.PrintManager;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
@@ -91,7 +90,7 @@ final class RemotePrintSpooler {
     public static interface PrintSpoolerCallbacks {
         public void onPrintJobQueued(PrintJobInfo printJob);
         public void onAllPrintJobsForServiceHandled(ComponentName printService);
-        public void onPrintJobStateChanged(PrintJobId printJobId, int appId);
+        public void onPrintJobStateChanged(PrintJobInfo printJob);
     }
 
     public RemotePrintSpooler(Context context, int userId,
@@ -280,30 +279,6 @@ final class RemotePrintSpooler {
         }
     }
 
-    public final void forgetPrintJobs(List<PrintJobId> printJobIds) {
-        throwIfCalledOnMainThread();
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            mCanUnbind = false;
-        }
-        try {
-            getRemoteInstanceLazy().forgetPrintJobs(printJobIds);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error forgeting print jobs", re);
-        } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error forgeting print jobs", te);
-        } finally {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
-                        + "] forgetPrintJobs()");
-            }
-            synchronized (mLock) {
-                mCanUnbind = true;
-                mLock.notifyAll();
-            }
-        }
-    }
-
     public final void destroy() {
         throwIfCalledOnMainThread();
         if (DEBUG) {
@@ -323,18 +298,15 @@ final class RemotePrintSpooler {
                     .append(String.valueOf(mDestroyed)).println();
             pw.append(prefix).append("bound=")
                     .append((mRemoteInstance != null) ? "true" : "false").println();
-            pw.append(prefix).append("print jobs:").println();
-            if (mRemoteInstance != null) {
-                List<PrintJobInfo> printJobs = getPrintJobInfos(null,
-                        PrintJobInfo.STATE_ANY, PrintManager.APP_ID_ANY);
-                if (printJobs != null) {
-                    final int printJobCount = printJobs.size();
-                    for (int i = 0; i < printJobCount; i++) {
-                        PrintJobInfo printJob = printJobs.get(i);
-                        pw.append(prefix).append(prefix).append(printJob.toString());
-                        pw.println();
-                    }
-                }
+
+            pw.flush();
+
+            try {
+                getRemoteInstanceLazy().asBinder().dump(fd, new String[]{prefix});
+            } catch (TimeoutException te) {
+                /* ignore */
+            } catch (RemoteException re) {
+                /* ignore */
             }
         }
     }
@@ -346,8 +318,8 @@ final class RemotePrintSpooler {
         }
     }
 
-    private void onPrintJobStateChanged(PrintJobId printJobId, int appId) {
-        mCallbacks.onPrintJobStateChanged(printJobId, appId);
+    private void onPrintJobStateChanged(PrintJobInfo printJob) {
+        mCallbacks.onPrintJobStateChanged(printJob);
     }
 
     private IPrintSpooler getRemoteInstanceLazy() throws TimeoutException {
@@ -625,12 +597,12 @@ final class RemotePrintSpooler {
         }
 
         @Override
-        public void onPrintJobStateChanged(PrintJobId printJobId, int appId) {
+        public void onPrintJobStateChanged(PrintJobInfo printJob) {
             RemotePrintSpooler spooler = mWeakSpooler.get();
             if (spooler != null) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    spooler.onPrintJobStateChanged(printJobId, appId);
+                    spooler.onPrintJobStateChanged(printJob);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

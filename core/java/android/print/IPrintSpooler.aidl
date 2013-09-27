@@ -36,7 +36,6 @@ import android.print.PrintJobInfo;
  */
 oneway interface IPrintSpooler {
     void removeObsoletePrintJobs();
-    void forgetPrintJobs(in List<PrintJobId> printJob);
     void getPrintJobInfos(IPrintSpoolerCallbacks callback, in ComponentName componentName,
             int state, int appId, int sequence);
     void getPrintJobInfo(in PrintJobId printJobId, IPrintSpoolerCallbacks callback,

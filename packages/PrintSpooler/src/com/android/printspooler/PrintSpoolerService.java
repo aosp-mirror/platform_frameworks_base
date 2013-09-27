@@ -43,6 +43,7 @@ import android.print.PrintManager;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -59,10 +60,12 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,6 +84,8 @@ public final class PrintSpoolerService extends Service {
     private static final boolean PERSISTNECE_MANAGER_ENABLED = true;
 
     private static final long CHECK_ALL_PRINTJOBS_HANDLED_DELAY = 5000;
+
+    private static final String PRINT_JOB_FILE_PREFIX = "print_job_";
 
     private static final String PRINT_FILE_EXTENSION = "pdf";
 
@@ -168,9 +173,9 @@ public final class PrintSpoolerService extends Service {
                         PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
                         | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
 
-                Message message = mHandlerCaller.obtainMessageIIO(
+                Message message = mHandlerCaller.obtainMessageO(
                         HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
-                        printJob.getAppId(), 0, printJob.getId());
+                        printJob);
                 mHandlerCaller.executeOrSendMessage(message);
 
                 message = mHandlerCaller.obtainMessageOO(
@@ -179,9 +184,6 @@ public final class PrintSpoolerService extends Service {
                 mHandlerCaller.executeOrSendMessage(message);
 
                 printJob.setCreationTime(System.currentTimeMillis());
-                synchronized (mLock) {
-                    mPersistanceManager.writeStateLocked();
-                }
             }
 
             @Override
@@ -225,10 +227,38 @@ public final class PrintSpoolerService extends Service {
             }
 
             @Override
-            public void forgetPrintJobs(List<PrintJobId> printJobIds) {
-                PrintSpoolerService.this.forgetPrintJobs(printJobIds);
+            protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+                PrintSpoolerService.this.dump(fd, writer, args);
             }
         };
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        synchronized (mLock) {
+            String prefix = args[0];
+            String tab = "  ";
+
+            pw.append(prefix).append("print jobs:").println();
+            final int printJobCount = mPrintJobs.size();
+            for (int i = 0; i < printJobCount; i++) {
+                PrintJobInfo printJob = mPrintJobs.get(i);
+                pw.append(prefix).append(tab).append(printJob.toString());
+                pw.println();
+            }
+
+            pw.append(prefix).append("print job files:").println();
+            File[] files = getFilesDir().listFiles();
+            if (files != null) {
+                final int fileCount = files.length;
+                for (int i = 0; i < fileCount; i++) {
+                    File file = files[i];
+                    if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
+                        pw.append(prefix).append(tab).append(file.getName()).println();
+                    }
+                }
+            }
+        }
     }
 
     private void sendOnPrintJobQueued(PrintJobInfo printJob) {
@@ -324,10 +354,9 @@ public final class PrintSpoolerService extends Service {
 
                 case MSG_ON_PRINT_JOB_STATE_CHANGED: {
                     if (mClient != null) {
-                        PrintJobId printJobId = (PrintJobId) message.obj;
-                        final int appId = message.arg1;
+                        PrintJobInfo printJob = (PrintJobInfo) message.obj;
                         try {
-                            mClient.onPrintJobStateChanged(printJobId, appId);
+                            mClient.onPrintJobStateChanged(printJob);
                         } catch (RemoteException re) {
                             Slog.e(LOG_TAG, "Error notify for print job state change.", re);
                         }
@@ -391,17 +420,46 @@ public final class PrintSpoolerService extends Service {
     public void createPrintJob(PrintJobInfo printJob) {
         synchronized (mLock) {
             addPrintJobLocked(printJob);
+            setPrintJobState(printJob.getId(), PrintJobInfo.STATE_CREATED, null);
         }
     }
 
     private void handleReadPrintJobsLocked() {
+        // Make a map with the files for a print job since we may have
+        // to delete some. One example of getting orphan files if the
+        // spooler crashes while constructing a print job. We do not
+        // persist partially populated print jobs under construction to
+        // avoid special handling for various attributes missing.
+        ArrayMap<PrintJobId, File> fileForJobMap = null;
+        File[] files = getFilesDir().listFiles();
+        if (files != null) {
+            final int fileCount = files.length;
+            for (int i = 0; i < fileCount; i++) {
+                File file = files[i];
+                if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
+                    if (fileForJobMap == null) {
+                        fileForJobMap = new ArrayMap<PrintJobId, File>();
+                    }
+                    String printJobIdString = file.getName().substring(0,
+                            PRINT_JOB_FILE_PREFIX.length());
+                    PrintJobId printJobId = PrintJobId.unflattenFromString(
+                            printJobIdString);
+                    fileForJobMap.put(printJobId, file);
+                }
+            }
+        }
+
         final int printJobCount = mPrintJobs.size();
         for (int i = 0; i < printJobCount; i++) {
             PrintJobInfo printJob = mPrintJobs.get(i);
 
+            // We want to have only the orphan files at the end.
+            if (fileForJobMap != null) {
+                fileForJobMap.remove(printJob.getId());
+            }
+
             // Update the notification.
             mNotificationController.onPrintJobStateChanged(printJob);
-
             switch (printJob.getState()) {
                 case PrintJobInfo.STATE_QUEUED:
                 case PrintJobInfo.STATE_STARTED:
@@ -413,6 +471,15 @@ public final class PrintSpoolerService extends Service {
                     setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
                             getString(R.string.no_connection_to_printer));
                 } break;
+            }
+        }
+
+        // Delete the orphan files.
+        if (fileForJobMap != null) {
+            final int orphanFileCount = fileForJobMap.size();
+            for (int i = 0; i < orphanFileCount; i++) {
+                File file = fileForJobMap.valueAt(i);
+                file.delete();
             }
         }
     }
@@ -465,7 +532,7 @@ public final class PrintSpoolerService extends Service {
     }
 
     public File generateFileForPrintJob(PrintJobId printJobId) {
-        return new File(getFilesDir(), "print_job_"
+        return new File(getFilesDir(), PRINT_JOB_FILE_PREFIX
                 + printJobId.flattenToString() + "." + PRINT_FILE_EXTENSION);
     }
 
@@ -473,31 +540,6 @@ public final class PrintSpoolerService extends Service {
         mPrintJobs.add(printJob);
         if (DEBUG_PRINT_JOB_LIFECYCLE) {
             Slog.i(LOG_TAG, "[ADD] " + printJob);
-        }
-    }
-
-    private void forgetPrintJobs(List<PrintJobId> printJobIds) {
-        synchronized (mLock) {
-            boolean printJobsRemoved = false;
-            final int removedPrintJobCount = printJobIds.size();
-            for (int i = 0; i < removedPrintJobCount; i++) {
-                PrintJobId removedPrintJobId = printJobIds.get(i);
-                final int printJobCount = mPrintJobs.size();
-                for (int j = printJobCount - 1; j >= 0; j--) {
-                    PrintJobInfo printJob = mPrintJobs.get(j);
-                    if (removedPrintJobId.equals(printJob.getId())) {
-                        mPrintJobs.remove(j);
-                        printJobsRemoved = true;
-                        if (DEBUG_PRINT_JOB_LIFECYCLE) {
-                            Slog.i(LOG_TAG, "[FORGOT] " + printJob.getId().flattenToString());
-                        }
-                        removePrintJobFileLocked(printJob.getId());
-                    }
-                }
-            }
-            if (printJobsRemoved) {
-                mPersistanceManager.writeStateLocked();
-            }
         }
     }
 
@@ -523,7 +565,7 @@ public final class PrintSpoolerService extends Service {
         if (file.exists()) {
             file.delete();
             if (DEBUG_PRINT_JOB_LIFECYCLE) {
-                Slog.i(LOG_TAG, "[REMOVE FILE FOR] " + printJobId.flattenToString());
+                Slog.i(LOG_TAG, "[REMOVE FILE FOR] " + printJobId);
             }
         }
     }
@@ -552,10 +594,7 @@ public final class PrintSpoolerService extends Service {
                 switch (state) {
                     case PrintJobInfo.STATE_COMPLETED:
                     case PrintJobInfo.STATE_CANCELED:
-                        // Just remove the file but keep the print job info since
-                        // the app that created it may be holding onto the PrintJob
-                        // instance and query it for its most recent state. We will
-                        // remove the info for this job when told so by the system.
+                        mPrintJobs.remove(printJob);
                         removePrintJobFileLocked(printJob.getId());
                         // $fall-through$
 
@@ -582,9 +621,9 @@ public final class PrintSpoolerService extends Service {
                     notifyOnAllPrintJobsHandled();
                 }
 
-                Message message = mHandlerCaller.obtainMessageIIO(
+                Message message = mHandlerCaller.obtainMessageO(
                         HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
-                        printJob.getAppId(), 0, printJob.getId());
+                        printJob);
                 mHandlerCaller.executeOrSendMessage(message);
             }
         }
