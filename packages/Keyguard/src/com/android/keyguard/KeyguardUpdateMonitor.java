@@ -249,11 +249,11 @@ public class KeyguardUpdateMonitor {
             if (Intent.ACTION_TIME_TICK.equals(action)
                     || Intent.ACTION_TIME_CHANGED.equals(action)
                     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_TIME_UPDATE));
+                mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
             } else if (TelephonyIntents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
                 mTelephonyPlmn = getTelephonyPlmnFrom(intent);
                 mTelephonySpn = getTelephonySpnFrom(intent);
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_CARRIER_INFO_UPDATE));
+                mHandler.sendEmptyMessage(MSG_CARRIER_INFO_UPDATE);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
@@ -277,12 +277,12 @@ public class KeyguardUpdateMonitor {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
+                mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_BOOT_COMPLETED));
+                dispatchBootCompleted();
             }
         }
     };
@@ -520,7 +520,7 @@ public class KeyguardUpdateMonitor {
                 super.onChange(selfChange);
                 mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
                 if (mDeviceProvisioned) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
+                    mHandler.sendEmptyMessage(MSG_DEVICE_PROVISIONED);
                 }
                 if (DEBUG) Log.d(TAG, "DEVICE_PROVISIONED state = " + mDeviceProvisioned);
             }
@@ -536,7 +536,7 @@ public class KeyguardUpdateMonitor {
         if (provisioned != mDeviceProvisioned) {
             mDeviceProvisioned = provisioned;
             if (mDeviceProvisioned) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
+                mHandler.sendEmptyMessage(MSG_DEVICE_PROVISIONED);
             }
         }
     }
@@ -578,6 +578,18 @@ public class KeyguardUpdateMonitor {
             if (cb != null) {
                 cb.onUserSwitchComplete(userId);
             }
+        }
+    }
+
+    /**
+     * This is exposed since {@link Intent#ACTION_BOOT_COMPLETED} is not sticky. If
+     * keyguard crashes sometime after boot, then it will never receive this
+     * broadcast and hence not handle the event. This method is ultimately called by
+     * PhoneWindowManager in this case.
+     */
+    protected void dispatchBootCompleted() {
+        if (!mBootCompleted) {
+            mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
         }
     }
 
