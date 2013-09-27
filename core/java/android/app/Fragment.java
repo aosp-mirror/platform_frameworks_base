@@ -580,6 +580,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             if (clazz == null) {
                 // Class not found in the cache, see if it's real, and try to add it
                 clazz = context.getClassLoader().loadClass(fname);
+                if (!Fragment.class.isAssignableFrom(clazz)) {
+                    throw new InstantiationException("Trying to instantiate a class " + fname
+                        + " that is not a Fragment", new ClassCastException());
+                }
                 sClassMap.put(fname, clazz);
             }
             Fragment f = (Fragment)clazz.newInstance();
