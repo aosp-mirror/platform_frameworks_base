@@ -63,6 +63,12 @@ static void glVertexAttribPointerBounds(GLuint indx, GLint size, GLenum type,
     glVertexAttribPointer(indx, size, type, normalized, stride, pointer);
 }
 #endif
+#ifdef GL_ES_VERSION_3_0
+static void glVertexAttribIPointerBounds(GLuint indx, GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count) {
+    glVertexAttribIPointer(indx, size, type, stride, pointer);
+}
+#endif
 }
 
 /* Cache method IDs each time the class is loaded. */
@@ -395,7 +401,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 /* GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent ) */
@@ -452,7 +458,7 @@ exit:
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
-    return _returnValue;
+    return (jint)_returnValue;
 }
 
 static const char *classPathName = "android/opengl/GLES10Ext";
