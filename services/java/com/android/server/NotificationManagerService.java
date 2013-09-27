@@ -28,6 +28,7 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -51,6 +52,7 @@ import android.media.IAudioService;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -91,9 +93,11 @@ import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -162,8 +166,11 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
+    private boolean mWasScreenOn = true;
     private boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
+    private HashMap<String, NotificationLedValues> mNotificationPulseCustomLedValues;
+    private Map<String, String> mPackageNameMappings;
 
     // used as a mutex for access to all active notifications & listeners
     private final ArrayList<NotificationRecord> mNotificationList =
@@ -1031,6 +1038,12 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
+    class NotificationLedValues {
+        public int color;
+        public int onMS;
+        public int offMS;
+    }
+
     private StatusBarManagerService.NotificationCallbacks mNotificationCallbacks
             = new StatusBarManagerService.NotificationCallbacks() {
 
@@ -1213,6 +1226,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                 mScreenOn = true;
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
+                mWasScreenOn = true;
+                updateLightsLocked();
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 mInCall = (intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(
                         TelephonyManager.EXTRA_STATE_OFFHOOK));
@@ -1249,23 +1264,55 @@ public class NotificationManagerService extends INotificationManager.Stub
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(ENABLED_NOTIFICATION_LISTENERS_URI,
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_ON), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES), false, this);
             update(null);
         }
 
         @Override public void onChange(boolean selfChange, Uri uri) {
             update(uri);
+            updateNotificationPulse();
         }
 
         public void update(Uri uri) {
             ContentResolver resolver = mContext.getContentResolver();
-            if (uri == null || NOTIFICATION_LIGHT_PULSE_URI.equals(uri)) {
-                boolean pulseEnabled = Settings.System.getInt(resolver,
-                            Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
-                if (mNotificationPulseEnabled != pulseEnabled) {
-                    mNotificationPulseEnabled = pulseEnabled;
-                    updateNotificationPulse();
-                }
+
+            // LED enabled
+            mNotificationPulseEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
+
+            // LED default color
+            mDefaultNotificationColor = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR, mDefaultNotificationColor,
+                    UserHandle.USER_CURRENT);
+
+            // LED default on MS
+            mDefaultNotificationLedOn = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_ON, mDefaultNotificationLedOn,
+                    UserHandle.USER_CURRENT);
+
+            // LED default off MS
+            mDefaultNotificationLedOff = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF, mDefaultNotificationLedOff,
+                    UserHandle.USER_CURRENT);
+
+            // LED custom notification colors
+            mNotificationPulseCustomLedValues.clear();
+            if (Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE, 0,
+                    UserHandle.USER_CURRENT) != 0) {
+                parseNotificationPulseCustomValuesString(Settings.System.getStringForUser(resolver,
+                        Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES, UserHandle.USER_CURRENT));
             }
+
             if (uri == null || ENABLED_NOTIFICATION_LISTENERS_URI.equals(uri)) {
                 rebindListenerServices();
             }
@@ -1325,6 +1372,15 @@ public class NotificationManagerService extends INotificationManager.Stub
                 R.array.config_notificationFallbackVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
+
+        mNotificationPulseCustomLedValues = new HashMap<String, NotificationLedValues>();
+
+        mPackageNameMappings = new HashMap<String, String>();
+        for (String mapping : resources.getStringArray(
+                 com.android.internal.R.array.notification_light_package_mapping)) {
+            String[] map = mapping.split("\\|");
+            mPackageNameMappings.put(map[0], map[1]);
+        }
 
         // Don't start allowing notifications until the setup wizard has run once.
         // After that, including subsequent boots, init with notifications turned on.
@@ -2241,20 +2297,69 @@ public class NotificationManagerService extends INotificationManager.Stub
             mNotificationLight.turnOff();
         } else {
             final Notification ledno = mLedNotification.sbn.getNotification();
+            final NotificationLedValues ledValues = getLedValuesForNotification(mLedNotification);
             int ledARGB = ledno.ledARGB;
             int ledOnMS = ledno.ledOnMS;
             int ledOffMS = ledno.ledOffMS;
-            if ((ledno.defaults & Notification.DEFAULT_LIGHTS) != 0) {
+
+            if (ledValues != null) {
+                ledARGB = ledValues.color != 0 ? ledValues.color : mDefaultNotificationColor;
+                ledOnMS = ledValues.onMS >= 0 ? ledValues.onMS : mDefaultNotificationLedOn;
+                ledOffMS = ledValues.offMS >= 0 ? ledValues.offMS : mDefaultNotificationLedOff;
+            } else if ((ledno.defaults & Notification.DEFAULT_LIGHTS) != 0) {
                 ledARGB = mDefaultNotificationColor;
                 ledOnMS = mDefaultNotificationLedOn;
                 ledOffMS = mDefaultNotificationLedOff;
             }
-            if (mNotificationPulseEnabled) {
-                // pulse repeatedly
-                mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
-                        ledOnMS, ledOffMS);
-            }
+
+            // pulse repeatedly
+            mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
+                    ledOnMS, ledOffMS);
         }
+    }
+
+    private void parseNotificationPulseCustomValuesString(String customLedValuesString) {
+        if (TextUtils.isEmpty(customLedValuesString)) {
+            return;
+        }
+
+        for (String packageValuesString : customLedValuesString.split("\\|")) {
+            String[] packageValues = packageValuesString.split("=");
+            if (packageValues.length != 2) {
+                Log.e(TAG, "Error parsing custom led values for unknown package");
+                continue;
+            }
+            String packageName = packageValues[0];
+            String[] values = packageValues[1].split(";");
+            if (values.length != 3) {
+                Log.e(TAG, "Error parsing custom led values '"
+                        + packageValues[1] + "' for " + packageName);
+                continue;
+            }
+            NotificationLedValues ledValues = new NotificationLedValues();
+            try {
+                ledValues.color = Integer.parseInt(values[0]);
+                ledValues.onMS = Integer.parseInt(values[1]);
+                ledValues.offMS = Integer.parseInt(values[2]);
+            } catch (Exception e) {
+                Log.e(TAG, "Error parsing custom led values '"
+                        + packageValues[1] + "' for " + packageName);
+                continue;
+            }
+            mNotificationPulseCustomLedValues.put(packageName, ledValues);
+        }
+    }
+
+    private NotificationLedValues getLedValuesForNotification(NotificationRecord ledNotification) {
+        final String packageName = ledNotification.sbn.getPackageName();
+        return mNotificationPulseCustomLedValues.get(mapPackage(packageName));
+    }
+
+    private String mapPackage(String pkg) {
+        if(!mPackageNameMappings.containsKey(pkg)) {
+            return pkg;
+        }
+        return mPackageNameMappings.get(pkg);
     }
 
     // lock on mNotificationList
