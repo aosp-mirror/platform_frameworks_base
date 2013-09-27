@@ -818,8 +818,6 @@ public class PrintJobConfigActivity extends Activity {
 
         private PrinterInfo mCurrentPrinter;
 
-        private boolean mRequestedCurrentPrinterRefresh;
-
         private final OnItemSelectedListener mOnItemSelectedListener =
                 new AdapterView.OnItemSelectedListener() {
             @Override
@@ -839,7 +837,7 @@ public class PrintJobConfigActivity extends Activity {
                         return;
                     }
 
-                    mRequestedCurrentPrinterRefresh = false;
+                    mCapabilitiesTimeout.remove();
 
                     mCurrentPrinter = (PrinterInfo) mDestinationSpinnerAdapter
                             .getItem(position);
@@ -854,8 +852,7 @@ public class PrintJobConfigActivity extends Activity {
 
                     PrinterCapabilitiesInfo capabilities = mCurrentPrinter.getCapabilities();
                     if (capabilities == null) {
-                        // TODO: We need a timeout for the update.
-                        mRequestedCurrentPrinterRefresh = true;
+                        mCapabilitiesTimeout.post();
                         updateUi();
                         refreshCurrentPrinter();
                     } else {
@@ -1128,6 +1125,9 @@ public class PrintJobConfigActivity extends Activity {
             }
         };
 
+        private final WaitForPrinterCapabilitiesTimeout mCapabilitiesTimeout =
+                new WaitForPrinterCapabilitiesTimeout();
+
         private int mEditorState;
 
         private boolean mIgnoreNextDestinationChange;
@@ -1173,16 +1173,16 @@ public class PrintJobConfigActivity extends Activity {
                                 if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE
                                         && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE
                                         && printer.getCapabilities() == null
-                                        && !mRequestedCurrentPrinterRefresh) {
-                                    mRequestedCurrentPrinterRefresh = true;
+                                        && !mCapabilitiesTimeout.isPosted()) {
+                                    mCapabilitiesTimeout.post();
                                     refreshCurrentPrinter();
                                     return;
                                 }
 
                                 // We just refreshed the current printer.
                                 if (printer.getCapabilities() != null
-                                        && mRequestedCurrentPrinterRefresh) {
-                                    mRequestedCurrentPrinterRefresh = false;
+                                        && mCapabilitiesTimeout.isPosted()) {
+                                    mCapabilitiesTimeout.remove();
                                     updatePrintAttributes(printer.getCapabilities());
                                     updateUi();
                                     mController.update();
@@ -1968,6 +1968,43 @@ public class PrintJobConfigActivity extends Activity {
 
             public String toString() {
                 return label.toString();
+            }
+        }
+
+        private final class WaitForPrinterCapabilitiesTimeout implements Runnable {
+            private static final long GET_CAPABILITIES_TIMEOUT_MILLIS = 10000; // 10sec
+
+            private boolean mIsPosted;
+
+            public void post() {
+                if (!mIsPosted) {
+                    mDestinationSpinner.postDelayed(this,
+                            GET_CAPABILITIES_TIMEOUT_MILLIS);
+                    mIsPosted = true;
+                }
+            }
+
+            public void remove() {
+                if (mIsPosted) {
+                    mIsPosted = false;
+                    mDestinationSpinner.removeCallbacks(this);
+                }
+            }
+
+            public boolean isPosted() {
+                return mIsPosted;
+            }
+
+            @Override
+            public void run() {
+                mIsPosted = false;
+                if (mDestinationSpinner.getSelectedItemPosition() >= 0) {
+                    View itemView = mDestinationSpinner.getSelectedView();
+                    TextView titleView = (TextView) itemView.findViewById(R.id.title);
+                    String title = getString(R.string.printer_unavailable,
+                            mCurrentPrinter.getName());
+                    titleView.setText(title);
+                }
             }
         }
 
