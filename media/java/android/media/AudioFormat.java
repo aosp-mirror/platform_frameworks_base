@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +39,16 @@ public class AudioFormat {
     public static final int ENCODING_PCM_16BIT = 2;
     /** Audio data format: PCM 8 bit per sample. Not guaranteed to be supported by devices. */
     public static final int ENCODING_PCM_8BIT = 3;
+    /** @hide */
+    public static final int ENCODING_AMRNB = 100;   // accessed by native code
+    /** @hide */
+    public static final int ENCODING_AMRWB = 101;   // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRC = 102;    // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRCB = 103;   // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRCWB = 104;  // accessed by native code
 
     /** Invalid audio channel configuration */
     /** @deprecated use CHANNEL_INVALID instead  */
@@ -118,7 +131,23 @@ public class AudioFormat {
     public static final int CHANNEL_IN_Z_AXIS = 0x2000;
     public static final int CHANNEL_IN_VOICE_UPLINK = 0x4000;
     public static final int CHANNEL_IN_VOICE_DNLINK = 0x8000;
+    /** @hide */
+    public static final int CHANNEL_IN_FRONT_LEFT = 0x10000;
+    /** @hide */
+    public static final int CHANNEL_IN_FRONT_RIGHT = 0x20000;
+    /** @hide */
+    public static final int CHANNEL_IN_FRONT_CENTER = 0x40000;
+    /** @hide */
+    public static final int CHANNEL_IN_LOW_FREQUENCY = 0x80000;
+    /** @hide */
+    public static final int CHANNEL_IN_BACK_LEFT = 0x100000;
+    /** @hide */
+    public static final int CHANNEL_IN_BACK_RIGHT = 0x200000;
     public static final int CHANNEL_IN_MONO = CHANNEL_IN_FRONT;
     public static final int CHANNEL_IN_STEREO = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_IN_5POINT1 = (CHANNEL_IN_FRONT_LEFT |
+            CHANNEL_IN_FRONT_RIGHT | CHANNEL_IN_FRONT_CENTER | CHANNEL_IN_LOW_FREQUENCY |
+            CHANNEL_IN_BACK_LEFT | CHANNEL_IN_BACK_RIGHT);
 
 }

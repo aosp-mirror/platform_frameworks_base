@@ -415,6 +415,11 @@ public class AudioTrack
             break;
         case AudioFormat.ENCODING_PCM_16BIT:
         case AudioFormat.ENCODING_PCM_8BIT:
+        case AudioFormat.ENCODING_AMRNB:
+        case AudioFormat.ENCODING_AMRWB:
+        case AudioFormat.ENCODING_EVRC:
+        case AudioFormat.ENCODING_EVRCB:
+        case AudioFormat.ENCODING_EVRCWB:
             mAudioFormat = audioFormat;
             break;
         default:
@@ -702,7 +707,12 @@ public class AudioTrack
         }
 
         if ((audioFormat != AudioFormat.ENCODING_PCM_16BIT)
-            && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)) {
+            && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)
+            && (audioFormat != AudioFormat.ENCODING_AMRNB)
+            && (audioFormat != AudioFormat.ENCODING_AMRWB)
+            && (audioFormat != AudioFormat.ENCODING_EVRC)
+            && (audioFormat != AudioFormat.ENCODING_EVRCB)
+            && (audioFormat != AudioFormat.ENCODING_EVRCWB)) {
             loge("getMinBufferSize(): Invalid audio format.");
             return ERROR_BAD_VALUE;
         }
