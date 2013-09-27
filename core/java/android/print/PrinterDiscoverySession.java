@@ -192,22 +192,46 @@ public final class PrinterDiscoverySession {
         }
     }
 
-    private void handlePrintersAdded(List<PrinterInfo> printers) {
+    private void handlePrintersAdded(List<PrinterInfo> addedPrinters) {
         if (isDestroyed()) {
             return;
         }
-        boolean printersChanged = false;
-        final int addedPrinterCount = printers.size();
-        for (int i = 0; i < addedPrinterCount; i++) {
-            PrinterInfo addedPrinter = printers.get(i);
-            PrinterInfo oldPrinter = mPrinters.put(addedPrinter.getId(), addedPrinter);
-            if (oldPrinter == null || !oldPrinter.equals(addedPrinter)) {
-                printersChanged = true;
+
+        // No old printers - do not bother keeping their position.
+        if (mPrinters.isEmpty()) {
+            final int printerCount = addedPrinters.size();
+            for (int i = 0; i < printerCount; i++) {
+                PrinterInfo printer = addedPrinters.get(i);
+                mPrinters.put(printer.getId(), printer);
+            }
+            notifyOnPrintersChanged();
+            return;
+        }
+
+        // Add the printers to a map.
+        ArrayMap<PrinterId, PrinterInfo> addedPrintersMap =
+                new ArrayMap<PrinterId, PrinterInfo>();
+        final int printerCount = addedPrinters.size();
+        for (int i = 0; i < printerCount; i++) {
+            PrinterInfo printer = addedPrinters.get(i);
+            addedPrintersMap.put(printer.getId(), printer);
+        }
+
+        // Update printers we already have.
+        final int oldPrinterCount = mPrinters.size();
+        for (int i = 0; i < oldPrinterCount; i++) {
+            PrinterId oldPrinterId = mPrinters.keyAt(i);
+            PrinterInfo updatedPrinter = addedPrintersMap.remove(oldPrinterId);
+            if (updatedPrinter != null) {
+                mPrinters.put(oldPrinterId, updatedPrinter);
             }
         }
-        if (printersChanged) {
-            notifyOnPrintersChanged();
-        }
+
+        // Add the new printers, i.e. what is left.
+        mPrinters.putAll(addedPrintersMap);
+
+        // Announce the change.
+        notifyOnPrintersChanged();
     }
 
     private void handlePrintersRemoved(List<PrinterId> printerIds) {

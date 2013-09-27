@@ -75,10 +75,9 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -95,6 +94,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import libcore.io.IoUtils;
 
 /**
  * Activity for configuring a print job.
@@ -2066,11 +2067,12 @@ public class PrintJobConfigActivity extends Activity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
                     convertView = getLayoutInflater().inflate(
-                            R.layout.spinner_dropdown_item, parent, false);
+                            R.layout.printer_dropdown_item, parent, false);
                 }
 
                 CharSequence title = null;
                 CharSequence subtitle = null;
+                Drawable icon = null;
 
                 if (mPrinters.isEmpty()) {
                     if (position == 0) {
@@ -2092,6 +2094,7 @@ public class PrintJobConfigActivity extends Activity {
                             PackageInfo packageInfo = getPackageManager().getPackageInfo(
                                     printer.getId().getServiceName().getPackageName(), 0);
                             subtitle = packageInfo.applicationInfo.loadLabel(getPackageManager());
+                            icon = packageInfo.applicationInfo.loadIcon(getPackageManager());
                         } catch (NameNotFoundException nnfe) {
                             /* ignore */
                         }
@@ -2108,6 +2111,14 @@ public class PrintJobConfigActivity extends Activity {
                 } else {
                     subtitleView.setText(null);
                     subtitleView.setVisibility(View.GONE);
+                }
+
+                ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
+                if (icon != null) {
+                    iconView.setImageDrawable(icon);
+                    iconView.setVisibility(View.VISIBLE);
+                } else {
+                    iconView.setVisibility(View.GONE);
                 }
 
                 return convertView;
