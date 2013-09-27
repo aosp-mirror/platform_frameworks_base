@@ -576,29 +576,6 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/id-auth/index.html"
-             description=
-             "How to remember the user by account, authenticate the user, acquire user permission
-             for the user's online data, and create custom accounts on the device."
-            >Remembering Users</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/id-auth/identify.html">
-            Remembering Your User
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/id-auth/authenticate.html">
-            Authenticating to OAuth2 Services
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/id-auth/custom_auth.html">
-            Creating a Custom Account Type
-          </a>
-          </li>
-        </ul>
-      </li>
 
       <li class="nav-section">
         <div class="nav-section-header">
