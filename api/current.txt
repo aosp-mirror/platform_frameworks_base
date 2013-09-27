@@ -20985,7 +20985,6 @@ package android.provider {
     field public static final java.lang.String COLUMN_MIME_TYPE = "mime_type";
     field public static final java.lang.String COLUMN_SIZE = "_size";
     field public static final java.lang.String COLUMN_SUMMARY = "summary";
-    field public static final int FLAG_DIR_HIDE_GRID_TITLES = 64; // 0x40
     field public static final int FLAG_DIR_PREFERS_GRID = 16; // 0x10
     field public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 32; // 0x20
     field public static final int FLAG_DIR_SUPPORTS_CREATE = 8; // 0x8
@@ -21002,18 +21001,12 @@ package android.provider {
     field public static final java.lang.String COLUMN_ICON = "icon";
     field public static final java.lang.String COLUMN_MIME_TYPES = "mime_types";
     field public static final java.lang.String COLUMN_ROOT_ID = "root_id";
-    field public static final java.lang.String COLUMN_ROOT_TYPE = "root_type";
     field public static final java.lang.String COLUMN_SUMMARY = "summary";
     field public static final java.lang.String COLUMN_TITLE = "title";
-    field public static final int FLAG_ADVANCED = 4; // 0x4
-    field public static final int FLAG_EMPTY = 32; // 0x20
     field public static final int FLAG_LOCAL_ONLY = 2; // 0x2
     field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
-    field public static final int FLAG_SUPPORTS_RECENTS = 8; // 0x8
-    field public static final int FLAG_SUPPORTS_SEARCH = 16; // 0x10
-    field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
-    field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
-    field public static final int ROOT_TYPE_SHORTCUT = 2; // 0x2
+    field public static final int FLAG_SUPPORTS_RECENTS = 4; // 0x4
+    field public static final int FLAG_SUPPORTS_SEARCH = 8; // 0x8
   }
 
   public abstract class DocumentsProvider extends android.content.ContentProvider {

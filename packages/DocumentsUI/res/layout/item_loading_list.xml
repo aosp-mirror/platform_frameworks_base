@@ -20,9 +20,8 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingTop="8dip"
-    android:paddingBottom="8dip"
-    android:orientation="horizontal">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <ProgressBar
         android:layout_width="wrap_content"

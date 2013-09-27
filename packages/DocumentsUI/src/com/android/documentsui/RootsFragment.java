@@ -26,7 +26,6 @@ import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.provider.DocumentsContract.Root;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
@@ -37,16 +36,16 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Space;
 import android.widget.TextView;
 
 import com.android.documentsui.DocumentsActivity.State;
-import com.android.documentsui.SectionedListAdapter.SectionAdapter;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Objects;
+import com.google.common.collect.Lists;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -56,7 +55,7 @@ import java.util.List;
 public class RootsFragment extends Fragment {
 
     private ListView mList;
-    private SectionedRootsAdapter mAdapter;
+    private RootsAdapter mAdapter;
 
     private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
 
@@ -112,7 +111,7 @@ public class RootsFragment extends Fragment {
 
                 final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new SectionedRootsAdapter(context, result, includeApps);
+                mAdapter = new RootsAdapter(context, result, includeApps);
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -154,136 +153,148 @@ public class RootsFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
-            final Object item = mAdapter.getItem(position);
-            if (item instanceof RootInfo) {
-                activity.onRootPicked((RootInfo) item, true);
-            } else if (item instanceof ResolveInfo) {
-                activity.onAppPicked((ResolveInfo) item);
+            final Item item = mAdapter.getItem(position);
+            if (item instanceof RootItem) {
+                activity.onRootPicked(((RootItem) item).root, true);
+            } else if (item instanceof AppItem) {
+                activity.onAppPicked(((AppItem) item).info);
             } else {
                 throw new IllegalStateException("Unknown root: " + item);
             }
         }
     };
 
-    private static class RootsAdapter extends ArrayAdapter<RootInfo> implements SectionAdapter {
-        public RootsAdapter(Context context) {
-            super(context, 0);
+    private static abstract class Item {
+        private final int mLayoutId;
+
+        public Item(int layoutId) {
+            mLayoutId = layoutId;
+        }
+
+        public View getView(View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(parent.getContext())
+                        .inflate(mLayoutId, parent, false);
+            }
+            bindView(convertView);
+            return convertView;
+        }
+
+        public abstract void bindView(View convertView);
+    }
+
+    private static class RootItem extends Item {
+        public final RootInfo root;
+
+        public RootItem(RootInfo root) {
+            super(R.layout.item_root);
+            this.root = root;
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final Context context = parent.getContext();
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context)
-                        .inflate(R.layout.item_root, parent, false);
-            }
-
+        public void bindView(View convertView) {
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
-            final RootInfo root = getItem(position);
+            final Context context = convertView.getContext();
             icon.setImageDrawable(root.loadIcon(context));
             title.setText(root.title);
 
-            // Device summary is always available space
-            final String summaryText;
-            if (root.rootType == Root.ROOT_TYPE_DEVICE && root.availableBytes >= 0) {
+            // Show available space if no summary
+            String summaryText = root.summary;
+            if (TextUtils.isEmpty(summaryText) && root.availableBytes >= 0) {
                 summaryText = context.getString(R.string.root_available_bytes,
                         Formatter.formatFileSize(context, root.availableBytes));
-            } else {
-                summaryText = root.summary;
             }
 
             summary.setText(summaryText);
             summary.setVisibility(TextUtils.isEmpty(summaryText) ? View.GONE : View.VISIBLE);
-
-            return convertView;
-        }
-
-        @Override
-        public View getHeaderView(View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = new Space(parent.getContext());
-            }
-            return convertView;
         }
     }
 
-    private static class AppsAdapter extends ArrayAdapter<ResolveInfo> implements SectionAdapter {
-        public AppsAdapter(Context context) {
-            super(context, 0);
+    private static class SpacerItem extends Item {
+        public SpacerItem() {
+            super(R.layout.item_root_spacer);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final Context context = parent.getContext();
-            final PackageManager pm = context.getPackageManager();
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context)
-                        .inflate(R.layout.item_root, parent, false);
-            }
+        public void bindView(View convertView) {
+            // Nothing to bind
+        }
+    }
 
+    private static class AppItem extends Item {
+        public final ResolveInfo info;
+
+        public AppItem(ResolveInfo info) {
+            super(R.layout.item_root);
+            this.info = info;
+        }
+
+        @Override
+        public void bindView(View convertView) {
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
-            final ResolveInfo info = getItem(position);
+            final PackageManager pm = convertView.getContext().getPackageManager();
             icon.setImageDrawable(info.loadIcon(pm));
             title.setText(info.loadLabel(pm));
 
             // TODO: match existing summary behavior from disambig dialog
             summary.setVisibility(View.GONE);
-
-            return convertView;
-        }
-
-        @Override
-        public View getHeaderView(View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_root_header, parent, false);
-            }
-
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            title.setText(R.string.root_type_apps);
-
-            return convertView;
         }
     }
 
-    private static class SectionedRootsAdapter extends SectionedListAdapter {
-        private final RootsAdapter mRecent;
-        private final RootsAdapter mServices;
-        private final RootsAdapter mShortcuts;
-        private final RootsAdapter mDevices;
-        private final AppsAdapter mApps;
+    private static class RootsAdapter extends ArrayAdapter<Item> {
+        public RootsAdapter(Context context, Collection<RootInfo> roots, Intent includeApps) {
+            super(context, 0);
 
-        public SectionedRootsAdapter(
-                Context context, Collection<RootInfo> roots, Intent includeApps) {
-            mRecent = new RootsAdapter(context);
-            mServices = new RootsAdapter(context);
-            mShortcuts = new RootsAdapter(context);
-            mDevices = new RootsAdapter(context);
-            mApps = new AppsAdapter(context);
+            RootItem recents = null;
+            RootItem images = null;
+            RootItem videos = null;
+            RootItem audio = null;
+            RootItem downloads = null;
+
+            final List<RootInfo> clouds = Lists.newArrayList();
+            final List<RootInfo> locals = Lists.newArrayList();
 
             for (RootInfo root : roots) {
-                if (root.authority == null) {
-                    mRecent.add(root);
-                    continue;
+                if (root.isRecents()) {
+                    recents = new RootItem(root);
+                } else if (root.isExternalStorage()) {
+                    locals.add(root);
+                } else if (root.isDownloads()) {
+                    downloads = new RootItem(root);
+                } else if (root.isImages()) {
+                    images = new RootItem(root);
+                } else if (root.isVideos()) {
+                    videos = new RootItem(root);
+                } else if (root.isAudio()) {
+                    audio = new RootItem(root);
+                } else {
+                    clouds.add(root);
                 }
+            }
 
-                switch (root.rootType) {
-                    case Root.ROOT_TYPE_SERVICE:
-                        mServices.add(root);
-                        break;
-                    case Root.ROOT_TYPE_SHORTCUT:
-                        mShortcuts.add(root);
-                        break;
-                    case Root.ROOT_TYPE_DEVICE:
-                        mDevices.add(root);
-                        break;
-                }
+            final RootComparator comp = new RootComparator();
+            Collections.sort(clouds, comp);
+            Collections.sort(locals, comp);
+
+            if (recents != null) add(recents);
+
+            for (RootInfo cloud : clouds) {
+                add(new RootItem(cloud));
+            }
+
+            if (images != null) add(images);
+            if (videos != null) add(videos);
+            if (audio != null) add(audio);
+            if (downloads != null) add(downloads);
+
+            for (RootInfo local : locals) {
+                add(new RootItem(local));
             }
 
             if (includeApps != null) {
@@ -291,34 +302,53 @@ public class RootsFragment extends Fragment {
                 final List<ResolveInfo> infos = pm.queryIntentActivities(
                         includeApps, PackageManager.MATCH_DEFAULT_ONLY);
 
+                final List<AppItem> apps = Lists.newArrayList();
+
                 // Omit ourselves from the list
                 for (ResolveInfo info : infos) {
                     if (!context.getPackageName().equals(info.activityInfo.packageName)) {
-                        mApps.add(info);
+                        apps.add(new AppItem(info));
+                    }
+                }
+
+                if (apps.size() > 0) {
+                    add(new SpacerItem());
+                    for (Item item : apps) {
+                        add(item);
                     }
                 }
             }
+        }
 
-            final RootComparator comp = new RootComparator();
-            mServices.sort(comp);
-            mShortcuts.sort(comp);
-            mDevices.sort(comp);
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final Item item = getItem(position);
+            return item.getView(convertView, parent);
+        }
 
-            if (mRecent.getCount() > 0) {
-                addSection(mRecent);
+        @Override
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return getItemViewType(position) != 1;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            final Item item = getItem(position);
+            if (item instanceof RootItem || item instanceof AppItem) {
+                return 0;
+            } else {
+                return 1;
             }
-            if (mServices.getCount() > 0) {
-                addSection(mServices);
-            }
-            if (mShortcuts.getCount() > 0) {
-                addSection(mShortcuts);
-            }
-            if (mDevices.getCount() > 0) {
-                addSection(mDevices);
-            }
-            if (mApps.getCount() > 0) {
-                addSection(mApps);
-            }
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
         }
     }
 

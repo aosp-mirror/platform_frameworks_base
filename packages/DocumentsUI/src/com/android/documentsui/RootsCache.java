@@ -99,7 +99,8 @@ public class RootsCache {
      */
     public void updateAsync() {
         // Special root for recents
-        mRecentsRoot.rootType = Root.ROOT_TYPE_SHORTCUT;
+        mRecentsRoot.authority = null;
+        mRecentsRoot.rootId = null;
         mRecentsRoot.icon = R.drawable.ic_root_recent;
         mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE;
         mRecentsRoot.title = mContext.getString(R.string.root_recent);

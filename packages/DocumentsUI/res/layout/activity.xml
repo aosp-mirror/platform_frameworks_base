@@ -27,7 +27,7 @@
         <com.android.documentsui.DirectoryContainerView
             android:id="@+id/container_directory"
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:layout_weight="1" />
 
         <FrameLayout

@@ -65,7 +65,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     private static final String MY_DOC_NULL = "myNull";
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
-            Root.COLUMN_ROOT_ID, Root.COLUMN_ROOT_TYPE, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
+            Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
             Root.COLUMN_TITLE, Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
             Root.COLUMN_AVAILABLE_BYTES,
     };
@@ -114,7 +114,6 @@ public class TestDocumentsProvider extends DocumentsProvider {
         final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
         final RowBuilder row = result.newRow();
         row.add(Root.COLUMN_ROOT_ID, MY_ROOT_ID);
-        row.add(Root.COLUMN_ROOT_TYPE, Root.ROOT_TYPE_SERVICE);
         row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_RECENTS);
         row.add(Root.COLUMN_TITLE, "_Test title which is really long");
         row.add(Root.COLUMN_SUMMARY,
