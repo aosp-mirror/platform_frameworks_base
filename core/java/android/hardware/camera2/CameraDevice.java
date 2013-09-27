@@ -16,11 +16,9 @@
 
 package android.hardware.camera2;
 
-import android.view.Surface;
 import android.os.Handler;
-import android.util.Log;
+import android.view.Surface;
 
-import java.lang.AutoCloseable;
 import java.util.List;
 
 /**
@@ -127,23 +125,10 @@ public interface CameraDevice extends AutoCloseable {
      * @return the ID for this camera device
      *
      * @see CameraManager#getCameraCharacteristics
-     * @see CameraManager#getDeviceIdList
+     * @see CameraManager#getCameraIdList
      */
     public String getId();
 
-    /**
-     * Get the static properties for this camera. These are identical to the
-     * properties returned by {@link CameraManager#getCameraCharacteristics}.
-     *
-     * @return the static properties of the camera
-     *
-     * @throws CameraAccessException if the camera device is no longer connected or has
-     *                               encountered a fatal error
-     * @throws IllegalStateException if the camera device has been closed
-     *
-     * @see CameraManager#getCameraCharacteristics
-     */
-    public CameraCharacteristics getProperties() throws CameraAccessException;
     /**
      * <p>Set up a new output set of Surfaces for the camera device.</p>
      *
