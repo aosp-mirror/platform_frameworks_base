@@ -31585,6 +31585,7 @@ package android.widget {
     method public void setAnimationStyle(int);
     method public void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setContentWidth(int);
+    method public void setDropDownGravity(int);
     method public void setHeight(int);
     method public void setHorizontalOffset(int);
     method public void setInputMethodMode(int);
@@ -31766,6 +31767,7 @@ package android.widget {
 
   public class PopupMenu {
     ctor public PopupMenu(android.content.Context, android.view.View);
+    ctor public PopupMenu(android.content.Context, android.view.View, int);
     method public void dismiss();
     method public android.view.View.OnTouchListener getDragToOpenListener();
     method public android.view.Menu getMenu();
@@ -31829,6 +31831,7 @@ package android.widget {
     method public void setWindowLayoutMode(int, int);
     method public void showAsDropDown(android.view.View);
     method public void showAsDropDown(android.view.View, int, int);
+    method public void showAsDropDown(android.view.View, int, int, int);
     method public void showAtLocation(android.view.View, int, int, int);
     method public void update();
     method public void update(int, int);
