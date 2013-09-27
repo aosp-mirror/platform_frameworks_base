@@ -574,8 +574,8 @@ public:
 private:
     InputReaderContext* mContext;
     int32_t mId;
-    int32_t mControllerNumber;
     int32_t mGeneration;
+    int32_t mControllerNumber;
     InputDeviceIdentifier mIdentifier;
     String8 mAlias;
     uint32_t mClasses;

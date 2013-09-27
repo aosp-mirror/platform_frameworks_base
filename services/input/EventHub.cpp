@@ -49,6 +49,7 @@
 #include <sys/ioctl.h>
 #include <sys/limits.h>
 #include <sys/sha1.h>
+#include <sys/utsname.h>
 
 /* this macro is used to tell if "bit" is set in "array"
  * it selects a byte from the array, and does a boolean AND
@@ -91,6 +92,14 @@ static String8 sha1(const String8& in) {
         out.appendFormat("%02x", digest[i]);
     }
     return out;
+}
+
+static void getLinuxRelease(int* major, int* minor) {
+    struct utsname info;
+    if (uname(&info) || sscanf(info.release, "%d.%d", major, minor) <= 0) {
+        *major = 0, *minor = 0;
+        ALOGE("Could not get linux version: %s", strerror(errno));
+    }
 }
 
 static void setDescriptor(InputDeviceIdentifier& identifier) {
@@ -236,6 +245,11 @@ EventHub::EventHub(void) :
     result = epoll_ctl(mEpollFd, EPOLL_CTL_ADD, mWakeReadPipeFd, &eventItem);
     LOG_ALWAYS_FATAL_IF(result != 0, "Could not add wake read pipe to epoll instance.  errno=%d",
             errno);
+
+    int major, minor;
+    getLinuxRelease(&major, &minor);
+    // EPOLLWAKEUP was introduced in kernel 3.5
+    mUsingEpollWakeup = major > 3 || (major == 3 && minor >= 5);
 }
 
 EventHub::~EventHub(void) {
@@ -1244,7 +1258,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     // Register with epoll.
     struct epoll_event eventItem;
     memset(&eventItem, 0, sizeof(eventItem));
-    eventItem.events = EPOLLIN;
+    eventItem.events = mUsingEpollWakeup ? EPOLLIN : EPOLLIN | EPOLLWAKEUP;
     eventItem.data.u32 = deviceId;
     if (epoll_ctl(mEpollFd, EPOLL_CTL_ADD, fd, &eventItem)) {
         ALOGE("Could not add device fd to epoll instance.  errno=%d", errno);
@@ -1252,9 +1266,14 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
         return -1;
     }
 
-    // Enable wake-lock behavior on kernels that support it.
-    // TODO: Only need this for devices that can really wake the system.
-    bool usingSuspendBlockIoctl = !ioctl(fd, EVIOCSSUSPENDBLOCK, 1);
+    String8 wakeMechanism("EPOLLWAKEUP");
+    if (!mUsingEpollWakeup) {
+        if (ioctl(fd, EVIOCSSUSPENDBLOCK, 1)) {
+            wakeMechanism = "<none>";
+        } else {
+            wakeMechanism = "EVIOCSSUSPENDBLOCK";
+        }
+    }
 
     // Tell the kernel that we want to use the monotonic clock for reporting timestamps
     // associated with input events.  This is important because the input system
@@ -1276,14 +1295,14 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     ALOGI("New device: id=%d, fd=%d, path='%s', name='%s', classes=0x%x, "
             "configuration='%s', keyLayout='%s', keyCharacterMap='%s', builtinKeyboard=%s, "
-            "usingSuspendBlockIoctl=%s, usingClockIoctl=%s",
+            "wakeMechanism=%s, usingClockIoctl=%s",
          deviceId, fd, devicePath, device->identifier.name.string(),
          device->classes,
          device->configurationFile.string(),
          device->keyMap.keyLayoutFile.string(),
          device->keyMap.keyCharacterMapFile.string(),
          toString(mBuiltInKeyboardId == deviceId),
-         toString(usingSuspendBlockIoctl), toString(usingClockIoctl));
+         wakeMechanism.string(), toString(usingClockIoctl));
 
     addDeviceLocked(device);
     return 0;
