@@ -30,22 +30,6 @@ import android.view.ViewGroup;
  * changes occur. Subclasses should implement one or both of the methods
  * {@link #onAppear(ViewGroup, TransitionValues, int, TransitionValues, int)},
  * {@link #onDisappear(ViewGroup, TransitionValues, int, TransitionValues, int)},
- *
- * <p>Note that a view's visibility change is determined by both whether the view
- * itself is changing and whether its parent hierarchy's visibility is changing.
- * That is, a view that appears in the end scene will only trigger a call to
- * {@link #onAppear(android.view.ViewGroup, TransitionValues, int, TransitionValues, int)
- * appear()} if its parent hierarchy was stable between the start and end scenes.
- * This is done to avoid causing a visibility transition on every node in a hierarchy
- * when only the top-most node is the one that should be transitioned in/out.
- * Stability is determined by either the parent hierarchy views being the same
- * between scenes or, if scenes are inflated from layout resource files and thus
- * have result in different view instances, if the views represented by
- * the ids of those parents are stable. This means that visibility determination
- * is more effective with inflated view hierarchies if ids are used.
- * The exception to this is when the visibility subclass transition is
- * targeted at specific views, in which case the visibility of parent views
- * is ignored.</p>
  */
 public abstract class Visibility extends Transition {
 
@@ -109,51 +93,6 @@ public abstract class Visibility extends Transition {
         View parent = (View) values.values.get(PROPNAME_PARENT);
 
         return visibility == View.VISIBLE && parent != null;
-    }
-
-    /**
-     * Tests whether the hierarchy, up to the scene root, changes visibility between
-     * start and end scenes. This is done to ensure that a view that changes visibility
-     * is only animated if that view's parent was stable between scenes; we should not
-     * fade an entire hierarchy, but rather just the top-most node in the hierarchy that
-     * changed visibility. Note that both the start and end parents are passed in
-     * because the instances may differ for the same view due to layout inflation
-     * between scenes.
-     *
-     * @param sceneRoot The root of the scene hierarchy
-     * @param startView The container view in the start scene
-     * @param endView The container view in the end scene
-     * @return true if the parent hierarchy experienced a visibility change, false
-     * otherwise
-     */
-    private boolean isHierarchyVisibilityChanging(ViewGroup sceneRoot, ViewGroup startView,
-            ViewGroup endView) {
-
-        if (startView == sceneRoot || endView == sceneRoot) {
-            return false;
-        }
-        TransitionValues startValues = startView != null ?
-                getTransitionValues(startView, true) : getTransitionValues(endView, true);
-        TransitionValues endValues = endView != null ?
-                getTransitionValues(endView, false) : getTransitionValues(startView, false);
-
-        if (startValues == null || endValues == null) {
-            return true;
-        }
-        Integer visibility = (Integer) startValues.values.get(PROPNAME_VISIBILITY);
-        int startVisibility = (visibility != null) ? visibility : -1;
-        ViewGroup startParent = (ViewGroup) startValues.values.get(PROPNAME_PARENT);
-        visibility = (Integer) endValues.values.get(PROPNAME_VISIBILITY);
-        int endVisibility = (visibility != null) ? visibility : -1;
-        ViewGroup endParent = (ViewGroup) endValues.values.get(PROPNAME_PARENT);
-        if (startVisibility != endVisibility || startParent != endParent) {
-            return true;
-        }
-
-        if (startParent != null || endParent != null) {
-            return isHierarchyVisibilityChanging(sceneRoot, startParent, endParent);
-        }
-        return false;
     }
 
     private VisibilityInfo getVisibilityChangeInfo(TransitionValues startValues,
@@ -225,9 +164,7 @@ public abstract class Visibility extends Transition {
                 int endId = endView != null ? endView.getId() : -1;
                 isTarget = isValidTarget(startView, startId) || isValidTarget(endView, endId);
             }
-            if (isTarget || ((visInfo.startParent != null || visInfo.endParent != null) &&
-                    !isHierarchyVisibilityChanging(sceneRoot,
-                            visInfo.startParent, visInfo.endParent))) {
+            if (isTarget || ((visInfo.startParent != null || visInfo.endParent != null))) {
                 if (visInfo.fadeIn) {
                     return onAppear(sceneRoot, startValues, visInfo.startVisibility,
                             endValues, visInfo.endVisibility);

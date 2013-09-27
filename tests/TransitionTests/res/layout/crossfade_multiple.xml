@@ -33,6 +33,11 @@
                      android:onClick="changeTransitionType"
                      android:id="@+id/textfade2"
                      android:text="@string/textfade2"/>
+        <RadioButton android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:onClick="changeTransitionType"
+                     android:id="@+id/textfade3"
+                     android:text="@string/textfade3"/>
     </RadioGroup>
     <LinearLayout android:orientation="horizontal"
                   android:layout_width="match_parent"

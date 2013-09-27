@@ -19,7 +19,7 @@ package com.android.internal.transition;
 
 import android.transition.ChangeBounds;
 import android.transition.Fade;
-import android.transition.TextChange;
+import android.transition.ChangeText;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
@@ -35,8 +35,8 @@ public class ActionBarTransition {
 
     static {
         if (TRANSITIONS_ENABLED) {
-            final TextChange tc = new TextChange();
-            tc.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT_IN);
+            final ChangeText tc = new ChangeText();
+            tc.setChangeBehavior(ChangeText.CHANGE_BEHAVIOR_OUT_IN);
             final TransitionSet inner = new TransitionSet();
             inner.addTransition(tc).addTransition(new ChangeBounds());
             final TransitionSet tg = new TransitionSet();

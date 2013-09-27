@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @hide
  */
-public class TextChange extends Transition {
+public class ChangeText extends Transition {
 
     private static final String LOG_TAG = "TextChange";
 
@@ -103,7 +103,7 @@ public class TextChange extends Transition {
      * transition is run.
      * @return this textChange object.
      */
-    public TextChange setChangeBehavior(int changeBehavior) {
+    public ChangeText setChangeBehavior(int changeBehavior) {
         if (changeBehavior >= CHANGE_BEHAVIOR_KEEP && changeBehavior <= CHANGE_BEHAVIOR_OUT_IN) {
             mChangeBehavior = changeBehavior;
         }
@@ -179,9 +179,13 @@ public class TextChange extends Transition {
             startSelectionStart = startSelectionEnd = endSelectionStart = endSelectionEnd = -1;
         }
         if (!startText.equals(endText)) {
-            view.setText(startText);
-            if (view instanceof EditText) {
-                setSelection(((EditText) view), startSelectionStart, startSelectionEnd);
+            final int startColor = (Integer) startVals.get(PROPNAME_TEXT_COLOR);
+            final int endColor = (Integer) endVals.get(PROPNAME_TEXT_COLOR);
+            if (mChangeBehavior != CHANGE_BEHAVIOR_IN) {
+                view.setText(startText);
+                if (view instanceof EditText) {
+                    setSelection(((EditText) view), startSelectionStart, startSelectionEnd);
+                }
             }
             Animator anim;
             if (mChangeBehavior == CHANGE_BEHAVIOR_KEEP) {
@@ -200,8 +204,6 @@ public class TextChange extends Transition {
                 });
             } else {
                 // Fade out start text
-                final int startColor = (Integer) startVals.get(PROPNAME_TEXT_COLOR);
-                final int endColor = (Integer) endVals.get(PROPNAME_TEXT_COLOR);
                 ValueAnimator outAnim = null, inAnim = null;
                 if (mChangeBehavior == CHANGE_BEHAVIOR_OUT_IN ||
                         mChangeBehavior == CHANGE_BEHAVIOR_OUT) {
@@ -210,8 +212,8 @@ public class TextChange extends Transition {
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
                             int currAlpha = (Integer) animation.getAnimatedValue();
-                            view.setTextColor(currAlpha << 24 | Color.red(startColor) << 16 |
-                                    Color.green(startColor) << 8 | Color.red(startColor));
+                            view.setTextColor(currAlpha << 24 | startColor & 0xff0000 |
+                                    startColor & 0xff00 | startColor & 0xff);
                         }
                     });
                     outAnim.addListener(new AnimatorListenerAdapter() {
@@ -225,6 +227,8 @@ public class TextChange extends Transition {
                                             endSelectionEnd);
                                 }
                             }
+                            // restore opaque alpha and correct end color
+                            view.setTextColor(endColor);
                         }
                     });
                 }
@@ -239,6 +243,13 @@ public class TextChange extends Transition {
                                     Color.green(endColor) << 8 | Color.red(endColor));
                         }
                     });
+                    inAnim.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                            // restore opaque alpha and correct end color
+                            view.setTextColor(endColor);
+                        }
+                    });
                 }
                 if (outAnim != null && inAnim != null) {
                     anim = new AnimatorSet();
@@ -251,21 +262,32 @@ public class TextChange extends Transition {
                 }
             }
             TransitionListener transitionListener = new TransitionListenerAdapter() {
-                boolean mCanceled = false;
+                int mPausedColor = 0;
 
                 @Override
                 public void onTransitionPause(Transition transition) {
-                    view.setText(endText);
-                    if (view instanceof EditText) {
-                        setSelection(((EditText) view), endSelectionStart, endSelectionEnd);
+                    if (mChangeBehavior != CHANGE_BEHAVIOR_IN) {
+                        view.setText(endText);
+                        if (view instanceof EditText) {
+                            setSelection(((EditText) view), endSelectionStart, endSelectionEnd);
+                        }
+                    }
+                    if (mChangeBehavior > CHANGE_BEHAVIOR_KEEP) {
+                        mPausedColor = view.getCurrentTextColor();
+                        view.setTextColor(endColor);
                     }
                 }
 
                 @Override
                 public void onTransitionResume(Transition transition) {
-                    view.setText(startText);
-                    if (view instanceof EditText) {
-                        setSelection(((EditText) view), startSelectionStart, startSelectionEnd);
+                    if (mChangeBehavior != CHANGE_BEHAVIOR_IN) {
+                        view.setText(startText);
+                        if (view instanceof EditText) {
+                            setSelection(((EditText) view), startSelectionStart, startSelectionEnd);
+                        }
+                    }
+                    if (mChangeBehavior > CHANGE_BEHAVIOR_KEEP) {
+                        view.setTextColor(mPausedColor);
                     }
                 }
             };
