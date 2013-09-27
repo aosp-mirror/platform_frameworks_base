@@ -21,6 +21,9 @@ import java.util.Vector;
 
 import android.content.Context;
 import android.media.SubtitleTrack.RenderingWidget;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.accessibility.CaptioningManager;
 
 /**
@@ -37,6 +40,34 @@ public class SubtitleController {
     private SubtitleTrack mSelectedTrack;
     private boolean mShowing;
     private CaptioningManager mCaptioningManager;
+    private Handler mHandler;
+
+    private static final int WHAT_SHOW = 1;
+    private static final int WHAT_HIDE = 2;
+    private static final int WHAT_SELECT_TRACK = 3;
+    private static final int WHAT_SELECT_DEFAULT_TRACK = 4;
+
+    private final Handler.Callback mCallback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+            case WHAT_SHOW:
+                doShow();
+                return true;
+            case WHAT_HIDE:
+                doHide();
+                return true;
+            case WHAT_SELECT_TRACK:
+                doSelectTrack((SubtitleTrack)msg.obj);
+                return true;
+            case WHAT_SELECT_DEFAULT_TRACK:
+                doSelectDefaultTrack();
+                return true;
+            default:
+                return false;
+            }
+        }
+    };
 
     private CaptioningManager.CaptioningChangeListener mCaptioningChangeListener =
         new CaptioningManager.CaptioningChangeListener() {
@@ -112,7 +143,7 @@ public class SubtitleController {
      * in-band data from the {@link MediaPlayer}.  However, this does
      * not change the subtitle visibility.
      *
-     * Must be called from the UI thread.
+     * Should be called from the anchor's (UI) thread. {@see #Anchor.getSubtitleLooper}
      *
      * @param track The subtitle track to select.  This must be one of the
      *              tracks in {@link #getTracks}.
@@ -122,9 +153,15 @@ public class SubtitleController {
         if (track != null && !mTracks.contains(track)) {
             return false;
         }
+
+        processOnAnchor(mHandler.obtainMessage(WHAT_SELECT_TRACK, track));
+        return true;
+    }
+
+    private void doSelectTrack(SubtitleTrack track) {
         mTrackIsExplicit = true;
         if (mSelectedTrack == track) {
-            return true;
+            return;
         }
 
         if (mSelectedTrack != null) {
@@ -145,7 +182,6 @@ public class SubtitleController {
         if (mListener != null) {
             mListener.onSubtitleTrackSelected(track);
         }
-        return true;
     }
 
     /**
@@ -170,8 +206,6 @@ public class SubtitleController {
      *
      * The default values for these flags are DEFAULT=no, AUTOSELECT=yes
      * and FORCED=no.
-     *
-     * Must be called from the UI thread.
      */
     public SubtitleTrack getDefaultTrack() {
         SubtitleTrack bestTrack = null;
@@ -226,8 +260,12 @@ public class SubtitleController {
     private boolean mTrackIsExplicit = false;
     private boolean mVisibilityIsExplicit = false;
 
-    /** @hide - called from UI thread */
+    /** @hide - should be called from anchor thread */
     public void selectDefaultTrack() {
+        processOnAnchor(mHandler.obtainMessage(WHAT_SELECT_DEFAULT_TRACK));
+    }
+
+    private void doSelectDefaultTrack() {
         if (mTrackIsExplicit) {
             // If track selection is explicit, but visibility
             // is not, it falls back to the captioning setting
@@ -259,8 +297,9 @@ public class SubtitleController {
         }
     }
 
-    /** @hide - called from UI thread */
+    /** @hide - must be called from anchor thread */
     public void reset() {
+        checkAnchorLooper();
         hide();
         selectTrack(null);
         mTracks.clear();
@@ -301,9 +340,13 @@ public class SubtitleController {
     /**
      * Show the selected (or default) subtitle track.
      *
-     * Must be called from the UI thread.
+     * Should be called from the anchor's (UI) thread. {@see #Anchor.getSubtitleLooper}
      */
     public void show() {
+        processOnAnchor(mHandler.obtainMessage(WHAT_SHOW));
+    }
+
+    private void doShow() {
         mShowing = true;
         mVisibilityIsExplicit = true;
         if (mSelectedTrack != null) {
@@ -314,9 +357,13 @@ public class SubtitleController {
     /**
      * Hide the selected (or default) subtitle track.
      *
-     * Must be called from the UI thread.
+     * Should be called from the anchor's (UI) thread. {@see #Anchor.getSubtitleLooper}
      */
     public void hide() {
+        processOnAnchor(mHandler.obtainMessage(WHAT_HIDE));
+    }
+
+    private void doHide() {
         mVisibilityIsExplicit = true;
         if (mSelectedTrack != null) {
             mSelectedTrack.hide();
@@ -384,22 +431,50 @@ public class SubtitleController {
          * @hide
          */
         public void setSubtitleWidget(RenderingWidget subtitleWidget);
+
+        /**
+         * Anchors provide the looper on which all track visibility changes
+         * (track.show/hide, setSubtitleWidget) will take place.
+         * @hide
+         */
+        public Looper getSubtitleLooper();
     }
 
     private Anchor mAnchor;
 
-    /** @hide - called from UI thread */
+    /**
+     *  @hide - called from anchor's looper (if any, both when unsetting and
+     *  setting)
+     */
     public void setAnchor(Anchor anchor) {
         if (mAnchor == anchor) {
             return;
         }
 
         if (mAnchor != null) {
+            checkAnchorLooper();
             mAnchor.setSubtitleWidget(null);
         }
         mAnchor = anchor;
+        mHandler = null;
         if (mAnchor != null) {
+            mHandler = new Handler(mAnchor.getSubtitleLooper(), mCallback);
+            checkAnchorLooper();
             mAnchor.setSubtitleWidget(getRenderingWidget());
+        }
+    }
+
+    private void checkAnchorLooper() {
+        assert mHandler != null : "Should have a looper already";
+        assert Looper.myLooper() == mHandler.getLooper() : "Must be called from the anchor's looper";
+    }
+
+    private void processOnAnchor(Message m) {
+        assert mHandler != null : "Should have a looper already";
+        if (Looper.myLooper() == mHandler.getLooper()) {
+            mHandler.dispatchMessage(m);
+        } else {
+            mHandler.sendMessage(m);
         }
     }
 
