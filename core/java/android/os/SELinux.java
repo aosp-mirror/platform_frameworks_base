@@ -45,7 +45,7 @@ public class SELinux {
 
     /**
      * Set whether SELinux is permissive or enforcing.
-     * @param boolean representing whether to set SELinux to enforcing
+     * @param value representing whether to set SELinux to enforcing
      * @return a boolean representing whether the desired mode was set
      */
     public static final native boolean setSELinuxEnforce(boolean value);
@@ -60,7 +60,7 @@ public class SELinux {
     /**
      * Change the security context of an existing file object.
      * @param path representing the path of file object to relabel.
-     * @param con new security context given as a String.
+     * @param context new security context given as a String.
      * @return a boolean indicating whether the operation succeeded.
      */
     public static final native boolean setFileContext(String path, String context);
@@ -87,8 +87,6 @@ public class SELinux {
 
     /**
      * Gets the security context of a given process id.
-     * Use of this function is discouraged for Binder transactions.
-     * Use Binder.getCallingSecctx() instead.
      * @param pid an int representing the process id to check.
      * @return a String representing the security context of the given pid.
      */
@@ -102,15 +100,15 @@ public class SELinux {
 
     /**
      * Gets the value for the given SELinux boolean name.
-     * @param String The name of the SELinux boolean.
+     * @param name The name of the SELinux boolean.
      * @return a boolean indicating whether the SELinux boolean is set.
      */
     public static final native boolean getBooleanValue(String name);
 
     /**
      * Sets the value for the given SELinux boolean name.
-     * @param String The name of the SELinux boolean.
-     * @param Boolean The new value of the SELinux boolean.
+     * @param name The name of the SELinux boolean.
+     * @param value The new value of the SELinux boolean.
      * @return a boolean indicating whether or not the operation succeeded.
      */
     public static final native boolean setBooleanValue(String name, boolean value);
