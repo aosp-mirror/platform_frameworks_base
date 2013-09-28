@@ -99,7 +99,7 @@ public final class DocumentsContract {
         /**
          * Unique ID of a document. This ID is both provided by and interpreted
          * by a {@link DocumentsProvider}, and should be treated as an opaque
-         * value by client applications.
+         * value by client applications. This column is required.
          * <p>
          * Each document must have a unique ID within a provider, but that
          * single document may be included as a child of multiple directories.
@@ -117,7 +117,7 @@ public final class DocumentsContract {
          * Concrete MIME type of a document. For example, "image/png" or
          * "application/pdf" for openable files. A document can also be a
          * directory containing additional documents, which is represented with
-         * the {@link #MIME_TYPE_DIR} MIME type.
+         * the {@link #MIME_TYPE_DIR} MIME type. This column is required.
          * <p>
          * Type: STRING
          *
@@ -127,15 +127,15 @@ public final class DocumentsContract {
 
         /**
          * Display name of a document, used as the primary title displayed to a
-         * user.
+         * user. This column is required.
          * <p>
          * Type: STRING
          */
         public static final String COLUMN_DISPLAY_NAME = OpenableColumns.DISPLAY_NAME;
 
         /**
-         * Summary of a document, which may be shown to a user. The summary may
-         * be {@code null}.
+         * Summary of a document, which may be shown to a user. This column is
+         * optional, and may be {@code null}.
          * <p>
          * Type: STRING
          */
@@ -143,9 +143,9 @@ public final class DocumentsContract {
 
         /**
          * Timestamp when a document was last modified, in milliseconds since
-         * January 1, 1970 00:00:00.0 UTC, or {@code null} if unknown. A
-         * {@link DocumentsProvider} can update this field using events from
-         * {@link OnCloseListener} or other reliable
+         * January 1, 1970 00:00:00.0 UTC. This column is required, and may be
+         * {@code null} if unknown. A {@link DocumentsProvider} can update this
+         * field using events from {@link OnCloseListener} or other reliable
          * {@link ParcelFileDescriptor} transports.
          * <p>
          * Type: INTEGER (long)
@@ -155,15 +155,16 @@ public final class DocumentsContract {
         public static final String COLUMN_LAST_MODIFIED = "last_modified";
 
         /**
-         * Specific icon resource ID for a document, or {@code null} to use
-         * platform default icon based on {@link #COLUMN_MIME_TYPE}.
+         * Specific icon resource ID for a document. This column is optional,
+         * and may be {@code null} to use a platform-provided default icon based
+         * on {@link #COLUMN_MIME_TYPE}.
          * <p>
          * Type: INTEGER (int)
          */
         public static final String COLUMN_ICON = "icon";
 
         /**
-         * Flags that apply to a document.
+         * Flags that apply to a document. This column is required.
          * <p>
          * Type: INTEGER (int)
          *
@@ -171,12 +172,13 @@ public final class DocumentsContract {
          * @see #FLAG_SUPPORTS_DELETE
          * @see #FLAG_SUPPORTS_THUMBNAIL
          * @see #FLAG_DIR_PREFERS_GRID
-         * @see #FLAG_DIR_SUPPORTS_CREATE
+         * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
          */
         public static final String COLUMN_FLAGS = "flags";
 
         /**
-         * Size of a document, in bytes, or {@code null} if unknown.
+         * Size of a document, in bytes, or {@code null} if unknown. This column
+         * is required.
          * <p>
          * Type: INTEGER (long)
          */
@@ -211,7 +213,7 @@ public final class DocumentsContract {
          * writability of a document may change over time, for example due to
          * remote access changes. This flag indicates that a document client can
          * expect {@link ContentResolver#openOutputStream(Uri)} to succeed.
-         *
+         * 
          * @see #COLUMN_FLAGS
          */
         public static final int FLAG_SUPPORTS_WRITE = 1 << 1;
@@ -265,8 +267,9 @@ public final class DocumentsContract {
          *
          * @see #COLUMN_FLAGS
          * @see #FLAG_DIR_PREFERS_GRID
+         * @hide
          */
-        public static final int FLAG_DIR_HIDE_GRID_TITLES = 1 << 6;
+        public static final int FLAG_DIR_HIDE_GRID_TITLES = 1 << 16;
     }
 
     /**
@@ -282,31 +285,17 @@ public final class DocumentsContract {
         /**
          * Unique ID of a root. This ID is both provided by and interpreted by a
          * {@link DocumentsProvider}, and should be treated as an opaque value
-         * by client applications.
+         * by client applications. This column is required.
          * <p>
          * Type: STRING
          */
         public static final String COLUMN_ROOT_ID = "root_id";
 
         /**
-         * Type of a root, used for clustering when presenting multiple roots to
-         * a user.
+         * Flags that apply to a root. This column is required.
          * <p>
          * Type: INTEGER (int)
          *
-         * @see #ROOT_TYPE_SERVICE
-         * @see #ROOT_TYPE_SHORTCUT
-         * @see #ROOT_TYPE_DEVICE
-         */
-        public static final String COLUMN_ROOT_TYPE = "root_type";
-
-        /**
-         * Flags that apply to a root.
-         * <p>
-         * Type: INTEGER (int)
-         *
-         * @see #FLAG_ADVANCED
-         * @see #FLAG_EMPTY
          * @see #FLAG_LOCAL_ONLY
          * @see #FLAG_SUPPORTS_CREATE
          * @see #FLAG_SUPPORTS_RECENTS
@@ -315,22 +304,23 @@ public final class DocumentsContract {
         public static final String COLUMN_FLAGS = "flags";
 
         /**
-         * Icon resource ID for a root.
+         * Icon resource ID for a root. This column is required.
          * <p>
          * Type: INTEGER (int)
          */
         public static final String COLUMN_ICON = "icon";
 
         /**
-         * Title for a root, which will be shown to a user.
+         * Title for a root, which will be shown to a user. This column is
+         * required.
          * <p>
          * Type: STRING
          */
         public static final String COLUMN_TITLE = "title";
 
         /**
-         * Summary for this root, which may be shown to a user. The summary may
-         * be {@code null}.
+         * Summary for this root, which may be shown to a user. This column is
+         * optional, and may be {@code null}.
          * <p>
          * Type: STRING
          */
@@ -338,7 +328,7 @@ public final class DocumentsContract {
 
         /**
          * Document which is a directory that represents the top directory of
-         * this root.
+         * this root. This column is required.
          * <p>
          * Type: STRING
          *
@@ -347,48 +337,25 @@ public final class DocumentsContract {
         public static final String COLUMN_DOCUMENT_ID = "document_id";
 
         /**
-         * Number of bytes available in this root, or {@code null} if unknown or
-         * unbounded.
+         * Number of bytes available in this root. This column is optional, and
+         * may be {@code null} if unknown or unbounded.
          * <p>
          * Type: INTEGER (long)
          */
         public static final String COLUMN_AVAILABLE_BYTES = "available_bytes";
 
         /**
-         * MIME types supported by this root, or {@code null} if the root
-         * supports all MIME types. Multiple MIME types can be separated by a
-         * newline. For example, a root supporting audio might use
-         * "audio/*\napplication/x-flac".
+         * MIME types supported by this root. This column is optional, and if
+         * {@code null} the root is assumed to support all MIME types. Multiple
+         * MIME types can be separated by a newline. For example, a root
+         * supporting audio might return "audio/*\napplication/x-flac".
          * <p>
-         * Type: String
+         * Type: STRING
          */
         public static final String COLUMN_MIME_TYPES = "mime_types";
 
         /** {@hide} */
         public static final String MIME_TYPE_ITEM = "vnd.android.document/root";
-
-        /**
-         * Type of root that represents a storage service, such as a cloud-based
-         * service.
-         *
-         * @see #COLUMN_ROOT_TYPE
-         */
-        public static final int ROOT_TYPE_SERVICE = 1;
-
-        /**
-         * Type of root that represents a shortcut to content that may be
-         * available elsewhere through another storage root.
-         *
-         * @see #COLUMN_ROOT_TYPE
-         */
-        public static final int ROOT_TYPE_SHORTCUT = 2;
-
-        /**
-         * Type of root that represents a physical storage device.
-         *
-         * @see #COLUMN_ROOT_TYPE
-         */
-        public static final int ROOT_TYPE_DEVICE = 3;
 
         /**
          * Flag indicating that at least one directory under this root supports
@@ -409,21 +376,13 @@ public final class DocumentsContract {
         public static final int FLAG_LOCAL_ONLY = 1 << 1;
 
         /**
-         * Flag indicating that this root should only be visible to advanced
-         * users.
-         *
-         * @see #COLUMN_FLAGS
-         */
-        public static final int FLAG_ADVANCED = 1 << 2;
-
-        /**
          * Flag indicating that this root can report recently modified
          * documents.
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsContract#buildRecentDocumentsUri(String, String)
          */
-        public static final int FLAG_SUPPORTS_RECENTS = 1 << 3;
+        public static final int FLAG_SUPPORTS_RECENTS = 1 << 2;
 
         /**
          * Flag indicating that this root supports search.
@@ -432,19 +391,31 @@ public final class DocumentsContract {
          * @see DocumentsProvider#querySearchDocuments(String, String,
          *      String[])
          */
-        public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
+        public static final int FLAG_SUPPORTS_SEARCH = 1 << 3;
 
         /**
          * Flag indicating that this root is currently empty. This may be used
          * to hide the root when opening documents, but the root will still be
          * shown when creating documents and {@link #FLAG_SUPPORTS_CREATE} is
-         * also set.
+         * also set. If the value of this flag changes, such as when a root
+         * becomes non-empty, you must send a content changed notification for
+         * {@link DocumentsContract#buildRootsUri(String)}.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsProvider#querySearchDocuments(String, String,
-         *      String[])
+         * @see ContentResolver#notifyChange(Uri,
+         *      android.database.ContentObserver, boolean)
+         * @hide
          */
-        public static final int FLAG_EMPTY = 1 << 5;
+        public static final int FLAG_EMPTY = 1 << 16;
+
+        /**
+         * Flag indicating that this root should only be visible to advanced
+         * users.
+         *
+         * @see #COLUMN_FLAGS
+         * @hide
+         */
+        public static final int FLAG_ADVANCED = 1 << 17;
     }
 
     /**

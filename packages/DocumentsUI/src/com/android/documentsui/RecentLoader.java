@@ -26,9 +26,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.android.documentsui.DocumentsActivity.State;
@@ -54,17 +56,23 @@ import java.util.concurrent.TimeUnit;
 public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     private static final boolean LOGD = true;
 
-    public static final int MAX_OUTSTANDING_RECENTS = 2;
+    // TODO: adjust for svelte devices
+    // TODO: add support for oneway queries to avoid wedging loader
+    private static final int MAX_OUTSTANDING_RECENTS = 2;
 
     /**
      * Time to wait for first pass to complete before returning partial results.
      */
-    public static final int MAX_FIRST_PASS_WAIT_MILLIS = 500;
+    private static final int MAX_FIRST_PASS_WAIT_MILLIS = 500;
 
-    /**
-     * Maximum documents from a single root.
-     */
-    public static final int MAX_DOCS_FROM_ROOT = 64;
+    /** Maximum documents from a single root. */
+    private static final int MAX_DOCS_FROM_ROOT = 64;
+
+    /** Ignore documents older than this age. */
+    private static final long REJECT_OLDER_THAN = 45 * DateUtils.DAY_IN_MILLIS;
+
+    /** MIME types that should always be excluded from recents. */
+    private static final String[] RECENT_REJECT_MIMES = new String[] { Document.MIME_TYPE_DIR };
 
     private static final ExecutorService sExecutor = buildExecutor();
 
@@ -173,6 +181,8 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
             }
         }
 
+        final long rejectBefore = System.currentTimeMillis() - REJECT_OLDER_THAN;
+
         // Collect all finished tasks
         List<Cursor> cursors = Lists.newArrayList();
         for (RecentTask task : mTasks.values()) {
@@ -180,7 +190,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
                 try {
                     final Cursor cursor = task.get();
                     final FilteringCursorWrapper filtered = new FilteringCursorWrapper(
-                            cursor, mState.acceptMimes, new String[] { Document.MIME_TYPE_DIR }) {
+                            cursor, mState.acceptMimes, RECENT_REJECT_MIMES, rejectBefore) {
                         @Override
                         public void close() {
                             // Ignored, since we manage cursor lifecycle internally
@@ -203,11 +213,22 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         final DirectoryResult result = new DirectoryResult();
         result.sortOrder = SORT_ORDER_LAST_MODIFIED;
 
-        if (cursors.size() > 0) {
-            final MergeCursor merged = new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
-            final SortingCursorWrapper sorted = new SortingCursorWrapper(merged, result.sortOrder);
-            result.cursor = sorted;
+        // Hint to UI if we're still loading
+        final Bundle extras = new Bundle();
+        if (cursors.size() != mTasks.size()) {
+            extras.putBoolean(DocumentsContract.EXTRA_LOADING, true);
         }
+
+        final MergeCursor merged = new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
+        final SortingCursorWrapper sorted = new SortingCursorWrapper(merged, result.sortOrder) {
+            @Override
+            public Bundle getExtras() {
+                return extras;
+            }
+        };
+
+        result.cursor = sorted;
+
         return result;
     }
 

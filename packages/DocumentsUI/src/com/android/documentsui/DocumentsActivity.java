@@ -854,20 +854,41 @@ public class DocumentsActivity extends Activity {
         mState.stackTouched = true;
 
         if (!mRoots.isRecentsRoot(root)) {
-            try {
-                final Uri uri = DocumentsContract.buildDocumentUri(root.authority, root.documentId);
-                final DocumentInfo doc = DocumentInfo.fromUri(getContentResolver(), uri);
-                mState.stack.push(doc);
-                mState.stackTouched = true;
-                onCurrentDirectoryChanged(ANIM_SIDE);
-            } catch (FileNotFoundException e) {
-            }
+            new PickRootTask(root).execute();
         } else {
             onCurrentDirectoryChanged(ANIM_SIDE);
         }
 
         if (closeDrawer) {
             setRootsDrawerOpen(false);
+        }
+    }
+
+    private class PickRootTask extends AsyncTask<Void, Void, DocumentInfo> {
+        private RootInfo mRoot;
+
+        public PickRootTask(RootInfo root) {
+            mRoot = root;
+        }
+
+        @Override
+        protected DocumentInfo doInBackground(Void... params) {
+            try {
+                final Uri uri = DocumentsContract.buildDocumentUri(
+                        mRoot.authority, mRoot.documentId);
+                return DocumentInfo.fromUri(getContentResolver(), uri);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(DocumentInfo result) {
+            if (result != null) {
+                mState.stack.push(result);
+                mState.stackTouched = true;
+                onCurrentDirectoryChanged(ANIM_SIDE);
+            }
         }
     }
 
@@ -909,7 +930,7 @@ public class DocumentsActivity extends Activity {
             onCurrentDirectoryChanged(ANIM_DOWN);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
-            onFinished(doc.derivedUri);
+            new ExistingFinishTask(doc.derivedUri).execute();
         } else if (mState.action == ACTION_CREATE) {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
@@ -943,29 +964,19 @@ public class DocumentsActivity extends Activity {
             for (int i = 0; i < size; i++) {
                 uris[i] = docs.get(i).derivedUri;
             }
-            onFinished(uris);
+            new ExistingFinishTask(uris).execute();
         }
     }
 
     public void onSaveRequested(DocumentInfo replaceTarget) {
-        onFinished(replaceTarget.derivedUri);
+        new ExistingFinishTask(replaceTarget.derivedUri).execute();
     }
 
     public void onSaveRequested(String mimeType, String displayName) {
-        final DocumentInfo cwd = getCurrentDirectory();
-
-        final Uri childUri = DocumentsContract.createDocument(
-                getContentResolver(), cwd.derivedUri, mimeType, displayName);
-        if (childUri != null) {
-            onFinished(childUri);
-        } else {
-            Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
-        }
+        new CreateFinishTask(mimeType, displayName).execute();
     }
 
-    private void onFinished(Uri... uris) {
-        Log.d(TAG, "onFinished() " + Arrays.toString(uris));
-
+    private void saveStackBlocking() {
         final ContentResolver resolver = getContentResolver();
         final ContentValues values = new ContentValues();
 
@@ -973,6 +984,7 @@ public class DocumentsActivity extends Activity {
         if (mState.action == ACTION_CREATE) {
             // Remember stack for last create
             values.clear();
+            values.put(RecentColumns.KEY, mState.stack.buildKey());
             values.put(RecentColumns.STACK, rawStack);
             resolver.insert(RecentsProvider.buildRecent(), values);
         }
@@ -983,6 +995,10 @@ public class DocumentsActivity extends Activity {
         values.put(ResumeColumns.STACK, rawStack);
         values.put(ResumeColumns.EXTERNAL, 0);
         resolver.insert(RecentsProvider.buildResume(packageName), values);
+    }
+
+    private void onFinished(Uri... uris) {
+        Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final Intent intent = new Intent();
         if (uris.length == 1) {
@@ -1006,6 +1022,56 @@ public class DocumentsActivity extends Activity {
 
         setResult(Activity.RESULT_OK, intent);
         finish();
+    }
+
+    private class CreateFinishTask extends AsyncTask<Void, Void, Uri> {
+        private final String mMimeType;
+        private final String mDisplayName;
+
+        public CreateFinishTask(String mimeType, String displayName) {
+            mMimeType = mimeType;
+            mDisplayName = displayName;
+        }
+
+        @Override
+        protected Uri doInBackground(Void... params) {
+            final DocumentInfo cwd = getCurrentDirectory();
+            final Uri childUri = DocumentsContract.createDocument(
+                    getContentResolver(), cwd.derivedUri, mMimeType, mDisplayName);
+            if (childUri != null) {
+                saveStackBlocking();
+            }
+            return childUri;
+        }
+
+        @Override
+        protected void onPostExecute(Uri result) {
+            if (result != null) {
+                onFinished(result);
+            } else {
+                Toast.makeText(DocumentsActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+    }
+
+    private class ExistingFinishTask extends AsyncTask<Void, Void, Void> {
+        private final Uri[] mUris;
+
+        public ExistingFinishTask(Uri... uris) {
+            mUris = uris;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            saveStackBlocking();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            onFinished(mUris);
+        }
     }
 
     public static class State implements android.os.Parcelable {

@@ -14,21 +14,7 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<View xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/grid_height"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:orientation="horizontal">
-
-    <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        style="?android:attr/progressBarStyle" />
-
-</FrameLayout>
+    android:layout_height="wrap_content"
+    android:background="@drawable/ic_drawer_tall_divider" />

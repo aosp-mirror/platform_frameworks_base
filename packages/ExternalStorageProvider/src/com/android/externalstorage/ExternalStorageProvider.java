@@ -47,9 +47,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
     // docId format: root:path/to/file
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
-            Root.COLUMN_ROOT_ID, Root.COLUMN_ROOT_TYPE, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
-            Root.COLUMN_TITLE, Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
-            Root.COLUMN_AVAILABLE_BYTES,
+            Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+            Root.COLUMN_DOCUMENT_ID, Root.COLUMN_AVAILABLE_BYTES,
     };
 
     private static final String[] DEFAULT_DOCUMENT_PROJECTION = new String[] {
@@ -59,7 +58,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     private static class RootInfo {
         public String rootId;
-        public int rootType;
         public int flags;
         public String title;
         public String docId;
@@ -84,7 +82,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
             final RootInfo root = new RootInfo();
             root.rootId = rootId;
-            root.rootType = Root.ROOT_TYPE_DEVICE;
             root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
                     | Root.FLAG_SUPPORTS_SEARCH;
             root.title = getContext().getString(R.string.root_internal_storage);
@@ -198,7 +195,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
             final RowBuilder row = result.newRow();
             row.add(Root.COLUMN_ROOT_ID, root.rootId);
-            row.add(Root.COLUMN_ROOT_TYPE, root.rootType);
             row.add(Root.COLUMN_FLAGS, root.flags);
             row.add(Root.COLUMN_TITLE, root.title);
             row.add(Root.COLUMN_DOCUMENT_ID, root.docId);

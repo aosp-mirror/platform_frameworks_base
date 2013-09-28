@@ -21,17 +21,18 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingTop="8dip"
-    android:paddingBottom="8dip"
-    android:orientation="horizontal">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:baselineAligned="false">
 
     <FrameLayout
         android:id="@android:id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:layout_marginStart="12dp"
-        android:layout_marginEnd="20dp"
-        android:layout_gravity="center_vertical">
+        android:layout_marginEnd="20dp">
 
         <ImageView
             android:id="@+id/icon_mime"
@@ -49,11 +50,11 @@
 
     </FrameLayout>
 
+    <!-- This is the one special case where we want baseline alignment! -->
     <LinearLayout
-        android:layout_width="0dip"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
