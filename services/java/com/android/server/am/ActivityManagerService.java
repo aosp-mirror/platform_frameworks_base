@@ -6786,6 +6786,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Kill the running processes.
             for (int i=0; i<procs.size(); i++) {
                 ProcessRecord pr = procs.get(i);
+                if (pr == mHomeProcess) {
+                    // Don't kill the home process along with tasks from the same package.
+                    continue;
+                }
                 if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
                     killUnneededProcessLocked(pr, "remove task");
                 } else {
