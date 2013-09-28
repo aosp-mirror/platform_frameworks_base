@@ -48,6 +48,7 @@ import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -87,6 +88,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -4147,17 +4149,13 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // RemoteControlDisplay / RemoteControlClient / Remote info
     //==========================================================================================
+    public boolean registerRemoteController(IRemoteControlDisplay rcd, int w, int h,
+            ComponentName listenerComp) {
+        return mMediaFocusControl.registerRemoteController(rcd, w, h, listenerComp);
+    }
+
     public boolean registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
-        if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MEDIA_CONTENT_CONTROL)) {
-            mMediaFocusControl.registerRemoteControlDisplay(rcd, w, h);
-            return true;
-        } else {
-            Log.w(TAG, "Access denied to process: " + Binder.getCallingPid() +
-                    ", must have permission " + android.Manifest.permission.MEDIA_CONTENT_CONTROL +
-                    " to register IRemoteControlDisplay");
-            return false;
-        }
+        return mMediaFocusControl.registerRemoteControlDisplay(rcd, w, h);
     }
 
     public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {

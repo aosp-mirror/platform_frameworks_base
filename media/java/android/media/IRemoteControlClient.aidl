@@ -56,6 +56,7 @@ oneway interface IRemoteControlClient
     void unplugRemoteControlDisplay(IRemoteControlDisplay rcd);
     void setBitmapSizeForDisplay(IRemoteControlDisplay rcd, int w, int h);
     void setWantsSyncForDisplay(IRemoteControlDisplay rcd, boolean wantsSync);
+    void enableRemoteControlDisplay(IRemoteControlDisplay rcd, boolean enabled);
     void seekTo(int clientGeneration, long timeMs);
     void updateMetadata(int clientGeneration, int key, in Rating value);
 }

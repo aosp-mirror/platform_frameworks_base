@@ -203,8 +203,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         if (DEBUG) Log.v(TAG, "Create TCV " + this);
         mAudioManager = new AudioManager(mContext);
         mCurrentPlayState = RemoteControlClient.PLAYSTATE_NONE; // until we get a callback
-        mRemoteController = new RemoteController(context);
-        mRemoteController.setOnClientUpdateListener(mRCClientUpdateListener);
+        mRemoteController = new RemoteController(context, mRCClientUpdateListener);
 
         final DisplayMetrics dm = context.getResources().getDisplayMetrics();
         final int dim = Math.max(dm.widthPixels, dm.heightPixels);
