@@ -162,6 +162,7 @@ class DisplayContent {
     void moveStack(TaskStack stack, boolean toTop) {
         mStackHistory.remove(stack);
         mStackHistory.add(toTop ? mStackHistory.size() : 0, stack);
+        mService.moveStackWindowsLocked(stack);
     }
 
     public boolean isPrivate() {

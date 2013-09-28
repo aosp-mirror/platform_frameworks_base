@@ -4715,7 +4715,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void moveStackWindowsLocked(TaskStack stack) {
+    void moveStackWindowsLocked(TaskStack stack) {
         DisplayContent displayContent = stack.getDisplayContent();
 
         // First remove all of the windows from the list.
@@ -4782,7 +4782,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 stack.moveTaskToTop(task);
                 displayContent.moveStack(stack, true);
-                moveStackWindowsLocked(stack);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
