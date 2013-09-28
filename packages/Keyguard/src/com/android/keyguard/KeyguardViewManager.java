@@ -16,6 +16,9 @@
 
 package com.android.keyguard;
 
+import android.app.PendingIntent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -76,6 +79,14 @@ public class KeyguardViewManager {
 
     private boolean mScreenOn = false;
     private LockPatternUtils mLockPatternUtils;
+
+    private KeyguardUpdateMonitorCallback mBackgroundChanger = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onSetBackground(Bitmap bmp) {
+            mKeyguardHost.setCustomBackground(bmp != null ?
+                    new BitmapDrawable(mContext.getResources(), bmp) : null);
+        }
+    };
 
     public interface ShowListener {
         void onShown(IBinder windowToken);
@@ -140,11 +151,25 @@ public class KeyguardViewManager {
     class ViewManagerHost extends FrameLayout {
         private static final int BACKGROUND_COLOR = 0x70000000;
 
+        private Drawable mCustomBackground;
+
         // This is a faster way to draw the background on devices without hardware acceleration
         private final Drawable mBackgroundDrawable = new Drawable() {
             @Override
             public void draw(Canvas canvas) {
-                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC);
+                if (mCustomBackground != null) {
+                    final Rect bounds = mCustomBackground.getBounds();
+                    final int vWidth = getWidth();
+                    final int vHeight = getHeight();
+
+                    final int restore = canvas.save();
+                    canvas.translate(-(bounds.width() - vWidth) / 2,
+                            -(bounds.height() - vHeight) / 2);
+                    mCustomBackground.draw(canvas);
+                    canvas.restoreToCount(restore);
+                } else {
+                    canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC);
+                }
             }
 
             @Override
@@ -164,6 +189,40 @@ public class KeyguardViewManager {
         public ViewManagerHost(Context context) {
             super(context);
             setBackground(mBackgroundDrawable);
+        }
+
+        public void setCustomBackground(Drawable d) {
+            mCustomBackground = d;
+            if (d != null) {
+                d.setColorFilter(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+            }
+            computeCustomBackgroundBounds();
+            invalidate();
+        }
+
+        private void computeCustomBackgroundBounds() {
+            if (mCustomBackground == null) return; // Nothing to do
+            if (!isLaidOut()) return; // We'll do this later
+
+            final int bgWidth = mCustomBackground.getIntrinsicWidth();
+            final int bgHeight = mCustomBackground.getIntrinsicHeight();
+            final int vWidth = getWidth();
+            final int vHeight = getHeight();
+
+            final float bgAspect = (float) bgWidth / bgHeight;
+            final float vAspect = (float) vWidth / vHeight;
+
+            if (bgAspect > vAspect) {
+                mCustomBackground.setBounds(0, 0, (int) (vHeight * bgAspect), vHeight);
+            } else {
+                mCustomBackground.setBounds(0, 0, vWidth, (int) (vWidth / bgAspect));
+            }
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh);
+            computeCustomBackgroundBounds();
         }
 
         @Override
@@ -239,9 +298,12 @@ public class KeyguardViewManager {
             lp.setTitle("Keyguard");
             mWindowLayoutParams = lp;
             mViewManager.addView(mKeyguardHost, lp);
+
+            KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mBackgroundChanger);
         }
 
         if (force || mKeyguardView == null) {
+            mKeyguardHost.setCustomBackground(null);
             mKeyguardHost.removeAllViews();
             inflateKeyguardView(options);
             mKeyguardView.requestFocus();
@@ -428,6 +490,8 @@ public class KeyguardViewManager {
                     public void run() {
                         synchronized (KeyguardViewManager.this) {
                             lastView.cleanUp();
+                            // Let go of any large bitmaps.
+                            mKeyguardHost.setCustomBackground(null);
                             mKeyguardHost.removeView(lastView);
                         }
                     }
