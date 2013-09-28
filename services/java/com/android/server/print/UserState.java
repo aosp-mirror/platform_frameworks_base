@@ -205,10 +205,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         // Add everything else the spooler knows about.
         List<PrintJobInfo> printJobs = mSpooler.getPrintJobInfos(null,
                 PrintJobInfo.STATE_ANY, appId);
-        final int printJobCount = printJobs.size();
-        for (int i = 0; i < printJobCount; i++) {
-            PrintJobInfo printJob = printJobs.get(i);
-            result.put(printJob.getId(), printJob);
+        if (printJobs != null) {
+            final int printJobCount = printJobs.size();
+            for (int i = 0; i < printJobCount; i++) {
+                PrintJobInfo printJob = printJobs.get(i);
+                result.put(printJob.getId(), printJob);
+            }
         }
 
         return new ArrayList<PrintJobInfo>(result.values());
@@ -269,6 +271,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 }
             }
             return enabledServices;
+        }
+    }
+
+    public List<PrintServiceInfo> getInstalledPrintServices() {
+        synchronized (mLock) {
+            return mInstalledServices;
         }
     }
 
