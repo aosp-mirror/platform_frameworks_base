@@ -45,6 +45,7 @@ interface IPrintManager {
     void removePrintJobStateChangeListener(in IPrintJobStateChangeListener listener,
             int userId);
 
+    List<PrintServiceInfo> getInstalledPrintServices(int userId);
     List<PrintServiceInfo> getEnabledPrintServices(int userId);
 
     void createPrinterDiscoverySession(in IPrinterDiscoveryObserver observer, int userId);

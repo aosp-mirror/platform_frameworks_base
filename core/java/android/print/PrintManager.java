@@ -289,7 +289,26 @@ public final class PrintManager {
                 return enabledServices;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting the enalbed print services", re);
+            Log.e(LOG_TAG, "Error getting the enabled print services", re);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Gets the list of installed print services.
+     *
+     * @return The installed service list or an empty list.
+     *
+     * @hide
+     */
+    public List<PrintServiceInfo> getInstalledPrintServices() {
+        try {
+            List<PrintServiceInfo> installedServices = mService.getInstalledPrintServices(mUserId);
+            if (installedServices != null) {
+                return installedServices;
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting the installed print services", re);
         }
         return Collections.emptyList();
     }
