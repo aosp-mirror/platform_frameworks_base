@@ -109,6 +109,9 @@
     <!-- Label for an unknown reason for failed or blocked print job. [CHAR LIMIT=25] -->
     <string name="reason_unknown">unknown</string>
 
+    <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
+    <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
+
     <!-- Arrays -->
 
     <!-- Color mode labels. -->
