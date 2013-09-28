@@ -203,12 +203,6 @@ public final class ActivityStackSupervisor {
      */
     final PowerManager.WakeLock mGoingToSleep;
 
-    /**
-     * The name of the current home activity for each user.
-     * TODO: Remove entries when user is deleted.
-     */
-    final SparseArray<String> mHomePackageNames = new SparseArray<String>();
-
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
         mService = service;
@@ -2267,11 +2261,6 @@ public final class ActivityStackSupervisor {
     boolean switchUserLocked(int userId, UserStartedState uss) {
         mCurrentUser = userId;
 
-        final String homePackageName = mService.getHomePackageName();
-        if (homePackageName != null) {
-            setHomePackageName(mCurrentUser, homePackageName);
-        }
-
         mStartingUsers.add(uss);
         boolean haveActivities = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
@@ -2373,12 +2362,6 @@ public final class ActivityStackSupervisor {
         pw.print(prefix); pw.print("mStackState="); pw.println(stackStateToString(mStackState));
         pw.print(prefix); pw.println("mSleepTimeout: " + mSleepTimeout);
         pw.print(prefix); pw.println("mCurTaskId: " + mCurTaskId);
-        pw.print(prefix); pw.print("mHomePackageNames:");
-                for (int i = 0; i < mHomePackageNames.size(); ++i) {
-                    pw.print(" ("); pw.print(mHomePackageNames.keyAt(i)); pw.print(",");
-                    pw.print(mHomePackageNames.valueAt(i)); pw.print(")");
-                }
-                pw.println();
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
@@ -2634,15 +2617,5 @@ public final class ActivityStackSupervisor {
                 } break;
             }
         }
-    }
-
-    String getHomePackageName() {
-        return mHomePackageNames.get(mCurrentUser);
-    }
-
-    void setHomePackageName(int userId, String homePackageName) {
-        if (DEBUG_SWITCH) Slog.d(TAG, "setHomePackageName: user=" + userId + " package="
-                + homePackageName);
-        mHomePackageNames.put(userId, homePackageName);
     }
 }

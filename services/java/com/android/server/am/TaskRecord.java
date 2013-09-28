@@ -418,6 +418,7 @@ final class TaskRecord extends ThumbnailHolder {
             pw.print(prefix); pw.print("numActivities="); pw.print(numActivities);
                     pw.print(" rootWasReset="); pw.print(rootWasReset);
                     pw.print(" userId="); pw.print(userId);
+                    pw.print(" mTaskType="); pw.print(mTaskType);
                     pw.print(" numFullscreen="); pw.print(numFullscreen);
                     pw.print(" mOnTopOfHome="); pw.println(mOnTopOfHome);
         }
