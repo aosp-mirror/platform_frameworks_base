@@ -515,13 +515,13 @@ public class RemoteControlClient
                 mEditorArtwork = null;
                 if (mMetadataChanged & mArtworkChanged) {
                     // send to remote control display if conditions are met
-                    sendMetadataWithArtwork_syncCacheLock();
+                    sendMetadataWithArtwork_syncCacheLock(null, 0, 0);
                 } else if (mMetadataChanged) {
                     // send to remote control display if conditions are met
-                    sendMetadata_syncCacheLock();
+                    sendMetadata_syncCacheLock(null);
                 } else if (mArtworkChanged) {
                     // send to remote control display if conditions are met
-                    sendArtwork_syncCacheLock();
+                    sendArtwork_syncCacheLock(null, 0, 0);
                 }
                 mApplied = true;
             }
@@ -620,7 +620,7 @@ public class RemoteControlClient
                 mPlaybackStateChangeTimeMs = SystemClock.elapsedRealtime();
 
                 // send to remote control display if conditions are met
-                sendPlaybackState_syncCacheLock();
+                sendPlaybackState_syncCacheLock(null);
                 // update AudioService
                 sendAudioServiceNewPlaybackState_syncCacheLock();
 
@@ -705,7 +705,7 @@ public class RemoteControlClient
             mTransportControlFlags = transportControlFlags;
 
             // send to remote control display if conditions are met
-            sendTransportControlInfo_syncCacheLock();
+            sendTransportControlInfo_syncCacheLock(null);
         }
     }
 
@@ -791,7 +791,7 @@ public class RemoteControlClient
             mPositionUpdateListener = l;
             if (oldCapa != mPlaybackPositionCapabilities) {
                 // tell RCDs that this RCC's playback position capabilities have changed
-                sendTransportControlInfo_syncCacheLock();
+                sendTransportControlInfo_syncCacheLock(null);
             }
         }
     }
@@ -813,7 +813,7 @@ public class RemoteControlClient
             mPositionProvider = l;
             if (oldCapa != mPlaybackPositionCapabilities) {
                 // tell RCDs that this RCC's playback position capabilities have changed
-                sendTransportControlInfo_syncCacheLock();
+                sendTransportControlInfo_syncCacheLock(null);
             }
             if ((mPositionProvider != null) && (mEventHandler != null)
                     && playbackPositionShouldMove(mPlaybackState)) {
@@ -1083,6 +1083,7 @@ public class RemoteControlClient
      */
     private final IRemoteControlClient mIRCC = new IRemoteControlClient.Stub() {
 
+        //TODO change name to informationRequestForAllDisplays()
         public void onInformationRequested(int generationId, int infoFlags) {
             // only post messages, we can't block here
             if (mEventHandler != null) {
@@ -1096,12 +1097,30 @@ public class RemoteControlClient
                 mEventHandler.removeMessages(MSG_REQUEST_METADATA);
                 mEventHandler.removeMessages(MSG_REQUEST_TRANSPORTCONTROL);
                 mEventHandler.removeMessages(MSG_REQUEST_ARTWORK);
+                mEventHandler.removeMessages(MSG_REQUEST_METADATA_ARTWORK);
                 mEventHandler.sendMessage(
-                        mEventHandler.obtainMessage(MSG_REQUEST_PLAYBACK_STATE));
+                        mEventHandler.obtainMessage(MSG_REQUEST_PLAYBACK_STATE, null));
                 mEventHandler.sendMessage(
-                        mEventHandler.obtainMessage(MSG_REQUEST_TRANSPORTCONTROL));
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(MSG_REQUEST_METADATA));
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(MSG_REQUEST_ARTWORK));
+                        mEventHandler.obtainMessage(MSG_REQUEST_TRANSPORTCONTROL, null));
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(MSG_REQUEST_METADATA_ARTWORK,
+                        0, 0, null));
+            }
+        }
+
+        public void informationRequestForDisplay(IRemoteControlDisplay rcd, int w, int h) {
+            // only post messages, we can't block here
+            if (mEventHandler != null) {
+                mEventHandler.sendMessage(
+                        mEventHandler.obtainMessage(MSG_REQUEST_TRANSPORTCONTROL, rcd));
+                mEventHandler.sendMessage(
+                        mEventHandler.obtainMessage(MSG_REQUEST_PLAYBACK_STATE, rcd));
+                if ((w > 0) && (h > 0)) {
+                    mEventHandler.sendMessage(
+                            mEventHandler.obtainMessage(MSG_REQUEST_METADATA_ARTWORK, w, h, rcd));
+                } else {
+                    mEventHandler.sendMessage(
+                            mEventHandler.obtainMessage(MSG_REQUEST_METADATA, rcd));
+                }
             }
         }
 
@@ -1207,6 +1226,7 @@ public class RemoteControlClient
     private final static int MSG_POSITION_DRIFT_CHECK = 11;
     private final static int MSG_DISPLAY_WANTS_POS_SYNC = 12;
     private final static int MSG_UPDATE_METADATA = 13;
+    private final static int MSG_REQUEST_METADATA_ARTWORK = 14;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -1218,22 +1238,29 @@ public class RemoteControlClient
             switch(msg.what) {
                 case MSG_REQUEST_PLAYBACK_STATE:
                     synchronized (mCacheLock) {
-                        sendPlaybackState_syncCacheLock();
+                        sendPlaybackState_syncCacheLock((IRemoteControlDisplay)msg.obj);
                     }
                     break;
                 case MSG_REQUEST_METADATA:
                     synchronized (mCacheLock) {
-                        sendMetadata_syncCacheLock();
+                        sendMetadata_syncCacheLock((IRemoteControlDisplay)msg.obj);
                     }
                     break;
                 case MSG_REQUEST_TRANSPORTCONTROL:
                     synchronized (mCacheLock) {
-                        sendTransportControlInfo_syncCacheLock();
+                        sendTransportControlInfo_syncCacheLock((IRemoteControlDisplay)msg.obj);
                     }
                     break;
                 case MSG_REQUEST_ARTWORK:
                     synchronized (mCacheLock) {
-                        sendArtwork_syncCacheLock();
+                        sendArtwork_syncCacheLock((IRemoteControlDisplay)msg.obj,
+                                msg.arg1, msg.arg2);
+                    }
+                    break;
+                case MSG_REQUEST_METADATA_ARTWORK:
+                    synchronized (mCacheLock) {
+                        sendMetadataWithArtwork_syncCacheLock((IRemoteControlDisplay)msg.obj,
+                                msg.arg1, msg.arg2);
                     }
                     break;
                 case MSG_NEW_INTERNAL_CLIENT_GEN:
@@ -1272,8 +1299,19 @@ public class RemoteControlClient
     //===========================================================
     // Communication with the IRemoteControlDisplay (the displays known to the system)
 
-    private void sendPlaybackState_syncCacheLock() {
+    private void sendPlaybackState_syncCacheLock(IRemoteControlDisplay target) {
         if (mCurrentClientGenId == mInternalClientGenId) {
+            if (target != null) {
+                try {
+                    target.setPlaybackState(mInternalClientGenId,
+                            mPlaybackState, mPlaybackStateChangeTimeMs, mPlaybackPositionMs,
+                            mPlaybackSpeed);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in setPlaybackState() for dead display " + target, e);
+                }
+                return;
+            }
+            // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
@@ -1289,8 +1327,17 @@ public class RemoteControlClient
         }
     }
 
-    private void sendMetadata_syncCacheLock() {
+    private void sendMetadata_syncCacheLock(IRemoteControlDisplay target) {
         if (mCurrentClientGenId == mInternalClientGenId) {
+            if (target != null) {
+                try {
+                    target.setMetadata(mInternalClientGenId, mMetadata);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in setMetadata() for dead display " + target, e);
+                }
+                return;
+            }
+            // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
@@ -1304,8 +1351,19 @@ public class RemoteControlClient
         }
     }
 
-    private void sendTransportControlInfo_syncCacheLock() {
+    private void sendTransportControlInfo_syncCacheLock(IRemoteControlDisplay target) {
         if (mCurrentClientGenId == mInternalClientGenId) {
+            if (target != null) {
+                try {
+                    target.setTransportControlInfo(mInternalClientGenId,
+                            mTransportControlFlags, mPlaybackPositionCapabilities);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in setTransportControlFlags() for dead display " + target,
+                            e);
+                }
+                return;
+            }
+            // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
@@ -1321,9 +1379,15 @@ public class RemoteControlClient
         }
     }
 
-    private void sendArtwork_syncCacheLock() {
+    private void sendArtwork_syncCacheLock(IRemoteControlDisplay target, int w, int h) {
         // FIXME modify to cache all requested sizes?
         if (mCurrentClientGenId == mInternalClientGenId) {
+            if (target != null) {
+                final DisplayInfoForClient di = new DisplayInfoForClient(target, w, h);
+                sendArtworkToDisplay(di);
+                return;
+            }
+            // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 if (!sendArtworkToDisplay((DisplayInfoForClient) displayIterator.next())) {
@@ -1353,9 +1417,23 @@ public class RemoteControlClient
         return true;
     }
 
-    private void sendMetadataWithArtwork_syncCacheLock() {
+    private void sendMetadataWithArtwork_syncCacheLock(IRemoteControlDisplay target, int w, int h) {
         // FIXME modify to cache all requested sizes?
         if (mCurrentClientGenId == mInternalClientGenId) {
+            if (target != null) {
+                try {
+                    if ((w > 0) && (h > 0)) {
+                        Bitmap artwork = scaleBitmapIfTooBig(mOriginalArtwork, w, h);
+                        target.setAllMetadata(mInternalClientGenId, mMetadata, artwork);
+                    } else {
+                        target.setMetadata(mInternalClientGenId, mMetadata);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in set(All)Metadata() for dead display " + target, e);
+                }
+                return;
+            }
+            // target == null implies all displays must be updated
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
