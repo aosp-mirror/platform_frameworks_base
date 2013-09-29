@@ -2281,10 +2281,9 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
+            int[] artworkDimensions = rctlr.getArtworkSize();
             boolean reg = service.registerRemoteControlDisplay(rctlr.getRcDisplay(),
-                    // passing a negative value for art work width and height
-                    //   as they are still unknown at this stage
-                    /*w*/-1, /*h*/ -1);
+                    artworkDimensions[0]/*w*/, artworkDimensions[1]/*h*/);
             rctlr.setIsRegistered(reg);
             return reg;
         } catch (RemoteException e) {

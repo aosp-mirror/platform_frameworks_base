@@ -74,6 +74,8 @@ public final class RemoteController
     private OnClientUpdateListener mOnClientUpdateListener;
     private PlaybackInfo mLastPlaybackInfo;
     private int mLastTransportControlFlags = TRANSPORT_UNKNOWN;
+    private int mArtworkWidth = -1;
+    private int mArtworkHeight = -1;
 
     /**
      * Class constructor.
@@ -290,7 +292,6 @@ public final class RemoteController
 
     /**
      * @hide
-     * must be called on a registered RemoteController
      * @param wantBitmap
      * @param width
      * @param height
@@ -298,22 +299,26 @@ public final class RemoteController
      */
     public int setArtworkConfiguration(boolean wantBitmap, int width, int height) {
         synchronized (mInfoLock) {
-            if (!mIsRegistered) {
-                Log.e(TAG, "Cannot specify bitmap configuration on unregistered RemoteController");
-                return ERROR;
-            }
-        }
-        if (wantBitmap) {
-            if ((width > 0) && (height > 0)) {
-                if (width > MAX_BITMAP_DIMENSION) { width = MAX_BITMAP_DIMENSION; }
-                if (height > MAX_BITMAP_DIMENSION) { height = MAX_BITMAP_DIMENSION; }
-                mAudioManager.remoteControlDisplayUsesBitmapSize(mRcd, width, height);
+            if (wantBitmap) {
+                if ((width > 0) && (height > 0)) {
+                    if (width > MAX_BITMAP_DIMENSION) { width = MAX_BITMAP_DIMENSION; }
+                    if (height > MAX_BITMAP_DIMENSION) { height = MAX_BITMAP_DIMENSION; }
+                    mArtworkWidth = width;
+                    mArtworkHeight = height;
+                } else {
+                    Log.e(TAG, "Invalid dimensions");
+                    return ERROR_BAD_VALUE;
+                }
             } else {
-                Log.e(TAG, "Invalid dimensions");
-                return ERROR_BAD_VALUE;
+                mArtworkWidth = -1;
+                mArtworkHeight = -1;
             }
-        } else {
-            mAudioManager.remoteControlDisplayUsesBitmapSize(mRcd, -1, -1);
+            if (mIsRegistered) {
+                mAudioManager.remoteControlDisplayUsesBitmapSize(mRcd,
+                        mArtworkWidth, mArtworkHeight);
+            } // else new values have been stored, and will be read by AudioManager with
+              //    RemoteController.getArtworkSize() when AudioManager.registerRemoteController()
+              //    is called.
         }
         return SUCCESS;
     }
@@ -321,7 +326,6 @@ public final class RemoteController
     /**
      * Set the maximum artwork image dimensions to be received in the metadata.
      * No bitmaps will be received unless this has been specified.
-     * This method can only be called on a registered RemoteController.
      * @param width the maximum width in pixels
      * @param height  the maximum height in pixels
      * @return {@link #SUCCESS}, {@link #ERROR} or {@link #ERROR_BAD_VALUE}
@@ -332,7 +336,6 @@ public final class RemoteController
 
     /**
      * Prevents this RemoteController from receiving artwork images.
-     * This method can only be called on a registered RemoteController.
      * @return {@link #SUCCESS}, {@link #ERROR}
      */
     public int clearArtworkConfiguration() {
@@ -767,4 +770,17 @@ public final class RemoteController
     protected RcDisplay getRcDisplay() {
         return mRcd;
     }
+
+    /**
+     * @hide
+     * Used by AudioManager to read the current artwork dimension
+     * @return array containing width (index 0) and height (index 1) of currently set artwork size
+     */
+    protected int[] getArtworkSize() {
+        synchronized (mInfoLock) {
+            int[] size = { mArtworkWidth, mArtworkHeight };
+            return size;
+        }
+    }
+
 }
