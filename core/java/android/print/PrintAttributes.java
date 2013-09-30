@@ -22,9 +22,12 @@ import android.content.res.Resources.NotFoundException;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.R;
+
+import java.util.Map;
 
 /**
  * This class represents the attributes of a print job.
@@ -267,6 +270,9 @@ public final class PrintAttributes implements Parcelable {
     public static final class MediaSize {
         private static final String LOG_TAG = "MediaSize";
 
+        private static final Map<String, MediaSize> sIdToMediaSizeMap =
+                new ArrayMap<String, MediaSize>();
+
         /**
          * Unknown media size in portrait mode.
          * <p>
@@ -494,8 +500,8 @@ public final class PrintAttributes implements Parcelable {
                         R.string.mediasize_chinese_prc_10, 12756, 18032);
 
         /** Chinese PRC 16k media size: 146mm x 215mm (5.749" x 8.465") */
-        public static final MediaSize PRC_16k =
-                new MediaSize("PRC_16k", "android",
+        public static final MediaSize PRC_16K =
+                new MediaSize("PRC_16K", "android",
                         R.string.mediasize_chinese_prc_16k, 5749, 8465);
         /** Chinese Pa Kai media size: 267mm x 389mm (10.512" x 15.315") */
         public static final MediaSize OM_PA_KAI =
@@ -651,6 +657,9 @@ public final class PrintAttributes implements Parcelable {
             mWidthMils = widthMils;
             mHeightMils = heightMils;
             mLabel = null;
+
+            // Build this mapping only for predefined media sizes.
+            sIdToMediaSizeMap.put(mId, this);
         }
 
         /**
@@ -853,6 +862,18 @@ public final class PrintAttributes implements Parcelable {
             builder.append(", labelResId: ").append(mLabelResId);
             builder.append("}");
             return builder.toString();
+        }
+
+        /**
+         * Gets a standard media size given its id.
+         *
+         * @param id The media size id.
+         * @return The media size for the given id or null.
+         *
+         * @hide
+         */
+        public static MediaSize getStandardMediaSizeById(String id) {
+            return sIdToMediaSizeMap.get(id);
         }
     }
 
