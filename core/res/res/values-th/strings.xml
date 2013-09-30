@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"อนุญาตให้แอปพลิเคชันเป็นแถบสถานะ"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ขยาย/ยุบแถบสถานะ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"อนุญาตให้แอปพลิเคชันขยายหรือยุบแถบสถานะ"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ติดตั้งทางลัด"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"อนุญาตให้แอปพลิเคชันเพิ่มทางลัดหน้าจอหลักโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ถอนการติดตั้งทางลัด"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"อนุญาตให้แอปพลิเคชันลบทางลัดหน้าจอหลักโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"จัดเส้นทางการโทรออกใหม่"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"อนุญาตให้แอปพลิเคชันประมวลผลการโทรออกและเปลี่ยนแปลงหมายเลขที่จะโทรไป การอนุญาตนี้จะทำให้แอปพลิเคชันสามารถตรวจสอบ เปลี่ยนเส้นทาง หรือกีดขวางไม่ให้โทรออกได้"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"รับข้อความ (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"อนุญาตให้แอปพลิเคชันอ่านคำ ชื่อ และวลีทั้งหมดที่ผู้ใช้ได้จัดเก็บไว้ในพจนานุกรมผู้ใช้"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"เพิ่มคำลงในพจนานุกรมที่ผู้ใช้กำหนด"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"อนุญาตให้แอปพลิเคชันเขียนคำใหม่ลงในพจนานุกรมผู้ใช้"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ทดสอบการเข้าถึงที่จัดเก็บข้อมูลที่มีการป้องกัน"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ทดสอบการเข้าถึงที่จัดเก็บข้อมูลที่มีการป้องกัน"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"อนุญาตให้แอปพลิเคชันทดสอบการอนุญาตสำหรับที่จัดเก็บข้อมููล USB ที่จะสามารถใช้งานได้ในอุปกรณ์ในอนาคต"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"อนุญาตให้แอปพลิเคชันทดสอบการอนุญาตสำหรับการ์ด SD ที่จะสามารถใช้งานได้ในอุปกรณ์ในอนาคต"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"อ่านเนื้อหาในที่จัดเก็บ USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"อ่านเนื้อหาในการ์ด SD ของคุณ"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"อนุญาตให้แอปอ่านเนื้อหาในที่จัดเก็บข้อมูล USB"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"อนุญาตให้แอปอ่านเนื้อหาในการ์ด SD"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"แก้ไขหรือลบเนื้อหาใน USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"แก้ไขหรือลบเนื้อหาในการ์ด SD ของคุณ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"อนุญาตให้แอปฯ เขียนลงใน USB"</string>
@@ -1573,7 +1577,7 @@
     <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
     <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
     <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
-    <string name="mediasize_na_letter" msgid="2841414839888344296">"จดหมาย"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
     <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
     <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
     <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
@@ -1621,8 +1625,8 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ภาพแนวตั้งที่ไม่รู้จัก"</string>
-    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"ภาพแนวนอนที่ไม่รู้จัก"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"แนวตั้งไม่ทราบขนาด"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"แนวนอนไม่ทราบขนาด"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ยกเลิก"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ข้อผิดพลาดในการเขียนเนื้อหา"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"ไม่ทราบ"</string>

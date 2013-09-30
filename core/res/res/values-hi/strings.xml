@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"एप्‍स को स्‍थिति बार होने देता है."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"स्‍थिति बार विस्‍तृत/संक्षिप्त करें"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"एप्स को स्थिति बार को विस्तृत या संक्षिप्त करने देता है."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"शॉर्टकट इंस्‍टॉल करें"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"एप्‍लिकेशन को उपयोगकर्ता के हस्‍तक्षेप के बिना होमस्‍क्रीन शॉर्टकट जोड़ने की अनुमति देता है."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"शॉर्टकट अनइंस्टॉल करें"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"एप्‍लिकेशन को उपयोगकर्ता के हस्‍तक्षेप के बिना होमस्‍क्रीन शॉर्टकट निकालने की अनुमति देता है."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"आउटगोइंग कॉल को कहीं और भेजें"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"एप्‍स को आउटगोइंग कॉल संसाधित करने और डायल किए जाने वाला नंबर बदलने देता है. यह अनुमति एप्‍स को आउटगोइंग कॉल की निगरानी करने, रीडायरेक्‍ट करने, या उन्‍हें रोकने देती है."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"पाठ संदेश (SMS) प्राप्त करें"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"एप्‍स को ऐसे सभी शब्‍दों, नामों और वाक्यांशों को पढ़ने देता है जो संभवत: उपयोगकर्ता द्वारा उपयोगकर्ता ‍शब्दकोश में संग्रहीत किए गए हों."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"उपयोगकर्ता द्वारा परिभाषित शब्दकोश में शब्द जोड़ें"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"एप्स को उपयोगकर्ता शब्दकोश में नए शब्द लिखने देता है."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"एप्लि. को USB संग्रहण अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"एप्स को SD कार्ड के लिए किसी अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"अपने USB संग्रहण की सामग्री पढ़ें"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"अपने SD कार्ड की सामग्री पढ़ें"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"एप्‍लिकेशन को आपके USB संग्रहण की सामग्री पढ़ने की अनुमति देता है."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"एप्‍लिकेशन को आपके SD कार्ड की सामग्री पढ़ने की अनुमति देता है."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB संग्रहण की सामग्री बदलें या हटाएं"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री बदलें या हटाएं"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"एप्लि. को USB संग्रहण में लिखने देता है."</string>

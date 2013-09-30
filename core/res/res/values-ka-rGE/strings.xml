@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"აპს შეეძლება სტატუსის ზოლის ჩანაცვლება."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"სტატუსების ზოლის გაფართოება/აკეცვა"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"აპს შეეძლება სტატუსის ზოლის გახსნა-დახურვა."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"მალსახმობების დაყენება"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"მთავარ ეკრანზე აპლიკაციისთვის მალსახმობების დამოუკიდებლად დამატების უფლების მიცემა."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"მალსახმობების წაშლა"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"მთავარ ეკრანზე აპლიკაციისთვის მალსახმობების დამოუკიდებლად წაშლის უფლების მიცემა."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"გამავალი ზარების გადამისამართება"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"აპს შეეძლება გამავალი ზარების დამუშავება და ასაკრეფი ნომრის შეცვლა. ეს უფლება აპს აძლევს შესაძლებლობას აკონტროლოს, გადაამისამართოს ან აღკვეთოს გამავალი ზარები."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ტექსტური შეტყობინებების (SMS) მიღება"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"აპს შეეძლება წაიკითხოს ყველა სიტყვა, სახელი და ფრაზა, რომელიც შეიძლება მომხმარებელმა შეიტანა მომხმარებლის ლექსიკონში."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"მომხმარებლისთვის განკუთვნილ ლექსიკონში სიტყვების დამატება."</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"აპს შეეძლება ახალი სიტყვების დამატება მომხმარებლის ლექსიკონში."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"დაცულ მეხსიერებაზე საცდელი წვდომა"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"დაცულ მეხსიერებაზე საცდელი წვდომა"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"აპს შეეძლება, მიაწოდოს USB მეხსიერებას ნებართვა, რომლებიც შემდგომ სხვა მოწყობილობებზეც იქნება ხელმისაწვდომი."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"აპს შეეძლება SD ბარათის ნებართვების შემოწმება, რომლებიც შემდგომ სხვა მოწყობილობებზეც გავრცელდება."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"თქვენი USB მეხსიერების კონტენტის წაკითხვა"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"თქვენი SD ბარათის კონტენტის წაკითხვა"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"აპი წაიკითხავს USB კონტენტს."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"აპი წაიკითხავს SD ბარათის კონტენტს."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"თქვენი USB მეხსიერების კონტენტის შეცვლა ან წაშლა"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"თქვენი SD ბარათის კონტენტის შეცვლა ან წაშლა"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"უფლებას აძლევს აპს, ჩაწეროს USB მეხსიერებაზე."</string>
