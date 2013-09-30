@@ -30,6 +30,24 @@ import android.view.ViewGroup;
  * {@link View#setVisibility(int)} state of the view as well as whether it
  * is parented in the current view hierarchy.
  *
+ * <p>The ability of this transition to fade out a particular view, and the
+ * way that that fading operation takes place, is based on
+ * the situation of the view in the view hierarchy. For example, if a view was
+ * simply removed from its parent, then the view will be added into a {@link
+ * android.view.ViewGroupOverlay} while fading. If a visible view is
+ * changed to be {@link View#GONE} or {@link View#INVISIBLE}, then the
+ * visibility will be changed to {@link View#VISIBLE} for the duration of
+ * the animation. However, if a view is in a hierarchy which is also altering
+ * its visibility, the situation can be more complicated. In general, if a
+ * view that is no longer in the hierarchy in the end scene still has a
+ * parent (so its parent hierarchy was removed, but it was not removed from
+ * its parent), then it will be left alone to avoid side-effects from
+ * improperly removing it from its parent. The only exception to this is if
+ * the previous {@link Scene} was
+ * {@link Scene#getSceneForLayout(android.view.ViewGroup, int, android.content.Context)
+ * created from a layout resource file}, then it is considered safe to un-parent
+ * the starting scene view in order to fade it out.</p>
+ *
  * <p>A Fade transition can be described in a resource file by using the
  * tag <code>fade</code>, along with the standard
  * attributes of {@link android.R.styleable#Fade} and
@@ -167,7 +185,7 @@ public class Fade extends Visibility {
         if ((mFadingMode & OUT) != OUT) {
             return null;
         }
-        View view;
+        View view = null;
         View startView = (startValues != null) ? startValues.view : null;
         View endView = (endValues != null) ? endValues.view : null;
         if (DBG) {
@@ -177,9 +195,28 @@ public class Fade extends Visibility {
         View overlayView = null;
         View viewToKeep = null;
         if (endView == null || endView.getParent() == null) {
-            // view was removed: add the start view to the Overlay
-            view = startView;
-            overlayView = view;
+            if (endView != null) {
+                // endView was removed from its parent - add it to the overlay
+                view = overlayView = endView;
+            } else if (startView != null) {
+                // endView does not exist. Use startView only under certain
+                // conditions, because placing a view in an overlay necessitates
+                // it being removed from its current parent
+                if (startView.getParent() == null) {
+                    // no parent - safe to use
+                    view = overlayView = startView;
+                } else if (startView.getParent() instanceof View &&
+                        startView.getParent().getParent() == null) {
+                    View startParent = (View) startView.getParent();
+                    int id = startParent.getId();
+                    if (id != View.NO_ID && sceneRoot.findViewById(id) != null && mCanRemoveViews) {
+                        // no parent, but its parent is unparented  but the parent
+                        // hierarchy has been replaced by a new hierarchy with the same id
+                        // and it is safe to un-parent startView
+                        view = overlayView = startView;
+                    }
+                }
+            }
         } else {
             // visibility change
             if (endVisibility == View.INVISIBLE) {

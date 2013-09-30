@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 import android.transition.Scene;
 import android.transition.TransitionSet;
 import android.transition.ChangeBounds;
-import android.transition.TextChange;
+import android.transition.ChangeText;
 import android.transition.TransitionManager;
 
 public class ChangingText extends Activity {
@@ -44,7 +44,7 @@ public class ChangingText extends Activity {
         mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.changing_text_2, this);
 
         mChanger = new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER);
-        mChanger.addTransition(new ChangeBounds()).addTransition(new TextChange());
+        mChanger.addTransition(new ChangeBounds()).addTransition(new ChangeText());
 
         mCurrentScene = mScene1;
     }

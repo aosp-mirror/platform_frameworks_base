@@ -23,7 +23,7 @@ import android.view.ViewGroup;
 import android.transition.Scene;
 import android.widget.Button;
 import android.transition.Fade;
-import android.transition.TextChange;
+import android.transition.ChangeText;
 import android.transition.TransitionSet;
 import android.transition.TransitionManager;
 
@@ -51,7 +51,7 @@ public class ClippingText extends Activity {
         mChanger = new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER);
         ChangeBounds changeBounds = new ChangeBounds();
         changeBounds.setResizeClip(true);
-        mChanger.addTransition(changeBounds).addTransition(new TextChange());
+        mChanger.addTransition(changeBounds).addTransition(new ChangeText());
 
         mCurrentScene = mScene1;
     }

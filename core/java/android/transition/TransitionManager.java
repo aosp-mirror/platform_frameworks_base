@@ -178,6 +178,11 @@ public class TransitionManager {
         Transition transitionClone = transition.clone();
         transitionClone.setSceneRoot(sceneRoot);
 
+        Scene oldScene = Scene.getCurrentScene(sceneRoot);
+        if (oldScene != null && oldScene.isCreatedFromLayoutResource()) {
+            transitionClone.setCanRemoveViews(true);
+        }
+
         sceneChangeSetup(sceneRoot, transitionClone);
 
         scene.enter();

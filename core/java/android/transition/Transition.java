@@ -118,6 +118,14 @@ public abstract class Transition implements Cloneable {
     // Scene Root is set at createAnimator() time in the cloned Transition
     ViewGroup mSceneRoot = null;
 
+    // Whether removing views from their parent is possible. This is only for views
+    // in the start scene, which are no longer in the view hierarchy. This property
+    // is determined by whether the previous Scene was created from a layout
+    // resource, and thus the views from the exited scene are going away anyway
+    // and can be removed as necessary to achieve a particular effect, such as
+    // removing them from parents to add them to overlays.
+    boolean mCanRemoveViews = false;
+
     // Track all animators in use in case the transition gets canceled and needs to
     // cancel running animators
     private ArrayList<Animator> mCurrentAnimators = new ArrayList<Animator>();
@@ -1443,6 +1451,10 @@ public abstract class Transition implements Cloneable {
     Transition setSceneRoot(ViewGroup sceneRoot) {
         mSceneRoot = sceneRoot;
         return this;
+    }
+
+    void setCanRemoveViews(boolean canRemoveViews) {
+        mCanRemoveViews = canRemoveViews;
     }
 
     @Override
