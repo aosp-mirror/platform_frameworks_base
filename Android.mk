@@ -31,6 +31,10 @@ framework_res_source_path := APPS/framework-res_intermediates/src
 # So we first build the framework as a monolithic static library then split it
 # up into smaller pieces.
 # ============================================================
+
+# embedded builds use nothing in frameworks/base
+ifneq ($(ANDROID_BUILD_EMBEDDED),true)
+
 include $(CLEAR_VARS)
 
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
@@ -879,3 +883,5 @@ include $(BUILD_JAVA_LIBRARY)
 ifeq (,$(ONE_SHOT_MAKEFILE))
 include $(call first-makefiles-under,$(LOCAL_PATH))
 endif
+
+endif # ANDROID_BUILD_EMBEDDED
