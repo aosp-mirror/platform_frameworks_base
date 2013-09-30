@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.content.res.Configuration;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -67,6 +68,13 @@ public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
             return WAIT_FOR_BARS_TO_DIE;
         }
         return 0;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        if (mStatusBar != null) {
+            mStatusBar.onConfigurationChanged(newConfig);
+        }
     }
 
     @Override
