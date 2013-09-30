@@ -1664,7 +1664,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (realQuality < quality
                         && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
                     Slog.w(TAG, "resetPassword: password quality 0x"
-                            + Integer.toHexString(quality)
+                            + Integer.toHexString(realQuality)
                             + " does not meet required quality 0x"
                             + Integer.toHexString(quality));
                     return false;

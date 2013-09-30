@@ -30,7 +30,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 /**
- *
+ * The superclass for all user-defined scripts. This is only
+ * intended to be used by the generated derived classes.
  **/
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";

@@ -12,14 +12,14 @@ page.tags="cloud","push","messaging"
 <li><a href="#create-proj">Creating a Google API Project</a></li>
 <li><a href="#gcm-service">Enabling the GCM Service</a></li>
 <li><a href="#access-key">Obtaining an API Key</a></li>
-<li><a href="#android-app">Writing the Android Application</a>
+<li><a href="#client">Writing a Client App</a></li>
+<li><a href="#server">Writing the Server Code</a></li>
 </ol>
 
 <h2>See Also</h2>
 
 <ol class="toc">
 <li><a href="https://code.google.com/apis/console">Google APIs Console page</a></li>
-<li><a href="{@docRoot}google/gcm/helper.html">Using the GCM Helper Libraries</a></li>
 <li><a href="https://services.google.com/fb/forms/gcm/" class="external-link" target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
@@ -29,20 +29,9 @@ page.tags="cloud","push","messaging"
 <p>The sections below guide you through the process of setting up a GCM
 implementation.
 Before you start, make sure to <a href="/google/play-services/setup.html">set up
-the Google Play Services SDK</a>. You need this SDK to use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> methods. Strictly speaking, the only thing you absolutely need this API for is upstream (device-to-cloud) messaging, but it also offers a streamlined registration API that is recommended.</p>
+the Google Play Services SDK</a>. You need this SDK to use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> methods.</p>
 
-
-<!--the basic steps are:
-
-<ul>
-<li>Creating a Google APIs Project</li>
-<li>Setting up GCM in your apps</li>
-<li>Integrating </li>
-
-<p>Note that a full GCM implementation requires a server-side implementation, in addition to the client implementation in your app. For complete information, make sure to read the <a href="/google/gcm/index.html">Google Cloud Messaging documentation</a>.
---> 
-
-
+<p>Note that a full GCM implementation requires a server-side implementation, in addition to the client implementation in your app. This document offers a complete example that includes both the client and server.</p>
 
 
 <h2 id="create-proj">Creating a Google API project</h2>
@@ -95,17 +84,21 @@ the Google Play Services SDK</a>. You need this SDK to use the <a href="{@docRoo
 <p> Take note of the <strong>API key</strong> value (<code>YourKeyWillBeShownHere</code>) in this example, as it will be used later on.</p>
 <p class="note"><strong>Note:</strong> If you need to rotate the key, click  <strong>Generate new key</strong>. A new key  will be created while the old one will still be active for up to 24 hours. If you want to get rid of the old key immediately (for example, if you feel it was compromised), click <strong>Delete key</strong>.</p>
 
+<p>The following sections walk you through the steps of creating client and server-side code.</p>
 
-<h2 id="android-app">Writing the Android Application</h2>
-<p>This section describes the steps involved in writing an Android application that uses GCM.</p>
+<h2 id="client">Writing a Client App</h2>
 
-<h4 id="manifest">Step 1: Make the following changes in the application's Android manifest</h4>
+<p>This section walks you through the steps involved in writing a client-side application&mdash;that is, the GCM-enabled application that runs on an Android device. This client sample is designed to work in conjunction with the server code shown in <a href="#server">Writing the Server Code</a>, below.</p>
+
+
+
+<h3 id="manifest">Step 1: Edit Your App's Manifest</h3>
 <ul>
   <li>The <code>com.google.android.c2dm.permission.RECEIVE</code> permission so the Android application can register and receive messages.</li>
   <li>The <code>android.permission.INTERNET</code> permission so the Android application can send the registration ID to the 3rd party server.</li>
   <li>The <code>android.permission.GET_ACCOUNTS</code> permission as GCM requires a Google account (necessary only if if the device is running a version lower than Android 4.0.4)</li>
   <li>The <code>android.permission.WAKE_LOCK</code> permission so the application can keep the processor from sleeping when a message is received. Optional&mdash;use only if the app wants to keep the device from sleeping.</li>
-  <li>An <code>applicationPackage + &quot;.permission.C2D_MESSAGE</code> permission to prevent other Android applications from registering and receiving the Android application's
+  <li>An <code>applicationPackage + &quot;.permission.C2D_MESSAGE&quot;</code> permission to prevent other Android applications from registering and receiving the Android application's
 messages. The permission name must exactly match this pattern&mdash;otherwise the Android application will not receive the messages.</li>
    <li>A receiver for <code>com.google.android.c2dm.intent.RECEIVE</code>, with the category set
 as <code>applicationPackage</code>. The receiver should require the <code>com.google.android.c2dm.SEND</code> permission, so that only the GCM
@@ -149,106 +142,199 @@ could not run properly. </li>
 </pre>
 
 
-<h4>Step 2: Register for GCM</h4>
+<h3 id="register">Step 2: Register for GCM</h3>
 
 <p>An Android application running on a mobile device registers to receive messages by calling 
 the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> method 
 <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#register">{@code register(senderID...)}</a>.
 This method registers the application for GCM and returns the registration ID. This streamlined approach replaces the previous
-GCM registration process.</p>
+GCM registration process. See the example below for details.</p>
 
-<h4> Step 3: Write your application</h4>
+<h3 id="app"> Step 3: Write Your Application</h3>
 
 <p>Finally, write your application. GCM offers a variety of ways to get the job done:</p>
 
 <ul>
-  <li>For your messaging server, you can either use the new <a href="ccs.html">GCM Cloud Connection Server</a> (CCS), the older <a href="gcm.html">GCM HTTP server</a>, or both in tandem.</li>
-  <li>To write your client application, you can use any of the following:
-    <ul>
-      <li>The helper libraries, which are described in the <a href="{@docRoot}google/gcm/demo.html">Demo App Tutorial</a> and <a href="{@docRoot}google/gcm/helper.html">Using the GCM Helper Libraries</a>.</li>
-      <li>The approach described in the <a href="{@docRoot}google/gcm/gcm.html#writing_apps">GCM Architectural Overview</a>.</li>
-      <li>Regardless, you must use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs if you are doing upstream (device-to-cloud) messaging. Even if you are not doing upstream messaging, we recommend that you use this API to take advantage of the streamlined registration process&mdash;described above and shown in the following sample.</li>
+  <li>For your messaging server, you can either use the new <a href="ccs.html">GCM Cloud Connection Server</a> (CCS), the older <a href="gcm.html">GCM HTTP server</a>, or both in tandem. For more discussion, see see <a href="server.html">GCM Server</a>.</li>
+  <li>To write your client application (that is, the GCM-enabled app that runs on an Android device), use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs as shown below. Don't forget to set up your project to use the Google Play services SDK as described in <a href="/google/play-services/setup.html">Setup Google Play Services SDK</a>.</li>
 </ul>
 </li>
   
 </ul>
 
-<h5 id="gs_example">Example</h5>
+<h4 id="example">Example</h4>
 
-<p>Here is a sample application that illustrates how to use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. In this example, the sender is a <a href="{@docRoot}google/gcm/ccs.html">CCS</a> echo server. The sample consists of a main Activity ({@code DemoActivity}) and a broadcast receiver ({@code GcmBroadcastReceiver}).</p>
+<p>Here is a sample client application that illustrates how to use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. The sample consists of a main activity ({@code DemoActivity}) and a broadcast receiver ({@code GcmBroadcastReceiver}). You can use this client sample code in conjunction with the server code shown in <a href="#server">Writing the Server Code</a>.</p>
 
+<p>Note the following:</p>
+
+<ul>
+  <li>The sample primarily illustrates two things: registration, and upstream messaging. Upstream messaging only applies to apps that are running against a <a href="ccs.html">CCS</a> server; HTTP-based servers don't support upstream messaging.</li>
+  <li>The <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> registration APIs replace the old registration process, which was based on the now-obsolete client helper library. While the old registration process still works, we encourage you to use the newer <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> registration APIs, regardless of your underlying server.</li>
+</ul>
+
+<h5>Registering</h5>
 <p>An Android application needs to register with GCM servers before it can receive messages. So in its {@code onCreate()} method, {@code DemoActivity} checks to see whether the app is registered with GCM and with the server:</p>
 
-<pre>public class DemoActivity extends Activity {
+<pre>/**
+ * Main UI for the demo app.
+ */
+public class DemoActivity extends Activity {
 
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
+    private static final String PROPERTY_APP_VERSION = "appVersion";
+    private static final String PROPERTY_ON_SERVER_EXPIRATION_TIME =
+            "onServerExpirationTimeMs";
     /**
-     * You can use your own project ID instead. This sender is a test CCS 
-     * echo server.
+     * Default lifespan (7 days) of a reservation until it is considered expired.
      */
-    String GCM_SENDER_ID = "Your-Sender-ID";
+    public static final long REGISTRATION_EXPIRY_TIME_MS = 1000 * 3600 * 24 * 7;
 
-    // Tag for log messages.
+    /**
+     * Substitute you own sender ID here.
+     */
+    String SENDER_ID = "Your-Sender-ID";
+
+    /**
+     * Tag used on log messages.
+     */
     static final String TAG = "GCMDemo";
 
     TextView mDisplay;
     GoogleCloudMessaging gcm;
     AtomicInteger msgId = new AtomicInteger();
     SharedPreferences prefs;
+    Context context;
+
     String regid;
 
     &#64;Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Make sure the app is registered with GCM and with the server
-        prefs = getSharedPreferences(DemoActivity.class.getSimpleName(), 
-                Context.MODE_PRIVATE);
         setContentView(R.layout.main);
-
         mDisplay = (TextView) findViewById(R.id.display);
 
-        regid = prefs.getString(PROPERTY_REG_ID, null);
- 
-        // If there is no registration ID, the app isn't registered.
-        // Call registerBackground() to register it.
-        if (regid == null) {
+        context = getApplicationContext();
+        regid = getRegistrationId(context);
+
+        if (regid.length() == 0) {
             registerBackground();
         }
-
         gcm = GoogleCloudMessaging.getInstance(this);
-    }</pre>
+    }
+...
+}</pre>
 
-<p>If the app isn't registered, {@code DemoActivity} calls the following {@code registerBackground()} method to register it. Note that because GCM methods are blocking, this has to take place on a background thread. This sample uses {@link android.os.AsyncTask} to accomplish this:</p>
+<p>The app calls {@code getRegistrationId()} to see whether there is an existing registration ID stored in shared preferences:</p>
 
-<pre>private void registerBackground() {
+<pre>/**
+ * Gets the current registration id for application on GCM service.
+ * &lt;p&gt;
+ * If result is empty, the registration has failed.
+ *
+ * &#64;return registration id, or empty string if the registration is not
+ *         complete.
+ */
+private String getRegistrationId(Context context) {
+    final SharedPreferences prefs = getGCMPreferences(context);
+    String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+    if (registrationId.length() == 0) {
+        Log.v(TAG, "Registration not found.");
+        return "";
+    }
+    // check if app was updated; if so, it must clear registration id to
+    // avoid a race condition if GCM sends a message
+    int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+    int currentVersion = getAppVersion(context);
+    if (registeredVersion != currentVersion || isRegistrationExpired()) {
+        Log.v(TAG, "App version changed or registration expired.");
+        return "";
+    }
+    return registrationId;
+}
+
+...
+
+/**
+ * &#64;return Application's {&#64;code SharedPreferences}.
+ */
+private SharedPreferences getGCMPreferences(Context context) {
+    return getSharedPreferences(DemoActivity.class.getSimpleName(), 
+            Context.MODE_PRIVATE);
+}</pre>
+
+<p>If the registration ID doesn't exist, or the app was updated, or the registration ID has expired, {@code getRegistrationId()} returns an empty string to indicate that the app needs to get a new regID. {@code getRegistrationId()} calls the following methods to check the app version and whether the regID has expired:</p>
+
+<pre>/**
+ * &#64;return Application's version code from the {&#64;code PackageManager}.
+ */
+private static int getAppVersion(Context context) {
+    try {
+        PackageInfo packageInfo = context.getPackageManager()
+                .getPackageInfo(context.getPackageName(), 0);
+        return packageInfo.versionCode;
+    } catch (NameNotFoundException e) {
+        // should never happen
+        throw new RuntimeException("Could not get package name: " + e);
+    }
+}
+
+/**
+ * Checks if the registration has expired.
+ *
+ * &lt;p&gt;To avoid the scenario where the device sends the registration to the
+ * server but the server loses it, the app developer may choose to re-register
+ * after REGISTRATION_EXPIRY_TIME_MS.
+ *
+ * &#64;return true if the registration has expired.
+ */
+private boolean isRegistrationExpired() {
+    final SharedPreferences prefs = getGCMPreferences(context);
+    // checks if the information is not stale
+    long expirationTime =
+            prefs.getLong(PROPERTY_ON_SERVER_EXPIRATION_TIME, -1);
+    return System.currentTimeMillis() > expirationTime;
+}</pre>
+
+
+<p>If there isn't a valid existing registration ID, {@code DemoActivity} calls the following {@code registerBackground()} method to register. Note that because GCM methods are blocking, this has to take place on a background thread. This sample uses {@link android.os.AsyncTask} to accomplish this:</p>
+
+<pre>
+/**
+ * Registers the application with GCM servers asynchronously.
+ * &lt;p&gt;
+ * Stores the registration id, app versionCode, and expiration time in the 
+ * application's shared preferences.
+ */
+private void registerBackground() {
     new AsyncTask<Void, Void, String>() {
         &#64;Override
         protected String doInBackground(Void... params) {
             String msg = "";
             try {
-                regid = gcm.register(GCM_SENDER_ID);
+                if (gcm == null) {
+                    gcm = GoogleCloudMessaging.getInstance(context);
+                }
+                regid = gcm.register(SENDER_ID);
                 msg = "Device registered, registration id=" + regid;
 
-                // You should send the registration ID to your server over HTTP, 
+                // You should send the registration ID to your server over HTTP,
                 // so it can use GCM/HTTP or CCS to send messages to your app.
 
-                // For this demo: we don't need to send it because the device  
-                // will send upstream messages to a server that will echo back 
-                // the message using the 'from' address in the message. 
-	
-                // Save the regid for future use - no need to register again.
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(PROPERTY_REG_ID, regid);
-                editor.commit();
+                // For this demo: we don't need to send it because the device
+                // will send upstream messages to a server that echo back the message
+                // using the 'from' address in the message.
+
+                // Save the regid - no need to register again.
+                setRegistrationId(context, regid);
             } catch (IOException ex) {
                 msg = "Error :" + ex.getMessage();
             }
             return msg;
         }
-        // Once registration is done, display the registration status
-        // string in the Activity's UI.
+
         &#64;Override
         protected void onPostExecute(String msg) {
             mDisplay.append(msg + "\n");
@@ -256,7 +342,33 @@ GCM registration process.</p>
     }.execute(null, null, null);
 }</pre>
 
-<p>When the user clicks the app's <strong>Echo</strong> button, the app generates the necessary XMPP stanza for the message, which it sends to the echo server:</p>
+<p>After registering, the app calls {@code setRegistrationId()} to store the registration ID in shared preferences for future use:</p>
+
+<pre>/**
+ * Stores the registration id, app versionCode, and expiration time in the
+ * application's {&#64;code SharedPreferences}.
+ *
+ * &#64;param context application's context.
+ * &#64;param regId registration id
+ */
+private void setRegistrationId(Context context, String regId) {
+    final SharedPreferences prefs = getGCMPreferences(context);
+    int appVersion = getAppVersion(context);
+    Log.v(TAG, "Saving regId on app version " + appVersion);
+    SharedPreferences.Editor editor = prefs.edit();
+    editor.putString(PROPERTY_REG_ID, regId);
+    editor.putInt(PROPERTY_APP_VERSION, appVersion);
+    long expirationTime = System.currentTimeMillis() + REGISTRATION_EXPIRY_TIME_MS;
+
+    Log.v(TAG, "Setting registration expiry time to " +
+            new Timestamp(expirationTime));
+    editor.putLong(PROPERTY_ON_SERVER_EXPIRATION_TIME, expirationTime);
+    editor.commit();
+}</pre>
+
+<h5>Sending a message</h5>
+<p>When the user clicks the app's <strong>Send</strong> button, the app sends an upstream message using the new <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">{@code GoogleCloudMessaging}</a> APIs. In order to receive the upstream message, your server should be connected to CCS. You can use the code shown in <a href="#server">Writing the Server Code</a> as a sample XMPP client to connect to CCS.</p>
+
 <pre>public void onClick(final View view) {
     if (view == findViewById(R.id.send)) {
         new AsyncTask<Void, Void, String>() {
@@ -265,11 +377,10 @@ GCM registration process.</p>
                 String msg = "";
                 try {
                     Bundle data = new Bundle();
-                    // data is a key-value pair.
-                    data.putString("hello", "world");
+                    data.putString("hello", "World");
                     String id = Integer.toString(msgId.incrementAndGet());
-                    gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, data);
-                    msg = "Sending message";
+                    gcm.send(SENDER_ID + "&#64;gcm.googleapis.com", id, data);
+                    msg = "Sent message";
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
                 }
@@ -278,23 +389,25 @@ GCM registration process.</p>
 
             &#64;Override
             protected void onPostExecute(String msg) {
-                // Displays the text "Sending message"
                 mDisplay.append(msg + "\n");
             }
         }.execute(null, null, null);
-    }
+    } else if (view == findViewById(R.id.clear)) {
+        mDisplay.setText("");
+    } 
 }</pre>
 
 <p>As described above in <a href="#manifest">Step 1</a>, the app includes a broadcast receiver for the <code>com.google.android.c2dm.intent.RECEIVE</code> intent. This is the mechanism GCM uses to deliver messages. When {@code onClick()} calls {@code gcm.send()}, it triggers the broadcast receiver's {@code onReceive()} method, which has the responsibility of handling the GCM message. In this sample the receiver's {@code onReceive()} method calls {@code sendNotification()} to put the message into a notification:</p>
 
-<pre>public class GcmBroadcastReceiver extends BroadcastReceiver {
+<pre>/**
+ * Handling of GCM messages.
+ */
+public class GcmBroadcastReceiver extends BroadcastReceiver {
     static final String TAG = "GCMDemo";
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
     Context ctx;
-    
-
     &#64;Override
     public void onReceive(Context context, Intent intent) {
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
@@ -303,7 +416,7 @@ GCM registration process.</p>
         if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
             sendNotification("Send error: " + intent.getExtras().toString());
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-            sendNotification("Deleted messages on server: " + 
+            sendNotification("Deleted messages on server: " +
                     intent.getExtras().toString());
         } else {
             sendNotification("Received: " + intent.getExtras().toString());
@@ -313,21 +426,98 @@ GCM registration process.</p>
 
     // Put the GCM message into a notification and post it.
     private void sendNotification(String msg) {
-      mNotificationManager = (NotificationManager)
-              ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-      
-      PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0,
-          new Intent(ctx, DemoActivity.class), 0);
-      
-      NotificationCompat.Builder mBuilder =
-          new NotificationCompat.Builder(ctx)
-          .setSmallIcon(R.drawable.ic_stat_notification)
-          .setContentTitle("GCM Notification")
-          .setStyle(new NotificationCompat.BigTextStyle()
-                     .bigText(msg))
-          .setContentText(msg);
-      
-     mBuilder.setContentIntent(contentIntent);
-     mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        mNotificationManager = (NotificationManager)
+                ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0,
+                new Intent(ctx, DemoActivity.class), 0);
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(ctx)
+        .setSmallIcon(R.drawable.ic_stat_gcm)
+        .setContentTitle("GCM Notification")
+        .setStyle(new NotificationCompat.BigTextStyle()
+        .bigText(msg))
+        .setContentText(msg);
+
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 }</pre>
+
+<h2 id="server">Writing the Server Code</h2>
+
+<p>Here is an example of a CCS server written in Python. You can use this in conjunction with the sample client code shown above. This sample echo server sends an initial message, and for every upstream message received, it sends a dummy response back to the application that sent the upstream message. This example illustrates how to connect,
+send, and receive GCM messages using XMPP. It shouldn't be used as-is
+on a production deployment. For examples of HTTP-based servers, see <a href="server.html">GCM Server</a>.</p>
+
+<pre>
+#!/usr/bin/python
+import sys, json, xmpp, random, string
+
+SERVER = 'gcm.googleapis.com'
+PORT = 5235
+USERNAME = ''
+PASSWORD = ''
+REGISTRATION_ID = ''
+
+unacked_messages_quota = 1000
+send_queue = []
+
+# Return a random alphanumerical id
+def random_id():
+  rid = ''
+  for x in range(8): rid += random.choice(string.ascii_letters + string.digits)
+  return rid
+
+def message_callback(session, message):
+  global unacked_messages_quota
+  gcm = message.getTags('gcm')
+  if gcm:
+    gcm_json = gcm[0].getData()
+    msg = json.loads(gcm_json)
+    if not msg.has_key('message_type'):
+      # Acknowledge the incoming message immediately.
+      send({'to': msg['from'],
+            'message_type': 'ack',
+            'message_id': msg['message_id']})
+      # Queue a response back to the server.
+      if msg.has_key('from'):
+        # Send a dummy echo response back to the app that sent the upstream message.
+        send_queue.append({'to': msg['from'],
+                           'message_id': random_id(),
+                           'data': {'pong': 1}})
+    elif msg['message_type'] == 'ack' or msg['message_type'] == 'nack':
+      unacked_messages_quota += 1
+
+def send(json_dict):
+  template = (&quot;&lt;message&gt;&lt;gcm xmlns='google:mobile:data'&gt;{1}&lt;/gcm&gt;&lt;/message&gt;&quot;)
+  client.send(xmpp.protocol.Message(
+      node=template.format(client.Bind.bound[0], json.dumps(json_dict))))
+
+def flush_queued_messages():
+  global unacked_messages_quota
+  while len(send_queue) and unacked_messages_quota &gt; 0:
+    send(send_queue.pop(0))
+    unacked_messages_quota -= 1
+
+client = xmpp.Client('gcm.googleapis.com', debug=['socket'])
+client.connect(server=(SERVER,PORT), secure=1, use_srv=False)
+auth = client.auth(USERNAME, PASSWORD)
+if not auth:
+  print 'Authentication failed!'
+  sys.exit(1)
+
+client.RegisterHandler('message', message_callback)
+
+send_queue.append({'to': REGISTRATION_ID,
+                   'message_id': 'reg_id',
+                   'data': {'message_destination': 'RegId',
+                            'message_id': random_id()}})
+
+while True:
+  client.Process(1)
+  flush_queued_messages()</pre>
+
+
+

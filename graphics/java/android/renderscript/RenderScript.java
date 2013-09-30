@@ -33,15 +33,14 @@ import android.view.Surface;
 
 
 /**
- * Renderscript base master class.  An instance of this class creates native
- * worker threads for processing commands from this object.  This base class
- * does not provide any extended capabilities beyond simple data processing.
- * For extended capabilities use derived classes such as RenderScriptGL.
+ * This class provides access to a RenderScript context, which controls RenderScript
+ * initialization, resource management, and teardown. An instance of the RenderScript
+ * class must be created before any other RS objects can be created.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
- * <p>For more information about creating an application that uses Renderscript, read the
- * <a href="{@docRoot}guide/topics/renderscript/index.html">Renderscript</a> developer guide.</p>
+ * <p>For more information about creating an application that uses RenderScript, read the
+ * <a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a> developer guide.</p>
  * </div>
  **/
 public class RenderScript {
@@ -903,11 +902,14 @@ public class RenderScript {
     //
 
     /**
-     * Base class application should derive from for handling RS messages
-     * coming from their scripts.  When a script calls sendToClient the data
-     * fields will be filled in and then the run method called by a message
-     * handling thread.  This will occur some time after sendToClient completes
-     * in the script.
+     * The base class from which an application should derive in order
+     * to receive RS messages from scripts. When a script calls {@code
+     * rsSendToClient}, the data fields will be filled, and the run
+     * method will be called on a separate thread.  This will occur
+     * some time after {@code rsSendToClient} completes in the script,
+     * as {@code rsSendToClient} is asynchronous. Message handlers are
+     * not guaranteed to have completed when {@link
+     * android.renderscript.RenderScript#finish} returns.
      *
      */
     public static class RSMessageHandler implements Runnable {
@@ -918,9 +920,10 @@ public class RenderScript {
         }
     }
     /**
-     * If an application is expecting messages it should set this field to an
-     * instance of RSMessage.  This instance will receive all the user messages
-     * sent from sendToClient by scripts from this context.
+     * If an application is expecting messages, it should set this
+     * field to an instance of {@link RSMessageHandler}.  This
+     * instance will receive all the user messages sent from {@code
+     * sendToClient} by scripts from this context.
      *
      */
     RSMessageHandler mMessageCallback = null;
@@ -944,9 +947,9 @@ public class RenderScript {
     }
 
     /**
-     * Runtime error base class.  An application should derive from this class
-     * if it wishes to install an error handler.  When errors occur at runtime
-     * the fields in this class will be filled and the run method called.
+     * The runtime error handler base class.  An application should derive from this class
+     * if it wishes to install an error handler.  When errors occur at runtime,
+     * the fields in this class will be filled, and the run method will be called.
      *
      */
     public static class RSErrorHandler implements Runnable {
@@ -959,7 +962,7 @@ public class RenderScript {
     /**
      * Application Error handler.  All runtime errors will be dispatched to the
      * instance of RSAsyncError set here.  If this field is null a
-     * RSRuntimeException will instead be thrown with details about the error.
+     * {@link RSRuntimeException} will instead be thrown with details about the error.
      * This will cause program termaination.
      *
      */
@@ -973,10 +976,9 @@ public class RenderScript {
     }
 
     /**
-     * RenderScript worker threads priority enumeration.  The default value is
-     * NORMAL.  Applications wishing to do background processing such as
-     * wallpapers should set their priority to LOW to avoid starving forground
-     * processes.
+     * RenderScript worker thread priority enumeration.  The default value is
+     * NORMAL.  Applications wishing to do background processing should set
+     * their priority to LOW to avoid starving forground processes.
      */
     public enum Priority {
         LOW (Process.THREAD_PRIORITY_BACKGROUND + (5 * Process.THREAD_PRIORITY_LESS_FAVORABLE)),
@@ -1043,7 +1045,7 @@ public class RenderScript {
                     }
                     if (mRS.nContextGetUserMessage(mRS.mContext, rbuf) !=
                         RS_MESSAGE_TO_CLIENT_USER) {
-                        throw new RSDriverException("Error processing message from Renderscript.");
+                        throw new RSDriverException("Error processing message from RenderScript.");
                     }
 
                     if(mRS.mMessageCallback != null) {
@@ -1128,7 +1130,7 @@ public class RenderScript {
     }
 
     /**
-     * Create a basic RenderScript context.
+     * Create a RenderScript context.
      *
      * @hide
      * @param ctx The context.
@@ -1149,7 +1151,7 @@ public class RenderScript {
     }
 
     /**
-     * Create a basic RenderScript context.
+     * Create a RenderScript context.
      *
      * @param ctx The context.
      * @return RenderScript
@@ -1159,7 +1161,7 @@ public class RenderScript {
     }
 
     /**
-     * Create a basic RenderScript context.
+     * Create a RenderScript context.
      *
      *
      * @param ctx The context.
@@ -1182,8 +1184,8 @@ public class RenderScript {
     }
 
     /**
-     * Wait for any commands in the fifo between the java bindings and native to
-     * be processed.
+     * Wait for any pending asynchronous opeations (such as copies to a RS
+     * allocation or RS script executions) to complete.
      *
      */
     public void finish() {
@@ -1191,8 +1193,9 @@ public class RenderScript {
     }
 
     /**
-     * Destroy this renderscript context.  Once this function is called its no
-     * longer legal to use this or any objects created by this context.
+     * Destroys this RenderScript context.  Once this function is called,
+     * using this context or any objects belonging to this context is
+     * illegal.
      *
      */
     public void destroy() {

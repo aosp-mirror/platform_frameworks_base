@@ -22,7 +22,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.net.InetAddress;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Parcel-like entity class for VPN profiles. To keep things simple, all
@@ -117,7 +117,7 @@ public class VpnProfile implements Cloneable, Parcelable {
                 return null;
             }
 
-            String[] values = new String(value, Charsets.UTF_8).split("\0", -1);
+            String[] values = new String(value, StandardCharsets.UTF_8).split("\0", -1);
             // There can be 14 or 15 values in ICS MR1.
             if (values.length < 14 || values.length > 15) {
                 return null;
@@ -167,7 +167,7 @@ public class VpnProfile implements Cloneable, Parcelable {
         builder.append('\0').append(ipsecUserCert);
         builder.append('\0').append(ipsecCaCert);
         builder.append('\0').append(ipsecServerCert);
-        return builder.toString().getBytes(Charsets.UTF_8);
+        return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     /**

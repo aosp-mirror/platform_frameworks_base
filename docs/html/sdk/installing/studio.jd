@@ -249,41 +249,66 @@ download (or continue to use) the
     <td>Windows</td>
     <td>
   <a onclick="return onDownload(this)" id="win-studio"
-      href="http://dl.google.com/android/studio/android-studio-bundle-130.687321-windows.exe">
-      android-studio-bundle-130.677228-windows.exe
+      href="http://dl.google.com/android/studio/android-studio-bundle-130.737825-windows.exe">
+      android-studio-bundle-130.737825-windows.exe
       </a>
     </td>
-    <td>393023485 bytes</td>
-    <td>3da987a9778b66edb68fb43d8b53bfcb</td>
+    <td>396091268 bytes</td>
+    <td>6da1bc8effa048c8ff669e4c484eb11f</td>
   </tr>
 
   <tr>
     <td><nobr>Mac OS X</nobr></td>
     <td>
   <a onclick="return onDownload(this)" id="mac-studio"
-    href="http://dl.google.com/android/studio/android-studio-bundle-130.687321-mac.dmg">
-    android-studio-bundle-130.687321-mac.dmg
+    href="http://dl.google.com/android/studio/android-studio-bundle-130.737825-mac.dmg">
+    android-studio-bundle-130.737825-mac.dmg
     </a>
     </td>
-    <td>379877697 bytes</td>
-    <td>eb5ca6c77f4a119595d941daeda58810</td>
+    <td>383326582 bytes</td>
+    <td>2959bc5039238d286670cc6225342b89</td>
   </tr>
 
   <tr>
     <td>Linux</td>
     <td>
   <a onclick="return onDownload(this)" id="linux-studio"
-    href="http://dl.google.com/android/studio/android-studio-bundle-130.687321-linux.tgz">
-    android-studio-bundle-130.687321-linux.tgz
+    href="http://dl.google.com/android/studio/android-studio-bundle-130.737825-linux.tgz">
+    android-studio-bundle-130.737825-linux.tgz
     </a>
     </td>
-    <td>406516375 bytes</td>
-    <td>6796d66de07c85b2822ca8d501a043c0</td>
+    <td>409935592 bytes</td>
+    <td>dcd13922f7cf577e3c852b224205d843</td>
   </tr>
   </table>
 
 </div><!-- end pax -->
 
+
+
+<h2 id="Updating">Updating to 0.2.x</h2>
+
+<p>To update from Android Studio 0.1.x to 0.2.x,
+follow the <a href="#Installing">installation instructions</a> below and replace your existing
+installation.</p>
+
+<div class="caution">
+<p><strong>Caution:</strong> Replacing your existing installation of
+Android Studio will remove any additional SDK packages you've installed, such as target
+platforms, system images, and sample apps. To preserve these, copy them from your current
+SDK directory under Android Studio to a temporary location
+before installing the update. Then move them back once the update is complete.
+If you fail to copy these packages, then you can instead download them again through
+the Android SDK Manager.</p>
+<p><strong>Windows users:</strong> Do not install Android Studio 0.2.x in the same
+location as 0.1.x. Doing so may cause errors such as ClassCastException or other unexpected
+behaviors. It's best if you remove your previous version of Android Studio 0.1.x.</p>
+</div>
+
+
+<p>Also note that due to the update to Gradle 0.5, you will encounter errors when opening
+existing projects. See the <a href="#Troubleshooting">Troubleshooting</a> notes below for
+information about how to resolve them.</p>
 
 
 <h2 id="Installing">Installing Android Studio</h2>
@@ -390,10 +415,79 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 
 <h2 id="Revisions">Revisions</h2>
 
+<p class="note"><strong>Note:</strong> <strong>There is not a patch update available from
+0.1.9 to 0.2</strong>. To update from Android Studio 0.1.x to 0.2.x, you must
+install a new Android Studio bundle from this page.  The reason for that is that we have made
+changes to the bundled SDK such that it includes a pre-configured local Maven repository
+which can serve up the v4 support library and which is required for creating new projects.</p>
+
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>Android Studio v0.1.1</a> <em>(May 2013)</em>
+      alt=""/>Android Studio v0.2.x</a> <em>(July 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>Merged in the latest IntelliJ codebase changes. Includes fixes for issues reported by Studio users such as tweaks to Linux font sizes and font rendering.</li>
+    <li>Android Gradle plug-in updated to 0.5.0.
+      <p class="caution"><strong>Caution:</strong> This new version is not backwards compatible.
+      When opening a project that uses an older version of the plug-in, Studio will show an error
+      stating <strong>Gradle &lt;project_name&gt; project refresh failed.</strong> See <a
+      href="#Troubleshooting">Troubleshooting</a> below for details.</p>
+      <p>The updated Gradle plug-in includes the following changes:</p>
+      <ul>
+        <li>Fixed IDE model to contain the output file even if it's customized through the DSL. Also
+        fixed the DSL to get/set the output file on the variant object so that it's not necessary to
+        use <code>variant.packageApplication or variant.zipAlign</code></li>
+        <li>Fixed dependency resolution so that we resolved the combination of (default config,
+        build types, flavor(s)) together instead of separately.</li>
+        <li>Fixed dependency for tests of library project to properly include all the dependencies
+        of the library itself.</li>
+        <li>Fixed case where two dependencies have the same leaf name.</li>
+        <li>Fixed issue where Proguard rules file cannot be applied on flavors.</li>
+      </ul>
+      <p>All Gradle plugin release notes are available are here: <a href=
+      "http://tools.android.com/tech-docs/new-build-system"
+      >http://tools.android.com/tech-docs/new-build-system</a>.</p>
+    </li>
+    <li>Gradle errors from aapt no longer point to merged output files in the build/ folder, they
+    point back to the real source locations.</li>
+    <li>Parallel Builds. It's now possible to use Gradle's parallel builds. Please be aware that
+    parallel builds are in "incubation" (see <a
+    href="http://www.gradle.org/docs/current/userguide/gradle_command_line.html">Gradle's
+    documentation</a>.) This feature is off by default. To enable it, go to
+    <strong>Preferences</strong> &gt; <strong>Compiler</strong> and check the box <em>Compile
+    independent modules in parallel</em>.</li>
+    <li>Further work on the new resource repository used for layout rendering, resource
+    folding in the editor, and more:
+      <ul>
+      <li>Basic support for .aar library dependencies (e.g. using a library without a local copy of
+      the sources). Still not working for resource XML validation and navigation in source editors.
+      </li>
+      <li>Cycle detection in resource references.</li>
+      <li>Quick Documentation (F1), which can show all translations of the string under the caret,
+      will now also show all resource overlays from the various Gradle flavors and build types, as
+      well as libraries. They are listed in reverse resource overlay order, with strikethrough on
+      the versions of the string that are masked.</li>
+      <li>Fixes to handle updating the merged resources when the set of module dependencies
+      change.</li>
+      <li>XML rendering fixes to properly handle character entity declarations and XML and unicode
+      escapes.</li>
+      </ul>
+    <li>Save screenshot support for the layout preview and layout editor windows.</li>
+    <li>Template bug fixes.</li>
+    <li>Lint bug fixes.</li>
+    <li>Various fixes for crash reports. Thank you, and keep filing crash reports!</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.1.x</a> <em>(May 2013)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -403,12 +497,79 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
   </div>
 </div>
 
+<p>&nbsp;</p>
+
+<p class="note"><strong>Note:</strong> Periodic updates are pushed to Android Studio
+without requiring you to update from here. To manually check for updates, select
+<strong>Help > Check for updates</strong> (on Mac, select <strong>Android Studio >
+Check for updates</strong>).</p>
 
 
 
 
+<h2 id="Troubleshooting">Troubleshooting</h2>
 
 
+<div class="figure" style="width:330px">
+<img src="{@docRoot}images/tools/studio_error_gradle5.png" width="330"/>
+<p class="img-caption"><strong>Figure 1.</strong> Error dialog when opening an existing project.</p>
+</div>
+
+<h3>Error: Gradle project refresh failed</h3>
+
+<p>Android Studio 0.2.0 has updated the Gradle plug-in to 0.5.0, which is not backwards compatible.
+When opening a project that uses an older version of the plug-in, Studio will display the error
+shown in figure 1 in the upper right corner of the IDE.
+To resolve the error, you must change the version of the Android Gradle plug-in to 0.5.0.</p>
+
+<ol>
+  <li>Click the link in the error dialog <strong>Search in build.gradle files</strong>. If the dialog
+is no longer visible, click <strong>Event Log</strong>
+<img src="{@docRoot}images/tools/studio_error_eventlog.png"
+style="vertical-align:bottom;margin:0;height:19px"/> in the bottom-right corner of the IDE,
+then click <strong>Search in build.gradle files</strong>.</li>
+  <li>Double-click the line under the <em>build.gradle</em> usage. For example:
+  <strong>classpath 'com.android.tools.build:gradle:0.4</strong>. This opens the project
+  <code>build.gradle</code> file.</li>
+  <li>Edit the <code>classpath</code> to change the gradle version to <code>0.5.+</code>.
+  For example:
+  <pre class="no-pretty-print">
+dependencies {
+  classpath 'com.android.tools.build:gradle:<strong>0.5.+</strong>'
+}
+</pre>
+  </li>
+  <li>Save the file and rebuild your project.</li>
+</ol>
+
+
+
+<div class="figure" style="width:330px">
+<img src="{@docRoot}images/tools/studio_error_supportlib.png" width="330"/>
+<p class="img-caption"><strong>Figure 2.</strong> Error dialog when creating a new project
+or opening a project using the support library.</p>
+</div>
+
+<h3>Error: Failed to import Gradle project</h3>
+
+<p>If, after updating to Android Studio 0.2.x and creating or opening a project, you receive an
+error stating <em>"Could not find any version that matches
+com.android.support:support-v4:13.0.+"</em>, then you must install the <strong>Android Support
+Repository</strong>. This was likely caused because you're pointing Android Studio to an external
+Android SDK location that does not have the new Maven repository included with Android Studio
+0.2.x. This new Maven repository is used by the new build system for the Support Library, instead
+of using the Support Library JAR files, so must be present in the SDK.</p>
+
+
+<ol>
+  <li>Open the <strong>Android SDK Manager</strong>.</li>
+  <li>Expand the <strong>Extras</strong> directory
+and install <strong>Android Support Repository</strong>.</li>
+</ol>
+
+<p>If you've encountered other problems in Android Studio, look at the following page
+for possible resolutions to known issues: <a href="http://tools.android.com/knownissues"
+>http://tools.android.com/knownissues</a>.</p>
 
 
 
@@ -425,7 +586,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 
 
 
-  
+
 <script>
   var os;
   var bundlename;
@@ -445,15 +606,15 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
   if (os) {
     /* set up primary ACE download button */
     $('#download-ide-button').show();
-    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.1.1</span>"
-        + "<br/><span class='small'>for " + os + "</span>");
+    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.2.x</span>"
+        + "<br/> <span class='small'>for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
   } else {
     $('.pax').show();
   }
-  
-  
+
+
   function onDownload(link, button) {
     var $studioLink;
 
@@ -465,7 +626,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
       $studioLink = $(link);
       $("#downloadForRealz").html("Download " + $(link).text());
     }
-    
+
     $("#downloadForRealz").attr('href', $studioLink.attr('href'));
 
     $("#tos").fadeIn('fast');
@@ -488,9 +649,9 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
-      $("div.sdk-terms").slideUp();
-      $("#sdk-terms-form,.sdk-terms-intro").fadeOut('slow');
-      $("#main").fadeIn('slow');
+      $("#tos").hide();
+      $("#main").show();
+      location.hash = "Updating";
       return true;
     } else {
       $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,

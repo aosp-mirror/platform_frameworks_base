@@ -1,6 +1,14 @@
 page.title=Launch Checklist
 page.tags="publishing","launch","Google Play", "Developer Console"
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 <div id="qv-wrapper"><div id="qv">
 <h2>Checklist</h2>
@@ -81,6 +89,10 @@ violations, termination of your developer account. </p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
+
+<li><strong><a href="{@docRoot}distribute/googleplay/policies/index.html">Google Play Policies and Guidelines</a></strong> &mdash; An overview of Google Play policies for spam, intellectual property, and ads, with examples of common problems. </li>
+</a></strong> &mdash; Help Center document describing various content policies and processes.</li>
+
 <li><strong><a href="http://support.google.com/googleplay/android-developer/bin/topic.py?hl=en&topic=2364761&parent=2365624&ctx=topic">Policy and Best Practices
 </a></strong> &mdash; Help Center document describing various content policies and processes.</li>
 

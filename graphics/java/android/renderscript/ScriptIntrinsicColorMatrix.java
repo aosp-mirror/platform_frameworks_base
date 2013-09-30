@@ -41,7 +41,7 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
      *
      * Supported elements types are {@link Element#U8_4}
      *
-     * @param rs The Renderscript context
+     * @param rs The RenderScript context
      * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsicColorMatrix

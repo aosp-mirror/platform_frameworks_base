@@ -250,14 +250,6 @@ href="http://drivers.cmcs.com.tw/">http://drivers.cmcs.com.tw/</a></td>
 href="http://www.fmworld.net/product/phone/sp/android/develop/">http://www.fmworld.net/product/phone/sp/android/develop/</a>
     </td>
   </tr>
-  <tr>
-    <td>
-      Fujitsu Toshiba
-    </td>
-    <td><a
-href="http://www.fmworld.net/product/phone/sp/android/develop/">http://www.fmworld.net/product/phone/sp/android/develop/</a>
-    </td>
-  </tr>
   <tr><td>
        Garmin-Asus
     </td>	<td><a
@@ -325,6 +317,10 @@ href="http://developer.sonymobile.com/downloads/drivers/">http://developer.sonym
 
 <tr><td>Teleepoch</td>	<td><a
 href="http://www.teleepoch.com/android.html">http://www.teleepoch.com/android.html</a></td>
+</tr>
+
+<tr><td>Toshiba</td>  <td><a
+href="http://support.toshiba.com/sscontent?docId=4001814">http://support.toshiba.com/sscontent?docId=4001814</a></td>
 </tr>
 
 <tr><td>Yulong Coolpad</td>	<td><a

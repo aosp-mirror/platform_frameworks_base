@@ -1,0 +1,524 @@
+page.title=Running a Sync Adapter
+
+trainingnavtop=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you how to:</h2>
+<ol>
+    <li><a href="#RunByMessage">Run the Sync Adapter When Server Data Changes</a>
+    <li><a href="#RunDataChange">Run the Sync Adapter When Content Provider Data Changes</a></li>
+    <li><a href="#RunByNetwork">Run the Sync Adapter After a Network Message</a></li>
+    <li><a href="#RunPeriodic">Run the Sync Adapter Periodically</a></li>
+    <li><a href="#RunOnDemand">Run the Sync Adapter On Demand</a></li>
+</ol>
+
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/BasicSyncAdapter.zip" class="button">Download the sample</a>
+ <p class="filename">BasicSyncAdapter.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    In the previous lessons in this class, you learned how to create a sync adapter component that
+    encapsulates data transfer code, and how to add the additional components that allow you to
+    plug the sync adapter into the system. You now have everything you need to install an app that
+    includes a sync adapter, but none of the code you've seen actually runs the sync adapter.
+</p>
+<p>
+    You should try to run your sync adapter based on a schedule or as the indirect result of some
+    event. For example, you may want your sync adapter to run on a regular schedule, either after a
+    certain period of time or at a particular time of the day. You may also want to run your sync
+    adapter when there are changes to data stored on the device. You should avoid running your
+    sync adapter as the direct result of a user action, because by doing this you don't get the full
+    benefit of the sync adapter framework's scheduling ability. For example, you should avoid
+    providing a refresh button in your user interface.
+</p>
+<p>
+    You have the following options for running your sync adapter:
+</p>
+<dl>
+    <dt>
+        When server data changes
+    </dt>
+    <dd>
+        Run the sync adapter in response to a message from a server, indicating that server-based
+        data has changed. This option allows you to refresh data from the server to the device
+        without degrading performance or wasting battery life by polling the server.
+    </dd>
+    <dt>When device data changes</dt>
+    <dd>
+        Run a sync adapter when data changes on the device. This option allows you to send
+        modified data from the device to a server, and is especially useful if you need to ensure
+        that the server always has the latest device data. This option is straightforward to
+        implement if you actually store data in your content provider. If you're using a stub
+        content provider, detecting data changes may be more difficult.
+    </dd>
+    <dt>
+        When the system sends out a network message
+    </dt>
+    <dd>
+        Run a sync adapter when the Android system sends out a network message that keeps the
+        TCP/IP connection open; this message is a basic part of the networking framework. Using
+        this option is one way to run the sync adapter automatically. Consider using it in
+        conjunction with interval-based sync adapter runs.
+    </dd>
+    <dt>
+        At regular intervals
+    </dt>
+    <dd>
+        Run a sync adapter after the expiration of an interval you choose, or run it at a certain
+        time every day.
+    </dd>
+    <dt>On demand</dt>
+    <dd>
+        Run the sync adapter in response to a user action. However, to provide the best user
+        experience you should rely primarily on one of the more automated options. By using
+        automated options, you conserve battery and network resources.
+    </dd>
+</dl>
+<p>
+    The rest of this lesson describes each of the options in more detail.
+</p>
+<h2 id="RunByMessage">Run the Sync Adapter When Server Data Changes</h2>
+<p>
+    If your app transfers data from a server and the server data changes frequently, you can use
+    a sync adapter to do downloads in response to data changes. To run the sync adapter, have
+    the server send a special message to a {@link android.content.BroadcastReceiver} in your app.
+    In response to this message, call {@link android.content.ContentResolver#requestSync
+    ContentResolver.requestSync()} to signal the sync adapter framework to run your
+    sync adapter.
+</p>
+<p>
+    <a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> (GCM) provides both the
+    server and device components you need to make this messaging system work. Using GCM to trigger
+    transfers is more reliable and more efficient than polling servers for status. While polling
+    requires a {@link android.app.Service} that is always active, GCM uses a
+    {@link android.content.BroadcastReceiver} that's activated when a message arrives. While polling
+    at regular intervals uses battery power even if no updates are available, GCM only sends
+    messages when needed.
+</p>
+<p class="note">
+    <strong>Note:</strong> If you use GCM to trigger your sync adapter via a broadcast to all
+    devices where your app is installed, remember that they receive your message at
+    roughly the same time. This situation can cause multiple instance of your sync adapter to run
+    at the same time, causing server and network overload. To avoid this situation for a broadcast
+    to all devices, you should consider deferring the start of the sync adapter for a period
+    that's unique for each device.
+<p>
+    The following code snippet shows you how to run
+    {@link android.content.ContentResolver#requestSync requestSync()} in response to an
+    incoming GCM message:
+</p>
+<pre>
+public class GcmBroadcastReceiver extends BroadcastReceiver {
+    ...
+    // Constants
+    // Content provider authority
+    public static final String AUTHORITY = "com.example.android.datasync.provider"
+    // Account type
+    public static final String ACCOUNT_TYPE = "com.example.android.datasync";
+    // Account
+    public static final String ACCOUNT = "default_account";
+    // Incoming Intent key for extended data
+    public static final String KEY_SYNC_REQUEST =
+            "com.example.android.datasync.KEY_SYNC_REQUEST";
+    ...
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        // Get a GCM object instance
+        GoogleCloudMessaging gcm =
+                GoogleCloudMessaging.getInstance(context);
+        // Get the type of GCM message
+        String messageType = gcm.getMessageType(intent);
+        /*
+         * Test the message type and examine the message contents.
+         * Since GCM is a general-purpose messaging system, you
+         * may receive normal messages that don't require a sync
+         * adapter run.
+         * The following code tests for a a boolean flag indicating
+         * that the message is requesting a transfer from the device.
+         */
+        if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)
+            &amp;&amp;
+            intent.getBooleanExtra(KEY_SYNC_REQUEST)) {
+            /*
+             * Signal the framework to run your sync adapter. Assume that
+             * app initialization has already created the account.
+             */
+            ContentResolver.requestSync(ACCOUNT, AUTHORITY, null);
+            ...
+        }
+        ...
+    }
+    ...
+}
+</pre>
+<h2 id="RunDataChange">Run the Sync Adapter When Content Provider Data Changes</h2>
+<p>
+    If your app collects data in a content provider, and you want to update the server whenever
+    you update the provider, you can set up your app to run your sync adapter automatically. To do
+    this, you register an observer for the content provider. When data in your content provider
+    changes, the content provider framework calls the observer. In the observer, call
+    {@link android.content.ContentResolver#requestSync requestSync()} to tell the framework to run
+    your sync adapter.
+</p>
+<p class="note">
+    <strong>Note:</strong> If you're using a stub content provider, you don't have any data in
+    the content provider and {@link android.database.ContentObserver#onChange onChange()} is
+    never called. In this case, you have to provide your own mechanism for detecting changes to
+    device data. This mechanism is also responsible for calling
+    {@link android.content.ContentResolver#requestSync requestSync()} when the data changes.
+</p>
+<p>
+   To create an observer for your content provider, extend the class
+   {@link android.database.ContentObserver} and implement both forms of its
+   {@link android.database.ContentObserver#onChange onChange()} method.  In
+   {@link android.database.ContentObserver#onChange onChange()}, call
+   {@link android.content.ContentResolver#requestSync requestSync()} to start the sync adapter.
+</p>
+<p>
+   To register the observer, pass it as an argument in a call to
+   {@link android.content.ContentResolver#registerContentObserver registerContentObserver()}. In
+   this call, you also have to pass in a content URI for the data you want to watch. The content
+   provider framework compares this watch URI to content URIs passed in as arguments to
+   {@link android.content.ContentResolver} methods that modify your provider, such as
+   {@link android.content.ContentResolver#insert ContentResolver.insert()}. If there's a match, your
+   implementation of {@link android.database.ContentObserver#onChange ContentObserver.onChange()}
+   is called.
+</p>
+
+<p>
+    The following code snippet shows you how to define a {@link android.database.ContentObserver}
+    that calls {@link android.content.ContentResolver#requestSync requestSync()} when a table
+    changes:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    // Constants
+    // Content provider scheme
+    public static final String SCHEME = "content://";
+    // Content provider authority
+    public static final String AUTHORITY = "com.example.android.datasync.provider";
+    // Path for the content provider table
+    public static final String TABLE_PATH = "data_table";
+    // Account
+    public static final String ACCOUNT = "default_account";
+    // Global variables
+    // A content URI for the content provider's data table
+    Uri mUri;
+    // A content resolver for accessing the provider
+    ContentResolver mResolver;
+    ...
+    public class TableObserver extends ContentObserver {
+        /*
+         * Define a method that's called when data in the
+         * observed content provider changes.
+         * This method signature is provided for compatibility with
+         * older platforms.
+         */
+        &#64;Override
+        public void onChange(boolean selfChange) {
+            /*
+             * Invoke the method signature available as of
+             * Android platform version 4.1, with a null URI.
+             */
+            onChange(selfChange, null);
+        }
+        /*
+         * Define a method that's called when data in the
+         * observed content provider changes.
+         */
+        &#64;Override
+        public void onChange(boolean selfChange, Uri changeUri) {
+            /*
+             * Ask the framework to run your sync adapter.
+             * To maintain backward compatibility, assume that
+             * changeUri is null.
+            ContentResolver.requestSync(ACCOUNT, AUTHORITY, null);
+        }
+        ...
+    }
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ...
+        // Get the content resolver object for your app
+        mResolver = getContentResolver();
+        // Construct a URI that points to the content provider data table
+        mUri = new Uri.Builder()
+                  .scheme(SCHEME)
+                  .authority(AUTHORITY)
+                  .path(TABLE_PATH)
+                  .build();
+        /*
+         * Create a content observer object.
+         * Its code does not mutate the provider, so set
+         * selfChange to "false"
+         */
+        TableObserver observer = new TableObserver(false);
+        /*
+         * Register the observer for the data table. The table's path
+         * and any of its subpaths trigger the observer.
+         */
+        mResolver.registerContentObserver(mUri, true, observer);
+        ...
+    }
+    ...
+}
+</pre>
+<h2 id="RunByNetwork">Run the Sync Adapter After a Network Message</h2>
+<p>
+    When a network connection is available, the Android system sends out a message
+    every few seconds to keep the device's TCP/IP connection open. This message also goes to
+    the {@link android.content.ContentResolver} of each app. By calling
+    {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()},
+    you can run the sync adapter whenever the {@link android.content.ContentResolver}
+    receives the message.
+</p>
+<p>
+    By scheduling your sync adapter to run when the network message is sent, you ensure that your
+    sync adapter is always scheduled to run while the network is available. Use this option if you
+    don't have to force a data transfer in response to data changes, but you do want to ensure
+    your data is regularly updated. Similarly, you can use this option if you don't want a fixed
+    schedule for your sync adapter, but you do want it to run frequently.
+</p>
+<p>
+    Since the method
+    {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()}
+    doesn't disable {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()}, your
+    sync adapter may be triggered repeatedly in a short period of time. If you do want to run
+    your sync adapter periodically on a regular schedule, you should disable
+    {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()}.
+</p>
+<p>
+    The following code snippet shows you how to configure your
+    {@link android.content.ContentResolver} to run your sync adapter in response to a network
+    message:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    // Constants
+    // Content provider authority
+    public static final String AUTHORITY = "com.example.android.datasync.provider";
+    // Account
+    public static final String ACCOUNT = "default_account";
+    // Global variables
+    // A content resolver for accessing the provider
+    ContentResolver mResolver;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ...
+        // Get the content resolver for your app
+        mResolver = getContentResolver();
+        // Turn on automatic syncing for the default account and authority
+        mResolver.setSyncAutomatically(ACCOUNT, AUTHORITY, true);
+        ...
+    }
+    ...
+}
+</pre>
+<h2 id="RunPeriodic">Run the Sync Adapter Periodically</h2>
+<p>
+    You can run your sync adapter periodically by setting a period of time to wait between runs,
+    or by running it at certain times of the day, or both. Running your sync adapter
+    periodically allows you to roughly match the update interval of your server.
+</p>
+<p>
+    Similarly, you can upload data from the device when your server is relatively idle, by
+    scheduling your sync adapter to run at night. Most users leave their powered on and plugged in
+    at night, so this time is usually available. Moreover, the device is not running other tasks at
+    the same time as your sync adapter. If you take this approach, however, you need to ensure that
+    each device triggers a data transfer at a slightly different time. If all devices run your
+    sync adapter at the same time, you are likely to overload your server and cell provider data
+    networks.
+</p>
+<p>
+    In general, periodic runs make sense if your users don't need instant updates, but expect to
+    have regular updates. Periodic runs also make sense if you want to balance the availability of
+    up-to-date data with the efficiency of smaller sync adapter runs that don't over-use device
+    resources.
+</p>
+<p>
+    To run your sync adapter at regular intervals, call
+    {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()}. This schedules your
+    sync adapter to run after a certain amount of time has elapsed. Since the sync adapter framework
+    has to account for other sync adapter executions and tries to maximize battery efficiency, the
+    elapsed time may vary by a few seconds. Also, the framework won't run your sync adapter if the
+    network is not available.
+</p>
+<p>
+    Notice that {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()} doesn't
+    run the sync adapter at a particular time of day. To run your sync adapter at roughly the
+    same time every day, use a repeating alarm as a trigger. Repeating alarms are described in more
+    detail in the reference documentation for {@link android.app.AlarmManager}. If you use the
+    method {@link android.app.AlarmManager#setInexactRepeating setInexactRepeating()} to set
+    time-of-day triggers that have some variation, you should still randomize the start time to
+    ensure that sync adapter runs from different devices are staggered.
+</p>
+<p>
+    The method {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()} doesn't
+    disable {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()},
+    so you may get multiple sync runs in a relatively short period of time. Also, only a few
+    sync adapter control flags are allowed in a call to
+    {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()}; the flags that are
+    not allowed are described in the referenced documentation for
+    {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()}.
+</p>
+<p>
+    The following code snippet shows you how to schedule periodic sync adapter runs:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    // Constants
+    // Content provider authority
+    public static final String AUTHORITY = "com.example.android.datasync.provider";
+    // Account
+    public static final String ACCOUNT = "default_account";
+    // Sync interval constants
+    public static final long MILLISECONDS_PER_SECOND = 1000L;
+    public static final long SECONDS_PER_MINUTE = 60L;
+    public static final long SYNC_INTERVAL_IN_MINUTES = 60L;
+    public static final long SYNC_INTERVAL =
+            SYNC_INTERVAL_IN_MINUTES *
+            SECONDS_PER_MINUTE *
+            MILLISECONDS_PER_SECOND;
+    // Global variables
+    // A content resolver for accessing the provider
+    ContentResolver mResolver;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ...
+        // Get the content resolver for your app
+        mResolver = getContentResolver();
+        /*
+         * Turn on periodic syncing
+         */
+        ContentResolver.addPeriodicSync(
+                ACCOUNT,
+                AUTHORITY,
+                null,
+                SYNC_INTERVAL);
+        ...
+    }
+    ...
+}
+</pre>
+<h2 id="RunOnDemand">Run the Sync Adapter On Demand</h2>
+<p>
+    Running your sync adapter in response to a user request is the least preferable strategy
+    for running a sync adapter. The framework is specifically designed to conserve battery power
+    when it runs sync adapters according to a schedule. Options that run a sync in response to data
+    changes use battery power effectively, since the power is used to provide new data.
+</p>
+<p>
+    In comparison, allowing users to run a sync on demand means that the sync runs by itself, which
+    is inefficient use of network and power resources. Also, providing sync on demand leads users to
+    request a sync even if there's no evidence that the data has changed, and running a sync that
+    doesn't refresh data is an ineffective use of battery power. In general, your app should either
+    use other signals to trigger a sync or schedule them at regular intervals, without user input.
+</p>
+<p>
+    However, if you still want to run the sync adapter on demand, set the sync adapter flags for a
+    manual sync adapter run, then call
+    {@link android.content.ContentResolver#requestSync ContentResolver.requestSync()}.
+</p>
+<p>
+    Run on demand transfers with the following flags:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentResolver#SYNC_EXTRAS_MANUAL SYNC_EXTRAS_MANUAL}
+    </dt>
+    <dd>
+        Forces a manual sync. The sync adapter framework ignores the existing settings,
+        such as the flag set by {@link android.content.ContentResolver#setSyncAutomatically
+        setSyncAutomatically()}.
+    </dd>
+    <dt>
+        {@link android.content.ContentResolver#SYNC_EXTRAS_EXPEDITED SYNC_EXTRAS_EXPEDITED}
+    </dt>
+    <dd>
+        Forces the sync to start immediately. If you don't set this, the system may wait several
+        seconds before running the sync request, because it tries to optimize battery use by
+        scheduling many requests in a short period of time.
+    </dd>
+</dl>
+<p>
+    The following code snippet shows you how to call
+    {@link android.content.ContentResolver#requestSync requestSync()} in response to a button
+    click:
+</p>
+<pre>
+public class MainActivity extends FragmentActivity {
+    ...
+    // Constants
+    // Content provider authority
+    public static final String AUTHORITY =
+            "com.example.android.datasync.provider"
+    // Account type
+    public static final String ACCOUNT_TYPE = "com.example.android.datasync";
+    // Account
+    public static final String ACCOUNT = "default_account";
+    // Instance fields
+    Account mAccount;
+    ...
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ...
+        /*
+         * Create the dummy account. The code for CreateSyncAccount
+         * is listed in the lesson Creating a Sync Adapter
+         */
+
+        mAccount = CreateSyncAccount(this);
+        ...
+    }
+    /**
+     * Respond to a button click by calling requestSync(). This is an
+     * asynchronous operation.
+     *
+     * This method is attached to the refresh button in the layout
+     * XML file
+     *
+     * @param v The View associated with the method call,
+     * in this case a Button
+     */
+    public void onRefreshButtonClick(View v) {
+        ...
+        // Pass the settings flags by inserting them in a bundle
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        /*
+         * Request the sync for the default account, authority, and
+         * manual sync settings
+         */
+        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
+    }
+</pre>

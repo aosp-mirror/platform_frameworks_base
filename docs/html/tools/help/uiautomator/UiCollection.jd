@@ -9,8 +9,6 @@ parent.link=index.html
  or targeting a sub elements by a child's text or description.
 </p>
 
-<div class="jd-descr">
-
 
 <h2>Summary</h2>
 
@@ -1267,5 +1265,4 @@ From class
   </div>
 
     </div>
-</div>
 

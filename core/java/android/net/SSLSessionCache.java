@@ -16,11 +16,11 @@
 
 package android.net;
 
-import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
-
 import android.content.Context;
 import android.util.Log;
+
+import com.android.org.conscrypt.FileClientSessionCache;
+import com.android.org.conscrypt.SSLClientSessionCache;
 
 import java.io.File;
 import java.io.IOException;

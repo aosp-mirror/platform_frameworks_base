@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -983,7 +995,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the conflict data. Only valid if <code><a href="/reference/com/google/android/gms/appstate/AppState.html#hasConflict()">hasConflict()</a></code> is <code>true</code>.
+      <ul class="nolist"><li>The conflict data. Only valid if <code><a href="/reference/com/google/android/gms/appstate/AppState.html#hasConflict()">hasConflict()</a></code> is <code>true</code>.
 </li></ul>
   </div>
 
@@ -1017,7 +1029,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the latest known version of conflicting data from the server.
+      <ul class="nolist"><li>The latest known version of conflicting data from the server.
 </li></ul>
   </div>
 
@@ -1051,7 +1063,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the key associated with this app state blob.
+      <ul class="nolist"><li>The key associated with this app state blob.
 </li></ul>
   </div>
 
@@ -1085,7 +1097,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the local data for this app state blob, or null if none present.
+      <ul class="nolist"><li>The local data for this app state blob, or null if none present.
 </li></ul>
   </div>
 
@@ -1119,7 +1131,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the local version of the app state data.
+      <ul class="nolist"><li>The local version of the app state data.
 </li></ul>
   </div>
 
@@ -1153,7 +1165,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>whether or not this app state has conflict data to resolve.
+      <ul class="nolist"><li>Whether or not this app state has conflict data to resolve.
 </li></ul>
   </div>
 

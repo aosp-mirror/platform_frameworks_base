@@ -107,6 +107,9 @@
       <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="<?cs var:toroot?>google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -132,11 +135,11 @@
         <li><a href="<?cs var:toroot?>google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="<?cs var:toroot?>google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+        <li><a href="<?cs var:toroot?>google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
         </li>
-        <li><a href="<?cs var:toroot?>google/gcm/helper.html">
-            <span class="en">Using the Helper Libraries</span></a>
+        <li><a href="<?cs var:toroot?>google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="<?cs var:toroot?>google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>

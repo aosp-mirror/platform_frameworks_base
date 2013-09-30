@@ -93,6 +93,7 @@ public class DctConstants {
     public static final int EVENT_ICC_CHANGED = BASE + 33;
     public static final int EVENT_DISCONNECT_DC_RETRYING = BASE + 34;
     public static final int EVENT_DATA_SETUP_COMPLETE_ERROR = BASE + 35;
+    public static final int CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA = BASE + 36;
 
     /***** Constants *****/
 

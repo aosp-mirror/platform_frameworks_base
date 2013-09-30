@@ -18,10 +18,10 @@ package android.core;
 
 import junit.framework.TestCase;
 
+import com.android.org.conscrypt.FileClientSessionCache;
+import com.android.org.conscrypt.OpenSSLContextImpl;
+import com.android.org.conscrypt.SSLClientSessionCache;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
-import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;

@@ -529,9 +529,9 @@ public class AppWidgetManager {
 
     /**
      * Notifies the specified collection view in all the specified AppWidget instances
-     * to invalidate their currently data.
+     * to invalidate their data.
      *
-     * @param appWidgetIds  The AppWidget instances for which to notify of view data changes.
+     * @param appWidgetIds  The AppWidget instances to notify of view data changes.
      * @param viewId        The collection view id.
      */
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
@@ -544,11 +544,11 @@ public class AppWidgetManager {
     }
 
     /**
-     * Notifies the specified collection view in all the specified AppWidget instance
-     * to invalidate it's currently data.
+     * Notifies the specified collection view in the specified AppWidget instance
+     * to invalidate its data.
      *
-     * @param appWidgetId  The AppWidget instance for which to notify of view data changes.
-     * @param viewId        The collection view id.
+     * @param appWidgetId  The AppWidget instance to notify of view data changes.
+     * @param viewId       The collection view id.
      */
     public void notifyAppWidgetViewDataChanged(int appWidgetId, int viewId) {
         notifyAppWidgetViewDataChanged(new int[] { appWidgetId }, viewId);

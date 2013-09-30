@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_element.rsh Source File</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_element.rsh Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -24,7 +24,7 @@
   </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">rs_element.rsh</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_element.rsh</div>  </div>
 </div>
 <div class="contents">
 <a href="rs__element_8rsh.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -50,34 +50,34 @@
 <a name="l00027"></a>00027 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
 <a name="l00028"></a>00028 <span class="preprocessor"></span>
 <a name="l00038"></a>00038 <span class="keyword">extern</span> <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00039"></a>00039     rsElementGetSubElementCount(<a class="code" href="structrs__element.html" title="Opaque handle to a Renderscript element.">rs_element</a> e);
+<a name="l00039"></a>00039     <a class="code" href="rs__element_8rsh.html#a2ecab064ea2b720bc3af27b523388f31">rsElementGetSubElementCount</a>(<a class="code" href="structrs__element.html" title="Opaque handle to a RenderScript element.">rs_element</a> e);
 <a name="l00040"></a>00040 
-<a name="l00049"></a>00049 extern <a class="code" href="structrs__element.html" title="Opaque handle to a Renderscript element.">rs_element</a> __attribute__((overloadable))
-<a name="l00050"></a>00050     rsElementGetSubElement(<a class="code" href="structrs__element.html" title="Opaque handle to a Renderscript element.">rs_element</a>, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00049"></a>00049 extern <a class="code" href="structrs__element.html" title="Opaque handle to a RenderScript element.">rs_element</a> __attribute__((overloadable))
+<a name="l00050"></a>00050     <a class="code" href="rs__element_8rsh.html#a8c690bce7d32be759fd787740c270c92">rsElementGetSubElement</a>(<a class="code" href="structrs__element.html" title="Opaque handle to a RenderScript element.">rs_element</a>, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00051"></a>00051 
 <a name="l00061"></a>00061 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00062"></a>00062     rsElementGetSubElementNameLength(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00062"></a>00062     <a class="code" href="rs__element_8rsh.html#a94834eb1d91b50a5df3cbe161c22e37d">rsElementGetSubElementNameLength</a>(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00063"></a>00063 
 <a name="l00075"></a>00075 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00076"></a>00076     rsElementGetSubElementName(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index, <span class="keywordtype">char</span> *name, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> nameLength);
+<a name="l00076"></a>00076     <a class="code" href="rs__element_8rsh.html#a3c1446166c43aa6ba3d5359f6c982f02">rsElementGetSubElementName</a>(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index, <span class="keywordtype">char</span> *name, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> nameLength);
 <a name="l00077"></a>00077 
 <a name="l00088"></a>00088 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00089"></a>00089     rsElementGetSubElementArraySize(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00089"></a>00089     <a class="code" href="rs__element_8rsh.html#a9c3140c18139db451279d9b221808eee">rsElementGetSubElementArraySize</a>(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00090"></a>00090 
 <a name="l00100"></a>00100 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00101"></a>00101     rsElementGetSubElementOffsetBytes(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00101"></a>00101     <a class="code" href="rs__element_8rsh.html#a840d53f1e91bb6887b40a4d8983c53ed">rsElementGetSubElementOffsetBytes</a>(rs_element e, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00102"></a>00102 
 <a name="l00109"></a>00109 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00110"></a>00110     rsElementGetBytesSize(rs_element e);
+<a name="l00110"></a>00110     <a class="code" href="rs__element_8rsh.html#ac54592168af5896d3fba5283af286f98">rsElementGetBytesSize</a>(rs_element e);
 <a name="l00111"></a>00111 
-<a name="l00118"></a>00118 extern rs_data_type __attribute__((overloadable))
-<a name="l00119"></a>00119     rsElementGetDataType(rs_element e);
+<a name="l00118"></a>00118 extern <a class="code" href="rs__types_8rsh.html#ae7551db5705f864fde49c13660aff647" title="Enumeration for possible element data types.">rs_data_type</a> __attribute__((overloadable))
+<a name="l00119"></a>00119     <a class="code" href="rs__element_8rsh.html#a9a3569d242be363517ea2354d98cf382">rsElementGetDataType</a>(rs_element e);
 <a name="l00120"></a>00120 
-<a name="l00127"></a>00127 extern rs_data_kind __attribute__((overloadable))
-<a name="l00128"></a>00128     rsElementGetDataKind(rs_element e);
+<a name="l00127"></a>00127 extern <a class="code" href="rs__types_8rsh.html#a1692d177c4a3fe1544bd91172056581a" title="Enumeration for possible element data kind.">rs_data_kind</a> __attribute__((overloadable))
+<a name="l00128"></a>00128     <a class="code" href="rs__element_8rsh.html#af072702a530e158093d69353072da5f9">rsElementGetDataKind</a>(rs_element e);
 <a name="l00129"></a>00129 
 <a name="l00137"></a>00137 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00138"></a>00138     rsElementGetVectorSize(rs_element e);
+<a name="l00138"></a>00138     <a class="code" href="rs__element_8rsh.html#a727997de25ae43c07dffcfd484928d53">rsElementGetVectorSize</a>(rs_element e);
 <a name="l00139"></a>00139 
 <a name="l00140"></a>00140 <span class="preprocessor">#endif // (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
 <a name="l00141"></a>00141 <span class="preprocessor"></span>

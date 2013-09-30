@@ -18,9 +18,9 @@ package android.net.http;
 
 import android.content.Context;
 import android.util.Log;
-import org.apache.harmony.xnet.provider.jsse.FileClientSessionCache;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
-import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
+import com.android.org.conscrypt.FileClientSessionCache;
+import com.android.org.conscrypt.OpenSSLContextImpl;
+import com.android.org.conscrypt.SSLClientSessionCache;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;

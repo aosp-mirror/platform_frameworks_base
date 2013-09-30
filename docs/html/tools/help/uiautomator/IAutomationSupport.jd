@@ -11,57 +11,7 @@ parent.link=index.html
 
 </p>
 
-
-
-
-
-</div><!-- jd-descr -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="jd-descr">
-
-
 <h2>Summary</h2>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <!-- ========== METHOD SUMMARY =========== -->
 <table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
@@ -97,31 +47,6 @@ parent.link=index.html
 
 </div><!-- jd-descr (summary) -->
 
-<!-- Details -->
-
-
-
-
-
-
-
-
-<!-- XML Attributes -->
-
-
-<!-- Enum Values -->
-
-
-<!-- Constants -->
-
-
-<!-- Fields -->
-
-
-<!-- Public ctors -->
-
-
-
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
 
@@ -149,20 +74,9 @@ parent.link=index.html
       <span class="sympad">sendStatus</span>
       <span class="normal">(int resultCode, Bundle status)</span>
     </h4>
-      <div class="api-level">
-        <div>
-
 </div>
         
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
+<div class="jd-details-descr">
   <div class="jd-tagdata jd-tagdescr"><p>Allows the running test cases to send out interim status</p></div>
-
-    </div>
 </div>
-
-
 

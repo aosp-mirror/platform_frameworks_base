@@ -418,7 +418,7 @@ final class ActivityRecord {
             launchMode = aInfo.launchMode;
             
             AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
-                    realTheme, com.android.internal.R.styleable.Window);
+                    realTheme, com.android.internal.R.styleable.Window, userId);
             fullscreen = ent != null && !ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowIsFloating, false)
                     && !ent.array.getBoolean(

@@ -171,11 +171,9 @@ public class MainActivity extends FragmentActivity {
             return true;
         // Google Play services was not available for some reason
         } else {
-            // Get the error code
-            int errorCode = connectionResult.getErrorCode();
             // Get the error dialog from Google Play services
             Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
-                    errorCode,
+                    resultCode,
                     this,
                     CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
@@ -649,7 +647,7 @@ public class ActivityRecognitionIntentService extends IntentService {
 public class MainActivity extends FragmentActivity implements
         ConnectionCallbacks, OnConnectionFailedListener {
     ...
-    public enum REQUEST_TYPE = {START, STOP}
+    public enum REQUEST_TYPE {START, STOP}
     private REQUEST_TYPE mRequestType;
     ...
 }
@@ -664,7 +662,7 @@ public class MainActivity extends FragmentActivity implements
     ...
     public void startUpdates() {
         // Set the request type to START
-        mRequestType = START;
+        mRequestType = REQUEST_TYPE.START;
         /*
          * Test for Google Play services after setting the request type.
          * If Google Play services isn't present, the proper request type
@@ -686,9 +684,16 @@ public class MainActivity extends FragmentActivity implements
                  */
                 mActivityRecognitionClient.requestActivityUpdates(
                         DETECTION_INTERVAL_MILLISECONDS,
-                        mActivityRecognitionPendingIntent());
+                        mActivityRecognitionPendingIntent);
                 break;
-            ...
+                ...
+                /*
+                 * An enum was added to the definition of REQUEST_TYPE,
+                 * but it doesn't match a known case. Throw an exception.
+                 */
+                default :
+                throw new Exception("Unknown request type in onConnected().");
+                break;
         }
         ...
     }
@@ -712,7 +717,7 @@ public class MainActivity extends FragmentActivity implements
      */
     public void stopUpdates() {
         // Set the request type to STOP
-        mRequestType = STOP;
+        mRequestType = REQUEST_TYPE.STOP;
         /*
          * Test for Google Play services after setting the request type.
          * If Google Play services isn't present, the request can be
@@ -760,7 +765,7 @@ public class MainActivity extends FragmentActivity implements
             mActivityRecognitionClient.removeActivityUpdates(
                     mActivityRecognitionPendingIntent);
             break;
-
+            ...
         }
         ...
     }

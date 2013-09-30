@@ -1,6 +1,6 @@
 page.title=Computation
 page.landing=true
-page.landing.intro=Renderscript provides a platform-independent computation engine that operates at the native level. Use it to accelerate your apps that require extensive computational horsepower.
+page.landing.intro=RenderScript provides a platform-independent computation engine that operates at the native level. Use it to accelerate your apps that require extensive computational horsepower.
 page.landing.image=
 
 @jd:body
@@ -12,16 +12,16 @@ page.landing.image=
 
       <a
 href="http://android-developers.blogspot.com/2013/01/evolution-of-renderscript-performance.html">
-        <h4>Evolution of Renderscript Performance</h4>
-      <p>It’s been a year since the last blog post on Renderscript, and with the release
+        <h4>Evolution of RenderScript Performance</h4>
+      <p>It’s been a year since the last blog post on RenderScript, and with the release
       of Android 4.2, it’s a good time to talk about the performance work that we’ve done
       since then. One of the major goals of this past year was to improve the performance
-      of common image-processing operations with Renderscript.</p> </a>
+      of common image-processing operations with RenderScript.</p> </a>
 
       <a
 href="http://android-developers.blogspot.com/2012/01/levels-in-renderscript.html">
-        <h4>Levels in Renderscript</h4>
-      <p>For ICS, Renderscript (RS) has been updated with several new features to simplify
+        <h4>Levels in RenderScript</h4>
+      <p>For ICS, RenderScript (RS) has been updated with several new features to simplify
         adding compute acceleration to your application. RS is interesting for compute
         acceleration when you have large buffers of data on which you need to do significant
         processing. In this example we will look at applying a levels/saturation operation
@@ -30,11 +30,11 @@ href="http://android-developers.blogspot.com/2012/01/levels-in-renderscript.html
 
       <a
 href="http://android-developers.blogspot.com/2011/03/renderscript.html">
-        <h4>Renderscript Part 2</h4>
-        <p>In Introducing Renderscript I gave a brief overview of this technology.
-          In this post I’ll look at "compute" in more detail. In Renderscript we use
+        <h4>RenderScript Part 2</h4>
+        <p>In Introducing RenderScript I gave a brief overview of this technology.
+          In this post I’ll look at "compute" in more detail. In RenderScript we use
           "compute" to mean offloading of data processing from Dalvik code to
-          Renderscript code which may run on the same or different processor(s).</p>
+          RenderScript code which may run on the same or different processor(s).</p>
       </a>
   </div>
 

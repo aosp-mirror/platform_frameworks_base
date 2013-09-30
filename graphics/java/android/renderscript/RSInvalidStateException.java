@@ -19,7 +19,7 @@ package android.renderscript;
 
 /**
  * Base class for all exceptions thrown by the Android
- * Renderscript
+ * RenderScript
  */
 public class RSInvalidStateException extends RSRuntimeException {
     public RSInvalidStateException(String string) {

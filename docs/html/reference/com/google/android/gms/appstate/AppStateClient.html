@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -805,7 +817,7 @@ Summary:
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_DEVELOPER_ERROR">STATUS_DEVELOPER_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">The developer has configured something incorrectly with their application.</td>
+        <td class="jd-descrcol" width="100%">Your application is incorrectly configured.</td>
     </tr>
     
     
@@ -858,8 +870,8 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#STATUS_STATE_KEY_LIMIT_EXCEEDED">STATUS_STATE_KEY_LIMIT_EXCEEDED</a></td>
-        <td class="jd-descrcol" width="100%">The application already has data in the maximum number of keys and is attempting to create a
- new one.</td>
+        <td class="jd-descrcol" width="100%">The application already has data in the maximum number of keys (data slots) and is attempting
+ to create a new one.</td>
     </tr>
     
     
@@ -1804,8 +1816,8 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The developer has configured something incorrectly with their application. This is a hard
- error, since retrying will not fix this.
+  <div class="jd-tagdata jd-tagdescr"><p>Your application is incorrectly configured. This is a hard error, since retrying will not fix
+ this.
 </p></div>
 
     
@@ -2083,9 +2095,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The application already has data in the maximum number of keys and is attempting to create a
- new one. This is a hard error. Subsequent writes to this same key will only succeed after
- some number of keys have been deleted.
+  <div class="jd-tagdata jd-tagdescr"><p>The application already has data in the maximum number of keys (data slots) and is attempting
+ to create a new one. This is a hard error. Subsequent writes to this same key will only
+ succeed after some number of keys have been deleted.
 </p></div>
 
     
@@ -2315,7 +2327,7 @@ From interface
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>the listener that is called when the load is complete. This listener is
+          <td>The listener that is called when the load is complete. This listener is
             required to be non-null. The listener is called on the main thread.</td>
         </tr>
         <tr>
@@ -2466,7 +2478,7 @@ From interface
  client actions caused by the user with a call to this method.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true If the client is connected to the service.
+      <ul class="nolist"><li>true if the client is connected to the service.
 </li></ul>
   </div>
 
@@ -2500,7 +2512,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is attempting to connect to the service.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true If the client is attempting to connect to the service.
+      <ul class="nolist"><li>true if the client is attempting to connect to the service.
 </li></ul>
   </div>
 
@@ -2544,7 +2556,7 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true If the specified listener is currently registered to receive connection
+      <ul class="nolist"><li>true if the specified listener is currently registered to receive connection
              events.</li></ul>
   </div>
 
@@ -2588,7 +2600,7 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true If the specified listener is currently registered to receive connection
+      <ul class="nolist"><li>true if the specified listener is currently registered to receive connection
              failed events.</li></ul>
   </div>
 
@@ -2628,7 +2640,7 @@ From interface
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>the listener that is called when the load is complete. This listener is
+          <td>The listener that is called when the load is complete. This listener is
             required to be non-null. The listener is called on the main thread.
 </td>
         </tr>
@@ -2671,7 +2683,7 @@ From interface
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>the listener that is called when the load is complete. This listener is
+          <td>The listener that is called when the load is complete. This listener is
             required to be non-null. The listener is called on the main thread.</td>
         </tr>
         <tr>
@@ -2753,9 +2765,10 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
- If we are already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> method
- will be called immediately.  Applications should balance calls to this method with calls to
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks(ConnectionCallbacks)</a></code> to avoid leaking resources.
+ If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
+ method will be called immediately.  Applications should balance calls to this method with
+ calls to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks(ConnectionCallbacks)</a></code> to avoid leaking
+ resources.
  <p>
  If the specified listener is already registered to receive connection events, this
  method will not add a duplicate entry for the same listener, but <strong>will</strong>
@@ -2804,11 +2817,12 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if we are not
- already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code>
- method will not be called immediately.  Applications should balance calls to this method with
- calls to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(OnConnectionFailedListener)</a></code> to avoid
- leaking resources.
+ <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if the service
+ is not already connected, the listener's
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> method will not be called immediately.
+ Applications should balance calls to this method with calls to
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(OnConnectionFailedListener)</a></code> to avoid leaking
+ resources.
  <p>
  If the specified listener is already registered to receive connection failed events, this
  method will not add a duplicate entry for the same listener.
@@ -2868,7 +2882,7 @@ From interface
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>the listener that is called when the operation is complete. This listener is
+          <td>The listener that is called when the operation is complete. This listener is
             required to be non-null. The listener is called on the main thread.</td>
         </tr>
         <tr>
@@ -2878,11 +2892,11 @@ From interface
         </tr>
         <tr>
           <th>resolvedVersion</td>
-          <td>version code from previous <code>onStateConflict</code> call.</td>
+          <td>Version code from previous <code>onStateConflict</code> call.</td>
         </tr>
         <tr>
           <th>resolvedData</td>
-          <td>data to submit as the current data. <code>null</code> is a valid value here.
+          <td>Data to submit as the current data. <code>null</code> is a valid value here.
             May be a maximum of <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#getMaxStateSize()">getMaxStateSize()</a></code> bytes.
 </td>
         </tr>
@@ -2925,7 +2939,7 @@ From interface
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>the listener that is called when sign-out is complete. This listener is
+          <td>The listener that is called when sign-out is complete. This listener is
             required to be non-null. The listener is called on the main thread.
 </td>
         </tr>
@@ -3094,7 +3108,7 @@ From interface
         </tr>
         <tr>
           <th>data</td>
-          <td>the data to store. May be a maximum of <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#getMaxStateSize()">getMaxStateSize()</a></code> bytes.
+          <td>The data to store. May be a maximum of <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#getMaxStateSize()">getMaxStateSize()</a></code> bytes.
 </td>
         </tr>
       </table>
@@ -3139,7 +3153,7 @@ From interface
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>the listener that is called when the write operation is complete. This
+          <td>The listener that is called when the write operation is complete. This
             listener is required to be non-null. The listener is called on the main thread.</td>
         </tr>
         <tr>
@@ -3149,7 +3163,7 @@ From interface
         </tr>
         <tr>
           <th>data</td>
-          <td>the data to store. May be a maximum of <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#getMaxStateSize()">getMaxStateSize()</a></code> bytes.
+          <td>The data to store. May be a maximum of <code><a href="/reference/com/google/android/gms/appstate/AppStateClient.html#getMaxStateSize()">getMaxStateSize()</a></code> bytes.
 </td>
         </tr>
       </table>

@@ -18,8 +18,7 @@ page.title=Support Library
 <h2>See also</h2>
 <ol>
   <li><a
-href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0</a></li>
-  <li><a href="http://code.google.com/p/iosched/">Google I/O App source code</a></li>
+href="{@docRoot}training/basics/fragments/support-lib.html">Using the Support Library</a></li>
 </ol>
 
 </div>
@@ -708,8 +707,8 @@ each activity when running on Android 3.0 and higher.</p>
 </div>
 
 <p>For more information about how you can optimize your application for the latest
-Android-powered devices, read <a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing
-Apps for Android 3.0</a>.</p>
+Android-powered devices, read <a href="{@docRoot}guide/practices/tablets-and-handsets.html"
+>Supporting Tablets and Handsets</a>.</p>
 
 
 <h2 id="Docs">Reference Docs</h2>

@@ -226,7 +226,7 @@ onclick="onRegister(); return false;" >Register with Android Backup Service</a><
     } else if ($("input#agree").is(':checked')
         && packagename.length
         && packagename != DEFAULT_TEXT) {
-      window.location = "https://play.google.com/apps/publish/v2/GetBackupApiKey?p=" +
+      window.location = "https://play.google.com/apps/publish/GetBackupApiKey?p=" +
                       encodeURIComponent(packagename);
     } else {
       $("label#agreeLabel,label#pnameLabel").parent().stop().animate({color: "#258AAF"}, 200,

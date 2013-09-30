@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -1118,28 +1130,28 @@ From class
         </tr>
         <tr>
           <th>alwaysPromptForAccount</td>
-          <td>if set the account chooser screen is always shown, otherwise
- it is only shown when there is more than one account from which to choose</td>
+          <td>if set, the account chooser screen is always shown, otherwise
+ it is only shown when there is more than one account from which to choose.</td>
         </tr>
         <tr>
           <th>descriptionOverrideText</td>
           <td>if non-null this string is used as the description in the
- accounts chooser screen rather than the default</td>
+ accounts chooser screen rather than the default.</td>
         </tr>
         <tr>
           <th>addAccountAuthTokenType</td>
           <td>this string is passed as the <code><a href="/reference/android/accounts/AccountManager.html#addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler)">addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback<Bundle>, Handler)</a></code>
- authTokenType parameter</td>
+ authTokenType parameter.</td>
         </tr>
         <tr>
           <th>addAccountRequiredFeatures</td>
           <td>this string array is passed as the
- <code><a href="/reference/android/accounts/AccountManager.html#addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler)">addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback<Bundle>, Handler)</a></code> requiredFeatures parameter</td>
+ <code><a href="/reference/android/accounts/AccountManager.html#addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler)">addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback<Bundle>, Handler)</a></code> requiredFeatures parameter.</td>
         </tr>
         <tr>
           <th>addAccountOptions</td>
           <td>This <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> is passed as the
- <code><a href="/reference/android/accounts/AccountManager.html#addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler)">addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback<Bundle>, Handler)</a></code> options parameter</td>
+ <code><a href="/reference/android/accounts/AccountManager.html#addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler)">addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback<Bundle>, Handler)</a></code> options parameter.</td>
         </tr>
       </table>
   </div>

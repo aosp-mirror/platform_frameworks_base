@@ -680,7 +680,7 @@ android.app.backup.BackupAgentHelper} looks like this:</p>
 
 <pre>
 public class MyFileBackupAgent extends BackupAgentHelper {
-    // The name of the SharedPreferences file
+    // The name of the file
     static final String TOP_SCORES = "scores";
     static final String PLAYER_STATS = "stats";
 

@@ -2,6 +2,19 @@ page.title=Android Studio Tips and Tricks
 
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+<h2>See also</h2>
+<ul>
+ <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Working+in+Eclipse+Compatibility+Mode" class="external-link"
+ >Eclipse Compatibility Mode</a></li>
+ <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA" class="external-link"
+ >FAQ on Migrating</a></li>
+ <li><a href="http://android-developers.blogspot.com/2013/06/adding-backend-to-your-app-in-android.html"
+ class="external-link">Adding a Backend to Your App In Android Studio</a></li>
+</ul>
+</div>
+</div>
 
 <p>If you're unfamiliar with the IntelliJ IDEA interface, you might be wondering
 how to accomplish some common tasks in Android Studio. This page provides some tips

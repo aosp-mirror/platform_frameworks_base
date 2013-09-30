@@ -49,6 +49,9 @@ up to 4kb of payload data (so apps like instant messaging can consume the messag
 
     <h4>Seamless multi-device messaging</h4>
     <p>Maps a single user to a notification key, which you can then use to send a single message to multiple devices owned by the user. Use <a href="https://services.google.com/fb/forms/gcm/">this form</a> to sign up for User Notifications. <a href="{@docRoot}google/gcm/notifications.html">Learn more &raquo;</a></p>
+
+   <h4>Get Started</h4>
+    <p>Get started using the new features with a tutorial that walks you through creating a GCM app. <a href="{@docRoot}google/gcm/gs.html">Learn more &raquo;</a></p>
   </div>
 
 </div>

@@ -102,7 +102,7 @@ static jstring getPeerCon(JNIEnv *env, jobject, jobject fileDescriptor) {
         return NULL;
     }
 
-    security_context_t tmp;
+    security_context_t tmp = NULL;
     int ret = getpeercon(fd, &tmp);
     Unique_SecurityContext context(tmp);
 
@@ -111,7 +111,7 @@ static jstring getPeerCon(JNIEnv *env, jobject, jobject fileDescriptor) {
         contextStr.reset(env->NewStringUTF(context.get()));
     }
 
-    ALOGV("getPeerCon(%d) => %s", fd, contextStr.get());
+    ALOGV("getPeerCon(%d) => %s", fd, context.get());
     return contextStr.release();
 }
 
@@ -198,7 +198,7 @@ static jstring getFileCon(JNIEnv *env, jobject, jstring pathStr) {
         return NULL;
     }
 
-    security_context_t tmp;
+    security_context_t tmp = NULL;
     int ret = getfilecon(path.c_str(), &tmp);
     Unique_SecurityContext context(tmp);
 
@@ -224,7 +224,7 @@ static jstring getCon(JNIEnv *env, jobject) {
         return NULL;
     }
 
-    security_context_t tmp;
+    security_context_t tmp = NULL;
     int ret = getcon(&tmp);
     Unique_SecurityContext context(tmp);
 
@@ -251,7 +251,7 @@ static jstring getPidCon(JNIEnv *env, jobject, jint pid) {
         return NULL;
     }
 
-    security_context_t tmp;
+    security_context_t tmp = NULL;
     int ret = getpidcon(static_cast<pid_t>(pid), &tmp);
     Unique_SecurityContext context(tmp);
 

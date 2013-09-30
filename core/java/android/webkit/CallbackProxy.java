@@ -296,7 +296,12 @@ class CallbackProxy extends Handler {
         // in the UI thread. The WebViewClient and WebChromeClient functions
         // that check for a non-null callback are ok because java ensures atomic
         // 32-bit reads and writes.
-        if (messagesBlocked()) return;
+        if (messagesBlocked()) {
+            synchronized (this) {
+                notify();
+            }
+            return;
+        }
         switch (msg.what) {
             case PAGE_STARTED:
                 String startedUrl = msg.getData().getString("url");

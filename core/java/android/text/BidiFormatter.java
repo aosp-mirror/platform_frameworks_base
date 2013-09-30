@@ -25,8 +25,12 @@ import java.util.Locale;
 /**
  * Utility class for formatting text for display in a potentially opposite-directionality context
  * without garbling. The directionality of the context is set at formatter creation and the
- * directionality of the text can be either estimated or passed in when known. Provides the
- * following functionality:
+ * directionality of the text can be either estimated or passed in when known. 
+ *
+ * <p>To support versions lower than {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
+ * you can use the support library's {@link android.support.v4.text.BidiFormatter} class.
+ *
+ * <p>These APIs provides the following functionality:
  * <p>
  * 1. Bidi Wrapping
  * When text in one language is mixed into a document in another, opposite-directionality language,
@@ -370,6 +374,7 @@ public final class BidiFormatter {
      *
      * @param str The input string.
      * @param heuristic The algorithm to be used to estimate the string's overall direction.
+     *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
      * @param isolate Whether to directionally isolate the string to prevent it from garbling the
      *     content around it
      * @return Input string after applying the above processing.
@@ -401,6 +406,7 @@ public final class BidiFormatter {
      *
      * @param str The input string.
      * @param heuristic The algorithm to be used to estimate the string's overall direction.
+     *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
      * @return Input string after applying the above processing.
      */
     public String unicodeWrap(String str, TextDirectionHeuristic heuristic) {

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_allocation.rsh File Reference</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_allocation.rsh File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -27,7 +27,7 @@
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">rs_allocation.rsh File Reference</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_allocation.rsh File Reference</div>  </div>
 </div>
 <div class="contents">
 <table class="memberdecls">
@@ -39,15 +39,202 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#acd6f1a2b2443e6ea39e6154577645d2c">rsAllocationGetDimZ</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#ac42a07c079d6b3c6bb21975170d4e11c">rsAllocationGetDimLOD</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#ac85f7ed88f38b35482c6d63b56d470fe">rsAllocationGetDimFaces</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a>)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a3fd30b4388748601e025bb3566ce0cbc">rsGetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a>, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a7e0a1753a930557f6dc87f25ed3fd23b">rsGetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a>, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a049ba2f6e6e18d47f2267474b2092822">rsGetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a>, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> z)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a3a1098a3ea3a5106955dd4398b8904e1">rsAllocationCopy1DRange</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> dstAlloc, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstOff, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstMip, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> count, <a class="el" href="structrs__allocation.html">rs_allocation</a> srcAlloc, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcOff, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcMip)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a7f7e2369b3ed7d7db31729b6db7ba07e">rsAllocationCopy2DRange</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> dstAlloc, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstXoff, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstYoff, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstMip, <a class="el" href="rs__types_8rsh.html#acc6f9a94176656c73fd74f789cfa2229">rs_allocation_cubemap_face</a> dstFace, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> width, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> height, <a class="el" href="structrs__allocation.html">rs_allocation</a> srcAlloc, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcXoff, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcYoff, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcMip, <a class="el" href="rs__types_8rsh.html#acc6f9a94176656c73fd74f789cfa2229">rs_allocation_cubemap_face</a> srcFace)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a56157b6ddef754b36833ca1f8e66aec2">rsGetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#aea4f2338fb36faf73021ff7179fa5930">rsGetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a4256e51301797517cafd5474d7d4b26f">rsGetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> z)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#afe9ebb2f89c6366c59f5e05ee4849c0a">rsAllocationIoSend</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a05f7391230a92d239fdb619d791162b5">rsAllocationIoReceive</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structrs__element.html">rs_element</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a6a3b6512bc269f6b369bdc54d12a45ff">rsAllocationGetElement</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a1ed04c0bfab4044b875bb31577b53407">rsSample</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="structrs__sampler.html">rs_sampler</a> s, float location)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#aa9574fd5f1655f6e74b4872aace618bf">rsSample</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="structrs__sampler.html">rs_sampler</a> s, float location, float lod)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a36ef1e609e360a9a5a5ff5dce13b5100">rsSetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, void *ptr, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a351627f335b9a091a5152db7ac9134dc">rsSetElementAt</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, void *ptr, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#ad7ffa1aa16511a75b4bc2c05bd0e0a75">rsGetElementAtYuv_uchar_Y</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#a41f61be02113ee22c039ea51fdedb20e">rsGetElementAtYuv_uchar_U</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__allocation_8rsh.html#af03cadb582fa80bbf7f39177d96df17e">rsGetElementAtYuv_uchar_V</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> a, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y)</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Allocation routines. </p>
 
 <p>Definition in file <a class="el" href="rs__allocation_8rsh_source.html">rs_allocation.rsh</a>.</p>
 </div><hr/><h2>Function Documentation</h2>
+<a class="anchor" id="a3a1098a3ea3a5106955dd4398b8904e1"></a><!-- doxytag: member="rs_allocation.rsh::rsAllocationCopy1DRange" ref="a3a1098a3ea3a5106955dd4398b8904e1" args="(rs_allocation dstAlloc, uint32_t dstOff, uint32_t dstMip, uint32_t count, rs_allocation srcAlloc, uint32_t srcOff, uint32_t srcMip)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsAllocationCopy1DRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>dstAlloc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>dstOff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>dstMip</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>srcAlloc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>srcOff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>srcMip</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Copy part of an allocation from another allocation.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dstAlloc</td><td>Allocation to copy data into. </td></tr>
+    <tr><td class="paramname">dstOff</td><td>The offset of the first element to be copied in the destination allocation. </td></tr>
+    <tr><td class="paramname">dstMip</td><td>Mip level in the destination allocation. </td></tr>
+    <tr><td class="paramname">count</td><td>The number of elements to be copied. </td></tr>
+    <tr><td class="paramname">srcAlloc</td><td>The source data allocation. </td></tr>
+    <tr><td class="paramname">srcOff</td><td>The offset of the first element in data to be copied in the source allocation. </td></tr>
+    <tr><td class="paramname">srcMip</td><td>Mip level in the source allocation. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a7f7e2369b3ed7d7db31729b6db7ba07e"></a><!-- doxytag: member="rs_allocation.rsh::rsAllocationCopy2DRange" ref="a7f7e2369b3ed7d7db31729b6db7ba07e" args="(rs_allocation dstAlloc, uint32_t dstXoff, uint32_t dstYoff, uint32_t dstMip, rs_allocation_cubemap_face dstFace, uint32_t width, uint32_t height, rs_allocation srcAlloc, uint32_t srcXoff, uint32_t srcYoff, uint32_t srcMip, rs_allocation_cubemap_face srcFace)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsAllocationCopy2DRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>dstAlloc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>dstXoff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>dstYoff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>dstMip</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#acc6f9a94176656c73fd74f789cfa2229">rs_allocation_cubemap_face</a>&#160;</td>
+          <td class="paramname"><em>dstFace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>srcAlloc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>srcXoff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>srcYoff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>srcMip</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#acc6f9a94176656c73fd74f789cfa2229">rs_allocation_cubemap_face</a>&#160;</td>
+          <td class="paramname"><em>srcFace</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Copy a rectangular region into the allocation from another allocation.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dstAlloc</td><td>allocation to copy data into. </td></tr>
+    <tr><td class="paramname">dstXoff</td><td>X offset of the region to update in the destination allocation. </td></tr>
+    <tr><td class="paramname">dstYoff</td><td>Y offset of the region to update in the destination allocation. </td></tr>
+    <tr><td class="paramname">dstMip</td><td>Mip level in the destination allocation. </td></tr>
+    <tr><td class="paramname">dstFace</td><td>Cubemap face of the destination allocation, ignored for allocations that aren't cubemaps. </td></tr>
+    <tr><td class="paramname">width</td><td>Width of the incoming region to update. </td></tr>
+    <tr><td class="paramname">height</td><td>Height of the incoming region to update. </td></tr>
+    <tr><td class="paramname">srcAlloc</td><td>The source data allocation. </td></tr>
+    <tr><td class="paramname">srcXoff</td><td>X offset in data of the source allocation. </td></tr>
+    <tr><td class="paramname">srcYoff</td><td>Y offset in data of the source allocation. </td></tr>
+    <tr><td class="paramname">srcMip</td><td>Mip level in the source allocation. </td></tr>
+    <tr><td class="paramname">srcFace</td><td>Cubemap face of the source allocation, ignored for allocations that aren't cubemaps. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="ac85f7ed88f38b35482c6d63b56d470fe"></a><!-- doxytag: member="rs_allocation.rsh::rsAllocationGetDimFaces" ref="ac85f7ed88f38b35482c6d63b56d470fe" args="(rs_allocation)" -->
 <div class="memitem">
 <div class="memproto">
@@ -143,6 +330,79 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a6a3b6512bc269f6b369bdc54d12a45ff"></a><!-- doxytag: member="rs_allocation.rsh::rsAllocationGetElement" ref="a6a3b6512bc269f6b369bdc54d12a45ff" args="(rs_allocation a)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structrs__element.html">rs_element</a> rsAllocationGetElement </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get the element object describing the allocation's layout </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>allocation to get data from </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>element describing allocation layout </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a05f7391230a92d239fdb619d791162b5"></a><!-- doxytag: member="rs_allocation.rsh::rsAllocationIoReceive" ref="a05f7391230a92d239fdb619d791162b5" args="(rs_allocation a)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const void rsAllocationIoReceive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Receive a new set of contents from the queue. </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>allocation to work on </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="afe9ebb2f89c6366c59f5e05ee4849c0a"></a><!-- doxytag: member="rs_allocation.rsh::rsAllocationIoSend" ref="afe9ebb2f89c6366c59f5e05ee4849c0a" args="(rs_allocation a)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const void rsAllocationIoSend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Send the contents of the Allocation to the queue. </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>allocation to work on </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="aadad7654929c451be299df125061c9ba"></a><!-- doxytag: member="rs_allocation.rsh::rsGetAllocation" ref="aadad7654929c451be299df125061c9ba" args="(const void *)" -->
 <div class="memitem">
 <div class="memproto">
@@ -157,11 +417,12 @@ Functions</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Returns the Allocation for a given pointer. The pointer should point within a valid allocation. The results are undefined if the pointer is not from a valid allocation. </p>
+<p>Returns the Allocation for a given pointer. The pointer should point within a valid allocation. The results are undefined if the pointer is not from a valid allocation.</p>
+<p>This function is deprecated and will be removed in the SDK from a future release. </p>
 
 </div>
 </div>
-<a class="anchor" id="a3fd30b4388748601e025bb3566ce0cbc"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAt" ref="a3fd30b4388748601e025bb3566ce0cbc" args="(rs_allocation, uint32_t x)" -->
+<a class="anchor" id="a56157b6ddef754b36833ca1f8e66aec2"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAt" ref="a56157b6ddef754b36833ca1f8e66aec2" args="(rs_allocation a, uint32_t x)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -169,7 +430,7 @@ Functions</h2></td></tr>
           <td class="memname">const void* rsGetElementAt </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>a</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -189,7 +450,7 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7e0a1753a930557f6dc87f25ed3fd23b"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAt" ref="a7e0a1753a930557f6dc87f25ed3fd23b" args="(rs_allocation, uint32_t x, uint32_t y)" -->
+<a class="anchor" id="aea4f2338fb36faf73021ff7179fa5930"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAt" ref="aea4f2338fb36faf73021ff7179fa5930" args="(rs_allocation a, uint32_t x, uint32_t y)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -197,7 +458,7 @@ Functions</h2></td></tr>
           <td class="memname">const void* rsGetElementAt </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>a</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -223,7 +484,7 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a049ba2f6e6e18d47f2267474b2092822"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAt" ref="a049ba2f6e6e18d47f2267474b2092822" args="(rs_allocation, uint32_t x, uint32_t y, uint32_t z)" -->
+<a class="anchor" id="a4256e51301797517cafd5474d7d4b26f"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAt" ref="a4256e51301797517cafd5474d7d4b26f" args="(rs_allocation a, uint32_t x, uint32_t y, uint32_t z)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -231,7 +492,7 @@ Functions</h2></td></tr>
           <td class="memname">const void* rsGetElementAt </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>a</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -250,6 +511,294 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
           <td class="paramname"><em>z</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts. </p>
+
+</div>
+</div>
+<a class="anchor" id="a41f61be02113ee22c039ea51fdedb20e"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAtYuv_uchar_U" ref="a41f61be02113ee22c039ea51fdedb20e" args="(rs_allocation a, uint32_t x, uint32_t y)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a> rsGetElementAtYuv_uchar_U </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Extract a single element from an allocation.</p>
+<p>Coordinates are in the dimensions of the Y plane </p>
+
+</div>
+</div>
+<a class="anchor" id="af03cadb582fa80bbf7f39177d96df17e"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAtYuv_uchar_V" ref="af03cadb582fa80bbf7f39177d96df17e" args="(rs_allocation a, uint32_t x, uint32_t y)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a> rsGetElementAtYuv_uchar_V </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Extract a single element from an allocation.</p>
+<p>Coordinates are in the dimensions of the Y plane </p>
+
+</div>
+</div>
+<a class="anchor" id="ad7ffa1aa16511a75b4bc2c05bd0e0a75"></a><!-- doxytag: member="rs_allocation.rsh::rsGetElementAtYuv_uchar_Y" ref="ad7ffa1aa16511a75b4bc2c05bd0e0a75" args="(rs_allocation a, uint32_t x, uint32_t y)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a> rsGetElementAtYuv_uchar_Y </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Extract a single element from an allocation. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1ed04c0bfab4044b875bb31577b53407"></a><!-- doxytag: member="rs_allocation.rsh::rsSample" ref="a1ed04c0bfab4044b875bb31577b53407" args="(rs_allocation a, rs_sampler s, float location)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> rsSample </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>location</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Fetch allocation in a way described by the sampler </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>1D allocation to sample from </td></tr>
+    <tr><td class="paramname">s</td><td>sampler state </td></tr>
+    <tr><td class="paramname">location</td><td>to sample from</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Fetch allocation in a way described by the sampler </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>2D allocation to sample from </td></tr>
+    <tr><td class="paramname">s</td><td>sampler state </td></tr>
+    <tr><td class="paramname">location</td><td>to sample from </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa9574fd5f1655f6e74b4872aace618bf"></a><!-- doxytag: member="rs_allocation.rsh::rsSample" ref="aa9574fd5f1655f6e74b4872aace618bf" args="(rs_allocation a, rs_sampler s, float location, float lod)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> rsSample </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>lod</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Fetch allocation in a way described by the sampler </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>1D allocation to sample from </td></tr>
+    <tr><td class="paramname">s</td><td>sampler state </td></tr>
+    <tr><td class="paramname">location</td><td>to sample from </td></tr>
+    <tr><td class="paramname">lod</td><td>mip level to sample from, for fractional values mip levels will be interpolated if RS_SAMPLER_LINEAR_MIP_LINEAR is used</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Fetch allocation in a way described by the sampler </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>2D allocation to sample from </td></tr>
+    <tr><td class="paramname">s</td><td>sampler state </td></tr>
+    <tr><td class="paramname">location</td><td>to sample from </td></tr>
+    <tr><td class="paramname">lod</td><td>mip level to sample from, for fractional values mip levels will be interpolated if RS_SAMPLER_LINEAR_MIP_LINEAR is used </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a36ef1e609e360a9a5a5ff5dce13b5100"></a><!-- doxytag: member="rs_allocation.rsh::rsSetElementAt" ref="a36ef1e609e360a9a5a5ff5dce13b5100" args="(rs_allocation a, void *ptr, uint32_t x)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsSetElementAt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>x</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Set single element of an allocation. </p>
+
+</div>
+</div>
+<a class="anchor" id="a351627f335b9a091a5152db7ac9134dc"></a><!-- doxytag: member="rs_allocation.rsh::rsSetElementAt" ref="a351627f335b9a091a5152db7ac9134dc" args="(rs_allocation a, void *ptr, uint32_t x, uint32_t y)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsSetElementAt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
         </tr>
         <tr>
           <td></td>

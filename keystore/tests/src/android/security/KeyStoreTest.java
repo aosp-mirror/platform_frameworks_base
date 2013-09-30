@@ -22,7 +22,7 @@ import android.security.KeyStore;
 import android.test.ActivityUnitTestCase;
 import android.test.AssertionFailedError;
 import android.test.suitebuilder.annotation.MediumTest;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -45,11 +45,11 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     private static final String TEST_KEYNAME = "test-key";
     private static final String TEST_KEYNAME1 = "test-key.1";
     private static final String TEST_KEYNAME2 = "test-key\02";
-    private static final byte[] TEST_KEYVALUE = "test value".getBytes(Charsets.UTF_8);
+    private static final byte[] TEST_KEYVALUE = "test value".getBytes(StandardCharsets.UTF_8);
 
     // "Hello, World" in Chinese
     private static final String TEST_I18N_KEY = "\u4F60\u597D, \u4E16\u754C";
-    private static final byte[] TEST_I18N_VALUE = TEST_I18N_KEY.getBytes(Charsets.UTF_8);
+    private static final byte[] TEST_I18N_VALUE = TEST_I18N_KEY.getBytes(StandardCharsets.UTF_8);
 
     // Test vector data for signatures
     private static final byte[] TEST_DATA =  new byte[256];

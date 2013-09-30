@@ -32,7 +32,7 @@ ensure that your app looks great on any device.</p>
   </div>
 </div>
 
-  <img src="{@docRoot}design/media/devices_displays_density.png">
+  <img src="{@docRoot}design/media/devices_displays_density@2x.png" alt="" height="160" />
 
 <h4>Strategies</h4>
 <p>So where do you begin when designing for multiple screens? One approach is to work in the base

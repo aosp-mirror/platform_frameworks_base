@@ -20,7 +20,7 @@ import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for {@link ProcFileReader}.
@@ -172,6 +172,6 @@ public class ProcFileReaderTest extends AndroidTestCase {
 
     private static ProcFileReader buildReader(String string, int bufferSize) throws IOException {
         return new ProcFileReader(
-                new ByteArrayInputStream(string.getBytes(Charsets.US_ASCII)), bufferSize);
+                new ByteArrayInputStream(string.getBytes(StandardCharsets.US_ASCII)), bufferSize);
     }
 }

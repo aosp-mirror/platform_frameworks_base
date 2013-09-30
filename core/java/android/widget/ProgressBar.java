@@ -959,11 +959,9 @@ public class ProgressBar extends View {
         if (!mInDrawing) {
             if (verifyDrawable(dr)) {
                 final Rect dirty = dr.getBounds();
-                final int scrollX = mScrollX + mPaddingLeft;
-                final int scrollY = mScrollY + mPaddingTop;
 
-                invalidate(dirty.left + scrollX, dirty.top + scrollY,
-                        dirty.right + scrollX, dirty.bottom + scrollY);
+                invalidate(dirty.left + mScrollX, dirty.top + mScrollY,
+                        dirty.right + mScrollX, dirty.bottom + mScrollY);
             } else {
                 super.invalidateDrawable(dr);
             }

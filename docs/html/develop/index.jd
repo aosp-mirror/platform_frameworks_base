@@ -4,6 +4,14 @@ header.hide=1
 carousel=1
 tabbedList=1
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 <style>
 #noplayer-message {
@@ -321,8 +329,8 @@ var playlists = {
   'bizdevbytes' : {
     'ids': ["PLWz5rJ2EKKc8-Osr0TuHyTMEhKV0xJ6ql"]
   },
-  'developersstrikeback' : {
-    'ids': ["PLWz5rJ2EKKc8nhhIOieejm1PxYHmPkIPh"]
+  'thisweek' : {
+    'ids': ["PLWz5rJ2EKKc9Wam5jE-9oY8l6RpeAx-XM"]
   },
   'googleio' : {
     'ids': ["PLWz5rJ2EKKc9WGUwq2gQ-coU3fSyexgOx"]

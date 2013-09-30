@@ -201,7 +201,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Kein Netz"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN aus"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"WLAN-Display"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Kabellose Übertragung"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Kabellose Übertragung (WiDi)"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helligkeit"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Benachrichtigungen erscheinen hier"</string>

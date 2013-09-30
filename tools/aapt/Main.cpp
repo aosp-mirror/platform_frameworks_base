@@ -48,6 +48,7 @@ void usage(void)
         "   List contents of Zip-compatible archive.\n\n", gProgName);
     fprintf(stderr,
         " %s d[ump] [--values] WHAT file.{apk} [asset [asset ...]]\n"
+        "   strings          Print the contents of the resource table string pool in the APK.\n"
         "   badging          Print the label and icon for the app declared in APK.\n"
         "   permissions      Print the permissions from the APK.\n"
         "   resources        Print the resource table from the APK.\n"

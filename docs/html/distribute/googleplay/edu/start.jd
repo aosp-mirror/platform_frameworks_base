@@ -1,5 +1,5 @@
 page.title=Get Started
-page.metaDescription=Get your apps ready for Google Play for Education.
+page.metaDescription=Get Started with Google Play for Education
 excludeFromSuggestions=true
 @jd:body
 
@@ -9,126 +9,256 @@ excludeFromSuggestions=true
             class="go-link"
             style="display: block;text-align: right;">SIGN UP</a></div>
 
+<div style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">You
+can now include your apps in the Google Play for Education <a href="#program">pilot program</a>,
+getting it into the hands of participating schools and key influencers in the education technology
+community. See the sections below to learn more.</div>
+
 <p>If you've got a great app for education or just an idea for one, plan to be a
 part of Google Play for Education to reach even more teachers and students. It's
-easy to participate, and you will be able to offer new or existing Android apps
-using the familiar tools in Google Play.</p>
+easy to participate, and you'll be able to offer new or existing Android apps
+using familiar tools and processes in Google Play.</p>
 
-<p>To get started, review the sections in this document and learn about the
-safety, usability, and quality guidelines that apps should meet. Assess your
-apps against these guidelines and make any adjustments needed. You can use the
-linked resources to help you develop a great app for students that offers
-compelling content and an intuitive user experience on Android tablets.</p>
+<p>To get started, review the sections in this document and learn how to make
+your apps available through Google Play for Education. Also make sure to read <a
+href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines for
+Apps</a>  for information on the safety, usability, and quality standards that
+your apps should meet. When your app is ready, you can opt-in to Google Play for
+Education from the Developer Console.</p>
 
-<h2 id="requirements">Safety First</h2>
+<p>Note that the initial launch of Google Play for Education is planned for Fall
+2013 and will include schools in the United States only, with support for other
+countries to follow. At this time, please include your app in Google Play for
+Education only if it is targeting the <strong>US K-12 market</strong>. </p>
 
-<p>To participate, your apps must be designed to be usable and appropriate for
-the K-12 market. The basic requirements that your apps must meet are:</p>
+
+<h2 id="participate">How to Participate</h2>
+
+<div style="float:right; padding-top:2em;"><img
+src="{@docRoot}images/gp-edu-process.png"></div>
+
+<p>Google Play for Education lets you put your educational apps in front of a
+new audience of teachers and students. You can develop and publish using
+familiar tools and processes, such as your existing Developer Console account
+and your current distribution and pricing settings. It's easy to participate
+&mdash; the sections below outline the process.</p>
+
+<h3 id="basic-info">1. Understand guidelines and policies</h3>
+
+<p>To prepare for a successful launch on Google Play for Education, start by
+reviewing the guidelines for educational apps in Google Play and the policies
+that apply to your apps. See <a
+href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines for
+Apps</a> for details.</p>
+
+<p>Also, make sure that your are familiar with the policies that your app must
+comply with, including
+<a href="http://play.google.com/about/developer-content-policy.html" target="_policies">content
+policies</a>, the <a
+href="http://play.google.com/about/developer-distribution-agreement.html"
+target="_policies">developer agreement</a>,  and <a
+href="https://play.google.com/about/developer-distribution-agreement-addendum.
+html" target="_policies">Google Play for Education Addendum</a>.</p>
+
+<h3 id="developing">2. Design and develop a great app for education</h3>
+
+<p>A great app for educators and students is designed for classroom use, looks
+great on tablets, and delivers a compelling feature set for teachers and
+students. If you are developing an app for education, make sure that it is
+appropriate for K-12 classrooms, offers educational value, and is refined to
+offer a polished, high-quality tablet experience.</p>
+
+<p>Assess your app against the criteria listed in <a
+href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines for
+Apps</a> and plan on supporting them to the greatest extent possible. In some
+cases you might need to modify your features or UI to support the requirements
+of the classroom use-case. It's a good idea to identify those areas early in
+development so that you are able address them properly. </p>
+
+<p>With Google Play for Education, optimizing your app for tablets is a crucial
+part of getting your app ready for distribution to educators. A variety of
+resources are available to help you understand what you need to optimize for
+tablets &mdash; a good starting point is the <a
+href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App Quality
+Guidelines</a>. </p>
+
+<p>Throughout design and development, it's important to have a suitable device
+on which to prototype and test your user experience. It's highly recommended
+that you acquire one or more tablet devices and set up your testing environment
+as early as possible. The recommended hardware device that replicates the Google
+Play for Education environment is the Nexus 7, which is available from <a href="https://play.google.com/store/devices/details?id=nexus_7_16gb" target="_android">Google Play</a> and other stores.</p>
+
+<p>Proper testing and quality assurance are key aspects of delivering a great
+app for teachers and students. Make sure you set up a <a
+href="{@docRoot}distribute/googleplay/edu/guidelines.html#test-environment">
+proper test environment</a> to ensure that your app meets guidelines under
+realistic conditions.</p>
+
+<h3 id="opt-in">3. Opt-in to Google Play for Education and publish</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Before you opt-in</h2>
+<p>To participate in Google Play for Education, you must agree to a <a
+href="https://play.google.com/about/developer-distribution-agreement-addendum.html"
+target="_policies">Google Play for Education Addendum</a>
+to the standard Developer Distribution Agreement.</p>
+
+<p>Before you opt-in, review the Addendum completely and make any necessary
+modifications to your app.</p>
+</div>
+</div>
+
+<p>When you've built your release-ready APK and tested to ensure that it meets
+the <a href="{@docRoot}distribute/googleplay/edu/guidelines.html">app guidelines</a>,
+upload it to the Developer Console, create your store listing, and set
+distribution options. If you aren't familiar with how to prepare for launch on
+Google Play, see the <a
+href="{@docRoot}distribute/googleplay/publish/preparing.html">Launch Checklist</a>. </p>
+
+<p>When your app is ready to publish, you can <em>opt-in</em> to Google Play for
+Education from the Developer Console. Opt-in means that you want your app to be
+made available to educators through Google Play for Education, including review,
+classification, and approval by our third-party educator network. Note that
+opt-in does not affect the availability of your app in Google Play Store.</p>
+
+<p>Opt-in also confirms that your app complies with <a
+href="http://play.google.com/about/developer-content-policy.html"
+target="_policies">Google Play Developer Program
+Policies</a> and the <a
+href="http://play.google.com/about/developer-distribution-agreement.html"
+target="_policies">Developer Distribution Agreement</a>,
+including a <a
+href="https://play.google.com/about/developer-distribution-agreement-addendum.
+html" target="_policies">Google Play for Education
+Addendum</a>. If you are not familiar with these policy documents or the
+Addendum, make sure to read them before opting-in. </p>
+
+<p>Here's how to opt-in to Google Play for Education for a specific app:</p>
 
 <ol>
-  <li>Apps and the ads they contain must not collect personally identifiable
-information other than user credentials or data required to operate and improve
-the app.</li>
-  <li>Apps must not use student data for purposes unrelated to its educational
-function.</li>
-  <li>Apps must have a content rating of "Everyone" or "Low Maturity" (apps with
-a "Medium Maturity" rating are allowed, if they have that rating solely because
-they allow communication between students).</li>
-  <li>App content, including ads displayed by the app, must be consistent with
-the app's maturity rating. The app must not display any “offensive” content, as
-described in the <a
-href="http://play.google.com/about/developer-content-policy.html">Google Play
-Developer Program Policies</a> and <a
-href="https://support.google.com/googleplay/android-developer/answer/188189">
-content-rating guidelines</a>.</p></li>
+  <li>In the Developer Console All Applications page, click the app you want to
+opt-in. </li>
+  <li>Under Pricing and Distribution, scroll down to find "Google Play for
+Education" and the opt-in checkbox. </li>
+  <li>Click the checkbox next to "Include my app in Google Play for
+Education..."</li>
+  <li>After you've opted-in, find the "Ads" and "In-app purchases" checkboxes below.
+Check each checkbox that applies. Your app's use of ads or in-app purchases will
+be shown to educators when they are browsing your app. </li>
+  <li>Click "Save" to save your Pricing and Distribution changes.</li>
 </ol>
 
+<div style="clear:both;margin-top:1.5em;margin-bottom:1.5em;width:660px;">
+<img src="{@docRoot}images/gp-edu-optin.png" style="border:2px solid #ddd;width:660px;">
+<p class="image-caption"><span style="font-weight:500;">Opt-in for apps</span>:
+Include your app in Google Play for Education by opting-in from the Developer Console.</p>
+</div>
 
-<h2 id="approved">With the Help of Educators</h2>
+<p>Once you save changes and publish your app, the app will be submitted to our
+third-party educator network for review and approval. If the app is already
+published, it will be submitted for review as soon as you opt-in and save your
+changes. </p>
 
-<p>App content submitted to Google Play for Education will be reviewed by
-educators who will categorize the apps and align them with <a
-href="http://www.corestandards.org/" class="external-link"
-target="_android">Common Core Standards</a>. This will help make your content
-discoverable in a way that is easy for teachers and administrators. </p>
+<p class="note"><strong>Note</strong>: Google Play for Education is part of
+Google Play. When you publish an app that's opted-in to Google Play for
+Education, the app becomes available to users in Google Play right away. After
+the app is reviewed and approved, it then becomes available to educators in
+Google Play for Education.</p>
 
+<h3 id="review">4. Track your review and approval</h3>
 
-<h2 id="secure">Sold Simply</h2>
+<p>Google Play for Education provides content to educators in a way that's
+properly organized by subject, grade level, and common core standards (where
+applicable). To ensure high educational value and proper classification, we work
+with a third-party educator network to review and approve apps before making
+them discoverable through the Google Play for Education browsing tools. </p>
 
-<p>Google Play for Education provides a simple and secure environment in which
-educators can buy apps in a way that's easy for schools &mdash; through purchase
-orders. Your apps must support this environment by ensuring that they:</p>
+<p>Our third-party educator network will evaluate apps according to educational
+value and alignment with K-12 core standards, then assign the metadata for
+subject, grade level, and core curriculum that makes them easily browseable for
+educators. To understand how your apps will be evaluated, please see the <a
+href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines for
+Apps</a> document.</p>
 
-<ul>
-  <li>Sell all content and services through Google Play for Education</li>
-  <li>Permit Google Play to offer teachers limited free trials before purchase
-(through business terms only, no development work is needed)</li>
-</ul>
+<p>As soon as you opt-in to Google Play for Education and publish, your app is
+queued for review by our third-party educator network. The review and approval
+process can take <strong>3-4 weeks or more</strong>. You'll receive notification
+by email (to your developer account address) when the review is complete, with a
+summary of the review results. </p>
 
-<p>In addition, it's highly recommended that your apps:</p>
-<ul>
-  <li>Disable in-app purchase in any UI accessible to students.</li>
-</ul>
-
-<h2 id="quality">High Quality and Usability</h2>
-
-<p>Google Play for Education brings educational content to students and teachers
-on Android tablets. Your apps should be designed to perform well and look great
-on Android tablets, and they should offer the best user experience possible.
+<p class="note"><strong>Note</strong>: Until the full product launch in Fall
+2013, please expect the initial review of your app to take longer than usual.
 </p>
 
-<p>High quality apps are engaging, intuitive, and offer compelling content.
-Google Play for Education will highlight high-quality apps for easy discovery in
-the store. Here are some recommendations for making your app easy for students
-and teachers to enjoy.</p>
+<p>At any time, you can check the review and approval status of your app in the
+Developer Console, under "Google Play for Education" in the app's Pricing and
+Distribution page. There are three approval states:</p>
 
 <ul>
-  <li>Meet Core app quality guidelines
-    <ul>
-      <li>Follow <a href="{@docRoot}design/index.html">Android Design Guidelines</a>. 
-      Pay special attention to the sections on <a href="{@docRoot}design/patterns/actionbar.html">Action
-      Bar</a>, <a href="{@docRoot}design/patterns/navigation.html">Navigation</a> and <a 
-      href="{@docRoot}design/patterns/pure-android.html">Pure Android</a>.</li>
-      <li>Test your apps against the <a href="{@docRoot}distribute/googleplay/quality/core.html">Core
-      App Quality Guidelines</a>.</li>
-    </ul>
-  </li>
-<li>Meet tablet app quality guidelines
-  <ul>
-   <li>Follow our best practices for tablet app development</li>
-   <li>Review the <a href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App
-   Quality Checklist</a> and <a href="http://android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html"
-   class="external-link;" target="_android">blog post on designing for tablets</a></li>
-   <li>Check your Optimization Tips in the Google Play Developer Console (if you've already uploaded your app)</li>
-  </ul>
-<li>Strive for simplicity and highest usability for students
-  <ul>
-    <li>Design your app so that teachers and students can use all capabilities of your app without
-    having to sign-in to multiple accounts and remember multiple passwords. </li>
-    <li>For best experience, use Google sign-in in your apps, which provides seamless authentication
-    across apps. <!--Google Account login service and integrate with Google Drive where appropriate. --></li>
-  </ul>
-</li>
-</ul>
-<p>In addition, it's highly recommended that your apps:</p>
-<ul>
-  <li>Disable advertisements in any UI accessible to students.</li>
+<li><em>Pending</em> &mdash; Your app was sent for review and the review
+is not yet complete.</li>
+<li><em>Approved</em> &mdash; Your app was reviewed and approved. The app
+will be made available directly to educators through Google Play for Education.
+Until the full product launch later this year, your app will be available to a
+limited number of educators through the <a
+href="{@docRoot}distribute/googleplay/edu/start.html#program">pilot program</a>.
+Once your app is approved, you can update it at your convenience without needing
+another full review. </li>
+<li><em>Not approved</em> &mdash; Your app was reviewed and not approved.
+Check the notification email for information about why the app was not approved.
+You can address any issues and opt-in again for another review. </li>
 </ul>
 
+<p>If you have questions about the review status of your app, follow the process
+discussed in the next section. </p>
 
-<h2 id="strategies">Strategies for Development</h2>
+<h3 id="appeal">5. Get support or appeal your review results</h3>
 
-  <p>If you have an existing educational app in Google Play, the classroom
-environment offered by Google Play for Education presents a slightly different
-set of needs, requirements, and also opportunities.</p> 
+<p>After your app is reviewed you'll receive an email giving you the review
+results, including whether the app was approved, how the app was classified, and
+what issues may need to be addressed. You'll receive the email at the address
+you specified for your developer account. </p>
 
-  <p>We're working to give you the tools you need to build for the classroom
-environment from a single APK, delivered as a single product to all of your
-users in Google Play. Our goal is to let you customize your app's UI and
-features as minimally or deeply as you need, to provide a simple, intuitive, and
-beautiful learning experience. </p>
+<p>If you believe your app was reviewed or classified incorrectly, you will be
+able to appeal and request reconsideration. Watch for more information on the
+appeal process and links in the weeks to come.</p>
 
-  <p>Watch for more information on developer tools coming in the weeks ahead.
-We'll update this page as we roll out tools for you to use. As a starting point,
-we recommend planning your app's design and ensuring its optimization on Nexus
-tablets.</p>
+<p class="note"><strong>Note</strong>: Support and appeal forms are not yet
+available, but will be available soon.</p>
+
+
+<h2 id="program">Including Your Apps in the Pilot Program</h2>
+
+<p>Leading up to the Fall 2013 launch, the Google Play for Education team is
+conducting an extensive series of pilots that include schools and students across
+the United States. Educators in participating schools can browse for apps and
+purchase them in bulk, then deploy them instantly to teacher and student
+devices. </p>
+
+<h3 id="pilot">Early opt-in and publishing</h3>
+<p>As an app developer, you can take part in the pilot program, getting your app
+into the hands of schools and key influencers in the education technology
+community. It's a great way to get early feedback on your educational app. </p>
+
+<p>To offer your app in the pilot program, prepare the app and ensure that it meets
+the <a href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines
+for Apps</a>. Then opt-in to Google Play for Education and publish as soon
+as you are ready. Once your app is approved during review by our third-party
+educator network, it will be made available to educators in the pilot program
+right away. Note that during the pilot program, the review and approval process
+may take longer than usual.</p>
+
+<h3 id="launch">Full launch to US schools</h3>
+<p>The initial launch of Google Play for Education is planned for Fall 2013. The
+pilot program and full launch will include schools in the United States only,
+with support for schools in other countries to follow. </p>
+
+<p>At this time, you should include your app in Google Play for Education only
+if it is targeting the US K-12 market. </p>
+
+<h3 id="more">More information</h3>
+
+<p>If you'd like to be notified by email of the latest information about Google Play
+for Education, visit the <a href="{@docRoot}distribute/googleplay/edu/contact.html">
+Sign Up</a> page and fill out the form. </p>

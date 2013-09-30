@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the native Renderscript int2 type back to the Android system.
+ * Class for exposing the native RenderScript int2 type back to the Android system.
  *
  **/
 public class Int2 {

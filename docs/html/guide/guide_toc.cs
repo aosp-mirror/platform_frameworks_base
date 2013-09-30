@@ -326,11 +326,11 @@
             </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
-                    <span class="en">Renderscript</span></a>
+                    <span class="en">RenderScript</span></a>
                   </li>
 
               <li><a href="<?cs var:toroot ?>guide/topics/renderscript/advanced.html">
-                    <span class="en">Advanced Renderscript</span></a>
+                    <span class="en">Advanced RenderScript</span></a>
                   </li>
               <li><a href="<?cs var:toroot ?>guide/topics/renderscript/reference.html">
                     <span class="en">Runtime API Reference</span></a>
@@ -388,15 +388,19 @@
 
 
 
-      <li class="nav-section">
+<li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/connectivity/index.html">
                <span class="en">Connectivity</span>
              </a></div>
         <ul>
-          <li><a href="<?cs var:toroot?>guide/topics/connectivity/bluetooth.html">
-              <span class="en">Bluetooth</span>
-            </a>
-          </li>
+          <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/connectivity/bluetooth.html">
+          <span class="en">Bluetooth</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/connectivity/bluetooth-le.html">Bluetooth Low Energy</a></li>
+        </ul>
+      </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/connectivity/nfc/index.html">
           <span class="en">NFC</span></a>
@@ -425,6 +429,7 @@
 
     </ul>
   </li><!-- end of connectivity -->
+
 
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/text/index.html">

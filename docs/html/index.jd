@@ -3,6 +3,14 @@ no_footer_links=true
 carousel=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 
 <div class="wrap">
@@ -12,6 +20,20 @@ page.metaDescription=The official site for Android developers. Provides the Andr
         <a href="" class="slideshow-next">Next</a>
         <div class="frame">
             <ul>
+                <li class="item carousel-home">
+                    <div class="content-left col-9">
+                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
+                    </div>
+                    <div class="content-right col-6">
+                    <h1>More Jelly Beans!</h1>
+                    <p>Android 4.3 is now available with a variety of performance improvements
+                    and new developer features. </p>
+                    <p>With this release, Android now supports Bluetooth Low Energy for battery
+                    savings with wireless peripherals, OpenGL ES 3.0 for the most advanced mobile 3D
+                    graphics, MPEG DASH support for high quality media streaming, and much more.</p>
+                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
+                    </div>
+                </li>
                 <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:10px;">
                         <a href="{@docRoot}channels/io2013.html">
@@ -42,7 +64,7 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                         <script type="text/javascript">
                             var params = { allowScriptAccess: "always" };
                             var atts = { id: "ytapiplayer" };
-                            swfobject.embedSWF("//www.youtube.com/v/RRelFvc6Czo?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                            swfobject.embedSWF("//www.youtube.com/v/O8i4HUw7JYA?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
                               "ytapiplayer", "600", "338", "8", null, null, params, atts);
 
                             // Callback used to pause/resume carousel based on video state
@@ -71,20 +93,8 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                       </div>
                     </div>
                     <div class="content-right col-4">
-                    <h1 style="white-space:nowrap;line-height:1em;">Developer Story: Smule</h1>
-                    <p>The creators of AutoRap, Magic Piano, and Songify talk about launching on
-                       Android and the explosive global growth they’ve seen on Google Play.</p>
-                    </div>
-                </li>
-                <li class="item carousel-home">
-                    <div class="content-left col-9">
-                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
-                    </div>
-                    <div class="content-right col-6">
-                    <h1>Android 4.2 Jelly Bean!</h1>
-                    <p>The latest version of Jelly Bean is here, with performance optimizations, a refreshed UI, and great new features for developers. </p>
-                    <p>Android 4.2 includes APIs for developing lock sceen widgets and Daydream screensavers, using external displays, creating RTL layouts, building flexible UI with nested Fragments, and much more.</p>
-                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
+                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />redBus.in</h1>
+                    <p>Bangalore-based developers redBus.in talk about how Android is helping them deliver a superior booking and travel experience to millions of daily bus riders in India.</p>
                     </div>
                 </li>
                 <li class="item carousel-home">

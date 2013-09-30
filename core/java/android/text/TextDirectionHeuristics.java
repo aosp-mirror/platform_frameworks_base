@@ -22,7 +22,14 @@ import android.view.View;
 import java.nio.CharBuffer;
 
 /**
- * Some objects that implement TextDirectionHeuristic.
+ * Some objects that implement {@link TextDirectionHeuristic}. Use these with
+ * the {@link BidiFormatter#unicodeWrap unicodeWrap()} methods in {@link BidiFormatter}.
+ * Also notice that these direction heuristics correspond to the same types of constants
+ * provided in the {@link android.view.View} class for {@link android.view.View#setTextDirection
+ * setTextDirection()}, such as {@link android.view.View#TEXT_DIRECTION_RTL}.
+ * <p>To support versions lower than {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
+ * you can use the support library's {@link android.support.v4.text.TextDirectionHeuristicsCompat}
+ * class.
  *
  */
 public class TextDirectionHeuristics {

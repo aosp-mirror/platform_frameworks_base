@@ -1,5 +1,13 @@
 page.title=Tablet App Quality Checklist
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 <div id="qv-wrapper"><div id="qv">
 <h2>Checklist</h2>
@@ -25,9 +33,7 @@ page.title=Tablet App Quality Checklist
 </ol>
 </div></div>
 
-<p>Before you publish an app on Google Play, it's important to make sure that
-the app meets the basic expectations of tablet users through compelling features
-and an intuitive, well-designed UI. </p>
+<p>Before you publish an app on Google Play, it's important to make sure that the app meets the basic expectations of tablet users through compelling features and an intuitive, well-designed UI. </p>
 
 <p>Tablets are a growing part of the Android installed base that offers new
 opportunities for <a
@@ -258,32 +264,34 @@ different layouts in the appropriate screen size buckets (such as
 <h2 id="use-tablet-icons">4. Use Icons and other assets that are designed
 for tablet screens</h2>
 
-<p>So that your app looks its best, make sure to use icons and other bitmap
-assets that are created specifically for the densities used by tablet screens.
-Specifically, you should create sets of alternative bitmap drawables for each
-density in the range commonly supported by tablets.</p>
+<p>To ensure your app looks its best, provide icons and other bitmap
+assets for each density in the range commonly supported by tablets. Specifically, you should
+design your icons for the action bar, notifications, and launcher according to the
+<a href="{@docRoot}design/style/iconography.html">Iconography</a> guidelines and
+provide them in multiple densities, so they appear at the appropriate size on all screens
+without blurring or other scaling artifacts.</p>
 
 <p class="table-caption"><strong>Table 1</strong>. Raw asset sizes for icon types.<table>
 <tr>
-<th>Density </th>
-<th colspa>Launcher</th>
+<th>Density</th>
+<th>Launcher</th>
 <th>Action Bar</th>
 <th>Small/Contextual</th>
 <th>Notification</th>
 </tr>
 <tr>
 <td><code>mdpi</code></td>
-<td>48x48px</td>
-<td>32x32px</td>
-<td>16x16px</td>
-<td>24x24px</td>
+<td>48x48 px</td>
+<td>32x32 px</td>
+<td>16x16 px</td>
+<td>24x24 px</td>
 </tr>
 <tr>
 <td><code>hdpi</code></td>
-<td>72x72px</td>
-<td>48x48px</td>
-<td>24x24px</td>
-<td>36x36px</td>
+<td>72x72 px</td>
+<td>48x48 px</td>
+<td>24x24 px</td>
+<td>36x36 px</td>
 </tr>
 <tr>
 <td><code>tvdpi</code></td>
@@ -294,34 +302,42 @@ density in the range commonly supported by tablets.</p>
 </tr>
 <tr>
 <td><code>xhdpi</code></td>
-<td>96x96px</td>
-<td>64x64px</td>
-<td>32x32px</td>
-<td>48x48px</td>
+<td>96x96 px</td>
+<td>64x64 px</td>
+<td>32x32 px</td>
+<td>48x48 px</td>
+</tr>
+<tr>
+<td><code>xxhdpi</code></td>
+<td>144x144 px</td>
+<td>96x96 px</td>
+<td>48x48 px</td>
+<td>74x74 px</td>
 </tr>
 
 </table>
 
-<p>Other points to consider: </p>
+<p>Your app should supply a version of each icon and bitmap asset that's optimized
+for <strong>at least one</strong> the following common tablet screen densities:</p>
 
 <ul>
-<li>Icons in the action bar, notifications, and launcher should be designed
-according to the icon design guidelines and have the same physical size on
-tablets as on phones.</li>
-<li>Use density-specific <a
-href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
-resource qualifiers</a> to ensure that the proper set of alternative resources
-gets loaded.</li>
+  <li><code>hdpi</code></li>
+  <li><code>xhdpi</code></li>
+  <li><code>xxhdpi</code></li>
 </ul>
 
-<p style="margin-bottom:.5em;">At a minimum, your app should supply sets of
-  custom drawables and assets for common tablet screen densities,
-  tagged with these qualifiers as appropriate:</p>
+<p>Other tips:</p>
 
 <ul>
-  <li><code>hdpi</code>, OR</li>
-  <li><code>xhdpi</code>, OR</li>
-  <li><code>xxhdpi</code></li>
+<li>When possible, use vector shapes for your icon designs so you can scale them
+without loss of detail and edge crispness.</li>
+<li>Use density-specific <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+resource qualifiers</a> to ensure that the proper icons are loaded for each screen density.</li>
+<li>Tablets and other large screen devices often request a launcher icon that is one density
+size larger than the device's actual density, so you should provide your launcher
+icon at the highest density possible. For example, if a tablet has an {@code xhdpi} screen,
+it will request the {@code xxhdpi} version of the launcher icon.</li>
 </ul>
 
 <div class="rel-resources">
@@ -331,8 +347,8 @@ gets loaded.</li>
 
   <ul>
     <li>
-      <a href="{@docRoot}design/style/iconography.html">Iconography</a>&mdash; Android
-      Design document that shows how to use various types of icons.
+      <a href="{@docRoot}design/style/iconography.html">Iconography</a>&mdash;
+      Design guidelines and tips about how to create various types of icons.
     </li>
 
     <li>

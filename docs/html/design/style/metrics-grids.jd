@@ -4,14 +4,27 @@ page.tags="layout","screens"
 
 <p>Devices vary not only in physical size, but also in screen density (<acronym title="Dots per
 inch">DPI</acronym>). To simplify the way you design for multiple screens, think of each device as
-falling into a particular size bucket and density bucket. The size buckets are <em>handset</em> (smaller than
-600<acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi
-screen.">dp</acronym>) and <em>tablet</em> (larger than or equal 600dp). The density buckets are <acronym
+falling into a particular size bucket and density bucket:</p>
+<ul>
+ <li>The size buckets are <em>handset</em> (smaller than
+600<acronym title="Density-independent pixels: One dp is one pixel on a 160 dpi (mdpi)
+screen.">dp</acronym>) and <em>tablet</em> (larger than or equal 600dp).</li>
+ <li>The density buckets are <acronym
 title="Low density (120 dpi)">LDPI</acronym>, <acronym title="Medium density (160
-dpi)">MDPI</acronym>, <acronym title="High density (240 dpi)">HDPI</acronym>, and <acronym title
-="Extra-high density (320 dpi)">XHDPI</acronym>. Optimize your application's UI by designing
+dpi)">MDPI</acronym>, <acronym title="High density (240 dpi)">HDPI</acronym>, <acronym title
+="Extra-high density (320 dpi)">XHDPI</acronym>, and <acronym title
+="Extra-extra!-high density (480 dpi)">XXHDPI</acronym>.</li>
+</ul>
+
+<p>Optimize your application's UI by designing
 alternative layouts for some of the different size buckets, and provide alternative bitmap images
 for different density buckets.</p>
+
+<p>Because it's important that you design and implement your layouts for multiple densities,
+the guidelines below and throught the documentation
+refer to layout dimensions with <acronym title="Density-independent pixels: One dp is one pixel
+on a 160 dpi (mdpi) screen.">dp</acronym> measurements instead of pixels.</p>
+
 
 <div class="layout-content-row">
   <div class="layout-content-col span-8">
@@ -29,6 +42,7 @@ Screen Sizes and Densities Device Dashboard</a>.</p>
 
   </div>
 </div>
+
 
 <h2 id="48dp-rhythm">48dp Rhythm</h2>
 

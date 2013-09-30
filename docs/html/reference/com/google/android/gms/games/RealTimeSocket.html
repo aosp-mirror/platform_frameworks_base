@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -673,7 +685,7 @@ onkeyup="return search_changed(event, false, '/')" />
  <p>
  Use <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code> to get a file descriptor for read/write, or
  use <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getInputStream()">getInputStream()</a></code> / <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getOutputStream()">getOutputStream()</a></code> to get
- access to an instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code> and <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>
+ access to an instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>
  respectively.
  <p>
  Calling close() on any of (i) the returned <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or, (ii) the
@@ -945,7 +957,7 @@ onkeyup="return search_changed(event, false, '/')" />
  Calling close() on the InputStream will close the socket.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code>.</li></ul>
+      <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code>.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
@@ -994,7 +1006,7 @@ onkeyup="return search_changed(event, false, '/')" />
  packet will be dropped and an error message will be sent to the log.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>.</li></ul>
+      <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
@@ -1038,8 +1050,8 @@ onkeyup="return search_changed(event, false, '/')" />
  Calling close() on the returned ParcelFileDescriptor will close the socket.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>instance of <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or null if the underlying socket
-         is closed.</li></ul>
+      <ul class="nolist"><li>An instance of <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or null if the underlying
+         socket is closed.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>

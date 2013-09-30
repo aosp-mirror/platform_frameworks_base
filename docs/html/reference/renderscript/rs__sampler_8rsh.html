@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_sampler.rsh File Reference</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_sampler.rsh File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -24,15 +24,152 @@
   </div>
 </div>
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">rs_sampler.rsh File Reference</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_sampler.rsh File Reference</div>  </div>
 </div>
 <div class="contents">
+<table class="memberdecls">
+<tr><td colspan="2"><h2><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_sampler_value&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__sampler_8rsh.html#acb1bec2c3d1edd752dd60499c8db58a4">rsSamplerGetMinification</a> (<a class="el" href="structrs__sampler.html">rs_sampler</a> s)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_sampler_value&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__sampler_8rsh.html#a5bddb73826cd20a79c31f012a4637e83">rsSamplerGetMagnification</a> (<a class="el" href="structrs__sampler.html">rs_sampler</a> s)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_sampler_value&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__sampler_8rsh.html#a68a7ab6724019c6e72fae8eb45aa48dd">rsSamplerGetWrapS</a> (<a class="el" href="structrs__sampler.html">rs_sampler</a> s)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_sampler_value&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__sampler_8rsh.html#ab6b25d3b9afa16f418e2dee78ebb4a75">rsSamplerGetWrapT</a> (<a class="el" href="structrs__sampler.html">rs_sampler</a> s)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__sampler_8rsh.html#ab1e79984609469604cba8e2b76a98844">rsSamplerGetAnisotropy</a> (<a class="el" href="structrs__sampler.html">rs_sampler</a> s)</td></tr>
+</table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Sampler routines. </p>
 
 <p>Definition in file <a class="el" href="rs__sampler_8rsh_source.html">rs_sampler.rsh</a>.</p>
-</div></div>
+</div><hr/><h2>Function Documentation</h2>
+<a class="anchor" id="ab1e79984609469604cba8e2b76a98844"></a><!-- doxytag: member="rs_sampler.rsh::rsSamplerGetAnisotropy" ref="ab1e79984609469604cba8e2b76a98844" args="(rs_sampler s)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float rsSamplerGetAnisotropy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get sampler anisotropy</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>sampler to query </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>anisotropy </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a5bddb73826cd20a79c31f012a4637e83"></a><!-- doxytag: member="rs_sampler.rsh::rsSamplerGetMagnification" ref="a5bddb73826cd20a79c31f012a4637e83" args="(rs_sampler s)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_sampler_value rsSamplerGetMagnification </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get sampler magnification value</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>sampler to query </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>magnification value </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="acb1bec2c3d1edd752dd60499c8db58a4"></a><!-- doxytag: member="rs_sampler.rsh::rsSamplerGetMinification" ref="acb1bec2c3d1edd752dd60499c8db58a4" args="(rs_sampler s)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_sampler_value rsSamplerGetMinification </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get sampler minification value</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>sampler to query </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>minification value </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a68a7ab6724019c6e72fae8eb45aa48dd"></a><!-- doxytag: member="rs_sampler.rsh::rsSamplerGetWrapS" ref="a68a7ab6724019c6e72fae8eb45aa48dd" args="(rs_sampler s)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_sampler_value rsSamplerGetWrapS </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get sampler wrap S value</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>sampler to query </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>wrap S value </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ab6b25d3b9afa16f418e2dee78ebb4a75"></a><!-- doxytag: member="rs_sampler.rsh::rsSamplerGetWrapT" ref="ab6b25d3b9afa16f418e2dee78ebb4a75" args="(rs_sampler s)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_sampler_value rsSamplerGetWrapT </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__sampler.html">rs_sampler</a>&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get sampler wrap T value</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>sampler to query </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>wrap T value </dd></dl>
+
+</div>
+</div>
+</div>
 
 </body>
 </html>

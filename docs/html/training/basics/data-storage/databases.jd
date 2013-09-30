@@ -73,22 +73,20 @@ single table:</p>
 
 
 <pre>
-public static abstract class FeedEntry implements BaseColumns {
-    public static final String TABLE_NAME = &quot;entry&quot;;
-    public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
-    public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
-    public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
-    ...
+public final class FeedReaderContract {
+    // To prevent someone from accidentally instantiating the contract class,
+    // give it an empty constructor.
+    public FeedReaderContract() {}
+
+    /* Inner class that defines the table contents */
+    public static abstract class FeedEntry implements BaseColumns {
+        public static final String TABLE_NAME = &quot;entry&quot;;
+        public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
+        public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
+        public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
+        ...
+    }
 }
-</pre>
-
-
-<p>To prevent someone from accidentally instantiating the contract class, give
-it an empty constructor.  </p>
-
-<pre>
-// Prevents the FeedReaderContract class from being instantiated.
-private FeedReaderContract() {}
 </pre>
 
 
@@ -103,15 +101,15 @@ statements that create and delete a table:</P>
 private static final String TEXT_TYPE = &quot; TEXT&quot;;
 private static final String COMMA_SEP = &quot;,&quot;;
 private static final String SQL_CREATE_ENTRIES =
-    &quot;CREATE TABLE &quot; + FeedReaderContract.FeedEntry.TABLE_NAME + &quot; (&quot; +
-    FeedReaderContract.FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
-    FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
-    FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
+    &quot;CREATE TABLE &quot; + FeedEntry.TABLE_NAME + &quot; (&quot; +
+    FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
+    FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+    FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
     ... // Any other options for the CREATE command
     &quot; )&quot;;
 
 private static final String SQL_DELETE_ENTRIES =
-    &quot;DROP TABLE IF EXISTS &quot; + TABLE_NAME_ENTRIES;
+    &quot;DROP TABLE IF EXISTS &quot; + FeedEntry.TABLE_NAME;
 </pre>
 
 <p>Just like files that you save on the device's <a
@@ -191,15 +189,15 @@ SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
 // Create a new map of values, where column names are the keys
 ContentValues values = new ContentValues();
-values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID, id);
-values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE, title);
-values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_CONTENT, content);
+values.put(FeedEntry.COLUMN_NAME_ENTRY_ID, id);
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
+values.put(FeedEntry.COLUMN_NAME_CONTENT, content);
 
 // Insert the new row, returning the primary key value of the new row
 long newRowId;
 newRowId = db.insert(
-         FeedReaderContract.FeedEntry.TABLE_NAME,
-         FeedReaderContract.FeedEntry.COLUMN_NAME_NULLABLE,
+         FeedEntry.TABLE_NAME,
+         FeedEntry.COLUMN_NAME_NULLABLE,
          values);
 </pre>
 
@@ -227,18 +225,18 @@ SQLiteDatabase db = mDbHelper.getReadableDatabase();
 // Define a <em>projection</em> that specifies which columns from the database
 // you will actually use after this query.
 String[] projection = {
-    FeedReaderContract.FeedEntry._ID,
-    FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE,
-    FeedReaderContract.FeedEntry.COLUMN_NAME_UPDATED,
+    FeedEntry._ID,
+    FeedEntry.COLUMN_NAME_TITLE,
+    FeedEntry.COLUMN_NAME_UPDATED,
     ...
     };
 
 // How you want the results sorted in the resulting Cursor
 String sortOrder =
-    FeedReaderContract.FeedEntry.COLUMN_NAME_UPDATED + " DESC";
+    FeedEntry.COLUMN_NAME_UPDATED + " DESC";
 
 Cursor c = db.query(
-    FeedReaderContract.FeedEntry.TABLE_NAME,  // The table to query
+    FeedEntry.TABLE_NAME,  // The table to query
     projection,                               // The columns to return
     selection,                                // The columns for the WHERE clause
     selectionArgs,                            // The values for the WHERE clause
@@ -262,7 +260,7 @@ For example:</p>
 <pre>
 cursor.moveToFirst();
 long itemId = cursor.getLong(
-    cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry._ID)
+    cursor.getColumnIndexOrThrow(FeedEntry._ID)
 );
 </pre>
 
@@ -282,7 +280,7 @@ immune to SQL injection.</p>
 
 <pre>
 // Define 'where' part of query.
-String selection = FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
 // Specify arguments in placeholder order.
 String[] selectionArgs = { String.valueOf(rowId) };
 // Issue SQL statement.
@@ -305,10 +303,10 @@ SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
 // New value for one column
 ContentValues values = new ContentValues();
-values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE, title);
+values.put(FeedEntry.COLUMN_NAME_TITLE, title);
 
 // Which row to update, based on the ID
-String selection = FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
 String[] selectionArgs = { String.valueOf(rowId) };
 
 int count = db.update(

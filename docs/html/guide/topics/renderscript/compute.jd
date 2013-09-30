@@ -1,4 +1,4 @@
-page.title=Renderscript Computation 
+page.title=RenderScript
 parent.title=Computation
 parent.link=index.html
 
@@ -9,15 +9,8 @@ parent.link=index.html
     <h2>In this document</h2>
 
     <ol>
-      <li><a href="#overview">Renderscript System Overview</a></li>
-      <li><a href="#filterscript">Filterscript</a></li>
-      <li>
-        <a href="#creating-renderscript">Creating a Computation Renderscript</a>
-        <ol>
-          <li><a href="#creating-rs-file">Creating the Renderscript file</a></li>
-          <li><a href="#calling">Calling the Renderscript code</a></li>
-        </ol>
-      </li>
+      <li><a href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a></li>
+      <li><a href="#using-rs-from-java">Using RenderScript from Java Code</a></li>
     </ol>
 
     <h2>Related Samples</h2>
@@ -29,371 +22,204 @@ parent.link=index.html
   </div>
 </div>
 
- <p>Renderscript offers a high performance computation API at the native
-level that you write in C (C99 standard). Renderscript gives your apps the ability to run
-operations with automatic parallelization across all available processor cores.
-It also supports different types of processors such as the CPU, GPU or DSP. Renderscript
-is useful for apps that do image processing, mathematical modeling, or any operations
-that require lots of mathematical computation.</p>
+<p>RenderScript is a framework for running computationally intensive tasks at high performance on
+Android. RenderScript is primarily oriented for use with data-parallel computation, although serial
+computationally intensive workloads can benefit as well. The RenderScript runtime will parallelize
+work across all processors available on a device, such as multi-core CPUs, GPUs, or DSPs, allowing
+you to focus on expressing algorithms rather than scheduling work or load balancing. RenderScript is
+especially useful for applications performing image processing, computational photography, or
+computer vision.</p>
 
-<p>In addition, you have access to all of these features without having to write code to
-support different architectures or a different amount of processing cores. You also
-do not need to recompile your application for different processor types, because Renderscript
-code is compiled on the device at runtime.</p>
-
-<p class="note"><strong>Deprecation Notice</strong>: Earlier versions of Renderscript included
-  an experimental graphics engine component. This component
-is now deprecated as of Android 4.1  (most of the APIs in <code>rs_graphics.rsh</code>
-and the corresponding APIs in {@link android.renderscript}).
-If you have apps that render graphics with Renderscript, we highly
-recommend you convert your code to another Android graphics rendering option.</p>
-
-  <h2 id="overview">Renderscript System Overview</h2>
-  <p>The Renderscript runtime operates at the native level and still needs to communicate
-with the Android VM, so the way a Renderscript application is set up is different from a pure VM
-application. An application that uses Renderscript is still a traditional Android application that
-runs in the VM, but you write Renderscript code for the parts of your program that require
-it. No matter what you use it for, Renderscript remains platform
-independent, so you do not have to target multiple architectures (for example,
-ARM v5, ARM v7, x86).</p>
-
-<p>The Renderscript system adopts a control and slave architecture where the low-level Renderscript runtime
-code is controlled by the higher level Android system that runs in a virtual machine (VM). The
-Android VM still retains all control of memory management and binds memory that it allocates to
-the Renderscript runtime, so the Renderscript code can access it. The Android framework makes
-asynchronous calls to Renderscript, and the calls are placed in a message queue and processed
-as soon as possible. Figure 1 shows how the Renderscript system is structured.</p>
-
-   <img id="figure1" src="{@docRoot}images/rs_overview.png" />
-  <p class="img-caption"><strong>Figure 1.</strong> Renderscript system overview</p>
-
-  <p>When using Renderscript, there are three layers of APIs that enable communication between the
-  Renderscript runtime and Android framework code:</p>
-
-  <ul>
-    <li>The Renderscript runtime APIs allow you to do the computation
-    that is required by your application.</li>
-
-    <li>The reflected layer APIs are a set of classes that are reflected from your Renderscript
-runtime code. It is basically a wrapper around the Renderscript code that allows the Android
-framework to interact with the Renderscript runtime. The Android build tools automatically generate the
-classes for this layer during the build process. These classes eliminate the need to write JNI glue
-code, like with the NDK.</li>
-
-    <li>The Android framework layer calls the reflected layer to access the Renderscript
-    runtime.</li>
-  </ul>
-
-<p>Because of the way Renderscript is structured, the main advantages are:</p>
-  <ul>
-    <li>Portability: Renderscript is designed to run on many types of devices with different
-    processor (CPU, GPU, and DSP for instance) architectures. It supports all of these architectures without
-    having to target each device, because the code is compiled and cached on the device
-    at runtime.</li>
-
-    <li>Performance: Renderscript provides a high performance computation API with seamless parallelization
-      across the amount of cores on the device.</li>
-
-    <li>Usability: Renderscript simplifies development when possible, such as eliminating JNI glue code.</li>
-  </ul>
-
-  <p>The main disadvantages are:</p>
-
-  <ul>
-    <li>Development complexity: Renderscript introduces a new set of APIs that you have to learn.</li>
-
-    <li>Debugging visibility: Renderscript can potentially execute (planned feature for later releases)
-    on processors other than the main CPU (such as the GPU), so if this occurs, debugging becomes more difficult.
-    </li>
-  </ul>
-
-<p>For a more detailed explanation of how all of these layers work together, see
-  <a href="{@docRoot}guide/topics/renderscript/advanced.html">Advanced Renderscript</a>.<p>
-
-<h2 id="filterscript">Filterscript</h2>
-
-<p>Introduced in Android 4.2 (API Level 17), Filterscript defines a subset of Renderscript
-that focuses on image processing operations, such as those
-that you would typically write with an OpenGL ES fragment shader. You still write your scripts
-using the standard Renderscript runtime APIs, but within stricter
-constraints that ensure wider compatibility and improved optimization across
-CPUs, GPUs, and DSPs. At compile time, the precompiler evaluates Filterscript files and
-applies a more stringent set of warnings and errors than
-it does for standard Renderscript files. The following list describes the major constraints
-of Filterscript when compared to Renderscript:</p>
-
+<p>To begin with RenderScript, there are two main concepts you should understand:</p>
 <ul>
-<li>Inputs and return values of root functions cannot contain pointers. The default root function
-signature contains pointers, so you must use the <code>__attribute__((kernel))</code> attribute to declare a custom
-root function when using Filterscript.</li>
-<li>Built-in types cannot exceed 32-bits.</li>
-<li>Filterscript must always use relaxed floating point precision by using the
-<code>rs_fp_relaxed</code> pragma.</li>
-<li>Filterscript files must end with an <code>.fs</code> extension, instead of an <code>.rs</code> extension.</li>
+
+<li>High-performance compute kernels are written in a C99-derived language.</li>
+
+<li>A Java API is used for managing the lifetime of RenderScript resources and controlling kernel
+execution.</li>
 </ul>
 
-<h2 id="creating-renderscript">Creating a Renderscript</h2>
+<h2 id="writing-an-rs-kernel">Writing a RenderScript Kernel</h2>
 
-<p>Renderscript scales to the amount of
-processing cores available on the device. This is enabled through a function named
-<code>rsForEach()</code> (or the <code>forEach_root()</code> method at the Android framework level).
-that automatically partitions work across available processing cores on the device.</p>
-
-<p>Implementing a Renderscript involves creating a <code>.rs</code> file that contains
-your Renderscript code and calling it at the Android framework level with the
-<code>forEach_root()</code> or at the Renderscript runtime level with the
-<code>rsForEach()</code> function. The following diagram describes how a typical
-Renderscript is set up:</p><img src="{@docRoot}images/rs_compute.png">
-
-<p class="img-caption"><strong>Figure 1.</strong> Renderscript overview</p>
-
-<p>The following sections describe how to create a simple Renderscript and use it in an
-Android application. This example uses the <a href=
-"{@docRoot}resources/samples/RenderScript/HelloCompute/index.html">HelloCompute Renderscript
-sample</a> that is provided in the SDK as a guide (some code has been modified from its original
-form for simplicity).</p>
-
-<h3 id="creating-rs-file">Creating the Renderscript file</h3>
-
-<p>Your Renderscript code resides in <code>.rs</code> and <code>.rsh</code> files in the
-<code>&lt;project_root&gt;/src/</code> directory. This code contains the computation logic
-and declares all necessary variables and pointers.
-Every <code>.rs</code> file generally contains the following items:</p>
+<p>A RenderScript kernel typically resides in a <code>.rs</code> file in the
+<code>&lt;project_root&gt;/src/</code> directory; each <code>.rs</code> file is called a
+script. Every script contains its own set of kernels, functions, and variables. A script can
+contain:</p>
 
 <ul>
-  <li>A pragma declaration (<code>#pragma rs java_package_name(<em>package.name</em>)</code>)
-  that declares the package name of the <code>.java</code> reflection of this Renderscript.</li>
+<li>A pragma declaration (<code>#pragma version(1)</code>) that declares the version of the
+RenderScript kernel language used in this script. Currently, 1 is the only valid value.</li>
 
-  <li>A pragma declaration (<code>#pragma version(1)</code>) that declares the version of
-  Renderscript that you are using (1 is the only value for now).</li>
-  
-  <li><p>A root function (or kernel) that is the main entry point to your Renderscript.
-  The default <code>root()</code> function must return
-  <code>void</code> and accept the following arguments:</p>
+<li>A pragma declaration (<code>#pragma rs java_package_name(com.example.app)</code>) that
+declares the package name of the Java classes reflected from this script.</li>
 
-    <ul>
-      <li>Pointers to memory allocations that are used for the input and output of the
-      Renderscript. Both of these pointers are required for Android 3.2 (API level 13) platform
-      versions or older. Android 4.0 (API level 14) and later requires one or both of these
-      allocations.</li>
-    </ul>
+<li>Some number of invokable functions. An invokable function is a single-threaded RenderScript
+function that you can call from your Java code with arbitrary arguments. These are often useful for
+initial setup or serial computations within a larger processing pipeline.</li>
 
-    <p>The following arguments are optional, but both must be supplied if you choose to use
-    them:</p>
+<li>Some number of script globals. A script global is equivalent to a global variable in C. You can
+access script globals from Java code, and these are often used for parameter passing to RenderScript
+kernels.</li>
 
-    <ul>
-      <li>A pointer for user-defined data that the Renderscript might need to carry out
-      computations in addition to the necessary allocations. This can be a pointer to a simple
-      primitive or a more complex struct.</li>
+<li>Some number of compute kernels. A kernel is a parallel function that executes across every
+{@link android.renderscript.Element} within an {@link android.renderscript.Allocation}.
 
-      <li>The size of the user-defined data.</li>
-    </ul>
+<p>A simple kernel may look like the following:</p>
 
-  <p>Starting in Android 4.1 (API Level 16), you can choose to define your own root function arguments
-  without adhering to the default root function signature described previously. In addition,
-  you can declare multiple root functions in the same Renderscript. To do this, use the <code>__attribute__((kernel))</code>
-  attribute to define a custom root function. For example, here's a root function
-  that returns a <code>uchar4</code> and accepts two <code>uint32_t</code> types: </p>
+<pre>uchar4 __attribute__((kernel)) invert(uchar4 in, uint32_t x, uint32_t y) {
+  uchar4 out = in;
+  out.r = 255 - in.r;
+  out.g = 255 - in.g;
+  out.b = 255 - in.b;
+  return out;
+}</pre>
 
-  <pre>
-  uchar4 __attribute__((kernel)) root(uint32_t x, uint32_t y) {
-    ...
-  }
-  </pre>
-  </li>
+<p>In most respects, this is identical to a standard C function. The first notable feature is the
+<code>__attribute__((kernel))</code> applied to the function prototype. This denotes that the
+function is a RenderScript kernel instead of an invokable function. The next feature is the
+<code>in</code> argument and its type. In a RenderScript kernel, this is a special argument that is
+automatically filled in based on the input {@link android.renderscript.Allocation} passed to the
+kernel launch. By default, the kernel is run across an entire {@link
+android.renderscript.Allocation}, with one execution of the kernel body per {@link
+android.renderscript.Element} in the {@link android.renderscript.Allocation}. The third notable
+feature is the return type of the kernel. The value returned from the kernel is automatically
+written to the appropriate location in the output {@link android.renderscript.Allocation}. The
+RenderScript runtime checks to ensure that the {@link android.renderscript.Element} types of the
+input and output Allocations match the kernel's prototype; if they do not match, an exception is
+thrown.</p>
 
-  <li>An optional <code>init()</code> function. This allows you to do any initialization 
-  before the root function runs, such as initializing variables. This
-  function runs once and is called automatically when the Renderscript starts, before anything
-  else in your Renderscript.</li>
+<p>A kernel may have an input {@link android.renderscript.Allocation}, an output {@link
+android.renderscript.Allocation}, or both. A kernel may not have more than one input or one output
+{@link android.renderscript.Allocation}. If more than one input or output is required, those objects
+should be bound to <code>rs_allocation</code> script globals and accessed from a kernel or invokable
+function via <code>rsGetElementAt_<em>type</em>()</code> or
+<code>rsSetElementAt_<em>type</em>()</code>.</p>
 
-  <li>Any variables, pointers, and structures that you wish to use in your Renderscript code (can
-  be declared in <code>.rsh</code> files if desired)</li>
-</ul>
+<p>A kernel may access the coordinates of the current execution using the <code>x</code>,
+<code>y</code>, and <code>z</code> arguments. These arguments are optional, but the type of the
+coordinate arguments must be <code>uint32_t</code>.</p></li>
 
-<p>The following code shows how the <a href=
-"{@docRoot}resources/samples/RenderScript/HelloCompute/src/com/example/android/rs/hellocompute/mono.html">
-mono.rs</a> file is implemented:</p>
-<pre>
-#pragma version(1)
-#pragma rs java_package_name(com.example.android.rs.hellocompute)
+<li>An optional <code>init()</code> function. An <code>init()</code> function is a special type of
+invokable function that is run when the script is first instantiated. This allows for some
+computation to occur automatically at script creation.</li>
 
-//multipliers to convert a RGB colors to black and white
-const static float3 gMonoMult = {0.299f, 0.587f, 0.114f};
-
-void root(const uchar4 *v_in, uchar4 *v_out) {
-  //unpack a color to a float4
-  float4 f4 = rsUnpackColor8888(*v_in);
-  //take the dot product of the color and the multiplier
-  float3 mono = dot(f4.rgb, gMonoMult);
-  //repack the float to a color
-  *v_out = rsPackColorTo8888(mono);
-}
-</pre>
+<li>Some number of static script globals and functions. A static script global is equivalent to a
+script global except that it cannot be set from Java code. A static function is a standard C
+function that can be called from any kernel or invokable function in the script but is not exposed
+to the Java API. If a script global or function does not need to be called from Java code, it is
+highly recommended that those be declared <code>static</code>.</li> </ul>
 
 <h4>Setting floating point precision</h4>
-<p>You can define the floating point precision required by your compute algorithms. This is useful if you
- require less precision than the IEEE 754-2008 standard (used by default). You can define
-the floating-point precision level of your script with the following pragmas:</p>
+
+<p>You can control the required level of floating point precision in a script. This is useful if
+full IEEE 754-2008 standard (used by default) is not required. The following pragmas can set a
+different level of floating point precision:</p>
 
 <ul>
-  <li><code>#pragma rs_fp_full</code> (default if nothing is specified): For apps that
-    require floating point precision as outlined by the IEEE 754-2008 standard.
+
+<li><code>#pragma rs_fp_full</code> (default if nothing is specified): For apps that require
+  floating point precision as outlined by the IEEE 754-2008 standard.
+
 </li>
-  <li><code>#pragma rs_fp_relaxed</code> - For apps that don’t require
-    strict IEEE 754-2008 compliance and can tolerate less precision. This mode enables
-    flush-to-zero for denorms and round-towards-zero.
+
+  <li><code>#pragma rs_fp_relaxed</code> - For apps that don’t require strict IEEE 754-2008
+    compliance and can tolerate less precision. This mode enables flush-to-zero for denorms and
+    round-towards-zero.
+
 </li>
-  <li><code>#pragma rs_fp_imprecise</code> - For apps that don’t have stringent precision requirements. This mode enables
-    everything in <code>rs_fp_relaxed</code> along with the following:
+
+  <li><code>#pragma rs_fp_imprecise</code> - For apps that don’t have stringent precision
+    requirements. This mode enables everything in <code>rs_fp_relaxed</code> along with the
+    following:
+
 <ul>
+
   <li>Operations resulting in -0.0 can return +0.0 instead.</li>
   <li>Operations on INF and NAN are undefined.</li>
 </ul>
 </li>
 </ul>
 
-<h4>Script intrinsics</h4>
-<p>Renderscript adds support for a set of script intrinsics, which are pre-implemented
-filtering primitives that reduce the amount of
-code that you need to write. They also are implemented to ensure that your app gets the
-maximum performance gain possible.</p>
+<p>Most applications can use <code>rs_fp_relaxed</code> without any side effects. This may be very
+beneficial on some architectures due to additional optimizations only available with relaxed
+precision (such as SIMD CPU instructions).</p>
 
-<p>
-Intrinsics are available for the following:
+<h2 id="using-rs-from-java">Using RenderScript from Java Code</h2>
+
+<p>Using RenderScript from Java code relies on the {@link android.renderscript} APIs. Most
+applications follow the same basic usage patterns:</p>
+
+<ol>
+
+<li><strong>Initialize a RenderScript context.</strong> The {@link
+android.renderscript.RenderScript} context, created with {@link
+android.renderscript.RenderScript#create}, ensures that RenderScript can be used and provides an
+object to control the lifetime of all subsequent RenderScript objects. You should consider context
+creation to be a potentially long-running operation, since it may create resources on different
+pieces of hardware; it should not be in an application's critical path if at all
+possible. Typically, an application will have only a single RenderScript context at a time.</li>
+
+<li><strong>Create at least one {@link android.renderscript.Allocation} to be passed to a
+script.</strong> An {@link android.renderscript.Allocation} is a RenderScript object that provides
+storage for a fixed amount of data. Kernels in scripts take {@link android.renderscript.Allocation}
+objects as their input and output, and {@link android.renderscript.Allocation} objects can be
+accessed in kernels using <code>rsGetElementAt_<em>type</em>()</code> and
+<code>rsSetElementAt_<em>type</em>()</code> when bound as script globals. {@link
+android.renderscript.Allocation} objects allow arrays to be passed from Java code to RenderScript
+code and vice-versa. {@link android.renderscript.Allocation} objects are typically created using
+{@link android.renderscript.Allocation#createTyped} or {@link
+android.renderscript.Allocation#createFromBitmap}.</li>
+
+<li><strong>Create whatever scripts are necessary.</strong> There are two types of scripts available
+to you when using RenderScript:
+
 <ul>
-  <li>{@link android.renderscript.ScriptIntrinsicBlend Blends}</li>
-  <li>{@link android.renderscript.ScriptIntrinsicBlur Blur}</li>
-  <li>{@link android.renderscript.ScriptIntrinsicColorMatrix Color matrix}</li>
-  <li>{@link android.renderscript.ScriptIntrinsicConvolve3x3 3x3 convolve}</li>
-  <li>{@link android.renderscript.ScriptIntrinsicConvolve5x5 5x5 convolve}</li>
-  <li>{@link android.renderscript.ScriptIntrinsicLUT Per-channel lookup table}</li>
-  <li>{@link android.renderscript.ScriptIntrinsicYuvToRGB Converting an Android YUV buffer to RGB}</li>
-</ul>
 
-<h3 id="calling">Calling the Renderscript code</h3>
+<li><strong>ScriptC</strong>: These are the user-defined scripts as described in <a
+href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a> above. Every script has a Java class
+reflected by the RenderScript compiler in order to make it easy to access the script from Java code;
+this class will have the name <code>ScriptC_<em>filename</em></code>. For example, if the kernel
+above was located in <code>invert.rs</code> and a RenderScript context was already located in
+<code>mRS</code>, the Java code to instantiate the script would be:
 
-<p>You can call the Renderscript from your Android framework code by
-creating a Renderscript object by instantiating the (<code>ScriptC_<em>script_name</em></code>)
-class. This class contains a method, <code>forEach_root()</code>, that lets you invoke
-<code>rsForEach</code>. You give it the same parameters that you would if you were invoking it
-at the Renderscript runtime level. This technique allows your Android application to offload
-intensive mathematical calculations to Renderscript. See the <a href=
-"{@docRoot}resources/samples/RenderScript/HelloCompute/index.html">HelloCompute</a> sample to see
-how a simple Android application can utilize Renderscript.</p>
+<pre>ScriptC_invert invert = new ScriptC_invert(mRenderScript);</pre></li>
 
-<p>To call Renderscript at the Android framework level:</p>
+<li><strong>ScriptIntrinsic</strong>: These are built-in RenderScript kernels for common operations,
+such as Gaussian blur, convolution, and image blending. For more information, see the subclasses of
+{@link android.renderscript.ScriptIntrinsic}.</li>
 
-<ol>
-  <li>Allocate memory that is needed by the Renderscript in your Android framework code.
-  You need an input and output {@link android.renderscript.Allocation} for Android 3.2 (API level
-  13) platform versions and older. The Android 4.0 (API level 14) platform version requires only
-  one or both {@link android.renderscript.Allocation}s.</li>
+</ul></li>
 
-  <li>Create an instance of the <code>ScriptC_<em>script_name</em></code> class.</li>
+<li><strong>Populate Allocations with data.</strong> Except for Allocations created with {@link
+android.renderscript#createFromBitmap}, an Allocation will be populated with empty data when it is
+first created. To populate an Allocation, use one of the <code>copy</code> methods in {@link
+android.renderscript.Allocation}.</li>
 
-  <li>Call <code>forEach_root()</code>, passing in the allocations, the
-  Renderscript, and any optional user-defined data. The output allocation will contain the output
-  of the Renderscript.</li>
-</ol>
+<li><strong>Set any necessary script globals.</strong> Globals may be set using methods in the same
+<code>ScriptC_<em>filename</em></code> class with methods named
+<code>set_<em>globalname</em></code>. For example, in order to set an <code>int</code> named
+<code>elements</code>, use the Java method <code>set_elements(int)</code>. RenderScript objects can
+also be set in kernels; for example, the <code>rs_allocation</code> variable named
+<code>lookup</code> can be set with the method <code>set_lookup(Allocation)</code>.</li>
 
-<p>The following example, taken from the <a href=
-"{@docRoot}resources/samples/RenderScript/HelloCompute/index.html">HelloCompute</a> sample, processes
-a bitmap and outputs a black and white version of it. The
-<code>createScript()</code> method carries out the steps described previously. This method calls the
-Renderscript, <code>mono.rs</code>, passing in memory allocations that store the bitmap to be processed
-as well as the eventual output bitmap. It then displays the processed bitmap onto the screen:</p>
-<pre>
-package com.example.android.rs.hellocompute;
+<li><strong>Launch the appropriate kernels.</strong> Methods to launch a given kernel will be
+reflected in the same <code>ScriptC_<em>filename</em></code> class with methods named
+<code>forEach_<em>kernelname</em>()</code>. These launches are asynchronous, and launches will be
+serialized in the order in which they are launched. Depending on the arguments to the kernel, the
+method will take either one or two Allocations. By default, a kernel will execute over the entire
+input or output Allocation; to execute over a subset of that Allocation, pass an appropriate {@link
+android.renderscript.Script.LaunchOptions} as the last argument to the <code>forEach</code> method.
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
-import android.renderscript.RenderScript;
-import android.renderscript.Allocation;
-import android.widget.ImageView;
+<p>Invoked functions can be launched using the <code>invoke_<em>functionname</em></code> methods
+reflected in the same <code>ScriptC_<em>filename</em></code> class.</p></li>
 
-public class HelloCompute extends Activity {
-  private Bitmap mBitmapIn;
-  private Bitmap mBitmapOut;
+<li><strong>Copy data out of {@link android.renderscript.Allocation} objects.</strong> In order to
+access data from an {@link android.renderscript.Allocation} from Java code, that data must be copied
+back to Java buffers using one of the <code>copy</code> methods in {@link
+android.renderscript.Allocation}. These functions will synchronize with asynchronous kernel and
+function launches as necessary.</li>
 
-  private RenderScript mRS;
-  private Allocation mInAllocation;
-  private Allocation mOutAllocation;
-  private ScriptC_mono mScript;
-
-  &#064;Override
-  protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      setContentView(R.layout.main);
-
-      mBitmapIn = loadBitmap(R.drawable.data);
-      mBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(),
-                                       mBitmapIn.getConfig());
-
-      ImageView in = (ImageView) findViewById(R.id.displayin);
-      in.setImageBitmap(mBitmapIn);
-
-      ImageView out = (ImageView) findViewById(R.id.displayout);
-      out.setImageBitmap(mBitmapOut);
-
-      createScript();
-  }
-  private void createScript() {
-      mRS = RenderScript.create(this);
-      mInAllocation = Allocation.createFromBitmap(mRS, mBitmapIn,
-          Allocation.MipmapControl.MIPMAP_NONE,
-          Allocation.USAGE_SCRIPT);
-      mOutAllocation = Allocation.createTyped(mRS, mInAllocation.getType());
-      mScript = new ScriptC_mono(mRS, getResources(), R.raw.mono);
-      mScript.forEach_root(mInAllocation, mOutAllocation);
-      mOutAllocation.copyTo(mBitmapOut);
-  }
-
-  private Bitmap loadBitmap(int resource) {
-      final BitmapFactory.Options options = new BitmapFactory.Options();
-      options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      return BitmapFactory.decodeResource(getResources(), resource, options);
-  }
-}
-</pre>
-
-<p>To call Renderscript from another Renderscript file:</p>
-<ol>
- <li>Allocate memory that is needed by the Renderscript in your Android framework code.
-  You need an input and output {@link android.renderscript.Allocation} for Android 3.2 (API level
-  13) platform versions and older. The Android 4.0 (API level 14) platform version requires only
-  one or both {@link android.renderscript.Allocation}s.</li>
-
-  <li>Call <code>rsForEach()</code>, passing in the allocations and any optional user-defined data.
-  The output allocation will contain the output of the Renderscript.</li>
-</ol>
- 
-<pre>
-rs_script script;
-rs_allocation in_allocation;
-rs_allocation out_allocation;
-UserData_t data;
-...
-rsForEach(script, in_allocation, out_allocation, &amp;data, sizeof(data));
-</pre>
-</p>
-<p>In this example, assume that the script and memory allocations have already been
-allocated and bound at the Android framework level and that <code>UserData_t</code> is a struct
-declared previously. Passing a pointer to a struct and the size of the struct to <code>rsForEach</code>
-is optional, but useful if your Renderscript requires additional information other than
-the necessary memory allocations.</p>
-
-
-<h4>Script groups</h4>
-
-<p>You can group Renderscript scripts together and execute them all with a single call as though
-they were part of a single script. This allows Renderscript to optimize execution of the scripts
-in ways that it could not do if the scripts were executed individually.</p>
-
-<p>To build a script groupm, use the {@link android.renderscript.ScriptGroup.Builder} class to create a {@link android.renderscript.ScriptGroup}
-defining the operations. At execution time, Renderscript optimizes the run order and the connections between these
-operations for best performance.
-
-<p class="note"><strong>Important:</strong> The script group must be a direct acyclic graph for this feature to work.</p>
+<li><strong>Tear down the RenderScript context.</strong> The RenderScript context can be destroyed
+with {@link android.renderscript.RenderScript#destroy} or by allowing the RenderScript context
+object to be garbage collected. This will cause any further use of any object belonging to that
+context to throw an exception.</li> </ol>

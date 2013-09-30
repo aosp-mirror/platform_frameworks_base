@@ -20,11 +20,11 @@ directly from Google Play.</li>
     <li><a href="#administering">Configuring Subscriptions Items</a></li>
     <li><a href="#cancellation">Cancellation</a></li>
     <li><a href="#payment">Payment Processing</a></li>
-    <li><a href="#play-dev-api">Google Play Android Developer API</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}google/play/billing/billing_integrate.html#Subs">Implementing Subscriptions (V3)</a></li>
+    <li><a href="https://developers.google.com/android-publisher/v1_1/">Google Play Android Developer API</a></li>
   </ol>
 </div>
 </div>
@@ -68,7 +68,7 @@ In-app Billing to provide subscription purchasers with extended access to
 content (for example, from your web site or another service).
 The server-side API lets you validate the status of a subscription when users
 sign into your other services. For more information about the API, see <a
-href="#play-dev-api">Google Play Android Developer API</a>. </p>
+href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Purchase Status API</a>. </p>
 
 <p>You can also build on your existing external subscriber base from inside your
 Android apps.</p>
@@ -157,8 +157,9 @@ subscription.</p>
 <p>When the subscription payment is approved by Google Wallet, Google Play
 provides a purchase token back to the purchasing app through the In-app Billing
 API. Your apps can store the token locally or pass it to your backend servers, 
-which can then use it to validate or cancel the subscription remotely using the <a
-href="#play-dev-api">Google Play Android Developer API</a>.</p>
+which can then use it to validate or cancel the subscription remotely using the
+<a
+href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Purchase Status API</a>.</p>
 
 <p>If a recurring payment fails (for example, because the customer’s credit
 card has become invalid), the subscription does not renew. How your app is 
@@ -322,93 +323,10 @@ or the {@code PURCHASE_STATE_CHANGED} intent (in V2).</p>
 
 <h2 id="play-dev-api">Google Play Android Developer API</h2>
 
-<p>Google Play offers an HTTP-based API that you can use to remotely query the
+<p>Google Play offers an HTTP-based API that lets you remotely query the
 validity of a specific subscription at any time or cancel a subscription. The
 API is designed to be used from your backend servers as a way of securely
 managing subscriptions, as well as extending and integrating subscriptions with
 other services.</p>
 
-<h3 id="using">Using the API</h3>
-
-<p>To use the API, you must first register a project at the <a
-href="https://code.google.com/apis/console">Google APIs Console</a> and receive
-a Client ID and shared secret that  your app will present when calling the
-Google Play Android Developer API. All calls to the API are authenticated with
-OAuth 2.0.</p>
-
-<p>Once your app is registered, you can access the API directly, using standard
-HTTP methods to retrieve and manipulate resources, or you can use the Google
-APIs Client Libraries, which are extended to support the API.</p>
-
-<p>The Google Play Android Developer API is built on a RESTful design that uses
-HTTP and JSON, so any standard web stack can send requests and parse the
-responses. However, if you don’t want to send HTTP requests and parse responses
-manually, you can access the API using the client libraries, which provide
-better language integration, improved security, and support for making calls
-that require user authorization.</p>
-
-<p>For more information about the API and how to access it through the Google
-APIs Client Libraries, see the documentation at:</p> 
-
-<p style="margin-left:1.5em;"><a
-href="https://developers.google.com/android-publisher/v1/">https://developers.
-google.com/android-publisher/v1/</a></p>
-
-<h3 id="quota">Quota</h3>
-
-<p>Applications using the Google Play Android Developer API are limited to an
-initial courtesy usage quota of <strong>15000 requests per day</strong> (per
-application). This should provide enough access for normal
-subscription-validation needs, assuming that you follow the recommendation in
-this section.</p>
-
-<p>If you need to request a higher limit for your application, please use the
-“Request more” link in the <a
-href="https://code.google.com/apis/console/#:quotas">Google APIs Console</a>.
-Also, please read the section below on design best practices for minimizing your
-use of the API.</p>
-
-<h3 id="auth">Authorization</h3>
-
-<p>Calls to the Google Play Android Developer API require authorization. Google
-uses the OAuth 2.0 protocol to allow authorized applications to access user
-data. To learn more, see <a
-href="https://developers.google.com/android-publisher/authorization">Authorization</a>
-in the Google Play Android Developer API documentation.</p>
-
-<h3 id="practices">Using the API efficiently</h3>
-
-<p>Access to the Google Play Android Developer API is regulated to help ensure a
-high-performance environment for all applications that use it. While you can
-request a higher daily quota for your application, we highly recommend that you
-minimize your access using the technique(s) below. </p>
-
-<ul>
-  <li><em>Store subscription expiry on your servers</em> &mdash; your servers
-  should use the Google Play Android Developer API to query the expiration date
-  for new subscription tokens, then store the expiration date locally. This allows
-  you to check the status of subscriptions only at or after the expiration (see
-  below). </li>
-  <li><em>Cache expiration and purchaseState</em> &mdash; If your app contacts
-  your backend servers at runtime to verify subscription validity, your server
-  should cache the expiration and purchaseState to ensure the fastest possible
-  response (and best experience) for the user.</li>
-  <li><em>Query for subscription status only at expiration</em> &mdash; Once your
-  server has retrieved the expiration date of subscription tokens, it should not
-  query the Google Play servers for the subscription status again until the
-  subscription is reaching or has passed the expiration date. Typically, your
-  servers would run a batch query each day to check the status of
-  <em>expiring</em> subscriptions, then update the database. Note that: 
-  <ul>
-    <li>Your servers should not query all subscriptions every day</li>
-    <li>Your servers should never query subscription status dynamically, based on
-    individual requests from your Android application. </li>
-  </ul>
-  </li>
-</ul>
-
-<p>By following those general guidelines, your implementation will offer the
-best possible performance for users and minimize use of the Google Play Android
-Developer API.</p>
-
-
+<p>For complete information, see <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Purchase Status API</a>.</p>

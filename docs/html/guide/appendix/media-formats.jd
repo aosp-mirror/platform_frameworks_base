@@ -259,7 +259,7 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 
 <tr>
 <td>VP8</td>
-<td>&nbsp;</td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.3+)</small></td>
 <td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 2.3.3+)</small></td>
 <td>Streamable only in Android 4.0 and above</td>
 <td>
@@ -272,9 +272,17 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 
 <h2 id="recommendations">Video Encoding Recommendations</h2>
 
-<p>Table 2, below, lists examples of video encoding profiles and parameters that the Android media framework supports for playback. In addition to these encoding parameter recommendations, a device's available <em>video recording</em> profiles can be used as a proxy for media playback capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile CamcorderProfile} class, which is available since API level 8.</p>
+<p>Table 2, below, lists examples of video encoding profiles and parameters that the Android
+media framework supports for playback in the H.264 Baseline Profile codec. While
+table 3 lists examples that the framework supports for playback in the VP8 media codec.</p>
 
-<p class="table-caption" id="encoding-recommendations-table"><strong>Table 2.</strong> Examples of supported video encoding parameters.</p>
+<p>In addition to these encoding parameter recommendations,
+a device's available <em>video recording</em> profiles can be used as a proxy for media playback
+capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile
+CamcorderProfile} class, which is available since API level 8.</p>
+
+<p class="table-caption" id="encoding-recommendations-table"><strong>Table 2.</strong>
+Examples of supported video encoding parameters for the H.264 Baseline Profile codec.</p>
 
 <table>
   <thead>
@@ -282,16 +290,10 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
     <th>&nbsp;</th>
     <th><acronym title="Standard definition">SD</a> (Low quality)</th>
     <th><acronym title="Standard definition">SD</a> (High quality)</th>
-    <th><acronym title="High definition">HD</a> (Not available on all devices)</th>
+    <th><acronym title="High definition">HD 720p</a> (N/A on all devices)</th>
   </tr>
   </thead>
   <tbody>
-  <tr>
-    <th>Video codec</th>
-    <td>H.264 Baseline Profile</td>
-    <td>H.264 Baseline Profile</td>
-    <td>H.264 Baseline Profile</td>
-  </tr>
   <tr>
     <th>Video resolution</th>
     <td>176 x 144 px</td>
@@ -330,6 +332,49 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
   </tr>
   </tbody>
 </table>
+
+
+
+<p class="table-caption" id="encoding-recommendations-table-vp8"><strong>Table 3.</strong>
+Examples of supported video encoding parameters for the VP8 codec.</p>
+
+<table>
+  <thead>
+  <tr>
+    <th>&nbsp;</th>
+    <th><acronym title="Standard definition">SD</a> (Low quality)</th>
+    <th><acronym title="Standard definition">SD</a> (High quality)</th>
+    <th><acronym title="High definition">HD 720p</a> (N/A on all devices)</th>
+    <th><acronym title="High definition">HD 1080p</a> (N/A on all devices)</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <th>Video resolution</th>
+    <td>320 x 180 px</td>
+    <td>640 x 360 px</td>
+    <td>1280 x 720 px</td>
+    <td>1920 x 1080 px</td>
+  </tr>
+  <tr>
+    <th>Video frame rate</th>
+    <td>30 fps</td>
+    <td>30 fps</td>
+    <td>30 fps</td>
+    <td>30 fps</td>
+  </tr>
+  <tr>
+    <th>Video bitrate</th>
+    <td>800 Kbps</td>
+    <td>2 Mbps</td>
+    <td>4 Mbps</td>
+    <td>10 Mbps</td>
+  </tr>
+  </tbody>
+</table>
+
+
+
 
 <p style="margin-top: 2em">For video content that is streamed over HTTP or RTSP, there are additional requirements:</p>
 

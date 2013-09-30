@@ -1,5 +1,13 @@
 page.title=Google Play In-app Billing
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 <p>In-app Billing is a Google Play service that lets you sell digital content from inside
 your applications. You can use the service to sell a wide range of content, including downloadable
@@ -10,6 +18,7 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
+  <li><strong>Purchase Status API</strong>&mdash;The <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Purchase Status API</a> lets you query the status of in-app product or subscription purchases. </li>
   <li><strong>In-app Billing Version 3</strong>&mdash;The <a href="{@docRoot}google/play/billing/api.html">latest version</a> of In-app Billing features a synchronous API that is easier to implement and lets you manage in-app products and subscriptions more effectively.</li>
   <li><strong>Subscriptions now supported in Version 3</strong>&mdash;You can query and launch purchase flows for subscription items using the V3 API.</li>
   <li><strong>Free trials</strong>&mdash;You can now offer users a configurable <a href="/google/play/billing/v2/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed.</li>

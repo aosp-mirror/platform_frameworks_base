@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -813,7 +825,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#build()">build</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Creates a new <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code>.</div>
+        <div class="jd-descrdiv">Builds a new <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object for communicating with the Google+ APIs.</div>
   
   </td></tr>
 
@@ -1227,8 +1239,12 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a new <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code>.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Builds a new <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object for communicating with the Google+ APIs.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1378,7 +1394,7 @@ From class
 
  <p>
  See <a href="https://developers.google.com/+/api/moment-types">Types of app
- activity</a>for the full list of valid app activity types. Example usage:
+ activity</a> for the full list of valid app activity types. Example usage:
  <pre>
       plusClientBuilder.setVisibleActivities(
           "http://schemas.google.com/AddActivity",

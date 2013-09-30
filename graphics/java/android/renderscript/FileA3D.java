@@ -30,9 +30,9 @@ import android.util.TypedValue;
 /**
  * @hide
  * @deprecated in API 16
- * FileA3D allows users to load Renderscript objects from files
+ * FileA3D allows users to load RenderScript objects from files
  * or resources stored on disk. It could be used to load items
- * such as 3D geometry data converted to a Renderscript format from
+ * such as 3D geometry data converted to a RenderScript format from
  * content creation tools. Currently only meshes are supported
  * in FileA3D.
  *
@@ -56,7 +56,7 @@ public class FileA3D extends BaseObj {
         UNKNOWN (0),
         /**
         * @deprecated in API 16
-        * Renderscript Mesh object
+        * RenderScript Mesh object
         **/
         MESH (1);
 
@@ -72,7 +72,7 @@ public class FileA3D extends BaseObj {
 
     /**
     * @deprecated in API 16
-    * IndexEntry contains information about one of the Renderscript
+    * IndexEntry contains information about one of the RenderScript
     * objects inside the file's index. It could be used to query the
     * object's type and also name and load the object itself if
     * necessary.

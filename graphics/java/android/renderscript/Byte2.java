@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the native Renderscript byte2 type back to the Android system.
+ * Class for exposing the native RenderScript byte2 type back to the Android system.
  *
  **/
 public class Byte2 {

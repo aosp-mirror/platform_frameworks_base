@@ -17,21 +17,21 @@
 package android.net.http;
 
 import android.content.Context;
+import com.android.okhttp.OkResponseCache;
+import com.android.okhttp.ResponseSource;
+import com.android.okhttp.internal.DiskLruCache;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.CacheRequest;
 import java.net.CacheResponse;
-import java.net.ExtendedResponseCache;
 import java.net.HttpURLConnection;
 import java.net.ResponseCache;
-import java.net.ResponseSource;
 import java.net.URI;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
-import libcore.io.DiskLruCache;
 import libcore.io.IoUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -151,13 +151,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
  *       } catch (Exception httpResponseCacheNotAvailable) {
  *       }}</pre>
  */
-public final class HttpResponseCache extends ResponseCache
-        implements Closeable, ExtendedResponseCache {
+public final class HttpResponseCache extends ResponseCache implements Closeable {
 
-    private final libcore.net.http.HttpResponseCache delegate;
+    private final com.android.okhttp.HttpResponseCache delegate;
 
-    private HttpResponseCache(File directory, long maxSize) throws IOException {
-        this.delegate = new libcore.net.http.HttpResponseCache(directory, maxSize);
+    private HttpResponseCache(com.android.okhttp.HttpResponseCache delegate) {
+        this.delegate = delegate;
     }
 
     /**
@@ -166,7 +165,12 @@ public final class HttpResponseCache extends ResponseCache
      */
     public static HttpResponseCache getInstalled() {
         ResponseCache installed = ResponseCache.getDefault();
-        return installed instanceof HttpResponseCache ? (HttpResponseCache) installed : null;
+        if (installed instanceof com.android.okhttp.HttpResponseCache) {
+            return new HttpResponseCache(
+                    (com.android.okhttp.HttpResponseCache) installed);
+        }
+
+        return null;
     }
 
     /**
@@ -181,22 +185,25 @@ public final class HttpResponseCache extends ResponseCache
      *     warning.
      */
     public static HttpResponseCache install(File directory, long maxSize) throws IOException {
-        HttpResponseCache installed = getInstalled();
-        if (installed != null) {
+        ResponseCache installed = ResponseCache.getDefault();
+        if (installed instanceof com.android.okhttp.HttpResponseCache) {
+            com.android.okhttp.HttpResponseCache installedCache =
+                    (com.android.okhttp.HttpResponseCache) installed;
             // don't close and reopen if an equivalent cache is already installed
-            DiskLruCache installedCache = installed.delegate.getCache();
             if (installedCache.getDirectory().equals(directory)
-                    && installedCache.maxSize() == maxSize
+                    && installedCache.getMaxSize() == maxSize
                     && !installedCache.isClosed()) {
-                return installed;
+                return new HttpResponseCache(installedCache);
             } else {
-                IoUtils.closeQuietly(installed);
+                // The HttpResponseCache that owns this object is about to be replaced.
+                installedCache.close();
             }
         }
 
-        HttpResponseCache result = new HttpResponseCache(directory, maxSize);
-        ResponseCache.setDefault(result);
-        return result;
+        com.android.okhttp.HttpResponseCache responseCache =
+                new com.android.okhttp.HttpResponseCache(directory, maxSize);
+        ResponseCache.setDefault(responseCache);
+        return new HttpResponseCache(responseCache);
     }
 
     @Override public CacheResponse get(URI uri, String requestMethod,
@@ -214,7 +221,7 @@ public final class HttpResponseCache extends ResponseCache
      * deletion is pending.
      */
     public long size() {
-        return delegate.getCache().size();
+        return delegate.getSize();
     }
 
     /**
@@ -222,7 +229,7 @@ public final class HttpResponseCache extends ResponseCache
      * its data.
      */
     public long maxSize() {
-        return delegate.getCache().maxSize();
+        return delegate.getMaxSize();
     }
 
     /**
@@ -232,7 +239,7 @@ public final class HttpResponseCache extends ResponseCache
      */
     public void flush() {
         try {
-            delegate.getCache().flush();
+            delegate.flush();
         } catch (IOException ignored) {
         }
     }
@@ -263,39 +270,24 @@ public final class HttpResponseCache extends ResponseCache
         return delegate.getRequestCount();
     }
 
-    /** @hide */
-    @Override public void trackResponse(ResponseSource source) {
-        delegate.trackResponse(source);
-    }
-
-    /** @hide */
-    @Override public void trackConditionalCacheHit() {
-        delegate.trackConditionalCacheHit();
-    }
-
-    /** @hide */
-    @Override public void update(CacheResponse conditionalCacheHit, HttpURLConnection connection) {
-        delegate.update(conditionalCacheHit, connection);
-    }
-
     /**
      * Uninstalls the cache and releases any active resources. Stored contents
      * will remain on the filesystem.
      */
     @Override public void close() throws IOException {
-        if (ResponseCache.getDefault() == this) {
+        if (ResponseCache.getDefault() == this.delegate) {
             ResponseCache.setDefault(null);
         }
-        delegate.getCache().close();
+        delegate.close();
     }
 
     /**
      * Uninstalls the cache and deletes all of its stored contents.
      */
     public void delete() throws IOException {
-        if (ResponseCache.getDefault() == this) {
+        if (ResponseCache.getDefault() == this.delegate) {
             ResponseCache.setDefault(null);
         }
-        delegate.getCache().delete();
+        delegate.delete();
     }
 }

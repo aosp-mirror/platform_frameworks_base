@@ -822,7 +822,7 @@ public class AccountManager {
      * {@link android.Manifest.permission#USE_CREDENTIALS}.
      *
      * @param account The account to fetch an auth token for
-     * @param authTokenType The auth token type, see {#link getAuthToken}
+     * @param authTokenType The auth token type, see {@link #getAuthToken getAuthToken()}
      * @param notifyAuthFailure If true, display a notification and return null
      *     if authentication fails; if false, prompt and wait for the user to
      *     re-enter correct credentials before returning

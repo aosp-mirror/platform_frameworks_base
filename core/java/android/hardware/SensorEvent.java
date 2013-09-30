@@ -402,10 +402,9 @@ public class SensorEvent {
      * <li> values[0]: ambient (room) temperature in degree Celsius.</li>
      * </ul>
      *
-     * @see SensorEvent
-     * @see GeomagneticField
      *
-     * <h4>{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD_UNCALIBRATED} </h4>
+     * <h4>{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD_UNCALIBRATED
+     * Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED}:</h4>
      * Similar to {@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD},
      * but the hard iron calibration is reported separately instead of being included
      * in the measurement. Factory calibration and temperature compensation will still
@@ -437,7 +436,7 @@ public class SensorEvent {
      * Soft iron - These distortions arise due to the interaction with the earth's magentic
      * field.
      * </p>
-     * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR} </h4>
+     * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR}:</h4>
      * Identical to {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR} except that it
      * doesn't use the geomagnetic field. Therefore the Y axis doesn't
      * point north, but instead to some other reference, that reference is
@@ -452,7 +451,8 @@ public class SensorEvent {
      * the estimated heading accuracy value.
      * </p>
      *
-     * <h4> {@link android.hardware.Sensor#TYPE_GYROSCOPE_UNCALIBRATED} </h4>
+     * <h4> {@link android.hardware.Sensor#TYPE_GYROSCOPE_UNCALIBRATED
+     * Sensor.TYPE_GYROSCOPE_UNCALIBRATED}:</h4>
      * All values are in radians/second and measure the rate of rotation
      * around the X, Y and Z axis. An estimation of the drift on each axis is
      * reported as well.
@@ -477,9 +477,10 @@ public class SensorEvent {
      * <li> values[5] : estimated drift around Z axis in rad/s </li>
      * </ul>
      * </p>
-     * <h4></h4>
-     * <h4> Pro Tip: Always use the length of the values array while performing operations
-     * on it. In earlier versions, this used to be always 3 which has changed now. </h4>
+     * <p><b>Pro Tip:</b> Always use the length of the values array while performing operations
+     * on it. In earlier versions, this used to be always 3 which has changed now. </p>
+     *
+     * @see GeomagneticField
      */
     public final float[] values;
 

@@ -56,7 +56,8 @@ public class WifiMonitor {
     private static final int TERMINATING  = 6;
     private static final int DRIVER_STATE = 7;
     private static final int EAP_FAILURE  = 8;
-    private static final int UNKNOWN      = 9;
+    private static final int ASSOC_REJECT = 9;
+    private static final int UNKNOWN      = 10;
 
     /** All events coming from the supplicant start with this prefix */
     private static final String EVENT_PREFIX_STR = "CTRL-EVENT-";
@@ -151,6 +152,11 @@ public class WifiMonitor {
      * This indicates an authentication failure on EAP FAILURE event
      */
     private static final String EAP_AUTH_FAILURE_STR = "EAP authentication failed";
+
+    /**
+     * This indicates an assoc reject event
+     */
+    private static final String ASSOC_REJECT_STR = "ASSOC-REJECT";
 
     /**
      * Regex pattern for extracting an Ethernet-style MAC address from a string.
@@ -328,6 +334,8 @@ public class WifiMonitor {
     public static final int AP_STA_DISCONNECTED_EVENT            = BASE + 41;
     public static final int AP_STA_CONNECTED_EVENT               = BASE + 42;
 
+    /* Indicates assoc reject event */
+    public static final int ASSOCIATION_REJECTION_EVENT          = BASE + 43;
     /**
      * This indicates the supplicant connection for the monitor is closed
      */
@@ -429,6 +437,8 @@ public class WifiMonitor {
                     event = DRIVER_STATE;
                 else if (eventName.equals(EAP_FAILURE_STR))
                     event = EAP_FAILURE;
+                else if (eventName.equals(ASSOC_REJECT_STR))
+                    event = ASSOC_REJECT;
                 else
                     event = UNKNOWN;
 
@@ -473,6 +483,8 @@ public class WifiMonitor {
                     if (eventData.startsWith(EAP_AUTH_FAILURE_STR)) {
                         mStateMachine.sendMessage(AUTHENTICATION_FAILURE_EVENT);
                     }
+                } else if (event == ASSOC_REJECT) {
+                        mStateMachine.sendMessage(ASSOCIATION_REJECTION_EVENT);
                 } else {
                     handleEvent(event, eventData);
                 }

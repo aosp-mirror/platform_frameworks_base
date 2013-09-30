@@ -24,6 +24,7 @@ devices.</p>
 that will help schools. We want to help you create innovative educational apps,
 without having to knock on school doors to reach teachers and students.</p>
 
+<p><a class="landing-page-link" style="text-align:right;" href="#video">Watch a Video</a></p>
 
 <div class="landing-docs">
   <div class="col-6 normal-links">
@@ -78,4 +79,26 @@ of any size, across classrooms, schools, or even districts. </p>
   </div>
 
 
+</div>
+<div id="video" style="background: #F0F0F0;
+            border-top: 1px solid #DDD;
+            padding: 0px 0 24px 0;
+            overflow: auto;
+            clear:both;
+            margin-bottom:40px;
+            margin-top:30px;">
+   <div style="padding:0 0 0 29px;">
+        <h4>Introducing Google Play for Education</h4>
+
+          <div style="width:700px;">
+          <p style="margin-top:26px;
+                    margin-bottom:12px;">
+          Hear how Google Play for Education works and how developers can leverage the unique business opportunities in creating educational apps for the K-12 market. There's a demo at 4m10s.</p>
+           </div>
+           <iframe style="float:left;
+             margin-right:24px;
+             margin-top:14px;" width="700" height="394" src=
+             "http://www.youtube.com/embed/haEmsMo0f3w?HD=1;rel=0;origin=developer.android.com;" frameborder="0" allowfullscreen>
+           </iframe>
+   </div> 
 </div>

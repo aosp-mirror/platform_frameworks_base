@@ -54,8 +54,8 @@ class="toggle-content-img" alt="" />
     <strong>Table of Contents</strong>
   </a></p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
-    <ol class="toc" style="margin-left:-1em">
+  <div class="toggle-content-toggleme" style="padding: 5px 18px">
+    <ol>
       <li><a href="#Contacts">Social APIs in Contacts Provider</a></li>
       <li><a href="#Calendar">Calendar Provider</a></li>
       <li><a href="#Voicemail">Voicemail Provider</a></li>

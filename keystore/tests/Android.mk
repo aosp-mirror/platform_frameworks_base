@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_CERTIFICATE := platform
 
-LOCAL_JAVA_LIBRARIES := android.test.runner bouncycastle
+LOCAL_JAVA_LIBRARIES := android.test.runner bouncycastle conscrypt
 
 # Include all test java files.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)

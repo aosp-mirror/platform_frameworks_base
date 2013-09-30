@@ -67,8 +67,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.LruCache;
+import android.text.TextUtils;
 
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
@@ -1367,6 +1367,7 @@ public class WifiStateMachine extends StateMachine {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
+    private static final String ID_STR = "id=";
     private static final String BSSID_STR = "bssid=";
     private static final String FREQ_STR = "freq=";
     private static final String LEVEL_STR = "level=";
@@ -1378,6 +1379,8 @@ public class WifiStateMachine extends StateMachine {
 
     /**
      * Format:
+     *
+     * id=1
      * bssid=68:7f:76:d7:1a:6e
      * freq=2412
      * level=-44
@@ -1385,6 +1388,7 @@ public class WifiStateMachine extends StateMachine {
      * flags=[WPA2-PSK-CCMP][WPS][ESS]
      * ssid=zfdy
      * ====
+     * id=2
      * bssid=68:5f:74:d7:1a:6f
      * freq=5180
      * level=-73
@@ -1393,16 +1397,43 @@ public class WifiStateMachine extends StateMachine {
      * ssid=zuby
      * ====
      */
-    private void setScanResults(String scanResults) {
+    private void setScanResults() {
         String bssid = "";
         int level = 0;
         int freq = 0;
         long tsf = 0;
         String flags = "";
         WifiSsid wifiSsid = null;
+        String scanResults;
+        String tmpResults;
+        StringBuffer scanResultsBuf = new StringBuffer();
+        int sid = 0;
 
-        if (scanResults == null) {
-            return;
+        while (true) {
+            tmpResults = mWifiNative.scanResults(sid);
+            if (TextUtils.isEmpty(tmpResults)) break;
+            scanResultsBuf.append(tmpResults);
+            scanResultsBuf.append("\n");
+            String[] lines = tmpResults.split("\n");
+            sid = -1;
+            for (int i=lines.length - 1; i >= 0; i--) {
+                if (lines[i].startsWith(END_STR)) {
+                    break;
+                } else if (lines[i].startsWith(ID_STR)) {
+                    try {
+                        sid = Integer.parseInt(lines[i].substring(ID_STR.length())) + 1;
+                    } catch (NumberFormatException e) {
+                        // Nothing to do
+                    }
+                    break;
+                }
+            }
+            if (sid == -1) break;
+        }
+
+        scanResults = scanResultsBuf.toString();
+        if (TextUtils.isEmpty(scanResults)) {
+           return;
         }
 
         synchronized(mScanResultCache) {
@@ -1740,6 +1771,14 @@ public class WifiStateMachine extends StateMachine {
         // TODO: Remove this comment when the driver is fixed.
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, false);
         mWifiNative.setPowerSave(false);
+
+        /* P2p discovery breaks dhcp, shut it down in order to get through this */
+        Message msg = new Message();
+        msg.what = WifiP2pService.BLOCK_DISCOVERY;
+        msg.arg1 = WifiP2pService.ENABLED;
+        msg.arg2 = DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE;
+        msg.obj = mDhcpStateMachine;
+        mWifiP2pChannel.sendMessage(msg);
     }
 
 
@@ -1765,6 +1804,8 @@ public class WifiStateMachine extends StateMachine {
         /* Restore power save and suspend optimizations */
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, true);
         mWifiNative.setPowerSave(true);
+
+        mWifiP2pChannel.sendMessage(WifiP2pService.BLOCK_DISCOVERY, WifiP2pService.DISABLED);
 
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
@@ -1944,6 +1985,7 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
                 case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_BLACKLIST_NETWORK:
                 case CMD_CLEAR_BLACKLIST:
@@ -2229,7 +2271,7 @@ public class WifiStateMachine extends StateMachine {
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
-                    setScanResults(mWifiNative.scanResults());
+                    setScanResults();
                     sendScanResultsAvailableBroadcast();
                     mScanResultIsPending = false;
                     break;
@@ -2361,6 +2403,7 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
                 case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
@@ -2740,6 +2783,9 @@ public class WifiStateMachine extends StateMachine {
             WifiConfiguration config;
             boolean ok;
             switch(message.what) {
+                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
+                    mSupplicantStateTracker.sendMessage(WifiMonitor.ASSOCIATION_REJECTION_EVENT);
+                    break;
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                     mSupplicantStateTracker.sendMessage(WifiMonitor.AUTHENTICATION_FAILURE_EVENT);
                     break;
@@ -2955,7 +3001,6 @@ public class WifiStateMachine extends StateMachine {
             switch (message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                   handlePreDhcpSetup();
-                  mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
                   break;
               case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                   handlePostDhcpSetup();
@@ -3469,6 +3514,9 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
+                    break;
+                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
+                    if (DBG) log("Ignore Assoc reject event during WPS Connection");
                     break;
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                     // Disregard auth failure events during WPS connection. The

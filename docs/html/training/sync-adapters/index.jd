@@ -1,0 +1,135 @@
+page.title=Transferring Data Using Sync Adapters
+
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+    <li>Android 2.1 (API Level 7) or higher</li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/components/bound-services.html">Bound Services</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+    </li>
+    <li>
+        <a href="{@docRoot}training/id-auth/custom_auth.html">Creating a Custom Account Type</a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/BasicSyncAdapter.zip" class="button">Download the sample</a>
+ <p class="filename">BasicSyncAdapter.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    Synchronizing data between an Android device and web servers can make your application
+    significantly more useful and compelling for your users. For example, transferring data to a web
+    server makes a useful backup, and transferring data from a server makes it available to the user
+    even when the device is offline. In some cases, users may find it easier to enter and edit their
+    data in a web interface and then have that data available on their device, or they may want to
+    collect data over time and then upload it to a central storage area.
+</p>
+<p>
+    Although you can design your own system for doing data transfers in your app, you should
+    consider using Android's sync adapter framework. This framework helps manage and automate data
+    transfers, and coordinates synchronization operations across different apps. When you use
+    this framework, you can take advantage of several features that aren't available to data
+    transfer schemes you design yourself:
+</p>
+<dl>
+    <dt>
+        Plug-in architecture
+    </dt>
+    <dd>
+        Allows you to add data transfer code to the system in the form of callable components.
+    </dd>
+    <dt>
+        Automated execution
+    </dt>
+    <dd>
+        Allows you to automate data transfer based on a variety of criteria, including data changes,
+        elapsed time, or time of day. In addition, the system adds transfers that are unable to
+        run to a queue, and runs them when possible.
+    </dd>
+    <dt>
+        Automated network checking
+    </dt>
+    <dd>
+        The system only runs your data transfer when the device has network connectivity.
+    </dd>
+    <dt>
+        Improved battery performance
+    </dt>
+    <dd>
+        Allows you to centralize all of your app's data transfer tasks in one place, so that they
+        all run at the same time. Your data transfer is also scheduled in conjunction with data
+        transfers from other apps. These factors reduce the number of times the system has to
+        switch on the network, which reduces battery usage.
+    </dd>
+    <dt>
+        Account management and authentication
+    </dt>
+    <dd>
+        If your app requires user credentials or server login, you can optionally
+        integrate account management and authentication into your data transfer.
+    </dd>
+</dl>
+<p>
+    This class shows you how to create a sync adapter and the bound {@link android.app.Service} that
+    wraps it, how to provide the other components that help you plug the sync adapter into the
+    framework, and how to run the sync adapter to run in various ways.
+</p>
+<p class="note">
+    <strong>Note:</strong> Sync adapters run asynchronously, so you should use them with the
+    expectation that they transfer data regularly and efficiently, but not instantaneously. If
+    you need to do real-time data transfer, you should do it in an {@link android.os.AsyncTask} or
+    an {@link android.app.IntentService}.
+</p>
+<h2>Lessons</h2>
+<dl>
+    <dt>
+        <b><a href="creating-authenticator.html">Creating a Stub Authenticator</a></b>
+    </dt>
+    <dd>
+        Learn how to add an account-handling component that the sync adapter framework expects to be
+        part of your app. This lesson shows you how to create a stub authentication component for
+        simplicity.
+    </dd>
+    <dt>
+        <b><a href="creating-stub-provider.html">Creating a Stub Content Provider</a></b>
+    </dt>
+    <dd>
+        Learn how to add a content provider component that the sync adapter framework expects to be
+        part of your app. This lesson assumes that your app doesn't use a content provider, so it
+        shows you how to add a stub component. If you have a content provider already in your app,
+        you can skip this lesson.
+    </dd>
+    <dt>
+        <b><a href="creating-sync-adapter.html">Creating a Sync Adapter</a></b>
+    </dt>
+    <dd>
+        Learn how to encapsulate your data transfer code in a component that the sync
+        adapter framework can run automatically.
+    </dd>
+    <dt>
+        <b><a href="running-sync-adapter.html">Running a Sync Adapter</a></b>
+    </dt>
+    <dd>
+        Learn how to trigger and schedule data transfers using the sync adapter framework.
+    </dd>
+</dl>

@@ -57,7 +57,7 @@ public final class SELinuxMMAC {
 
     // Locations of potential install policy files.
     private static final File[] INSTALL_POLICY_FILE = {
-        new File(Environment.getDataDirectory(), "system/mac_permissions.xml"),
+        new File(Environment.getDataDirectory(), "security/mac_permissions.xml"),
         new File(Environment.getRootDirectory(), "etc/security/mac_permissions.xml"),
         null};
 

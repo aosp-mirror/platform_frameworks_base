@@ -187,6 +187,7 @@ class="en">MonkeyRunner</span></a></li>
        <li class="nav-section">
           <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/uiautomator/index.html"><span class="en">uiautomator</span></a></div>
           <ul>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/Configurator.html"><span class="en">Configurator</span></a></li>
              <li><a href="<?cs var:toroot ?>tools/help/uiautomator/IAutomationSupport.html"><span class="en">IAutomationSupport</span></a></li>
              <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiAutomatorTestCase.html"><span class="en">UiAutomatorTestCase</span></a></li>
              <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiCollection.html"><span class="en">UiCollection</span></a></li>

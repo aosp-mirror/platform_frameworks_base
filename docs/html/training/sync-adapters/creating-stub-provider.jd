@@ -1,0 +1,203 @@
+page.title=Creating a Stub Content Provider
+
+trainingnavtop=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li>
+        <a href="#CreateProvider">Add a Stub Content Provider</a>
+    </li>
+    <li>
+        <a href="#DeclareProvider">Declare the Provider in the Manifest</a>
+    </li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html"
+        >Content Provider Basics</a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/BasicSyncAdapter.zip" class="button">Download the sample</a>
+ <p class="filename">BasicSyncAdapter.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    The sync adapter framework is designed to work with device data managed by the flexible and
+    highly secure content provider framework. For this reason, the sync adapter framework expects
+    that an app that uses the framework has already defined a content provider for its local data.
+    If the sync adapter framework tries to run your sync adapter, and your app doesn't have a
+    content provider, your sync adapter crashes.
+</p>
+<p>
+    If you're developing a new app that transfers data from a server to the device, you should
+    strongly consider storing the local data in a content provider. Besides their importance for
+    sync adapters, content providers offer a variety of security benefits and are specifically
+    designed to handle data storage on Android systems. To learn more about creating a content
+    provider, see <a href="{@docRoot}guide/topics/providers/content-provider-creating.html"
+    >Creating a Content Provider</a>.
+</p>
+<p>
+    However, if you're already storing local data in another form, you can still use a sync
+    adapter to handle data transfer. To satisfy the sync adapter framework requirement for a
+    content provider, add a stub content provider to your app. A stub provider implements the
+    content provider class, but all of its required methods return {@code null} or {@code 0}. If you
+    add a stub provider, you can then use a sync adapter to transfer data from any storage
+    mechanism you choose.
+</p>
+<p>
+    If you already have a content provider in your app, you don't need a stub content provider.
+    In that case, you can skip this lesson and proceed to the lesson
+    <a href="creating-sync-adapter.html">Creating a Sync Adapter</a>. If you don't yet have a
+    content provider, this lesson shows you how to add a stub content provider that allows you to
+    plug your sync adapter into the framework.
+</p>
+<h2 id="CreateProvider">Add a Stub Content Provider</h2>
+<p>
+    To create a stub content provider for your app, extend the class
+    {@link android.content.ContentProvider} and stub out its required methods. The following
+    snippet shows you how to create the stub provider:
+</p>
+<pre>
+/*
+ * Define an implementation of ContentProvider that stubs out
+ * all methods
+ */
+public class StubProvider extends ContentProvider {
+    /*
+     * Always return true, indicating that the
+     * provider loaded correctly.
+     */
+    &#64;Override
+    public boolean onCreate() {
+        return true;
+    }
+    /*
+     * Return an empty String for MIME type
+     */
+    &#64;Override
+    public String getType() {
+        return new String();
+    }
+    /*
+     * query() always returns no results
+     *
+     */
+    &#64;Override
+    public Cursor query(
+            Uri uri,
+            String[] projection,
+            String selection,
+            String[] selectionArgs,
+            String sortOrder) {
+        return null;
+    }
+    /*
+     * insert() always returns null (no URI)
+     */
+    &#64;Override
+    public Uri insert(Uri uri, ContentValues values) {
+        return null;
+    }
+    /*
+     * delete() always returns "no rows affected" (0)
+     */
+    &#64;Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        return 0;
+    }
+    /*
+     * update() always returns "no rows affected" (0)
+     */
+    public int update(
+            Uri uri,
+            ContentValues values,
+            String selection,
+            String[] selectionArgs) {
+        return 0;
+    }
+}
+</pre>
+<h2 id="DeclareProvider">Declare the Provider in the Manifest</h2>
+<p>
+    The sync adapter framework verifies that your app has a content provider by checking that your
+    app has declared a provider in its app manifest. To declare the stub provider in the
+    manifest, add a <code><a href="{@docRoot}guide/topics/manifest/provider-element.html"
+    >&lt;provider&gt;</a></code> element with  the following attributes:
+</p>
+<dl>
+    <dt>
+        <code>android:name="com.example.android.datasync.provider.StubProvider"</code>
+    </dt>
+    <dd>
+        Specifies the fully-qualified name of the class that implements the stub content provider.
+    </dd>
+    <dt>
+        <code>android:authorities="com.example.android.datasync.provider"</code>
+    </dt>
+    <dd>
+        A URI authority that identifies the stub content provider. Make this value your app's
+        package name with the string ".provider" appended to it. Even though you're declaring your
+        stub provider to the system, nothing tries to access the provider itself.
+   </dd>
+    <dt>
+        <code>android:exported="false"</code>
+    </dt>
+    <dd>
+        Determines whether other apps can access the content provider. For your stub content
+        provider, set the value to {@code false}, since there's no need to allow other apps to see
+        the provider. This value doesn't affect the interaction between the sync adapter framework
+        and the content provider.
+    </dd>
+    <dt>
+        <code>android:syncable="true"</code>
+    </dt>
+    <dd>
+        Sets a flag that indicates that the provider is syncable. If you set this flag to
+        {@code true}, you don't have to call {@link android.content.ContentResolver#setIsSyncable
+        setIsSyncable()} in your code. The flag allows the sync adapter framework to make data
+        transfers with the content provider, but transfers only occur if you do them explicitly.
+    </dd>
+</dl>
+<p>
+    The following snippet shows you how to add the
+    <code><a href="{@docRoot}guide/topics/manifest/provider-element.html"
+    >&lt;provider&gt;</a></code> element to the app manifest:
+</p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.android.network.sync.BasicSyncAdapter"
+    android:versionCode="1"
+    android:versionName="1.0" &gt;
+    &lt;application
+        android:allowBackup="true"
+        android:icon="&#64;drawable/ic_launcher"
+        android:label="&#64;string/app_name"
+        android:theme="&#64;style/AppTheme" &gt;
+    ...
+    &lt;provider
+        android:name="com.example.android.datasync.provider.StubProvider"
+        android:authorities="com.example.android.datasync.provider"
+        android:export="false"
+        android:syncable="true"/&gt;
+    ...
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+<p>
+    Now that you have created the dependencies required by the sync adapter framework, you can
+    create the component that encapsulates your data transfer code. This component is called a
+    sync adapter. The next lesson shows you how to add this component to your app.
+</p>

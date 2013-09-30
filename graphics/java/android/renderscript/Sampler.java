@@ -28,9 +28,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 /**
- * Sampler object which defines how data is extracted from textures. Samplers
- * are attached to Program objects (currently only ProgramFragment) when those objects
- * need to access texture data.
+ * Sampler object that defines how Allocations can be read as textures within a
+ * kernel. Samplers are used in conjunction with the {@code rsSample} runtime
+ * function to return values from normalized coordinates.
+ *
+ * Any Allocation used with a Sampler must have been created with {@link
+ * android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE}; using a Sampler on
+ * an {@link android.renderscript.Allocation} that was not created with {@link
+ * android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE} is undefined.
  **/
 public class Sampler extends BaseObj {
     public enum Value {
@@ -275,9 +280,8 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * Builder for creating non-standard samplers.  Usefull if mix and match of
-     * wrap modes is necesary or if anisotropic filtering is desired.
-     *
+     * Builder for creating non-standard samplers.  This is only necessary if
+     * a Sampler with different min and mag modes is desired.
      */
     public static class Builder {
         RenderScript mRS;

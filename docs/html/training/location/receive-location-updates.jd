@@ -417,7 +417,7 @@ public class MainActivity extends FragmentActivity implements
     public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
     // Update frequency in milliseconds
     private static final long UPDATE_INTERVAL =
-            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN SECONDS;
+            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
     // The fastest update frequency, in seconds
     private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
     // A fast frequency ceiling in milliseconds
@@ -425,7 +425,7 @@ public class MainActivity extends FragmentActivity implements
             MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
     ...
     // Define an object that holds accuracy and frequency parameters
-    LocationResult mLocationRequest;
+    LocationRequest mLocationRequest;
     ...
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -458,9 +458,11 @@ public class MainActivity extends FragmentActivity implements
     the request by calling
 <code><a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">requestLocationUpdates()</a></code>.
     Since your client must be connected for your app to receive updates, you should
-    connect the client and make the request in
+    connect the client in
     {@link android.support.v4.app.FragmentActivity#onStart onStart()}. This ensures that you always
-    have a valid, connected client while your app is visible.
+    have a valid, connected client while your app is visible. Since you need a connection before you
+    can request updates, make the update request in
+<code><a href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">ConnectionCallbacks.onConnected()</a></code>
 </p>
 <p>
     Remember that the user may want to turn off location updates for various reasons. You should
@@ -533,6 +535,21 @@ public class MainActivity extends FragmentActivity implements
         } else {
             mEditor.putBoolean("KEY_UPDATES_ON", false);
             mEditor.commit();
+        }
+    }
+    ...
+    /*
+     * Called by Location Services when the request to connect the
+     * client finishes successfully. At this point, you can
+     * request the current location or start periodic updates
+     */
+    &#64;Override
+    public void onConnected(Bundle dataBundle) {
+        // Display the connection status
+        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        // If already requested, start periodic updates
+        if (mUpdatesRequested) {
+            mLocationClient.requestLocationUpdates(mLocationRequest, this);
         }
     }
     ...

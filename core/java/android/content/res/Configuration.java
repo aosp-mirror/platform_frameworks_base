@@ -853,11 +853,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
             screenHeightDp = delta.screenHeightDp;
         }
-        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && smallestScreenWidthDp != delta.smallestScreenWidthDp) {
+            changed |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
             smallestScreenWidthDp = delta.smallestScreenWidthDp;
         }
-        if (delta.densityDpi != DENSITY_DPI_UNDEFINED) {
+        if (delta.densityDpi != DENSITY_DPI_UNDEFINED &&
+                densityDpi != delta.densityDpi) {
             changed |= ActivityInfo.CONFIG_DENSITY;
             densityDpi = delta.densityDpi;
         }

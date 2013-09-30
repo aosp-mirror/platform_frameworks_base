@@ -2,6 +2,17 @@ page.title=Migrating from Eclipse
 
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+<h2>See also</h2>
+<ul>
+ <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Working+in+Eclipse+Compatibility+Mode" class="external-link"
+ >Eclipse Compatibility Mode</a></li>
+ <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA" class="external-link"
+ >FAQ on Migrating</a></li>
+</ul>
+</div>
+</div>
 
 <p>If you've previously developed for Android using Eclipse and would like to migrate
 to Android Studio, you should export your projects from Eclipse in order to generate

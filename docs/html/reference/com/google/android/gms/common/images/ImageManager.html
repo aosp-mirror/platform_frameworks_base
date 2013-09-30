@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -755,21 +767,9 @@ Summary:
          
          
         
-        class</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/images/ImageManager.ImageReceiver.html">ImageManager.ImageReceiver</a></td>
-      <td class="jd-descrcol" width="100%">&nbsp;</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%">&nbsp;</td>
+      <td class="jd-descrcol" width="100%">Listener interface for handling when the image for a particular URI has been loaded.&nbsp;</td>
     </tr>
     
     
@@ -1257,7 +1257,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.</td>
+          <td>URI to load the image data from.</td>
         </tr>
       </table>
   </div>
@@ -1344,8 +1344,8 @@ From class
  <p>
  The result is delivered to the given listener on the main thread.
  <p>
- If we don't find a result image view will be set to the given default resource if the image
- needs to be loaded asynchronously.</p></div>
+ If a result is not found, the image view will be set to the given default resource if the
+ image needs to be loaded asynchronously.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1355,7 +1355,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.</td>
+          <td>URI to load the image data from.</td>
         </tr>
         <tr>
           <th>defaultResId</td>
@@ -1405,7 +1405,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.
+          <td>URI to load the image data from.
 </td>
         </tr>
       </table>
@@ -1459,7 +1459,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.</td>
+          <td>URI to load the image data from.</td>
         </tr>
         <tr>
           <th>defaultResId</td>

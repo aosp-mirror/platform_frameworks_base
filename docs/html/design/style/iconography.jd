@@ -4,8 +4,36 @@ page.tags="icons"
 
 <img src="{@docRoot}design/media/iconography_overview.png">
 
+
 <p>An icon is a graphic that takes up a small portion of screen real estate and provides a quick,
 intuitive representation of an action, a status, or an app.</p>
+
+<p>When you design icons for your app, it's important to keep in mind that your
+app may be installed on a variety of devices that offer a range of
+pixel densities, as mentioned in
+<a href="{@docRoot}design/style/devices-displays.html">Devices
+and Displays</a>. But you can make your icons look great on all devices
+by providing each icon in multiple sizes. When your app runs, Android checks the characteristics of
+the device screen and loads the appropriate density-specific assets for your app. </p>
+
+<p>Because you will deliver each icon in multiple sizes to support different densities,
+the design guidelines below
+refer to the icon dimensions in <acronym title="density-independent pixels">dp</acronym>
+units, which are based on the pixel dimensions of a medium-density (MDPI) screen.</p>
+
+<img src="{@docRoot}design/media/devices_displays_density@2x.png" alt="" height="160" />
+
+<p>So, to create an icon for different densities, you should follow the <strong>2:3:4:6 scaling
+ratio</strong> between the four primary densities (medium, high, x-high, and xx-high,
+respectively). For example, consider that the size for a launcher icon is specified to be
+48x48 dp. This means the baseline (MDPI) asset is 48x48 px, and the
+high density (HDPI) asset should be 1.5x the baseline at 72x72 px, and the x-high
+density (XHDPI) asset should be 2x the baseline at 96x96 px, and so on.</p>
+
+<p class="note"><strong>Note:</strong> Android also supports low-density (LDPI) screens,
+but you normally don't need to create custom assets at this size because Android
+effectively down-scales your HDPI assets by 1/2 to match the expected size.</p>
+
 
 
 
@@ -338,3 +366,165 @@ whenever a new notification is available.</p>
   </div>
   <!-- 2 free columns -->
 </div>
+
+
+
+
+
+
+
+
+
+
+<h2 id="DesignTips">Design Tips</h2>
+
+<p>Here are some tips you might find useful as you create icons or other
+drawable assets for your application. These tips assume you are using
+Adobe&reg; Photoshop&reg; or a similar raster and vector image-editing program.</p>
+
+
+
+
+<h3>Use vector shapes where possible</h3>
+
+<p>Many image-editing programs such as Adobe&reg; Photoshop&reg; allow you to use a
+combination of vector shapes and raster layers and effects. When possible,
+use vector shapes so that if the need arises, assets can be scaled up without
+loss of detail and edge crispness.</p>
+
+<p>Using vectors also makes it easy to align edges and corners to pixel
+boundaries at smaller resolutions.</li>
+
+
+
+<h3>Start with large artboards</h3>
+
+<p>Because you will need to create assets for different screen densities,
+it is best to start your icon
+designs on large artboards with dimensions that are multiples of the target icon
+sizes. For example, launcher icons are 48, 72, 96, or 144 pixels wide,
+depending on screen density (mdpi, hdpi, xhdpi, and xxhdpi, respectively). If you
+initially draw launcher icons on an 864x864 artboard, it will be easier and
+cleaner to adjust the icons when you scale the artboard down to the target
+sizes for final asset creation.</p>
+
+
+
+<h3>When scaling, redraw bitmap layers as needed</h3>
+
+<p>If you scaled an image up from a bitmap layer, rather than from a vector
+layer, those layers will need to be redrawn manually to appear crisp at higher
+densities. For example if a 60x60 circle was painted as a bitmap for
+mdpi it will need to be repainted as a 90x90 circle for hdpi.</p>
+
+
+
+<h3>Use common naming conventions for icon assets</h3>
+
+<p>Try to name files so that related assets will group together inside a
+directory when they are sorted alphabetically. In particular, it helps to use a
+common prefix for each icon type. For example:</p>
+
+<table>
+<tr>
+<th>Asset Type</th>
+<th>Prefix</th>
+<th>Example</th>
+</tr>
+<tr>
+<td>Icons</td>
+<td><code>ic_</code></td>
+<td><code>ic_star.png</code></td>
+</tr>
+<tr>
+<td>Launcher icons</td>
+<td><code>ic_launcher</code></td>
+<td><code>ic_launcher_calendar.png</code></td>
+</tr>
+<tr>
+<td>Menu icons and Action Bar icons</td>
+<td><code>ic_menu</code></td>
+<td><code>ic_menu_archive.png</code></td>
+</tr>
+<tr>
+<td>Status bar icons</td>
+<td><code>ic_stat_notify</code></td>
+<td><code>ic_stat_notify_msg.png</code></td>
+</tr>
+<tr>
+<td>Tab icons</td>
+<td><code>ic_tab</code></td>
+<td><code>ic_tab_recent.png</code></td>
+</tr>
+<tr>
+<td>Dialog icons</td>
+<td><code>ic_dialog</code></td>
+<td><code>ic_dialog_info.png</code></td>
+</tr>
+</table>
+
+<p>Note that you are not required to use a shared prefix of any
+type&mdash;doing so is for your convenience only.</p>
+
+
+<h3>Set up a working space that organizes files by density</h3>
+
+<p>Supporting multiple screen densities means you must create multiple versions
+of the same icon. To help keep the multiple copies of files safe and easier to
+find, we recommend creating a directory structure in your working space that
+organizes asset files based on the target density. For example:</p>
+
+<pre>
+art/...
+    mdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png
+    hdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png
+    xhdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png</pre>
+    xxhdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png</pre>
+
+<p>Because the structure in your working space is similar to that of the application, you
+can quickly determine which assets should be copied to each
+resources directory. Separating assets by density also helps you detect any
+variances in filenames across densities, which is important because
+corresponding assets for different densities must share the same filename.</p>
+
+<p>For comparison, here's the resources directory structure of a typical
+application: </p>
+
+<pre>res/...
+    drawable-ldpi/...
+        <em>finished_asset</em>.png
+    drawable-mdpi/...
+        <em>finished_asset</em>.png
+    drawable-hdpi/...
+        <em>finished_asset</em>.png
+    drawable-xhdpi/...
+        <em>finished_asset</em>.png
+</pre>
+
+<p>For more information about how to save resources in the application project,
+see <a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a>.
+</p>
+
+
+<h3>Remove unnecessary metadata from final assets</h3>
+
+<p>Although the Android SDK tools will automatically compress PNGs when packaging
+application resources into the application binary, a good practice is to remove
+unnecessary headers and metadata from your PNG assets. Tools such as <a
+href="http://optipng.sourceforge.net/">OptiPNG</a> or <a
+href="http://pmt.sourceforge.net/pngcrush/">Pngcrush</a> can ensure that this
+metadata is removed and that your image asset file sizes are optimized.</p>
+
+

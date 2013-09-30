@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -1415,9 +1427,8 @@ onkeyup="return search_changed(event, false, '/')" />
  is only accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the String representation of the viewing player's rank, or {@code null)
+      <ul class="nolist"><li>The String representation of the viewing player's rank, or {@code null)
          if the player has no rank for this variant.
-
 </li></ul>
   </div>
 
@@ -1452,7 +1463,7 @@ onkeyup="return search_changed(event, false, '/')" />
  accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the String representation of the viewing player's score, or <code>null</code> if the
+      <ul class="nolist"><li>The String representation of the viewing player's score, or <code>null</code> if the
          player has no score for this variant.
 </li></ul>
   </div>
@@ -1489,7 +1500,7 @@ onkeyup="return search_changed(event, false, '/')" />
  this method will return <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#NUM_SCORES_UNKNOWN">NUM_SCORES_UNKNOWN</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the number of scores for this variant, or <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#NUM_SCORES_UNKNOWN">NUM_SCORES_UNKNOWN</a></code>.
+      <ul class="nolist"><li>The number of scores for this variant, or <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#NUM_SCORES_UNKNOWN">NUM_SCORES_UNKNOWN</a></code>.
 </li></ul>
   </div>
 
@@ -1524,7 +1535,7 @@ onkeyup="return search_changed(event, false, '/')" />
  accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the long representation of the viewing player's rank, or <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#PLAYER_RANK_UNKNOWN">PLAYER_RANK_UNKNOWN</a></code>
+      <ul class="nolist"><li>The long representation of the viewing player's rank, or <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#PLAYER_RANK_UNKNOWN">PLAYER_RANK_UNKNOWN</a></code>
          if the player has no rank for this variant.
 </li></ul>
   </div>
@@ -1560,7 +1571,7 @@ onkeyup="return search_changed(event, false, '/')" />
  accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the long representation of the viewing player's score, or
+      <ul class="nolist"><li>The long representation of the viewing player's score, or
          <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#PLAYER_SCORE_UNKNOWN">PLAYER_SCORE_UNKNOWN</a></code> if the player has no score for this variant.
 </li></ul>
   </div>
@@ -1637,7 +1648,7 @@ onkeyup="return search_changed(event, false, '/')" />
  a rank.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>whether or not this variant contains score information for the viewing player.
+      <ul class="nolist"><li>Whether or not this variant contains score information for the viewing player.
 </li></ul>
   </div>
 

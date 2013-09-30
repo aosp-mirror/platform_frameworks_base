@@ -145,6 +145,13 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * view for editing.
  *
  * <p>
+ * To allow users to copy some or all of the TextView's value and paste it somewhere else, set the
+ * XML attribute {@link android.R.styleable#TextView_textIsSelectable
+ * android:textIsSelectable} to "true" or call
+ * {@link #setTextIsSelectable setTextIsSelectable(true)}. The {@code textIsSelectable} flag
+ * allows users to make selection gestures in the TextView, which in turn triggers the system's
+ * built-in copy/paste controls.
+ * <p>
  * <b>XML attributes</b>
  * <p>
  * See {@link android.R.styleable#TextView TextView Attributes},
@@ -4799,17 +4806,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * When a TextView is used to display a useful piece of information to the user (such as a
-     * contact's address), it should be made selectable, so that the user can select and copy this
-     * content.
      *
-     * Use {@link #setTextIsSelectable(boolean)} or the
-     * {@link android.R.styleable#TextView_textIsSelectable} XML attribute to make this TextView
-     * selectable (text is not selectable by default).
-     *
-     * Note that this method simply returns the state of this flag. Although this flag has to be set
-     * in order to select text in non-editable TextView, the content of an {@link EditText} can
-     * always be selected, independently of the value of this flag.
+     * Returns the state of the {@code textIsSelectable} flag (See
+     * {@link #setTextIsSelectable setTextIsSelectable()}). Although you have to set this flag
+     * to allow users to select and copy text in a non-editable TextView, the content of an
+     * {@link EditText} can always be selected, independently of the value of this flag.
+     * <p>
      *
      * @return True if the text displayed in this TextView can be selected by the user.
      *
@@ -4820,16 +4822,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets whether or not (default) the content of this view is selectable by the user.
+     * Sets whether the content of this view is selectable by the user. The default is
+     * {@code false}, meaning that the content is not selectable.
+     * <p>
+     * When you use a TextView to display a useful piece of information to the user (such as a
+     * contact's address), make it selectable, so that the user can select and copy its
+     * content. You can also use set the XML attribute
+     * {@link android.R.styleable#TextView_textIsSelectable} to "true".
+     * <p>
+     * When you call this method to set the value of {@code textIsSelectable}, it sets
+     * the flags {@code focusable}, {@code focusableInTouchMode}, {@code clickable},
+     * and {@code longClickable} to the same value. These flags correspond to the attributes
+     * {@link android.R.styleable#View_focusable android:focusable},
+     * {@link android.R.styleable#View_focusableInTouchMode android:focusableInTouchMode},
+     * {@link android.R.styleable#View_clickable android:clickable}, and
+     * {@link android.R.styleable#View_longClickable android:longClickable}. To restore any of these
+     * flags to a state you had set previously, call one or more of the following methods:
+     * {@link #setFocusable(boolean) setFocusable()},
+     * {@link #setFocusableInTouchMode(boolean) setFocusableInTouchMode()},
+     * {@link #setClickable(boolean) setClickable()} or
+     * {@link #setLongClickable(boolean) setLongClickable()}.
      *
-     * Note that this methods affect the {@link #setFocusable(boolean)},
-     * {@link #setFocusableInTouchMode(boolean)} {@link #setClickable(boolean)} and
-     * {@link #setLongClickable(boolean)} states and you may want to restore these if they were
-     * customized.
-     *
-     * See {@link #isTextSelectable} for details.
-     *
-     * @param selectable Whether or not the content of this TextView should be selectable.
+     * @param selectable Whether the content of this TextView should be selectable.
      */
     public void setTextIsSelectable(boolean selectable) {
         if (!selectable && mEditor == null) return; // false is default value with no edit data

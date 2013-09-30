@@ -24,7 +24,7 @@ import android.util.Log;
  * @hide
  * @deprecated in API 16
  * <p>This class is a container for geometric data displayed with
- * Renderscript. Internally, a mesh is a collection of allocations that
+ * RenderScript. Internally, a mesh is a collection of allocations that
  * represent vertex data (positions, normals, texture
  * coordinates) and index data such as triangles and lines. </p>
  * <p>
@@ -32,7 +32,7 @@ import android.util.Log;
  * allocation that is provided separately, as multiple allocation
  * objects, or done as a combination of both. When a
  * vertex channel name matches an input in the vertex program,
- * Renderscript automatically connects the two together.
+ * RenderScript automatically connects the two together.
  * </p>
  * <p>
  *  Parts of the mesh can be rendered with either explicit

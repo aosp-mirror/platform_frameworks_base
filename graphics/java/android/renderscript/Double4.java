@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the native Renderscript double4 type back
+ * Class for exposing the native RenderScript double4 type back
  * to the Android system.
  *
  **/

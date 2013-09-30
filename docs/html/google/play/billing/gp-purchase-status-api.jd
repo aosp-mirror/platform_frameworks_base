@@ -1,0 +1,166 @@
+page.title=Purchase Status API
+page.tags="In-app Billing", "Google Play", "inapp billing", "in app billing", "iab", "billing"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#using">Using the API</a></li>
+        <li><a href="#strategies">Verification Strategies</a></li>
+            <li><a href="#practices">Using the API Efficiently</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="https://developers.google.com/android-publisher/v1_1/">Google Play Android Developer API</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Google Play provides an HTTP-based Purchase Status API that lets
+you remotely query the status of a specific in-app product or subscription,
+or cancel an active subscription. The API is designed to be used from your
+backend servers as a way of securely managing in-app products and
+subscriptions, as well as extending and integrating them with other services.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>With the Purchase Status API you can quickly retrieve the details of any
+purchase using a standard GET request. In the request you supply information
+about the purchase &mdash; app package name, purchase or subscription ID,
+and the purchase token. The server responds with a JSON object describing
+the associated purchase details, order status, developer payload, and other
+information.</p>
+
+<p>You can use the Purchase Status API in several ways, such as for reporting
+and reconciliation of individual orders and for verifying purchases and
+subscription expirations. You can also use the API to learn about cancelled
+orders and confirm whether in-app products have been consumed, including
+whether they were consumed before being cancelled.</p>
+
+<p>For subscriptions, in addition to querying for order status and expiration,
+you can use the Purchase Status API to remotely cancel a subscription. This is a
+convenient way to manage cancellations on behalf of customers, without
+requiring them to manage the cancellation themselves on their Android devices.</p>
+
+<p>If you plan to use the Purchase Status API, keep in mind that:</p>
+<ul><li>You can use the API to check the status of individual items only
+&mdash; bulk requests for order status are not supported at this time.</li>
+<li>You can query for the details of orders placed on or after 12 June 2013,
+but not for orders placed earlier.</li>
+<li>You can query purchases of any item type made with the In-app
+Billing v3 API, or purchases of managed items made with In-app Billing v1 and
+v2. You can not use the Purchase Status API to query purchases of unmanaged items
+made with In-app Billing v1 or v2.</li>
+</ul>
+
+<p>The Purchase Status API is part of the <a
+href="https://developers.google.com/android-publisher/v1_1/">Google Play Android
+Developer API v1.1</a>, available through the Google APIs console. The new version
+of the API supersedes the v1 API, which is deprecated. If you are using the v1
+API, please migrate your operations to the v1.1 API as soon as possible.</p>
+
+
+<h2 id="using">Using the API</h2>
+
+<p>To use the API, you must first register a project at the <a
+href="https://code.google.com/apis/console">Google APIs Console</a> and receive
+a Client ID and shared secret that  your app will present when calling the
+API. All calls are authenticated with OAuth 2.0.</p>
+
+<p>Once your app is registered, you can access the API directly, using standard
+HTTP methods to retrieve and manipulate resources. The API is built on a RESTful
+design that uses HTTP and JSON. so any standard web stack can send requests and
+parse the responses. However, if you don’t want to send HTTP requests and parse
+responses manually, you can access the API using the Google APIs Client
+Libraries, which provide better language integration, improved security,
+and support for making calls that require user authorization.</p>
+
+<p>For more information about the API and how to access it through the Google
+APIs Client Libraries, see the documentation at:</p> 
+
+<p style="margin-left:1.5em;"><a
+href="https://developers.google.com/android-publisher/v1_1/">https://developers.
+google.com/android-publisher/v1_1/</a></p>
+
+<h3 id="quota">Quota</h3>
+
+<p>Applications using the Google Play Android Developer API are limited to an
+initial courtesy usage quota of <strong>15000 requests per day</strong> (per
+application). This should provide enough access for normal
+subscription-validation needs, assuming that you follow the recommendation in
+this section.</p>
+
+<p>If you need to request a higher limit for your application, please use the
+“Request more” link in the <a
+href="https://code.google.com/apis/console/#:quotas">Google APIs Console</a>.
+Also, please read the section below on design best practices for minimizing your
+use of the API.</p>
+
+<h3 id="auth">Authorization</h3>
+
+<p>Calls to the Google Play Android Developer API require authorization. Google
+uses the OAuth 2.0 protocol to allow authorized applications to access user
+data. To learn more, see <a
+href="https://developers.google.com/android-publisher/authorization">Authorization</a>
+in the Google Play Android Developer API documentation.</p>
+
+<h2 id="strategies">Purchase Verification Strategies</h2>
+
+<p>In a typical scenario, your app verifies the order status for new purchases
+to ensure that they are valid before granting access to the purchased content.</p>
+
+<p>To verify a purchase, the app passes the purchase token and other details up
+to your backend servers, which verifies them directly with Google Play using the
+Purchase Status API. For security reasons, the app should not normally attempt to verify
+the purchase itself using the Purchase Status API.</p>
+
+<p>If the backend server determines that the purchase is valid, it notifies the
+app and grant access to the content. For improved performance, the backend servers
+should store the purchase details and order status in a local database, updated a
+intervals or as-needed.</p>
+
+<p>Keep in mind that users will want to be able to use your app at any time, including
+when there may be no network connection available. Make sure that your approach to
+purchase verification takes account of the offline use-case.</p>
+
+<h2 id="practices">Using the API Efficiently</h2>
+
+<p>Access to the Google Play Android Developer API is regulated to help ensure a
+high-performance environment for all applications that use it. While you can
+request a higher daily quota for your application, we highly recommend that you
+minimize your access using the techniques below. </p>
+
+<ul>
+  <li><em>Query the Purchase Status API for new purchases only</em> &mdash; At
+  purchase, your app can pass the purchase token and other details to your backend
+  servers, which can use the Purchase Status API to verify the purchase.</li>
+  <li><em>Cache purchase details on your servers</em> &mdash; To the extent possible,
+  cache the purchase details for in-app products and subscriptions on your backend
+  servers. If your app contacts your backend servers at runtime to verify purchase
+  validity, your server can verify the purchase based on the cached details, to
+  minimize use of the Purchase Status API and to provide the fastest possible response
+  (and best experience) for the user.</li>
+  <li><em>Store subscription expiry on your servers</em> &mdash; Your servers should
+  use the Purchase Status API to query the expiration date for new subscription tokens,
+  then store the expiration date locally. This allows you to check the status of
+  subscriptions only at or after the expiration (see below).</li>
+  <li><em>Query for subscription status only at expiration</em> &mdash; Once your
+  server has retrieved the expiration date of subscription tokens, it should not query
+  the Google Play servers for the subscription status again until the subscription is
+  reaching or has passed the expiration date. Typically, your servers would run a batch
+  query each day to check the status of expiring subscriptions, then update the database.
+  Note that:
+    <ul>
+      <li>Your servers should not query all subscriptions every day</li>
+      <li>Your servers should never query subscription status dynamically, based on
+      individual requests from your Android application.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>By following those general guidelines, your implementation will offer the
+best possible performance for users and minimize use of the Google Play Android
+Developer API.</p>

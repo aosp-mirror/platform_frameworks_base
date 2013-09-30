@@ -487,6 +487,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
+      <li><a href="/google/play/billing/gp-purchase-status-api.html">
+              <span class="en">Purchase Status API</span></a>
+      </li>
       <li><a href="/google/play/billing/versions.html">
               <span class="en">Version Notes</span></a>
       </li>
@@ -506,8 +509,17 @@ onkeyup="return search_changed(event, false, '/')" />
         <li><a href="/google/gcm/gcm.html">
             <span class="en">Architectural Overview</span></a>
         </li>
-        <li><a href="/google/gcm/demo.html">
-            <span class="en">Demo App Tutorial</span></a>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
+        </li>
+        <li><a href="/google/gcm/notifications.html">
+              <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -667,6 +679,10 @@ onkeyup="return search_changed(event, false, '/')" />
 <div class="jd-descr">
 
 
+<h2>Class Overview</h2>
+<p itemprop="articleBody">Listener interface for handling when the image for a particular URI has been loaded.
+</p>
+
 
 
 
@@ -737,6 +753,8 @@ onkeyup="return search_changed(event, false, '/')" />
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html#onImageLoaded(android.net.Uri, android.graphics.drawable.Drawable)">onImageLoaded</a></span>(Uri uri, Drawable drawable)</nobr>
         
+        <div class="jd-descrdiv">Listener method invoked when an image has been loaded.</div>
+  
   </td></tr>
 
 
@@ -811,7 +829,21 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Listener method invoked when an image has been loaded.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>uri</td>
+          <td>The URI of the loaded image.</td>
+        </tr>
+        <tr>
+          <th>drawable</td>
+          <td>Drawable containing the image.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

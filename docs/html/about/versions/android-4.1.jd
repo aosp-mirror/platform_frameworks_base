@@ -6,19 +6,78 @@ sdk.platform.apiLevel=16
 
 <div id="qv-wrapper">
 <div id="qv">
-  
-  <h2>In this document</h2>
-<ol>
-  <li><a href="#AppComponents">App Components</a></li>
-  <li><a href="#Multimedia">Multimedia</a></li>
-  <li><a href="#Camera">Camera</a></li>
-  <li><a href="#Connectivity">Connectivity</a></li>
-  <li><a href="#A11y">Accessibility</a></li>
-  <li><a href="#CopyPaste">Copy and Paste</a></li>
+
+<h2>In this document
+    <a href="#" onclick="hideNestedItems('#toc41',this);return false;" class="header-toggle">
+        <span class="more">show more</span>
+        <span class="less" style="display:none">show less</span></a></h2>
+
+<ol id="toc41" class="hide-nested">
+  <li><a href="#AppComponents">App Components</a>
+    <ol>
+      <li><a href="#Isolated">Isolated services</a></li>
+      <li><a href="#Memory">Memory management</a></li>
+      <li><a href="#ContentProvider">Content providers</a></li>
+      <li><a href="#LiveWallpapers">Live Wallpapers</a></li>
+      <li><a href="#StackNav">App stack navigation</a></li>
+    </ol>
+  </li>
+  <li><a href="#Multimedia">Multimedia</a>
+    <ol>
+      <li><a href="#Codecs">Media codecs</a></li>
+      <li><a href="#AudioCue">Record audio on cue</a></li>
+      <li><a href="#TextTracks">Timed text tracks</a></li>
+      <li><a href="#AudioEffects">Audio effects</a></li>
+      <li><a href="#Gapless">Gapless playback</a></li>
+    </ol>
+  </li>
+  <li><a href="#Camera">Camera</a>
+    <ol>
+      <li><a href="#AutoFocus">Auto focus movement</a></li>
+      <li><a href="#CameraSounds">Camera sounds</a></li>
+    </ol>
+  </li>
+  <li><a href="#Connectivity">Connectivity</a>
+    <ol>
+      <li><a href="#AndroidBeam">Android Beam</a></li>
+      <li><a href="#LocalNsd">Network service discovery</a></li>
+      <li><a href="#WiFiNsd">Wi-Fi Direct service discovery</a></li>
+      <li><a href="#NetworkUsage">Network usage</a></li>
+    </ol>
+  </li>
+  <li><a href="#A11y">Accessibility</a>
+    <ol>
+      <li><a href="#A11yService">Accessibility service APIs</a></li>
+      <li><a href="#A11yCustomNav">Customizable app navigation</a></li>
+      <li><a href="#A11yStructure">More accessible widgets</a></li>
+    </ol>
+  </li>
+  <li><a href="#CopyPaste">Copy and Paste</a>
+    <ol>
+      <li><a href="#CopyIntent">Copy and paste with intents</a></li>
+    </ol>
+  </li>
   <li><a href="#Renderscript">Renderscript</a></li>
-  <li><a href="#Animation">Animation</a></li>
-  <li><a href="#UI">User Interface</a></li>
-  <li><a href="#Input">Input Framework</a></li>
+  <li><a href="#Animation">Animation</a>
+    <ol>
+      <li><a href="#ActivityOptions">Activity launch animations</a></li>
+      <li><a href="#TimeAnimator">Time animator</a></li>
+    </ol>
+  </li>
+  <li><a href="#UI">User Interface</a>
+    <ol>
+      <li><a href="#Notifications">Notifications</a></li>
+      <li><a href="#SystemUI">Controls for system UI</a></li>
+      <li><a href="#RemoteViews">Remote views</a></li>
+      <li><a href="#Fonts">Font families</a></li>
+    </ol>
+  </li>
+  <li><a href="#Input">Input Framework</a>
+    <ol>
+      <li><a href="#InputDevice">Multiple input devices</a></li>
+      <li><a href="#Vibrate">Vibrate for input controllers</a></li>
+    </ol>
+  </li>
   <li><a href="#Permissions">Permissions</a></li>
   <li><a href="#DeviceFeatures">Device Features</a></li>
 </ol>
@@ -492,7 +551,7 @@ device becomes connected to Wi-Fi).</p>
 
 <h2 id="A11y">Accessibility</h2>
 
-<h3 id="">Accessibility service APIs</h3>
+<h3 id="A11yService">Accessibility service APIs</h3>
 
 <p>The reach of accessibility service APIs has been significantly increased in Android 4.1. It now
 allows you to build services that monitor and respond to more input events, such as complex gestures

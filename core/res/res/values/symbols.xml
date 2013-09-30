@@ -632,7 +632,6 @@
   <java-symbol type="string" name="number_picker_increment_scroll_action" />
   <java-symbol type="string" name="number_picker_increment_scroll_mode" />
   <java-symbol type="string" name="numeric_date" />
-  <java-symbol type="string" name="numeric_date_format" />
   <java-symbol type="string" name="numeric_date_template" />
   <java-symbol type="string" name="numeric_md1_md2" />
   <java-symbol type="string" name="numeric_md1_time1_md2_time2" />
@@ -703,6 +702,8 @@
   <java-symbol type="string" name="preposition_for_time" />
   <java-symbol type="string" name="progress_erasing" />
   <java-symbol type="string" name="progress_unmounting" />
+  <java-symbol type="string" name="mobile_provisioning_url" />
+  <java-symbol type="string" name="mobile_redirected_provisioning_url" />
   <java-symbol type="string" name="reboot_safemode_confirm" />
   <java-symbol type="string" name="reboot_safemode_title" />
   <java-symbol type="string" name="relationTypeAssistant" />

@@ -207,8 +207,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
-     * @param requestCode Private request code for the sender (currently
-     * not used).
+     * @param requestCode Private request code for the sender
      * @param intent Intent of the activity to be launched.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
      * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
@@ -239,8 +238,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
-     * @param requestCode Private request code for the sender (currently
-     * not used).
+     * @param requestCode Private request code for the sender
      * @param intent Intent of the activity to be launched.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
      * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
@@ -332,8 +330,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
-     * @param requestCode Private request code for the sender (currently
-     * not used).
+     * @param requestCode Private request code for the sender
      * @param intents Array of Intents of the activities to be launched.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
      * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
@@ -383,8 +380,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @param context The Context in which this PendingIntent should start
      * the activity.
-     * @param requestCode Private request code for the sender (currently
-     * not used).
+     * @param requestCode Private request code for the sender
      * @param intents Array of Intents of the activities to be launched.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
      * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
@@ -454,8 +450,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @param context The Context in which this PendingIntent should perform
      * the broadcast.
-     * @param requestCode Private request code for the sender (currently
-     * not used).
+     * @param requestCode Private request code for the sender
      * @param intent The Intent to be broadcast.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
      * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
@@ -509,8 +504,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @param context The Context in which this PendingIntent should start
      * the service.
-     * @param requestCode Private request code for the sender (currently
-     * not used).
+     * @param requestCode Private request code for the sender
      * @param intent An Intent describing the service to be started.
      * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
      * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},

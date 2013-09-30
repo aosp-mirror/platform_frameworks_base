@@ -247,7 +247,7 @@ public class CalendarView extends FrameLayout {
     /**
      * Which month should be displayed/highlighted [0-11].
      */
-    private int mCurrentMonthDisplayed;
+    private int mCurrentMonthDisplayed = -1;
 
     /**
      * Used for tracking during a scroll.

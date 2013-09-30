@@ -191,73 +191,73 @@ size_t AMotionEvent_getHistorySize(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getHistorySize();
 }
 
-int64_t AMotionEvent_getHistoricalEventTime(AInputEvent* motion_event,
+int64_t AMotionEvent_getHistoricalEventTime(const AInputEvent* motion_event,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalEventTime(
             history_index);
 }
 
-float AMotionEvent_getHistoricalRawX(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalRawX(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalRawX(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalRawY(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalRawY(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalX(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalX(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalX(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalY(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalY(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalY(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalPressure(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalPressure(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalPressure(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalSize(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalSize(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalTouchMajor(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalTouchMajor(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalTouchMajor(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalTouchMinor(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalTouchMinor(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalTouchMinor(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalToolMajor(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalToolMajor(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalToolMajor(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalToolMinor(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalToolMinor(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalToolMinor(
             pointer_index, history_index);
 }
 
-float AMotionEvent_getHistoricalOrientation(AInputEvent* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalOrientation(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalOrientation(
             pointer_index, history_index);

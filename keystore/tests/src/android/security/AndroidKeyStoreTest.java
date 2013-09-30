@@ -18,7 +18,7 @@ package android.security;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 
-import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
+import com.android.org.conscrypt.OpenSSLEngine;
 
 import android.test.AndroidTestCase;
 
