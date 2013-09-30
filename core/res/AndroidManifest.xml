@@ -2243,7 +2243,7 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="signature|system" />
 
     <!-- Allows an application to control the backup and restore process.
     <p>Not for use by third-party applications.
