@@ -56,7 +56,7 @@ class DirectoryResult implements AutoCloseable {
     @Override
     public void close() {
         IoUtils.closeQuietly(cursor);
-        ContentProviderClient.closeQuietly(client);
+        ContentProviderClient.releaseQuietly(client);
         cursor = null;
         client = null;
     }
@@ -158,7 +158,9 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
                 + result.mode + ", sortOrder=" + result.sortOrder);
 
         try {
-            result.client = resolver.acquireUnstableContentProviderClient(authority);
+            result.client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                    resolver, authority);
+
             cursor = result.client.query(
                     mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
             cursor.registerContentObserver(mObserver);
@@ -177,7 +179,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         } catch (Exception e) {
             Log.w(TAG, "Failed to query", e);
             result.exception = e;
-            ContentProviderClient.closeQuietly(result.client);
+            ContentProviderClient.releaseQuietly(result.client);
         } finally {
             synchronized (this) {
                 mSignal = null;

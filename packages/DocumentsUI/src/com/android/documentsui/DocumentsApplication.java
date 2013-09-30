@@ -19,13 +19,19 @@ package com.android.documentsui;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.RemoteException;
+import android.text.format.DateUtils;
 
 public class DocumentsApplication extends Application {
+    private static final long PROVIDER_ANR_TIMEOUT = 20 * DateUtils.SECOND_IN_MILLIS;
+
     private RootsCache mRoots;
     private Point mThumbnailsSize;
     private ThumbnailCache mThumbnails;
@@ -42,6 +48,17 @@ public class DocumentsApplication extends Application {
             app.mThumbnailsSize = size;
         }
         return thumbnails;
+    }
+
+    public static ContentProviderClient acquireUnstableProviderOrThrow(
+            ContentResolver resolver, String authority) throws RemoteException {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                authority);
+        if (client == null) {
+            throw new RemoteException("Failed to acquire provider for " + authority);
+        }
+        client.setDetectNotResponding(PROVIDER_ANR_TIMEOUT);
+        return client;
     }
 
     @Override

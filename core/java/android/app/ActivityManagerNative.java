@@ -758,6 +758,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder b = data.readStrongBinder();
+            appNotRespondingViaProvider(b);
+            reply.writeNoException();
+            return true;
+        }
+
         case REMOVE_CONTENT_PROVIDER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
@@ -2891,12 +2899,25 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
+
     public void unstableProviderDied(IBinder connection) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(connection);
         mRemote.transact(UNSTABLE_PROVIDER_DIED_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void appNotRespondingViaProvider(IBinder connection) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(connection);
+        mRemote.transact(APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
