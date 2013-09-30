@@ -18725,6 +18725,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 = new ViewTreeObserver.InternalInsetsInfo();
 
         /**
+         * Set to true when mGivenInternalInsets is non-empty.
+         */
+        boolean mHasNonEmptyGivenInternalInsets;
+
+        /**
          * All views in the window's hierarchy that serve as scroll containers,
          * used to determine if the window can be resized or must be panned
          * to adjust for a soft input area.

@@ -241,6 +241,13 @@ public final class ViewTreeObserver {
             mTouchableInsets = TOUCHABLE_INSETS_FRAME;
         }
 
+        boolean isEmpty() {
+            return contentInsets.isEmpty()
+                    && visibleInsets.isEmpty()
+                    && touchableRegion.isEmpty()
+                    && mTouchableInsets == TOUCHABLE_INSETS_FRAME;
+        }
+
         @Override
         public int hashCode() {
             int result = contentInsets.hashCode();
