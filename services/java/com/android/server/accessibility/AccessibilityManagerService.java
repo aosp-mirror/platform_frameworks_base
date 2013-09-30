@@ -51,6 +51,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -61,6 +62,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
+import android.util.MatrixUtils;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
@@ -138,6 +140,56 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
     private static final int MAX_POOL_SIZE = 10;
+
+    /** Matrix used for converting color to grayscale. */
+    private static final float[] GRAYSCALE_MATRIX = new float[] {
+        .2126f, .2126f, .2126f,
+        .7152f, .7152f, .7152f,
+        .0722f, .0722f, .0722f
+    };
+
+    /** Matrix used for standard display inversion. */
+    private static final float[] INVERSION_MATRIX_STANDARD = new float[] {
+        -1,  0,  0,
+         0, -1,  0,
+         0,  0, -1
+    };
+
+    /** Offset used for standard display inversion. */
+    private static final float INVERSION_OFFSET_STANDARD = 1;
+
+    /** Matrix and offset used for hue-only display inversion. */
+    private static final float[] INVERSION_MATRIX_HUE_ONLY = new float[] {
+          0, .5f, .5f,
+        .5f,   0, .5f,
+        .5f, .5f,   0
+    };
+
+    /** Offset used for hue-only display inversion. */
+    private static final float INVERSION_OFFSET_HUE_ONLY = 0;
+
+    /** Matrix and offset used for value-only display inversion. */
+    private static final float[] INVERSION_MATRIX_VALUE_ONLY = new float[] {
+           0, -.5f, -.5f,
+        -.5f,    0, -.5f,
+        -.5f, -.5f,    0
+    };
+
+    /** Offset used for value-only display inversion. */
+    private static final float INVERSION_OFFSET_VALUE_ONLY = 1;
+
+    /** Default contrast for display contrast enhancement. */
+    private static final float DEFAULT_DISPLAY_CONTRAST = 2;
+
+    /** Default brightness for display contrast enhancement. */
+    private static final float DEFAULT_DISPLAY_BRIGHTNESS = 0;
+
+    /** Default inversion mode for display color inversion. */
+    private static final int DEFAULT_DISPLAY_INVERSION = AccessibilityManager.INVERSION_STANDARD;
+
+    /** Default inversion mode for display color correction. */
+    private static final int DEFAULT_DISPLAY_DALTONIZER =
+            AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY;
 
     private static int sIdCounter = 0;
 
@@ -1297,6 +1349,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
+        updateDisplayColorAdjustmentSettingsLocked(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
     }
@@ -1355,6 +1408,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somthingChanged |= readTouchExplorationEnabledSettingLocked(userState);
         somthingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
         somthingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
+        somthingChanged |= readDisplayColorAdjustmentSettingsLocked(userState);
         return somthingChanged;
     }
 
@@ -1401,6 +1455,136 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
              return true;
          }
          return false;
+    }
+
+    private boolean readDisplayColorAdjustmentSettingsLocked(UserState userState) {
+        final ContentResolver cr = mContext.getContentResolver();
+        final int userId = userState.mUserId;
+
+        boolean hasColorTransform = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
+
+        if (!hasColorTransform) {
+            hasColorTransform |= Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED, 0, userId) == 1;
+        }
+
+        if (!hasColorTransform) {
+            hasColorTransform |= Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, userId) == 1;
+        }
+
+        if (userState.mHasDisplayColorAdjustment != hasColorTransform) {
+            userState.mHasDisplayColorAdjustment = hasColorTransform;
+            return true;
+        }
+
+        // If adjustment is enabled, always assume there was a transform change.
+        return hasColorTransform;
+    }
+
+    private void updateDisplayColorAdjustmentSettingsLocked(UserState userState) {
+        final ContentResolver cr = mContext.getContentResolver();
+        final int userId = userState.mUserId;
+        final float[] offsetVector = new float[3];
+        float[] colorOffset = new float[3];
+        float[] outputOffset = new float[3];
+        float[] colorMatrix = new float[9];
+        float[] outputMatrix = new float[9];
+        boolean hasColorTransform = false;
+
+        MatrixUtils.setIdentityM(colorMatrix, 3, 3);
+
+        final boolean inversionEnabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
+        if (inversionEnabled) {
+            final int inversionMode = Settings.Secure.getIntForUser(cr,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION, DEFAULT_DISPLAY_INVERSION,
+                    userId);
+            final float[] inversionMatrix;
+            final float inversionOffset;
+            switch (inversionMode) {
+                case AccessibilityManager.INVERSION_HUE_ONLY:
+                    inversionMatrix = INVERSION_MATRIX_HUE_ONLY;
+                    inversionOffset = INVERSION_OFFSET_HUE_ONLY;
+                    break;
+                case AccessibilityManager.INVERSION_VALUE_ONLY:
+                    inversionMatrix = INVERSION_MATRIX_VALUE_ONLY;
+                    inversionOffset = INVERSION_OFFSET_VALUE_ONLY;
+                    break;
+                default:
+                    inversionMatrix = INVERSION_MATRIX_STANDARD;
+                    inversionOffset = INVERSION_OFFSET_STANDARD;
+            }
+
+            Arrays.fill(offsetVector, inversionOffset);
+
+            MatrixUtils.multiplyMM(outputMatrix, colorMatrix, 3, 3, inversionMatrix, 3);
+            MatrixUtils.multiplyMM(outputOffset, colorOffset, 1, 3, inversionMatrix, 3);
+            MatrixUtils.addMM(colorOffset, outputOffset, 1, 3, offsetVector);
+
+            final float[] temp = colorMatrix;
+            colorMatrix = outputMatrix;
+            outputMatrix = temp;
+
+            hasColorTransform = true;
+        }
+
+        final boolean contrastEnabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED, 0, userId) == 1;
+        if (contrastEnabled) {
+            final float contrast = Settings.Secure.getFloatForUser(cr,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST, DEFAULT_DISPLAY_CONTRAST,
+                    userId);
+            final float brightness = Settings.Secure.getFloatForUser(cr,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS, DEFAULT_DISPLAY_BRIGHTNESS,
+                    userId);
+            final float offset = brightness * contrast - 0.5f * contrast + 0.5f;
+            Arrays.fill(offsetVector, offset);
+
+            MatrixUtils.multiplyMS(outputMatrix, colorMatrix, contrast);
+            MatrixUtils.multiplyMS(outputOffset, colorOffset, contrast);
+            MatrixUtils.addMM(colorOffset, outputOffset, 1, 3, offsetVector);
+
+            final float[] temp = colorMatrix;
+            colorMatrix = outputMatrix;
+            outputMatrix = temp;
+
+            hasColorTransform = true;
+        }
+
+        final boolean daltonizerEnabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, userId) != 0;
+        if (daltonizerEnabled) {
+            final int daltonizerMode = Settings.Secure.getIntForUser(cr,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER, DEFAULT_DISPLAY_DALTONIZER,
+                    userId);
+            // Monochromacy isn't supported by the native Daltonizer.
+            if (daltonizerMode == AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY) {
+                MatrixUtils.multiplyMM(outputMatrix, colorMatrix, 3, 3, GRAYSCALE_MATRIX, 3);
+                MatrixUtils.multiplyMM(outputOffset, colorOffset, 1, 3, GRAYSCALE_MATRIX, 3);
+
+                final float[] temp = colorMatrix;
+                colorMatrix = outputMatrix;
+                outputMatrix = temp;
+
+                final float[] tempVec = colorOffset;
+                colorOffset = outputOffset;
+                outputOffset = temp;
+
+                nativeSetDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+            } else {
+                nativeSetDaltonizerMode(daltonizerMode);
+            }
+        } else {
+            nativeSetDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+        }
+
+        if (hasColorTransform) {
+            nativeSetColorTransform(colorMatrix, colorOffset);
+        } else {
+            nativeSetColorTransform(null, null);
+        }
     }
 
     private void updateTouchExplorationLocked(UserState userState) {
@@ -1521,6 +1705,59 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 pw.println("}]");
                 pw.println();
             }
+        }
+    }
+
+    /**
+     * Sets the surface flinger's Daltonization mode. This adjusts the color
+     * space to correct for or simulate various types of color blindness.
+     *
+     * @param mode new Daltonization mode
+     */
+    private static void nativeSetDaltonizerMode(int mode) {
+        try {
+            final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
+            if (flinger != null) {
+                final Parcel data = Parcel.obtain();
+                data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                data.writeInt(mode);
+                flinger.transact(1014, data, null, 0);
+                data.recycle();
+            }
+        } catch (RemoteException ex) {
+            Slog.e(LOG_TAG, "Failed to set Daltonizer mode", ex);
+        }
+    }
+
+    /**
+     * Sets the surface flinger's color transformation matrix and offset. If
+     * either value is null, color transformations are disabled.
+     *
+     * @param matrix new color transformation matrix, or null to disable
+     * @param offset new color transformation offset, or null to disable
+     */
+    private static void nativeSetColorTransform(float[] matrix, float[] offset) {
+        try {
+            final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
+            if (flinger != null) {
+                final Parcel data = Parcel.obtain();
+                data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                if (matrix != null && offset != null) {
+                    data.writeInt(1);
+                    for (int i = 0; i < 9; i++) {
+                        data.writeFloat(matrix[i]);
+                    }
+                    for (int i = 0; i < 3; i++) {
+                        data.writeFloat(offset[i]);
+                    }
+                } else {
+                    data.writeInt(0);
+                }
+                flinger.transact(1015, data, null, 0);
+                data.recycle();
+            }
+        } catch (RemoteException ex) {
+            Slog.e(LOG_TAG, "Failed to set color transform", ex);
         }
     }
 
@@ -2947,6 +3184,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mIsEnhancedWebAccessibilityEnabled;
         public boolean mIsDisplayMagnificationEnabled;
         public boolean mIsFilterKeyEventsEnabled;
+        public boolean mHasDisplayColorAdjustment;
 
         private Service mUiAutomationService;
         private IAccessibilityServiceClient mUiAutomationServiceClient;
@@ -3038,6 +3276,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mEnhancedWebAccessibilityUri = Settings.Secure
                 .getUriFor(Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION);
 
+        private final Uri mDisplayContrastEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED);
+        private final Uri mDisplayContrastUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST);
+        private final Uri mDisplayBrightnessUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS);
+
+        private final Uri mDisplayInversionEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+        private final Uri mDisplayInversionUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION);
+
+        private final Uri mDisplayDaltonizerEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
+        private final Uri mDisplayDaltonizerUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -3056,6 +3311,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mEnhancedWebAccessibilityUri,
                     false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayContrastEnabledUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayContrastUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayBrightnessUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayInversionEnabledUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayInversionUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayDaltonizerEnabledUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayDaltonizerUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -3117,6 +3386,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (userState.mUiAutomationService == null) {
                         if (readEnhancedWebAccessibilityEnabledChangedLocked(userState)) {
                             onUserStateChangedLocked(userState);
+                        }
+                    }
+                }
+            } else if (mDisplayContrastEnabledUri.equals(uri)
+                    || mDisplayInversionEnabledUri.equals(uri)
+                    || mDisplayDaltonizerEnabledUri.equals(uri)
+                    || mDisplayContrastUri.equals(uri)
+                    || mDisplayBrightnessUri.equals(uri)
+                    || mDisplayInversionUri.equals(uri)
+                    || mDisplayDaltonizerUri.equals(uri)) {
+                synchronized (mLock) {
+                    // We will update when the automation service dies.
+                    UserState userState = getCurrentUserStateLocked();
+                    if (userState.mUiAutomationService == null) {
+                        if (readDisplayColorAdjustmentSettingsLocked(userState)) {
+                            updateDisplayColorAdjustmentSettingsLocked(userState);
                         }
                     }
                 }
