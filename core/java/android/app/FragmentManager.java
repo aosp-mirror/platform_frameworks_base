@@ -569,12 +569,12 @@ final class FragmentManagerImpl extends FragmentManager {
             return null;
         }
         if (index >= mActive.size()) {
-            throwException(new IllegalStateException("Fragement no longer exists for key "
+            throwException(new IllegalStateException("Fragment no longer exists for key "
                     + key + ": index " + index));
         }
         Fragment f = mActive.get(index);
         if (f == null) {
-            throwException(new IllegalStateException("Fragement no longer exists for key "
+            throwException(new IllegalStateException("Fragment no longer exists for key "
                     + key + ": index " + index));
         }
         return f;
