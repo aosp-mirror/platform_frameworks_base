@@ -24,7 +24,7 @@
     <string name="label_paper_size" msgid="8681895607876809323">"Format du papier"</string>
     <string name="label_color" msgid="1108690305218188969">"Couleur"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientation"</string>
-    <string name="label_pages" msgid="6300874667546617333">"PAGES (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
+    <string name="label_pages" msgid="6300874667546617333">"Pages (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
     <string name="pages_range_example" msgid="4069269138547562081">"p.ex. 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Aperçu avant impression"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Installer un lecteur PDF pour voir l\'aperçu"</string>
