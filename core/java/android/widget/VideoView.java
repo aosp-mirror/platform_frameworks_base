@@ -33,6 +33,7 @@ import android.media.SubtitleController;
 import android.media.SubtitleTrack.RenderingWidget;
 import android.media.WebVttRenderer;
 import android.net.Uri;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -882,5 +883,11 @@ public class VideoView extends SurfaceView
         }
 
         invalidate();
+    }
+
+    /** @hide */
+    @Override
+    public Looper getSubtitleLooper() {
+        return Looper.getMainLooper();
     }
 }
