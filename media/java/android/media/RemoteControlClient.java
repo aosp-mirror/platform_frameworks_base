@@ -1674,7 +1674,7 @@ public class RemoteControlClient
      * @return true during any form of playback, false if it's not playing anything while in this
      *     playback state
      */
-    private static boolean playbackPositionShouldMove(int playstate) {
+    static boolean playbackPositionShouldMove(int playstate) {
         switch(playstate) {
             case PLAYSTATE_STOPPED:
             case PLAYSTATE_PAUSED:

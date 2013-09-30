@@ -148,6 +148,13 @@
     <string name="keyguard_accessibility_transport_play_description">Play button</string>
     <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
     <string name="keyguard_accessibility_transport_stop_description">Stop button</string>
+    <!-- Shown on transport control of lockscreen. Pressing button rates the track as "thumbs up." -->
+    <string name="keyguard_accessibility_transport_thumbs_up_description">Thumbs up</string>
+    <!-- Shown on transport control of lockscreen. Pressing button rates the track as "thumbs down." -->
+    <string name="keyguard_accessibility_transport_thumbs_down_description">Thumbs down</string>
+    <!-- Shown on transport control of lockscreen. Pressing button toggles the "heart" rating. -->
+    <string name="keyguard_accessibility_transport_heart_description">Heart</string>
+
 
     <!-- Accessibility description for when the device prompts the user to dismiss keyguard
          in order to complete an action. This will be followed by a message about the current

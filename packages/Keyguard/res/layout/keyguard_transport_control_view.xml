@@ -22,34 +22,133 @@
     android:gravity="center_horizontal"
     android:id="@+id/keyguard_transport_control">
 
-    <!-- Use ImageView for its cropping features; otherwise could be android:background -->
-    <ImageView
-        android:id="@+id/albumart"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="fill"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="false"
-        android:contentDescription="@string/keygaurd_accessibility_media_controls" />
-
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
-        <TextView
-            android:id="@+id/title"
+        android:layout_gravity="top"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/badge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="fitCenter" />
+        <FrameLayout
+            android:id="@+id/info_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dip"
-            android:layout_marginStart="16dip"
-            android:layout_marginEnd="16dip"
-            android:gravity="center_horizontal"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-        />
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/metadata_container"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dip"
+                    android:layout_marginEnd="16dip"
+                    android:gravity="center_horizontal"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:fontFamily="sans-serif-light" />
+                <TextView
+                    android:id="@+id/artist_album"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dip"
+                    android:layout_marginEnd="16dip"
+                    android:gravity="center_horizontal"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?android:attr/textColorSecondary" />
+            </LinearLayout>
+            <RelativeLayout
+                android:id="@+id/transient_seek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible">
+                <SeekBar
+                    android:id="@+id/transient_seek_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/transient_seek_time_elapsed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/transient_seek_bar"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="12dp" />
+                <TextView
+                    android:id="@+id/transient_seek_time_remaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_below="@id/transient_seek_bar"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="12dp" />
+            </RelativeLayout>
+            <LinearLayout
+                android:id="@+id/transient_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible">
+                <RatingBar
+                    android:id="@+id/transient_rating_bar_stars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:id="@+id/transient_rating_thumbs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+                        <ImageButton
+                            android:id="@+id/btn_thumbs_up"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_media_previous"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:minWidth="48dp"
+                            android:minHeight="48dp"
+                            android:contentDescription="@string/keyguard_accessibility_transport_thumbs_up_description"/>
+                    </FrameLayout>
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+                        <ImageButton
+                            android:id="@+id/btn_thumbs_down"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_media_next"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:minWidth="48dp"
+                            android:minHeight="48dp"
+                            android:contentDescription="@string/keyguard_accessibility_transport_thumbs_down_description"/>
+                    </FrameLayout>
+                </LinearLayout>
+                <ToggleButton
+                    android:id="@+id/transient_rating_heart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:contentDescription="@string/keyguard_accessibility_transport_heart_description" />
+            </LinearLayout>
+        </FrameLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,45 +158,45 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
-                <ImageView
+                <ImageButton
                     android:id="@+id/btn_prev"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_media_previous"
-                    android:clickable="true"
                     android:background="?android:attr/selectableItemBackground"
-                    android:padding="10dip"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
                     android:contentDescription="@string/keyguard_accessibility_transport_prev_description"/>
             </FrameLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
-                <ImageView
+                <ImageButton
                     android:id="@+id/btn_play"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:clickable="true"
                     android:src="@drawable/ic_media_play"
                     android:background="?android:attr/selectableItemBackground"
-                    android:padding="10dip"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
                     android:contentDescription="@string/keyguard_accessibility_transport_play_description"/>
             </FrameLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
-                <ImageView
+                <ImageButton
                     android:id="@+id/btn_next"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:clickable="true"
                     android:src="@drawable/ic_media_next"
                     android:background="?android:attr/selectableItemBackground"
-                    android:padding="10dip"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
                     android:contentDescription="@string/keyguard_accessibility_transport_next_description"/>
             </FrameLayout>
         </LinearLayout>

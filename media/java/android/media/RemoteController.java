@@ -17,6 +17,7 @@
 package android.media;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
@@ -30,6 +31,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -59,6 +62,7 @@ public final class RemoteController
     private final RcDisplay mRcd;
     private final Context mContext;
     private final AudioManager mAudioManager;
+    private final int mMaxBitmapDimension;
     private MetadataEditor mMetadataEditor;
 
     /**
@@ -110,6 +114,13 @@ public final class RemoteController
         mContext = context;
         mRcd = new RcDisplay();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            mMaxBitmapDimension = MAX_BITMAP_DIMENSION;
+        } else {
+            final DisplayMetrics dm = context.getResources().getDisplayMetrics();
+            mMaxBitmapDimension = Math.max(dm.widthPixels, dm.heightPixels);
+        }
     }
 
 
@@ -142,7 +153,7 @@ public final class RemoteController
          * @param state one of the playback states authorized
          *     in {@link RemoteControlClient#setPlaybackState(int)}.
          * @param stateChangeTimeMs the system time at which the state change was reported,
-         *     expressed in ms.
+         *     expressed in ms. Based on {@link android.os.SystemClock.elapsedRealtime()}.
          * @param currentPosMs a positive value for the current media playback position expressed
          *     in ms, a negative value if the position is temporarily unknown.
          * @param speed  a value expressed as a ratio of 1x playback: 1.0f is normal playback,
@@ -200,6 +211,50 @@ public final class RemoteController
         }
     }
 
+    /**
+     * @hide
+     */
+    public String getRemoteControlClientPackageName() {
+        return mClientPendingIntentCurrent != null ?
+                mClientPendingIntentCurrent.getCreatorPackage() : null;
+    }
+
+    /**
+     * Return the estimated playback position of the current media track or a negative value
+     * if not available.
+     *
+     * <p>The value returned is estimated by the current process and may not be perfect.
+     * The time returned by this method is calculated from the last state change time based
+     * on the current play position at that time and the last known playback speed.
+     * An application may call {@link #setSynchronizationMode(int)} to apply
+     * a synchronization policy that will periodically re-sync the estimated position
+     * with the RemoteControlClient.</p>
+     *
+     * @return the current estimated playback position in milliseconds or a negative value
+     *         if not available
+     *
+     * @see OnClientUpdateListener#onClientPlaybackStateUpdate(int, long, long, float)
+     */
+    public long getEstimatedMediaPosition() {
+        if (mLastPlaybackInfo != null) {
+            if (!RemoteControlClient.playbackPositionShouldMove(mLastPlaybackInfo.mState)) {
+                return mLastPlaybackInfo.mCurrentPosMs;
+            }
+
+            // Take the current position at the time of state change and estimate.
+            final long thenPos = mLastPlaybackInfo.mCurrentPosMs;
+            if (thenPos < 0) {
+                return -1;
+            }
+
+            final long now = SystemClock.elapsedRealtime();
+            final long then = mLastPlaybackInfo.mStateChangeTimeMs;
+            final long sinceThen = now - then;
+            final long scaledSinceThen = (long) (sinceThen * mLastPlaybackInfo.mSpeed);
+            return thenPos + scaledSinceThen;
+        }
+        return -1;
+    }
 
     /**
      * Send a simulated key event for a media button to be received by the current client.
@@ -301,8 +356,8 @@ public final class RemoteController
         synchronized (mInfoLock) {
             if (wantBitmap) {
                 if ((width > 0) && (height > 0)) {
-                    if (width > MAX_BITMAP_DIMENSION) { width = MAX_BITMAP_DIMENSION; }
-                    if (height > MAX_BITMAP_DIMENSION) { height = MAX_BITMAP_DIMENSION; }
+                    if (width > mMaxBitmapDimension) { width = mMaxBitmapDimension; }
+                    if (height > mMaxBitmapDimension) { height = mMaxBitmapDimension; }
                     mArtworkWidth = width;
                     mArtworkHeight = height;
                 } else {
@@ -415,7 +470,13 @@ public final class RemoteController
         protected MetadataEditor(Bundle metadata, long editableKeys) {
             mEditorMetadata = metadata;
             mEditableKeys = editableKeys;
-            mEditorArtwork = null;
+
+            mEditorArtwork = (Bitmap) metadata.getParcelable(
+                    String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK));
+            if (mEditorArtwork != null) {
+                cleanupBitmapFromBundle(MediaMetadataEditor.BITMAP_KEY_ARTWORK);
+            }
+
             mMetadataChanged = true;
             mArtworkChanged = true;
             mApplied = false;
@@ -706,6 +767,7 @@ public final class RemoteController
                     // existing metadata, merge existing and new
                     mMetadataEditor.mEditorMetadata.putAll(metadata);
                 }
+
                 mMetadataEditor.putBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK,
                         (Bitmap)metadata.getParcelable(
                                 String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK)));
