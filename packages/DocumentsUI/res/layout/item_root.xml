@@ -22,13 +22,14 @@
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:baselineAligned="false"
     android:background="@drawable/item_root">
 
     <ImageView
         android:id="@android:id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:layout_marginEnd="8dip"
+        android:layout_marginEnd="8dp"
         android:scaleType="centerInside"
         android:contentDescription="@null" />
 

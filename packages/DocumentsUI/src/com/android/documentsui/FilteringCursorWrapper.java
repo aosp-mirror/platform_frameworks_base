@@ -34,10 +34,15 @@ public class FilteringCursorWrapper extends AbstractCursor {
     private int mCount;
 
     public FilteringCursorWrapper(Cursor cursor, String[] acceptMimes) {
-        this(cursor, acceptMimes, null);
+        this(cursor, acceptMimes, null, Long.MIN_VALUE);
     }
 
     public FilteringCursorWrapper(Cursor cursor, String[] acceptMimes, String[] rejectMimes) {
+        this(cursor, acceptMimes, rejectMimes, Long.MIN_VALUE);
+    }
+
+    public FilteringCursorWrapper(
+            Cursor cursor, String[] acceptMimes, String[] rejectMimes, long rejectBefore) {
         mCursor = cursor;
 
         final int count = cursor.getCount();
@@ -47,7 +52,12 @@ public class FilteringCursorWrapper extends AbstractCursor {
         while (cursor.moveToNext()) {
             final String mimeType = cursor.getString(
                     cursor.getColumnIndex(Document.COLUMN_MIME_TYPE));
+            final long lastModified = cursor.getLong(
+                    cursor.getColumnIndex(Document.COLUMN_LAST_MODIFIED));
             if (rejectMimes != null && MimePredicate.mimeMatches(rejectMimes, mimeType)) {
+                continue;
+            }
+            if (lastModified < rejectBefore) {
                 continue;
             }
             if (MimePredicate.mimeMatches(acceptMimes, mimeType)) {

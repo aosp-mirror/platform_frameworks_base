@@ -33,7 +33,7 @@ import android.util.Log;
 public class RecentsProvider extends ContentProvider {
     private static final String TAG = "RecentsProvider";
 
-    public static final long MAX_HISTORY_IN_MILLIS = DateUtils.DAY_IN_MILLIS * 45;
+    public static final long MAX_HISTORY_IN_MILLIS = 45 * DateUtils.DAY_IN_MILLIS;
 
     private static final String AUTHORITY = "com.android.documentsui.recents";
 
@@ -56,6 +56,7 @@ public class RecentsProvider extends ContentProvider {
     public static final String TABLE_RESUME = "resume";
 
     public static class RecentColumns {
+        public static final String KEY = "key";
         public static final String STACK = "stack";
         public static final String TIMESTAMP = "timestamp";
     }
@@ -99,16 +100,18 @@ public class RecentsProvider extends ContentProvider {
         private static final int VERSION_INIT = 1;
         private static final int VERSION_AS_BLOB = 3;
         private static final int VERSION_ADD_EXTERNAL = 4;
+        private static final int VERSION_ADD_RECENT_KEY = 5;
 
         public DatabaseHelper(Context context) {
-            super(context, DB_NAME, null, VERSION_ADD_EXTERNAL);
+            super(context, DB_NAME, null, VERSION_ADD_RECENT_KEY);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
 
             db.execSQL("CREATE TABLE " + TABLE_RECENT + " (" +
-                    RecentColumns.STACK + " BLOB PRIMARY KEY ON CONFLICT REPLACE," +
+                    RecentColumns.KEY + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
+                    RecentColumns.STACK + " BLOB DEFAULT NULL," +
                     RecentColumns.TIMESTAMP + " INTEGER" +
                     ")");
 

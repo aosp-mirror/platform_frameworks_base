@@ -66,6 +66,7 @@ import java.util.List;
  */
 public class RecentsCreateFragment extends Fragment {
 
+    private View mEmptyView;
     private ListView mListView;
 
     private DocumentStackAdapter mAdapter;
@@ -86,6 +87,8 @@ public class RecentsCreateFragment extends Fragment {
         final Context context = inflater.getContext();
 
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
+
+        mEmptyView = view.findViewById(android.R.id.empty);
 
         mListView = (ListView) view.findViewById(R.id.list);
         mListView.setOnItemClickListener(mItemListener);
@@ -189,6 +192,13 @@ public class RecentsCreateFragment extends Fragment {
 
         public void swapStacks(List<DocumentStack> stacks) {
             mStacks = stacks;
+
+            if (isEmpty()) {
+                mEmptyView.setVisibility(View.VISIBLE);
+            } else {
+                mEmptyView.setVisibility(View.GONE);
+            }
+
             notifyDataSetChanged();
         }
 

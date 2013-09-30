@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -34,6 +35,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.documentsui.model.DocumentInfo;
+
+import java.io.FileNotFoundException;
 
 /**
  * Dialog to create a new directory.
@@ -64,24 +67,45 @@ public class CreateDirectoryFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String displayName = text1.getText().toString();
-
-                final DocumentsActivity activity = (DocumentsActivity) getActivity();
-                final DocumentInfo cwd = activity.getCurrentDirectory();
-
-                try {
-                    final Uri childUri = DocumentsContract.createDocument(
-                            resolver, cwd.derivedUri, Document.MIME_TYPE_DIR, displayName);
-
-                    // Navigate into newly created child
-                    final DocumentInfo childDoc = DocumentInfo.fromUri(resolver, childUri);
-                    activity.onDocumentPicked(childDoc);
-                } catch (Exception e) {
-                    Toast.makeText(context, R.string.create_error, Toast.LENGTH_SHORT).show();
-                }
+                new CreateDirectoryTask(displayName).execute();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
 
         return builder.create();
+    }
+
+    private class CreateDirectoryTask extends AsyncTask<Void, Void, DocumentInfo> {
+        private final String mDisplayName;
+
+        public CreateDirectoryTask(String displayName) {
+            mDisplayName = displayName;
+        }
+
+        @Override
+        protected DocumentInfo doInBackground(Void... params) {
+            final DocumentsActivity activity = (DocumentsActivity) getActivity();
+            final ContentResolver resolver = activity.getContentResolver();
+
+            final DocumentInfo cwd = activity.getCurrentDirectory();
+            final Uri childUri = DocumentsContract.createDocument(
+                    resolver, cwd.derivedUri, Document.MIME_TYPE_DIR, mDisplayName);
+            try {
+                return DocumentInfo.fromUri(resolver, childUri);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(DocumentInfo result) {
+            final DocumentsActivity activity = (DocumentsActivity) getActivity();
+            if (result != null) {
+                // Navigate into newly created child
+                activity.onDocumentPicked(result);
+            } else {
+                Toast.makeText(activity, R.string.create_error, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
