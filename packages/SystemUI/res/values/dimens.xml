@@ -217,4 +217,7 @@
 
     <!-- The width of the notification panel window: match_parent below sw600dp -->
     <dimen name="notification_panel_width">-1dp</dimen>
+
+    <!-- used by DessertCase -->
+    <dimen name="dessert_case_cell_size">192dp</dimen>
 </resources>

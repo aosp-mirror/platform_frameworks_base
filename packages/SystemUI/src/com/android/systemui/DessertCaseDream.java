@@ -19,21 +19,36 @@ package com.android.systemui;
 import android.service.dreams.DreamService;
 
 public class DessertCaseDream extends DreamService {
+    private DessertCaseView mView;
+    private DessertCaseView.RescalingContainer mContainer;
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        setInteractive(true);
-        setFullscreen(true);
+        setInteractive(false);
+
+        mView = new DessertCaseView(this);
+
+        mContainer = new DessertCaseView.RescalingContainer(this);
+
+        mContainer.setView(mView);
+
+        setContentView(mContainer);
     }
 
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
+        mView.postDelayed(new Runnable() {
+            public void run() {
+                mView.start();
+            }
+        }, 1000);
     }
 
     @Override
     public void onDreamingStopped() {
         super.onDreamingStopped();
+        mView.stop();
     }
 }
