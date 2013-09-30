@@ -2545,12 +2545,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mServiceTransactionId = 0;
         mServiceDiscReqId = null;
 
-        String countryCode = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.WIFI_COUNTRY_CODE);
-        if (countryCode != null && !countryCode.isEmpty()) {
-            mP2pStateMachine.sendMessage(SET_COUNTRY_CODE, countryCode);
-        }
-
         updatePersistentNetworks(RELOAD);
     }
 
