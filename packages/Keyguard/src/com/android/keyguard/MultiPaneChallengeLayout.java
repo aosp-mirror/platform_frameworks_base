@@ -28,6 +28,7 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.MeasureSpec;
 import android.widget.LinearLayout;
 
 public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayout {
@@ -47,6 +48,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
     private final Rect mTempRect = new Rect();
     private final Rect mZeroPadding = new Rect();
+    private final Rect mInsets = new Rect();
 
     private final DisplayMetrics mDisplayMetrics;
 
@@ -78,6 +80,10 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         mDisplayMetrics = res.getDisplayMetrics();
 
         setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+
+    public void setInsets(Rect insets) {
+        mInsets.set(insets);
     }
 
     @Override
@@ -187,7 +193,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             // This calculation is super dodgy and relies on several assumptions.
             // Specifically that the root of the window will be padded in for insets
             // and that the window is LAYOUT_IN_SCREEN.
-            virtualHeight = mDisplayMetrics.heightPixels - root.getPaddingTop();
+            virtualHeight = mDisplayMetrics.heightPixels - root.getPaddingTop() - mInsets.top;
         }
         if (lp.childType == LayoutParams.CHILD_TYPE_WIDGET ||
                 lp.childType == LayoutParams.CHILD_TYPE_USER_SWITCHER) {
@@ -212,6 +218,9 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         final int width = MeasureSpec.getSize(widthSpec);
         final int height = MeasureSpec.getSize(heightSpec);
         setMeasuredDimension(width, height);
+
+        final int insetHeight = height - mInsets.top - mInsets.bottom;
+        final int insetHeightSpec = MeasureSpec.makeMeasureSpec(insetHeight, MeasureSpec.EXACTLY);
 
         int widthUsed = 0;
         int heightUsed = 0;
@@ -245,14 +254,14 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 if (child.getVisibility() == GONE) continue;
 
                 int adjustedWidthSpec = widthSpec;
-                int adjustedHeightSpec = heightSpec;
+                int adjustedHeightSpec = insetHeightSpec;
                 if (lp.maxWidth >= 0) {
                     adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
                             Math.min(lp.maxWidth, width), MeasureSpec.EXACTLY);
                 }
                 if (lp.maxHeight >= 0) {
                     adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                            Math.min(lp.maxHeight, height), MeasureSpec.EXACTLY);
+                            Math.min(lp.maxHeight, insetHeight), MeasureSpec.EXACTLY);
                 }
                 // measureChildWithMargins will resolve layout direction for the LayoutParams
                 measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
@@ -282,7 +291,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 continue;
             }
 
-            final int virtualHeight = getVirtualHeight(lp, height, heightUsed);
+            final int virtualHeight = getVirtualHeight(lp, insetHeight, heightUsed);
 
             int adjustedWidthSpec;
             int adjustedHeightSpec;
@@ -330,11 +339,12 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         padding.bottom = getPaddingBottom();
         final int width = r - l;
         final int height = b - t;
+        final int insetHeight = height - mInsets.top - mInsets.bottom;
 
         // Reserve extra space in layout for the user switcher by modifying
         // local padding during this layout pass
         if (mUserSwitcherView != null && mUserSwitcherView.getVisibility() != GONE) {
-            layoutWithGravity(width, height, mUserSwitcherView, padding, true);
+            layoutWithGravity(width, insetHeight, mUserSwitcherView, padding, true);
         }
 
         final int count = getChildCount();
@@ -349,11 +359,11 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 child.layout(0, 0, width, height);
                 continue;
             } else if (lp.childType == LayoutParams.CHILD_TYPE_PAGE_DELETE_DROP_TARGET) {
-                layoutWithGravity(width, height, child, mZeroPadding, false);
+                layoutWithGravity(width, insetHeight, child, mZeroPadding, false);
                 continue;
             }
 
-            layoutWithGravity(width, height, child, padding, false);
+            layoutWithGravity(width, insetHeight, child, padding, false);
         }
     }
 
@@ -445,6 +455,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 right = left + childWidth;
                 break;
         }
+        top += mInsets.top;
+        bottom += mInsets.top;
         child.layout(left, top, right, bottom);
     }
 
