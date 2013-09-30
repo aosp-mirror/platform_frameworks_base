@@ -213,8 +213,8 @@ public class TextureView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mLayer != null && mAttachInfo != null && mAttachInfo.mHardwareRenderer != null) {
-            boolean success = mAttachInfo.mHardwareRenderer.safelyRun(new Runnable() {
+        if (mLayer != null) {
+            boolean success = executeHardwareAction(new Runnable() {
                 @Override
                 public void run() {
                     destroySurface();
