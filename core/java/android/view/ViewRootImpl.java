@@ -4830,8 +4830,8 @@ public final class ViewRootImpl implements ViewParent,
 
             enqueueInputEvent(new KeyEvent(event.getDownTime(), event.getEventTime(),
                         event.getAction(), keyCode, event.getRepeatCount(), event.getMetaState(),
-                        event.getScanCode(), event.getFlags() | KeyEvent.FLAG_FALLBACK,
-                        event.getSource()));
+                        event.getDeviceId(), event.getScanCode(),
+                        event.getFlags() | KeyEvent.FLAG_FALLBACK, event.getSource()));
             return true;
         }
 
