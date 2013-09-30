@@ -38,6 +38,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
@@ -633,7 +634,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -2433,17 +2433,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 notifyNavigationBarScreenOn(false);
                 notifyHeadsUpScreenOn(false);
             }
-            else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                if (DEBUG) {
-                    Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
-                }
-                mDisplay.getSize(mCurrentDisplaySize);
-
-                updateResources();
-                repositionNavigationBar();
-                updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-                updateShowSearchHoldoff();
-            }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = true;
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
@@ -2465,6 +2454,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
         }
     };
+
+    // SystemUIService notifies SystemBars of configuration changes, which then calls down here
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig); // calls refreshLayout
+
+        if (DEBUG) {
+            Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
+        }
+        mDisplay.getSize(mCurrentDisplaySize);
+
+        updateResources();
+        repositionNavigationBar();
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+        updateShowSearchHoldoff();
+    }
 
     @Override
     public void userSwitched(int newUserId) {
