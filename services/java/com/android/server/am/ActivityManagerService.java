@@ -235,6 +235,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PSS = localLOGV || false;
+    static final boolean DEBUG_LOCKSCREEN = localLOGV || true;
     static final boolean VALIDATE_TOKENS = true;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -829,11 +830,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * State of external call telling us if the lock screen is shown.
      */
-    static final int LOCK_SCREEN_NEVER_SHOWN = 0;
-    static final int LOCK_SCREEN_FIRST_SHOWN = 1;
-    static final int LOCK_SCREEN_HIDDEN = 2;
-    static final int LOCK_SCREEN_SHOWING = 3;
-    int mLockScreenState = LOCK_SCREEN_NEVER_SHOWN;
+    boolean mLockScreenShown = false;
 
     /**
      * Set if we are shutting down the system, similar to sleeping.
@@ -4961,8 +4958,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                if (lockScreenShowing()) {
-                    mLockScreenState = LOCK_SCREEN_HIDDEN;
+                if (DEBUG_LOCKSCREEN) logLockScreen("");
+                if (mLockScreenShown) {
+                    mLockScreenShown = false;
                     comeOutOfSleepIfNeededLocked();
                 }
                 mStackSupervisor.setDismissKeyguard(true);
@@ -8087,22 +8085,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         Binder.restoreCallingIdentity(origId);
     }
 
-    boolean lockScreenShowing() {
-        switch (mLockScreenState) {
-            case LOCK_SCREEN_NEVER_SHOWN:
-            case LOCK_SCREEN_HIDDEN:
-                return false;
-            case LOCK_SCREEN_FIRST_SHOWN:
-            case LOCK_SCREEN_SHOWING:
-                return true;
-            default:
-                Slog.e(TAG, "lockScreenShowing: illegal state");
-                throw new IllegalStateException("mLockScreenState=" + mLockScreenState);
-        }
+    void logLockScreen(String msg) {
+        if (DEBUG_LOCKSCREEN) Slog.d(TAG, Debug.getCallers(2) + ":" + msg +
+                " mLockScreenShown=" + mLockScreenShown + " mWentToSleep=" +
+                mWentToSleep + " mSleeping=" + mSleeping + " mDismissKeyguardOnNextActivity=" +
+                mStackSupervisor.mDismissKeyguardOnNextActivity);
     }
 
     private void comeOutOfSleepIfNeededLocked() {
-        if (!mWentToSleep && !lockScreenShowing()) {
+        if (!mWentToSleep && !mLockScreenShown) {
             if (mSleeping) {
                 mSleeping = false;
                 mStackSupervisor.comeOutOfSleepIfNeededLocked();
@@ -8138,12 +8129,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (shown && mLockScreenState == LOCK_SCREEN_NEVER_SHOWN) {
-                    mStackSupervisor.pauseStacks(false, true);
-                    mLockScreenState = LOCK_SCREEN_FIRST_SHOWN;
-                } else {
-                    mLockScreenState = shown ? LOCK_SCREEN_SHOWING : LOCK_SCREEN_HIDDEN;
-                }
+                if (DEBUG_LOCKSCREEN) logLockScreen(" shown=" + shown);
+                mLockScreenShown = shown;
                 comeOutOfSleepIfNeededLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -10676,9 +10663,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (dumpPackage == null) {
-            if (mSleeping || mWentToSleep || lockScreenShowing()) {
+            if (mSleeping || mWentToSleep || mLockScreenShown) {
                 pw.println("  mSleeping=" + mSleeping + " mWentToSleep=" + mWentToSleep
-                        + " mLockScreenState=" + lockScreenStateToString());
+                        + " mLockScreenShown " + mLockScreenShown);
             }
             if (mShuttingDown) {
                 pw.println("  mShuttingDown=" + mShuttingDown);
@@ -16302,15 +16289,5 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityInfo info = new ActivityInfo(aInfo);
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
-    }
-
-    private String lockScreenStateToString() {
-        switch (mLockScreenState) {
-            case LOCK_SCREEN_NEVER_SHOWN: return "LOCK_SCREEN_NEVER_SHOWN";
-            case LOCK_SCREEN_FIRST_SHOWN: return "LOCK_SCREEN_FIRST_SHOWN";
-            case LOCK_SCREEN_HIDDEN: return "LOCK_SCREEN_HIDDEN";
-            case LOCK_SCREEN_SHOWING: return "LOCK_SCREEN_SHOWING";
-            default: return "unknown (" + mLockScreenState + ")";
-        }
     }
 }

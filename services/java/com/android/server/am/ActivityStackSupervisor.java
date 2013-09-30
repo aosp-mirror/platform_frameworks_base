@@ -122,7 +122,7 @@ public final class ActivityStackSupervisor {
     WindowManagerService mWindowManager;
 
     /** Dismiss the keyguard after the next activity is displayed? */
-    private boolean mDismissKeyguardOnNextActivity = false;
+    boolean mDismissKeyguardOnNextActivity = false;
 
     /** Identifier counter for all ActivityStacks */
     private int mLastStackId = HOME_STACK_ID;
@@ -232,6 +232,7 @@ public final class ActivityStackSupervisor {
     }
 
     void dismissKeyguard() {
+        if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
         if (mDismissKeyguardOnNextActivity) {
             mDismissKeyguardOnNextActivity = false;
             mWindowManager.dismissKeyguard();
@@ -310,6 +311,7 @@ public final class ActivityStackSupervisor {
     }
 
     void setDismissKeyguard(boolean dismiss) {
+        if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen(" dismiss=" + dismiss);
         mDismissKeyguardOnNextActivity = dismiss;
     }
 
@@ -468,15 +470,14 @@ public final class ActivityStackSupervisor {
     /**
      * Pause all activities in either all of the stacks or just the back stacks.
      * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
-     * @param allStacks Whether to pause all the stacks (true), or just the back stacks (false).
      * @return true if any activity was paused as a result of this call.
      */
-    boolean pauseStacks(boolean userLeaving, boolean allStacks) {
+    boolean pauseBackStacks(boolean userLeaving) {
         boolean someActivityPaused = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
-            if ((allStacks || !isFrontStack(stack)) && stack.mResumedActivity != null) {
-                if (DEBUG_STATES) Slog.d(TAG, "pauseStacks: stack=" + stack +
+            if (!isFrontStack(stack) && stack.mResumedActivity != null) {
+                if (DEBUG_STATES) Slog.d(TAG, "pauseBackStacks: stack=" + stack +
                         " mResumedActivity=" + stack.mResumedActivity);
                 stack.startPausingLocked(userLeaving, false);
                 someActivityPaused = true;
@@ -2157,6 +2158,9 @@ public final class ActivityStackSupervisor {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             stack.awakeFromSleepingLocked();
+            if (isFrontStack(stack)) {
+                resumeTopActivitiesLocked();
+            }
         }
         mGoingToSleepActivities.clear();
     }
