@@ -4683,8 +4683,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             assumeLayout();
         }
 
-        boolean changed = false;
-
         if (mMovement != null) {
             /* This code also provides auto-scrolling when a cursor is moved using a
              * CursorController (insertion point or selection limits).
@@ -4707,10 +4705,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (curs >= 0) {
-                changed = bringPointIntoView(curs);
+                bringPointIntoView(curs);
             }
         } else {
-            changed = bringTextIntoView();
+            bringTextIntoView();
         }
 
         // This has to be checked here since:
@@ -4731,7 +4729,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         getViewTreeObserver().removeOnPreDrawListener(this);
         mPreDrawRegistered = false;
 
-        return !changed;
+        return true;
     }
 
     @Override
