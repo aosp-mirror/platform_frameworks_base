@@ -36,8 +36,7 @@
     <string name="drawer_open" msgid="4545466532430226949">"Rodyti šaknis"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Slėpti šaknis"</string>
     <string name="save_error" msgid="6167009778003223664">"Nepavyko išsaugoti dokumento"</string>
-    <!-- no translation found for create_error (3735649141335444215) -->
-    <skip />
+    <string name="create_error" msgid="3735649141335444215">"Nepavyko sukurti aplanko"</string>
     <string name="root_recent" msgid="4470053704320518133">"Naujausi"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Laisvos vietos: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Saugyklos paslaugos"</string>
