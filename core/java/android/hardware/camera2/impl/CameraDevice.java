@@ -88,24 +88,6 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public CameraCharacteristics getProperties() throws CameraAccessException {
-
-        CameraMetadataNative info = new CameraMetadataNative();
-
-        try {
-            mRemoteDevice.getCameraInfo(/*out*/info);
-        } catch(CameraRuntimeException e) {
-            throw e.asChecked();
-        } catch(RemoteException e) {
-            // impossible
-            return null;
-        }
-
-        CameraCharacteristics properties = new CameraCharacteristics(info);
-        return properties;
-    }
-
-    @Override
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
         synchronized (mLock) {
             HashSet<Surface> addSet = new HashSet<Surface>(outputs);    // Streams to create
