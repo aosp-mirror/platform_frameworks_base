@@ -60,6 +60,11 @@ public final class CaptureResult extends CameraMetadata {
 
     @Override
     public <T> T get(Key<T> key) {
+        if (key == STATISTICS_FACES) { // Don't throw IllegalArgumentException
+            // TODO: Implement android.statistics.faces
+            return null;
+        }
+
         return mResults.get(key);
     }
 
