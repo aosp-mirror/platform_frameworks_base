@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Ermöglicht der App, zur Statusleiste zu werden"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Statusleiste ein-/ausblenden"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Ermöglicht der App, die Statusleiste ein- oder auszublenden"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"Verknüpfungen installieren"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Ermöglicht einer App das Hinzufügen von Verknüpfungen zum Startbildschirm ohne Eingriff des Nutzers"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"Verknüpfungen deinstallieren"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Ermöglicht einer App das Entfernen von Verknüpfungen vom Startbildschirm ohne Eingriff des Nutzers"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"Ausgehende Anrufe umleiten"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Ermöglicht der App, ausgehende Anrufe zu verarbeiten und die zu wählende Nummer zu ändern. Die Berechtigung erlaubt der App, ausgehende Anrufe zu überwachen, umzuleiten und zu unterbinden."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"SMS empfangen"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Ermöglicht der App, alle Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Wörter zu meinem Wörterbuch hinzufügen"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ermöglicht der App, neue Einträge zum Nutzerwörterbuch hinzuzufügen"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"Zugriff auf geschützten Speicher testen"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"Zugriff auf geschützten Speicher testen"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Ermöglicht der App, eine Berechtigung für USB-Speicher zu testen, die künftig auf neuen Geräten verfügbar sein wird"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Ermöglicht der App, eine Berechtigung für SD-Karten zu testen, die künftig auf neuen Geräten verfügbar sein wird"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB-Speicherinhalte lesen"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD-Karteninhalte lesen"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Ermöglicht der App, den USB-Speicher zu lesen"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Ermöglicht der App, den Inhalt einer SD-Karte zu lesen"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB-Speicherinhalte ändern oder löschen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD-Karteninhalte ändern oder löschen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ermöglicht der App, in den USB-Speicher zu schreiben"</string>
@@ -1625,7 +1629,7 @@
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fehler beim Schreiben von Inhalten"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"Unbekannt"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Dienst <xliff:g id="NAME">%s</xliff:g> installiert"</string>
-    <string name="print_service_installed_message" msgid="5897362931070459152">"Zum Aktivieren klicken"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Zum Aktivieren tippen"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Administrator-PIN eingeben"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN eingeben"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Falsch"</string>

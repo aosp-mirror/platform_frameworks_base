@@ -349,6 +349,14 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expander/reducir la trav da status"</string>
     <!-- no translation found for permdesc_expandStatusBar (6917549437129401132) -->
     <skip />
+    <!-- no translation found for permlab_install_shortcut (4279070216371564234) -->
+    <skip />
+    <!-- no translation found for permdesc_install_shortcut (8341295916286736996) -->
+    <skip />
+    <!-- no translation found for permlab_uninstall_shortcut (4729634524044003699) -->
+    <skip />
+    <!-- no translation found for permdesc_uninstall_shortcut (6745743474265057975) -->
+    <skip />
     <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
     <skip />
     <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
@@ -1061,13 +1069,13 @@
     <skip />
     <!-- no translation found for permdesc_writeDictionary (8185385716255065291) -->
     <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
+    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
     <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
+    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
     <skip />
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <!-- no translation found for permdesc_sdcardRead (3446988712598386079) -->
     <skip />
-    <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
+    <!-- no translation found for permdesc_sdcardRead (2607362473654975411) -->
     <skip />
     <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
     <skip />

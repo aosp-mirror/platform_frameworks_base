@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tillåter att appen visas i statusfältet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandera/komprimera statusfält"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Tillåter att appen expanderar eller komprimerar statusfältet."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installera genvägar"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Tillåter att en app lägger till genvägar på startskärmen utan åtgärd från användaren."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"avinstallera genvägar"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Tillåter att appen tar bort genvägar på startskärmen utan åtgärd från användaren."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigera utgående samtal"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Tillåter att appen hanterar utgående samtal och ändrar numret som ska ringas upp. Med den här behörigheten kan appen övervaka, omdirigera eller förhindra utgående samtal."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ta emot textmeddelanden (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Tillåter att appen läser alla ord, namn och fraser som användaren har sparat i ordlistan."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"lägga till ord i den användardefinierade ordlistan"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillåter att appen anger nya ord i användarordlistan."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testa åtkomst till skyddad lagringsenhet"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testa åtkomst till skyddad lagringsenhet"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Tillåter att appen testar behörighet till USB-enheter för användning på framtida enheter."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Tillåter appen att testa behörighet till SD-kortet för användning på framtida enheter."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"läsa innehåll på USB-enheten"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"läsa innehållet på SD-kortet"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Låter appen läsa USB-innehåll."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Tillåter att appen läser innehållet på SD-kortet."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ändra eller ta bort innehåll på USB-enheten"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ändra eller ta bort innehåll på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Gör att app skriver till USB."</string>

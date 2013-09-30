@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Hiermee kan de app de statusbalk zijn."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"statusbalk uitvouwen/samenvouwen"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Hiermee kan de app de statusbalk uitvouwen of samenvouwen."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"snelkoppelingen installeren"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Een app toestaan snelkoppelingen aan het startscherm toe te voegen zonder tussenkomst van de gebruiker."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"snelkoppelingen verwijderen"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"De app toestaan snelkoppelingen van het startscherm te verwijderen zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"uitgaande oproepen doorschakelen"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Hiermee kan de app uitgaande oproepen verwerken en het nummer wijzigen dat wordt gebeld. De app kan uitgaande oproepen bijhouden, omleiden of blokkeren."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"tekstberichten (SMS) ontvangen"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Hiermee kan de app alle woorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"woorden toevoegen aan het gebruikerswoordenboek"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Hiermee kan de app nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testtoegang tot beveiligde opslag"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testtoegang tot beveiligde opslag"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Hiermee kan de app toestemming testen voor USB-opslag op toekomstige apparaten."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Hiermee kan de app toestemming testen voor de SD-kaart die beschikbaar komt op toekomstige apparaten."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"de inhoud van uw USB-opslag lezen"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"de inhoud van uw SD-kaart lezen"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"De app toestaan de inhoud van uw USB-opslag te lezen."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"De app toestaan de inhoud van uw SD-kaart te lezen."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"de inhoud van uw USB-opslag aanpassen of verwijderen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"de inhoud van uw SD-kaart aanpassen of verwijderen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Hiermee kan de app schrijven naar de USB-opslag."</string>

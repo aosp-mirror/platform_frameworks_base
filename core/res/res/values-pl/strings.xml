@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Pozwala aplikacji na występowanie na pasku stanu."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"rozwijanie/zwijanie paska stanu"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Pozwala aplikacji na rozwijanie lub zwijanie paska stanu."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalowanie skrótów"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Pozwala aplikacji dodawać skróty na ekranie głównym bez interwencji użytkownika."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"odinstalowywanie skrótów"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Pozwala aplikacji usuwać skróty z ekranu głównego bez interwencji użytkownika."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"przekierowywanie połączeń wychodzących"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Pozwala aplikacji na przetwarzanie połączeń wychodzących i zmianę wybieranego numeru. Aplikacje z tym uprawnieniem mogą monitorować, przekierowywać lub blokować połączenia wychodzące."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"odbieranie wiadomości tekstowych (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Pozwala aplikacji na odczytywanie wszelkich słów, nazw i wyrażeń zapisanych w słowniku użytkownika."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"dodawanie wyrazów do słownika zdefiniowanego przez użytkownika"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pozwala aplikacji na zapisywanie nowych słów do słownika użytkownika."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testowanie dostępu do chronionej pamięci"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testowanie dostępu do chronionej pamięci"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Aplikacja może testować uprawnienie do pamięci USB, dostępne w przyszłych urządzeniach."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Pozwala aplikacji na testowanie uprawnienia do karty SD, które będzie dostępne w przyszłych urządzeniach."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"odczytywanie zawartości pamięci USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"odczytywanie zawartości karty SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Pozwala aplikacji na odczyt Twojej pamięci USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Pozwala aplikacji na odczyt Twojej karty SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modyfikowanie i usuwanie zawartości pamięci USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modyfikowanie i usuwanie zawartości karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Pozwala aplikacji na zapis w pamięci USB."</string>

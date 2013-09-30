@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permite que a aplicação seja apresentada na barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandir/fechar barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permite à aplicação expandir ou fechar a barra de estado."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalar atalhos"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permite que uma aplicação adicione atalhos ao Ecrã principal sem a intervenção do utilizador."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstalar atalhos"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite que a aplicação remova atalhos do Ecrã principal sem a intervenção do utilizador."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirecionar as chamadas efetuadas"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite que a aplicação processe chamadas efetuadas e mude o número a marcar. Esta autorização permite que a aplicação monitorize, redirecione ou impeça a realização de chamadas."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"receber mensagens de texto (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite que a aplicação leia todas as palavras, nomes e expressões que o utilizador possa ter guardado no dicionário do utilizador."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"adicionar palavras ao dicionário definido pelo utilizador"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite à aplicação escrever novas palavras no dicionário do utilizador."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testar o acesso a armazenamento protegido"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testar o acesso a armazenamento protegido"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permite que a aplicação teste uma autorização para a memória USB que irá estar disponível em dispositivos futuros."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permite que a aplicação teste uma autorização para o cartão SD que irá estar disponível em dispositivos futuros."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ler os conteúdos da memória USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ler os conteúdos do cartão SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permite que a aplicação leia conteúdos da memória USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permite que a aplicação leia conteúdos do cartão SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modificar ou eliminar os conteúdos da memória USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar ou eliminar os conteúdos do cartão SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite que a aplicação escreva na unidade de armazenamento USB."</string>
@@ -1106,7 +1110,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenção"</string>
     <string name="loading" msgid="7933681260296021180">"A carregar…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Ativado"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Desativar"</string>
+    <string name="capital_off" msgid="6815870386972805832">"Desativado"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Concluir ação utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Limpar a predefinição nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>

@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ອະນຸຍາດໃຫ້ແອັບຯເປັນແຖບສະຖານະ."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ຫຍໍ້/ຂະຫຍາຍ ແຖບສະຖານະ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ອະນຸຍາດໃຫ້ແອັບຯ ຂະຫຍາຍ ຫຼືຫຍໍ້ແຖບສະຖານະ."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ຕິດຕັ້ງທາງລັດ"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເພີ່ມທາງລັດໄດ້ ໂດຍບໍ່ຕ້ອງຮັບການຢືນຢັນຈາກຜູ່ໃຊ້."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ຖອນທາງລັດ"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນລຶບທາງລັດໃນໜ້າຫຼັກໄດ້ ໂດຍບໍ່ຕ້ອງຮັບການຢືນຢັນຈາກຜູ່ໃຊ້."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ປ່ຽນເສັ້ນທາງການໂທອອກ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"ອະນຸຍາດໃຫ້ແອັບຯປະມວນຜົນສາຍທີ່ໂທອອກ ແລະປ່ຽນໝາຍເລກທີ່ຈະໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດກວດສອບ, ໂອນສາຍ ຫຼືຂັດຂວາງບໍ່ໃຫ້ໂທອອກໄດ້."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ຮັບຂໍ້ຄວາມສັ້ນ (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ອະນຸຍາດແອັບຯອ່ານຄຳສັບ, ຊື່ ແລະປະໂຫຍກທັງໝົດທີ່ຜູ່ໃຊ້ອາດບັນທຶກໄວ້ໃນວັດຈະນານຸກົມຜູ່ໃຊ້."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ເພີ່ມຄຳສັບໃສ່ວັດຈະນານຸກົມທີ່ຜູ່ໃຊ້ກຳນົດເອງ"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"ອະນຸຍາດໃຫ້ແອັບຯຂຽນຄຳສັບໃໝ່ ໃສ່ວັດຈະນານຸກົມຜູ່ໃຊ້."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ທົດສອບການເຂົ້າເຖິງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ຖືກປ້ອງກັນໄວ້"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ທົດສອບການເຂົ້າເຖິງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ຖືກປ້ອງກັນໄວ້"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"ອະນຸຍາດໃຫ້ແອັບຯທົດສອບການອະນຸຍາດຂອງ ບ່ອນຈັດເກັບຂໍ້ມູນ USB ເຊິ່ງຈະຖືກໃຊ້ໃນອຸປະກອນໃນອະນາຄົດ."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"ອະນຸຍາດໃຫ້ແອັບຯ ທົດລອງສິດໃດນຶ່ງສຳລັບ SD card ທີ່ຈະມີໃນອຸປະກອນໃນອະນາຄົດ."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ອ່ານເນື້ອຫາຕ່າງໆໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານ"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ອ່ານເນື້ອຫາຕ່າງໆໃນ SD Card ຂອງທ່ານ"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານເນື້ອຫາຕ່າງໆໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານ."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານເນື້ອຫາຕ່າງໆໃນ SD Card ຂອງທ່ານ."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານ"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາຂອງ SD card ຂອງທ່ານ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ອະນຸຍາດໃຫ້ແອັບຯຂຽນຂໍ້ມູນໃສ່ບ່ອນຈັດເກັບຂໍ້ມູນ USB."</string>
@@ -1110,7 +1114,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"ເຮັດວຽກໃຫ້ສຳເລັດໂດຍໃຊ້"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ລຶບລ້າງຄ່າເລີ່ມຕົ້ນ ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ."</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"ເລືອກການປະຕິບັດ"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"ເລືອກການເຮັດວຽກ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ເລືອກແອັບຯສໍາລັບອຸປະກອນ USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ບໍ່ມີແອັບຯໃດສາມາດເຮັດວຽກນີ້ໄດ້."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>

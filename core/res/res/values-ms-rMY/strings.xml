@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Membenarkan apl menjadi bar status."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"kembangkan/runtuhkan bar status"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Membenarkan apl mengembangkan atau meruntuhkan bar status."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"pasang pintasan"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Membenarkan aplikasi menambah pintasan Skrin Laman Utama tanpa campur tangan pengguna."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"nyahpasang pintasan"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Membenarkan aplikasi memadam pintasan Skrin Laman Utama tanpa campur tangan pengguna."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"tukar laluan panggilan keluar"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Membenarkan apl memproses panggilan keluar dan menukar nombor yang perlu didail. Kebenaran ini membolehkan apl memantau, mengalih atau menghalang panggilan keluar."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"terima mesej teks (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Membenarkan apl membaca semua perkataan, nama dan frasa yang mungkin telah disimpan oleh pengguna dalam kamus pengguna."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"tambah perkataan ke kamus ditakrifkan pengguna"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Membenarkan apl menulis perkataan baharu ke dalam kamus pengguna."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"uji akses ke storan dilindungi"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"uji akses ke storan dilindungi"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Apl boleh uji kebenaran USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Membenarkan apl menguji kebenaran untuk kad SD yang akan tersedia pada peranti akan datang."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"baca kandungan storan USB anda"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"baca kandungan kad SD anda"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Membenarkan aplikasi membaca kandungan storan USB anda."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Membenarkan apl membaca kandungan kad SD anda."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah suai atau padam kandungan storan USB anda"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ubah suai atau padam kandungan kad SD anda"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Membenarkan apl menulis ke storan USB."</string>

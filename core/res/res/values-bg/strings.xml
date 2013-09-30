@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Разрешава на приложението да бъде лентата на състоянието."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разгъване или свиване на лентата на състоянието"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Разрешава на приложението да разгъва или свива лентата на състоянието."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"инсталиране на преки пътища"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Разрешава на приложението да добавя към началния екран преки пътища без намеса на потребителя."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"деинсталиране на преки пътища"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Разрешава на приложението да премахва преки пътища от началния екран без намеса на потребителя."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"пренасочване на изходящите обаждания"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Разрешава на приложението да обработва изходящите обаждания и да променя номера, който да се набере. Това разрешение му позволява да наблюдава, пренасочва или не допуска изходящи обаждания."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"получаване на текстови съобщения (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Разрешава на приложението да чете всички думи, имена и фрази, които потребителят може да е съхранил в потребителския речник."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"добавяне на думи в дефинирания от потребителя речник"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Разрешава на приложението да записва нови думи в потребителския речник."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"изпробване на достъп до защитено хранилище"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"изпробване на достъп до защитено хранилище"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Разрешава на приложението да изпробва разрешение за USB хран., което ще е налице на бъдещи у-ва."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Разрешава на приложението да изпробва разрешение за SD картата, което ще бъде налице на бъдещи устройства."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"четене на съдърж. от USB хран. ви"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"четене на съдържанието от SD картата ви"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Разрешава на прил. да чете съдърж. на USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Разрешава на приложението да чете съдържанието на SD картата ви."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"промяна или изтрив. на съдърж. от USB хран. ви"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"промяна или изтриване на съдържанието от SD картата ви"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Разрешава на приложението да записва в USB."</string>

@@ -249,6 +249,14 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дазваляе прыкладанням быць радком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разгарнуць/згарнуць радок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дазваляе прыкладанню разгортваць ці згортваць радок стану."</string>
+    <!-- no translation found for permlab_install_shortcut (4279070216371564234) -->
+    <skip />
+    <!-- no translation found for permdesc_install_shortcut (8341295916286736996) -->
+    <skip />
+    <!-- no translation found for permlab_uninstall_shortcut (4729634524044003699) -->
+    <skip />
+    <!-- no translation found for permdesc_uninstall_shortcut (6745743474265057975) -->
+    <skip />
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"перанакіраванне зыходзячых выклікіаў"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Дазваляе прыкладанням апрацоўваць выходныя выклікі і змяняць набіраны нумар. Дзякуючы гэтаму дазволу прыкладаннi могуць адсочваць, перанакіроўваць ці прадухіляць выходныя выклікі."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"атрыманне тэкставых паведамленняў (SMS)"</string>
@@ -659,10 +667,12 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Дазваляе прыкладанням счытваць любыя словы, імёны і фразы, якія карыстальнік можа захоўваць у карыстальніцкім слоўніку."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Даданне слоў у карыстальнiцкі слоўнік"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дазваляе прыкладанням запісваць новыя словы ў карыстальніцкі слоўнік."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"выпрабавальны доступ да абароненага сховiшча"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"выпрабавальны доступ да абароненага сховiшча"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Дазваляе прыкладанню правяраць дазвол на USB-назапашвальнiк, якi будзе даступны для прылад у будучынi."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Дазваляе прыкладанню правяраць дазвол на SD-карту, якая будзе даступна для прылад у будучынi."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"чытанне змесціва USB-назапашв."</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"чытанне змесціва SD-карты"</string>
+    <!-- no translation found for permdesc_sdcardRead (3446988712598386079) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (2607362473654975411) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"зм. або выд. змес. USB-назап."</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"змяніць або выдаліць змесціва SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дазваляе прыкладаням выконваць запіс ва USB-назапашвальнік."</string>
