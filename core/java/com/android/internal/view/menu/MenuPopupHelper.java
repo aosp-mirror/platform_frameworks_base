@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Parcelable;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -69,6 +70,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     /** Cached content width from {@link #measureContentWidth}. */
     private int mContentWidth;
 
+    private int mDropDownGravity = Gravity.NO_GRAVITY;
+
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false);
     }
@@ -102,6 +105,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mForceShowIcon = forceShow;
     }
 
+    public void setGravity(int gravity) {
+        mDropDownGravity = gravity;
+    }
+
     public void show() {
         if (!tryShow()) {
             throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
@@ -126,6 +133,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             if (addGlobalListener) mTreeObserver.addOnGlobalLayoutListener(this);
             anchor.addOnAttachStateChangeListener(this);
             mPopup.setAnchorView(anchor);
+            mPopup.setDropDownGravity(mDropDownGravity);
         } else {
             return false;
         }

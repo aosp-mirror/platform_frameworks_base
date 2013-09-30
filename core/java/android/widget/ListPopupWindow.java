@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.IntProperty;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -75,6 +76,8 @@ public class ListPopupWindow {
     private int mDropDownHorizontalOffset;
     private int mDropDownVerticalOffset;
     private boolean mDropDownVerticalOffsetSet;
+
+    private int mDropDownGravity = Gravity.NO_GRAVITY;
 
     private boolean mDropDownAlwaysVisible = false;
     private boolean mForceIgnoreOutsideTouch = false;
@@ -439,6 +442,16 @@ public class ListPopupWindow {
     }
 
     /**
+     * Set the gravity of the dropdown list. This is commonly used to
+     * set gravity to START or END for alignment with the anchor.
+     *
+     * @param gravity Gravity value to use
+     */
+    public void setDropDownGravity(int gravity) {
+        mDropDownGravity = gravity;
+    }
+
+    /**
      * @return The width of the popup window in pixels.
      */
     public int getWidth() {
@@ -610,7 +623,7 @@ public class ListPopupWindow {
             mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
             mPopup.setTouchInterceptor(mTouchInterceptor);
             mPopup.showAsDropDown(getAnchorView(),
-                    mDropDownHorizontalOffset, mDropDownVerticalOffset);
+                    mDropDownHorizontalOffset, mDropDownVerticalOffset, mDropDownGravity);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
             
             if (!mModal || mDropDownList.isInTouchMode()) {
