@@ -213,8 +213,13 @@ public class TestActivity extends Activity {
                 if (DocumentsContract.isDocumentUri(this, uri)) {
                     result += "; DOC_ID";
                 }
-                getContentResolver()
-                        .takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try {
+                    getContentResolver().takePersistableUriPermission(
+                            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    result += "; FAILED TO TAKE";
+                    Log.e(TAG, "Failed to take", e);
+                }
                 InputStream is = null;
                 try {
                     is = getContentResolver().openInputStream(uri);
@@ -222,7 +227,7 @@ public class TestActivity extends Activity {
                     result += "; read length=" + length;
                 } catch (Exception e) {
                     result += "; ERROR";
-                    Log.w(TAG, "Failed to read " + uri, e);
+                    Log.e(TAG, "Failed to read " + uri, e);
                 } finally {
                     IoUtils.closeQuietly(is);
                 }
@@ -235,15 +240,20 @@ public class TestActivity extends Activity {
                 if (DocumentsContract.isDocumentUri(this, uri)) {
                     result += "; DOC_ID";
                 }
-                getContentResolver()
-                        .takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                try {
+                    getContentResolver().takePersistableUriPermission(
+                            uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    result += "; FAILED TO TAKE";
+                    Log.e(TAG, "Failed to take", e);
+                }
                 OutputStream os = null;
                 try {
                     os = getContentResolver().openOutputStream(uri);
                     os.write("THE COMPLETE WORKS OF SHAKESPEARE".getBytes());
                 } catch (Exception e) {
                     result += "; ERROR";
-                    Log.w(TAG, "Failed to write " + uri, e);
+                    Log.e(TAG, "Failed to write " + uri, e);
                 } finally {
                     IoUtils.closeQuietly(os);
                 }

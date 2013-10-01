@@ -28,37 +28,25 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginBottom="6dp"
-            android:background="#fff">
-
-            <FrameLayout
-                android:id="@android:id/icon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/icon_mime"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerInside"
-                    android:contentDescription="@null" />
-
-                <ImageView
-                    android:id="@+id/icon_thumb"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="@null" />
-
-            </FrameLayout>
+            android:background="#fff"
+            android:foreground="@drawable/ic_grid_gradient_bg"
+            android:foregroundGravity="fill">
 
             <ImageView
+                android:id="@+id/icon_mime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="fitXY"
-                android:src="@drawable/ic_grid_gradient_bg"
+                android:scaleType="centerInside"
+                android:contentDescription="@null" />
+
+            <ImageView
+                android:id="@+id/icon_thumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
                 android:contentDescription="@null" />
 
         </FrameLayout>
@@ -67,7 +55,9 @@
             android:id="@+id/line1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
+            android:baselineAligned="false"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
@@ -85,7 +75,7 @@
                 android:id="@android:id/icon1"
                 android:layout_width="@dimen/root_icon_size"
                 android:layout_height="@dimen/root_icon_size"
-                android:layout_marginStart="8dip"
+                android:layout_marginStart="8dp"
                 android:scaleType="centerInside"
                 android:contentDescription="@null" />
 
@@ -95,16 +85,17 @@
             android:id="@+id/line2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
+            android:baselineAligned="false"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
             <TextView
                 android:id="@+id/date"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:minWidth="80dp"
+                android:layout_weight="0.5"
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
@@ -112,26 +103,20 @@
 
             <TextView
                 android:id="@+id/size"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_weight="0.5"
                 android:layout_marginStart="8dp"
-                android:minWidth="80dp"
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
                 style="@style/TextAppearance.Small" />
 
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <ImageView
                 android:id="@android:id/icon2"
                 android:layout_width="@dimen/root_icon_size"
                 android:layout_height="@dimen/root_icon_size"
-                android:layout_marginStart="8dip"
+                android:layout_marginStart="8dp"
                 android:scaleType="centerInside"
                 android:contentDescription="@null"
                 android:visibility="gone" />

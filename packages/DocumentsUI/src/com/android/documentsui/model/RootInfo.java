@@ -42,10 +42,10 @@ import java.util.Objects;
  */
 public class RootInfo implements Durable, Parcelable {
     private static final int VERSION_INIT = 1;
+    private static final int VERSION_DROP_TYPE = 2;
 
     public String authority;
     public String rootId;
-    public int rootType;
     public int flags;
     public int icon;
     public String title;
@@ -67,7 +67,6 @@ public class RootInfo implements Durable, Parcelable {
     public void reset() {
         authority = null;
         rootId = null;
-        rootType = 0;
         flags = 0;
         icon = 0;
         title = null;
@@ -85,10 +84,9 @@ public class RootInfo implements Durable, Parcelable {
     public void read(DataInputStream in) throws IOException {
         final int version = in.readInt();
         switch (version) {
-            case VERSION_INIT:
+            case VERSION_DROP_TYPE:
                 authority = DurableUtils.readNullableString(in);
                 rootId = DurableUtils.readNullableString(in);
-                rootType = in.readInt();
                 flags = in.readInt();
                 icon = in.readInt();
                 title = DurableUtils.readNullableString(in);
@@ -105,10 +103,9 @@ public class RootInfo implements Durable, Parcelable {
 
     @Override
     public void write(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_INIT);
+        out.writeInt(VERSION_DROP_TYPE);
         DurableUtils.writeNullableString(out, authority);
         DurableUtils.writeNullableString(out, rootId);
-        out.writeInt(rootType);
         out.writeInt(flags);
         out.writeInt(icon);
         DurableUtils.writeNullableString(out, title);
@@ -146,7 +143,6 @@ public class RootInfo implements Durable, Parcelable {
         final RootInfo root = new RootInfo();
         root.authority = authority;
         root.rootId = getCursorString(cursor, Root.COLUMN_ROOT_ID);
-        root.rootType = getCursorInt(cursor, Root.COLUMN_ROOT_TYPE);
         root.flags = getCursorInt(cursor, Root.COLUMN_FLAGS);
         root.icon = getCursorInt(cursor, Root.COLUMN_ICON);
         root.title = getCursorString(cursor, Root.COLUMN_TITLE);
@@ -162,25 +158,44 @@ public class RootInfo implements Durable, Parcelable {
         derivedMimeTypes = (mimeTypes != null) ? mimeTypes.split("\n") : null;
 
         // TODO: remove these special case icons
-        if ("com.android.externalstorage.documents".equals(authority)) {
-            if ("documents".equals(rootId)) {
-                derivedIcon = R.drawable.ic_doc_text;
-            } else {
-                derivedIcon = R.drawable.ic_root_sdcard;
-            }
-        }
-        if ("com.android.providers.downloads.documents".equals(authority)) {
+        if (isExternalStorage()) {
+            derivedIcon = R.drawable.ic_root_sdcard;
+        } else if (isDownloads()) {
             derivedIcon = R.drawable.ic_root_download;
+        } else if (isImages()) {
+            derivedIcon = R.drawable.ic_doc_image;
+        } else if (isVideos()) {
+            derivedIcon = R.drawable.ic_doc_video;
+        } else if (isAudio()) {
+            derivedIcon = R.drawable.ic_doc_audio;
         }
-        if ("com.android.providers.media.documents".equals(authority)) {
-            if ("images_root".equals(rootId)) {
-                derivedIcon = R.drawable.ic_doc_image;
-            } else if ("videos_root".equals(rootId)) {
-                derivedIcon = R.drawable.ic_doc_video;
-            } else if ("audio_root".equals(rootId)) {
-                derivedIcon = R.drawable.ic_doc_audio;
-            }
-        }
+    }
+
+    public boolean isRecents() {
+        return authority == null && rootId == null;
+    }
+
+    public boolean isExternalStorage() {
+        return "com.android.externalstorage.documents".equals(authority);
+    }
+
+    public boolean isDownloads() {
+        return "com.android.providers.downloads.documents".equals(authority);
+    }
+
+    public boolean isImages() {
+        return "com.android.providers.media.documents".equals(authority)
+                && "images_root".equals(rootId);
+    }
+
+    public boolean isVideos() {
+        return "com.android.providers.media.documents".equals(authority)
+                && "videos_root".equals(rootId);
+    }
+
+    public boolean isAudio() {
+        return "com.android.providers.media.documents".equals(authority)
+                && "audio_root".equals(rootId);
     }
 
     @Override

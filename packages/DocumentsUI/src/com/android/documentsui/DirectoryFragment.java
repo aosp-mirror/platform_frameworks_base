@@ -742,7 +742,6 @@ public class DirectoryFragment extends Fragment {
             final View line1 = convertView.findViewById(R.id.line1);
             final View line2 = convertView.findViewById(R.id.line2);
 
-            final View icon = convertView.findViewById(android.R.id.icon);
             final ImageView iconMime = (ImageView) convertView.findViewById(R.id.icon_mime);
             final ImageView iconThumb = (ImageView) convertView.findViewById(R.id.icon_thumb);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
@@ -786,10 +785,12 @@ public class DirectoryFragment extends Fragment {
             // loaded in background.
             if (cacheHit) {
                 iconMime.setAlpha(0f);
+                iconMime.setImageDrawable(null);
                 iconThumb.setAlpha(1f);
             } else {
                 iconMime.setAlpha(1f);
                 iconThumb.setAlpha(0f);
+                iconThumb.setImageDrawable(null);
                 if (docIcon != 0) {
                     iconMime.setImageDrawable(
                             IconUtils.loadPackageIcon(context, docAuthority, docIcon));
@@ -895,12 +896,14 @@ public class DirectoryFragment extends Fragment {
             final boolean enabled = isDocumentEnabled(docMimeType, docFlags);
             if (enabled) {
                 setEnabledRecursive(convertView, true);
-                icon.setAlpha(1f);
+                iconMime.setAlpha(1f);
+                iconThumb.setAlpha(1f);
                 if (icon1 != null) icon1.setAlpha(1f);
                 if (icon2 != null) icon2.setAlpha(1f);
             } else {
                 setEnabledRecursive(convertView, false);
-                icon.setAlpha(0.5f);
+                iconMime.setAlpha(0.5f);
+                iconThumb.setAlpha(0.5f);
                 if (icon1 != null) icon1.setAlpha(0.5f);
                 if (icon2 != null) icon2.setAlpha(0.5f);
             }
@@ -991,10 +994,11 @@ public class DirectoryFragment extends Fragment {
                 mIconThumb.setTag(null);
                 mIconThumb.setImageBitmap(result);
 
-                mIconMime.setAlpha(1f);
+                final float targetAlpha = mIconMime.isEnabled() ? 1f : 0.5f;
+                mIconMime.setAlpha(targetAlpha);
                 mIconMime.animate().alpha(0f).start();
                 mIconThumb.setAlpha(0f);
-                mIconThumb.animate().alpha(1f).start();
+                mIconThumb.animate().alpha(targetAlpha).start();
             }
         }
     }

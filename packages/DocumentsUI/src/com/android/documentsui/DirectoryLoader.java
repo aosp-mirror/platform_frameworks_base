@@ -63,6 +63,9 @@ class DirectoryResult implements AutoCloseable {
 }
 
 public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
+
+    private static final String[] SEARCH_REJECT_MIMES = new String[] { Document.MIME_TYPE_DIR };
+
     private final ForceLoadContentObserver mObserver = new ForceLoadContentObserver();
 
     private final int mType;
@@ -164,8 +167,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
             if (mType == DirectoryFragment.TYPE_SEARCH) {
                 // Filter directories out of search results, for now
-                cursor = new FilteringCursorWrapper(cursor, null, new String[] {
-                        Document.MIME_TYPE_DIR });
+                cursor = new FilteringCursorWrapper(cursor, null, SEARCH_REJECT_MIMES);
             } else {
                 // Normal directories should have sorting applied
                 cursor = new SortingCursorWrapper(cursor, result.sortOrder);

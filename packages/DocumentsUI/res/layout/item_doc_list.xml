@@ -21,17 +21,18 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingTop="8dip"
-    android:paddingBottom="8dip"
-    android:orientation="horizontal">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:baselineAligned="false">
 
     <FrameLayout
         android:id="@android:id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:layout_marginStart="12dp"
-        android:layout_marginEnd="20dp"
-        android:layout_gravity="center_vertical">
+        android:layout_marginEnd="20dp">
 
         <ImageView
             android:id="@+id/icon_mime"
@@ -50,20 +51,20 @@
     </FrameLayout>
 
     <LinearLayout
-        android:layout_width="0dip"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_gravity="center_vertical"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <TextView
                 android:id="@android:id/title"
-                android:layout_width="0dip"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:singleLine="true"
@@ -75,7 +76,7 @@
                 android:id="@android:id/icon1"
                 android:layout_width="@dimen/root_icon_size"
                 android:layout_height="@dimen/root_icon_size"
-                android:layout_marginStart="8dip"
+                android:layout_marginStart="8dp"
                 android:scaleType="centerInside"
                 android:contentDescription="@null" />
 
@@ -85,13 +86,15 @@
             android:id="@+id/line2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <TextView
                 android:id="@+id/date"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_weight="0.25"
                 android:minWidth="70dp"
                 android:singleLine="true"
                 android:ellipsize="marquee"
@@ -100,11 +103,11 @@
 
             <TextView
                 android:id="@+id/size"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:minWidth="70dp"
+                android:layout_weight="0.25"
                 android:layout_marginStart="8dp"
+                android:minWidth="70dp"
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textAlignment="viewStart"
@@ -114,8 +117,7 @@
                 android:id="@android:id/summary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical"
+                android:layout_weight="0.5"
                 android:layout_marginStart="8dp"
                 android:singleLine="true"
                 android:ellipsize="marquee"
