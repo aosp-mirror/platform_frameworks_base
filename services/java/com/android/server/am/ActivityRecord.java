@@ -58,6 +58,7 @@ import java.util.HashSet;
 final class ActivityRecord {
     static final String TAG = ActivityManagerService.TAG;
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
+    final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recent";
 
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
@@ -443,25 +444,18 @@ final class ActivityRecord {
             noDisplay = ent != null && ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowNoDisplay, false);
 
-            // If we know the system has determined the component, then
-            // we can consider this to be a home activity...
-            String homePackageName = supervisor.getHomePackageName();
-            if (homePackageName != null && homePackageName.equals(packageName)) {
-                mActivityType = HOME_ACTIVITY_TYPE;
-            } else if ((!_componentSpecified || _launchedFromUid == Process.myUid()
+            if ((!_componentSpecified || _launchedFromUid == Process.myUid()
                     || _launchedFromUid == 0) &&
                     Intent.ACTION_MAIN.equals(_intent.getAction()) &&
                     _intent.hasCategory(Intent.CATEGORY_HOME) &&
                     _intent.getCategories().size() == 1 &&
                     _intent.getData() == null &&
                     _intent.getType() == null &&
-                    (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+                    (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
+                    isNotResolverActivity()) {
                 // This sure looks like a home activity!
                 mActivityType = HOME_ACTIVITY_TYPE;
-                if (isNotResolverActivity()) {
-                    supervisor.setHomePackageName(userId, packageName);
-                }
-            } else if (realActivity.getClassName().contains("com.android.systemui.recent")) {
+            } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
                 mActivityType = RECENTS_ACTIVITY_TYPE;
             } else {
                 mActivityType = APPLICATION_ACTIVITY_TYPE;

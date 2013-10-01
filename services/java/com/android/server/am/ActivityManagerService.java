@@ -2705,18 +2705,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         return intent;
     }
 
-    String getHomePackageName() {
-        Intent intent = getHomeIntent();
-        ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, mCurrentUserId);
-        if (aInfo != null) {
-            final String homePackageName = aInfo.applicationInfo.packageName;
-            if (!ResolverActivity.class.getName().equals(homePackageName)) {
-                return homePackageName;
-            }
-        }
-        return null;
-    }
-
     boolean startHomeActivityLocked(int userId) {
         if (mHeadless) {
             // Added because none of the other calls to ensureBootCompleted seem to fire
