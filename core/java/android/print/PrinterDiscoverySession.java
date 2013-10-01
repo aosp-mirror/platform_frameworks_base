@@ -28,6 +28,7 @@ import android.util.Log;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -40,8 +41,8 @@ public final class PrinterDiscoverySession {
     private static final int MSG_PRINTERS_ADDED = 1;
     private static final int MSG_PRINTERS_REMOVED = 2;
 
-    private final ArrayMap<PrinterId, PrinterInfo> mPrinters =
-            new ArrayMap<PrinterId, PrinterInfo>();
+    private final LinkedHashMap<PrinterId, PrinterInfo> mPrinters =
+            new LinkedHashMap<PrinterId, PrinterInfo>();
 
     private final IPrintManager mPrintManager;
 
@@ -218,9 +219,7 @@ public final class PrinterDiscoverySession {
         }
 
         // Update printers we already have.
-        final int oldPrinterCount = mPrinters.size();
-        for (int i = 0; i < oldPrinterCount; i++) {
-            PrinterId oldPrinterId = mPrinters.keyAt(i);
+        for (PrinterId oldPrinterId : mPrinters.keySet()) {
             PrinterInfo updatedPrinter = addedPrintersMap.remove(oldPrinterId);
             if (updatedPrinter != null) {
                 mPrinters.put(oldPrinterId, updatedPrinter);
