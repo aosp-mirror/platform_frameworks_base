@@ -166,4 +166,32 @@
     <color name="timepicker_default_ampm_unselected_background_color_material">@color/transparent</color>
     <color name="timepicker_default_selector_color_material">@color/material_light_blue_A200</color>
     <color name="timepicker_default_numbers_background_color_material">@color/transparent</color>
+
+    <!-- DatePicker colors -->
+    <eat-comment />
+
+    <color name="datepicker_default_header_selector_background_material_light">@android:color/white</color>
+    <color name="datepicker_default_header_selector_background_material_dark">#ff303030</color>
+
+    <color name="datepicker_default_header_dayofweek_background_color_material_light">#999999</color>
+    <color name="datepicker_default_header_dayofweek_background_color_material_dark">@android:color/white</color>
+
+    <color name="datepicker_default_normal_text_color_material_light">#ff999999</color>
+    <color name="datepicker_default_normal_text_color_material_dark">@android:color/white</color>
+
+    <color name="datepicker_default_disabled_text_color_material_light">#80999999</color>
+    <color name="datepicker_default_disabled_text_color_material_dark">#80999999</color>
+
+    <color name="datepicker_default_selected_text_color_material_light">#33b5e5</color>
+    <color name="datepicker_default_selected_text_color_material_dark">#33b5e5</color>
+
+    <color name="datepicker_default_pressed_text_color_material_light">#0099cc</color>
+    <color name="datepicker_default_pressed_text_color_material_dark">#0099cc</color>
+
+    <color name="datepicker_default_circle_background_color_material_light">@android:color/holo_blue_light</color>
+    <color name="datepicker_default_circle_background_color_material_dark">@android:color/holo_blue_light</color>
+
+    <color name="datepicker_default_view_animator_color_material_light">#f2f2f2</color>
+    <color name="datepicker_default_view_animator_color_material_dark">#ff303030</color>
+
 </resources>

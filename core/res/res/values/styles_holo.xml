@@ -477,8 +477,18 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.DatePicker" parent="Widget.DatePicker">
+        <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
         <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
+        <item name="dateSelectorDayOfWeekBackgroundColor">?attr/datePickerHeaderDayOfWeekLabelBackgroundColor</item>
+        <item name="dateSelectorDayOfWeekTextAppearance">?attr/datePickerHeaderDayOfWeekLabelTextAppearance</item>
+        <item name="dateSelectorBackgroundColor">?attr/datePickerHeaderSelectorBackgroundColor</item>
+        <item name="dateSelectorMonthTextAppearance">?attr/datePickerHeaderSelectorMonthLabelTextAppearance</item>
+        <item name="dateSelectorDayOfMonthTextAppearance">?attr/datePickerHeaderSelectorDayOfMonthLabelTextAppearance</item>
+        <item name="dateSelectorYearTextAppearance">?attr/datePickerHeaderSelectorYearLabelTextAppearance</item>
+        <item name="dateSelectorYearListItemTextAppearance">?attr/datePickerHeaderListYearLabelTextAppearance</item>
+        <item name="dateSelectorYearListSelectedCircleColor">?attr/datePickerHeaderListYearLabelCircleBackgroundColor</item>
+        <item name="calendarTextColor">@color/date_picker_calendar_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.ActivityChooserView" parent="Widget.ActivityChooserView" />
@@ -884,7 +894,20 @@ please see styles_device_defaults.xml.
         <item name="numbersSelectorColor">@color/holo_blue_light</item>
     </style>
 
-    <style name="Widget.Holo.Light.DatePicker" parent="Widget.Holo.DatePicker" />
+    <style name="Widget.Holo.Light.DatePicker" parent="Widget.DatePicker">
+        <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
+        <item name="internalLayout">@layout/date_picker_holo</item>
+        <item name="calendarViewShown">true</item>
+        <item name="dateSelectorDayOfWeekBackgroundColor">?attr/datePickerHeaderDayOfWeekLabelBackgroundColor</item>
+        <item name="dateSelectorDayOfWeekTextAppearance">?attr/datePickerHeaderDayOfWeekLabelTextAppearance</item>
+        <item name="dateSelectorBackgroundColor">?attr/datePickerHeaderSelectorBackgroundColor</item>
+        <item name="dateSelectorMonthTextAppearance">?attr/datePickerHeaderSelectorMonthLabelTextAppearance</item>
+        <item name="dateSelectorDayOfMonthTextAppearance">?attr/datePickerHeaderSelectorDayOfMonthLabelTextAppearance</item>
+        <item name="dateSelectorYearTextAppearance">?attr/datePickerHeaderSelectorYearLabelTextAppearance</item>
+        <item name="dateSelectorYearListItemTextAppearance">?attr/datePickerHeaderListYearLabelTextAppearance</item>
+        <item name="dateSelectorYearListSelectedCircleColor">?attr/datePickerHeaderListYearLabelCircleBackgroundColor</item>
+        <item name="calendarTextColor">@color/date_picker_calendar_holo_light</item>
+    </style>
 
     <style name="Widget.Holo.Light.ActivityChooserView" parent="Widget.Holo.ActivityChooserView">
         <item name="background">@drawable/ab_share_pack_holo_light</item>
@@ -1183,6 +1206,11 @@ please see styles_device_defaults.xml.
         <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_holo_light</item>
     </style>
 
+    <style name="TextAppearance.Holo.TimePicker.TimeLabel" parent="TextAppearance.Holo">
+        <item name="textSize">@dimen/timepicker_time_label_size</item>
+        <item name="textColor">@color/timepicker_default_text_color_holo_dark</item>
+    </style>
+
     <style name="TextAppearance.Holo.TimePicker.AmPmLabel" parent="TextAppearance.Holo">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
         <item name="textAllCaps">true</item>
@@ -1200,6 +1228,62 @@ please see styles_device_defaults.xml.
         <item name="textAllCaps">true</item>
         <item name="textColor">@color/timepicker_default_text_color_holo_light</item>
         <item name="textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DatePicker.DayOfWeekLabel" parent="TextAppearance.Holo">
+        <item name="includeFontPadding">false</item>
+        <item name="textColor">@color/black</item>
+        <item name="textSize">@dimen/datepicker_header_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DatePicker.Selector" parent="TextAppearance.Holo">
+        <item name="includeFontPadding">false</item>
+        <item name="textColor">@color/date_picker_selector_holo_dark</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DatePicker.Selector.MonthLabel" parent="TextAppearance.Holo.DatePicker.Selector">
+        <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.Holo.DatePicker.Selector">
+        <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DatePicker.Selector.YearLabel" parent="TextAppearance.Holo.DatePicker.Selector">
+        <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DatePicker.List.YearLabel" parent="TextAppearance.Holo">
+        <item name="textColor">@color/date_picker_year_selector_holo_dark</item>
+        <item name="textSize">@dimen/datepicker_year_label_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DatePicker.DayOfWeekLabel" parent="TextAppearance.Holo">
+        <item name="includeFontPadding">false</item>
+        <item name="textColor">@color/white</item>
+        <item name="textSize">@dimen/datepicker_header_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DatePicker.Selector" parent="TextAppearance.Holo">
+        <item name="includeFontPadding">false</item>
+        <item name="textColor">@color/date_picker_selector_holo_light</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DatePicker.Selector.MonthLabel" parent="TextAppearance.Holo.Light.DatePicker.Selector">
+        <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DatePicker.Selector.DayOfMonthLabel" parent="TextAppearance.Holo.Light.DatePicker.Selector">
+        <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DatePicker.Selector.YearLabel" parent="TextAppearance.Holo.Light.DatePicker.Selector">
+        <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DatePicker.List.YearLabel" parent="TextAppearance.Holo">
+        <item name="textColor">@color/date_picker_year_selector_holo_light</item>
+        <item name="textSize">@dimen/datepicker_year_label_text_size</item>
     </style>
 
     <style name="Widget.Holo.FastScroll" parent="Widget.FastScroll">

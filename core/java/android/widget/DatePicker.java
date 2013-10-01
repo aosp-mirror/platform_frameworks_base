@@ -17,7 +17,9 @@
 package android.widget;
 
 import android.annotation.Widget;
+import android.app.UiModeManager;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Parcel;
@@ -49,6 +51,8 @@ import java.util.TimeZone;
 
 import libcore.icu.ICU;
 
+import static android.os.Build.VERSION_CODES.L;
+
 /**
  * This class is a widget for selecting a date. The date can be selected by a
  * year, month, and day spinners or a {@link CalendarView}. The set of spinners
@@ -70,6 +74,15 @@ import libcore.icu.ICU;
  * @attr ref android.R.styleable#DatePicker_minDate
  * @attr ref android.R.styleable#DatePicker_spinnersShown
  * @attr ref android.R.styleable#DatePicker_calendarViewShown
+ * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfWeekBackgroundColor
+ * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfWeekTextAppearance
+ * @attr ref android.R.styleable#DatePicker_dateSelectorBackgroundColor
+ * @attr ref android.R.styleable#DatePicker_dateSelectorMonthTextAppearance
+ * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfMonthTextAppearance
+ * @attr ref android.R.styleable#DatePicker_dateSelectorYearTextAppearance
+ * @attr ref android.R.styleable#DatePicker_dateSelectorYearListItemTextAppearance
+ * @attr ref android.R.styleable#DatePicker_dateSelectorYearListSelectedCircleColor
+ * @attr ref android.R.styleable#DatePicker_calendarTextColor
  */
 @Widget
 public class DatePicker extends FrameLayout {
@@ -77,6 +90,10 @@ public class DatePicker extends FrameLayout {
     private static final String LOG_TAG = DatePicker.class.getSimpleName();
 
     private DatePickerDelegate mDelegate;
+
+    private int mDefStyleAttr;
+    private int mDefStyleRes;
+    private Context mContext;
 
     /**
      * The callback used to indicate the user changes\d the date.
@@ -110,7 +127,65 @@ public class DatePicker extends FrameLayout {
     public DatePicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mDelegate = new LegacyDatePickerDelegate(this, context, attrs, defStyleAttr, defStyleRes);
+        mContext = context;
+        mDefStyleAttr = defStyleAttr;
+        mDefStyleRes = defStyleRes;
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
+                mDefStyleAttr, mDefStyleRes);
+
+        // Create the correct UI delegate. Default is the legacy one.
+        final boolean isLegacyMode = a.getBoolean(R.styleable.DatePicker_legacyMode,
+                isLegacyMode());
+
+        a.recycle();
+
+        setLegacyMode(isLegacyMode, attrs);
+    }
+
+    private boolean isLegacyMode() {
+        UiModeManager uiModeManager =
+                (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            return true;
+        }
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        return targetSdkVersion < L;
+    }
+
+    private DatePickerDelegate createLegacyUIDelegate(Context context, AttributeSet attrs,
+            int defStyleAttr, int defStyleRes) {
+        return new LegacyDatePickerDelegate(this, context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    private DatePickerDelegate createNewUIDelegate(Context context, AttributeSet attrs,
+            int defStyleAttr, int defStyleRes) {
+        return new android.widget.DatePickerDelegate(this, context, attrs, defStyleAttr,
+                defStyleRes);
+    }
+
+    /**
+     * @hide
+     */
+    public void setLegacyMode(boolean isLegacyMode, AttributeSet attrs) {
+        removeAllViewsInLayout();
+        mDelegate = isLegacyMode ?
+                createLegacyUIDelegate(mContext, attrs, mDefStyleAttr, mDefStyleRes) :
+                createNewUIDelegate(mContext, attrs, mDefStyleAttr, mDefStyleRes);
+    }
+
+    /**
+     * @hide
+     */
+    public void setShowDoneButton(boolean showDoneButton) {
+        mDelegate.setShowDoneButton(showDoneButton);
+    }
+
+    /**
+     * @hide
+     */
+    public void setDismissCallback(DatePickerDismissCallback callback) {
+        mDelegate.setDismissCallback(callback);
     }
 
     /**
@@ -129,7 +204,7 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
-     * Updates the current date.
+     * Update the current date.
      *
      * @param year The year.
      * @param month The month which is <strong>starting from zero</strong>.
@@ -171,7 +246,7 @@ public class DatePicker extends FrameLayout {
      * @return The minimal supported date.
      */
     public long getMinDate() {
-        return mDelegate.getMinDate();
+        return mDelegate.getMinDate().getTimeInMillis();
     }
 
     /**
@@ -196,7 +271,7 @@ public class DatePicker extends FrameLayout {
      * @return The maximal supported date.
      */
     public long getMaxDate() {
-        return mDelegate.getMaxDate();
+        return mDelegate.getMaxDate().getTimeInMillis();
     }
 
     /**
@@ -300,6 +375,182 @@ public class DatePicker extends FrameLayout {
         mDelegate.setSpinnersShown(shown);
     }
 
+    /**
+     * Sets the background color for the date selector's day of week.
+     *
+     * @param color The background color.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfWeekBackgroundColor
+     */
+    public void setDateSelectorDayOfWeekBackgroundColor(int color) {
+        mDelegate.setDateSelectorDayOfWeekBackgroundColor(color);
+    }
+
+    /**
+     * Gets the background color for the date selector's day of week.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfWeekBackgroundColor
+     */
+    public int getDateSelectorDayOfWeekBackgroundColor() {
+        return mDelegate.getDateSelectorDayOfWeekBackgroundColor();
+    }
+
+    /**
+     * Sets the text appearance for the date selector's day of week.
+     *
+     * @param resId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfWeekTextAppearance
+     */
+    public void setDateSelectorDayOfWeekTextAppearance(int resId) {
+        mDelegate.setDateSelectorDayOfWeekTextAppearance(resId);
+    }
+
+    /**
+     * Gets the text appearance for the date selector's day of week.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfWeekTextAppearance
+     */
+    public int getDateSelectorDayOfWeekTextAppearance() {
+        return mDelegate.getDateSelectorDayOfWeekTextAppearance();
+    }
+
+    /**
+     * Sets the background color for the date selector's.
+     *
+     * @param color The background color.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorBackgroundColor
+     */
+    public void setDateSelectorBackgroundColor(int color) {
+        mDelegate.setDateSelectorBackgroundColor(color);
+    }
+
+    /**
+     * Gets the background color for the date selector's.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorBackgroundColor
+     */
+    public int getDateSelectorBackgroundColor() {
+        return mDelegate.getDateSelectorBackgroundColor();
+    }
+
+    /**
+     * Sets the text appearance for the date selector's month.
+     *
+     * @param resId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorMonthTextAppearance
+     */
+    public void setDateSelectorMonthTextAppearance(int resId) {
+        mDelegate.setDateSelectorMonthTextAppearance(resId);
+    }
+
+    /**
+     * Gets the text appearance for the date selector's month.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorMonthTextAppearance
+     */
+    public int getDateSelectorMonthTextAppearance() {
+        return mDelegate.getDateSelectorMonthTextAppearance();
+    }
+
+    /**
+     * Sets the text appearance for the date selector's day of month.
+     *
+     * @param resId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfMonthTextAppearance
+     */
+    public void setDateSelectorDayOfMonthTextAppearance(int resId) {
+        mDelegate.setDateSelectorDayOfMonthTextAppearance(resId);
+    }
+
+    /**
+     * Gets the text appearance for the date selector's day of month.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorDayOfMonthTextAppearance
+     */
+    public int getDateSelectorDayOfMonthTextAppearance() {
+        return mDelegate.getDateSelectorDayOfMonthTextAppearance();
+    }
+
+    /**
+     * Sets the text appearance for the date selector's year.
+     *
+     * @param resId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorYearTextAppearance
+     */
+    public void setDateSelectorYearTextAppearance(int resId) {
+        mDelegate.setDateSelectorYearTextAppearance(resId);
+    }
+
+    /**
+     * Gets the text appearance for the date selector's year.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorYearTextAppearance
+     */
+    public int getDateSelectorYearTextAppearance() {
+        return mDelegate.getDateSelectorYearTextAppearance();
+    }
+
+    /**
+     * Sets the text appearance for the year list item.
+     *
+     * @param resId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorYearListItemTextAppearance
+     */
+    public void setDateSelectorYearListItemTextAppearance(int resId) {
+        mDelegate.setDateSelectorYearListItemTextAppearance(resId);
+    }
+
+    /**
+     * Gets the text appearance for the year list item.
+     *
+     * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#DatePicker_dateSelectorYearListItemTextAppearance
+     */
+    public int getDateSelectorYearListItemTextAppearance() {
+        return mDelegate.getDateSelectorYearListItemTextAppearance();
+    }
+
+    /**
+     * Sets the text color state list for the calendar.
+     *
+     * @param colors The text color state list.
+     *
+     * @attr ref android.R.styleable#DatePicker_calendarTextColor
+     */
+    public void setCalendarTextColor(ColorStateList colors) {
+        mDelegate.setCalendarTextColor(colors);
+    }
+
+    /**
+     * Gets the text color state list for the calendar.
+     *
+     * @return The text color state list for the calendar.
+     *
+     * @attr ref android.R.styleable#DatePicker_calendarTextColor
+     */
+    public ColorStateList getCalendarTextColor() {
+        return mDelegate.getCalendarTextColors();
+    }
+
     // Override so we are in complete control of save / restore for this widget.
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
@@ -323,6 +574,8 @@ public class DatePicker extends FrameLayout {
      * A delegate interface that defined the public API of the DatePicker. Allows different
      * DatePicker implementations. This would need to be implemented by the DatePicker delegates
      * for the real behavior.
+     *
+     * @hide
      */
     interface DatePickerDelegate {
         void init(int year, int monthOfYear, int dayOfMonth,
@@ -335,21 +588,51 @@ public class DatePicker extends FrameLayout {
         int getDayOfMonth();
 
         void setMinDate(long minDate);
-        long getMinDate();
+        Calendar getMinDate();
 
         void setMaxDate(long maxDate);
-        long getMaxDate();
+        Calendar getMaxDate();
 
         void setEnabled(boolean enabled);
         boolean isEnabled();
 
-        CalendarView getCalendarView ();
+        void setDateSelectorDayOfWeekBackgroundColor(int color);
+        int getDateSelectorDayOfWeekBackgroundColor();
+
+        void setDateSelectorDayOfWeekTextAppearance(int resId);
+        int getDateSelectorDayOfWeekTextAppearance();
+
+        void setDateSelectorBackgroundColor(int color);
+        int getDateSelectorBackgroundColor();
+
+        void setDateSelectorMonthTextAppearance(int resId);
+        int getDateSelectorMonthTextAppearance();
+
+        void setDateSelectorDayOfMonthTextAppearance(int resId);
+        int getDateSelectorDayOfMonthTextAppearance();
+
+        void setDateSelectorYearTextAppearance(int resId);
+        int getDateSelectorYearTextAppearance();
+
+        void setDateSelectorYearListItemTextAppearance(int resId);
+        int getDateSelectorYearListItemTextAppearance();
+
+        void setDateSelectorYearListSelectedCircleColor(int color);
+        int getDateSelectorYearListSelectedCircleColor();
+
+        void setCalendarTextColor(ColorStateList colors);
+        ColorStateList getCalendarTextColors();
+
+        CalendarView getCalendarView();
 
         void setCalendarViewShown(boolean shown);
         boolean getCalendarViewShown();
 
         void setSpinnersShown(boolean shown);
         boolean getSpinnersShown();
+
+        void setShowDoneButton(boolean showDoneButton);
+        void setDismissCallback(DatePickerDismissCallback callback);
 
         void onConfigurationChanged(Configuration newConfig);
 
@@ -366,7 +649,7 @@ public class DatePicker extends FrameLayout {
     /**
      * An abstract class which can be used as a start for DatePicker implementations
      */
-    abstract static class AbstractTimePickerDelegate implements DatePickerDelegate {
+    abstract static class AbstractDatePickerDelegate implements DatePickerDelegate {
         // The delegator
         protected DatePicker mDelegator;
 
@@ -379,7 +662,7 @@ public class DatePicker extends FrameLayout {
         // Callbacks
         protected  OnDateChangedListener mOnDateChangedListener;
 
-        public AbstractTimePickerDelegate(DatePicker delegator, Context context) {
+        public AbstractDatePickerDelegate(DatePicker delegator, Context context) {
             mDelegator = delegator;
             mContext = context;
 
@@ -396,9 +679,18 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
+     * A callback interface for dismissing the DatePicker when included into a Dialog
+     *
+     * @hide
+     */
+    public static interface DatePickerDismissCallback {
+        void dismiss(DatePicker view, boolean isCancel, int year, int month, int dayOfMonth);
+    }
+
+    /**
      * A delegate implementing the basic DatePicker
      */
-    private static class LegacyDatePickerDelegate extends AbstractTimePickerDelegate {
+    private static class LegacyDatePickerDelegate extends AbstractDatePickerDelegate {
 
         private static final String DATE_FORMAT = "MM/dd/yyyy";
 
@@ -466,7 +758,7 @@ public class DatePicker extends FrameLayout {
             String minDate = attributesArray.getString(R.styleable.DatePicker_minDate);
             String maxDate = attributesArray.getString(R.styleable.DatePicker_maxDate);
             int layoutResourceId = attributesArray.getResourceId(
-                    R.styleable.DatePicker_internalLayout, R.layout.date_picker);
+                    R.styleable.DatePicker_legacyLayout, R.layout.date_picker_legacy);
             attributesArray.recycle();
 
             LayoutInflater inflater = (LayoutInflater) context
@@ -643,8 +935,10 @@ public class DatePicker extends FrameLayout {
         }
 
         @Override
-        public long getMinDate() {
-            return mCalendarView.getMinDate();
+        public Calendar getMinDate() {
+            final Calendar minDate = Calendar.getInstance();
+            minDate.setTimeInMillis(mCalendarView.getMinDate());
+            return minDate;
         }
 
         @Override
@@ -664,8 +958,10 @@ public class DatePicker extends FrameLayout {
         }
 
         @Override
-        public long getMaxDate() {
-            return mCalendarView.getMaxDate();
+        public Calendar getMaxDate() {
+            final Calendar maxDate = Calendar.getInstance();
+            maxDate.setTimeInMillis(mCalendarView.getMaxDate());
+            return maxDate;
         }
 
         @Override
@@ -680,6 +976,87 @@ public class DatePicker extends FrameLayout {
         @Override
         public boolean isEnabled() {
             return mIsEnabled;
+        }
+
+        @Override
+        public void setDateSelectorDayOfWeekBackgroundColor(int color) {
+        }
+
+        @Override
+        public int getDateSelectorDayOfWeekBackgroundColor() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorDayOfWeekTextAppearance(int resId) {
+        }
+
+        @Override
+        public int getDateSelectorDayOfWeekTextAppearance() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorBackgroundColor(int color) {
+        }
+
+        @Override
+        public int getDateSelectorBackgroundColor() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorMonthTextAppearance(int resId) {
+        }
+
+        @Override
+        public int getDateSelectorMonthTextAppearance() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorDayOfMonthTextAppearance(int resId) {
+        }
+
+        @Override
+        public int getDateSelectorDayOfMonthTextAppearance() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorYearTextAppearance(int resId) {
+        }
+
+        @Override
+        public int getDateSelectorYearTextAppearance() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorYearListItemTextAppearance(int resId) {
+        }
+
+        @Override
+        public int getDateSelectorYearListItemTextAppearance() {
+            return 0;
+        }
+
+        @Override
+        public void setDateSelectorYearListSelectedCircleColor(int color) {
+        }
+
+        @Override
+        public int getDateSelectorYearListSelectedCircleColor() {
+            return 0;
+        }
+
+        @Override
+        public void setCalendarTextColor(ColorStateList colors) {
+        }
+
+        @Override
+        public ColorStateList getCalendarTextColors() {
+            return ColorStateList.valueOf(0);
         }
 
         @Override
@@ -705,6 +1082,16 @@ public class DatePicker extends FrameLayout {
         @Override
         public boolean getSpinnersShown() {
             return mSpinners.isShown();
+        }
+
+        @Override
+        public void setShowDoneButton(boolean showDoneButton) {
+            // Nothing to do
+        }
+
+        @Override
+        public void setDismissCallback(DatePickerDismissCallback callback) {
+            // Nothing to do
         }
 
         @Override

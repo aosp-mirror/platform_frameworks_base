@@ -1182,7 +1182,7 @@
   <java-symbol type="layout" name="calendar_view" />
   <java-symbol type="layout" name="character_picker" />
   <java-symbol type="layout" name="character_picker_button" />
-  <java-symbol type="layout" name="date_picker" />
+  <java-symbol type="layout" name="date_picker_legacy" />
   <java-symbol type="layout" name="date_picker_dialog" />
   <java-symbol type="layout" name="expanded_menu_layout" />
   <java-symbol type="layout" name="fragment_bread_crumb_item" />
@@ -1840,9 +1840,10 @@
   <java-symbol type="dimen" name="subtitle_shadow_offset" />
   <java-symbol type="dimen" name="subtitle_outline_width" />
 
-  <!-- From the new TimePicker -->
-  <java-symbol type="attr" name="timePickerHeaderBackgroundColor" />
+  <!-- From the new TimePicker and DatePicker -->
   <java-symbol type="attr" name="timePickerDialogTheme" />
+  <java-symbol type="attr" name="timePickerHeaderTimeLabelTextAppearance" />
+  <java-symbol type="attr" name="timePickerHeaderBackgroundColor" />
   <java-symbol type="attr" name="headerSelectedTextColor" />
   <java-symbol type="attr" name="headerUnselectedTextColor" />
   <java-symbol type="attr" name="numbersTextColor" />
@@ -1853,9 +1854,18 @@
   <java-symbol type="attr" name="numbersSelectorColor" />
   <java-symbol type="attr" name="timePickerHeaderTimeLabelTextAppearance" />
   <java-symbol type="attr" name="nestedScrollingEnabled" />
+  <java-symbol type="attr" name="datePickerDialogTheme" />
+  <java-symbol type="attr" name="datePickerHeaderSelectorBackgroundColor" />
+  <java-symbol type="attr" name="datePickerHeaderListYearLabelCircleBackgroundColor" />
+  <java-symbol type="attr" name="calendarTextColor" />
+
   <java-symbol type="style" name="TextAppearance.Holo.TimePicker.TimeLabel" />
+
   <java-symbol type="layout" name="time_picker_holo" />
   <java-symbol type="layout" name="time_header_label" />
+  <java-symbol type="layout" name="year_label_text_view" />
+  <java-symbol type="layout" name="date_picker_holo" />
+
   <java-symbol type="id" name="time_header" />
   <java-symbol type="id" name="hours" />
   <java-symbol type="id" name="minutes" />
@@ -1864,6 +1874,15 @@
   <java-symbol type="id" name="separator" />
   <java-symbol type="id" name="layout_buttons" />
   <java-symbol type="id" name="done_button" />
+  <java-symbol type="id" name="date_picker_header" />
+  <java-symbol type="id" name="date_picker_month_and_day_layout" />
+  <java-symbol type="id" name="day_picker_selector_layout" />
+  <java-symbol type="id" name="date_picker_month" />
+  <java-symbol type="id" name="date_picker_day" />
+  <java-symbol type="id" name="date_picker_year" />
+  <java-symbol type="id" name="animator" />
+  <java-symbol type="id" name="done" />
+
   <java-symbol type="string" name="done_label" />
   <java-symbol type="string" name="hour_picker_description" />
   <java-symbol type="string" name="minute_picker_description" />
@@ -1885,7 +1904,42 @@
   <java-symbol type="string" name="timepicker_numbers_radius_multiplier_normal" />
   <java-symbol type="string" name="timepicker_transition_mid_radius_multiplier" />
   <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
+
+  <java-symbol type="string" name="item_is_selected" />
+  <java-symbol type="string" name="day_of_week_label_typeface" />
+  <java-symbol type="string" name="select_day" />
+  <java-symbol type="string" name="day_picker_description" />
+  <java-symbol type="string" name="select_year" />
+  <java-symbol type="string" name="year_picker_description" />
+
+  <java-symbol type="dimen" name="datepicker_day_number_size" />
+  <java-symbol type="dimen" name="datepicker_month_label_size" />
+  <java-symbol type="dimen" name="datepicker_month_day_label_text_size" />
+  <java-symbol type="dimen" name="datepicker_month_list_item_header_height" />
+  <java-symbol type="dimen" name="datepicker_day_number_select_circle_radius" />
+  <java-symbol type="dimen" name="datepicker_view_animator_height" />
+  <java-symbol type="dimen" name="datepicker_year_label_height" />
+  <java-symbol type="dimen" name="datepicker_year_picker_padding_top" />
+
+  <java-symbol type="color" name="timepicker_default_text_color_holo_light" />
+  <java-symbol type="color" name="timepicker_default_disabled_color_holo_light" />
+  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_holo_light" />
+  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_holo_light" />
+
+  <java-symbol type="color" name="datepicker_default_normal_text_color_holo_light" />
+  <java-symbol type="color" name="datepicker_default_disabled_text_color_holo_light" />
+  <java-symbol type="color" name="datepicker_default_circle_background_color_holo_light" />
+  <java-symbol type="color" name="datepicker_default_header_dayofweek_background_color_holo_light" />
+  <java-symbol type="color" name="datepicker_default_header_selector_background_holo_light" />
+
+  <java-symbol type="color" name="datepicker_default_normal_text_color_material_light" />
+  <java-symbol type="color" name="datepicker_default_disabled_text_color_material_light" />
+  <java-symbol type="color" name="datepicker_default_circle_background_color_material_light" />
+  <java-symbol type="color" name="datepicker_default_header_dayofweek_background_color_material_light" />
+  <java-symbol type="color" name="datepicker_default_header_selector_background_material_light" />
+
   <java-symbol type="array" name="config_clockTickVibePattern" />
+  <java-symbol type="array" name="config_calendarDateVibePattern" />
 
   <!-- From various Material changes -->
   <java-symbol type="attr" name="toolbarStyle" />

@@ -409,7 +409,34 @@ please see themes_device_defaults.xml.
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.DatePicker</item>
 
-        <item name="fastScrollThumbDrawable">@drawable/scrollbar_handle_accelerated_anim2</item>
+        <!-- DatePicker Header day of week label background color -->
+        <item name="datePickerHeaderDayOfWeekLabelBackgroundColor">@android:color/darker_gray</item>
+
+        <!-- DatePicker Header day of week label text appearance -->
+        <item name="datePickerHeaderDayOfWeekLabelTextAppearance">@style/TextAppearance.DatePicker.DayOfWeekLabel</item>
+
+        <!-- DatePicker Header selector background color -->
+        <item name="datePickerHeaderSelectorBackgroundColor">@android:color/darker_gray</item>
+
+        <!-- DatePicker Header selector month label text appearance -->
+        <item name="datePickerHeaderSelectorMonthLabelTextAppearance">@style/TextAppearance.DatePicker.Selector.MonthLabel</item>
+
+        <!-- DatePicker Header selector day of month label text appearance -->
+        <item name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance">@style/TextAppearance.DatePicker.Selector.DayOfMonthLabel</item>
+
+        <!-- DatePicker Header selector year label text appearance -->
+        <item name="datePickerHeaderSelectorYearLabelTextAppearance">@style/TextAppearance.DatePicker.Selector.YearLabel</item>
+
+        <!-- DatePicker list year label text appearance -->
+        <item name="datePickerHeaderListYearLabelTextAppearance">@style/TextAppearance.DatePicker.List.YearLabel</item>
+
+        <!-- DatePicker list year label circle background color -->
+        <item name="datePickerHeaderListYearLabelCircleBackgroundColor">@android:color/darker_gray</item>
+
+        <!-- DatePicker dialog theme -->
+        <item name="datePickerDialogTheme">@android:style/Theme.Dialog.DatePicker</item>
+
+        <item name="fastScrollThumbDrawable">@android:drawable/scrollbar_handle_accelerated_anim2</item>
         <item name="fastScrollTrackDrawable">@null</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/menu_submenu_background</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/menu_submenu_background</item>
@@ -728,6 +755,14 @@ please see themes_device_defaults.xml.
     <style name="Theme.Dialog.TimePicker">
         <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle</item>
+        <item name="windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Default heme for the DatePicker dialog windows, which is used by the
+         {@link android.app.DatePickerDialog} class. -->
+    <style name="Theme.Dialog.DatePicker">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowContentOverlay">@null</item>
     </style>
 

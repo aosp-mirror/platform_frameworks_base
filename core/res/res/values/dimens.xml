@@ -362,6 +362,24 @@
     <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
     <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
 
+    <dimen name="datepicker_done_label_size">14sp</dimen>
+    <dimen name="datepicker_day_number_size">16sp</dimen>
+    <dimen name="datepicker_month_label_size">16sp</dimen>
+    <dimen name="datepicker_month_day_label_text_size">10sp</dimen>
+    <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
+    <dimen name="datepicker_month_list_item_header_height">50dp</dimen>
+    <dimen name="datepicker_view_animator_height">270dp</dimen>
+    <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
+    <dimen name="datepicker_year_label_height">64dp</dimen>
+    <dimen name="datepicker_year_label_text_size">22dp</dimen>
+    <dimen name="datepicker_component_width">270dp</dimen>
+    <dimen name="datepicker_selected_calendar_layout_height">155dp</dimen>
+    <dimen name="datepicker_selected_date_day_size">75dp</dimen>
+    <dimen name="datepicker_selected_date_month_size">30dp</dimen>
+    <dimen name="datepicker_selected_date_year_size">30dp</dimen>
+    <dimen name="datepicker_header_height">30dp</dimen>
+    <dimen name="datepicker_header_text_size">14dp</dimen>
+
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
 

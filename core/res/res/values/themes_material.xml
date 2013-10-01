@@ -367,6 +367,33 @@ please see themes_device_defaults.xml.
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Material.DatePicker</item>
 
+        <!-- DatePicker Header day of week label background color -->
+        <item name="datePickerHeaderDayOfWeekLabelBackgroundColor">@android:color/datepicker_default_header_dayofweek_background_color_material_dark</item>
+
+        <!-- DatePicker Header day of week label text appearance -->
+        <item name="datePickerHeaderDayOfWeekLabelTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
+
+        <!-- DatePicker Header selector background color -->
+        <item name="datePickerHeaderSelectorBackgroundColor">@android:color/datepicker_default_header_selector_background_material_dark</item>
+
+        <!-- DatePicker Header selector month label text appearance -->
+        <item name="datePickerHeaderSelectorMonthLabelTextAppearance">@style/TextAppearance.Material.DatePicker.Selector.MonthLabel</item>
+
+        <!-- DatePicker Header selector day of month label text appearance -->
+        <item name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance">@style/TextAppearance.Material.DatePicker.Selector.DayOfMonthLabel</item>
+
+        <!-- DatePicker Header selector year label text appearance -->
+        <item name="datePickerHeaderSelectorYearLabelTextAppearance">@style/TextAppearance.Material.DatePicker.Selector.YearLabel</item>
+
+        <!-- DatePicker list year label text appearance -->
+        <item name="datePickerHeaderListYearLabelTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
+
+        <!-- DatePicker list year label circle background color -->
+        <item name="datePickerHeaderListYearLabelCircleBackgroundColor">@android:color/datepicker_default_circle_background_color_material_dark</item>
+
+        <!-- DatePicker dialog theme -->
+        <item name="datePickerDialogTheme">@android:style/Theme.Material.Dialog.DatePicker</item>
+
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
@@ -714,6 +741,33 @@ please see themes_device_defaults.xml.
 
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Material.Light.DatePicker</item>
+
+        <!-- DatePicker Header day of week label background color -->
+        <item name="datePickerHeaderDayOfWeekLabelBackgroundColor">@android:color/datepicker_default_header_dayofweek_background_color_material_light</item>
+
+        <!-- DatePicker Header day of week label text appearance -->
+        <item name="datePickerHeaderDayOfWeekLabelTextAppearance">@style/TextAppearance.Material.Light.DatePicker.DayOfWeekLabel</item>
+
+        <!-- DatePicker Header selector background color -->
+        <item name="datePickerHeaderSelectorBackgroundColor">@android:color/datepicker_default_header_selector_background_material_light</item>
+
+        <!-- DatePicker Header selector month label text appearance -->
+        <item name="datePickerHeaderSelectorMonthLabelTextAppearance">@style/TextAppearance.Material.Light.DatePicker.Selector.MonthLabel</item>
+
+        <!-- DatePicker Header selector day of month label text appearance -->
+        <item name="datePickerHeaderSelectorDayOfMonthLabelTextAppearance">@style/TextAppearance.Material.Light.DatePicker.Selector.DayOfMonthLabel</item>
+
+        <!-- DatePicker Header selector year label text appearance -->
+        <item name="datePickerHeaderSelectorYearLabelTextAppearance">@style/TextAppearance.Material.Light.DatePicker.Selector.YearLabel</item>
+
+        <!-- DatePicker list year label text appearance -->
+        <item name="datePickerHeaderListYearLabelTextAppearance">@style/TextAppearance.Material.Light.DatePicker.List.YearLabel</item>
+
+        <!-- DatePicker list year label circle background color -->
+        <item name="datePickerHeaderListYearLabelCircleBackgroundColor">@android:color/datepicker_default_circle_background_color_material_light</item>
+
+        <!-- DatePicker dialog theme -->
+        <item name="datePickerDialogTheme">@android:style/Theme.Material.Light.Dialog.DatePicker</item>
 
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
@@ -1110,6 +1164,16 @@ please see themes_device_defaults.xml.
          {@link android.app.TimePickerDialog} class. -->
     <style name="Theme.Material.Dialog.TimePicker" parent="Theme.Material.Dialog.BaseTimePicker"/>
 
+    <style name="Theme.Material.Dialog.BaseDatePicker">
+        <item name="windowBackground">@color/transparent</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
+        <item name="windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Material theme for the DatePicker dialog windows, which is used by the
+         {@link android.app.DatePickerDialog} class. -->
+    <style name="Theme.Material.Dialog.DatePicker" parent="Theme.Material.Dialog.BaseDatePicker"/>
+
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
@@ -1222,11 +1286,22 @@ please see themes_device_defaults.xml.
         <item name="windowBackground">@color/transparent</item>
         <item name="windowElevation">0dp</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Material Light theme for the TimePicker dialog windows, which is used by the
          {@link android.app.TimePickerDialog} class. -->
     <style name="Theme.Material.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker"/>
+
+    <style name="Theme.Material.Light.Dialog.BaseDatePicker">
+        <item name="windowBackground">@color/transparent</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
+        <item name="windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Material Light theme for the DatePicker dialog windows, which is used by the
+         {@link android.app.DatePickerDialog} class. -->
+    <style name="Theme.Material.Light.Dialog.DatePicker" parent="Theme.Material.Light.Dialog.BaseDatePicker"/>
 
     <!-- Theme for a presentation window on a secondary display. -->
     <style name="Theme.Material.Light.Dialog.Presentation" parent="@style/Theme.Material.Light.NoActionBar.Fullscreen" />
