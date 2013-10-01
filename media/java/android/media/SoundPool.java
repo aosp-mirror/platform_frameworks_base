@@ -374,7 +374,7 @@ public class SoundPool {
          * Called when a sound has completed loading.
          *
          * @param soundPool SoundPool object from the load() method
-         * @param soundPool the sample ID of the sound loaded.
+         * @param sampleId the sample ID of the sound loaded.
          * @param status the status of the load operation (0 = success)
          */
         public void onLoadComplete(SoundPool soundPool, int sampleId, int status);
