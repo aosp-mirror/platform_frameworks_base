@@ -14,10 +14,10 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="fill_parent">
 
     <fragment
         android:name="com.android.printspooler.SelectPrinterFragment"
@@ -26,4 +26,39 @@
         android:layout_height="wrap_content">
     </fragment>
 
-</FrameLayout>
+    <FrameLayout
+        android:id="@+id/empty_print_state"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+   
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dip"
+                android:src="@*android:drawable/ic_grayedout_printer"
+                android:contentDescription="@string/print_no_printers_found">
+            </ImageView>
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="?android:attr/textColorSecondary"
+                android:text="@string/print_no_printers_found">
+            </TextView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
