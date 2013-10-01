@@ -7838,7 +7838,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 getCompoundPaddingLeft() - getCompoundPaddingRight() -
                                 mLayout.getLineLeft(0)) / getHorizontalFadingEdgeLength();
                     case Gravity.CENTER_HORIZONTAL:
-                        return 0.0f;
+                    case Gravity.FILL_HORIZONTAL:
+                        final int textDirection = mLayout.getParagraphDirection(0);
+                        if (textDirection == Layout.DIR_LEFT_TO_RIGHT) {
+                            return 0.0f;
+                        } else {
+                            return (mLayout.getLineRight(0) - (mRight - mLeft) -
+                                getCompoundPaddingLeft() - getCompoundPaddingRight() -
+                                mLayout.getLineLeft(0)) / getHorizontalFadingEdgeLength();
+                        }
                 }
             }
         }
@@ -7867,9 +7875,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return 0.0f;
                     case Gravity.CENTER_HORIZONTAL:
                     case Gravity.FILL_HORIZONTAL:
-                        return (mLayout.getLineWidth(0) - ((mRight - mLeft) -
+                        final int textDirection = mLayout.getParagraphDirection(0);
+                        if (textDirection == Layout.DIR_RIGHT_TO_LEFT) {
+                            return 0.0f;
+                        } else {
+                            return (mLayout.getLineWidth(0) - ((mRight - mLeft) -
                                 getCompoundPaddingLeft() - getCompoundPaddingRight())) /
                                 getHorizontalFadingEdgeLength();
+                        }
                 }
             }
         }
