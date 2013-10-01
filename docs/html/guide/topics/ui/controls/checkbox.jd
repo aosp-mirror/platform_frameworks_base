@@ -94,7 +94,7 @@ must have a signature exactly as shown above. Specifically, the method must:</p>
 android.view.View} that was clicked)</li>
 </ul>
 
-<p class="note"><strong>Tip:</strong> If you need to change the radio button state
+<p class="note"><strong>Tip:</strong> If you need to change the checkbox state
 yourself (such as when loading a saved {@link android.preference.CheckBoxPreference}),
 use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
 android.widget.CompoundButton#toggle()} method.</p>
