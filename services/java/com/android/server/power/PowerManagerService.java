@@ -453,7 +453,8 @@ public final class PowerManagerService extends IPowerManager.Stub
                     mDisplayPowerControllerCallbacks, mHandler);
 
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
-                    createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"));
+                    createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),
+                    mHandler);
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
 
