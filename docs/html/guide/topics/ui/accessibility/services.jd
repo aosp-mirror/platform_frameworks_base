@@ -81,7 +81,8 @@ as shown in the following sample:</p>
 <pre>
 &lt;application&gt;
   &lt;service android:name=&quot;.MyAccessibilityService&quot;
-      android:label=&quot;@string/accessibility_service_label&quot;&gt;
+      android:label=&quot;@string/accessibility_service_label&quot;
+      android:permission=&quot;android.permission.BIND_ACCESSIBILITY_SERVICE&quot&gt;
     &lt;intent-filter&gt;
       &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
     &lt;/intent-filter&gt;
