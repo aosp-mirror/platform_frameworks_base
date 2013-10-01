@@ -1839,7 +1839,7 @@ public final class ActiveServices {
                 }
             }
         } else {
-            ServiceMap smap = mServiceMap.valueAt(userId);
+            ServiceMap smap = mServiceMap.get(userId);
             if (smap != null) {
                 ArrayMap<ComponentName, ServiceRecord> items = smap.mServicesByName;
                 didSomething = collectForceStopServicesLocked(name, userId, evenPersistent,
