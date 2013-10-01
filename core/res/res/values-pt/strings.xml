@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permite que o aplicativo seja a barra de status."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandir/recolher barra de status"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permite que o aplicativo expanda ou recolha a barra de status."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalar atalhos"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permite que um aplicativo adicione atalhos da tela inicial sem a intervenção do usuário."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstalar atalhos"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite que o aplicativo remova atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirecionar as chamadas efetuadas"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite que o aplicativo processe as chamadas de saída e altere o número a ser discado. Esta permissão autoriza o aplicativo a monitorar, redirecionar ou evitar chamadas de saída."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"receber mensagens de texto (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite que o aplicativo leia palavras, nomes e frases armazenados pelo usuário no dicionário do usuário."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"adicionar palavras ao dicionário do usuário"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite que o aplicativo grave novas palavras no dicionário do usuário."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testar o acesso ao armazenamento protegido"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testar o acesso ao armazenamento protegido"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permite que o aplicativo teste uma permissão para o armazenamento USB que estará disponível em dispositivos futuros."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permite que o aplicativo teste uma permissão para o cartão SD que estará disponível em dispositivos futuros."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ler conteúdo do armaz. USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ler conteúdo do cartão SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permite que o aplicativo leia o conteúdo do cartão SD."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permite que o aplicativo leia o conteúdo do cartão SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modificar ou excluir conteúdo do armazenamento USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar ou excluir o conteúdo do cartão SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite gravar no armaz. USB."</string>

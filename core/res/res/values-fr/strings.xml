@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permet à l\'application de faire office de barre d\'état."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Agrandir/réduire la barre d\'état"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permet à l\'application de réduire ou de développer la barre d\'état."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installer des raccourcis"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permettre à une application d\'ajouter des raccourcis à l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"désinstaller des raccourcis"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permettre à l\'application de supprimer des raccourcis de l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"transférer les appels sortants"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permet à l\'application de traiter les appels sortants et de modifier le numéro à composer. Cette autorisation lui permet de surveiller, rediriger ou empêcher les appels sortants."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recevoir des messages texte (SMS)"</string>
@@ -631,10 +635,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet à l\'application d\'accéder aux mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ajouter des mots au dictionnaire personnel"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet à l\'application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"tester l\'accès à la mémoire de stockage protégée"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"tester l\'accès à la mémoire de stockage protégée"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permet à l\'application de tester une autorisation pour la mémoire de stockage USB qui sera ensuite proposée sur les futurs appareils."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permet à l\'application de tester une autorisation pour la carte SD qui sera ensuite proposée sur les futurs appareils."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"voir le contenu de la mémoire USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"voir le contenu de la carte SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permettre de lire contenu de la mémoire de stockage USB"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permettre à l\'application de lire le contenu de la carte SD"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifier ou supprimer le contenu de la mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifier ou supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet à l\'application de modifier le contenu de la mémoire de stockage USB."</string>
