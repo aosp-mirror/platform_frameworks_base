@@ -268,11 +268,13 @@ public class IntentFirewall {
         }
 
         File[] files = rulesDir.listFiles();
-        for (int i=0; i<files.length; i++) {
-            File file = files[i];
+        if (files != null) {
+            for (int i=0; i<files.length; i++) {
+                File file = files[i];
 
-            if (file.getName().endsWith(".xml")) {
-                readRules(file, resolvers);
+                if (file.getName().endsWith(".xml")) {
+                    readRules(file, resolvers);
+                }
             }
         }
 
