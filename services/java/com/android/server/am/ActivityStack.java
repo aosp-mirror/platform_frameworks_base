@@ -1083,10 +1083,24 @@ final class ActivityStack {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
-                    } else if (task.mActivities.indexOf(r) == 0 && task.mOnTopOfHome) {
-                        if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
-                        showHomeBehindStack = true;
-                        behindFullscreen = true;
+                    } else if (task.mOnTopOfHome) {
+                        // Work our way down from r to bottom of task and see if there are any
+                        // visible activities below r.
+                        int rIndex = task.mActivities.indexOf(r);
+                        for ( --rIndex; rIndex >= 0; --rIndex) {
+                            final ActivityRecord blocker = task.mActivities.get(rIndex);
+                            if (!blocker.finishing && blocker.visible) {
+                                if (DEBUG_VISBILITY) Slog.v(TAG, "Home visibility for " +
+                                        r + " blocked by " + blocker);
+                                break;
+                            }
+                        }
+                        if (rIndex < 0) {
+                            // Got to task bottom without finding a visible activity, show home.
+                            if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
+                            showHomeBehindStack = true;
+                            behindFullscreen = true;
+                        }
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
