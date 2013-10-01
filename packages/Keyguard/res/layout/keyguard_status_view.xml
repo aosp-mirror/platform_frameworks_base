@@ -35,34 +35,26 @@
         android:layout_height="match_parent"
         android:gravity="center_horizontal|top"
         android:contentDescription="@string/keyguard_accessibility_status">
-
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center_horizontal|top"
-                      android:orientation="vertical"
-                      android:focusable="true">
-            <com.android.keyguard.ClockView
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:orientation="vertical"
+            android:focusable="true">
+            <TextClock
                 android:id="@+id/clock_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-                android:layout_gravity="right">
-
-                <TextView android:id="@+id/clock_text"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:singleLine="true"
-                          android:ellipsize="none"
-                          android:textSize="@dimen/kg_status_clock_font_size"
-                          android:textAppearance="?android:attr/textAppearanceMedium"
-                          android:textColor="#ffffffff"
-                          android:drawablePadding="2dip"
-                          />
-
-            </com.android.keyguard.ClockView>
+                android:layout_gravity="center_horizontal|top"
+                android:textColor="@color/clock_white"
+                android:singleLine="true"
+                style="@style/widget_big_thin"
+                android:format12Hour="@string/keyguard_widget_12_hours_format"
+                android:format24Hour="@string/keyguard_widget_24_hours_format"
+                android:baselineAligned="true"
+                android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
 
             <include layout="@layout/keyguard_status_area" />
         </LinearLayout>
-
     </com.android.keyguard.KeyguardStatusView>
 </com.android.keyguard.KeyguardWidgetFrame>

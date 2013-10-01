@@ -18,17 +18,6 @@
 */
 -->
 <resources>
-    <!-- Default height of a key in the password keyboard for alpha (used by keyguard) -->
-    <dimen name="password_keyboard_key_height_alpha">56dip</dimen>
-    <!-- Default height of a key in the password keyboard for numeric (used by keyguard) -->
-    <dimen name="password_keyboard_key_height_numeric">56dip</dimen>
-    <!-- Default correction for the space key in the password keyboard  (used by keyguard) -->
-    <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
-    <!-- Default horizontal gap between keys in the password keyboard (used by keyguard) -->
-    <dimen name="password_keyboard_horizontalGap">3dip</dimen>
-    <!-- Default vertical gap between keys in the password keyboard (used by keyguard) -->
-    <dimen name="password_keyboard_verticalGap">9dip</dimen>
-
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">270dp</dimen>
 
@@ -46,9 +35,6 @@
 
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
-
-    <!-- Size of clock font in LockScreen on Unsecure unlock screen. -->
-    <dimen name="keyguard_lockscreen_clock_font_size">80dip</dimen>
 
     <!-- Size of status line font on Unsecure unlock LockScreen. -->
     <dimen name="keyguard_lockscreen_status_line_font_size">14dip</dimen>
@@ -84,11 +70,8 @@
     <!-- Size of the clock font in keyguard's status view -->
     <dimen name="kg_status_clock_font_size">75dp</dimen>
 
-    <!-- Size of the date font in keyguard's status view  -->
-    <dimen name="kg_status_date_font_size">15dp</dimen>
-
     <!-- Size of the generic status lines keyguard's status view  -->
-    <dimen name="kg_status_line_font_size">13dp</dimen>
+    <dimen name="kg_status_line_font_size">12dp</dimen>
 
     <!-- Size of margin on the right of keyguard's status view -->
     <dimen name="kg_status_line_font_right_margin">16dp</dimen>
@@ -166,5 +149,12 @@
     used on tablets; on phones, this size is determined by the space left by the
     security mode. -->
     <dimen name="kg_small_widget_height">160dp</dimen>
+    
+    <!-- Default clock parameters -->
+    <dimen name="bottom_text_spacing_digital">-8dp</dimen>
+    <dimen name="label_font_size">14dp</dimen>
+    <dimen name="widget_label_font_size">12dp</dimen>
+    <dimen name="widget_big_font_size">80dp</dimen>
+    <dimen name="big_font_size">120dp</dimen>
 
 </resources>

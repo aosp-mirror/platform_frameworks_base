@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,18 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-    <!-- Keyguard colors -->
-    <color name="keyguard_avatar_frame_color">#ffffffff</color>
-    <color name="keyguard_avatar_frame_shadow_color">#80000000</color>
-    <color name="keyguard_avatar_nick_color">#ffffffff</color>
-    <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
-    <color name="kg_widget_pager_gradient">#ffffffff</color>
 
-    <!-- FaceLock -->
-    <color name="facelock_spotlight_mask">#CC000000</color>
-
-    <!-- Clock -->
-    <color name="clock_white">#ffffffff</color>
-    <color name="clock_gray">#80ffffff</color>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- String matching the lock screen format for displaying the date. -->
+    <string name="abbrev_wday_month_day_no_year">EEE, MMMM d</string>
+    <!-- Format for describing the date, for accessibility. -->
+    <string name="full_wday_month_day_no_year">EEEE, MMMM d</string>
 </resources>
