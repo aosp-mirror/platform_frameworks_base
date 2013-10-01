@@ -36,6 +36,7 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -98,11 +99,9 @@ public class KeyguardTransportControlView extends FrameLayout implements OnClick
 
             case MSG_SET_ARTWORK:
                 if (mClientGeneration == msg.arg1) {
-                    if (mMetadata.bitmap != null) {
-                        mMetadata.bitmap.recycle();
-                    }
                     mMetadata.bitmap = (Bitmap) msg.obj;
-                    mAlbumArt.setImageBitmap(mMetadata.bitmap);
+                    KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(
+                            mMetadata.bitmap);
                 }
                 break;
 
@@ -223,7 +222,8 @@ public class KeyguardTransportControlView extends FrameLayout implements OnClick
     @Override
     protected void onSizeChanged (int w, int h, int oldw, int oldh) {
         if (mAttached) {
-            int dim = Math.min(512, Math.max(w, h));
+            final DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
+            int dim = Math.max(dm.widthPixels, dm.heightPixels);
             if (DEBUG) Log.v(TAG, "TCV uses bitmap size=" + dim);
             mAudioManager.remoteControlDisplayUsesBitmapSize(mIRCD, dim, dim);
         }
@@ -300,7 +300,8 @@ public class KeyguardTransportControlView extends FrameLayout implements OnClick
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        mAlbumArt.setImageBitmap(mMetadata.bitmap);
+        KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(
+                mMetadata.bitmap);
         final int flags = mTransportControlFlags;
         setVisibilityBasedOnFlag(mBtnPrev, flags, RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS);
         setVisibilityBasedOnFlag(mBtnNext, flags, RemoteControlClient.FLAG_KEY_MEDIA_NEXT);

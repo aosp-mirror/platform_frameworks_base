@@ -407,6 +407,20 @@ public class KeyguardUpdateMonitor {
         return sInstance;
     }
 
+    /**
+     * IMPORTANT: Must be called from UI thread.
+     */
+    public void dispatchSetBackground(Bitmap bmp) {
+        if (DEBUG) Log.d(TAG, "dispatchSetBackground");
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onSetBackground(bmp);
+            }
+        }
+    }
+
     protected void handleSetGenerationId(int clientGeneration, boolean clearing, PendingIntent p) {
         mDisplayClientState.clientGeneration = clientGeneration;
         mDisplayClientState.clearing = clearing;
