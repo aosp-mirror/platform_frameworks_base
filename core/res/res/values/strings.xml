@@ -3182,6 +3182,8 @@
 
     <!-- Title of intent resolver dialog when selecting an application to run. -->
     <string name="whichApplication">Complete action using</string>
+    <!-- Title of intent resolver dialog when selecting a HOME application to run. -->
+    <string name="whichHomeApplication">Select a home app</string>
     <!-- Option to always use the selected application resolution in the future. See the "Complete action using" dialog title-->
     <string name="alwaysUse">Use by default for this action.</string>
     <!-- Text displayed when the user selects the check box for setting default application.  See the "Use by default for this action" check box. -->
