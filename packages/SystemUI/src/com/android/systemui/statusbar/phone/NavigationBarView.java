@@ -88,7 +88,6 @@ public class NavigationBarView extends LinearLayout {
 
     // used to disable the camera icon in navbar when disabled by DPM
     private boolean mCameraDisabledByDpm;
-    KeyguardTouchDelegate mKeyguardTouchDelegate;
 
     private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
         @Override
@@ -112,7 +111,7 @@ public class NavigationBarView extends LinearLayout {
                     }
                     break;
             }
-            return mKeyguardTouchDelegate.dispatch(event);
+            return KeyguardTouchDelegate.getInstance(getContext()).dispatch(event);
         }
     };
 
@@ -154,8 +153,6 @@ public class NavigationBarView extends LinearLayout {
         getIcons(res);
 
         mBarTransitions = new NavigationBarTransitions(this);
-
-        mKeyguardTouchDelegate = new KeyguardTouchDelegate(mContext);
 
         mCameraDisabledByDpm = isCameraDisabledByDpm();
         watchForDevicePolicyChanges();
@@ -341,7 +338,7 @@ public class NavigationBarView extends LinearLayout {
                 final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
                 final  boolean disabledBecauseKeyguardSecure =
                         (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                        && mKeyguardTouchDelegate.isSecure();
+                        && KeyguardTouchDelegate.getInstance(getContext()).isSecure();
                 return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't get userId", e);
@@ -426,9 +423,9 @@ public class NavigationBarView extends LinearLayout {
 
     protected void launchForAccessibilityClick(View v) {
         if (v == getCameraButton()) {
-            mKeyguardTouchDelegate.launchCamera();
+            KeyguardTouchDelegate.getInstance(getContext()).launchCamera();
         } else if (v == getSearchLight()) {
-            mKeyguardTouchDelegate.showAssistant();
+            KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
         }
     }
 

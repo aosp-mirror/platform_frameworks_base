@@ -181,11 +181,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     public void showAssistant() {
-        try {
-            mService.showAssistant();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
+        // Not used by PhoneWindowManager
     }
 
     public void dispatch(MotionEvent event) {
