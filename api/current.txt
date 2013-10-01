@@ -33,6 +33,7 @@ package android {
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final java.lang.String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
+    field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final java.lang.String BRICK = "android.permission.BRICK";
     field public static final java.lang.String BROADCAST_PACKAGE_REMOVED = "android.permission.BROADCAST_PACKAGE_REMOVED";
     field public static final java.lang.String BROADCAST_SMS = "android.permission.BROADCAST_SMS";
@@ -5103,6 +5104,7 @@ package android.bluetooth {
 
   public final class BluetoothDevice implements android.os.Parcelable {
     method public android.bluetooth.BluetoothGatt connectGatt(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback);
+    method public boolean createBond();
     method public android.bluetooth.BluetoothSocket createInsecureRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket createRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public int describeContents();
@@ -5113,6 +5115,8 @@ package android.bluetooth {
     method public java.lang.String getName();
     method public int getType();
     method public android.os.ParcelUuid[] getUuids();
+    method public boolean setPairingConfirmation(boolean);
+    method public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
     field public static final java.lang.String ACTION_ACL_DISCONNECTED = "android.bluetooth.device.action.ACL_DISCONNECTED";
@@ -5121,6 +5125,7 @@ package android.bluetooth {
     field public static final java.lang.String ACTION_CLASS_CHANGED = "android.bluetooth.device.action.CLASS_CHANGED";
     field public static final java.lang.String ACTION_FOUND = "android.bluetooth.device.action.FOUND";
     field public static final java.lang.String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
+    field public static final java.lang.String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
     field public static final java.lang.String ACTION_UUID = "android.bluetooth.device.action.UUID";
     field public static final int BOND_BONDED = 12; // 0xc
     field public static final int BOND_BONDING = 11; // 0xb
@@ -5135,9 +5140,13 @@ package android.bluetooth {
     field public static final java.lang.String EXTRA_CLASS = "android.bluetooth.device.extra.CLASS";
     field public static final java.lang.String EXTRA_DEVICE = "android.bluetooth.device.extra.DEVICE";
     field public static final java.lang.String EXTRA_NAME = "android.bluetooth.device.extra.NAME";
+    field public static final java.lang.String EXTRA_PAIRING_KEY = "android.bluetooth.device.extra.PAIRING_KEY";
+    field public static final java.lang.String EXTRA_PAIRING_VARIANT = "android.bluetooth.device.extra.PAIRING_VARIANT";
     field public static final java.lang.String EXTRA_PREVIOUS_BOND_STATE = "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
     field public static final java.lang.String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
     field public static final java.lang.String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
+    field public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2; // 0x2
+    field public static final int PAIRING_VARIANT_PIN = 0; // 0x0
   }
 
   public final class BluetoothGatt implements android.bluetooth.BluetoothProfile {
