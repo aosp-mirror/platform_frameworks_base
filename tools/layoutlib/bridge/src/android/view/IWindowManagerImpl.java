@@ -458,11 +458,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void showAssistant() {
-
-    }
-
-    @Override
     public IBinder getFocusedWindowToken() {
         // TODO Auto-generated method stub
         return null;
