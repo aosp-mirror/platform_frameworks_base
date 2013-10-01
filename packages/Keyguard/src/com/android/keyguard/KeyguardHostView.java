@@ -57,6 +57,7 @@ import android.view.WindowManager;
 import android.widget.RemoteViews.OnClickHandler;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
@@ -123,6 +124,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected boolean mShowSecurityWhenReturn;
 
     private final Rect mInsets = new Rect();
+
+    private MyOnClickHandler mOnClickHandler = new MyOnClickHandler(this);
 
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
@@ -812,24 +815,39 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private OnClickHandler mOnClickHandler = new OnClickHandler() {
+    private static class MyOnClickHandler extends OnClickHandler {
+
+        // weak reference to the hostView to avoid keeping a live reference
+        // due to Binder GC linkages to AppWidgetHost. By the same token,
+        // this click handler should not keep references to any large
+        // objects.
+        WeakReference<KeyguardHostView> mThis;
+
+        MyOnClickHandler(KeyguardHostView hostView) {
+            mThis = new WeakReference<KeyguardHostView>(hostView);
+        }
+
         @Override
         public boolean onClickHandler(final View view,
                 final android.app.PendingIntent pendingIntent,
                 final Intent fillInIntent) {
+            KeyguardHostView hostView = mThis.get();
+            if (hostView == null) {
+                return false;
+            }
             if (pendingIntent.isActivity()) {
-                setOnDismissAction(new OnDismissAction() {
+                hostView.setOnDismissAction(new OnDismissAction() {
                     public boolean onDismiss() {
                         try {
-                              // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-                              Context context = view.getContext();
-                              ActivityOptions opts = ActivityOptions.makeScaleUpAnimation(view,
-                                      0, 0,
-                                      view.getMeasuredWidth(), view.getMeasuredHeight());
-                              context.startIntentSender(
-                                      pendingIntent.getIntentSender(), fillInIntent,
-                                      Intent.FLAG_ACTIVITY_NEW_TASK,
-                                      Intent.FLAG_ACTIVITY_NEW_TASK, 0, opts.toBundle());
+                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                            Context context = view.getContext();
+                            ActivityOptions opts = ActivityOptions.makeScaleUpAnimation(view,
+                                    0, 0,
+                                    view.getMeasuredWidth(), view.getMeasuredHeight());
+                            context.startIntentSender(
+                                    pendingIntent.getIntentSender(), fillInIntent,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0, opts.toBundle());
                         } catch (IntentSender.SendIntentException e) {
                             android.util.Log.e(TAG, "Cannot send pending intent: ", e);
                         } catch (Exception e) {
@@ -840,10 +858,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                     }
                 });
 
-                if (mViewStateManager.isChallengeShowing()) {
-                    mViewStateManager.showBouncer(true);
+                if (hostView.mViewStateManager.isChallengeShowing()) {
+                    hostView.mViewStateManager.showBouncer(true);
                 } else {
-                    mCallback.dismiss(false);
+                    hostView.mCallback.dismiss(false);
                 }
                 return true;
             } else {
