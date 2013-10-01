@@ -374,6 +374,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpOverscanFrame = new Rect();
     static final Rect mTmpContentFrame = new Rect();
     static final Rect mTmpVisibleFrame = new Rect();
+    static final Rect mTmpDecorFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
@@ -2680,10 +2681,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect df = mTmpDisplayFrame;
         final Rect of = mTmpOverscanFrame;
         final Rect vf = mTmpVisibleFrame;
+        final Rect dcf = mTmpDecorFrame;
         pf.left = df.left = of.left = vf.left = mDockLeft;
         pf.top = df.top = of.top = vf.top = mDockTop;
         pf.right = df.right = of.right = vf.right = mDockRight;
         pf.bottom = df.bottom = of.bottom = vf.bottom = mDockBottom;
+        dcf.setEmpty();  // Decor frame N/A for system bars.
 
         if (isDefaultDisplay) {
             // For purposes of putting out fake window up to steal focus, we will
@@ -2781,7 +2784,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarLayer = mNavigationBar.getSurfaceLayer();
                 // And compute the final frame.
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                        mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame);
+                        mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
                 if (mNavigationBarController.checkHiddenLw()) {
                     updateSysUiVisibility = true;
@@ -2806,7 +2809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarLayer = mStatusBar.getSurfaceLayer();
 
                 // Let the status bar determine its size.
-                mStatusBar.computeFrameLw(pf, df, vf, vf, vf);
+                mStatusBar.computeFrameLw(pf, df, vf, vf, vf, dcf);
 
                 // For layout, the status bar is always at the top with our fixed height.
                 mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
@@ -2854,11 +2857,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int getSystemDecorRectLw(Rect systemRect) {
-        systemRect.left = mSystemLeft;
-        systemRect.top = mSystemTop;
-        systemRect.right = mSystemRight;
-        systemRect.bottom = mSystemBottom;
+    public int getSystemDecorLayerLw() {
         if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
         if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
         return 0;
@@ -2961,6 +2960,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect of = mTmpOverscanFrame;
         final Rect cf = mTmpContentFrame;
         final Rect vf = mTmpVisibleFrame;
+        final Rect dcf = mTmpDecorFrame;
+        dcf.setEmpty();
 
         final boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
                 && mNavigationBar != null && mNavigationBar.isVisibleLw());
@@ -2991,6 +2992,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
         } else {
+
+            // Default policy decor for the default display
+            dcf.left = mSystemLeft;
+            dcf.top = mSystemTop;
+            dcf.right = mSystemRight;
+            dcf.bottom = mSystemBottom;
+            if (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
+                    && attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW) {
+                if ((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0
+                        && (sysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
+                        && (sysUiFl & View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS) == 0) {
+                    // Ensure policy decor includes status bar
+                    dcf.top = mStableTop;
+                }
+                if ((sysUiFl & View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION) == 0) {
+                    // Ensure policy decor includes navigation bar
+                    dcf.bottom = mStableBottom;
+                    dcf.right = mStableRight;
+                }
+            }
+
             if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
                     == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle() 
@@ -3026,7 +3048,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
                                         "Laying out status bar window: (%d,%d - %d,%d)",
                                         pf.left, pf.top, pf.right, pf.bottom));
-                    } else if ((attrs.flags&FLAG_LAYOUT_IN_OVERSCAN) != 0
+                    } else if ((fl & FLAG_LAYOUT_IN_OVERSCAN) != 0
                             && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                             && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
                         // Asking to layout into the overscan region, so give it that pure
@@ -3071,7 +3093,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         of.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                     }
 
-                    if ((attrs.flags&FLAG_FULLSCREEN) == 0) {
+                    if ((fl & FLAG_FULLSCREEN) == 0) {
                         if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                             cf.left = mDockLeft;
                             cf.top = mDockTop;
@@ -3093,7 +3115,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         cf.right = mRestrictedScreenLeft + mRestrictedScreenWidth;
                         cf.bottom = mRestrictedScreenTop + mRestrictedScreenHeight;
                     }
-
                     applyStableConstraints(sysUiFl, fl, cf);
                     if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
                         vf.left = mCurLeft;
@@ -3164,7 +3185,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom
                             = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
-                } else if ((attrs.flags & FLAG_LAYOUT_IN_OVERSCAN) != 0
+                } else if ((fl & FLAG_LAYOUT_IN_OVERSCAN) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
                     // Asking to layout into the overscan region, so give it that pure
@@ -3275,9 +3296,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + String.format(" flags=0x%08x", fl)
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " of=" + of.toShortString()
-                + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
+                + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
+                + " dcf=" + dcf.toShortString());
 
-        win.computeFrameLw(pf, df, of, cf, vf);
+        win.computeFrameLw(pf, df, of, cf, vf, dcf);
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.

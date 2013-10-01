@@ -218,6 +218,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final Rect mContentFrame = new Rect();
     final Rect mParentFrame = new Rect();
     final Rect mVisibleFrame = new Rect();
+    final Rect mDecorFrame = new Rect();
 
     boolean mContentChanged;
 
@@ -458,7 +459,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf) {
+    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf) {
         mHaveFrame = true;
 
         TaskStack stack = mAppToken != null ? getStack() : null;
@@ -524,6 +525,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mOverscanFrame.set(of);
         mContentFrame.set(cf);
         mVisibleFrame.set(vf);
+        mDecorFrame.set(dcf);
 
         final int fw = mFrame.width();
         final int fh = mFrame.height();
@@ -1403,6 +1405,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.println();
             pw.print(prefix); pw.print("    content="); mContentFrame.printShortString(pw);
                     pw.print(" visible="); mVisibleFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("    decor="); mDecorFrame.printShortString(pw);
                     pw.println();
             pw.print(prefix); pw.print("Cur insets: overscan=");
                     mOverscanInsets.printShortString(pw);
