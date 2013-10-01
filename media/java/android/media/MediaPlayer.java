@@ -1772,6 +1772,9 @@ public class MediaPlayer implements SubtitleController.Listener
             mSelectedSubtitleTrackIndex = -1;
         }
         setOnSubtitleDataListener(null);
+        if (track == null) {
+            return;
+        }
         for (int i = 0; i < mInbandSubtitleTracks.length; i++) {
             if (mInbandSubtitleTracks[i] == track) {
                 Log.v(TAG, "Selecting subtitle track " + i);
