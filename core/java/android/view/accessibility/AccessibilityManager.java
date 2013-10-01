@@ -75,6 +75,42 @@ public final class AccessibilityManager {
     /** @hide */
     public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 0x00000002;
 
+    /** @hide */
+    public static final int INVERSION_DISABLED = -1;
+
+    /** @hide */
+    public static final int INVERSION_STANDARD = 0;
+
+    /** @hide */
+    public static final int INVERSION_HUE_ONLY = 1;
+
+    /** @hide */
+    public static final int INVERSION_VALUE_ONLY = 2;
+
+    /** @hide */
+    public static final int DALTONIZER_DISABLED = -1;
+
+    /** @hide */
+    public static final int DALTONIZER_SIMULATE_MONOCHROMACY = 0;
+
+    /** @hide */
+    public static final int DALTONIZER_SIMULATE_PROTANOMALY = 1;
+
+    /** @hide */
+    public static final int DALTONIZER_SIMULATE_DEUTERANOMALY = 2;
+
+    /** @hide */
+    public static final int DALTONIZER_SIMULATE_TRITANOMALY = 3;
+
+    /** @hide */
+    public static final int DALTONIZER_CORRECT_PROTANOMALY = 11;
+
+    /** @hide */
+    public static final int DALTONIZER_CORRECT_DEUTERANOMALY = 12;
+
+    /** @hide */
+    public static final int DALTONIZER_CORRECT_TRITANOMALY = 13;
+
     static final Object sInstanceSync = new Object();
 
     private static AccessibilityManager sInstance;
