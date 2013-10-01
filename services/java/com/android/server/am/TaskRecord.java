@@ -139,6 +139,16 @@ final class TaskRecord extends ThumbnailHolder {
         return null;
     }
 
+    ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
+        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord r = mActivities.get(activityNdx);
+            if (!r.finishing && r != notTop && stack.okToShow(r)) {
+                return r;
+            }
+        }
+        return null;
+    }
+
     /**
      * Reorder the history stack so that the activity at the given index is
      * brought to the front.

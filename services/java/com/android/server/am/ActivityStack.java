@@ -334,20 +334,16 @@ final class ActivityStack {
         mCurrentUser = service.mCurrentUserId;
     }
 
-    private boolean okToShow(ActivityRecord r) {
+    boolean okToShow(ActivityRecord r) {
         return r.userId == mCurrentUser
                 || (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0;
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = activities.get(activityNdx);
-                if (!r.finishing && r != notTop && okToShow(r)) {
-                    return r;
-                }
+            ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked(notTop);
+            if (r != null) {
+                return r;
             }
         }
         return null;
@@ -3405,11 +3401,16 @@ final class ActivityStack {
         }
     }
 
-    void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
+    /**
+     * Reset local parameters because an app's activity died.
+     * @param app The app of the activity that died.
+     * @return true if home should be launched next.
+     */
+    boolean handleAppDiedLocked(ProcessRecord app) {
         if (!containsApp(app)) {
-            return;
+            return false;
         }
-        // TODO: handle the case where an app spans multiple stacks.
+
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
                     "App died while pausing: " + mPausingActivity);
@@ -3419,28 +3420,32 @@ final class ActivityStack {
             mLastPausedActivity = null;
             mLastNoHistoryActivity = null;
         }
-        final ActivityRecord top = topRunningActivityLocked(null);
-        final boolean launchHomeTaskNext =
-                top != null && top.app == app && top.task.mOnTopOfHome;
 
-        // Remove this application's activities from active lists.
-        boolean hasVisibleActivities = removeHistoryRecordsForAppLocked(app);
-
-        if (!restarting) {
-            ActivityStack stack = mStackSupervisor.getFocusedStack();
-            if (stack == null || launchHomeTaskNext) {
-                mStackSupervisor.resumeHomeActivity(null);
-            } else if (!mStackSupervisor.resumeTopActivitiesLocked(stack, null, null)) {
-                // If there was nothing to resume, and we are not already
-                // restarting this process, but there is a visible activity that
-                // is hosted by the process...  then make sure all visible
-                // activities are running, taking care of restarting this
-                // process.
-                if (hasVisibleActivities) {
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
-                }
+        // Determine if the top task is exiting and should return to home. Do this before it gets
+        // removed in removeHistoryRecordsForAppsLocked.
+        boolean launchHomeNext = false;
+        int top = mTaskHistory.size() - 1;
+        while (top >= 0) {
+            final TaskRecord topTask = mTaskHistory.get(top);
+            if (topTask.mActivities.isEmpty()) {
+                // Not possible, but just in case.
+                --top;
+                continue;
             }
+            ActivityRecord r = topTask.topRunningActivityLocked(null);
+            if (r != null) {
+                // r will be launched next.
+                break;
+            }
+            // There is an activity in topTask that is finishing. If topTask belongs to the app
+            // return to home depending on the task flag.
+            launchHomeNext = topTask.mOnTopOfHome;
+            break;
         }
+
+        removeHistoryRecordsForAppLocked(app);
+
+        return launchHomeNext;
     }
 
     void handleAppCrashLocked(ProcessRecord app) {
