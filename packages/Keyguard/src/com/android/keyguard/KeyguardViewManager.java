@@ -139,6 +139,7 @@ public class KeyguardViewManager {
 
     class ViewManagerHost extends FrameLayout {
         private static final int BACKGROUND_COLOR = 0x70000000;
+
         // This is a faster way to draw the background on devices without hardware acceleration
         private final Drawable mBackgroundDrawable = new Drawable() {
             @Override
@@ -159,54 +160,10 @@ public class KeyguardViewManager {
                 return PixelFormat.TRANSLUCENT;
             }
         };
-        private final View mScrimView;
-        private boolean mExtendIntoPadding;
-        public ViewManagerHost(Context context, boolean extendIntoPadding) {
+
+        public ViewManagerHost(Context context) {
             super(context);
-            mExtendIntoPadding = extendIntoPadding;
-            setFitsSystemWindows(true);
-            setClipToPadding(!mExtendIntoPadding);
             setBackground(mBackgroundDrawable);
-
-            mScrimView = new View(context);
-            mScrimView.setVisibility(View.GONE);
-            mScrimView.setBackgroundColor(0x99000000);
-            addView(mScrimView);
-        }
-
-        private boolean considerPadding(View child) {
-            return !mExtendIntoPadding || child instanceof KeyguardHostView;
-        }
-
-        @Override
-        protected void measureChildWithMargins(View child,
-                int parentWidthMeasureSpec, int widthUsed,
-                int parentHeightMeasureSpec, int heightUsed) {
-            if (considerPadding(child)) {
-                // don't extend into padding (default behavior)
-                super.measureChildWithMargins(child,
-                        parentWidthMeasureSpec, widthUsed,
-                        parentHeightMeasureSpec, heightUsed);
-            } else {
-                // allowed to extend into padding (scrim / camera preview)
-                child.measure(parentWidthMeasureSpec, parentHeightMeasureSpec);
-            }
-        }
-
-        @Override
-        protected void onLayout(boolean changed, int l, int t, int r, int b) {
-            final int count = getChildCount();
-            for (int i = 0; i < count; i++) {
-                final View child = getChildAt(i);
-                int cl = l, ct = t, cr = r, cb = b;
-                if (considerPadding(child)) {
-                    cl += mPaddingLeft;
-                    ct += mPaddingTop;
-                    cr -= mPaddingRight;
-                    cb -= mPaddingBottom;
-                }
-                child.layout(cl, ct, cr, cb);
-            }
         }
 
         @Override
@@ -252,7 +209,7 @@ public class KeyguardViewManager {
         if (mKeyguardHost == null) {
             if (DEBUG) Log.d(TAG, "keyguard host is null, creating it...");
 
-            mKeyguardHost = new ViewManagerHost(mContext, shouldEnableTransparentBars());
+            mKeyguardHost = new ViewManagerHost(mContext);
 
             int flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
@@ -306,7 +263,6 @@ public class KeyguardViewManager {
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
         mKeyguardView.initializeSwitchingUserState(options != null &&
                 options.getBoolean(IS_SWITCHING_USER));
-        mKeyguardView.setScrimView(mKeyguardHost.mScrimView);
 
         // HACK
         // The keyguard view will have set up window flags in onFinishInflate before we set

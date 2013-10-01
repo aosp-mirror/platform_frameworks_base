@@ -123,6 +123,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     protected boolean mShowSecurityWhenReturn;
 
+    private final Rect mInsets = new Rect();
+
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
         void showSecurityView();
@@ -403,11 +405,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
-    }
-
-    public void setScrimView(View scrim) {
-        if (mSlidingChallengeLayout != null) mSlidingChallengeLayout.setScrimView(scrim);
-        if (mMultiPaneChallengeLayout != null) mMultiPaneChallengeLayout.setScrimView(scrim);
     }
 
     private void setBackButtonEnabled(boolean enabled) {
@@ -1351,6 +1348,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     static class SavedState extends BaseSavedState {
         int transportState;
         int appWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
+        Rect insets = new Rect();
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -1360,6 +1358,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             super(in);
             this.transportState = in.readInt();
             this.appWidgetToShow = in.readInt();
+            this.insets = in.readParcelable(null);
         }
 
         @Override
@@ -1367,6 +1366,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             super.writeToParcel(out, flags);
             out.writeInt(this.transportState);
             out.writeInt(this.appWidgetToShow);
+            out.writeParcelable(insets, 0);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
@@ -1391,6 +1391,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 && mAppWidgetContainer.getWidgetPageIndex(mTransportControl) >= 0;
         ss.transportState =  showing ? TRANSPORT_VISIBLE : mTransportState;
         ss.appWidgetToShow = mAppWidgetToShow;
+        ss.insets.set(mInsets);
         return ss;
     }
 
@@ -1404,8 +1405,21 @@ public class KeyguardHostView extends KeyguardViewBase {
         super.onRestoreInstanceState(ss.getSuperState());
         mTransportState = (ss.transportState);
         mAppWidgetToShow = ss.appWidgetToShow;
+        setInsets(ss.insets);
         if (DEBUG) Log.d(TAG, "onRestoreInstanceState, transport=" + mTransportState);
         post(mSwitchPageRunnable);
+    }
+
+    @Override
+    protected boolean fitSystemWindows(Rect insets) {
+        setInsets(insets);
+        return true;
+    }
+
+    private void setInsets(Rect insets) {
+        mInsets.set(insets);
+        if (mSlidingChallengeLayout != null) mSlidingChallengeLayout.setInsets(mInsets);
+        if (mMultiPaneChallengeLayout != null) mMultiPaneChallengeLayout.setInsets(mInsets);
     }
 
     @Override
