@@ -242,6 +242,7 @@ public class KeyguardViewManager {
         }
 
         if (force || mKeyguardView == null) {
+            mKeyguardHost.removeAllViews();
             inflateKeyguardView(options);
             mKeyguardView.requestFocus();
         }
