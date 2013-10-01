@@ -1785,16 +1785,20 @@ public class SyncManager {
         public final SyncTimeTracker mSyncTimeTracker = new SyncTimeTracker();
         private final HashMap<Pair<Account, String>, PowerManager.WakeLock> mWakeLocks =
                 Maps.newHashMap();
-
-        private volatile CountDownLatch mReadyToRunLatch = new CountDownLatch(1);
+        private List<Message> mBootQueue = new ArrayList<Message>();
 
         public void onBootCompleted() {
-            mBootCompleted = true;
-
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Boot completed, clearing boot queue.");
+            }
             doDatabaseCleanup();
-
-            if (mReadyToRunLatch != null) {
-                mReadyToRunLatch.countDown();
+            synchronized(this) {
+                // Dispatch any stashed messages.
+                for (Message message : mBootQueue) {
+                    sendMessage(message);
+                }
+                mBootQueue = null;
+                mBootCompleted = true;
             }
         }
 
@@ -1811,20 +1815,24 @@ public class SyncManager {
             return wakeLock;
         }
 
-        private void waitUntilReadyToRun() {
-            CountDownLatch latch = mReadyToRunLatch;
-            if (latch != null) {
-                while (true) {
-                    try {
-                        latch.await();
-                        mReadyToRunLatch = null;
-                        return;
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+        /**
+         * Stash any messages that come to the handler before boot is complete.
+         * {@link #onBootCompleted()} will disable this and dispatch all the messages collected.
+         * @param msg Message to dispatch at a later point.
+         * @return true if a message was enqueued, false otherwise. This is to avoid losing the
+         * message if we manage to acquire the lock but by the time we do boot has completed.
+         */
+        private boolean tryEnqueueMessageUntilReadyToRun(Message msg) {
+            synchronized (this) {
+                if (!mBootCompleted) {
+                    // Need to copy the message bc looper will recycle it.
+                    mBootQueue.add(Message.obtain(msg));
+                    return true;
                 }
+                return false;
             }
         }
+
         /**
          * Used to keep track of whether a sync notification is active and who it is for.
          */
@@ -1854,13 +1862,15 @@ public class SyncManager {
 
         @Override
         public void handleMessage(Message msg) {
+            if (tryEnqueueMessageUntilReadyToRun(msg)) {
+                return;
+            }
+
             long earliestFuturePollTime = Long.MAX_VALUE;
             long nextPendingSyncTime = Long.MAX_VALUE;
-
             // Setting the value here instead of a method because we want the dumpsys logs
             // to have the most recent value used.
             try {
-                waitUntilReadyToRun();
                 mDataConnectionIsConnected = readDataConnectionState();
                 mSyncManagerWakeLock.acquire();
                 // Always do this first so that we be sure that any periodic syncs that
