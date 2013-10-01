@@ -3438,23 +3438,22 @@ final class ActivityStack {
         // Determine if the top task is exiting and should return to home. Do this before it gets
         // removed in removeHistoryRecordsForAppsLocked.
         boolean launchHomeNext = false;
-        int top = mTaskHistory.size() - 1;
-        while (top >= 0) {
-            final TaskRecord topTask = mTaskHistory.get(top);
-            if (topTask.mActivities.isEmpty()) {
-                // Not possible, but just in case.
-                --top;
+        TaskRecord topTask = mTaskHistory.get(mTaskHistory.size() - 1);
+        ArrayList<ActivityRecord> activities = topTask.mActivities;
+        int activityNdx;
+        for (activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord r = activities.get(activityNdx);
+            if (r.finishing) {
                 continue;
             }
-            ActivityRecord r = topTask.topRunningActivityLocked(null);
-            if (r != null) {
-                // r will be launched next.
+            if (r.app != app) {
+                // This is the dying activity.
                 break;
             }
-            // There is an activity in topTask that is finishing. If topTask belongs to the app
-            // return to home depending on the task flag.
+        }
+        if (activityNdx < 0) {
+            // All activities in task belong to app. Set launchHomeNext to task's value.
             launchHomeNext = topTask.mOnTopOfHome;
-            break;
         }
 
         removeHistoryRecordsForAppLocked(app);

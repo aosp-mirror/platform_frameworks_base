@@ -1932,7 +1932,7 @@ public final class ActivityStackSupervisor {
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             // Only update launchHomeTaskNext for the focused stack.
-            launchHomeTaskNext |= (stack == focusedStack && stack.handleAppDiedLocked(app));
+            launchHomeTaskNext |= (stack.handleAppDiedLocked(app) && stack == focusedStack);
         }
 
         if (!restarting) {
