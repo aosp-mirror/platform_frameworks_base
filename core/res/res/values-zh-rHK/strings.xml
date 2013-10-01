@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"允許應用程式以狀態列顯示。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展開/收合狀態列"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"允許應用程式展開或收合狀態列。"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"安裝捷徑"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"允許應用程式繞過用戶授權直接新增主畫面捷徑。"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"解除安裝捷徑"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"允許應用程式繞過用戶授權直接移除主畫面捷徑。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重新設定撥出電話的路徑"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"允許應用程式處理撥出電話及更改撥打的號碼。這項權限允許應用程式監控、轉接或阻止撥出的電話。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收短訊 (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"允許應用程式讀取用戶儲存在用戶字典中的所有字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"將字詞加入用戶定義字典"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允許應用程式將新字詞寫入用戶字典。"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"測試能否存取受保護的儲存裝置"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"測試能否存取受保護的儲存裝置"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"允許應用程式測試未來裝置將支援的 USB 儲存權限。"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"允許應用程式測試未來裝置將支援的 SD 記憶卡權限。"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"讀取您 USB 儲存裝置中的內容"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"讀取您 SD 記憶卡中的內容"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允許應用程式讀取 USB 儲存裝置的內容。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"允許應用程式讀取 SD 卡的內容。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或刪除您 USB 儲存裝置中的內容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或刪除您 SD 記憶卡中的內容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允許應用程式寫入 USB 儲存裝置。"</string>
@@ -1627,7 +1631,7 @@
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"寫入內容時發生錯誤"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"已安裝「<xliff:g id="NAME">%s</xliff:g>」服務"</string>
-    <string name="print_service_installed_message" msgid="5897362931070459152">"輕按一下即可啟用"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"輕按即可啟用"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"輸入管理員 PIN"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"輸入 PIN 碼"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"不正確"</string>

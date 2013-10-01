@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permite aplicaţiei să fie bară de stare."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"extindere/restrângere bară de stare"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permite aplicaţiei să extindă sau să restrângă bara de stare."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalează comenzi rapide"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permite unei aplicații să adauge comenzi rapide pe ecranul de pornire, fără intervenția utilizatorului."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"dezinstalează comenzi rapide"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite aplicației să elimine comenzi rapide de pe ecranul de pornire, fără intervenția utilizatorului."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirecţionează apelurile efectuate"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite aplicaţiei să proceseze apelurile efectuate şi să schimbe numărul care trebuie format. Cu această permisiune aplicaţia poate monitoriza, redirecţiona sau împiedica apelurile efectuate."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"primeşte mesaje text (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite aplicaţiei să citească toate cuvintele, numele şi expresiile stocate în dicţionarul utilizatorului."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"adaugă cuvinte în dicţionarul definit de utilizator"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite aplicaţiei să scrie cuvinte noi în dicţionarul utilizatorului."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testează accesul la stocarea protejată"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testează accesul la stocarea protejată"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permite aplicaţiei testarea permisiunii pt. stocarea USB, disponibilă pe gadgeturi viitoare."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permite aplicaţiei să testeze o permisiune pentru cardul SD care va fi disponibil pe dispozitivele viitoare."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"citeşte conţinutul stocării USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"citeşte conţinutul cardului SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permite aplic. citirea conținutului stoc. USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permite aplicației citirea conținutul cardului SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifică sau şterge conţinutul stocării USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifică sau şterge conţinutul cardului SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite scriere în stoc. USB."</string>

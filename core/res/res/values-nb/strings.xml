@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Gir appen tillatelse til å vises i statusfeltet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"utvide/slå sammen statusfeltet"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Lar appen utvide eller skjule statuslinjen."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installere snarveier"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Lar appen legge til snarveier på startsiden uten å involvere brukeren."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"avinstallere snarveier"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Lar appen fjerne snarveier på startsiden uten å involvere brukeren."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigere utgående anrop"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Lar appen behandle utgående anrop og endre nummeret som skal ringes opp. Denne tillatelsen lar appen overvåke, viderekoble eller hindre utgående anrop."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"motta tekstmeldinger (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Lar appen lese alle ord, navn og uttrykk som brukeren har lagret i brukerordlisten."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"legge til ord i brukerdefinert ordliste"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lar appen skrive nye ord i brukerordlisten."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testadgang til beskyttet lagring"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testadgang til beskyttet lagring"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Lar appen teste en tillatelse for USB-lagring som kommer til å bli tilgjengelig på fremtidige enheter."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Lar appen teste en tillatelse for SD-kortet som kommer til å bli tilgjengelig på fremtidige enheter."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"leser innholdet i USB-lagringen"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"leser innholdet i SD-kortet"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Lar appen lese innhold på USB-lagringen din."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Lar appen lese innhold på SD-kortet ditt."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"endre eller slette innholdet i USB-lagringen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"endre eller slette innhold i SD-kortet"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Gir appen tillatelse til å skrive til USB-lagringen."</string>
@@ -1627,7 +1631,7 @@
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Feil under skriving av innhold"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"ukjent"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g>-tjenesten er installert"</string>
-    <string name="print_service_installed_message" msgid="5897362931070459152">"klikk for å aktivere"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Trykk for å aktivere"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Skriv inn administrator-PIN-koden"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Skriv inn PIN-koden"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Feil"</string>

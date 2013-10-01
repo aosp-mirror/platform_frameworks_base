@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Leidžiama programai būti būsenos juosta."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"išskleisti / sutraukti būsenos juostą"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Leidžiama programai išskleisti arba sutraukti būsenos juostą."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"įdiegti sparčiuosius klavišus"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Programai leidžiama pridėti sparčiuosius klavišus prie pagrindinio ekrano be naudotojo įsikišimo."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"pašalinti sparčiuosius klavišus"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Programai leidžiama pašalinti sparčiuosius klavišus iš pagrindinio ekrano be naudotojo įsikišimo."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"peradresuoti išsiunčiamuosius skambučius"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Leidžiama programai atlikti išsiunčiamuosius skambučius ir keisti renkamą numerį. Šis leidimas suteikia teisę programai stebėti, peradresuoti ar neleisti išsiunčiamųjų skambučių."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"gauti teksto pranešimus (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Leidžiama programai skaityti visus žodžius, vardus ir frazes, kuriuos naudotojas išsaugojo naudotojo žodyne."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"pridėti žodžių prie naudotojo apibrėžto žodyno"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Leidžiama programai rašyti naujus žodžius į naudotojo žodyną."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"prieigos prie apsaugotos saugyklos tikrinimas"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"prieigos prie apsaugotos saugyklos tikrinimas"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Leidžia progr. tikr. leidimą USB atm., kuri bus vėlesn. įreng."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Leidžiama programai tikrinti SD kortelės, kuri bus pasiekiama ateityje naudojant kitus įrenginius, leidimą."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"skaityti USB atminties turinį"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"skaityti SD kortelės turinį"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Leidžiama skait. USB atmintį."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Programai leidžiama skaityti SD kortelės turinį."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"keisti / trinti USB atm. turinį"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"keisti arba trinti SD kortelės turinį"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Leidž. progr. raš. į USB atm."</string>

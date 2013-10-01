@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permet que l\'aplicació sigui la barra d\'estat."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ampliar/reduir la barra d\'estat"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permet que l\'aplicació ampliï o redueixi la barra d\'estat."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instal·la dreceres"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permet que una aplicació afegeixi dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstal·la dreceres"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permet que l\'aplicació suprimeixi les dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"desviació de les trucades sortints"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permet que l\'aplicació processi les trucades sortints i que canviï el número que es marcarà. Aquest permís permet que l\'aplicació supervisi, redirigeixi o bloquegi les trucades sortints."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recepció de missatges de text (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet que l\'aplicació llegeixi les paraules, els noms i les frases que l\'usuari pot haver emmagatzemat al seu diccionari."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"afegeix paraules al diccionari definit per l\'usuari"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet que l\'aplicació escrigui paraules noves al diccionari de l\'usuari."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"provar l\'accés a emmagatzematge protegit"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"provar l\'accés a emmagatzematge protegit"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permet que l\'aplicació provi un permís per a emmagatzematge USB que estarà disponible a propers dispositius."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permet que l\'aplicació provi un permís per a la targeta SD que estarà disponible als dispositius en el futur."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lectura contingut emmagat. USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lectura del contingut de la targeta SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permet que l\'aplicació llegeixi el contingut de l\'emmagatzematge USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permet que l\'aplicació llegeixi el contingut de la targeta SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"editar o suprimir contingut d\'USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifica o suprimeix el contingut de la targeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet que l\'aplicació escrigui a l\'emmagatzematge USB."</string>

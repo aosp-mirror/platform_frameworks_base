@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Pinapayagan ang app na maging status bar."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"palawakin/tiklupin ang status bar"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Pinapayagan ang app na palawakin o tiklupin ang status bar."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"i-install ang mga shortcut"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Pinapayagan ang isang application na magdagdag ng mga shortcut ng Homescreen nang walang panghihimasok ng user."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"i-uninstall ang mga shortcut"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Pinapayagan ang application na alisin ang mga shortcut ng Homescreen nang walang panghihimasok ng user."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"baguhin ang ruta ng mga papalabas na tawag"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Pinapayagan ang app na magproseso ng mga papalabas na tawag at baguhin ang numerong ida-dial. Pinapayagan ng pahintulot na ito ang app na sumubaybay, mag-redirect, o pumigil ng mga papalabas na tawag."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"tumanggap ng mga text message (SMS)"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Pinapayagan ang app na basahin ang lahat ng salita, pangalan at parirala na maaaring inimbak ng user sa diksyunaryo ng user."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"magdagdag ng mga salita sa diksyunaryong tinukoy ng user"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pinapayagan ang app na magsulat ng mga bagong salita sa diksyunaryo ng user."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"subukan ang access sa pinoprotektahang storage"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"subukan ang access sa pinoprotektahang storage"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Binibigyang-daan ang app na subukan ang isang pagpapahintulot para sa USB storage na magiging availabe sa mga device sa hinaharap."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Pinapayagan ang app na subukan ang isang pahintulot para sa SD card na magiging available sa mga device sa hinaharap."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"basa nilalaman USB storage mo"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"basahin ang mga nilalaman ng iyong SD card"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Pinapayagan ang app na basahin ang mga nilalaman ng iyong USB storage."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Pinapayagan ang app na basahin ang mga nilalaman ng iyong SD card."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"bago tanggal laman USB storage"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"baguhin o tanggalin ang mga nilalaman ng iyong SD card"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Pinapayagan ang app na magsulat sa USB storage."</string>

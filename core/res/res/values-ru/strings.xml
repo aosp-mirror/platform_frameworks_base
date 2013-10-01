@@ -175,7 +175,7 @@
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Чтение и запись SMS, электронных писем и других сообщений."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Личная информация"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Прямой доступ к моим контактным данным."</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Информация о моих социальных контактах"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Информация о моих контактах"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Прямой доступ к информации о моих контактах и социальных связях."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Ваше местоположение"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Приложение сможет отслеживать ваше местоположение."</string>
@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Приложение сможет заменять собой строку состояния."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Разворачивание/сворачивание строки состояния"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Приложение сможет разворачивать и сворачивать строку состояния."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"Создание ярлыков"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Приложение сможет добавлять ярлыки на главный экран без вмешательства пользователя."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"Удаление ярлыков"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Приложение сможет удалять ярлыки с главного экрана без вмешательства пользователя."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"Перенаправление исходящих вызовов"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Приложение сможет обрабатывать исходящие вызовы и изменять набираемые номера, а также отслеживать, перенаправлять или блокировать исходящие вызовы."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"Прием SMS-сообщений"</string>
@@ -633,10 +637,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Приложение получит доступ ко всем словам и фразам, которые хранятся в пользовательском словаре."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Добавление слов в словарь пользователя"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Приложение сможет добавлять слова в пользовательский словарь."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"Проверка доступа к защищенному хранилищу"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"Проверка доступа к защищенному хранилищу"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Приложение сможет проверять разрешение для USB-накопителя, которое в дальнейшем будет предоставляться на других устройствах."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Приложение сможет проверять разрешение для SD-карты, которое в дальнейшем будет предоставляться на других устройствах."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"Просмотр данных на USB-накопителе"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"Считывание содержимого SD-карты"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Приложение сможет считывать данные с USB-накопителя."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Приложение сможет считывать содержимое SD-карты."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"Изменение/удаление данных на USB-накопителе"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Изменение или удаление содержимого SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Приложение сможет записывать данные на USB-накопитель."</string>
