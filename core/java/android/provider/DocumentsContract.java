@@ -635,17 +635,18 @@ public final class DocumentsContract {
                 documentUri.getAuthority());
         try {
             return getDocumentThumbnail(client, documentUri, size, signal);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
             return null;
         } finally {
-            ContentProviderClient.closeQuietly(client);
+            ContentProviderClient.releaseQuietly(client);
         }
     }
 
     /** {@hide} */
     public static Bitmap getDocumentThumbnail(
             ContentProviderClient client, Uri documentUri, Point size, CancellationSignal signal)
-            throws RemoteException {
+            throws RemoteException, IOException {
         final Bundle openOpts = new Bundle();
         openOpts.putParcelable(DocumentsContract.EXTRA_THUMBNAIL_SIZE, size);
 
@@ -693,9 +694,6 @@ public final class DocumentsContract {
                 }
                 return BitmapFactory.decodeFileDescriptor(fd, null, opts);
             }
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
-            return null;
         } finally {
             IoUtils.closeQuietly(afd);
         }
@@ -717,55 +715,53 @@ public final class DocumentsContract {
                 parentDocumentUri.getAuthority());
         try {
             return createDocument(client, parentDocumentUri, mimeType, displayName);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to create document", e);
+            return null;
         } finally {
-            ContentProviderClient.closeQuietly(client);
+            ContentProviderClient.releaseQuietly(client);
         }
     }
 
     /** {@hide} */
     public static Uri createDocument(ContentProviderClient client, Uri parentDocumentUri,
-            String mimeType, String displayName) {
+            String mimeType, String displayName) throws RemoteException {
         final Bundle in = new Bundle();
         in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(parentDocumentUri));
         in.putString(Document.COLUMN_MIME_TYPE, mimeType);
         in.putString(Document.COLUMN_DISPLAY_NAME, displayName);
 
-        try {
-            final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
-            return buildDocumentUri(
-                    parentDocumentUri.getAuthority(), out.getString(Document.COLUMN_DOCUMENT_ID));
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to create document", e);
-            return null;
-        }
+        final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
+        return buildDocumentUri(
+                parentDocumentUri.getAuthority(), out.getString(Document.COLUMN_DOCUMENT_ID));
     }
 
     /**
      * Delete the given document.
      *
      * @param documentUri document with {@link Document#FLAG_SUPPORTS_DELETE}
+     * @return if the document was deleted successfully.
      */
     public static boolean deleteDocument(ContentResolver resolver, Uri documentUri) {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
         try {
-            return deleteDocument(client, documentUri);
-        } finally {
-            ContentProviderClient.closeQuietly(client);
-        }
-    }
-
-    /** {@hide} */
-    public static boolean deleteDocument(ContentProviderClient client, Uri documentUri) {
-        final Bundle in = new Bundle();
-        in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(documentUri));
-
-        try {
-            final Bundle out = client.call(METHOD_DELETE_DOCUMENT, null, in);
+            deleteDocument(client, documentUri);
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to delete document", e);
             return false;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
         }
+    }
+
+    /** {@hide} */
+    public static void deleteDocument(ContentProviderClient client, Uri documentUri)
+            throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(documentUri));
+
+        client.call(METHOD_DELETE_DOCUMENT, null, in);
     }
 }

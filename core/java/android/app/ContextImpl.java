@@ -2200,5 +2200,10 @@ class ContextImpl extends Context {
         public void unstableProviderDied(IContentProvider icp) {
             mMainThread.handleUnstableProviderDied(icp.asBinder(), true);
         }
+
+        @Override
+        public void appNotRespondingViaProvider(IContentProvider icp) {
+            mMainThread.appNotRespondingViaProvider(icp.asBinder());
+        }
     }
 }

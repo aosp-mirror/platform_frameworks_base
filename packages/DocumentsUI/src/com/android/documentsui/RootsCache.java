@@ -243,10 +243,11 @@ public class RootsCache {
 
         final List<RootInfo> roots = Lists.newArrayList();
         final Uri rootsUri = DocumentsContract.buildRootsUri(authority);
-        final ContentProviderClient client = resolver
-                .acquireUnstableContentProviderClient(authority);
+
+        ContentProviderClient client = null;
         Cursor cursor = null;
         try {
+            client = DocumentsApplication.acquireUnstableProviderOrThrow(resolver, authority);
             cursor = client.query(rootsUri, null, null, null, null);
             while (cursor.moveToNext()) {
                 final RootInfo root = RootInfo.fromRootsCursor(authority, cursor);
@@ -256,7 +257,7 @@ public class RootsCache {
             Log.w(TAG, "Failed to load some roots from " + authority + ": " + e);
         } finally {
             IoUtils.closeQuietly(cursor);
-            ContentProviderClient.closeQuietly(client);
+            ContentProviderClient.releaseQuietly(client);
         }
         return roots;
     }

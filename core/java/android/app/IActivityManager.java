@@ -139,6 +139,7 @@ public interface IActivityManager extends IInterface {
     public boolean refContentProvider(IBinder connection, int stableDelta, int unstableDelta)
             throws RemoteException;
     public void unstableProviderDied(IBinder connection) throws RemoteException;
+    public void appNotRespondingViaProvider(IBinder connection) throws RemoteException;
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
             throws RemoteException;
     public ComponentName startService(IApplicationThread caller, Intent service,
@@ -691,4 +692,5 @@ public interface IActivityManager extends IInterface {
     int TAKE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+179;
     int RELEASE_PERSISTABLE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+180;
     int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
+    int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
 }
