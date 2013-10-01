@@ -1176,12 +1176,6 @@ public interface WindowManagerPolicy {
     public void dump(String prefix, PrintWriter writer, String[] args);
 
     /**
-     * Ask keyguard to invoke the assist intent after dismissing keyguard
-     * {@link android.content.Intent#ACTION_ASSIST}
-     */
-    public void showAssistant();
-
-    /**
      * Returns whether a given window type can be magnified.
      *
      * @param windowType The window type.
