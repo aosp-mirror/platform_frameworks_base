@@ -433,6 +433,7 @@ include external/junit/Common.mk
 
 non_base_dirs := \
 	../../external/apache-http/src/org/apache/http \
+	../opt/telephony/src/java/android/provider \
 	../opt/telephony/src/java/android/telephony \
 	../opt/telephony/src/java/android/telephony/gsm \
 	../opt/net/voip/src/java/android/net/rtp \

@@ -21727,6 +21727,277 @@ package android.provider {
     method public static void update(android.content.ContentProviderClient, android.net.Uri, byte[]) throws android.os.RemoteException;
   }
 
+  public final class Telephony {
+  }
+
+  public static abstract interface Telephony.BaseMmsColumns implements android.provider.BaseColumns {
+    field public static final java.lang.String CONTENT_CLASS = "ct_cls";
+    field public static final java.lang.String CONTENT_LOCATION = "ct_l";
+    field public static final java.lang.String CONTENT_TYPE = "ct_t";
+    field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String DATE_SENT = "date_sent";
+    field public static final java.lang.String DELIVERY_REPORT = "d_rpt";
+    field public static final java.lang.String DELIVERY_TIME = "d_tm";
+    field public static final java.lang.String EXPIRY = "exp";
+    field public static final java.lang.String LOCKED = "locked";
+    field public static final java.lang.String MESSAGE_BOX = "msg_box";
+    field public static final int MESSAGE_BOX_ALL = 0; // 0x0
+    field public static final int MESSAGE_BOX_DRAFTS = 3; // 0x3
+    field public static final int MESSAGE_BOX_INBOX = 1; // 0x1
+    field public static final int MESSAGE_BOX_OUTBOX = 4; // 0x4
+    field public static final int MESSAGE_BOX_SENT = 2; // 0x2
+    field public static final java.lang.String MESSAGE_CLASS = "m_cls";
+    field public static final java.lang.String MESSAGE_ID = "m_id";
+    field public static final java.lang.String MESSAGE_SIZE = "m_size";
+    field public static final java.lang.String MESSAGE_TYPE = "m_type";
+    field public static final java.lang.String MMS_VERSION = "v";
+    field public static final java.lang.String PRIORITY = "pri";
+    field public static final java.lang.String READ = "read";
+    field public static final java.lang.String READ_REPORT = "rr";
+    field public static final java.lang.String READ_STATUS = "read_status";
+    field public static final java.lang.String REPORT_ALLOWED = "rpt_a";
+    field public static final java.lang.String RESPONSE_STATUS = "resp_st";
+    field public static final java.lang.String RESPONSE_TEXT = "resp_txt";
+    field public static final java.lang.String RETRIEVE_STATUS = "retr_st";
+    field public static final java.lang.String RETRIEVE_TEXT = "retr_txt";
+    field public static final java.lang.String RETRIEVE_TEXT_CHARSET = "retr_txt_cs";
+    field public static final java.lang.String SEEN = "seen";
+    field public static final java.lang.String STATUS = "st";
+    field public static final java.lang.String SUBJECT = "sub";
+    field public static final java.lang.String SUBJECT_CHARSET = "sub_cs";
+    field public static final java.lang.String TEXT_ONLY = "text_only";
+    field public static final java.lang.String THREAD_ID = "thread_id";
+    field public static final java.lang.String TRANSACTION_ID = "tr_id";
+  }
+
+  public static abstract interface Telephony.CanonicalAddressesColumns implements android.provider.BaseColumns {
+    field public static final java.lang.String ADDRESS = "address";
+  }
+
+  public static final class Telephony.Carriers implements android.provider.BaseColumns {
+    field public static final java.lang.String APN = "apn";
+    field public static final java.lang.String AUTH_TYPE = "authtype";
+    field public static final java.lang.String BEARER = "bearer";
+    field public static final java.lang.String CARRIER_ENABLED = "carrier_enabled";
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String CURRENT = "current";
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "name ASC";
+    field public static final java.lang.String MCC = "mcc";
+    field public static final java.lang.String MMSC = "mmsc";
+    field public static final java.lang.String MMSPORT = "mmsport";
+    field public static final java.lang.String MMSPROXY = "mmsproxy";
+    field public static final java.lang.String MNC = "mnc";
+    field public static final java.lang.String MVNO_MATCH_DATA = "mvno_match_data";
+    field public static final java.lang.String MVNO_TYPE = "mvno_type";
+    field public static final java.lang.String NAME = "name";
+    field public static final java.lang.String NUMERIC = "numeric";
+    field public static final java.lang.String PASSWORD = "password";
+    field public static final java.lang.String PORT = "port";
+    field public static final java.lang.String PROTOCOL = "protocol";
+    field public static final java.lang.String PROXY = "proxy";
+    field public static final java.lang.String ROAMING_PROTOCOL = "roaming_protocol";
+    field public static final java.lang.String SERVER = "server";
+    field public static final java.lang.String TYPE = "type";
+    field public static final java.lang.String USER = "user";
+  }
+
+  public static final class Telephony.Mms implements android.provider.Telephony.BaseMmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+    field public static final android.net.Uri REPORT_REQUEST_URI;
+    field public static final android.net.Uri REPORT_STATUS_URI;
+  }
+
+  public static final class Telephony.Mms.Addr implements android.provider.BaseColumns {
+    field public static final java.lang.String ADDRESS = "address";
+    field public static final java.lang.String CHARSET = "charset";
+    field public static final java.lang.String CONTACT_ID = "contact_id";
+    field public static final java.lang.String MSG_ID = "msg_id";
+    field public static final java.lang.String TYPE = "type";
+  }
+
+  public static final class Telephony.Mms.Draft implements android.provider.Telephony.BaseMmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Mms.Inbox implements android.provider.Telephony.BaseMmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Mms.Intents {
+    field public static final java.lang.String CONTENT_CHANGED_ACTION = "android.intent.action.CONTENT_CHANGED";
+    field public static final java.lang.String DELETED_CONTENTS = "deleted_contents";
+  }
+
+  public static final class Telephony.Mms.Outbox implements android.provider.Telephony.BaseMmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Mms.Part implements android.provider.BaseColumns {
+    field public static final java.lang.String CHARSET = "chset";
+    field public static final java.lang.String CONTENT_DISPOSITION = "cd";
+    field public static final java.lang.String CONTENT_ID = "cid";
+    field public static final java.lang.String CONTENT_LOCATION = "cl";
+    field public static final java.lang.String CONTENT_TYPE = "ct";
+    field public static final java.lang.String CT_START = "ctt_s";
+    field public static final java.lang.String CT_TYPE = "ctt_t";
+    field public static final java.lang.String FILENAME = "fn";
+    field public static final java.lang.String MSG_ID = "mid";
+    field public static final java.lang.String NAME = "name";
+    field public static final java.lang.String SEQ = "seq";
+    field public static final java.lang.String TEXT = "text";
+    field public static final java.lang.String _DATA = "_data";
+  }
+
+  public static final class Telephony.Mms.Rate {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String SENT_TIME = "sent_time";
+  }
+
+  public static final class Telephony.Mms.Sent implements android.provider.Telephony.BaseMmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.MmsSms implements android.provider.BaseColumns {
+    field public static final android.net.Uri CONTENT_CONVERSATIONS_URI;
+    field public static final android.net.Uri CONTENT_DRAFT_URI;
+    field public static final android.net.Uri CONTENT_FILTER_BYPHONE_URI;
+    field public static final android.net.Uri CONTENT_LOCKED_URI;
+    field public static final android.net.Uri CONTENT_UNDELIVERED_URI;
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final int ERR_TYPE_GENERIC = 1; // 0x1
+    field public static final int ERR_TYPE_GENERIC_PERMANENT = 10; // 0xa
+    field public static final int ERR_TYPE_MMS_PROTO_PERMANENT = 12; // 0xc
+    field public static final int ERR_TYPE_MMS_PROTO_TRANSIENT = 3; // 0x3
+    field public static final int ERR_TYPE_SMS_PROTO_PERMANENT = 11; // 0xb
+    field public static final int ERR_TYPE_SMS_PROTO_TRANSIENT = 2; // 0x2
+    field public static final int ERR_TYPE_TRANSPORT_FAILURE = 4; // 0x4
+    field public static final int MMS_PROTO = 1; // 0x1
+    field public static final int NO_ERROR = 0; // 0x0
+    field public static final android.net.Uri SEARCH_URI;
+    field public static final int SMS_PROTO = 0; // 0x0
+    field public static final java.lang.String TYPE_DISCRIMINATOR_COLUMN = "transport_type";
+  }
+
+  public static final class Telephony.MmsSms.PendingMessages implements android.provider.BaseColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DUE_TIME = "due_time";
+    field public static final java.lang.String ERROR_CODE = "err_code";
+    field public static final java.lang.String ERROR_TYPE = "err_type";
+    field public static final java.lang.String LAST_TRY = "last_try";
+    field public static final java.lang.String MSG_ID = "msg_id";
+    field public static final java.lang.String MSG_TYPE = "msg_type";
+    field public static final java.lang.String PROTO_TYPE = "proto_type";
+    field public static final java.lang.String RETRY_INDEX = "retry_index";
+  }
+
+  public static final class Telephony.Sms implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
+    method public static java.lang.String getDefaultSmsPackage(android.content.Context);
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Sms.Conversations implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+    field public static final java.lang.String MESSAGE_COUNT = "msg_count";
+    field public static final java.lang.String SNIPPET = "snippet";
+  }
+
+  public static final class Telephony.Sms.Draft implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Sms.Inbox implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Sms.Intents {
+    method public static android.telephony.SmsMessage[] getMessagesFromIntent(android.content.Intent);
+    field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.provider.Telephony.ACTION_CHANGE_DEFAULT";
+    field public static final java.lang.String DATA_SMS_RECEIVED_ACTION = "android.intent.action.DATA_SMS_RECEIVED";
+    field public static final java.lang.String EXTRA_PACKAGE_NAME = "package";
+    field public static final int RESULT_SMS_DUPLICATED = 5; // 0x5
+    field public static final int RESULT_SMS_GENERIC_ERROR = 2; // 0x2
+    field public static final int RESULT_SMS_HANDLED = 1; // 0x1
+    field public static final int RESULT_SMS_OUT_OF_MEMORY = 3; // 0x3
+    field public static final int RESULT_SMS_UNSUPPORTED = 4; // 0x4
+    field public static final java.lang.String SIM_FULL_ACTION = "android.provider.Telephony.SIM_FULL";
+    field public static final java.lang.String SMS_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_CB_RECEIVED";
+    field public static final java.lang.String SMS_DELIVER_ACTION = "android.provider.Telephony.SMS_DELIVER";
+    field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+    field public static final java.lang.String SMS_RECEIVED_ACTION = "android.provider.Telephony.SMS_RECEIVED";
+    field public static final java.lang.String SMS_REJECTED_ACTION = "android.provider.Telephony.SMS_REJECTED";
+    field public static final java.lang.String SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION = "android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED";
+    field public static final java.lang.String WAP_PUSH_DELIVER_ACTION = "android.provider.Telephony.WAP_PUSH_DELIVER";
+    field public static final java.lang.String WAP_PUSH_RECEIVED_ACTION = "android.provider.Telephony.WAP_PUSH_RECEIVED";
+  }
+
+  public static final class Telephony.Sms.Outbox implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static final class Telephony.Sms.Sent implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
+  }
+
+  public static abstract interface Telephony.TextBasedSmsColumns {
+    field public static final java.lang.String ADDRESS = "address";
+    field public static final java.lang.String BODY = "body";
+    field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String DATE_SENT = "date_sent";
+    field public static final java.lang.String ERROR_CODE = "error_code";
+    field public static final java.lang.String LOCKED = "locked";
+    field public static final int MESSAGE_TYPE_ALL = 0; // 0x0
+    field public static final int MESSAGE_TYPE_DRAFT = 3; // 0x3
+    field public static final int MESSAGE_TYPE_FAILED = 5; // 0x5
+    field public static final int MESSAGE_TYPE_INBOX = 1; // 0x1
+    field public static final int MESSAGE_TYPE_OUTBOX = 4; // 0x4
+    field public static final int MESSAGE_TYPE_QUEUED = 6; // 0x6
+    field public static final int MESSAGE_TYPE_SENT = 2; // 0x2
+    field public static final java.lang.String PERSON = "person";
+    field public static final java.lang.String PROTOCOL = "protocol";
+    field public static final java.lang.String READ = "read";
+    field public static final java.lang.String REPLY_PATH_PRESENT = "reply_path_present";
+    field public static final java.lang.String SEEN = "seen";
+    field public static final java.lang.String SERVICE_CENTER = "service_center";
+    field public static final java.lang.String STATUS = "status";
+    field public static final int STATUS_COMPLETE = 0; // 0x0
+    field public static final int STATUS_FAILED = 64; // 0x40
+    field public static final int STATUS_NONE = -1; // 0xffffffff
+    field public static final int STATUS_PENDING = 32; // 0x20
+    field public static final java.lang.String SUBJECT = "subject";
+    field public static final java.lang.String THREAD_ID = "thread_id";
+    field public static final java.lang.String TYPE = "type";
+  }
+
+  public static final class Telephony.Threads implements android.provider.Telephony.ThreadsColumns {
+    field public static final int BROADCAST_THREAD = 1; // 0x1
+    field public static final int COMMON_THREAD = 0; // 0x0
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final android.net.Uri OBSOLETE_THREADS_URI;
+  }
+
+  public static abstract interface Telephony.ThreadsColumns implements android.provider.BaseColumns {
+    field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String ERROR = "error";
+    field public static final java.lang.String HAS_ATTACHMENT = "has_attachment";
+    field public static final java.lang.String MESSAGE_COUNT = "message_count";
+    field public static final java.lang.String READ = "read";
+    field public static final java.lang.String RECIPIENT_IDS = "recipient_ids";
+    field public static final java.lang.String SNIPPET = "snippet";
+    field public static final java.lang.String SNIPPET_CHARSET = "snippet_cs";
+    field public static final java.lang.String TYPE = "type";
+  }
+
   public class UserDictionary {
     ctor public UserDictionary();
     field public static final java.lang.String AUTHORITY = "user_dictionary";
