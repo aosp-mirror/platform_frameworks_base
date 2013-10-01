@@ -23,9 +23,10 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsProvider;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsProvider;
 
+import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.RootCursorWrapper;
 
 import libcore.io.IoUtils;
@@ -178,10 +179,11 @@ public class DocumentInfo implements Durable, Parcelable {
     }
 
     public void updateFromUri(ContentResolver resolver, Uri uri) throws FileNotFoundException {
-        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
-                uri.getAuthority());
+        ContentProviderClient client = null;
         Cursor cursor = null;
         try {
+            client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                    resolver, uri.getAuthority());
             cursor = client.query(uri, null, null, null, null);
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException("Missing details for " + uri);
@@ -191,7 +193,7 @@ public class DocumentInfo implements Durable, Parcelable {
             throw asFileNotFoundException(t);
         } finally {
             IoUtils.closeQuietly(cursor);
-            ContentProviderClient.closeQuietly(client);
+            ContentProviderClient.releaseQuietly(client);
         }
     }
 

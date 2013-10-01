@@ -31,6 +31,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -259,7 +260,7 @@ public class DirectoryFragment extends Fragment {
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
                 if (!isAdded()) return;
 
-                mAdapter.swapCursor(result.cursor);
+                mAdapter.swapResult(result.cursor, result.exception);
 
                 // Push latest state up to UI
                 // TODO: if mode change was racing with us, don't overwrite it
@@ -285,7 +286,7 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoaderReset(Loader<DirectoryResult> loader) {
-                mAdapter.swapCursor(null);
+                mAdapter.swapResult(null, null);
             }
         };
 
@@ -552,9 +553,16 @@ public class DirectoryFragment extends Fragment {
                 continue;
             }
 
-            if (!DocumentsContract.deleteDocument(resolver, doc.derivedUri)) {
+            ContentProviderClient client = null;
+            try {
+                client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                        resolver, doc.derivedUri.getAuthority());
+                DocumentsContract.deleteDocument(client, doc.derivedUri);
+            } catch (Exception e) {
                 Log.w(TAG, "Failed to delete " + doc);
                 hadTrouble = true;
+            } finally {
+                ContentProviderClient.releaseQuietly(client);
             }
         }
 
@@ -646,7 +654,7 @@ public class DirectoryFragment extends Fragment {
 
         private List<Footer> mFooters = Lists.newArrayList();
 
-        public void swapCursor(Cursor cursor) {
+        public void swapResult(Cursor cursor, Exception e) {
             mCursor = cursor;
             mCursorCount = cursor != null ? cursor.getCount() : 0;
 
@@ -665,6 +673,11 @@ public class DirectoryFragment extends Fragment {
                 if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
                     mFooters.add(new LoadingFooter());
                 }
+            }
+
+            if (e != null) {
+                mFooters.add(new MessageFooter(
+                        3, R.drawable.ic_dialog_alert, getString(R.string.query_error)));
             }
 
             if (isEmpty()) {
@@ -971,19 +984,23 @@ public class DirectoryFragment extends Fragment {
         @Override
         protected Bitmap doInBackground(Uri... params) {
             final Context context = mIconThumb.getContext();
+            final ContentResolver resolver = context.getContentResolver();
 
+            ContentProviderClient client = null;
             Bitmap result = null;
             try {
-                // TODO: switch to using unstable provider
-                result = DocumentsContract.getDocumentThumbnail(
-                        context.getContentResolver(), mUri, mThumbSize, mSignal);
+                client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                        resolver, mUri.getAuthority());
+                result = DocumentsContract.getDocumentThumbnail(client, mUri, mThumbSize, mSignal);
                 if (result != null) {
                     final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                             context, mThumbSize);
                     thumbs.put(mUri, result);
                 }
             } catch (Exception e) {
-                Log.w(TAG, "Failed to load thumbnail: " + e);
+                Log.w(TAG, "Failed to load thumbnail for " + mUri + ": " + e);
+            } finally {
+                ContentProviderClient.releaseQuietly(client);
             }
             return result;
         }

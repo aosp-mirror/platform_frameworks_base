@@ -4653,6 +4653,19 @@ public final class ActivityThread {
         }
     }
 
+    final void appNotRespondingViaProvider(IBinder provider) {
+        synchronized (mProviderMap) {
+            ProviderRefCount prc = mProviderRefCountMap.get(provider);
+            if (prc != null) {
+                try {
+                    ActivityManagerNative.getDefault()
+                            .appNotRespondingViaProvider(prc.holder.connection);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
+
     private ProviderClientRecord installProviderAuthoritiesLocked(IContentProvider provider,
             ContentProvider localProvider, IActivityManager.ContentProviderHolder holder) {
         final String auths[] = PATTERN_SEMICOLON.split(holder.info.authority);

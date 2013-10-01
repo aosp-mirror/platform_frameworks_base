@@ -287,6 +287,11 @@ public abstract class ContentResolver {
     /** @hide */
     public abstract void unstableProviderDied(IContentProvider icp);
 
+    /** @hide */
+    public void appNotRespondingViaProvider(IContentProvider icp) {
+        throw new UnsupportedOperationException("appNotRespondingViaProvider");
+    }
+
     /**
      * Return the MIME type of the given content URL.
      *
