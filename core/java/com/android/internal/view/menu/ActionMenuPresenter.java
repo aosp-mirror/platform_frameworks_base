@@ -25,6 +25,7 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.SparseBooleanArray;
 import android.view.ActionProvider;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 import android.view.View;
@@ -665,6 +666,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         public OverflowPopup(Context context, MenuBuilder menu, View anchorView,
                 boolean overflowOnly) {
             super(context, menu, anchorView, overflowOnly);
+            setGravity(Gravity.END);
             setCallback(mPopupPresenterCallback);
         }
 
