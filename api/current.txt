@@ -26634,6 +26634,7 @@ package android.view {
   }
 
   public class HapticFeedbackConstants {
+    field public static final int CLOCK_TICK = 4; // 0x4
     field public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
     field public static final int FLAG_IGNORE_VIEW_SETTING = 1; // 0x1
     field public static final int KEYBOARD_TAP = 3; // 0x3
@@ -31794,8 +31795,6 @@ package android.widget {
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int);
     ctor public NumberPicker(android.content.Context, android.util.AttributeSet, int, int);
-    method public int computeVerticalScrollOffset();
-    method public int computeVerticalScrollRange();
     method public java.lang.String[] getDisplayedValues();
     method public int getMaxValue();
     method public int getMinValue();

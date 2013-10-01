@@ -380,6 +380,18 @@ please see themes_device_defaults.xml.
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.TimePicker</item>
 
+        <!-- TimePicker background color -->
+        <item name="timePickerHeaderBackgroundColor">@android:color/darker_gray</item>
+
+        <!-- TimePicker Header time label text appearance -->
+        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.TimePicker.TimeLabel</item>
+
+        <!-- TimePicker Header am pm label text appearance -->
+        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.TimePicker.AmPmLabel</item>
+
+        <!-- TimePicker dialog theme -->
+        <item name="timePickerDialogTheme">@android:style/Theme.Dialog.TimePicker</item>
+
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.DatePicker</item>
 
@@ -686,7 +698,15 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItem">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceListItemSmall">@android:style/TextAppearance.Large.Inverse</item>
     </style>
-    
+
+    <!-- Default heme for the TimePicker dialog windows, which is used by the
+         {@link android.app.TimePickerDialog} class. -->
+    <style name="Theme.Dialog.TimePicker">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
+        <item name="windowContentOverlay">@null</item>
+    </style>
+
     <!-- Default dark theme for panel windows (on API level 10 and lower).  This removes all
          extraneous window decorations, so you basically have an empty rectangle in which
          to place your content.  It makes the window floating, with a transparent
@@ -1201,6 +1221,18 @@ please see themes_device_defaults.xml.
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.Holo.TimePicker</item>
 
+        <!-- TimePicker background color -->
+        <item name="timePickerHeaderBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
+
+        <!-- TimePicker Header time label text appearance -->
+        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Holo.TimePicker.TimeLabel</item>
+
+        <!-- TimePicker Header am pm label text appearance -->
+        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.Holo.TimePicker.AmPmLabel</item>
+
+        <!-- TimePicker dialog theme -->
+        <item name="timePickerDialogTheme">@android:style/Theme.Holo.Dialog.TimePicker</item>
+
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Holo.DatePicker</item>
 
@@ -1517,6 +1549,18 @@ please see themes_device_defaults.xml.
         <!-- TimePicker style -->
         <item name="timePickerStyle">@style/Widget.Holo.Light.TimePicker</item>
 
+        <!-- TimePicker Header background color -->
+        <item name="timePickerHeaderBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
+
+        <!-- TimePicker Header time label text appearance -->
+        <item name="timePickerHeaderTimeLabelTextAppearance">@style/TextAppearance.Holo.Light.TimePicker.TimeLabel</item>
+
+        <!-- TimePicker Header am pm label text appearance -->
+        <item name="timePickerHeaderAmPmLabelTextAppearance">@style/TextAppearance.Holo.Light.TimePicker.AmPmLabel</item>
+
+        <!-- TimePicker dialog theme -->
+        <item name="timePickerDialogTheme">@android:style/Theme.Holo.Light.Dialog.TimePicker</item>
+
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Holo.Light.DatePicker</item>
 
@@ -1711,6 +1755,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
+    <!-- Holo theme for the TimePicker dialog windows, which is used by the
+         {@link android.app.TimePickerDialog} class. -->
+    <style name="Theme.Holo.Dialog.TimePicker">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
+        <item name="windowContentOverlay">@null</item>
+    </style>
+
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
@@ -1824,6 +1876,14 @@ please see themes_device_defaults.xml.
         <item name="windowContentOverlay">@null</item>
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+    </style>
+
+    <!-- Holo Light theme for the TimePicker dialog windows, which is used by the
+         {@link android.app.TimePickerDialog} class. -->
+    <style name="Theme.Holo.Light.Dialog.TimePicker">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Theme for a presentation window on a secondary display. -->

@@ -735,4 +735,22 @@ easier.
     <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Holo.MediaRouteButton" />
     <style name="Widget.DeviceDefault.Light.MediaRouteButton" parent="Widget.Holo.Light.MediaRouteButton" />
 
+    <style name="TextAppearance.DeviceDefault.TimePicker.TimeLabel" parent="TextAppearance.Holo.TimePicker.TimeLabel">
+    </style>
+
+    <style name="TextAppearance.DeviceDefault.Light.TimePicker.TimeLabel" parent="TextAppearance.Holo.Light.TimePicker.TimeLabel">
+    </style>
+
+    <style name="TextAppearance.DeviceDefault.TimePicker.AmPmLabel" parent="TextAppearance.Holo.TimePicker.AmPmLabel">
+    </style>
+
+    <style name="TextAppearance.DeviceDefault.Light.TimePicker.AmPmLabel" parent="TextAppearance.Holo.Light.TimePicker.AmPmLabel">
+    </style>
+
+    <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Holo.Dialog.TimePicker">
+    </style>
+
+    <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Holo.Light.Dialog.TimePicker">
+    </style>
+
 </resources>

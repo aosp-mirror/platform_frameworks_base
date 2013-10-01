@@ -201,5 +201,22 @@
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 
     <color name="accessibility_focus_highlight">#80ffff00</color>
+
+    <!-- New TimePicker colors -->
+    <color name="timepicker_default_background_holo_light">@android:color/white</color>
+    <color name="timepicker_default_background_holo_dark">#ff303030</color>
+
+    <color name="timepicker_default_text_color_holo_light">#8c8c8c</color>
+    <color name="timepicker_default_text_color_holo_dark">@android:color/white</color>
+
+    <color name="timepicker_default_disabled_color_holo_light">#7f000000</color>
+    <color name="timepicker_default_disabled_color_holo_dark">#7f08c8c8</color>
+
+    <color name="timepicker_default_ampm_selected_background_color_holo_light">@android:color/holo_blue_light</color>
+    <color name="timepicker_default_ampm_selected_background_color_holo_dark">@android:color/holo_blue_light</color>
+
+    <color name="timepicker_default_ampm_unselected_background_color_holo_light">@android:color/white</color>
+    <color name="timepicker_default_ampm_unselected_background_color_holo_dark">@android:color/transparent</color>
+
 </resources>
 
