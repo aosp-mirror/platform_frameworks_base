@@ -29,5 +29,5 @@ oneway interface IPrintSpoolerClient {
     void onPrintJobQueued(in PrintJobInfo printJob);
     void onAllPrintJobsForServiceHandled(in ComponentName printService);
     void onAllPrintJobsHandled();
-    void onPrintJobStateChanged(in PrintJobId printJobId, int appId);
+    void onPrintJobStateChanged(in PrintJobInfo printJob);
 }

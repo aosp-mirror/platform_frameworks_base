@@ -33,7 +33,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.print.IPrintClient;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
@@ -52,6 +51,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.os.BackgroundThread;
@@ -62,6 +62,7 @@ import com.android.server.print.RemotePrintSpooler.PrintSpoolerCallbacks;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -93,8 +94,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     private final Set<ComponentName> mEnabledServices =
             new ArraySet<ComponentName>();
 
-    private final CreatedPrintJobTracker mCreatedPrintJobTracker =
-            new CreatedPrintJobTracker();
+    private final PrintJobForAppCache mPrintJobForAppCache =
+            new PrintJobForAppCache();
 
     private final Object mLock;
 
@@ -155,22 +156,21 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     public PrintJobInfo print(String printJobName, final IPrintClient client,
             final IPrintDocumentAdapter documentAdapter, PrintAttributes attributes,
             int appId) {
-        PrintJobId printJobId = new PrintJobId();
-
-        // Track this job so we can forget it when the creator dies.
-        if (!mCreatedPrintJobTracker.onPrintJobCreatedLocked(client.asBinder(), printJobId)) {
-            // Not adding a print job means the client is dead - done.
-            return null;
-        }
-
         // Create print job place holder.
         final PrintJobInfo printJob = new PrintJobInfo();
-        printJob.setId(printJobId);
+        printJob.setId(new PrintJobId());
         printJob.setAppId(appId);
         printJob.setLabel(printJobName);
         printJob.setAttributes(attributes);
         printJob.setState(PrintJobInfo.STATE_CREATED);
         printJob.setCopies(1);
+
+        // Track this job so we can forget it when the creator dies.
+        if (!mPrintJobForAppCache.onPrintJobCreated(client.asBinder(), appId,
+                printJob)) {
+            // Not adding a print job means the client is dead - done.
+            return null;
+        }
 
         // Spin the spooler to add the job and show the config UI.
         new AsyncTask<Void, Void, Void>() {
@@ -185,10 +185,40 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     }
 
     public List<PrintJobInfo> getPrintJobInfos(int appId) {
-        return mSpooler.getPrintJobInfos(null, PrintJobInfo.STATE_ANY, appId);
+        List<PrintJobInfo> cachedPrintJobs = mPrintJobForAppCache.getPrintJobs(appId);
+        // Note that the print spooler is not storing print jobs that
+        // are in a terminal state as it is non-trivial to properly update
+        // the spooler state for when to forget print jobs in terminal state.
+        // Therefore, we fuse the cached print jobs for running apps (some
+        // jobs are in a terminal state) with the ones that the print
+        // spooler knows about (some jobs are being processed).
+        ArrayMap<PrintJobId, PrintJobInfo> result =
+                new ArrayMap<PrintJobId, PrintJobInfo>();
+
+        // Add the cached print jobs for running apps.
+        final int cachedPrintJobCount = cachedPrintJobs.size();
+        for (int i = 0; i < cachedPrintJobCount; i++) {
+            PrintJobInfo cachedPrintJob = cachedPrintJobs.get(i);
+            result.put(cachedPrintJob.getId(), cachedPrintJob);
+        }
+
+        // Add everything else the spooler knows about.
+        List<PrintJobInfo> printJobs = mSpooler.getPrintJobInfos(null,
+                PrintJobInfo.STATE_ANY, appId);
+        final int printJobCount = printJobs.size();
+        for (int i = 0; i < printJobCount; i++) {
+            PrintJobInfo printJob = printJobs.get(i);
+            result.put(printJob.getId(), printJob);
+        }
+
+        return new ArrayList<PrintJobInfo>(result.values());
     }
 
     public PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId) {
+        PrintJobInfo printJob = mPrintJobForAppCache.getPrintJob(printJobId, appId);
+        if (printJob != null) {
+            return printJob;
+        }
         return mSpooler.getPrintJobInfo(printJobId, appId);
     }
 
@@ -398,9 +428,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     }
 
     @Override
-    public void onPrintJobStateChanged(PrintJobId printJobId, int appId) {
+    public void onPrintJobStateChanged(PrintJobInfo printJob) {
+        mPrintJobForAppCache.onPrintJobStateChanged(printJob);
         mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_JOB_STATE_CHANGED,
-                appId, 0, printJobId).sendToTarget();
+                printJob.getAppId(), 0, printJob.getId()).sendToTarget();
     }
 
     @Override
@@ -524,6 +555,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             activeService.dump(pw, prefix + tab + tab);
             pw.println();
         }
+
+        pw.append(prefix).append(tab).append("cached print jobs:").println();
+        mPrintJobForAppCache.dump(pw, prefix + tab + tab);
 
         pw.append(prefix).append(tab).append("discovery mediator:").println();
         if (mPrinterDiscoverySession != null) {
@@ -1424,34 +1458,19 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    private final class CreatedPrintJobTracker {
-        private final ArrayMap<IBinder, List<PrintJobId>> mCreatedPrintJobs =
-                new ArrayMap<IBinder, List<PrintJobId>>();
+    private final class PrintJobForAppCache {
+        private final SparseArray<List<PrintJobInfo>> mPrintJobsForRunningApp =
+                new SparseArray<List<PrintJobInfo>>();
 
-        public boolean onPrintJobCreatedLocked(final IBinder creator, PrintJobId printJobId) {
+        public boolean onPrintJobCreated(final IBinder creator, final int appId,
+                PrintJobInfo printJob) {
             try {
                 creator.linkToDeath(new DeathRecipient() {
                     @Override
                     public void binderDied() {
                         creator.unlinkToDeath(this, 0);
-                        UserManager userManager = (UserManager) mContext.getSystemService(
-                                Context.USER_SERVICE);
-                        // If the death is a result of the user being removed, then
-                        // do nothing since the spooler data for this user will be
-                        // wiped and we cannot bind to the spooler at this point.
-                        if (userManager.getUserInfo(mUserId) == null) {
-                            return;
-                        }
-                        List<PrintJobId> printJobIds = null;
                         synchronized (mLock) {
-                            printJobIds = mCreatedPrintJobs.remove(creator);
-                            if (printJobIds == null) {
-                                return;
-                            }
-                            printJobIds = new ArrayList<PrintJobId>(printJobIds);
-                        }
-                        if (printJobIds != null) {
-                            mSpooler.forgetPrintJobs(printJobIds);
+                            mPrintJobsForRunningApp.remove(appId);
                         }
                     }
                 }, 0);
@@ -1460,14 +1479,93 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 return false;
             }
             synchronized (mLock) {
-                List<PrintJobId> printJobIds = mCreatedPrintJobs.get(creator);
-                if (printJobIds == null) {
-                    printJobIds = new ArrayList<PrintJobId>();
-                    mCreatedPrintJobs.put(creator, printJobIds);
+                List<PrintJobInfo> printJobsForApp = mPrintJobsForRunningApp.get(appId);
+                if (printJobsForApp == null) {
+                    printJobsForApp = new ArrayList<PrintJobInfo>();
+                    mPrintJobsForRunningApp.put(appId, printJobsForApp);
                 }
-                printJobIds.add(printJobId);
+                printJobsForApp.add(printJob);
             }
             return true;
+        }
+
+        public void onPrintJobStateChanged(PrintJobInfo printJob) {
+            synchronized (mLock) {
+                List<PrintJobInfo> printJobsForApp = mPrintJobsForRunningApp.get(
+                        printJob.getAppId());
+                if (printJobsForApp == null) {
+                    return;
+                }
+                final int printJobCount = printJobsForApp.size();
+                for (int i = 0; i < printJobCount; i++) {
+                    PrintJobInfo oldPrintJob = printJobsForApp.get(i);
+                    if (oldPrintJob.getId().equals(printJob.getId())) {
+                        printJobsForApp.set(i, printJob);
+                    }
+                }
+            }
+        }
+
+        public PrintJobInfo getPrintJob(PrintJobId printJobId, int appId) {
+            synchronized (mLock) {
+                List<PrintJobInfo> printJobsForApp = mPrintJobsForRunningApp.get(appId);
+                if (printJobsForApp == null) {
+                    return null;
+                }
+                final int printJobCount = printJobsForApp.size();
+                for (int i = 0; i < printJobCount; i++) {
+                    PrintJobInfo printJob = printJobsForApp.get(i);
+                    if (printJob.getId().equals(printJobId)) {
+                        return printJob;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public List<PrintJobInfo> getPrintJobs(int appId) {
+            synchronized (mLock) {
+                List<PrintJobInfo> printJobs = null;
+                if (appId == PrintManager.APP_ID_ANY) {
+                    final int bucketCount = mPrintJobsForRunningApp.size();
+                    for (int i = 0; i < bucketCount; i++) {
+                        List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
+                        if (printJobs == null) {
+                            printJobs = new ArrayList<PrintJobInfo>();
+                        }
+                        printJobs.addAll(bucket);
+                    }
+                } else {
+                    List<PrintJobInfo> bucket = mPrintJobsForRunningApp.get(appId);
+                    if (bucket != null) {
+                        if (printJobs == null) {
+                            printJobs = new ArrayList<PrintJobInfo>();
+                        }
+                        printJobs.addAll(bucket);
+                    }
+                }
+                if (printJobs != null) {
+                    return printJobs;
+                }
+                return Collections.emptyList();
+            }
+        }
+
+        public void dump(PrintWriter pw, String prefix) {
+            synchronized (mLock) {
+                String tab = "  ";
+                final int bucketCount = mPrintJobsForRunningApp.size();
+                for (int i = 0; i < bucketCount; i++) {
+                    final int appId = mPrintJobsForRunningApp.keyAt(i);
+                    pw.append(prefix).append("appId=" + appId).append(':').println();
+                    List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
+                    final int printJobCount = bucket.size();
+                    for (int j = 0; j < printJobCount; j++) {
+                        PrintJobInfo printJob = bucket.get(j);
+                        pw.append(prefix).append(tab).append(printJob.toString()).println();
+                    }
+                }
+            }
         }
     }
 }
