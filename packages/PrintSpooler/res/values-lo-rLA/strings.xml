@@ -21,19 +21,15 @@
     <string name="save_button" msgid="1921310454071758999">"ບັນທຶກ"</string>
     <string name="label_destination" msgid="9132510997381599275">"ປາຍທາງ"</string>
     <string name="label_copies" msgid="3634531042822968308">"ສຳເນົາ"</string>
-    <!-- no translation found for label_paper_size (8681895607876809323) -->
-    <skip />
-    <!-- no translation found for label_color (1108690305218188969) -->
-    <skip />
+    <string name="label_paper_size" msgid="8681895607876809323">"ຂະໜາດຂອງໜ້າເຈ້ຍ"</string>
+    <string name="label_color" msgid="1108690305218188969">"ສີ"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ລວງ"</string>
-    <!-- no translation found for label_pages (6300874667546617333) -->
-    <skip />
+    <string name="label_pages" msgid="6300874667546617333">"(<xliff:g id="PAGE_COUNT">%1$s</xliff:g>) ໜ້າ"</string>
     <string name="pages_range_example" msgid="4069269138547562081">"ຕົວຢ່າງ. 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"ເບິ່ງກ່ອນພິມ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"ຕິດຕັ້ງໂປຼແກຼມເບິ່ງ PDF ເພື່ອເບິ່ງຕົວຢ່າງ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ແອັບຯພິມລົ້ມເຫລວ"</string>
-    <!-- no translation found for page_count_unknown (7412881437770983864) -->
-    <skip />
+    <string name="page_count_unknown" msgid="7412881437770983864">"ບໍ່ມີຂໍ້ມູນ"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ກຳລັງສ້າງວຽກພິມ"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"ບັນທຶກເປັ​​ນ PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"ທຸກເຄື່ອງພິມ..."</string>
@@ -49,6 +45,8 @@
     <string name="restart" msgid="2472034227037808749">"ປິດເປີດໃໝ່"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ບໍ່ມີການເຊື່ອມຕໍ່ຫາເຄື່ອງພິມ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ບໍ່ຮູ້ຈັກ"</string>
+    <!-- no translation found for printer_unavailable (2434170617003315690) -->
+    <skip />
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"ຂາວດຳ"</item>
     <item msgid="2762241247228983754">"ສີ"</item>

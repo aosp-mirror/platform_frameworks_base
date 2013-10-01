@@ -45,6 +45,8 @@
     <string name="restart" msgid="2472034227037808749">"Restartovat"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nelze se připojit k tiskárně"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"neznámé"</string>
+    <!-- no translation found for printer_unavailable (2434170617003315690) -->
+    <skip />
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Černobíle"</item>
     <item msgid="2762241247228983754">"Barevně"</item>
