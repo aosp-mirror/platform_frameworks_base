@@ -194,6 +194,21 @@ public final class PrintManagerService extends IPrintManager.Stub {
     }
 
     @Override
+    public List<PrintServiceInfo> getInstalledPrintServices(int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return userState.getInstalledPrintServices();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
     public void createPrinterDiscoverySession(IPrinterDiscoveryObserver observer,
             int userId) {
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
