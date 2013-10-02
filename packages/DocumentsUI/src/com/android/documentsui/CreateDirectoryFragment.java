@@ -69,7 +69,12 @@ public class CreateDirectoryFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String displayName = text1.getText().toString();
-                new CreateDirectoryTask(displayName).execute();
+
+                final DocumentsActivity activity = (DocumentsActivity) getActivity();
+                final DocumentInfo cwd = activity.getCurrentDirectory();
+
+                new CreateDirectoryTask(displayName).executeOnExecutor(
+                        ProviderExecutor.forAuthority(cwd.authority));
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);

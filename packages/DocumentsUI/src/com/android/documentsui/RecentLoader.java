@@ -49,9 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
@@ -74,30 +72,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     /** MIME types that should always be excluded from recents. */
     private static final String[] RECENT_REJECT_MIMES = new String[] { Document.MIME_TYPE_DIR };
 
-    private static ExecutorService sExecutor;
-
-    /**
-     * Create a bounded thread pool for fetching recents; it creates threads as
-     * needed (up to maximum) and reclaims them when finished.
-     */
-    private synchronized static ExecutorService getExecutor(Context context) {
-        if (sExecutor == null) {
-            final ActivityManager am = (ActivityManager) context.getSystemService(
-                    Context.ACTIVITY_SERVICE);
-            final int maxOutstanding = am.isLowRamDevice() ? MAX_OUTSTANDING_RECENTS_SVELTE
-                    : MAX_OUTSTANDING_RECENTS;
-
-            // Create a bounded thread pool for fetching recents; it creates
-            // threads as needed (up to maximum) and reclaims them when finished.
-            final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                    maxOutstanding, maxOutstanding, 10, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>());
-            executor.allowCoreThreadTimeOut(true);
-            sExecutor = executor;
-        }
-
-        return sExecutor;
-    }
+    private final Semaphore mQueryPermits;
 
     private final RootsCache mRoots;
     private final State mState;
@@ -129,6 +104,20 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         public void run() {
             if (isCancelled()) return;
 
+            try {
+                mQueryPermits.acquire();
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            try {
+                runInternal();
+            } finally {
+                mQueryPermits.release();
+            }
+        }
+
+        public void runInternal() {
             ContentProviderClient client = null;
             try {
                 client = DocumentsApplication.acquireUnstableProviderOrThrow(
@@ -138,6 +127,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
                 final Cursor cursor = client.query(
                         uri, null, null, null, DirectoryLoader.getQuerySortOrder(mSortOrder));
                 mWithRoot = new RootCursorWrapper(authority, rootId, cursor, MAX_DOCS_FROM_ROOT);
+
             } catch (Exception e) {
                 Log.w(TAG, "Failed to load " + authority + ", " + rootId, e);
             } finally {
@@ -162,12 +152,17 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         super(context);
         mRoots = roots;
         mState = state;
+
+        // Keep clients around on high-RAM devices, since we'd be spinning them
+        // up moments later to fetch thumbnails anyway.
+        final ActivityManager am = (ActivityManager) getContext().getSystemService(
+                Context.ACTIVITY_SERVICE);
+        mQueryPermits = new Semaphore(
+                am.isLowRamDevice() ? MAX_OUTSTANDING_RECENTS_SVELTE : MAX_OUTSTANDING_RECENTS);
     }
 
     @Override
     public DirectoryResult loadInBackground() {
-        final ExecutorService executor = getExecutor(getContext());
-
         if (mFirstPassLatch == null) {
             // First time through we kick off all the recent tasks, and wait
             // around to see if everyone finishes quickly.
@@ -182,7 +177,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
             mFirstPassLatch = new CountDownLatch(mTasks.size());
             for (RecentTask task : mTasks.values()) {
-                executor.execute(task);
+                ProviderExecutor.forAuthority(task.authority).execute(task);
             }
 
             try {
@@ -224,7 +219,6 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
         if (LOGD) {
             Log.d(TAG, "Found " + cursors.size() + " of " + mTasks.size() + " recent queries done");
-            Log.d(TAG, executor.toString());
         }
 
         final DirectoryResult result = new DirectoryResult();
