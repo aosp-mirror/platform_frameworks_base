@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accesează setările Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite aplicaţiei să configureze tableta Bluetooth locală, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite aplicaţiei să configureze telefonul Bluetooth local, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"permiteți conectarea aplicației prin Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Permite aplicației să se conecteze la dispozitive de la distanță, fără intervenția utilizatorului."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Permite aplicației să se conecteze la dispozitive de la distanță, fără intervenția utilizatorului."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"se conectează şi se deconectează de la WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite aplicaţiei să stabilească dacă o reţea WiMAX este activată şi să vadă informaţiile cu privire la toate reţelele WiMAX conectate."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>
@@ -1112,6 +1115,8 @@
     <string name="capital_on" msgid="1544682755514494298">"DA"</string>
     <string name="capital_off" msgid="6815870386972805832">"NU"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Finalizare acţiune utilizând"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"Se utilizează în mod prestabilit pentru această acţiune."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ștergeţi setările prestabilite din Setări de sistem &gt; Aplicaţii &gt; Descărcate."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Alegeţi o acţiune"</string>
@@ -1628,6 +1633,8 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Anulat"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Eroare la scrierea conținutului"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"necunoscut"</string>
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
+    <skip />
     <string name="print_service_installed_title" msgid="2246317169444081628">"Serviciul <xliff:g id="NAME">%s</xliff:g> a fost instalat"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Atingeți pentru a activa"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introduceți codul PIN de administrator"</string>

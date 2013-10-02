@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-instellingen openen"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Bluetooth-koppeling door app toestaan"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
@@ -1112,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"AAN"</string>
     <string name="capital_off" msgid="6815870386972805832">"UIT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Actie voltooien met"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Een startscherm-app selecteren"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standaard gebruiken voor deze actie."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Standaardinstelling wissen via Systeeminstellingen &gt; Apps &gt; Gedownload."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Een actie selecteren"</string>
@@ -1628,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Geannuleerd"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fout bij schrijven van inhoud"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"onbekend"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Afdrukservice niet ingeschakeld"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g>-service geïnstalleerd"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Tik om in te schakelen"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Pincode voor beheerder opgeven"</string>

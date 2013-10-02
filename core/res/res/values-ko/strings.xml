@@ -132,7 +132,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"태블릿 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"휴대전화 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장공간을 늘리세요."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"네트워크가 모니터링될 수 있음"</string>
-    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자가 모니터링"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자의 모니터링"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>에서 모니터링"</string>
     <string name="me" msgid="6545696007631404292">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"태블릿 옵션"</string>
@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"블루투스 설정에 액세스"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"앱이 로컬 블루투스 태블릿을 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"앱이 로컬 블루투스 휴대전화를 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"애플리케이션에서 블루투스 페어링 허용"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"앱이 사용자 상호작용 없이 원격 기기와 페어링할 수 있도록 허용합니다."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"앱이 사용자 상호작용 없이 원격 기기와 페어링할 수 있도록 허용합니다."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX 연결 및 연결 해제"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"앱이 WiMAX를 사용하도록 설정했는지 여부와 연결된 WiMAX 네트워크에 대한 정보를 결정할 수 있도록 허용합니다."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX 상태 변경"</string>
@@ -1112,6 +1115,8 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"작업을 수행할 때 사용하는 애플리케이션"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"이 작업에 대해 기본값으로 사용"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"시스템 설정 &gt; 앱 &gt; 다운로드로 이동하여 기본 설정을 지웁니다."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"작업 선택"</string>
@@ -1628,6 +1633,8 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"취소됨"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"콘텐츠 작성 중 오류"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"알 수 없음"</string>
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
+    <skip />
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> 서비스 설치됨"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"사용하려면 탭하세요."</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"관리자 PIN 입력"</string>

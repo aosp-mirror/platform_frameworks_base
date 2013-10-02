@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-beállítások elérése"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth-t, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth telefont, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Bluetooth-párosítás engedélyezése az alkalmazás számára"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Lehetővé teszi az alkalmazás számára a távoli eszközök párosítását felhasználói beavatkozás nélkül."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Lehetővé teszi az alkalmazás számára a távoli eszközök párosítását felhasználói beavatkozás nélkül."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-kapcsolódás és a kapcsolat bontása"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Lehetővé teszi az alkalmazás számára, hogy ellenőrizze, a WiMax engedélyezve van-e, valamint hogy információt gyűjtsön a csatlakoztatott WiMax-hálózatokról."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-állapot módosítása"</string>
@@ -1112,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"Be"</string>
     <string name="capital_off" msgid="6815870386972805832">"Ki"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Művelet végrehajtása a következővel:"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"A kezdőalkalmazás kiválasztása"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ez legyen az alapértelmezett program ehhez a művelethez."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Alapértelmezés törlése itt: Rendszerbeállítások &gt; Alkalmazások &gt; Letöltve."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Válasszon egy műveletet"</string>
@@ -1628,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Törölve"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Hiba történt a tartalomírás közben"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"ismeretlen"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"A nyomtatási szolgáltatás nincs bekapcsolva"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"A(z) <xliff:g id="NAME">%s</xliff:g> szolgáltatás telepítve"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Koppintson az engedélyezéshez"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Rendszergazdai PIN kód megadása"</string>
