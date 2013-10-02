@@ -22,15 +22,16 @@
     <style name="Widget.Button.NumPadKey"
             parent="@android:style/Widget.Button">
         <item name="android:singleLine">true</item>
-        <item name="android:padding">6dip</item>
         <item name="android:gravity">left|center_vertical</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textSize">34dp</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#ffffff</item>
-        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">8dp</item>
         <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">6dp</item>
     </style>
     <style name="TextAppearance.NumPadKey"
             parent="@android:style/TextAppearance">
