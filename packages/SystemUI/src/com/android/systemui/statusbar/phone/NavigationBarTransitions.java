@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.ServiceManager;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,9 +34,11 @@ public final class NavigationBarTransitions extends BarTransitions {
     private final IStatusBarService mBarService;
 
     private boolean mLightsOut;
+    private boolean mVertical;
+    private int mRequestedMode;
 
     public NavigationBarTransitions(NavigationBarView view) {
-        super(view);
+        super(view, R.drawable.nav_background);
         mView = view;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -50,7 +51,18 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     public void setVertical(boolean isVertical) {
-        setOrientation(isVertical ? Orientation.RIGHT_LEFT : Orientation.BOTTOM_TOP);
+        mVertical = isVertical;
+        transitionTo(mRequestedMode, false /*animate*/);
+    }
+
+    @Override
+    public void transitionTo(int mode, boolean animate) {
+        mRequestedMode = mode;
+        if (mVertical && mode == MODE_TRANSPARENT) {
+            // fully transparent mode not allowed when vertical
+            mode = MODE_OPAQUE;
+        }
+        super.transitionTo(mode, animate);
     }
 
     @Override
