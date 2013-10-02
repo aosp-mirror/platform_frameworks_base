@@ -2235,11 +2235,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         View scrapView;
 
         scrapView = mRecycler.getTransientStateView(position);
-        if (scrapView != null) {
-            return scrapView;
+        if (scrapView == null) {
+            scrapView = mRecycler.getScrapView(position);
         }
-
-        scrapView = mRecycler.getScrapView(position);
 
         View child;
         if (scrapView != null) {
