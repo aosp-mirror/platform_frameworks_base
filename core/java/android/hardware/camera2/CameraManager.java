@@ -369,10 +369,30 @@ public final class CameraManager {
             }
 
             mDeviceIdList = new ArrayList<String>();
+            CameraMetadataNative info = new CameraMetadataNative();
             for (int i = 0; i < numCameras; ++i) {
                 // Non-removable cameras use integers starting at 0 for their
                 // identifiers
-                mDeviceIdList.add(String.valueOf(i));
+                boolean isDeviceSupported = false;
+                try {
+                    mCameraService.getCameraCharacteristics(i, info);
+                    if (!info.isEmpty()) {
+                        isDeviceSupported = true;
+                    } else {
+                        throw new AssertionError("Expected to get non-empty characteristics");
+                    }
+                } catch(IllegalArgumentException  e) {
+                    // Got a BAD_VALUE from service, meaning that this
+                    // device is not supported.
+                } catch(CameraRuntimeException e) {
+                    throw e.asChecked();
+                } catch(RemoteException e) {
+                    // impossible
+                }
+
+                if (isDeviceSupported) {
+                    mDeviceIdList.add(String.valueOf(i));
+                }
             }
 
         }
