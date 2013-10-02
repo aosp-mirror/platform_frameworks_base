@@ -4456,6 +4456,9 @@
     <!-- Print fail reason: unknown. [CHAR LIMIT=25] -->
     <string name="reason_unknown">unknown</string>
 
+    <!-- Print fail reason: the print service that has to process the print job is not available. [CHAR LIMIT=none] -->
+    <string name="reason_service_unavailable">Print service not enabled</string>
+
     <!-- Title for the notification that a print service was installed. [CHAR LIMIT=50] -->
     <string name="print_service_installed_title"><xliff:g id="name" example="Cloud Print">%s</xliff:g> service installed</string>
     <!-- Message for the notification that a print service was installed. [CHAR LIMIT=50] -->

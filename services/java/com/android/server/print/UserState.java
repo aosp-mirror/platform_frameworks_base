@@ -134,6 +134,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
         if (service != null) {
             service.onPrintJobQueued(printJob);
+        } else {
+            // The service for the job is no longer enabled, so just
+            // fail the job with the appropriate message.
+            mSpooler.setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
+                    mContext.getString(R.string.reason_service_unavailable));
         }
     }
 
@@ -779,7 +784,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             for (int i = 0; i < printJobCount; i++) {
                 PrintJobInfo printJob = printJobs.get(i);
                 mSpooler.setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
-                        mContext.getString(R.string.reason_unknown));
+                        mContext.getString(R.string.reason_service_unavailable));
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
