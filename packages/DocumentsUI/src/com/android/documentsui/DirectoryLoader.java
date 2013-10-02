@@ -79,7 +79,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
     public DirectoryLoader(Context context, int type, RootInfo root, DocumentInfo doc, Uri uri,
             int userSortOrder) {
-        super(context);
+        super(context, ProviderExecutor.forAuthority(root.authority));
         mType = type;
         mRoot = root;
         mDoc = doc;
@@ -157,11 +157,11 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         Log.d(TAG, "userMode=" + userMode + ", userSortOrder=" + mUserSortOrder + " --> mode="
                 + result.mode + ", sortOrder=" + result.sortOrder);
 
+        ContentProviderClient client = null;
         try {
-            result.client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                    resolver, authority);
+            client = DocumentsApplication.acquireUnstableProviderOrThrow(resolver, authority);
 
-            cursor = result.client.query(
+            cursor = client.query(
                     mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
             cursor.registerContentObserver(mObserver);
 
@@ -175,11 +175,12 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
                 cursor = new SortingCursorWrapper(cursor, result.sortOrder);
             }
 
+            result.client = client;
             result.cursor = cursor;
         } catch (Exception e) {
             Log.w(TAG, "Failed to query", e);
             result.exception = e;
-            ContentProviderClient.releaseQuietly(result.client);
+            ContentProviderClient.releaseQuietly(client);
         } finally {
             synchronized (this) {
                 mSignal = null;

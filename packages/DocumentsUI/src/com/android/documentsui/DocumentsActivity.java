@@ -91,6 +91,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class DocumentsActivity extends Activity {
     public static final String TAG = "Documents";
@@ -215,7 +216,7 @@ public class DocumentsActivity extends Activity {
         if (!mState.restored) {
             if (mState.action == ACTION_MANAGE) {
                 final Uri rootUri = getIntent().getData();
-                new RestoreRootTask(rootUri).execute();
+                new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
             } else {
                 new RestoreStackTask().execute();
             }
@@ -782,6 +783,15 @@ public class DocumentsActivity extends Activity {
         return mState.stack.peek();
     }
 
+    public Executor getCurrentExecutor() {
+        final DocumentInfo cwd = getCurrentDirectory();
+        if (cwd != null && cwd.authority != null) {
+            return ProviderExecutor.forAuthority(cwd.authority);
+        } else {
+            return AsyncTask.THREAD_POOL_EXECUTOR;
+        }
+    }
+
     public State getDisplayState() {
         return mState;
     }
@@ -855,7 +865,7 @@ public class DocumentsActivity extends Activity {
         mState.stackTouched = true;
 
         if (!mRoots.isRecentsRoot(root)) {
-            new PickRootTask(root).execute();
+            new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
         } else {
             onCurrentDirectoryChanged(ANIM_SIDE);
         }
@@ -932,7 +942,7 @@ public class DocumentsActivity extends Activity {
             onCurrentDirectoryChanged(ANIM_DOWN);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
-            new ExistingFinishTask(doc.derivedUri).execute();
+            new ExistingFinishTask(doc.derivedUri).executeOnExecutor(getCurrentExecutor());
         } else if (mState.action == ACTION_CREATE) {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
@@ -966,16 +976,16 @@ public class DocumentsActivity extends Activity {
             for (int i = 0; i < size; i++) {
                 uris[i] = docs.get(i).derivedUri;
             }
-            new ExistingFinishTask(uris).execute();
+            new ExistingFinishTask(uris).executeOnExecutor(getCurrentExecutor());
         }
     }
 
     public void onSaveRequested(DocumentInfo replaceTarget) {
-        new ExistingFinishTask(replaceTarget.derivedUri).execute();
+        new ExistingFinishTask(replaceTarget.derivedUri).executeOnExecutor(getCurrentExecutor());
     }
 
     public void onSaveRequested(String mimeType, String displayName) {
-        new CreateFinishTask(mimeType, displayName).execute();
+        new CreateFinishTask(mimeType, displayName).executeOnExecutor(getCurrentExecutor());
     }
 
     private void saveStackBlocking() {
