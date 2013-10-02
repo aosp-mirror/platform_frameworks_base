@@ -884,6 +884,7 @@ public final class ActivityStackSupervisor {
             throws RemoteException {
 
         r.startFreezingScreenLocked(app, 0);
+        if (true) Slog.d(TAG, "realStartActivity: setting app visibility true");
         mWindowManager.setAppVisibility(r.appToken, true);
 
         // schedule launch ticks to collect information about slow apps.
@@ -2299,7 +2300,7 @@ public final class ActivityStackSupervisor {
         final boolean nowVisible = allResumedActivitiesVisible();
         for (int i=0; i<N; i++) {
             ActivityRecord s = mStoppingActivities.get(i);
-            if (localLOGV) Slog.v(TAG, "Stopping " + s + ": nowVisible="
+            if (true || localLOGV) Slog.v(TAG, "Stopping " + s + ": nowVisible="
                     + nowVisible + " waitingVisible=" + s.waitingVisible
                     + " finishing=" + s.finishing);
             if (s.waitingVisible && nowVisible) {

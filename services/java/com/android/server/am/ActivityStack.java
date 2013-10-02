@@ -978,7 +978,7 @@ final class ActivityStack {
      */
     final boolean ensureActivitiesVisibleLocked(ActivityRecord top, ActivityRecord starting,
             String onlyThisProcess, int configChanges, boolean forceHomeShown) {
-        if (DEBUG_VISBILITY) Slog.v(
+        if (true || DEBUG_VISBILITY) Slog.v(
                 TAG, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
 
@@ -1034,7 +1034,7 @@ final class ActivityStack {
                                 r.startFreezingScreenLocked(r.app, configChanges);
                             }
                             if (!r.visible) {
-                                if (DEBUG_VISBILITY) Slog.v(
+                                if (true || DEBUG_VISBILITY) Slog.v(
                                         TAG, "Starting and making visible: " + r);
                                 mWindowManager.setAppVisibility(r.appToken, true);
                             }
@@ -1056,7 +1056,7 @@ final class ActivityStack {
                         if (r.state != ActivityState.RESUMED && r != starting) {
                             // If this activity is paused, tell it
                             // to now show its window.
-                            if (DEBUG_VISBILITY) Slog.v(
+                            if (true || DEBUG_VISBILITY) Slog.v(
                                     TAG, "Making visible and scheduling visibility: " + r);
                             try {
                                 if (mTranslucentActivityWaiting != null) {
@@ -1110,7 +1110,7 @@ final class ActivityStack {
                     // Now for any activities that aren't visible to the user, make
                     // sure they no longer are keeping the screen frozen.
                     if (r.visible) {
-                        if (DEBUG_VISBILITY) Slog.v(TAG, "Making invisible: " + r);
+                        if (true || DEBUG_VISBILITY) Slog.v(TAG, "Making invisible: " + r);
                         r.visible = false;
                         try {
                             mWindowManager.setAppVisibility(r.appToken, false);
@@ -2367,7 +2367,7 @@ final class ActivityStack {
 
         if (mResumedActivity == r) {
             boolean endTask = index <= 0;
-            if (DEBUG_TRANSITION) Slog.v(TAG,
+            if (DEBUG_VISBILITY || DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare close transition: finishing " + r);
             mWindowManager.prepareAppTransition(endTask
                     ? AppTransition.TRANSIT_TASK_CLOSE
