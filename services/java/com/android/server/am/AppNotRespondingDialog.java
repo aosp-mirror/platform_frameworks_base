@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -94,7 +94,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog {
         if (aboveSystem) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         }
-        getWindow().addFlags(FLAG_SYSTEM_ERROR);
+        getWindow().addFlags(PRIVATE_FLAG_SYSTEM_ERROR);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Not Responding: " + app.info.processName);
         attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;

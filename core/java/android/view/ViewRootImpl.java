@@ -82,7 +82,6 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Locale;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -468,7 +467,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (DEBUG_LAYOUT) Log.d(TAG, "WindowLayout in setView:" + attrs);
 
                 if (!compatibilityInfo.supportsScreen()) {
-                    attrs.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                    attrs.flags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                     mLastInCompatMode = true;
                 }
 
@@ -750,7 +749,7 @@ public final class ViewRootImpl implements ViewParent,
             mClientWindowLayoutFlags = attrs.flags;
             // preserve compatible window flag if exists.
             int compatibleWindowFlag =
-                mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                mWindowAttributes.flags & WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
             // transfer over system UI visibility values as they carry current state.
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
@@ -1147,10 +1146,10 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             mLayoutRequested = true;
             if (mLastInCompatMode) {
-                params.flags &= ~WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                params.flags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                 mLastInCompatMode = false;
             } else {
-                params.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                params.flags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                 mLastInCompatMode = true;
             }
         }
