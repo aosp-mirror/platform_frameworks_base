@@ -841,6 +841,15 @@ public interface WindowManager extends ViewManager {
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.
 
+        /**
+         * Flag for a window in local focus mode.
+         * Window in local focus mode can control focus independent of window manager using
+         * {@link Window#setLocalFocus(boolean, boolean)}.
+         * Usually window in this mode will not get touch/key events from window manager, but will
+         * get events only via local injection using {@link Window#injectInputEvent(InputEvent)}.
+         */
+        public static final int FLAG_LOCAL_FOCUS_MODE = 0x10000000;
+
         /** Window flag: Enable touches to slide out of a window into neighboring
          * windows in mid-gesture instead of being captured for the duration of
          * the gesture.
@@ -851,7 +860,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int FLAG_SLIPPERY = 0x04000000;
+        public static final int FLAG_SLIPPERY = 0x20000000;
 
         /**
          * Flag for a window belonging to an activity that responds to {@link KeyEvent#KEYCODE_MENU}
@@ -864,29 +873,8 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int FLAG_NEEDS_MENU_KEY = 0x08000000;
+        public static final int FLAG_NEEDS_MENU_KEY = 0x40000000;
 
-        /**
-         * Flag for a window in local focus mode.
-         * Window in local focus mode can control focus independent of window manager using
-         * {@link Window#setLocalFocus(boolean, boolean)}.
-         * Usually window in this mode will not get touch/key events from window manager, but will
-         * get events only via local injection using {@link Window#injectInputEvent(InputEvent)}.
-         */
-        public static final int FLAG_LOCAL_FOCUS_MODE = 0x10000000;
-
-        /** Window flag: special flag to limit the size of the window to be
-         * original size ([320x480] x density). Used to create window for applications
-         * running under compatibility mode.
-         *
-         * {@hide} */
-        public static final int FLAG_COMPATIBLE_WINDOW = 0x20000000;
-
-        /** Window flag: a special option intended for system dialogs.  When
-         * this flag is set, the window will demand focus unconditionally when
-         * it is created.
-         * {@hide} */
-        public static final int FLAG_SYSTEM_ERROR = 0x40000000;
 
         /**
          * Various behavioral options/flags.  Default is none.
@@ -1044,6 +1032,19 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide} */
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
+
+        /** Window flag: special flag to limit the size of the window to be
+         * original size ([320x480] x density). Used to create window for applications
+         * running under compatibility mode.
+         *
+         * {@hide} */
+        public static final int PRIVATE_FLAG_COMPATIBLE_WINDOW = 0x00000080;
+
+        /** Window flag: a special option intended for system dialogs.  When
+         * this flag is set, the window will demand focus unconditionally when
+         * it is created.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
 
         /**
          * Control flags that are private to the platform.
@@ -1783,7 +1784,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(" rotAnim=");
                 sb.append(rotationAnimation);
             }
-            if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+            if ((flags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
                 sb.append(" compatible=true");
             }
             if (systemUiVisibility != 0) {
