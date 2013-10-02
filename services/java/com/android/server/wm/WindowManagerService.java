@@ -60,6 +60,7 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -5508,9 +5509,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param displayId the Display to take a screenshot of.
      * @param width the width of the target bitmap
      * @param height the height of the target bitmap
+     * @param force565 if true the returned bitmap will be RGB_565, otherwise it
+     *                 will be the same config as the surface
      */
     @Override
-    public Bitmap screenshotApplications(IBinder appToken, int displayId, int width, int height) {
+    public Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
+            int height, boolean force565) {
         if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
@@ -5713,7 +5717,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return null;
         }
 
-        Bitmap bm = Bitmap.createBitmap(width, height, rawss.getConfig());
+        Bitmap bm = Bitmap.createBitmap(width, height, force565 ? Config.RGB_565 : rawss.getConfig());
         frame.scale(scale);
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
