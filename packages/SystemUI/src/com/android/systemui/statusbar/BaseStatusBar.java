@@ -123,7 +123,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mCurrentUserId = 0;
 
-    protected int mLayoutDirection;
+    protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
     protected boolean mUseHeadsUp = false;
 
@@ -299,8 +299,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
-
-        mLocale = mContext.getResources().getConfiguration().locale;
     }
 
     public void userSwitched(int newUserId) {
@@ -320,11 +318,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        final Locale newLocale = mContext.getResources().getConfiguration().locale;
-        if (! newLocale.equals(mLocale)) {
-            mLocale = newLocale;
-            mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
-            refreshLayout(mLayoutDirection);
+        final Locale locale = mContext.getResources().getConfiguration().locale;
+        final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
+        if (! locale.equals(mLocale) || ld != mLayoutDirection) {
+            if (DEBUG) {
+                Log.v(TAG, String.format(
+                        "config changed locale/LD: %s (%d) -> %s (%d)", mLocale, mLayoutDirection,
+                        locale, ld));
+            }
+            mLocale = locale;
+            mLayoutDirection = ld;
+            refreshLayout(ld);
         }
     }
 
