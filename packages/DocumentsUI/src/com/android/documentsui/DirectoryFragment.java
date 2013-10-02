@@ -27,6 +27,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -113,6 +114,7 @@ public class DirectoryFragment extends Fragment {
 
     private boolean mHideGridTitles = false;
 
+    private boolean mSvelteRecents;
     private Point mThumbSize;
 
     private DocumentsAdapter mAdapter;
@@ -204,6 +206,19 @@ public class DirectoryFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Cancel any outstanding thumbnail requests
+        final ViewGroup target = (mListView.getAdapter() != null) ? mListView : mGridView;
+        final int count = target.getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View view = target.getChildAt(i);
+            mRecycleListener.onMovedToScrapHeap(view);
+        }
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -224,6 +239,10 @@ public class DirectoryFragment extends Fragment {
         } else {
             mHideGridTitles = (doc != null) && doc.isGridTitlesHidden();
         }
+
+        final ActivityManager am = (ActivityManager) context.getSystemService(
+                Context.ACTIVITY_SERVICE);
+        mSvelteRecents = am.isLowRamDevice() && (mType == TYPE_RECENT_OPEN);
 
         mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
@@ -260,7 +279,7 @@ public class DirectoryFragment extends Fragment {
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
                 if (!isAdded()) return;
 
-                mAdapter.swapResult(result.cursor, result.exception);
+                mAdapter.swapResult(result);
 
                 // Push latest state up to UI
                 // TODO: if mode change was racing with us, don't overwrite it
@@ -286,7 +305,7 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoaderReset(Loader<DirectoryResult> loader) {
-                mAdapter.swapResult(null, null);
+                mAdapter.swapResult(null);
             }
         };
 
@@ -654,13 +673,13 @@ public class DirectoryFragment extends Fragment {
 
         private List<Footer> mFooters = Lists.newArrayList();
 
-        public void swapResult(Cursor cursor, Exception e) {
-            mCursor = cursor;
-            mCursorCount = cursor != null ? cursor.getCount() : 0;
+        public void swapResult(DirectoryResult result) {
+            mCursor = result != null ? result.cursor : null;
+            mCursorCount = mCursor != null ? mCursor.getCount() : 0;
 
             mFooters.clear();
 
-            final Bundle extras = cursor != null ? cursor.getExtras() : null;
+            final Bundle extras = mCursor != null ? mCursor.getExtras() : null;
             if (extras != null) {
                 final String info = extras.getString(DocumentsContract.EXTRA_INFO);
                 if (info != null) {
@@ -675,7 +694,7 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            if (e != null) {
+            if (result != null && result.exception != null) {
                 mFooters.add(new MessageFooter(
                         3, R.drawable.ic_dialog_alert, getString(R.string.query_error)));
             }
@@ -776,7 +795,7 @@ public class DirectoryFragment extends Fragment {
             final boolean supportsThumbnail = (docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
             final boolean allowThumbnail = (state.derivedMode == MODE_GRID)
                     || MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, docMimeType);
-            final boolean showThumbnail = supportsThumbnail && allowThumbnail;
+            final boolean showThumbnail = supportsThumbnail && allowThumbnail && !mSvelteRecents;
 
             boolean cacheHit = false;
             if (showThumbnail) {
@@ -790,7 +809,7 @@ public class DirectoryFragment extends Fragment {
                     final ThumbnailAsyncTask task = new ThumbnailAsyncTask(
                             uri, iconMime, iconThumb, mThumbSize);
                     iconThumb.setTag(task);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    task.executeOnExecutor(ProviderExecutor.forAuthority(docAuthority));
                 }
             }
 
@@ -983,6 +1002,8 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         protected Bitmap doInBackground(Uri... params) {
+            if (isCancelled()) return null;
+
             final Context context = mIconThumb.getContext();
             final ContentResolver resolver = context.getContentResolver();
 

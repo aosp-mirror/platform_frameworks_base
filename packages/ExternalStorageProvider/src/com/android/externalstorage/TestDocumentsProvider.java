@@ -66,6 +66,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     private static final boolean CHILD_WEDGE = false;
     private static final boolean CHILD_CRASH = false;
 
+    private static final boolean THUMB_HUNDREDS = false;
     private static final boolean THUMB_WEDGE = false;
     private static final boolean THUMB_CRASH = false;
 
@@ -225,6 +226,12 @@ public class TestDocumentsProvider extends DocumentsProvider {
         includeFile(result, "localfile3", 0);
         includeFile(result, "localfile4", 0);
 
+        if (THUMB_HUNDREDS) {
+            for (int i = 0; i < 256; i++) {
+                includeFile(result, "i maded u an picshure", Document.FLAG_SUPPORTS_THUMBNAIL);
+            }
+        }
+
         synchronized (this) {
             // Try picking up an existing network fetch
             CloudTask task = mTask != null ? mTask.get() : null;
@@ -292,7 +299,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     public AssetFileDescriptor openDocumentThumbnail(
             String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
 
-        if (THUMB_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
+        if (THUMB_WEDGE) wedgeUntilCanceled(signal);
         if (THUMB_CRASH) System.exit(12);
 
         final Bitmap bitmap = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
@@ -330,6 +337,18 @@ public class TestDocumentsProvider extends DocumentsProvider {
     @Override
     public boolean onCreate() {
         return true;
+    }
+
+    private static void wedgeUntilCanceled(CancellationSignal signal) {
+        if (signal != null) {
+            while (true) {
+                signal.throwIfCanceled();
+                SystemClock.sleep(500);
+            }
+        } else {
+            Log.w(TAG, "WEDGING WITHOUT A CANCELLATIONSIGNAL");
+            SystemClock.sleep(Integer.MAX_VALUE);
+        }
     }
 
     private static void includeFile(MatrixCursor result, String docId, int flags) {
