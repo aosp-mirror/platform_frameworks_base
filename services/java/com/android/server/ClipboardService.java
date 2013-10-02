@@ -122,7 +122,9 @@ public class ClipboardService extends IClipboard.Stub {
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {
-            Slog.w("clipboard", "Exception: ", e);
+            if (!(e instanceof SecurityException)) {
+                Slog.wtf("clipboard", "Exception: ", e);
+            }
             throw e;
         }
         

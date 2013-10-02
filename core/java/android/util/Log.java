@@ -84,14 +84,14 @@ public final class Log {
     public static final int ASSERT = 7;
 
     /**
-     * Exception class used to capture a stack trace in {@link #wtf()}.
+     * Exception class used to capture a stack trace in {@link #wtf}.
      */
     private static class TerribleFailure extends Exception {
         TerribleFailure(String msg, Throwable cause) { super(msg, cause); }
     }
 
     /**
-     * Interface to handle terrible failures from {@link #wtf()}.
+     * Interface to handle terrible failures from {@link #wtf}.
      *
      * @hide
      */
@@ -257,6 +257,15 @@ public final class Log {
     }
 
     /**
+     * Like {@link #wtf(String, String)}, but also writes to the log the full
+     * call stack.
+     * @hide
+     */
+    public static int wtfStack(String tag, String msg) {
+        return wtfStack(LOG_ID_MAIN, tag, msg);
+    }
+
+    /**
      * What a Terrible Failure: Report an exception that should never happen.
      * Similar to {@link #wtf(String, String)}, with an exception to log.
      * @param tag Used to identify the source of a log message.
@@ -274,8 +283,18 @@ public final class Log {
      * @param tr An exception to log.  May be null.
      */
     public static int wtf(String tag, String msg, Throwable tr) {
+        return wtf(LOG_ID_MAIN, tag, msg, tr);
+    }
+
+    static int wtfStack(int logId, String tag, String msg) {
+        TerribleFailure here = new TerribleFailure("here", null);
+        here.fillInStackTrace();
+        return wtf(logId, tag, msg, here);
+    }
+
+    static int wtf(int logId, String tag, String msg, Throwable tr) {
         TerribleFailure what = new TerribleFailure(msg, tr);
-        int bytes = println_native(LOG_ID_MAIN, ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+        int bytes = println_native(logId, ASSERT, tag, msg + '\n' + getStackTraceString(tr));
         sWtfHandler.onTerribleFailure(tag, what);
         return bytes;
     }
