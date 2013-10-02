@@ -1621,7 +1621,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
             if (!compatInfo.supportsScreen()) {
-                win.addFlags(WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW);
+                win.addFlags(WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW);
             }
 
             win.setDefaultIcon(icon);
