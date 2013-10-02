@@ -41,6 +41,13 @@ oneway interface IRemoteControlClient
     void onInformationRequested(int generationId, int infoFlags);
 
     /**
+     * Notifies a remote control client that information for the given generation ID is
+     * requested for the given IRemoteControlDisplay alone.
+     * @param rcd the display to which current info should be sent
+     */
+    void informationRequestForDisplay(IRemoteControlDisplay rcd, int w, int h);
+
+    /**
      * Sets the generation counter of the current client that is displayed on the remote control.
      */
     void setCurrentClientGenerationId(int clientGeneration);
