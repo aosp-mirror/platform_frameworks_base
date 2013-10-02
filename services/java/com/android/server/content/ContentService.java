@@ -144,7 +144,7 @@ public final class ContentService extends IContentService.Stub {
             // The content service only throws security exceptions, so let's
             // log all others.
             if (!(e instanceof SecurityException)) {
-                Log.e(TAG, "Content Service Crash", e);
+                Slog.wtf(TAG, "Content Service Crash", e);
             }
             throw e;
         }

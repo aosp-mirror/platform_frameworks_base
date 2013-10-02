@@ -126,7 +126,7 @@ final class Session extends IWindowSession.Stub
         } catch (RuntimeException e) {
             // Log all 'real' exceptions thrown to the caller
             if (!(e instanceof SecurityException)) {
-                Slog.e(WindowManagerService.TAG, "Window Session Crash", e);
+                Slog.wtf(WindowManagerService.TAG, "Window Session Crash", e);
             }
             throw e;
         }

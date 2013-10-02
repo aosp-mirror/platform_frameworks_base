@@ -130,9 +130,9 @@ public final class ActiveServices {
             = new ArrayList<ServiceRecord>();
 
     /**
-     * List of services that are in the process of being stopped.
+     * List of services that are in the process of being destroyed.
      */
-    final ArrayList<ServiceRecord> mStoppingServices
+    final ArrayList<ServiceRecord> mDestroyingServices
             = new ArrayList<ServiceRecord>();
 
     static final class DelayingProcess extends ArrayList<ServiceRecord> {
@@ -788,7 +788,7 @@ public final class ActiveServices {
                     }
                 }
 
-                serviceDoneExecutingLocked(r, mStoppingServices.contains(r));
+                serviceDoneExecutingLocked(r, mDestroyingServices.contains(r), false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -834,9 +834,9 @@ public final class ActiveServices {
                         + " at " + b + ": apps="
                         + (b != null ? b.apps.size() : 0));
 
-                boolean inStopping = mStoppingServices.contains(r);
+                boolean inDestroying = mDestroyingServices.contains(r);
                 if (b != null) {
-                    if (b.apps.size() > 0 && !inStopping) {
+                    if (b.apps.size() > 0 && !inDestroying) {
                         // Applications have already bound since the last
                         // unbind, so just rebind right here.
                         boolean inFg = false;
@@ -856,7 +856,7 @@ public final class ActiveServices {
                     }
                 }
 
-                serviceDoneExecutingLocked(r, inStopping);
+                serviceDoneExecutingLocked(r, inDestroying, false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1419,14 +1419,10 @@ public final class ActiveServices {
         }
     }
 
-    private final void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
-            boolean hasConn) {
-        //Slog.i(TAG, "Bring down service:");
-        //r.dump("  ");
-
+    private final boolean isServiceNeeded(ServiceRecord r, boolean knowConn, boolean hasConn) {
         // Are we still explicitly being asked to run?
         if (r.startRequested) {
-            return;
+            return true;
         }
 
         // Is someone still bound to us keepign us running?
@@ -1434,6 +1430,18 @@ public final class ActiveServices {
             hasConn = r.hasAutoCreateConnections();
         }
         if (hasConn) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private final void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
+            boolean hasConn) {
+        //Slog.i(TAG, "Bring down service:");
+        //r.dump("  ");
+
+        if (isServiceNeeded(r, knowConn, hasConn)) {
             return;
         }
 
@@ -1484,7 +1492,7 @@ public final class ActiveServices {
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when unbinding service "
                                 + r.shortName, e);
-                        serviceDoneExecutingLocked(r, true);
+                        serviceDoneExecutingLocked(r, true, true);
                     }
                 }
             }
@@ -1527,14 +1535,14 @@ public final class ActiveServices {
             r.app.services.remove(r);
             if (r.app.thread != null) {
                 try {
-                    bumpServiceExecutingLocked(r, false, "stop");
-                    mStoppingServices.add(r);
+                    bumpServiceExecutingLocked(r, false, "destroy");
+                    mDestroyingServices.add(r);
                     mAm.updateOomAdjLocked(r.app);
                     r.app.thread.scheduleStopService(r);
                 } catch (Exception e) {
-                    Slog.w(TAG, "Exception when stopping service "
+                    Slog.w(TAG, "Exception when destroying service "
                             + r.shortName, e);
-                    serviceDoneExecutingLocked(r, true);
+                    serviceDoneExecutingLocked(r, true, true);
                 }
                 updateServiceForegroundLocked(r.app, false);
             } else {
@@ -1560,7 +1568,7 @@ public final class ActiveServices {
             r.tracker.setStarted(false, memFactor, now);
             r.tracker.setBound(false, memFactor, now);
             if (r.executeNesting == 0) {
-                r.tracker.makeInactive();
+                r.tracker.clearCurrentOwner(r);
                 r.tracker = null;
             }
         }
@@ -1619,7 +1627,7 @@ public final class ActiveServices {
                     s.app.thread.scheduleUnbindService(s, b.intent.intent.getIntent());
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when unbinding service " + s.shortName, e);
-                    serviceDoneExecutingLocked(s, true);
+                    serviceDoneExecutingLocked(s, true, true);
                 }
             }
 
@@ -1637,7 +1645,7 @@ public final class ActiveServices {
     }
 
     void serviceDoneExecutingLocked(ServiceRecord r, int type, int startId, int res) {
-        boolean inStopping = mStoppingServices.contains(r);
+        boolean inDestroying = mDestroyingServices.contains(r);
         if (r != null) {
             if (type == 1) {
                 // This is a call from a service start...  take care of
@@ -1690,7 +1698,7 @@ public final class ActiveServices {
                 }
             }
             final long origId = Binder.clearCallingIdentity();
-            serviceDoneExecutingLocked(r, inStopping);
+            serviceDoneExecutingLocked(r, inDestroying, inDestroying);
             Binder.restoreCallingIdentity(origId);
         } else {
             Slog.w(TAG, "Done executing unknown service from pid "
@@ -1698,10 +1706,11 @@ public final class ActiveServices {
         }
     }
 
-    private void serviceDoneExecutingLocked(ServiceRecord r, boolean inStopping) {
+    private void serviceDoneExecutingLocked(ServiceRecord r, boolean inDestroying,
+            boolean finishing) {
         if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
                 + ": nesting=" + r.executeNesting
-                + ", inStopping=" + inStopping + ", app=" + r.app);
+                + ", inDestroying=" + inDestroying + ", app=" + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, "<<< DONE EXECUTING " + r.shortName);
         r.executeNesting--;
         if (r.executeNesting <= 0) {
@@ -1723,10 +1732,10 @@ public final class ActiveServices {
                         }
                     }
                 }
-                if (inStopping) {
+                if (inDestroying) {
                     if (DEBUG_SERVICE) Slog.v(TAG,
-                            "doneExecuting remove stopping " + r);
-                    mStoppingServices.remove(r);
+                            "doneExecuting remove destroying " + r);
+                    mDestroyingServices.remove(r);
                     r.bindings.clear();
                 }
                 mAm.updateOomAdjLocked(r.app);
@@ -1735,8 +1744,8 @@ public final class ActiveServices {
             if (r.tracker != null) {
                 r.tracker.setExecuting(false, mAm.mProcessStats.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
-                if (inStopping) {
-                    r.tracker.makeInactive();
+                if (finishing) {
+                    r.tracker.clearCurrentOwner(r);
                     r.tracker = null;
                 }
             }
@@ -1931,12 +1940,9 @@ public final class ActiveServices {
             sr.app = null;
             sr.isolatedProc = null;
             sr.executeNesting = 0;
-            if (sr.tracker != null) {
-                sr.tracker.setExecuting(false, mAm.mProcessStats.getMemFactorLocked(),
-                        SystemClock.uptimeMillis());
-            }
-            if (mStoppingServices.remove(sr)) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
+            sr.forceClearTracker();
+            if (mDestroyingServices.remove(sr)) {
+                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove destroying " + sr);
             }
 
             final int numClients = sr.bindings.size();
@@ -1984,13 +1990,14 @@ public final class ActiveServices {
         }
 
         // Make sure we have no more records on the stopping list.
-        int i = mStoppingServices.size();
+        int i = mDestroyingServices.size();
         while (i > 0) {
             i--;
-            ServiceRecord sr = mStoppingServices.get(i);
+            ServiceRecord sr = mDestroyingServices.get(i);
             if (sr.app == app) {
-                mStoppingServices.remove(i);
-                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
+                sr.forceClearTracker();
+                mDestroyingServices.remove(i);
+                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove destroying " + sr);
             }
         }
 
@@ -2340,10 +2347,10 @@ public final class ActiveServices {
             needSep = true;
         }
 
-        if (mStoppingServices.size() > 0) {
+        if (mDestroyingServices.size() > 0) {
             boolean printed = false;
-            for (int i=0; i<mStoppingServices.size(); i++) {
-                ServiceRecord r = mStoppingServices.get(i);
+            for (int i=0; i< mDestroyingServices.size(); i++) {
+                ServiceRecord r = mDestroyingServices.get(i);
                 if (!matcher.match(r, r.name)) {
                     continue;
                 }
@@ -2354,10 +2361,10 @@ public final class ActiveServices {
                 if (!printed) {
                     if (needSep) pw.println();
                     needSep = true;
-                    pw.println("  Stopping services:");
+                    pw.println("  Destroying services:");
                     printed = true;
                 }
-                pw.print("  * Stopping "); pw.println(r);
+                pw.print("  * Destroy "); pw.println(r);
                 r.dump(pw, "    ");
             }
             needSep = true;
