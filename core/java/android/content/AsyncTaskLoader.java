@@ -26,6 +26,7 @@ import android.util.TimeUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 
 /**
  * Abstract Loader that provides an {@link AsyncTask} to do the work.  See
@@ -123,6 +124,8 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         }
     }
 
+    private final Executor mExecutor;
+
     volatile LoadTask mTask;
     volatile LoadTask mCancellingTask;
 
@@ -131,7 +134,13 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     Handler mHandler;
 
     public AsyncTaskLoader(Context context) {
+        this(context, AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    /** {@hide} */
+    public AsyncTaskLoader(Context context, Executor executor) {
         super(context);
+        mExecutor = executor;
     }
 
     /**
@@ -223,7 +232,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
                 }
             }
             if (DEBUG) Slog.v(TAG, "Executing: " + mTask);
-            mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+            mTask.executeOnExecutor(mExecutor, (Void[]) null);
         }
     }
 
