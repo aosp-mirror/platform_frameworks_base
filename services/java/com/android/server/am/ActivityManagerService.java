@@ -7827,6 +7827,31 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public void appNotRespondingViaProvider(IBinder connection) {
+        enforceCallingPermission(
+                android.Manifest.permission.REMOVE_TASKS, "appNotRespondingViaProvider()");
+
+        final ContentProviderConnection conn = (ContentProviderConnection) connection;
+        if (conn == null) {
+            Slog.w(TAG, "ContentProviderConnection is null");
+            return;
+        }
+
+        final ProcessRecord host = conn.provider.proc;
+        if (host == null) {
+            Slog.w(TAG, "Failed to find hosting ProcessRecord");
+            return;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            appNotResponding(host, null, null, false, "ContentProvider not responding");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     public static final void installSystemProviders() {
         List<ProviderInfo> providers;
         synchronized (mSelf) {

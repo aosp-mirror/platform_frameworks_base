@@ -19,11 +19,12 @@ package com.android.documentsui;
 import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
 
+import android.app.ActivityManager;
 import android.content.AsyncTaskLoader;
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -56,9 +57,8 @@ import java.util.concurrent.TimeUnit;
 public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     private static final boolean LOGD = true;
 
-    // TODO: adjust for svelte devices
-    // TODO: add support for oneway queries to avoid wedging loader
-    private static final int MAX_OUTSTANDING_RECENTS = 2;
+    private static final int MAX_OUTSTANDING_RECENTS = 4;
+    private static final int MAX_OUTSTANDING_RECENTS_SVELTE = 2;
 
     /**
      * Time to wait for first pass to complete before returning partial results.
@@ -74,20 +74,29 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     /** MIME types that should always be excluded from recents. */
     private static final String[] RECENT_REJECT_MIMES = new String[] { Document.MIME_TYPE_DIR };
 
-    private static final ExecutorService sExecutor = buildExecutor();
+    private static ExecutorService sExecutor;
 
     /**
      * Create a bounded thread pool for fetching recents; it creates threads as
      * needed (up to maximum) and reclaims them when finished.
      */
-    private static ExecutorService buildExecutor() {
-        // Create a bounded thread pool for fetching recents; it creates
-        // threads as needed (up to maximum) and reclaims them when finished.
-        final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                MAX_OUTSTANDING_RECENTS, MAX_OUTSTANDING_RECENTS, 10, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
-        executor.allowCoreThreadTimeOut(true);
-        return executor;
+    private synchronized static ExecutorService getExecutor(Context context) {
+        if (sExecutor == null) {
+            final ActivityManager am = (ActivityManager) context.getSystemService(
+                    Context.ACTIVITY_SERVICE);
+            final int maxOutstanding = am.isLowRamDevice() ? MAX_OUTSTANDING_RECENTS_SVELTE
+                    : MAX_OUTSTANDING_RECENTS;
+
+            // Create a bounded thread pool for fetching recents; it creates
+            // threads as needed (up to maximum) and reclaims them when finished.
+            final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                    maxOutstanding, maxOutstanding, 10, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<Runnable>());
+            executor.allowCoreThreadTimeOut(true);
+            sExecutor = executor;
+        }
+
+        return sExecutor;
     }
 
     private final RootsCache mRoots;
@@ -120,25 +129,26 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         public void run() {
             if (isCancelled()) return;
 
-            final ContentResolver resolver = getContext().getContentResolver();
-            final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
-                    authority);
+            ContentProviderClient client = null;
             try {
+                client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                        getContext().getContentResolver(), authority);
+
                 final Uri uri = DocumentsContract.buildRecentDocumentsUri(authority, rootId);
                 final Cursor cursor = client.query(
                         uri, null, null, null, DirectoryLoader.getQuerySortOrder(mSortOrder));
                 mWithRoot = new RootCursorWrapper(authority, rootId, cursor, MAX_DOCS_FROM_ROOT);
-                set(mWithRoot);
-
-                mFirstPassLatch.countDown();
-                if (mFirstPassDone) {
-                    onContentChanged();
-                }
-
             } catch (Exception e) {
-                setException(e);
+                Log.w(TAG, "Failed to load " + authority + ", " + rootId, e);
             } finally {
-                ContentProviderClient.closeQuietly(client);
+                ContentProviderClient.releaseQuietly(client);
+            }
+
+            set(mWithRoot);
+
+            mFirstPassLatch.countDown();
+            if (mFirstPassDone) {
+                onContentChanged();
             }
         }
 
@@ -156,6 +166,8 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
     @Override
     public DirectoryResult loadInBackground() {
+        final ExecutorService executor = getExecutor(getContext());
+
         if (mFirstPassLatch == null) {
             // First time through we kick off all the recent tasks, and wait
             // around to see if everyone finishes quickly.
@@ -170,7 +182,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
             mFirstPassLatch = new CountDownLatch(mTasks.size());
             for (RecentTask task : mTasks.values()) {
-                sExecutor.execute(task);
+                executor.execute(task);
             }
 
             try {
@@ -184,11 +196,14 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         final long rejectBefore = System.currentTimeMillis() - REJECT_OLDER_THAN;
 
         // Collect all finished tasks
+        boolean allDone = true;
         List<Cursor> cursors = Lists.newArrayList();
         for (RecentTask task : mTasks.values()) {
             if (task.isDone()) {
                 try {
                     final Cursor cursor = task.get();
+                    if (cursor == null) continue;
+
                     final FilteringCursorWrapper filtered = new FilteringCursorWrapper(
                             cursor, mState.acceptMimes, RECENT_REJECT_MIMES, rejectBefore) {
                         @Override
@@ -200,14 +215,16 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } catch (ExecutionException e) {
-                    Log.w(TAG, "Failed to load " + task.authority + ", " + task.rootId, e);
+                    // We already logged on other side
                 }
+            } else {
+                allDone = false;
             }
         }
 
         if (LOGD) {
             Log.d(TAG, "Found " + cursors.size() + " of " + mTasks.size() + " recent queries done");
-            Log.d(TAG, sExecutor.toString());
+            Log.d(TAG, executor.toString());
         }
 
         final DirectoryResult result = new DirectoryResult();
@@ -215,11 +232,18 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
 
         // Hint to UI if we're still loading
         final Bundle extras = new Bundle();
-        if (cursors.size() != mTasks.size()) {
+        if (!allDone) {
             extras.putBoolean(DocumentsContract.EXTRA_LOADING, true);
         }
 
-        final MergeCursor merged = new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
+        final Cursor merged;
+        if (cursors.size() > 0) {
+            merged = new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
+        } else {
+            // Return something when nobody is ready
+            merged = new MatrixCursor(new String[0]);
+        }
+
         final SortingCursorWrapper sorted = new SortingCursorWrapper(merged, result.sortOrder) {
             @Override
             public Bundle getExtras() {

@@ -2,6 +2,7 @@
         package="com.android.documentsui">
 
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
+    <uses-permission android:name="android.permission.REMOVE_TASKS" />
 
     <application
         android:name=".DocumentsApplication"

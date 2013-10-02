@@ -16,10 +16,13 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.TAG;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,14 +32,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.documentsui.model.DocumentInfo;
-
-import java.io.FileNotFoundException;
 
 /**
  * Dialog to create a new directory.
@@ -88,12 +90,19 @@ public class CreateDirectoryFragment extends DialogFragment {
             final ContentResolver resolver = activity.getContentResolver();
 
             final DocumentInfo cwd = activity.getCurrentDirectory();
-            final Uri childUri = DocumentsContract.createDocument(
-                    resolver, cwd.derivedUri, Document.MIME_TYPE_DIR, mDisplayName);
+
+            ContentProviderClient client = null;
             try {
+                client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                        resolver, cwd.derivedUri.getAuthority());
+                final Uri childUri = DocumentsContract.createDocument(
+                        client, cwd.derivedUri, Document.MIME_TYPE_DIR, mDisplayName);
                 return DocumentInfo.fromUri(resolver, childUri);
-            } catch (FileNotFoundException e) {
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to create directory", e);
                 return null;
+            } finally {
+                ContentProviderClient.releaseQuietly(client);
             }
         }
 

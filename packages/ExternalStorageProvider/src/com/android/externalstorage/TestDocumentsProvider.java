@@ -54,11 +54,20 @@ import java.lang.ref.WeakReference;
 public class TestDocumentsProvider extends DocumentsProvider {
     private static final String TAG = "TestDocuments";
 
-    private static final boolean LAG_ROOTS = false;
-    private static final boolean CRASH_ROOTS = false;
-    private static final boolean REFRESH_ROOTS = false;
+    private static final boolean ROOTS_WEDGE = false;
+    private static final boolean ROOTS_LAG = false;
+    private static final boolean ROOTS_CRASH = false;
+    private static final boolean ROOTS_REFRESH = false;
 
-    private static final boolean CRASH_DOCUMENT = false;
+    private static final boolean DOCUMENT_CRASH = false;
+
+    private static final boolean RECENT_WEDGE = false;
+
+    private static final boolean CHILD_WEDGE = false;
+    private static final boolean CHILD_CRASH = false;
+
+    private static final boolean THUMB_WEDGE = false;
+    private static final boolean THUMB_CRASH = false;
 
     private static final String MY_ROOT_ID = "myRoot";
     private static final String MY_DOC_ID = "myDoc";
@@ -95,10 +104,11 @@ public class TestDocumentsProvider extends DocumentsProvider {
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
         Log.d(TAG, "Someone asked for our roots!");
 
-        if (LAG_ROOTS) SystemClock.sleep(3000);
-        if (CRASH_ROOTS) System.exit(12);
+        if (ROOTS_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
+        if (ROOTS_LAG) SystemClock.sleep(3000);
+        if (ROOTS_CRASH) System.exit(12);
 
-        if (REFRESH_ROOTS) {
+        if (ROOTS_REFRESH) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -126,7 +136,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
-        if (CRASH_DOCUMENT) System.exit(12);
+        if (DOCUMENT_CRASH) System.exit(12);
 
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         includeFile(result, documentId, 0);
@@ -198,6 +208,9 @@ public class TestDocumentsProvider extends DocumentsProvider {
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
 
+        if (CHILD_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
+        if (CHILD_CRASH) System.exit(12);
+
         final ContentResolver resolver = getContext().getContentResolver();
         final Uri notifyUri = DocumentsContract.buildDocumentUri(
                 "com.example.documents", parentDocumentId);
@@ -257,6 +270,9 @@ public class TestDocumentsProvider extends DocumentsProvider {
     @Override
     public Cursor queryRecentDocuments(String rootId, String[] projection)
             throws FileNotFoundException {
+
+        if (RECENT_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
+
         // Pretend to take a super long time to respond
         SystemClock.sleep(3000);
 
@@ -275,6 +291,10 @@ public class TestDocumentsProvider extends DocumentsProvider {
     @Override
     public AssetFileDescriptor openDocumentThumbnail(
             String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
+
+        if (THUMB_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
+        if (THUMB_CRASH) System.exit(12);
+
         final Bitmap bitmap = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(bitmap);
         final Paint paint = new Paint();
