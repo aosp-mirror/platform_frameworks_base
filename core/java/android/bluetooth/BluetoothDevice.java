@@ -1172,33 +1172,6 @@ public final class BluetoothDevice implements Parcelable {
         return new BluetoothSocket(BluetoothSocket.TYPE_SCO, -1, true, true, this, -1, null);
     }
 
-
-    /**
-     * Construct a L2CAP socket ready to start an outgoing connection.
-     * Call #connect on the returned #BluetoothSocket to begin the connection.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     *
-     * @param secure    select whether security will be required
-     * @param fixedChannel    select if this will be a "fixed channel" L2CAP connection
-     *                        or a PSM-based connection
-     * @param channel    fixed channel or PSM to connect to
-     * @return a L2CAP BluetoothSocket
-     * @throws IOException on error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     * @hide
-     */
-    public BluetoothSocket createL2CapSocket(boolean secure, boolean fixedChannel, int channel)
-            throws IOException {
-
-        if (fixedChannel) {
-            channel |= BluetoothSocket.PORT_MASK_FIXED_CHAN;
-        }
-
-        return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP, -1, secure, secure, this,
-                channel, null);
-    }
-
-
     /**
      * Check that a pin is valid and convert to byte array.
      *

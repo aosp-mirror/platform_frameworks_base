@@ -923,42 +923,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Create a listening, L2CAP Bluetooth socket.
-     * <p>A remote device connecting to this socket will optionally be
-     * authenticated and communication on this socket will optionally be
-     * encrypted.
-     * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
-     * connections from a listening {@link BluetoothServerSocket}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * @param secure whether security and authentication are required
-     * @param fixedChannel whether we're looking for a PSM-based connection or a fixed channel
-     * @param channel L2CAP PSM or channel to use
-     * @return a listening L2CAP BluetoothServerSocket
-     * @throws IOException on error, for example Bluetooth not available, or
-     *                     insufficient permissions, or channel in use.
-     * @hide
-     */
-    public BluetoothServerSocket listenUsingL2CapOn(boolean secure, boolean fixedChannel,
-            int channel) throws IOException {
-        BluetoothServerSocket socket;
-
-        if (fixedChannel) {
-            channel |= BluetoothSocket.PORT_MASK_FIXED_CHAN;
-        }
-
-        socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_L2CAP, secure, secure, channel);
-        int errno = socket.mSocket.bindListen();
-        if (errno != 0) {
-            //TODO(BT): Throw the same exception error code
-            // that the previous code was using.
-            //socket.mSocket.throwErrnoNative(errno);
-            throw new IOException("Error: " + errno);
-        }
-        return socket;
-    }
-
-    /**
      * Create a listening, secure RFCOMM Bluetooth socket.
      * <p>A remote device connecting to this socket will be authenticated and
      * communication on this socket will be encrypted.
