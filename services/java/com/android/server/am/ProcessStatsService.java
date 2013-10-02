@@ -61,7 +61,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     static final String STATE_FILE_SUFFIX = ".bin"; // Suffix to use for state filenames.
     static final String STATE_FILE_CHECKIN_SUFFIX = ".ci"; // State files that have checked in.
     static long WRITE_PERIOD = 30*60*1000;      // Write file every 30 minutes or so.
-    static long COMMIT_PERIOD = 3*60*60*1000;  // Commit current stats every 3 hours.
 
     final ActivityManagerService mAm;
     final File mBaseDir;
@@ -160,7 +159,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     public boolean shouldWriteNowLocked(long now) {
         if (now > (mLastWriteTime+WRITE_PERIOD)) {
             if (SystemClock.elapsedRealtime()
-                    > (mProcessStats.mTimePeriodStartRealtime+COMMIT_PERIOD)) {
+                    > (mProcessStats.mTimePeriodStartRealtime+ProcessStats.COMMIT_PERIOD)) {
                 mCommitPending = true;
             }
             return true;
@@ -358,7 +357,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             boolean sepScreenStates, int[] screenStates, boolean sepMemStates, int[] memStates,
             boolean sepProcStates, int[] procStates, long now, String reqPackage) {
         ArrayList<ProcessStats.ProcessState> procs = mProcessStats.collectProcessesLocked(
-                screenStates, memStates, procStates, now, reqPackage);
+                screenStates, memStates, procStates, procStates, now, reqPackage);
         if (procs.size() > 0) {
             if (header != null) {
                 pw.println(header);
@@ -457,7 +456,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (curTime < minTime) {
                 // Need to add in older stats to reach desired time.
                 ArrayList<String> files = getCommittedFiles(0, false, true);
-                if (files.size() > 0) {
+                if (files != null && files.size() > 0) {
                     current.setDataPosition(0);
                     ProcessStats stats = ProcessStats.CREATOR.createFromParcel(current);
                     current.recycle();
@@ -520,7 +519,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
-        pw.println("    [--details] [--full-details] [--current] [--one-day]");
+        pw.println("    [--details] [--full-details] [--current] [--hours]");
         pw.println("    [--commit] [--reset] [--clear] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: perform a checkin: print and delete old committed states.");
         pw.println("  --c: print only state in checkin format.");
@@ -532,7 +531,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  --details: dump all execution details, not just summary.");
         pw.println("  --full-details: dump only detail information, for all saved state.");
         pw.println("  --current: only dump current state.");
-        pw.println("  --one-day: dump stats aggregated across about one day.");
+        pw.println("  --hours: aggregate over about N last hours.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
         pw.println("  --reset: reset current stats, without committing.");
         pw.println("  --clear: clear all stats; does both --reset and deletes old stats.");
@@ -562,7 +561,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         boolean dumpDetails = false;
         boolean dumpFullDetails = false;
         boolean dumpAll = false;
-        boolean oneDay = false;
+        int aggregateHours = 0;
         String reqPackage = null;
         boolean csvSepScreenStats = false;
         int[] csvScreenStats = new int[] { ProcessStats.ADJ_SCREEN_OFF, ProcessStats.ADJ_SCREEN_ON};
@@ -632,8 +631,20 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     dumpDetails = true;
                 } else if ("--full-details".equals(arg)) {
                     dumpFullDetails = true;
-                } else if ("--one-day".equals(arg)) {
-                    oneDay = true;
+                } else if ("--hours".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("Error: argument required for --hours");
+                        dumpHelp(pw);
+                        return;
+                    }
+                    try {
+                        aggregateHours = Integer.parseInt(args[i]);
+                    } catch (NumberFormatException e) {
+                        pw.println("Error: --hours argument not an int -- " + args[i]);
+                        dumpHelp(pw);
+                        return;
+                    }
                 } else if ("--current".equals(arg)) {
                     currentOnly = true;
                 } else if ("--commit".equals(arg)) {
@@ -750,8 +761,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 */
             }
             return;
-        } else if (oneDay) {
-            ParcelFileDescriptor pfd = getStatsOverTime(24*60*60*1000);
+        } else if (aggregateHours != 0) {
+            ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
+                    - (ProcessStats.COMMIT_PERIOD/2));
             if (pfd == null) {
                 pw.println("Unable to build stats!");
                 return;
