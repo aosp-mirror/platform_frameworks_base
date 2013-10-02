@@ -2687,7 +2687,11 @@ public class AudioService extends IAudioService.Stub {
      */
     private void queueMsgUnderWakeLock(Handler handler, int msg,
             int arg1, int arg2, Object obj, int delay) {
+        final long ident = Binder.clearCallingIdentity();
+        // Always acquire the wake lock as AudioService because it is released by the
+        // message handler.
         mAudioEventWakeLock.acquire();
+        Binder.restoreCallingIdentity(ident);
         sendMsg(handler, msg, SENDMSG_QUEUE, arg1, arg2, obj, delay);
     }
 
