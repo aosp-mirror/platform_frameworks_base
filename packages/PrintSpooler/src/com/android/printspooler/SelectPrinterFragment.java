@@ -92,6 +92,8 @@ public final class SelectPrinterFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setListAdapter(new DestinationAdapter());
+        View emptyView = getActivity().findViewById(R.id.empty_print_state);
+        getListView().setEmptyView(emptyView);
     }
 
     @Override
@@ -252,7 +254,7 @@ public final class SelectPrinterFragment extends ListFragment {
             Uri marketUri = Uri.parse(DEFAULT_MARKET_QUERY_STRING);
             final Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
             if (getActivity().getPackageManager().resolveActivity(marketIntent, 0) != null) {
-                builder.setPositiveButton(R.string.search_play_store,
+                builder.setPositiveButton(R.string.add_print_service_label,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             try {
