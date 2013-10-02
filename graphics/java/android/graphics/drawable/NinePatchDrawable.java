@@ -219,16 +219,15 @@ public class NinePatchDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         final Rect bounds = getBounds();
-        final boolean needMirroring = isAutoMirrored() &&
-                getLayoutDirection() == LayoutDirection.RTL;
-        if (needMirroring) {
+        final boolean needsMirroring = needsMirroring();
+        if (needsMirroring) {
             canvas.save();
             // Mirror the 9patch
             canvas.translate(bounds.right - bounds.left, 0);
             canvas.scale(-1.0f, 1.0f);
         }
         mNinePatch.draw(canvas, bounds, mPaint);
-        if (needMirroring) {
+        if (needsMirroring) {
             canvas.restore();
         }
     }
@@ -240,7 +239,11 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public boolean getPadding(Rect padding) {
-        padding.set(mPadding);
+        if (needsMirroring()) {
+            padding.set(mPadding.right, mPadding.top, mPadding.left, mPadding.bottom);
+        } else {
+            padding.set(mPadding);
+        }
         return true;
     }
 
@@ -249,7 +252,12 @@ public class NinePatchDrawable extends Drawable {
      */
     @Override
     public Insets getOpticalInsets() {
-        return mOpticalInsets;
+        if (needsMirroring()) {
+            return Insets.of(mOpticalInsets.right, mOpticalInsets.top, mOpticalInsets.right,
+                    mOpticalInsets.bottom);
+        } else {
+            return mOpticalInsets;
+        }
     }
 
     @Override
@@ -295,6 +303,10 @@ public class NinePatchDrawable extends Drawable {
     @Override
     public void setAutoMirrored(boolean mirrored) {
         mNinePatchState.mAutoMirrored = mirrored;
+    }
+
+    private boolean needsMirroring() {
+        return isAutoMirrored() && getLayoutDirection() == LayoutDirection.RTL;
     }
 
     @Override
