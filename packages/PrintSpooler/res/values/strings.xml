@@ -75,13 +75,16 @@
     <!-- Title for the select printer activity. [CHAR LIMIT=30] -->
     <string name="all_printers_label">All printers</string>
 
+    <!-- Title of the button to install a print service. [CHAR LIMIT=25] -->
+    <string name="add_print_service_label">Add service</string>
+
     <!-- Add printer dialog  -->
 
     <!-- Title for the alert dialog for selecting a print service. [CHAR LIMIT=50] -->
     <string name="choose_print_service">Choose print service</string>
 
-    <!-- Title for the button to search the play store for print services. [CHAR LIMIT=50] -->
-    <string name="search_play_store">Search in play store</string>
+    <!-- Title for the prompt shown as a placeholder if no printers are found while searching. [CHAR LIMIT=50] -->
+    <string name="print_no_printers_found">No printers found</string>
 
     <!-- Notifications -->
 
