@@ -928,6 +928,7 @@
   <java-symbol type="string" name="mediasize_japanese_kahu" />
   <java-symbol type="string" name="mediasize_japanese_kaku2" />
   <java-symbol type="string" name="mediasize_japanese_you4" />
+  <java-symbol type="string" name="reason_service_unavailable" />
   <java-symbol type="string" name="reason_unknown" />
   <java-symbol type="string" name="restr_pin_enter_admin_pin" />
   <java-symbol type="string" name="restr_pin_enter_pin" />
