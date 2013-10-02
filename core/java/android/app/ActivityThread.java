@@ -533,8 +533,10 @@ public final class ActivityThread {
     private native void dumpGraphicsInfo(FileDescriptor fd);
 
     private class ApplicationThread extends ApplicationThreadNative {
-        private static final String HEAP_FULL_COLUMN = "%13s %8s %8s %8s %8s %8s %8s %8s %8s %8s";
-        private static final String HEAP_COLUMN = "%13s %8s %8s %8s %8s %8s %8s %8s";
+        private static final String HEAP_FULL_COLUMN
+                = "%13s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s";
+        private static final String HEAP_COLUMN
+                = "%13s %8s %8s %8s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%21s %8d";
         private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
@@ -1039,34 +1041,36 @@ public final class ActivityThread {
             // otherwise, show human-readable format
             if (dumpFullInfo) {
                 printRow(pw, HEAP_FULL_COLUMN, "", "Pss", "Pss", "Shared", "Private",
-                        "Shared", "Private", "Heap", "Heap", "Heap");
+                        "Shared", "Private", "Swapped", "Heap", "Heap", "Heap");
                 printRow(pw, HEAP_FULL_COLUMN, "", "Total", "Clean", "Dirty", "Dirty",
-                        "Clean", "Clean", "Size", "Alloc", "Free");
+                        "Clean", "Clean", "Dirty", "Size", "Alloc", "Free");
                 printRow(pw, HEAP_FULL_COLUMN, "", "------", "------", "------", "------",
-                        "------", "------", "------", "------", "------");
+                        "------", "------", "------", "------", "------", "------");
                 printRow(pw, HEAP_FULL_COLUMN, "Native Heap", memInfo.nativePss,
                         memInfo.nativeSwappablePss, memInfo.nativeSharedDirty,
                         memInfo.nativePrivateDirty, memInfo.nativeSharedClean,
-                        memInfo.nativePrivateClean, nativeMax, nativeAllocated, nativeFree);
+                        memInfo.nativePrivateClean, memInfo.nativeSwappedOut,
+                        nativeMax, nativeAllocated, nativeFree);
                 printRow(pw, HEAP_FULL_COLUMN, "Dalvik Heap", memInfo.dalvikPss,
                         memInfo.dalvikSwappablePss, memInfo.dalvikSharedDirty,
                         memInfo.dalvikPrivateDirty, memInfo.dalvikSharedClean,
-                        memInfo.dalvikPrivateClean, dalvikMax, dalvikAllocated, dalvikFree);
+                        memInfo.dalvikPrivateClean, memInfo.dalvikSwappedOut,
+                        dalvikMax, dalvikAllocated, dalvikFree);
             } else {
-                printRow(pw, HEAP_COLUMN, "", "Pss", "Pss", "Private",
-                        "Private", "Heap", "Heap", "Heap");
-                printRow(pw, HEAP_COLUMN, "", "Total", "Clean", "Dirty",
-                        "Clean", "Size", "Alloc", "Free");
+                printRow(pw, HEAP_COLUMN, "", "Pss", "Private",
+                        "Private", "Swapped", "Heap", "Heap", "Heap");
+                printRow(pw, HEAP_COLUMN, "", "Total", "Dirty",
+                        "Clean", "Dirty", "Size", "Alloc", "Free");
                 printRow(pw, HEAP_COLUMN, "", "------", "------", "------",
-                        "------", "------", "------", "------");
+                        "------", "------", "------", "------", "------");
                 printRow(pw, HEAP_COLUMN, "Native Heap", memInfo.nativePss,
-                        memInfo.nativeSwappablePss,
                         memInfo.nativePrivateDirty,
-                        memInfo.nativePrivateClean, nativeMax, nativeAllocated, nativeFree);
+                        memInfo.nativePrivateClean, memInfo.nativeSwappedOut,
+                        nativeMax, nativeAllocated, nativeFree);
                 printRow(pw, HEAP_COLUMN, "Dalvik Heap", memInfo.dalvikPss,
-                        memInfo.dalvikSwappablePss,
                         memInfo.dalvikPrivateDirty,
-                        memInfo.dalvikPrivateClean, dalvikMax, dalvikAllocated, dalvikFree);
+                        memInfo.dalvikPrivateClean, memInfo.dalvikSwappedOut,
+                        dalvikMax, dalvikAllocated, dalvikFree);
             }
 
             int otherPss = memInfo.otherPss;
@@ -1075,6 +1079,7 @@ public final class ActivityThread {
             int otherPrivateDirty = memInfo.otherPrivateDirty;
             int otherSharedClean = memInfo.otherSharedClean;
             int otherPrivateClean = memInfo.otherPrivateClean;
+            int otherSwappedOut = memInfo.otherSwappedOut;
 
             for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
                 final int myPss = memInfo.getOtherPss(i);
@@ -1083,16 +1088,17 @@ public final class ActivityThread {
                 final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
                 final int mySharedClean = memInfo.getOtherSharedClean(i);
                 final int myPrivateClean = memInfo.getOtherPrivateClean(i);
+                final int mySwappedOut = memInfo.getOtherSwappedOut(i);
                 if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
-                        || mySharedClean != 0 || myPrivateClean != 0) {
+                        || mySharedClean != 0 || myPrivateClean != 0 || mySwappedOut != 0) {
                     if (dumpFullInfo) {
                         printRow(pw, HEAP_FULL_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
                                 myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
-                                mySharedClean, myPrivateClean, "", "", "");
+                                mySharedClean, myPrivateClean, mySwappedOut, "", "", "");
                     } else {
                         printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
-                                myPss, mySwappablePss, myPrivateDirty,
-                                myPrivateClean, "", "", "");
+                                myPss, myPrivateDirty,
+                                myPrivateClean, mySwappedOut, "", "", "");
                     }
                     otherPss -= myPss;
                     otherSwappablePss -= mySwappablePss;
@@ -1100,27 +1106,28 @@ public final class ActivityThread {
                     otherPrivateDirty -= myPrivateDirty;
                     otherSharedClean -= mySharedClean;
                     otherPrivateClean -= myPrivateClean;
+                    otherSwappedOut -= mySwappedOut;
                 }
             }
 
             if (dumpFullInfo) {
                 printRow(pw, HEAP_FULL_COLUMN, "Unknown", otherPss, otherSwappablePss,
                         otherSharedDirty, otherPrivateDirty, otherSharedClean, otherPrivateClean,
-                        "", "", "");
+                        otherSwappedOut, "", "", "");
                 printRow(pw, HEAP_FULL_COLUMN, "TOTAL", memInfo.getTotalPss(),
                         memInfo.getTotalSwappablePss(),
                         memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
                         memInfo.getTotalSharedClean(), memInfo.getTotalPrivateClean(),
-                        nativeMax+dalvikMax,
+                        memInfo.getTotalSwappedOut(), nativeMax+dalvikMax,
                         nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
             } else {
-                printRow(pw, HEAP_COLUMN, "Unknown", otherPss, otherSwappablePss,
-                        otherPrivateDirty, otherPrivateClean,
+                printRow(pw, HEAP_COLUMN, "Unknown", otherPss,
+                        otherPrivateDirty, otherPrivateClean, otherSwappedOut,
                         "", "", "");
                 printRow(pw, HEAP_COLUMN, "TOTAL", memInfo.getTotalPss(),
-                        memInfo.getTotalSwappablePss(),
                         memInfo.getTotalPrivateDirty(),
                         memInfo.getTotalPrivateClean(),
+                        memInfo.getTotalSwappedOut(),
                         nativeMax+dalvikMax,
                         nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
             }
@@ -1137,16 +1144,17 @@ public final class ActivityThread {
                     final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
                     final int mySharedClean = memInfo.getOtherSharedClean(i);
                     final int myPrivateClean = memInfo.getOtherPrivateClean(i);
+                    final int mySwappedOut = memInfo.getOtherSwappedOut(i);
                     if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
                             || mySharedClean != 0 || myPrivateClean != 0) {
                         if (dumpFullInfo) {
                             printRow(pw, HEAP_FULL_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
                                     myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
-                                    mySharedClean, myPrivateClean, "", "", "");
+                                    mySharedClean, myPrivateClean, mySwappedOut, "", "", "");
                         } else {
                             printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
-                                    myPss, mySwappablePss, myPrivateDirty,
-                                    myPrivateClean, "", "", "");
+                                    myPss, myPrivateDirty,
+                                    myPrivateClean, mySwappedOut, "", "", "");
                         }
                     }
                 }

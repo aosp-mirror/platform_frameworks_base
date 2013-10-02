@@ -124,6 +124,9 @@ public final class Debug
         /** The shared clean pages used by dalvik heap. */
         /** @hide We may want to expose this, eventually. */
         public int dalvikSharedClean;
+        /** The dirty dalvik pages that have been swapped out. */
+        /** @hide We may want to expose this, eventually. */
+        public int dalvikSwappedOut;
 
         /** The proportional set size for the native heap. */
         public int nativePss;
@@ -140,6 +143,9 @@ public final class Debug
         /** The shared clean pages used by the native heap. */
         /** @hide We may want to expose this, eventually. */
         public int nativeSharedClean;
+        /** The dirty native pages that have been swapped out. */
+        /** @hide We may want to expose this, eventually. */
+        public int nativeSwappedOut;
 
         /** The proportional set size for everything else. */
         public int otherPss;
@@ -156,6 +162,9 @@ public final class Debug
         /** The shared clean pages used by everything else. */
         /** @hide We may want to expose this, eventually. */
         public int otherSharedClean;
+        /** The dirty pages used by anyting else that have been swapped out. */
+        /** @hide We may want to expose this, eventually. */
+        public int otherSwappedOut;
 
         /** @hide */
         public static final int NUM_OTHER_STATS = 16;
@@ -164,7 +173,7 @@ public final class Debug
         public static final int NUM_DVK_STATS = 5;
 
         /** @hide */
-        public static final int NUM_CATEGORIES = 6;
+        public static final int NUM_CATEGORIES = 7;
 
         /** @hide */
         public static final int offsetPss = 0;
@@ -178,7 +187,8 @@ public final class Debug
         public static final int offsetPrivateClean = 4;
         /** @hide */
         public static final int offsetSharedClean = 5;
-
+        /** @hide */
+        public static final int offsetSwappedOut = 6;
 
         private int[] otherStats = new int[(NUM_OTHER_STATS+NUM_DVK_STATS)*NUM_CATEGORIES];
 
@@ -236,6 +246,14 @@ public final class Debug
             return dalvikSharedClean + nativeSharedClean + otherSharedClean;
         }
 
+        /**
+         * Return total swapped out memory in kB.
+         * @hide
+         */
+        public int getTotalSwappedOut() {
+            return dalvikSwappedOut + nativeSwappedOut + otherSwappedOut;
+        }
+
         /** @hide */
         public int getOtherPss(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetPss];
@@ -263,10 +281,14 @@ public final class Debug
             return otherStats[which*NUM_CATEGORIES + offsetPrivateClean];
         }
 
-
         /** @hide */
         public int getOtherSharedClean(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSharedClean];
+        }
+
+        /** @hide */
+        public int getOtherSwappedOut(int which) {
+            return otherStats[which*NUM_CATEGORIES + offsetSwappedOut];
         }
 
         /** @hide */
@@ -287,7 +309,7 @@ public final class Debug
                 case 12: return "Other mmap";
                 case 13: return "Graphics";
                 case 14: return "GL";
-                case 15: return "Other memtrack";
+                case 15: return "Memtrack";
                 case 16: return ".Heap";
                 case 17: return ".LOS";
                 case 18: return ".LinearAlloc";
@@ -308,18 +330,21 @@ public final class Debug
             dest.writeInt(dalvikSharedDirty);
             dest.writeInt(dalvikPrivateClean);
             dest.writeInt(dalvikSharedClean);
+            dest.writeInt(dalvikSwappedOut);
             dest.writeInt(nativePss);
             dest.writeInt(nativeSwappablePss);
             dest.writeInt(nativePrivateDirty);
             dest.writeInt(nativeSharedDirty);
             dest.writeInt(nativePrivateClean);
             dest.writeInt(nativeSharedClean);
+            dest.writeInt(nativeSwappedOut);
             dest.writeInt(otherPss);
             dest.writeInt(otherSwappablePss);
             dest.writeInt(otherPrivateDirty);
             dest.writeInt(otherSharedDirty);
             dest.writeInt(otherPrivateClean);
             dest.writeInt(otherSharedClean);
+            dest.writeInt(otherSwappedOut);
             dest.writeIntArray(otherStats);
         }
 
@@ -330,18 +355,21 @@ public final class Debug
             dalvikSharedDirty = source.readInt();
             dalvikPrivateClean = source.readInt();
             dalvikSharedClean = source.readInt();
+            dalvikSwappedOut = source.readInt();
             nativePss = source.readInt();
             nativeSwappablePss = source.readInt();
             nativePrivateDirty = source.readInt();
             nativeSharedDirty = source.readInt();
             nativePrivateClean = source.readInt();
             nativeSharedClean = source.readInt();
+            nativeSwappedOut = source.readInt();
             otherPss = source.readInt();
             otherSwappablePss = source.readInt();
             otherPrivateDirty = source.readInt();
             otherSharedDirty = source.readInt();
             otherPrivateClean = source.readInt();
             otherSharedClean = source.readInt();
+            otherSwappedOut = source.readInt();
             otherStats = source.createIntArray();
         }
 
