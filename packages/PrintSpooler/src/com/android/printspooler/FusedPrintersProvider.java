@@ -19,13 +19,16 @@ package com.android.printspooler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
+import android.content.pm.ServiceInfo;
 import android.os.AsyncTask;
 import android.print.PrintManager;
 import android.print.PrinterDiscoverySession;
 import android.print.PrinterDiscoverySession.OnPrintersChangeListener;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
+import android.printservice.PrintServiceInfo;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -46,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import libcore.io.IoUtils;
 
@@ -384,6 +388,30 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                             + FusedPrintersProvider.this.hashCode());
                 }
 
+                // Ignore printer records whose target services are not installed.
+                PrintManager printManager = (PrintManager) getContext()
+                        .getSystemService(Context.PRINT_SERVICE);
+                List<PrintServiceInfo> services = printManager
+                        .getInstalledPrintServices();
+
+                Set<ComponentName> installedComponents = new ArraySet<ComponentName>();
+                final int installedServiceCount = services.size();
+                for (int i = 0; i < installedServiceCount; i++) {
+                    ServiceInfo serviceInfo = services.get(i).getResolveInfo().serviceInfo;
+                    ComponentName componentName = new ComponentName(
+                            serviceInfo.packageName, serviceInfo.name);
+                    installedComponents.add(componentName);
+                }
+
+                final int printerCount = printers.size();
+                for (int i = printerCount - 1; i >= 0; i--) {
+                    ComponentName printerServiceName = printers.get(i).getId().getServiceName();
+                    if (!installedComponents.contains(printerServiceName.getPackageName())) {
+                        printers.remove(i);
+                    }
+                }
+
+                // Store the filtered list.
                 mHistoricalPrinters = printers;
 
                 // Compute the favorite printers.
