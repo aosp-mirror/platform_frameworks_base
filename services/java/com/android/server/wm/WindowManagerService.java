@@ -2793,7 +2793,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
                     + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
 
-            win.mEnforceSizeCompat = (win.mAttrs.flags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
+            win.mEnforceSizeCompat =
+                    (win.mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
 
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 winAnimator.mAlpha = attrs.alpha;
@@ -10117,12 +10118,13 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public FakeWindow addFakeWindow(Looper looper,
             InputEventReceiver.Factory inputEventReceiverFactory,
-            String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
-            boolean hasFocus, boolean touchFullscreen) {
+            String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
+            boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen) {
         synchronized (mWindowMap) {
             FakeWindowImpl fw = new FakeWindowImpl(this, looper, inputEventReceiverFactory,
                     name, windowType,
-                    layoutParamsFlags, canReceiveKeys, hasFocus, touchFullscreen);
+                    layoutParamsFlags, layoutParamsPrivateFlags, canReceiveKeys,
+                    hasFocus, touchFullscreen);
             int i=0;
             while (i<mFakeWindows.size()) {
                 if (mFakeWindows.get(i).mWindowLayer <= fw.mWindowLayer) {
