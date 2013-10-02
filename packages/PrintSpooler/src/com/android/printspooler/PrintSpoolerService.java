@@ -236,7 +236,7 @@ public final class PrintSpoolerService extends Service {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mLock) {
-            String prefix = args[0];
+            String prefix = (args.length > 0) ? args[0] : "";
             String tab = "  ";
 
             pw.append(prefix).append("print jobs:").println();
