@@ -817,7 +817,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // The input method manager only throws security exceptions, so let's
             // log all others.
             if (!(e instanceof SecurityException)) {
-                Slog.e(TAG, "Input Method Manager Crash", e);
+                Slog.wtf(TAG, "Input Method Manager Crash", e);
             }
             throw e;
         }

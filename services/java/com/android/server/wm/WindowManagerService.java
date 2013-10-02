@@ -813,7 +813,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // The window manager only throws security exceptions, so let's
             // log all others.
             if (!(e instanceof SecurityException)) {
-                Log.wtf(TAG, "Window Manager Crash", e);
+                Slog.wtf(TAG, "Window Manager Crash", e);
             }
             throw e;
         }

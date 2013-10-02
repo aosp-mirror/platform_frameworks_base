@@ -357,7 +357,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             boolean sepScreenStates, int[] screenStates, boolean sepMemStates, int[] memStates,
             boolean sepProcStates, int[] procStates, long now, String reqPackage) {
         ArrayList<ProcessStats.ProcessState> procs = mProcessStats.collectProcessesLocked(
-                screenStates, memStates, procStates, procStates, now, reqPackage);
+                screenStates, memStates, procStates, procStates, now, reqPackage, false);
         if (procs.size() > 0) {
             if (header != null) {
                 pw.println(header);
@@ -519,7 +519,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
-        pw.println("    [--details] [--full-details] [--current] [--hours]");
+        pw.println("    [--details] [--full-details] [--current] [--hours] [--active]");
         pw.println("    [--commit] [--reset] [--clear] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: perform a checkin: print and delete old committed states.");
         pw.println("  --c: print only state in checkin format.");
@@ -528,10 +528,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  --csv-mem: norm, mod, low, crit.");
         pw.println("  --csv-proc: pers, top, fore, vis, precept, backup,");
         pw.println("    service, home, prev, cached");
-        pw.println("  --details: dump all execution details, not just summary.");
-        pw.println("  --full-details: dump only detail information, for all saved state.");
+        pw.println("  --details: dump per-package details, not just summary.");
+        pw.println("  --full-details: dump all timing and active state details.");
         pw.println("  --current: only dump current state.");
         pw.println("  --hours: aggregate over about N last hours.");
+        pw.println("  --active: only show currently active processes/services.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
         pw.println("  --reset: reset current stats, without committing.");
         pw.println("  --clear: clear all stats; does both --reset and deletes old stats.");
@@ -562,6 +563,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         boolean dumpFullDetails = false;
         boolean dumpAll = false;
         int aggregateHours = 0;
+        boolean activeOnly = false;
         String reqPackage = null;
         boolean csvSepScreenStats = false;
         int[] csvScreenStats = new int[] { ProcessStats.ADJ_SCREEN_OFF, ProcessStats.ADJ_SCREEN_ON};
@@ -645,6 +647,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         dumpHelp(pw);
                         return;
                     }
+                } else if ("--active".equals(arg)) {
+                    activeOnly = true;
+                    currentOnly = true;
                 } else if ("--current".equals(arg)) {
                     currentOnly = true;
                 } else if ("--commit".equals(arg)) {
@@ -779,9 +784,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 stats.dumpCheckinLocked(pw, reqPackage);
             } else {
                 if (dumpDetails || dumpFullDetails) {
-                    stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll);
+                    stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll, activeOnly);
                 } else {
-                    stats.dumpSummaryLocked(pw, reqPackage, now);
+                    stats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
                 }
             }
             return;
@@ -826,9 +831,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                 // Always dump summary here, dumping all details is just too
                                 // much crud.
                                 if (dumpFullDetails) {
-                                    mProcessStats.dumpLocked(pw, reqPackage, now, false, false);
+                                    mProcessStats.dumpLocked(pw, reqPackage, now, false, false,
+                                            activeOnly);
                                 } else {
-                                    processStats.dumpSummaryLocked(pw, reqPackage, now);
+                                    processStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
                                 }
                             }
                             if (isCheckin) {
@@ -856,12 +862,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         pw.println("CURRENT STATS:");
                     }
                     if (dumpDetails || dumpFullDetails) {
-                        mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll);
+                        mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll,
+                                activeOnly);
                         if (dumpAll) {
                             pw.print("  mFile="); pw.println(mFile.getBaseFile());
                         }
                     } else {
-                        mProcessStats.dumpSummaryLocked(pw, reqPackage, now);
+                        mProcessStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
                     }
                 }
             }
