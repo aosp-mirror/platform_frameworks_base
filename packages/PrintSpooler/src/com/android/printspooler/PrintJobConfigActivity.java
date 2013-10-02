@@ -56,6 +56,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -735,8 +736,12 @@ public class PrintJobConfigActivity extends Activity {
                 if (resultCode == RESULT_OK) {
                     PrinterId printerId = (PrinterId) data.getParcelableExtra(
                             INTENT_EXTRA_PRINTER_ID);
-                    mEditor.selectPrinter(printerId);
+                    if (printerId != null) {
+                        mEditor.ensurePrinterSelected(printerId);
+                        break;
+                    }
                 }
+                mEditor.ensureCurrentPrinterSelected();
             } break;
         }
     }
@@ -817,6 +822,8 @@ public class PrintJobConfigActivity extends Activity {
 
         private Button mPrintButton;
 
+        private PrinterId mNextPrinterId;
+
         private PrinterInfo mCurrentPrinter;
 
         private final OnItemSelectedListener mOnItemSelectedListener =
@@ -830,10 +837,6 @@ public class PrintJobConfigActivity extends Activity {
                     }
 
                     if (id == DEST_ADAPTER_ITEM_ID_ALL_PRINTERS) {
-                        // The selection changed to the all printers item. We
-                        // want to select back the last selected printer.
-                        mIgnoreNextDestinationChange = true;
-                        mEditor.selectPrinter(mCurrentPrinter.getId());
                         startSelectPrinterActivity();
                         return;
                     }
@@ -1157,6 +1160,13 @@ public class PrintJobConfigActivity extends Activity {
                         mDestinationSpinner.setSelection(0);
                     }
 
+                    // If there is a next printer to select and we succeed selecting
+                    // it - done. Let the selection handling code make everything right.
+                    if (mNextPrinterId != null && selectPrinter(mNextPrinterId)) {
+                        mNextPrinterId = null;
+                        return;
+                    }
+
                     // If the current printer properties changed, we update the UI.
                     if (mCurrentPrinter != null) {
                         final int printerCount = mDestinationSpinnerAdapter.getCount();
@@ -1299,10 +1309,32 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
-        public void selectPrinter(PrinterId printerId) {
-            mDestinationSpinnerAdapter.ensurePrinterShownPrinterShown(printerId);
+        public void ensurePrinterSelected(PrinterId printerId) {
+            // If the printer is not present maybe the loader is not
+            // updated yet. In this case make a note and as soon as
+            // the printer appears will will select it.
+            if (!selectPrinter(printerId)) {
+                mNextPrinterId = printerId;
+            }
+        }
+
+        public boolean selectPrinter(PrinterId printerId) {
+            mDestinationSpinnerAdapter.ensurePrinterInVisibleAdapterPosition(printerId);
             final int position = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
-            mDestinationSpinner.setSelection(position);
+            if (position != AdapterView.INVALID_POSITION
+                    && position != mDestinationSpinner.getSelectedItemPosition()) {
+                Object item = mDestinationSpinnerAdapter.getItem(position);
+                mCurrentPrinter = (PrinterInfo) item;
+                mDestinationSpinner.setSelection(position);
+                return true;
+            }
+            return false;
+        }
+
+        public void ensureCurrentPrinterSelected() {
+            if (mCurrentPrinter != null) {
+                selectPrinter(mCurrentPrinter.getId());
+            }
         }
 
         public boolean isPrintingToPdf() {
@@ -2015,8 +2047,6 @@ public class PrintJobConfigActivity extends Activity {
 
             private final PrinterInfo mFakePdfPrinter;
 
-            private PrinterId mLastShownPrinterId;
-
             public DestinationAdapter() {
                 getLoaderManager().initLoader(LOADER_ID_PRINTERS_LOADER, null, this);
                 mFakePdfPrinter = createFakePdfPrinter();
@@ -2032,9 +2062,23 @@ public class PrintJobConfigActivity extends Activity {
                 return AdapterView.INVALID_POSITION;
             }
 
-            public void ensurePrinterShownPrinterShown(PrinterId printerId) {
-                mLastShownPrinterId = printerId;
-                ensureLastShownPrinterInPosition();
+            public void ensurePrinterInVisibleAdapterPosition(PrinterId printerId) {
+                final int printerCount = mPrinters.size();
+                for (int i = 0; i < printerCount; i++) {
+                    PrinterInfo printer = (PrinterInfo) mPrinters.get(i);
+                    if (printer.getId().equals(printerId)) {
+                        // If already in the list - do nothing.
+                        if (i < getCount() - 2) {
+                            return;
+                        }
+                        // Else replace the last one (two items are not printers).
+                        final int lastPrinterIndex = getCount() - 3;
+                        mPrinters.set(i, mPrinters.get(lastPrinterIndex));
+                        mPrinters.set(lastPrinterIndex, printer);
+                        notifyDataSetChanged();
+                        return;
+                    }
+                }
             }
 
             @Override
@@ -2172,9 +2216,46 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public void onLoadFinished(Loader<List<PrinterInfo>> loader,
                     List<PrinterInfo> printers) {
+                // We rearrange the printers if the user selects a printer
+                // not shown in the initial short list. Therefore, we have
+                // to keep the printer order.
+
+                // No old printers - do not bother keeping their position.
+                if (mPrinters.isEmpty()) {
+                    mPrinters.addAll(printers);
+                    mEditor.ensureCurrentPrinterSelected();
+                    notifyDataSetChanged();
+                    return;
+                }
+
+                // Add the new printers to a map.
+                ArrayMap<PrinterId, PrinterInfo> newPrintersMap =
+                        new ArrayMap<PrinterId, PrinterInfo>();
+                final int printerCount = printers.size();
+                for (int i = 0; i < printerCount; i++) {
+                    PrinterInfo printer = printers.get(i);
+                    newPrintersMap.put(printer.getId(), printer);
+                }
+
+                List<PrinterInfo> newPrinters = new ArrayList<PrinterInfo>();
+
+                // Update printers we already have.
+                final int oldPrinterCount = mPrinters.size();
+                for (int i = 0; i < oldPrinterCount; i++) {
+                    PrinterId oldPrinterId = mPrinters.get(i).getId();
+                    PrinterInfo updatedPrinter = newPrintersMap.remove(oldPrinterId);
+                    if (updatedPrinter != null) {
+                        newPrinters.add(updatedPrinter);
+                    }
+                }
+
+                // Add the rest of the new printers, i.e. what is left.
+                newPrinters.addAll(newPrintersMap.values());
+
                 mPrinters.clear();
-                mPrinters.addAll(printers);
-                ensureLastShownPrinterInPosition();
+                mPrinters.addAll(newPrinters);
+
+                mEditor.ensureCurrentPrinterSelected();
                 notifyDataSetChanged();
             }
 
@@ -2182,27 +2263,6 @@ public class PrintJobConfigActivity extends Activity {
             public void onLoaderReset(Loader<List<PrinterInfo>> loader) {
                 mPrinters.clear();
                 notifyDataSetInvalidated();
-            }
-
-            private void ensureLastShownPrinterInPosition() {
-                if (mLastShownPrinterId == null) {
-                    return;
-                }
-                final int printerCount = mPrinters.size();
-                for (int i = 0; i < printerCount; i++) {
-                    PrinterInfo printer = (PrinterInfo) mPrinters.get(i);
-                    if (printer.getId().equals(mLastShownPrinterId)) {
-                        // If already in the list - do nothing.
-                        if (i < getCount() - 2) {
-                            return;
-                        }
-                        // Else replace the last one.
-                        final int lastPrinter = getCount() - 2;
-                        mPrinters.set(i, mPrinters.get(lastPrinter - 1));
-                        mPrinters.set(lastPrinter - 1, printer);
-                        return;
-                    }
-                }
             }
 
             private PrinterInfo createFakePdfPrinter() {
