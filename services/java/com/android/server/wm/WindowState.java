@@ -20,7 +20,7 @@ import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -332,7 +332,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
         mSeq = seq;
-        mEnforceSizeCompat = (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
+        mEnforceSizeCompat = (mAttrs.flags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
