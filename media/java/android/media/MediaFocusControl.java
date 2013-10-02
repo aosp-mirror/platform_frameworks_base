@@ -139,6 +139,7 @@ public class MediaFocusControl implements OnFinished {
     private static final int MSG_RCC_NEW_PLAYBACK_STATE = 7;
     private static final int MSG_RCC_SEEK_REQUEST = 8;
     private static final int MSG_RCC_UPDATE_METADATA = 9;
+    private static final int MSG_RCDISPLAY_INIT_INFO = 10;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -213,6 +214,12 @@ public class MediaFocusControl implements OnFinished {
 
                 case MSG_PROMOTE_RCC:
                     onPromoteRcc(msg.arg1);
+                    break;
+
+                case MSG_RCDISPLAY_INIT_INFO:
+                    // msg.obj is guaranteed to be non null
+                    onRcDisplayInitInfo((IRemoteControlDisplay)msg.obj /*newRcd*/,
+                            msg.arg1/*w*/, msg.arg2/*h*/);
                     break;
             }
         }
@@ -852,6 +859,11 @@ public class MediaFocusControl implements OnFinished {
      * Access protected by mCurrentRcLock.
      */
     private IRemoteControlClient mCurrentRcClient = null;
+    /**
+     * The PendingIntent associated with mCurrentRcClient. Its value is irrelevant
+     * if mCurrentRcClient is null
+     */
+    private PendingIntent mCurrentRcClientIntent = null;
 
     private final static int RC_INFO_NONE = 0;
     private final static int RC_INFO_ALL =
@@ -1446,6 +1458,7 @@ public class MediaFocusControl implements OnFinished {
 
                     // tell the current client that it needs to send info
                     try {
+                        //TODO change name to informationRequestForAllDisplays()
                         mCurrentRcClient.onInformationRequested(mCurrentRcClientGen, flags);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Current valid remote client is dead: "+e);
@@ -1460,6 +1473,36 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
+    /**
+     * Called when processing MSG_RCDISPLAY_INIT_INFO event
+     * Causes the current RemoteControlClient to send its info (metadata, playstate...) to
+     *   a single RemoteControlDisplay, NOT all of them, as with MSG_RCDISPLAY_UPDATE.
+     */
+    private void onRcDisplayInitInfo(IRemoteControlDisplay newRcd, int w, int h) {
+        synchronized(mRCStack) {
+            synchronized(mCurrentRcLock) {
+                if (mCurrentRcClient != null) {
+                    if (DEBUG_RC) { Log.i(TAG, "Init RCD with current info"); }
+                    try {
+                        // synchronously update the new RCD with the current client generation
+                        // and matching PendingIntent
+                        newRcd.setCurrentClientId(mCurrentRcClientGen, mCurrentRcClientIntent,
+                                false);
+
+                        // tell the current RCC that it needs to send info, but only to the new RCD
+                        try {
+                            mCurrentRcClient.informationRequestForDisplay(newRcd, w, h);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Current valid remote client is dead: ", e);
+                            mCurrentRcClient = null;
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Dead display in onRcDisplayInitInfo()", e);
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Helper function:
@@ -1497,6 +1540,7 @@ public class MediaFocusControl implements OnFinished {
                 infoFlagsAboutToBeUsed = RC_INFO_ALL;
             }
             mCurrentRcClient = rcse.mRcClient;
+            mCurrentRcClientIntent = rcse.mMediaIntent;
         }
         // will cause onRcDisplayUpdate() to be called in AudioService's handler thread
         mEventHandler.sendMessage( mEventHandler.obtainMessage(MSG_RCDISPLAY_UPDATE,
@@ -1923,8 +1967,12 @@ public class MediaFocusControl implements OnFinished {
                     }
                 }
 
-                // we have a new display, of which all the clients are now aware: have it be updated
-                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
+                // we have a new display, of which all the clients are now aware: have it be
+                // initialized wih the current gen ID and the current client info, do not
+                // reset the information for the other (existing) displays
+                sendMsg(mEventHandler, MSG_RCDISPLAY_INIT_INFO, SENDMSG_QUEUE,
+                        w /*arg1*/, h /*arg2*/,
+                        rcd /*obj*/, 0/*delay*/);
             }
         }
     }
