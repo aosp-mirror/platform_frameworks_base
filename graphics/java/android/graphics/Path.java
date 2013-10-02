@@ -78,7 +78,11 @@ public class Path {
             mLastDirection = null;
             if (rects != null) rects.setEmpty();
         }
+        // We promised not to change this, so preserve it around the native
+        // call, which does now reset fill type.
+        final FillType fillType = getFillType();
         native_reset(mNativePath);
+        setFillType(fillType);
     }
 
     /**
