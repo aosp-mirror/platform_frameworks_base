@@ -790,9 +790,21 @@ public class AppOpsManager {
 
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
+     * @param op The operation to monitor, one of OPSTR_*.
+     * @param packageName The name of the application to monitor.
+     * @param callback Where to report changes.
+     */
+    public void startWatchingMode(String op, String packageName,
+            final OnOpChangedListener callback) {
+        startWatchingMode(strOpToOp(op), packageName, callback);
+    }
+
+    /**
+     * Monitor for changes to the operating mode for the given op in the given app package.
      * @param op The operation to monitor, one of OP_*.
      * @param packageName The name of the application to monitor.
      * @param callback Where to report changes.
+     * @hide
      */
     public void startWatchingMode(int op, String packageName, final OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
