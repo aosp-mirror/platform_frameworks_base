@@ -1806,6 +1806,15 @@
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
       the local Bluetooth phone, and to discover and pair with remote devices.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bluetoothPriv">allow Bluetooth pairing by Application</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothPriv" product="tablet">Allows the app to
+      pair with remote devices without user interaction.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothPriv" product="default">Allows the app to
+      pair with remote devices without user interaction.</string>
+
     <string name="permlab_accessWimaxState">connect and disconnect from WiMAX</string>
     <string name="permdesc_accessWimaxState">Allows the app to determine whether
      WiMAX is enabled and information about any WiMAX networks that are
