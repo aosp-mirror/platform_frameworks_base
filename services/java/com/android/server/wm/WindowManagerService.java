@@ -3379,6 +3379,18 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
+    private Task createTask(int taskId, int stackId, int userId, AppWindowToken atoken) {
+        final TaskStack stack = mStackIdToStack.get(stackId);
+        if (stack == null) {
+            throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
+        }
+        Task task = new Task(atoken, stack, userId);
+        stack.addTask(task, true);
+        stack.getDisplayContent().moveStack(stack, true);
+        mTaskIdToTask.put(taskId, task);
+        return task;
+    }
+
     @Override
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId) {
@@ -3418,14 +3430,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                TaskStack stack = mStackIdToStack.get(stackId);
-                if (stack == null) {
-                    throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
-                }
-                task = new Task(atoken, stack, userId);
-                stack.addTask(task, true);
-                stack.getDisplayContent().moveStack(stack, true);
-                mTaskIdToTask.put(taskId, task);
+                task = createTask(taskId, stackId, userId, atoken);
             } else {
                 task.addAppToken(addPos, atoken);
             }
@@ -3459,8 +3464,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.groupId = groupId;
             Task newTask = mTaskIdToTask.get(groupId);
             if (newTask == null) {
-                throw new IllegalStateException("setAppGroupId: groupId=" + groupId
-                        + " does not exist");
+                newTask = createTask(groupId, oldTask.mStack.mStackId, oldTask.mUserId, atoken);
             }
             newTask.mAppTokens.add(atoken);
         }
@@ -4786,6 +4790,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 Task task = mTaskIdToTask.get(taskId);
                 if (task == null) {
+                    // Normal behavior, addAppToken will be called next and task will be created.
                     return;
                 }
                 final TaskStack stack = task.mStack;
