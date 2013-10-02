@@ -254,7 +254,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
      */
     public void enableHardwareLayersForContent() {
         View widget = getContent();
-        if (widget != null) {
+        if (widget != null && widget.isHardwareAccelerated()) {
             widget.setLayerType(LAYER_TYPE_HARDWARE, null);
         }
     }
@@ -269,14 +269,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
         if (widget != null) {
             widget.setLayerType(LAYER_TYPE_NONE, null);
         }
-    }
-
-    public void enableHardwareLayers() {
-        setLayerType(LAYER_TYPE_HARDWARE, null);
-    }
-
-    public void disableHardwareLayers() {
-        setLayerType(LAYER_TYPE_NONE, null);
     }
 
     public View getContent() {

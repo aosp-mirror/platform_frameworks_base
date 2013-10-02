@@ -395,7 +395,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         cancelTransitionsInProgress();
 
         mChallengeInteractiveInternal = false;
-        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+        enableHardwareLayerForChallengeView();
         final int sy = mChallengeView.getBottom();
         final int dy = y - sy;
         if (dy == 0) {
@@ -580,7 +580,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         mGestureStartY = y;
                         mGestureStartChallengeBottom = getChallengeBottom();
                         mDragging = true;
-                        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+                        enableHardwareLayerForChallengeView();
                     } else if (mChallengeShowing && isInChallengeView(x, y)) {
                         mBlockDrag = true;
                     }
@@ -657,7 +657,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                             mActivePointerId = ev.getPointerId(i);
                             mGestureStartChallengeBottom = getChallengeBottom();
                             mDragging = true;
-                            mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+                            enableHardwareLayerForChallengeView();
                             break;
                         }
                     }
@@ -1065,13 +1065,19 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
     private void onFadeStart(boolean show) {
         mChallengeInteractiveInternal = false;
-        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+        enableHardwareLayerForChallengeView();
 
         if (show) {
             moveChallengeTo(getMinChallengeBottom());
         }
 
         setScrollState(SCROLL_STATE_FADING);
+    }
+
+    private void enableHardwareLayerForChallengeView() {
+        if (mChallengeView.isHardwareAccelerated()) {
+            mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+        }
     }
 
     private void onFadeEnd(boolean show) {
