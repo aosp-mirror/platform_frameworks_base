@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -267,18 +269,21 @@ public class DownloadManager {
     /**
      * Broadcast intent action sent by the download manager when a download completes.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
 
     /**
      * Broadcast intent action sent by the download manager when the user clicks on a running
      * download, either from a system notification or from the downloads UI.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public final static String ACTION_NOTIFICATION_CLICKED =
             "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
      * Intent action to launch an activity to display all downloads.
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public final static String ACTION_VIEW_DOWNLOADS = "android.intent.action.VIEW_DOWNLOADS";
 
     /**
