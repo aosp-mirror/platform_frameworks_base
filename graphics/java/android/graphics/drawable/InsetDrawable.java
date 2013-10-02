@@ -202,7 +202,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     public void setColorFilter(ColorFilter cf) {
         mInsetState.mDrawable.setColorFilter(cf);
     }
-    
+
+    /** {@hide} */
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        mInsetState.mDrawable.setLayoutDirection(layoutDirection);
+    }
+
     @Override
     public int getOpacity() {
         return mInsetState.mDrawable.getOpacity();
