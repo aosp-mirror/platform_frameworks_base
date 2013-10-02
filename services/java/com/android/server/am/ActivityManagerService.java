@@ -2051,7 +2051,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // The activity manager only throws security exceptions, so let's
             // log all others.
             if (!(e instanceof SecurityException)) {
-                Slog.e(TAG, "Activity Manager Crash", e);
+                Slog.wtf(TAG, "Activity Manager Crash", e);
             }
             throw e;
         }

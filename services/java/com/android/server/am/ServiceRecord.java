@@ -328,9 +328,21 @@ final class ServiceRecord extends Binder {
         if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
             tracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
                     serviceInfo.applicationInfo.uid, serviceInfo.processName, serviceInfo.name);
-            tracker.makeActive();
+            tracker.applyNewOwner(this);
         }
         return tracker;
+    }
+
+    public void forceClearTracker() {
+        if (tracker != null) {
+            int memFactor = ams.mProcessStats.getMemFactorLocked();
+            long now = SystemClock.uptimeMillis();
+            tracker.setStarted(false, memFactor, now);
+            tracker.setBound(false, memFactor, now);
+            tracker.setExecuting(false, memFactor, now);
+            tracker.clearCurrentOwner(this);
+            tracker = null;
+        }
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
