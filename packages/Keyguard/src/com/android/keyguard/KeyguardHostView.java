@@ -1483,6 +1483,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (DEBUGXPORT) Log.v(TAG, "remove transport");
             mAppWidgetContainer.removeWidget(getOrCreateTransportControl());
             mTransportControl = null;
+            KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(null);
         }
     }
 

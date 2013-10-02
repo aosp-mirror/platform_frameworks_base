@@ -17,6 +17,7 @@ package com.android.keyguard;
 
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -135,4 +136,8 @@ class KeyguardUpdateMonitorCallback {
      * Called when the emergency call button is pressed.
      */
     void onEmergencyCallAction() { }
+
+    public void onSetBackground(Bitmap bitmap) {
+        // THIS SPACE FOR RENT
+    }
 }
