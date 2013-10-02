@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Доступ к настройкам Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Приложение сможет настраивать параметры локального планшетного ПК с поддержкой Bluetooth, а также обнаруживать удаленные устройства и выполнять сопряжение с ними."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Приложение сможет настраивать параметры локального телефона с поддержкой Bluetooth, а также обнаруживать удаленные устройства и выполнять сопряжение с ними."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Подключение устройств через Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Приложение сможет самостоятельно подключаться к удаленным устройствам."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Приложение сможет самостоятельно подключаться к удаленным устройствам."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"подключать/отключать сеть WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Приложение сможет определять, активирован ли WiMAX, а также получать информацию о подключенных сетях WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Изменение статуса WiMAX"</string>
@@ -639,8 +642,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Приложение сможет добавлять слова в пользовательский словарь."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"Просмотр данных на USB-накопителе"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"Считывание содержимого SD-карты"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Приложение сможет считывать данные с USB-накопителя."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Приложение сможет считывать содержимое SD-карты."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Приложение сможет считывать данные на USB-накопителе."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Приложение сможет считывать данные на SD-карте."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"Изменение/удаление данных на USB-накопителе"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Изменение или удаление содержимого SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Приложение сможет записывать данные на USB-накопитель."</string>
@@ -1647,4 +1650,26 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Повторите попытку позже."</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Чтобы вернуться в обычный режим, проведите пальцем вниз"</string>
+    <!-- no translation found for done_label (2093726099505892398) -->
+    <skip />
+    <!-- no translation found for hour_picker_description (6698199186859736512) -->
+    <skip />
+    <!-- no translation found for minute_picker_description (8606010966873791190) -->
+    <skip />
+    <!-- no translation found for select_hours (6043079511766008245) -->
+    <skip />
+    <!-- no translation found for select_minutes (3974345615920336087) -->
+    <skip />
+    <!-- no translation found for day_picker_description (8990847925961297968) -->
+    <skip />
+    <!-- no translation found for year_picker_description (5524331207436052403) -->
+    <skip />
+    <!-- no translation found for select_day (7774759604701773332) -->
+    <skip />
+    <!-- no translation found for select_year (7952052866994196170) -->
+    <skip />
+    <!-- no translation found for item_is_selected (949687401682476608) -->
+    <skip />
+    <!-- no translation found for deleted_key (7659477886625566590) -->
+    <skip />
 </resources>

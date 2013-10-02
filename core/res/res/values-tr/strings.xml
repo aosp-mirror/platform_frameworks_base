@@ -246,10 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Uygulamaya, durum çubuğu olma izni verir."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"durum çubuğunu genişlet/daralt"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Uygulamaya, durum çubuğunu genişletip daraltma izni verir."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"kısayolları yükle"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana ekrana ekleme izni verir."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"kısayolların yüklemesini kaldır"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana ekrandan kaldırma izni verir."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"kısayolları yükleme"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana Ekrana ekleme izni verir."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"kısayolların yüklemesini kaldırma"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana Ekrandan kaldırma izni verir."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendir"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Uygulamaya, yapılan çağrıları işleme ve aranacak numarayı değiştirme izni verir. Bu izin, uygulamanın yapılan çağrıları izlemesine, yönlendirmesine ve önlemesine olanak sağlar."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"kısa mesajları al (SMS)"</string>
@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ayarlara eriş"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Uygulamaya, yerel Bluetooth telefonunu yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Uygulama tarafından yapılan Bluetooth eşleştirmelerine izin ver"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Uygulamaya, kullanıcının müdahalesi olmadan uzak cihazlarla eşleme izni verir."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Uygulamaya, kullanıcının müdahalesi olmadan uzak cihazlarla eşleme izni verir."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX\'e bağlan veya WiMAX bağlantısını kes"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Uygulamaya, WiMAX\'in etkin olup olmadığını belirleme ve bağlı tüm WiMAX ağlarıyla ilgili bilgilere erişme izni verir."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX durumunu değiştir"</string>
@@ -1647,4 +1650,26 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Daha sonra tekrar deneyin"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Tam ekrandan çıkmak için aşağıya hızlıca kaydırın"</string>
+    <!-- no translation found for done_label (2093726099505892398) -->
+    <skip />
+    <!-- no translation found for hour_picker_description (6698199186859736512) -->
+    <skip />
+    <!-- no translation found for minute_picker_description (8606010966873791190) -->
+    <skip />
+    <!-- no translation found for select_hours (6043079511766008245) -->
+    <skip />
+    <!-- no translation found for select_minutes (3974345615920336087) -->
+    <skip />
+    <!-- no translation found for day_picker_description (8990847925961297968) -->
+    <skip />
+    <!-- no translation found for year_picker_description (5524331207436052403) -->
+    <skip />
+    <!-- no translation found for select_day (7774759604701773332) -->
+    <skip />
+    <!-- no translation found for select_year (7952052866994196170) -->
+    <skip />
+    <!-- no translation found for item_is_selected (949687401682476608) -->
+    <skip />
+    <!-- no translation found for deleted_key (7659477886625566590) -->
+    <skip />
 </resources>

@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"الدخول إلى إعدادات بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"للسماح للتطبيق بتهيئة لوحة البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"للسماح للتطبيق بتهيئة هاتف البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"السماح بإقران البلوتوث مع التطبيق"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"للسماح بإقران لتطبيق مع الأجهزة البعيدة بدون تدخل المستخدم."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"للسماح بإقران لتطبيق مع الأجهزة البعيدة بدون تدخل المستخدم."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"الاتصال بـشبكة WiMAX وقطع الاتصال بها"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"للسماح للتطبيق بتحديد ما إذا تم تمكين WiMAX وتحديد معلومات حول أية شبكات WiMAX متصلة."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"تغيير حالة WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"أعد المحاولة لاحقًا"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"التمرير من أعلى لأسفل للخروج من وضع ملء الشاشة"</string>
+    <string name="done_label" msgid="2093726099505892398">"تم"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"شريط التمرير الدائري للساعات"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"شريط التمرير الدائري للدقائق"</string>
+    <string name="select_hours" msgid="6043079511766008245">"تحديد الساعات"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"تحديد الدقائق"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"شبكة الشهر مكونة من الأيام"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"قائمة الأعوام"</string>
+    <string name="select_day" msgid="7774759604701773332">"تحديد الشهر واليوم"</string>
+    <string name="select_year" msgid="7952052866994196170">"تحديد العام"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"تم تحديد <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
 </resources>

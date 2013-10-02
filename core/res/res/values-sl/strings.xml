@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"dostop do nastavitev Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Programu omogoča konfiguriranje lokalnega tabličnega računalnika Bluetooth ter zaznavanje oddaljenih naprav in združevanje z njimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Programu omogoča konfiguriranje lokalnega telefona s tehnologijo Bluetooth ter odkrivanje oddaljenih naprav in povezovanje z njimi."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"aplikaciji dovoli seznanjanje prek povezave Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Aplikaciji dovoljuje seznanjanje z oddaljenimi napravami brez interakcije uporabnika."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Aplikaciji dovoljuje seznanjanje z oddaljenimi napravami brez interakcije uporabnika."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"vzpostavitev povezave z omrežjem WiMax in prekinitev povezave z njim"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Aplikaciji omogoča, da ugotovi, ali je WiMAX omogočen, in ogled podatkov o povezanih omrežjih WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Sprememba stanja omrežja WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Povlecite z vrha, da zaprete celozas. način"</string>
+    <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Okrogli drsnik za ure"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Okrogli drsnik za minute"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Izberite ure"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Izberite minute"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Mesečna mreža dni"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Seznam let"</string>
+    <string name="select_day" msgid="7774759604701773332">"Izberite mesec in dan"</string>
+    <string name="select_year" msgid="7952052866994196170">"Izberite leto"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"Izbrano: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
 </resources>

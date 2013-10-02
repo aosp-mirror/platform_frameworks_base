@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-instellingen openen"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Bluetooth-koppeling door app toestaan"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Probeer het later opnieuw"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Van boven omlaag vegen: voll. scherm sluiten"</string>
+    <string name="done_label" msgid="2093726099505892398">"Gereed"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Ronde schuifregelaar voor uren"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Ronde schuifregelaar voor minuten"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Uren selecteren"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Minuten selecteren"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Maandraster van dagen"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Jaarlijst"</string>
+    <string name="select_day" msgid="7774759604701773332">"Maand en dag selecteren"</string>
+    <string name="select_year" msgid="7952052866994196170">"Jaar selecteren"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> geselecteerd"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> verwijderd"</string>
 </resources>

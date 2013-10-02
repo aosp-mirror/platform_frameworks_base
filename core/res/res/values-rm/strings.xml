@@ -1025,6 +1025,12 @@
     <skip />
     <!-- no translation found for permdesc_bluetoothAdmin (8931682159331542137) -->
     <skip />
+    <!-- no translation found for permlab_bluetoothPriv (4009494246009513828) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothPriv (8045735193417468857) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothPriv (8045735193417468857) -->
+    <skip />
     <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
     <skip />
     <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
@@ -2727,5 +2733,27 @@
     <!-- no translation found for restr_pin_try_later (973144472490532377) -->
     <skip />
     <!-- no translation found for transient_navigation_confirmation (8554991488096662508) -->
+    <skip />
+    <!-- no translation found for done_label (2093726099505892398) -->
+    <skip />
+    <!-- no translation found for hour_picker_description (6698199186859736512) -->
+    <skip />
+    <!-- no translation found for minute_picker_description (8606010966873791190) -->
+    <skip />
+    <!-- no translation found for select_hours (6043079511766008245) -->
+    <skip />
+    <!-- no translation found for select_minutes (3974345615920336087) -->
+    <skip />
+    <!-- no translation found for day_picker_description (8990847925961297968) -->
+    <skip />
+    <!-- no translation found for year_picker_description (5524331207436052403) -->
+    <skip />
+    <!-- no translation found for select_day (7774759604701773332) -->
+    <skip />
+    <!-- no translation found for select_year (7952052866994196170) -->
+    <skip />
+    <!-- no translation found for item_is_selected (949687401682476608) -->
+    <skip />
+    <!-- no translation found for deleted_key (7659477886625566590) -->
     <skip />
 </resources>

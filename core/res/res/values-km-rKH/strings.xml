@@ -163,9 +163,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"របៀប​ស្ងាត់"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"បិទ​សំឡេង"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"បើក​សំឡេង"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"របៀប​ជិះ​យន្តហោះ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ពេល​ជិះ​យន្តហោះ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"បាន​បើក​របៀប​ពេល​ជិះ​យន្ត​ហោះ"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀប​យន្តហោះ"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ប្រព័ន្ធ​​ Android"</string>
@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ចូល​ដំណើរការ​​ការ​កំណត់​ប៊្លូធូស"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ឲ្យ​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​កុំព្យូទ័រ​បន្ទះ​ប៊្លូធូស​មូលដ្ឋាន និង​រកមើល ព្រម​ទាំង​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ។"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ឲ្យ​កម្មវិធី​មើល​​ការ​កំណត់​រចនាសម្ព័ន្ធ​ប៊្លូធូស​ក្នុង​ទូរស័ព្ទ ដើម្បី​រកមើល និង​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ។"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"ឲ្យ​ប៊្លូធូស​ផ្គូផ្គង​ជា​មួយ​កម្មវិធី"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ភ្ជាប់ និង​ផ្ដាច់​ពី WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ឲ្យ​កម្មវិធី​កំណត់​ថា​តើ WiMAX ត្រូវ​បាន​បើក និង​ព័ត៌មាន​អំពី​បណ្ដាញ WiMAX ដែល​ត្រូវ​បាន​តភ្ជាប់។"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ប្ដូរ​ស្ថានភាព WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"សូម​ព្យាយាម​ម្ដងទៀត​នៅ​ពេល​ក្រោយ។"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"អូស​​​ចុះក្រោម ដើម្បី​ចេញ​ពី​ការ​បង្ហាញ​ពេញ​អេក្រង់"</string>
+    <string name="done_label" msgid="2093726099505892398">"រួចរាល់"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"គ្រាប់​រំកិល​រង្វង់​ម៉ោង"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"គ្រាប់​រំកិល​រង្វង់​នាទី"</string>
+    <string name="select_hours" msgid="6043079511766008245">"ជ្រើស​ម៉ោង"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"ជ្រើស​នាទី"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"ក្រឡា​​​ខែ​នៃ​ថ្ងៃ"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"បញ្ជី​ឆ្នាំ"</string>
+    <string name="select_day" msgid="7774759604701773332">"ជ្រើស​ខែ និង​ថ្ងៃ"</string>
+    <string name="select_year" msgid="7952052866994196170">"ជ្រើស​ឆ្នាំ"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"បាន​ជ្រើស <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
 </resources>

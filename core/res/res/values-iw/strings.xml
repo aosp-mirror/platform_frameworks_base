@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"גישה להגדרות Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"מאפשר לאפליקציה להגדיר את תצורתו של הטאבלט המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"מאפשר לאפליקציה להגדיר את תצורתו של הטלפון המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"אפשר התאמת Bluetooth על ידי האפליקציה"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"מאפשרת לאפליקציה לבצע התאמה עם מכשירים מרוחקים ללא התערבות המשתמש."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"מאפשרת לאפליקציה לבצע התאמה עם מכשירים מרוחקים ללא התערבות המשתמש."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"התחברות והתנתקות מ-WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"מאפשר לאפליקציה לדעת האם WiNMAX מופעל, כמו גם לקבל מידע האם רשתות WiNMAX כלשהן מחוברות."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"שנה את מצב WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"נסה שוב מאוחר יותר"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"החלק מטה מהחלק העליון כדי לצאת ממסך מלא"</string>
+    <string name="done_label" msgid="2093726099505892398">"בוצע"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"מחוון שעות מעגלי"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"מחוון דקות מעגלי"</string>
+    <string name="select_hours" msgid="6043079511766008245">"בחר שעות"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"בחר דקות"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"בחירת ימים בחודש בתצוגת רשת"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"רשימת שנים"</string>
+    <string name="select_day" msgid="7774759604701773332">"בחר חודש ויום"</string>
+    <string name="select_year" msgid="7952052866994196170">"בחר שנה"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> נבחר"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> נמחק"</string>
 </resources>

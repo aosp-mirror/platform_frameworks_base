@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses setelan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Mengizinkan apl mengonfigurasi tablet Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"memungkinkan penyandingan Bluetooth oleh Aplikasi"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Memungkinkan aplikasi disandingkan dengan perangkat jarak jauh tanpa interaksi pengguna."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Memungkinkan aplikasi disandingkan dengan perangkat jarak jauh tanpa interaksi pengguna."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambungkan dan putuskan dari WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang tersambung."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ubah status WiMAX"</string>
@@ -1647,4 +1650,26 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Coba lagi nanti"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Gesek ke bawah untuk keluar dari layar penuh"</string>
+    <!-- no translation found for done_label (2093726099505892398) -->
+    <skip />
+    <!-- no translation found for hour_picker_description (6698199186859736512) -->
+    <skip />
+    <!-- no translation found for minute_picker_description (8606010966873791190) -->
+    <skip />
+    <!-- no translation found for select_hours (6043079511766008245) -->
+    <skip />
+    <!-- no translation found for select_minutes (3974345615920336087) -->
+    <skip />
+    <!-- no translation found for day_picker_description (8990847925961297968) -->
+    <skip />
+    <!-- no translation found for year_picker_description (5524331207436052403) -->
+    <skip />
+    <!-- no translation found for select_day (7774759604701773332) -->
+    <skip />
+    <!-- no translation found for select_year (7952052866994196170) -->
+    <skip />
+    <!-- no translation found for item_is_selected (949687401682476608) -->
+    <skip />
+    <!-- no translation found for deleted_key (7659477886625566590) -->
+    <skip />
 </resources>

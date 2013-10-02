@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få adgang til Bluetooth-indstillinger"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillader, at appen kan konfigurere den lokale Bluetooth-tablet samt finde og parre med fjerne enheder."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillader, at appen kan konfigurere den lokale Bluetooth-telefon samt finde og parre med eksterne enheder."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"tillader Bluetooth-parring efter applikation"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Tillader, at appen parrer med eksterne enheder uden brugerinteraktion."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Tillader, at appen parrer med eksterne enheder uden brugerinteraktion."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"tilslut og afbryd fra WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillader, at appen kan bestemme, hvorvidt WiMAX er aktiveret, og oplysninger om eventuelle WiMAX-netværk, der er forbundet."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Skift WiMAX-tilstand"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Prøv igen senere"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Stryg ned fra toppen for at stoppe fuld skærm"</string>
+    <string name="done_label" msgid="2093726099505892398">"Udfør"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Cirkulær timevælger"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Cirkulær minutvælger"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Vælg timer"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Vælg minutter"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Månedsgitter med dage"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Liste over år"</string>
+    <string name="select_day" msgid="7774759604701773332">"Vælg måned og dag"</string>
+    <string name="select_year" msgid="7952052866994196170">"Vælg år"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
 </resources>
