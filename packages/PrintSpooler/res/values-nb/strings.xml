@@ -35,8 +35,11 @@
     <string name="all_printers" msgid="5018829726861876202">"Alle skrivere"</string>
     <string name="search" msgid="5421724265322228497">"Søk"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Alle skrivere"</string>
+    <!-- no translation found for add_print_service_label (5356702546188981940) -->
+    <skip />
     <string name="choose_print_service" msgid="3740309762324459694">"Velg utskriftstjeneste"</string>
-    <string name="search_play_store" msgid="1575218005860538249">"Søk i Play-butikken"</string>
+    <!-- no translation found for print_no_printers_found (5932593791392441303) -->
+    <skip />
     <string name="printing_notification_title_template" msgid="295903957762447362">"Skriver ut <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Avbryter <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Skriverfeil <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
@@ -45,8 +48,7 @@
     <string name="restart" msgid="2472034227037808749">"Start på nytt"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Ingen forbindelse med skriveren"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ukjent"</string>
-    <!-- no translation found for printer_unavailable (2434170617003315690) -->
-    <skip />
+    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – utilgjengelig"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Svart og hvitt"</item>
     <item msgid="2762241247228983754">"Farge"</item>
