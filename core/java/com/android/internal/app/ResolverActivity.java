@@ -100,8 +100,20 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        onCreate(savedInstanceState, makeMyIntent(),
-                getResources().getText(com.android.internal.R.string.whichApplication),
+        // Use a specialized prompt when we're handling the 'Home' app startActivity()
+        final int titleResource;
+        final Intent intent = makeMyIntent();
+        final Set<String> categories = intent.getCategories();
+        if (Intent.ACTION_MAIN.equals(intent.getAction())
+                && categories != null
+                && categories.size() == 1
+                && categories.contains(Intent.CATEGORY_HOME)) {
+            titleResource = com.android.internal.R.string.whichHomeApplication;
+        } else {
+            titleResource = com.android.internal.R.string.whichApplication;
+        }
+
+        onCreate(savedInstanceState, intent, getResources().getText(titleResource),
                 null, null, true);
     }
 
