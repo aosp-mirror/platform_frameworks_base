@@ -2250,6 +2250,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             } else {
                 isScrap[0] = true;
+
+                // Clear any system-managed transient state so that we can
+                // recycle this view and bind it to different data.
+                if (child.isAccessibilityFocused()) {
+                    child.clearAccessibilityFocus();
+                }
+
                 child.dispatchFinishTemporaryDetach();
             }
         } else {
@@ -5069,6 +5076,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     count++;
                     int position = firstPosition + i;
                     if (position >= headerViewsCount && position < footerViewsStart) {
+                        // The view will be rebound to new data, clear any
+                        // system-managed transient state.
+                        if (child.isAccessibilityFocused()) {
+                            child.clearAccessibilityFocus();
+                        }
                         mRecycler.addScrapView(child, position);
                     }
                 }
@@ -5087,6 +5099,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     count++;
                     int position = firstPosition + i;
                     if (position >= headerViewsCount && position < footerViewsStart) {
+                        // The view will be rebound to new data, clear any
+                        // system-managed transient state.
+                        if (child.isAccessibilityFocused()) {
+                            child.clearAccessibilityFocus();
+                        }
                         mRecycler.addScrapView(child, position);
                     }
                 }
@@ -6660,8 +6677,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             lp.scrappedFromPosition = position;
 
-            // Don't scrap header or footer views, or views that should
-            // otherwise not be recycled.
+            // Remove but don't scrap header or footer views, or views that
+            // should otherwise not be recycled.
             final int viewType = lp.viewType;
             if (!shouldRecycleViewType(viewType)) {
                 return;
@@ -6698,6 +6715,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mCurrentScrap.add(scrap);
                 } else {
                     mScrapViews[viewType].add(scrap);
+                }
+
+                // Clear any system-managed transient state.
+                if (scrap.isAccessibilityFocused()) {
+                    scrap.clearAccessibilityFocus();
                 }
 
                 scrap.setAccessibilityDelegate(null);
