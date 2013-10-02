@@ -37,6 +37,8 @@
     <string name="drawer_close" msgid="7602734368552123318">"Masquer les racines"</string>
     <string name="save_error" msgid="6167009778003223664">"Échec de l\'enregistrement du document"</string>
     <string name="create_error" msgid="3735649141335444215">"Échec de la création du dossier"</string>
+    <!-- no translation found for query_error (1222448261663503501) -->
+    <skip />
     <string name="root_recent" msgid="4470053704320518133">"Récents"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> disponible"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Services de stockage"</string>
