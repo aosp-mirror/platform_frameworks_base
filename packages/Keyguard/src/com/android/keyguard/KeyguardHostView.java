@@ -428,10 +428,11 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private boolean widgetsDisabled() {
+        boolean disabledByLowRamDevice = ActivityManager.isLowRamDeviceStatic();
         boolean disabledByDpm =
                 (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0;
         boolean disabledByUser = !mLockPatternUtils.getWidgetsEnabled();
-        return disabledByDpm || disabledByUser;
+        return disabledByLowRamDevice || disabledByDpm || disabledByUser;
     }
 
     private boolean cameraDisabledByDpm() {
