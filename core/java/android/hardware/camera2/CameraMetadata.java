@@ -19,6 +19,7 @@ package android.hardware.camera2;
 import android.hardware.camera2.impl.CameraMetadataNative;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -105,7 +106,9 @@ public abstract class CameraMetadata {
 
         Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {
-            if (field.getDeclaringClass().isAssignableFrom(Key.class)) {
+            // Filter for Keys that are public
+            if (field.getType().isAssignableFrom(Key.class) &&
+                    (field.getModifiers() & Modifier.PUBLIC) != 0) {
                 Key<?> key;
                 try {
                     key = (Key<?>) field.get(instance);
