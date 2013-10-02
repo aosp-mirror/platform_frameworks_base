@@ -61,7 +61,7 @@ Platform Versions</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on September 4, 2013.
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 2, 2013.
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
@@ -92,7 +92,7 @@ Screens</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on September 4, 2013
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 2, 2013
 <br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
 
@@ -139,7 +139,7 @@ uses.</p>
 
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on September 4, 2013</em></p>
+<p style="clear:both"><em>Data collected during a 7-day period ending on October 2, 2013</em></p>
 
 
 
@@ -157,17 +157,17 @@ uses.</p>
 var VERSION_DATA =
 [
   {
-    "chart": "//chart.googleapis.com/chart?chs=500x250&cht=p&chco=c4df9b%2C6fad0c&chd=t%3A2.4%2C30.7%2C0.1%2C21.7%2C45.1&chf=bg%2Cs%2C00000000&chl=Froyo%7CGingerbread%7CHoneycomb%7CIce%20Cream%20Sandwich%7CJelly%20Bean",
+    "chart": "//chart.googleapis.com/chart?chs=500x250&cht=p&chco=c4df9b%2C6fad0c&chf=bg%2Cs%2C00000000&chd=t%3A2.2%2C28.5%2C0.1%2C20.6%2C48.6&chl=Froyo%7CGingerbread%7CHoneycomb%7CIce%20Cream%20Sandwich%7CJelly%20Bean",
     "data": [
       {
         "api": 8,
         "name": "Froyo",
-        "perc": "2.4"
+        "perc": "2.2"
       },
       {
         "api": 10,
         "name": "Gingerbread",
-        "perc": "30.7"
+        "perc": "28.5"
       },
       {
         "api": 13,
@@ -177,17 +177,22 @@ var VERSION_DATA =
       {
         "api": 15,
         "name": "Ice Cream Sandwich",
-        "perc": "21.7"
+        "perc": "20.6"
       },
       {
         "api": 16,
         "name": "Jelly Bean",
-        "perc": "36.6"
+        "perc": "36.5"
       },
       {
         "api": 17,
         "name": "Jelly Bean",
-        "perc": "8.5"
+        "perc": "10.6"
+      },
+      {
+        "api": 18,
+        "name": "Jelly Bean",
+        "perc": "1.5"
       }
     ]
   }
@@ -202,21 +207,21 @@ var SCREEN_DATA =
   {
     "data": {
       "Large": {
-        "hdpi": "0.4",
+        "hdpi": "0.5",
         "ldpi": "0.6",
-        "mdpi": "3.4",
+        "mdpi": "3.5",
         "tvdpi": "1.2",
-        "xhdpi": "0.5"
+        "xhdpi": "0.6"
       },
       "Normal": {
-        "hdpi": "33.6",
+        "hdpi": "33.5",
         "ldpi": "0.1",
-        "mdpi": "15.7",
-        "xhdpi": "23.1",
-        "xxhdpi": "7.1"
+        "mdpi": "15.3",
+        "xhdpi": "22.8",
+        "xxhdpi": "7.7"
       },
       "Small": {
-        "ldpi": "9.5"
+        "ldpi": "9.4"
       },
       "Xlarge": {
         "hdpi": "0.3",
@@ -224,8 +229,8 @@ var SCREEN_DATA =
         "xhdpi": "0.1"
       }
     },
-    "densitychart": "//chart.googleapis.com/chart?chs=400x250&cht=p&chco=c4df9b%2C6fad0c&chd=t%3A10.2%2C23.5%2C1.2%2C34.3%2C23.7%2C7.1&chf=bg%2Cs%2C00000000&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi",
-    "layoutchart": "//chart.googleapis.com/chart?chs=400x250&cht=p&chco=c4df9b%2C6fad0c&chd=t%3A4.8%2C6.1%2C79.6%2C9.5&chf=bg%2Cs%2C00000000&chl=Xlarge%7CLarge%7CNormal%7CSmall"
+    "densitychart": "//chart.googleapis.com/chart?chs=400x250&cht=p&chco=c4df9b%2C6fad0c&chf=bg%2Cs%2C00000000&chd=t%3A10.1%2C23.3%2C1.2%2C34.3%2C23.5%2C7.7&chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi",
+    "layoutchart": "//chart.googleapis.com/chart?chs=400x250&cht=p&chco=c4df9b%2C6fad0c&chf=bg%2Cs%2C00000000&chd=t%3A4.8%2C6.4%2C79.5%2C9.4&chl=Xlarge%7CLarge%7CNormal%7CSmall"
   }
 ];
 
