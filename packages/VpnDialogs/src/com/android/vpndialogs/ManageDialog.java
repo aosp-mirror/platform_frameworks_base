@@ -147,7 +147,7 @@ public class ManageDialog extends AlertActivity implements
         mHandler.removeMessages(0);
 
         if (!isFinishing()) {
-            if (mConfig.startTime != 0) {
+            if (mConfig.startTime != -1) {
                 long seconds = (SystemClock.elapsedRealtime() - mConfig.startTime) / 1000;
                 mDuration.setText(String.format("%02d:%02d:%02d",
                         seconds / 3600, seconds / 60 % 60, seconds % 60));

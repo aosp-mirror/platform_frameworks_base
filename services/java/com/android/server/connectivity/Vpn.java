@@ -1096,6 +1096,9 @@ public class Vpn extends BaseNetworkStateTracker {
 
                 // Here is the last step and it must be done synchronously.
                 synchronized (Vpn.this) {
+                    // Set the start time
+                    mConfig.startTime = SystemClock.elapsedRealtime();
+
                     // Check if the thread is interrupted while we are waiting.
                     checkpoint(false);
 
