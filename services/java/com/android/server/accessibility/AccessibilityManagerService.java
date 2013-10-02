@@ -1572,6 +1572,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 colorOffset = outputOffset;
                 outputOffset = temp;
 
+                hasColorTransform = true;
                 nativeSetDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
             } else {
                 nativeSetDaltonizerMode(daltonizerMode);
