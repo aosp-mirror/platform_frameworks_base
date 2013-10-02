@@ -7923,11 +7923,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     final void rebuildAppWindowListLocked() {
-        final int numDisplays = mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-            rebuildAppWindowListLocked(displayContent);
-        }
+        // TODO: Multidisplay, when ActivityStacks and tasks exist on more than one display.
+        rebuildAppWindowListLocked(getDefaultDisplayContentLocked());
     }
 
     private void rebuildAppWindowListLocked(final DisplayContent displayContent) {
