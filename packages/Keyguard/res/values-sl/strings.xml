@@ -73,7 +73,7 @@
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Gumb za ustavitev"</string>
     <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Za nadaljevanje odklenite"</string>
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Zagon je preklican"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Povlecite pripomoček <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>, da ga izbrišete."</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Izpustite pripomoček <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>, da ga izbrišete."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Pripomoček <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ne bo izbrisan."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
