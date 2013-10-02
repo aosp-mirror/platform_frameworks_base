@@ -235,7 +235,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PSS = localLOGV || false;
-    static final boolean DEBUG_LOCKSCREEN = localLOGV || true;
+    static final boolean DEBUG_LOCKSCREEN = localLOGV || false;
     static final boolean VALIDATE_TOKENS = true;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
