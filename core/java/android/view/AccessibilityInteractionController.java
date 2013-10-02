@@ -423,9 +423,15 @@ final class AccessibilityInteractionController {
                         }
                     } break;
                     case AccessibilityNodeInfo.FOCUS_INPUT: {
-                        // Input focus cannot go to virtual views.
                         View target = root.findFocus();
-                        if (target != null && isShown(target)) {
+                        if (target == null || !isShown(target)) {
+                            break;
+                        }
+                        AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
+                        if (provider != null) {
+                            focused = provider.findFocus(focusType);
+                        }
+                        if (focused == null) {
                             focused = target.createAccessibilityNodeInfo();
                         }
                     } break;
