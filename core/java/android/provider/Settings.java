@@ -4374,6 +4374,20 @@ public final class Settings {
         public static final String TRANSIENT_NAV_CONFIRMATIONS = "transient_nav_confirmations";
 
         /**
+         * This is the query URI for finding a print service to install.
+         *
+         * @hide
+         */
+        public static final String PRINT_SERVICE_SEARCH_URI = "print_service_search_uri";
+
+        /**
+         * This is the query URI for finding a NFC payment service to install.
+         *
+         * @hide
+         */
+        public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
