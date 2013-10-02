@@ -2162,6 +2162,7 @@ public class MediaPlayer implements SubtitleController.Listener
     private static final int MEDIA_STARTED = 6;
     private static final int MEDIA_PAUSED = 7;
     private static final int MEDIA_STOPPED = 8;
+    private static final int MEDIA_SKIPPED = 9;
     private static final int MEDIA_TIMED_TEXT = 99;
     private static final int MEDIA_ERROR = 100;
     private static final int MEDIA_INFO = 200;
@@ -2227,6 +2228,9 @@ public class MediaPlayer implements SubtitleController.Listener
               if (mOnSeekCompleteListener != null) {
                   mOnSeekCompleteListener.onSeekComplete(mMediaPlayer);
               }
+              // fall through
+
+            case MEDIA_SKIPPED:
               if (mTimeProvider != null) {
                   mTimeProvider.onSeekComplete(mMediaPlayer);
               }
@@ -2812,6 +2816,7 @@ public class MediaPlayer implements SubtitleController.Listener
         private Handler mEventHandler;
         private boolean mRefresh = false;
         private boolean mPausing = false;
+        private boolean mSeeking = false;
         private static final int NOTIFY = 1;
         private static final int NOTIFY_TIME = 0;
         private static final int REFRESH_AND_NOTIFY_TIME = 1;
@@ -2849,7 +2854,15 @@ public class MediaPlayer implements SubtitleController.Listener
         }
 
         private void scheduleNotification(int type, long delayUs) {
+            // ignore time notifications until seek is handled
+            if (mSeeking &&
+                    (type == NOTIFY_TIME || type == REFRESH_AND_NOTIFY_TIME)) {
+                return;
+            }
+
             if (DEBUG) Log.v(TAG, "scheduleNotification " + type + " in " + delayUs);
+            mStopped = type == NOTIFY_STOP;
+            mSeeking = type == NOTIFY_SEEK;
             mEventHandler.removeMessages(NOTIFY);
             Message msg = mEventHandler.obtainMessage(NOTIFY, type, 0);
             mEventHandler.sendMessageDelayed(msg, (int) (delayUs / 1000));
@@ -2876,7 +2889,6 @@ public class MediaPlayer implements SubtitleController.Listener
             synchronized(this) {
                 if (DEBUG) Log.d(TAG, "onPaused: " + paused);
                 if (mStopped) { // handle as seek if we were stopped
-                    mStopped = false;
                     scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
                 } else {
                     mPausing = paused;  // special handling if player disappeared
@@ -2890,7 +2902,6 @@ public class MediaPlayer implements SubtitleController.Listener
             synchronized(this) {
                 if (DEBUG) Log.d(TAG, "onStopped");
                 mPaused = true;
-                mStopped = true;
                 scheduleNotification(NOTIFY_STOP, 0 /* delay */);
             }
         }
@@ -2899,7 +2910,6 @@ public class MediaPlayer implements SubtitleController.Listener
         @Override
         public void onSeekComplete(MediaPlayer mp) {
             synchronized(this) {
-                mStopped = false;
                 scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
             }
         }
@@ -2914,6 +2924,7 @@ public class MediaPlayer implements SubtitleController.Listener
         }
 
         private synchronized void notifySeek() {
+            mSeeking = false;
             try {
                 long timeUs = getCurrentTimeUs(true, false);
                 if (DEBUG) Log.d(TAG, "onSeekComplete at " + timeUs);
@@ -3025,6 +3036,11 @@ public class MediaPlayer implements SubtitleController.Listener
             }
             long nextTimeUs = nowUs;
 
+            if (mSeeking) {
+                // skip timed-event notifications until seek is complete
+                return;
+            }
+
             if (DEBUG) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("notifyTimedEvent(").append(mLastTimeUs).append(" -> ")
@@ -3124,6 +3140,11 @@ public class MediaPlayer implements SubtitleController.Listener
                     if (monotonic && mLastTimeUs < mLastReportedTime) {
                         /* have to adjust time */
                         mTimeAdjustment = mLastReportedTime - mLastTimeUs;
+                        if (mTimeAdjustment > 1000000) {
+                            // schedule seeked event if time jumped significantly
+                            // TODO: do this properly by introducing an exception
+                            scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
+                        }
                     } else {
                         mTimeAdjustment = 0;
                     }
