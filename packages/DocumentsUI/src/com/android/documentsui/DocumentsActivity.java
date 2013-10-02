@@ -35,6 +35,7 @@ import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -878,6 +879,7 @@ public class DocumentsActivity extends Activity {
                         mRoot.authority, mRoot.documentId);
                 return DocumentInfo.fromUri(getContentResolver(), uri);
             } catch (FileNotFoundException e) {
+                Log.w(TAG, "Failed to find root", e);
                 return null;
             }
         }
@@ -1035,12 +1037,26 @@ public class DocumentsActivity extends Activity {
 
         @Override
         protected Uri doInBackground(Void... params) {
+            final ContentResolver resolver = getContentResolver();
             final DocumentInfo cwd = getCurrentDirectory();
-            final Uri childUri = DocumentsContract.createDocument(
-                    getContentResolver(), cwd.derivedUri, mMimeType, mDisplayName);
+
+            ContentProviderClient client = null;
+            Uri childUri = null;
+            try {
+                client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                        resolver, cwd.derivedUri.getAuthority());
+                childUri = DocumentsContract.createDocument(
+                        client, cwd.derivedUri, mMimeType, mDisplayName);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to create document", e);
+            } finally {
+                ContentProviderClient.releaseQuietly(client);
+            }
+
             if (childUri != null) {
                 saveStackBlocking();
             }
+
             return childUri;
         }
 
