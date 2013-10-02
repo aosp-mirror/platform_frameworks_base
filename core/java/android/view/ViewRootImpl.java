@@ -1348,8 +1348,12 @@ public final class ViewRootImpl implements ViewParent,
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
 
+        // Determine whether to compute insets.
+        // If there are no inset listeners remaining then we may still need to compute
+        // insets in case the old insets were non-empty and must be reset.
         final boolean computesInternalInsets =
-                attachInfo.mTreeObserver.hasComputeInternalInsetsListeners();
+                attachInfo.mTreeObserver.hasComputeInternalInsetsListeners()
+                || attachInfo.mHasNonEmptyGivenInternalInsets;
 
         boolean insetsPending = false;
         int relayoutResult = 0;
@@ -1764,6 +1768,7 @@ public final class ViewRootImpl implements ViewParent,
 
             // Compute new insets in place.
             attachInfo.mTreeObserver.dispatchOnComputeInternalInsets(insets);
+            attachInfo.mHasNonEmptyGivenInternalInsets = !insets.isEmpty();
 
             // Tell the window manager.
             if (insetsPending || !mLastGivenInsets.equals(insets)) {
