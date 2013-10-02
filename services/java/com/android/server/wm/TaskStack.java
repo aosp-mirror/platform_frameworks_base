@@ -71,8 +71,8 @@ public class TaskStack {
         mStackId = stackId;
         mDisplayContent = displayContent;
         final int displayId = displayContent.getDisplayId();
-        mDimLayer = new DimLayer(service, displayContent);
-        mAnimationBackgroundSurface = new DimLayer(service, displayContent);
+        mDimLayer = new DimLayer(service, this);
+        mAnimationBackgroundSurface = new DimLayer(service, this);
     }
 
     DisplayContent getDisplayContent() {
