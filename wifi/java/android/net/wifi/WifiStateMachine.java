@@ -1456,6 +1456,9 @@ public class WifiStateMachine extends StateMachine {
     public void setCountryCode(String countryCode, boolean persist) {
         if (persist) {
             mPersistedCountryCode = countryCode;
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.WIFI_COUNTRY_CODE,
+                    countryCode);
         }
         sendMessage(CMD_SET_COUNTRY_CODE, countryCode);
         mWifiP2pChannel.sendMessage(WifiP2pService.SET_COUNTRY_CODE, countryCode);
@@ -1688,8 +1691,8 @@ public class WifiStateMachine extends StateMachine {
      * Set the country code from the system setting value, if any.
      */
     private void setCountryCode() {
-        String countryCode = mContext.getResources().getString(
-                                    R.string.config_wifi_default_country_code);
+        String countryCode = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.WIFI_COUNTRY_CODE);
         if (countryCode != null && !countryCode.isEmpty()) {
             setCountryCode(countryCode, false);
         } else {
@@ -2414,6 +2417,13 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_BOOT_COMPLETED:
                     String countryCode = mPersistedCountryCode;
                     if (TextUtils.isEmpty(countryCode) == false) {
+                        Settings.Global.putString(mContext.getContentResolver(),
+                                Settings.Global.WIFI_COUNTRY_CODE,
+                                countryCode);
+                        // it may be that the state transition that should send this info
+                        // to the driver happened between mPersistedCountryCode getting set
+                        // and now, so simply persisting it here would mean we have sent
+                        // nothing to the driver.  Send the cmd so it might be set now.
                         sendMessageAtFrontOfQueue(CMD_SET_COUNTRY_CODE, countryCode);
                     }
                     break;

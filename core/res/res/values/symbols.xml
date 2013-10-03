@@ -818,7 +818,6 @@
   <java-symbol type="string" name="wifi_tether_configure_ssid_default" />
   <java-symbol type="string" name="wifi_watchdog_network_disabled" />
   <java-symbol type="string" name="wifi_watchdog_network_disabled_detailed" />
-  <java-symbol type="string" name="config_wifi_default_country_code" />
   <java-symbol type="string" name="imei" />
   <java-symbol type="string" name="meid" />
   <java-symbol type="string" name="granularity_label_character" />
