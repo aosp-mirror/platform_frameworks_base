@@ -197,6 +197,8 @@ public final class CameraManager {
      * {@link #openCamera}.
      *
      * @param cameraId The unique identifier of the camera device to open
+     * @param listener The listener for the camera. Must not be null.
+     * @param handler  The handler to call the listener on. Must not be null.
      *
      * @throws CameraAccessException if the camera is disabled by device policy,
      * or too many camera devices are already open, or the cameraId does not match
@@ -204,11 +206,14 @@ public final class CameraManager {
      *
      * @throws SecurityException if the application does not have permission to
      * access the camera
+     * @throws IllegalArgumentException if listener or handler is null.
      *
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    private CameraDevice openCamera(String cameraId) throws CameraAccessException {
+    private void openCameraDeviceUserAsync(String cameraId,
+            CameraDevice.StateListener listener, Handler handler)
+            throws CameraAccessException {
         try {
 
             synchronized (mLock) {
@@ -216,7 +221,10 @@ public final class CameraManager {
                 ICameraDeviceUser cameraUser;
 
                 android.hardware.camera2.impl.CameraDevice device =
-                        new android.hardware.camera2.impl.CameraDevice(cameraId);
+                        new android.hardware.camera2.impl.CameraDevice(
+                                cameraId,
+                                listener,
+                                handler);
 
                 BinderHolder holder = new BinderHolder();
                 mCameraService.connectDevice(device.getCallbacks(),
@@ -225,10 +233,9 @@ public final class CameraManager {
                 cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
 
                 // TODO: factor out listener to be non-nested, then move setter to constructor
+                // For now, calling setRemoteDevice will fire initial
+                // onOpened/onUnconfigured callbacks.
                 device.setRemoteDevice(cameraUser);
-
-                return device;
-
             }
 
         } catch (NumberFormatException e) {
@@ -238,7 +245,6 @@ public final class CameraManager {
             throw e.asChecked();
         } catch (RemoteException e) {
             // impossible
-            return null;
         }
     }
 
@@ -303,16 +309,7 @@ public final class CameraManager {
             }
         }
 
-        final CameraDevice camera = openCamera(cameraId);
-        camera.setDeviceListener(listener, handler);
-
-        // TODO: make truly async in the camera service
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                listener.onOpened(camera);
-            }
-        });
+        openCameraDeviceUserAsync(cameraId, listener, handler);
     }
 
     /**
