@@ -21,6 +21,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.provider.Settings;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -151,6 +152,13 @@ public class PlatLogoActivity extends Activity {
         logo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                if (Settings.System.getLong(getContentResolver(), Settings.System.EGG_MODE, 0)
+                        == 0) {
+                    // For posterity: the moment this user unlocked the easter egg
+                    Settings.System.putLong(getContentResolver(),
+                            Settings.System.EGG_MODE,
+                            System.currentTimeMillis());
+                }
                 try {
                     startActivity(new Intent(Intent.ACTION_MAIN)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -158,7 +166,7 @@ public class PlatLogoActivity extends Activity {
                             | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                         .addCategory("com.android.internal.category.PLATLOGO"));
                 } catch (ActivityNotFoundException ex) {
-                    android.util.Log.e("PlatLogoActivity", "Couldn't find a piece of pie.");
+                    android.util.Log.e("PlatLogoActivity", "Couldn't catch a break.");
                 }
                 finish();
                 return true;
