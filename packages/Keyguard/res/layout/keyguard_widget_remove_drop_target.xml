@@ -26,7 +26,7 @@
     android:drawablePadding="4dp"
     android:text="@string/kg_reordering_delete_drop_target_text"
     android:textColor="#FFF"
-    android:textSize="13sp"
+    android:textSize="12dp"
     android:shadowColor="#000"
     android:shadowDy="1.0"
     android:shadowRadius="1.0"
