@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"存取藍牙設定"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允許應用程式設定本機藍牙平板電腦，以及搜尋遠端裝置並配對連線。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允許應用程式設定本機藍牙手機，以及搜尋遠端裝置並配對連線。"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"允許應用程式執行藍牙配對"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"允許應用程式自動與遠端裝置配對。"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"允許應用程式自動與遠端裝置配對。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"建立或中斷與 WiMAX 網路的連線"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"允許應用程式判斷是否已啟用 WiMAX，以及判讀任何已連上 WiMAX 網路的相關資訊。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"變更 WiMAX 狀態"</string>
@@ -1647,4 +1650,26 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"從頂端往下滑動即可結束全螢幕"</string>
+    <!-- no translation found for done_label (2093726099505892398) -->
+    <skip />
+    <!-- no translation found for hour_picker_description (6698199186859736512) -->
+    <skip />
+    <!-- no translation found for minute_picker_description (8606010966873791190) -->
+    <skip />
+    <!-- no translation found for select_hours (6043079511766008245) -->
+    <skip />
+    <!-- no translation found for select_minutes (3974345615920336087) -->
+    <skip />
+    <!-- no translation found for day_picker_description (8990847925961297968) -->
+    <skip />
+    <!-- no translation found for year_picker_description (5524331207436052403) -->
+    <skip />
+    <!-- no translation found for select_day (7774759604701773332) -->
+    <skip />
+    <!-- no translation found for select_year (7952052866994196170) -->
+    <skip />
+    <!-- no translation found for item_is_selected (949687401682476608) -->
+    <skip />
+    <!-- no translation found for deleted_key (7659477886625566590) -->
+    <skip />
 </resources>

@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Блютүүт тохиргоонд хандах"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Апп нь дотоод блютүүт таблетын тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Апп нь утасны дотоод блютүүтыг тохируулах боломжтой ба гадаад төхөөрөмжийг олох болон хос үүсгэх боломжтой."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Аппликешнд Блютүүт хоallow Bluetooth pairing by Application"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-д холбогдох болон салах"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Апп нь WiMAX идэвхтэй эсэх болон холбогдсон WiMAX сүлжээний талаар мэдээллийг тодорхойлох боломжтой."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX статусыг өөрчлөх"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Дараа дахин оролдоно уу"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Бүтэн дэлгэцээс гарахын тулд дээрээс нь эхлэн доош шудрана уу"</string>
+    <string name="done_label" msgid="2093726099505892398">"Дууссан"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Цаг гүйлгэгч"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Минут гүйлгэгч"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Цаг сонгоно уу"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Минут сонгоно уу"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Өдрүүдийг сараар"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Жилийн жагсаалт"</string>
+    <string name="select_day" msgid="7774759604701773332">"Сар болон өдрийг сонгоно уу"</string>
+    <string name="select_year" msgid="7952052866994196170">"Жилийг сонгоно уу"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> сонгогдсон"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> устсан"</string>
 </resources>

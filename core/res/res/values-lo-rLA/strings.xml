@@ -145,7 +145,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ປິດສຽງຣິງໂທນ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ສັ່ນພ້ອມສຽງຣິງໂທນ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ເປີດສຽງໂທເຂົ້າແລ້ວ"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"ກຳລັງປິດລົງ..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"ກຳລັງປິດລະບົບລົງ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ແທັບເລັດຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ໂທລະສັບຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ທ່ານຕ້ອງການທີ່ຈະປິດບໍ່?"</string>
@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ເຂົ້າເຖິງການຕັ້ງຄ່າ Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າແທັບເລັດ Bluetooth ພາຍໃນ ແລະຊອກຫາ ແລະເຊື່ອມຕໍ່ໄວ້ກັບອຸປະກອນພາຍນອກ."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າ Bluetooth ໃນໂທລະສັບ ເພື່ອຊອກຫາ ແລະການເຊື່ອມຕໍ່ກັບອຸປະກອນໄຮ້ສາຍພາຍນອກ."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຈັບຄູ່ Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຈາກ WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ອະນຸຍາດໃຫ້ແອັບຯກວດເບິ່ງວ່າ WiMAX ຖືກເປີດນຳໃຊ້ຢູ່ບໍ່ ແລະຂໍ້ມູນກ່ຽວກັບເຄືອຂ່າຍ WiMAX ອື່ນໆທີ່ກຳລັງເຊື່ອມຕໍ່ຢູ່."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ປ່ຽນສະຖານະ WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"ປັດລົງຈາກເທິງສຸດເພື່ອອກຈາກໂໝດເຕັມໜ້າຈໍ"</string>
+    <string name="done_label" msgid="2093726099505892398">"ແລ້ວໆ"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"ໂຕໝຸນປັບຊົ່ວໂມງ"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"ໂຕໝຸນປັບນາທີ"</string>
+    <string name="select_hours" msgid="6043079511766008245">"ເລືອກ​ຊົ່ວ​ໂມງ"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"ເລືອກນາ​ທີ"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"ຕາຕາລາງວັນທີເດືອນປີ"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"ລາຍການປີ"</string>
+    <string name="select_day" msgid="7774759604701773332">"ເລືອກເດືອນ ແລະ ວັນ"</string>
+    <string name="select_year" msgid="7952052866994196170">"ເລືອກ​ປີ"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ຖືກເລືອກແລ້ວ"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
 </resources>

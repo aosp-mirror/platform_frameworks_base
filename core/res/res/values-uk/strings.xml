@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"отримувати доступ до налаштувань Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозволяє програмі налаштовувати планшетний ПК із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозволяє програмі налаштовувати телефон із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"дозволити програмі створювати пару з Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Дозволяє програмі самостійно підключатись до віддалених пристроїв."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Дозволяє програмі самостійно підключатись до віддалених пристроїв."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"під’єднуватися та від’єднуватися від WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Дозволяє програмі визначати, чи ввімкнено WiMAX, а також переглядати інформацію про будь-які під’єднані мережі WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Змінити стан WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Спробуйте пізніше"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Проведіть пальцем зверху вниз, щоб зменшити"</string>
+    <string name="done_label" msgid="2093726099505892398">"Готово"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Вибір годин на циферблаті"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Вибір хвилин на циферблаті"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Виберіть години"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Виберіть хвилини"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Дні місяця – ескізи"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Роки – список"</string>
+    <string name="select_day" msgid="7774759604701773332">"Виберіть місяць і день"</string>
+    <string name="select_year" msgid="7952052866994196170">"Виберіть рік"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"Вибрано: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> видалено"</string>
 </resources>

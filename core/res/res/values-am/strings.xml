@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"የብሉቱዝ ቅንብሮችን ድረስባቸው"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"በመተግበሪያ የብሉቱዝ ማጣመር ይፍቀዱ"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"መተግበሪያው ያለተጠቃሚ ጣልቃ-ገብነት ከርቀት መሣሪያዎች ጋር እንዲጣመር ያስችለዋል።"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"መተግበሪያው ያለተጠቃሚ ጣልቃ-ገብነት ከርቀት መሣሪያዎች ጋር እንዲጣመር ያስችለዋል።"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ከWiMAX ጋር ይገናኙ እና ያላቅቁ"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"መተግበሪያው WiMAX እንደነቃ እና ስለማናቸውም የተገናኙ የWiMAX አውታረ መረቦች መረጃ እንዲወስን ይፈቅድለታል።"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"የWiMAX ሁኔታ ለውጥ"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ቆይተው እንደገና ይሞክሩ"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"ከሙሉ ገጽ ማያ ለመውጣት ከላይ ወደታች ጣትዎን ያንቀሳቅሱ"</string>
+    <string name="done_label" msgid="2093726099505892398">"ተከናውኗል"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"የሰዓታት ክብ ተንሸራታች"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"የደቂቃዎች ክብ ተንሸራታች"</string>
+    <string name="select_hours" msgid="6043079511766008245">"ሰዓታትን ይምረጡ"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"ደቂቃዎችን ይምረጡ"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"የቀናት የወር ፍርግርግ"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"የዓመት ዝርዝር"</string>
+    <string name="select_day" msgid="7774759604701773332">"ወር እና ቀን ይምረጡ"</string>
+    <string name="select_year" msgid="7952052866994196170">"ዓመት ይምረጡ"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ተመርጧል"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ተሰርዟል"</string>
 </resources>

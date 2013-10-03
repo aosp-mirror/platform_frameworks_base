@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"přístup do nastavení Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"povolit párování Bluetooth prostřednictvím aplikace"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Povoluje aplikaci provést be zásahu uživatele spárování se vzdálenými zařízeními."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Povoluje aplikaci provést be zásahu uživatele spárování se vzdálenými zařízeními."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"připojení a odpojení od sítě WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Umožňuje aplikaci zjistit, zda je povoleno připojení WiMAX, a také získat informace o všech připojených sítích WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Změnit stav připojení WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Zkuste to znovu později"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Režim celé obrazovky ukončíte přejetím dolů"</string>
+    <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Kruhový posuvník hodin"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Kruhový posuvník minut"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Zvolte hodiny"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Zvolte minuty"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Dny uspořádané po měsících"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Seznam roků"</string>
+    <string name="select_day" msgid="7774759604701773332">"Vyberte měsíc a den"</string>
+    <string name="select_year" msgid="7952052866994196170">"Vyberte rok"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"Vybrána položka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"Číslice <xliff:g id="KEY">%1$s</xliff:g> byla smazána"</string>
 </resources>

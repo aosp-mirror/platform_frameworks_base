@@ -249,7 +249,7 @@
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"instal·la dreceres"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permet que una aplicació afegeixi dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstal·la dreceres"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permet que l\'aplicació suprimeixi les dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"desviació de les trucades sortints"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permet que l\'aplicació processi les trucades sortints i que canviï el número que es marcarà. Aquest permís permet que l\'aplicació supervisi, redirigeixi o bloquegi les trucades sortints."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recepció de missatges de text (SMS)"</string>
@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accés a la configuració de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que detecti i emparelli dispositius remots."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que detecti i emparelli dispositius remots."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"permet l\'emparellament de l\'aplicació mitjançant Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Permet que l\'aplicació s\'emparelli amb dispositius remots sense la interacció de l\'usuari."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Permet que l\'aplicació s\'emparelli amb dispositius remots sense la interacció de l\'usuari."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"connecta i desconnecta de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permet que l\'aplicació determini si WiMAX està activat i que vegi la informació sobre totes les xarxes WiMAX que estan connectades."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Fes llis. dit avall per sortir de pant. comp."</string>
+    <string name="done_label" msgid="2093726099505892398">"Fet"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Control circular de les hores"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Control circular dels minuts"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Selecciona les hores"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Selecciona els minuts"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Graella mensual de dies"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Llista anual"</string>
+    <string name="select_day" msgid="7774759604701773332">"Selecciona un mes i un dia"</string>
+    <string name="select_year" msgid="7952052866994196170">"Selecciona un any"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionat"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
 </resources>

@@ -611,6 +611,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"tillåt Bluetooth-koppling för appen"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ändra WiMAX-status"</string>
@@ -1647,4 +1650,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Försök igen senare"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Dra nedåt om du vill avbryta fullskärmsläget"</string>
+    <string name="done_label" msgid="2093726099505892398">"Klart"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Cirkelreglage för timmar"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Cirkelreglage för minuter"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Välj timmar"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Välj minuter"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Rutnät för månad"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Lista över år"</string>
+    <string name="select_day" msgid="7774759604701773332">"Välj månad och dag"</string>
+    <string name="select_year" msgid="7952052866994196170">"Välj år"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> har markerats"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> har tagits bort"</string>
 </resources>
