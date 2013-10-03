@@ -399,8 +399,8 @@ public interface WindowManagerPolicy {
          */
         public FakeWindow addFakeWindow(Looper looper,
                 InputEventReceiver.Factory inputEventReceiverFactory,
-                String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
-                boolean hasFocus, boolean touchFullscreen);
+                String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
+                boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen);
 
         /**
          * Returns a code that describes the current state of the lid switch.
