@@ -579,6 +579,12 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     @Override // Binder call
+    public void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
+            int uid) {
+        acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid));
+    }
+
+    @Override // Binder call
     public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
             WorkSource ws) {
         if (lock == null) {
