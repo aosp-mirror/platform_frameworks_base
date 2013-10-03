@@ -80,6 +80,7 @@ struct stat_fields {
     jfieldID sharedDirty_field;
     jfieldID privateClean_field;
     jfieldID sharedClean_field;
+    jfieldID swappedOut_field;
 };
 
 struct stat_field_names {
@@ -89,14 +90,18 @@ struct stat_field_names {
     const char* sharedDirty_name;
     const char* privateClean_name;
     const char* sharedClean_name;
+    const char* swappedOut_name;
 };
 
 static stat_fields stat_fields[_NUM_CORE_HEAP];
 
 static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
-    { "otherPss", "otherSwappablePss", "otherPrivateDirty", "otherSharedDirty", "otherPrivateClean", "otherSharedClean" },
-    { "dalvikPss", "dalvikSwappablePss", "dalvikPrivateDirty", "dalvikSharedDirty", "dalvikPrivateClean", "dalvikSharedClean" },
-    { "nativePss", "nativeSwappablePss", "nativePrivateDirty", "nativeSharedDirty", "nativePrivateClean", "nativeSharedClean" }
+    { "otherPss", "otherSwappablePss", "otherPrivateDirty", "otherSharedDirty",
+        "otherPrivateClean", "otherSharedClean", "otherSwappedOut" },
+    { "dalvikPss", "dalvikSwappablePss", "dalvikPrivateDirty", "dalvikSharedDirty",
+        "dalvikPrivateClean", "dalvikSharedClean", "dalvikSwappedOut" },
+    { "nativePss", "nativeSwappablePss", "nativePrivateDirty", "nativeSharedDirty",
+        "nativePrivateClean", "nativeSharedClean", "nativeSwappedOut" }
 };
 
 jfieldID otherStats_field;
@@ -110,6 +115,7 @@ struct stats_t {
     int sharedDirty;
     int privateClean;
     int sharedClean;
+    int swappedOut;
 };
 
 #define BINDER_STATS "/proc/binder/stats"
@@ -219,6 +225,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     float sharing_proportion = 0.0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
+    unsigned swapped_out = 0;
     bool is_swappable = false;
     unsigned referenced = 0;
     unsigned temp;
@@ -333,28 +340,36 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         //ALOGI("native=%d dalvik=%d sqlite=%d: %s\n", isNativeHeap, isDalvikHeap,
         //    isSqliteHeap, line);
 
+        shared_clean = 0;
+        shared_dirty = 0;
+        private_clean = 0;
+        private_dirty = 0;
+        swapped_out = 0;
+
         while (true) {
             if (fgets(line, 1024, fp) == 0) {
                 done = true;
                 break;
             }
 
-            if (sscanf(line, "Size: %d kB", &temp) == 1) {
+            if (line[0] == 'S' && sscanf(line, "Size: %d kB", &temp) == 1) {
                 size = temp;
-            } else if (sscanf(line, "Rss: %d kB", &temp) == 1) {
+            } else if (line[0] == 'R' && sscanf(line, "Rss: %d kB", &temp) == 1) {
                 resident = temp;
-            } else if (sscanf(line, "Pss: %d kB", &temp) == 1) {
+            } else if (line[0] == 'P' && sscanf(line, "Pss: %d kB", &temp) == 1) {
                 pss = temp;
-            } else if (sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
+            } else if (line[0] == 'S' && sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
                 shared_clean = temp;
-            } else if (sscanf(line, "Shared_Dirty: %d kB", &temp) == 1) {
+            } else if (line[0] == 'S' && sscanf(line, "Shared_Dirty: %d kB", &temp) == 1) {
                 shared_dirty = temp;
-            } else if (sscanf(line, "Private_Clean: %d kB", &temp) == 1) {
+            } else if (line[0] == 'P' && sscanf(line, "Private_Clean: %d kB", &temp) == 1) {
                 private_clean = temp;
-            } else if (sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
+            } else if (line[0] == 'P' && sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
                 private_dirty = temp;
-            } else if (sscanf(line, "Referenced: %d kB", &temp) == 1) {
+            } else if (line[0] == 'R' && sscanf(line, "Referenced: %d kB", &temp) == 1) {
                 referenced = temp;
+            } else if (line[0] == 'S' && sscanf(line, "Swap: %d kB", &temp) == 1) {
+                swapped_out = temp;
             } else if (strlen(line) > 30 && line[8] == '-' && line[17] == ' ') {
                 // looks like a new mapping
                 // example: "10000000-10001000 ---p 10000000 00:00 0"
@@ -366,7 +381,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             if (is_swappable && (pss > 0)) {
                 sharing_proportion = 0.0;
                 if ((shared_clean > 0) || (shared_dirty > 0)) {
-                    sharing_proportion = (pss - private_clean - private_dirty)/(shared_clean+shared_dirty);
+                    sharing_proportion = (pss - private_clean
+                            - private_dirty)/(shared_clean+shared_dirty);
                 }
                 swappable_pss = (sharing_proportion*shared_clean) + private_clean;
             } else
@@ -378,6 +394,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             stats[whichHeap].sharedDirty += shared_dirty;
             stats[whichHeap].privateClean += private_clean;
             stats[whichHeap].sharedClean += shared_clean;
+            stats[whichHeap].swappedOut += swapped_out;
             if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER) {
                 stats[subHeap].pss += pss;
                 stats[subHeap].swappablePss += swappable_pss;
@@ -385,6 +402,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 stats[subHeap].sharedDirty += shared_dirty;
                 stats[subHeap].privateClean += private_clean;
                 stats[subHeap].sharedClean += shared_clean;
+                stats[subHeap].swappedOut += swapped_out;
             }
         }
     }
@@ -428,6 +446,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         stats[HEAP_UNKNOWN].sharedDirty += stats[i].sharedDirty;
         stats[HEAP_UNKNOWN].privateClean += stats[i].privateClean;
         stats[HEAP_UNKNOWN].sharedClean += stats[i].sharedClean;
+        stats[HEAP_UNKNOWN].swappedOut += stats[i].swappedOut;
     }
 
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
@@ -437,6 +456,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         env->SetIntField(object, stat_fields[i].sharedDirty_field, stats[i].sharedDirty);
         env->SetIntField(object, stat_fields[i].privateClean_field, stats[i].privateClean);
         env->SetIntField(object, stat_fields[i].sharedClean_field, stats[i].sharedClean);
+        env->SetIntField(object, stat_fields[i].swappedOut_field, stats[i].swappedOut);
     }
 
 
@@ -455,6 +475,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         otherArray[j++] = stats[i].sharedDirty;
         otherArray[j++] = stats[i].privateClean;
         otherArray[j++] = stats[i].sharedClean;
+        otherArray[j++] = stats[i].swappedOut;
     }
 
     env->ReleasePrimitiveArrayCritical(otherIntArray, otherArray, 0);
@@ -971,6 +992,8 @@ int register_android_os_Debug(JNIEnv *env)
                 env->GetFieldID(clazz, stat_field_names[i].privateClean_name, "I");
         stat_fields[i].sharedClean_field =
                 env->GetFieldID(clazz, stat_field_names[i].sharedClean_name, "I");
+        stat_fields[i].swappedOut_field =
+                env->GetFieldID(clazz, stat_field_names[i].swappedOut_name, "I");
     }
 
     return jniRegisterNativeMethods(env, "android/os/Debug", gMethods, NELEM(gMethods));
