@@ -23,8 +23,6 @@ import android.app.ActivityManager;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.Log;
 import android.view.View;
@@ -50,15 +48,12 @@ public class BarTransitions {
 
     private final int mOpaque;
     private final int mSemiTransparent;
-    private final int mGradientStart;
-    private final int mGradientEnd;
 
     private int mMode;
     private ValueAnimator mColorDrawableAnimator;
     private boolean mColorDrawableShowing;
 
     private final ColorDrawable mColorDrawable;
-    private final GradientDrawable mGradientDrawable;
     private final TransitionDrawable mTransitionDrawable;
     private final AnimatorUpdateListener mAnimatorListener = new AnimatorUpdateListener() {
         @Override
@@ -67,7 +62,7 @@ public class BarTransitions {
         }
     };
 
-    public BarTransitions(View view) {
+    public BarTransitions(View view, int gradientResourceId) {
         mTag = "BarTransitions." + view.getClass().getSimpleName();
         mView = view;
         final Resources res = mView.getContext().getResources();
@@ -75,32 +70,19 @@ public class BarTransitions {
         if (DEBUG_COLORS) {
             mOpaque = 0xff0000ff;
             mSemiTransparent = 0x7f0000ff;
-            mGradientStart = 0x7fff0000;
-            mGradientEnd = 0x7f00ff00;
         } else {
             mOpaque = res.getColor(R.drawable.system_bar_background);
             mSemiTransparent = res.getColor(R.color.system_bar_background_semi_transparent);
-            mGradientStart = res.getColor(R.color.system_bar_background_gradient_start);
-            mGradientEnd = res.getColor(R.color.system_bar_background_gradient_end);
         }
 
         mColorDrawable = new ColorDrawable(mOpaque);
-        mGradientDrawable = new GradientDrawable(Orientation.BOTTOM_TOP,
-                new int[] { mGradientStart, mGradientEnd });
         mTransitionDrawable = new TransitionDrawable(
-                new Drawable[] { mGradientDrawable, mColorDrawable });
+                new Drawable[] { res.getDrawable(gradientResourceId), mColorDrawable });
         mTransitionDrawable.setCrossFadeEnabled(true);
         mTransitionDrawable.resetTransition();
         if (mSupportsTransitions) {
             mView.setBackground(mTransitionDrawable);
         }
-    }
-
-    protected void setOrientation(GradientDrawable.Orientation orientation) {
-        if (orientation.equals(mGradientDrawable.getOrientation())) return; // GD doesn't check
-        if (DEBUG) Log.d(mTag, "setOrientation " + orientation);
-        mGradientDrawable.mutate();
-        mGradientDrawable.setOrientation(orientation);
     }
 
     public int getMode() {
