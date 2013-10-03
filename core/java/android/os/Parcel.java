@@ -1610,6 +1610,7 @@ public final class Parcel {
     public final Bundle readBundle(ClassLoader loader) {
         int length = readInt();
         if (length < 0) {
+            if (Bundle.DEBUG) Log.d(TAG, "null bundle: length=" + length);
             return null;
         }
         
