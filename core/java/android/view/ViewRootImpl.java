@@ -467,7 +467,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (DEBUG_LAYOUT) Log.d(TAG, "WindowLayout in setView:" + attrs);
 
                 if (!compatibilityInfo.supportsScreen()) {
-                    attrs.flags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+                    attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                     mLastInCompatMode = true;
                 }
 
@@ -748,8 +748,8 @@ public final class ViewRootImpl implements ViewParent,
             // Keep track of the actual window flags supplied by the client.
             mClientWindowLayoutFlags = attrs.flags;
             // preserve compatible window flag if exists.
-            int compatibleWindowFlag =
-                mWindowAttributes.flags & WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+            int compatibleWindowFlag = mWindowAttributes.privateFlags
+                    & WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
             // transfer over system UI visibility values as they carry current state.
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
@@ -757,7 +757,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mWindowAttributes.packageName == null) {
                 mWindowAttributes.packageName = mBasePackageName;
             }
-            mWindowAttributes.flags |= compatibleWindowFlag;
+            mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
             applyKeepScreenOnFlag(mWindowAttributes);
 
@@ -1146,10 +1146,10 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             mLayoutRequested = true;
             if (mLastInCompatMode) {
-                params.flags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+                params.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                 mLastInCompatMode = false;
             } else {
-                params.flags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+                params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                 mLastInCompatMode = true;
             }
         }

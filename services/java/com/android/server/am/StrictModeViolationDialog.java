@@ -74,7 +74,7 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
         }
 
         setTitle(res.getText(com.android.internal.R.string.aerr_title));
-        getWindow().addFlags(PRIVATE_FLAG_SYSTEM_ERROR);
+        getWindow().addPrivateFlags(PRIVATE_FLAG_SYSTEM_ERROR);
         getWindow().setTitle("Strict Mode Violation: " + app.info.processName);
 
         // After the timeout, pretend the user clicked the quit button
