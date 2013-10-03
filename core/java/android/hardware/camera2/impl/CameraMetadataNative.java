@@ -652,7 +652,6 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
      * We use a class initializer to allow the native code to cache some field offsets
      */
     static {
-        System.loadLibrary("media_jni");
         nativeClassInit();
 
         Log.v(TAG, "Shall register metadata marshalers");
