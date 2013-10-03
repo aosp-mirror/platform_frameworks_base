@@ -152,11 +152,20 @@ public class CameraBinderTest extends AndroidTestCase {
     static class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
         @Override
-        public void notifyCallback(int msgType, int ext1, int ext2) throws RemoteException {
+        public void onCameraError(int errorCode) {
         }
 
         @Override
-        public void onResultReceived(int frameId, CameraMetadataNative result) throws RemoteException {
+        public void onCameraIdle() {
+        }
+
+        @Override
+        public void onCaptureStarted(int requestId, long timestamp) {
+        }
+
+        @Override
+        public void onResultReceived(int frameId, CameraMetadataNative result)
+                throws RemoteException {
         }
     }
 
