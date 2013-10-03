@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.net.Uri;
+import android.opengl.Matrix;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,7 +63,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
-import android.util.MatrixUtils;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
@@ -141,42 +141,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int MAX_POOL_SIZE = 10;
 
-    /** Matrix used for converting color to grayscale. */
+    /** Matrix and offset used for converting color to grayscale. */
     private static final float[] GRAYSCALE_MATRIX = new float[] {
-        .2126f, .2126f, .2126f,
-        .7152f, .7152f, .7152f,
-        .0722f, .0722f, .0722f
+        .2126f, .2126f, .2126f, 0,
+        .7152f, .7152f, .7152f, 0,
+        .0722f, .0722f, .0722f, 0,
+             0,      0,      0, 1
     };
 
-    /** Matrix used for standard display inversion. */
+    /** Matrix and offset used for standard display inversion. */
     private static final float[] INVERSION_MATRIX_STANDARD = new float[] {
-        -1,  0,  0,
-         0, -1,  0,
-         0,  0, -1
+        -1,  0,  0, 0,
+         0, -1,  0, 0,
+         0,  0, -1, 0,
+         1,  1,  1, 1
     };
-
-    /** Offset used for standard display inversion. */
-    private static final float INVERSION_OFFSET_STANDARD = 1;
 
     /** Matrix and offset used for hue-only display inversion. */
     private static final float[] INVERSION_MATRIX_HUE_ONLY = new float[] {
-          0, .5f, .5f,
-        .5f,   0, .5f,
-        .5f, .5f,   0
+          0, .5f, .5f, 0,
+        .5f,   0, .5f, 0,
+        .5f, .5f,   0, 0,
+          0,   0,   0, 1
     };
-
-    /** Offset used for hue-only display inversion. */
-    private static final float INVERSION_OFFSET_HUE_ONLY = 0;
 
     /** Matrix and offset used for value-only display inversion. */
     private static final float[] INVERSION_MATRIX_VALUE_ONLY = new float[] {
-           0, -.5f, -.5f,
-        -.5f,    0, -.5f,
-        -.5f, -.5f,    0
+           0, -.5f, -.5f, 0,
+        -.5f,    0, -.5f, 0,
+        -.5f, -.5f,    0, 0,
+           1,    1,    1, 1
     };
-
-    /** Offset used for value-only display inversion. */
-    private static final float INVERSION_OFFSET_VALUE_ONLY = 1;
 
     /** Default contrast for display contrast enhancement. */
     private static final float DEFAULT_DISPLAY_CONTRAST = 2;
@@ -1486,14 +1481,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void updateDisplayColorAdjustmentSettingsLocked(UserState userState) {
         final ContentResolver cr = mContext.getContentResolver();
         final int userId = userState.mUserId;
-        final float[] offsetVector = new float[3];
-        float[] colorOffset = new float[3];
-        float[] outputOffset = new float[3];
-        float[] colorMatrix = new float[9];
-        float[] outputMatrix = new float[9];
+        float[] colorMatrix = new float[16];
+        float[] outputMatrix = new float[16];
         boolean hasColorTransform = false;
 
-        MatrixUtils.setIdentityM(colorMatrix, 3, 3);
+        Matrix.setIdentityM(colorMatrix, 0);
 
         final boolean inversionEnabled = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
@@ -1502,30 +1494,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION, DEFAULT_DISPLAY_INVERSION,
                     userId);
             final float[] inversionMatrix;
-            final float inversionOffset;
             switch (inversionMode) {
                 case AccessibilityManager.INVERSION_HUE_ONLY:
                     inversionMatrix = INVERSION_MATRIX_HUE_ONLY;
-                    inversionOffset = INVERSION_OFFSET_HUE_ONLY;
                     break;
                 case AccessibilityManager.INVERSION_VALUE_ONLY:
                     inversionMatrix = INVERSION_MATRIX_VALUE_ONLY;
-                    inversionOffset = INVERSION_OFFSET_VALUE_ONLY;
                     break;
                 default:
                     inversionMatrix = INVERSION_MATRIX_STANDARD;
-                    inversionOffset = INVERSION_OFFSET_STANDARD;
             }
 
-            Arrays.fill(offsetVector, inversionOffset);
-
-            MatrixUtils.multiplyMM(outputMatrix, colorMatrix, 3, 3, inversionMatrix, 3);
-            MatrixUtils.multiplyMM(outputOffset, colorOffset, 1, 3, inversionMatrix, 3);
-            MatrixUtils.addMM(colorOffset, outputOffset, 1, 3, offsetVector);
+            Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, inversionMatrix, 0);
 
             final float[] temp = colorMatrix;
             colorMatrix = outputMatrix;
-            outputMatrix = temp;
+            outputMatrix = colorMatrix;
 
             hasColorTransform = true;
         }
@@ -1539,16 +1523,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final float brightness = Settings.Secure.getFloatForUser(cr,
                     Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS, DEFAULT_DISPLAY_BRIGHTNESS,
                     userId);
-            final float offset = brightness * contrast - 0.5f * contrast + 0.5f;
-            Arrays.fill(offsetVector, offset);
+            final float off = brightness * contrast - 0.5f * contrast + 0.5f;
+            final float[] contrastMatrix = {
+                    contrast, 0, 0, 0,
+                    0, contrast, 0, 0,
+                    0, 0, contrast, 0,
+                    off, off, off, 1
+            };
 
-            MatrixUtils.multiplyMS(outputMatrix, colorMatrix, contrast);
-            MatrixUtils.multiplyMS(outputOffset, colorOffset, contrast);
-            MatrixUtils.addMM(colorOffset, outputOffset, 1, 3, offsetVector);
+            Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, contrastMatrix, 0);
 
             final float[] temp = colorMatrix;
             colorMatrix = outputMatrix;
-            outputMatrix = temp;
+            outputMatrix = colorMatrix;
 
             hasColorTransform = true;
         }
@@ -1561,16 +1548,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userId);
             // Monochromacy isn't supported by the native Daltonizer.
             if (daltonizerMode == AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY) {
-                MatrixUtils.multiplyMM(outputMatrix, colorMatrix, 3, 3, GRAYSCALE_MATRIX, 3);
-                MatrixUtils.multiplyMM(outputOffset, colorOffset, 1, 3, GRAYSCALE_MATRIX, 3);
+                Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, GRAYSCALE_MATRIX, 0);
 
                 final float[] temp = colorMatrix;
                 colorMatrix = outputMatrix;
                 outputMatrix = temp;
-
-                final float[] tempVec = colorOffset;
-                colorOffset = outputOffset;
-                outputOffset = temp;
 
                 hasColorTransform = true;
                 nativeSetDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
@@ -1582,9 +1564,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         if (hasColorTransform) {
-            nativeSetColorTransform(colorMatrix, colorOffset);
+            nativeSetColorTransform(colorMatrix);
         } else {
-            nativeSetColorTransform(null, null);
+            nativeSetColorTransform(null);
         }
     }
 
@@ -1731,25 +1713,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Sets the surface flinger's color transformation matrix and offset. If
-     * either value is null, color transformations are disabled.
+     * Sets the surface flinger's color transformation as a 4x4 matrix. If the
+     * matrix is null, color transformations are disabled.
      *
-     * @param matrix new color transformation matrix, or null to disable
-     * @param offset new color transformation offset, or null to disable
+     * @param m the float array that holds the transformation matrix, or null to
+     *            disable transformation
      */
-    private static void nativeSetColorTransform(float[] matrix, float[] offset) {
+    private static void nativeSetColorTransform(float[] m) {
         try {
             final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
             if (flinger != null) {
                 final Parcel data = Parcel.obtain();
                 data.writeInterfaceToken("android.ui.ISurfaceComposer");
-                if (matrix != null && offset != null) {
+                if (m != null) {
                     data.writeInt(1);
-                    for (int i = 0; i < 9; i++) {
-                        data.writeFloat(matrix[i]);
-                    }
-                    for (int i = 0; i < 3; i++) {
-                        data.writeFloat(offset[i]);
+                    for (int i = 0; i < 16; i++) {
+                        data.writeFloat(m[i]);
                     }
                 } else {
                     data.writeInt(0);
