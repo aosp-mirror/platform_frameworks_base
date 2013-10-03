@@ -266,8 +266,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Bitmap screenshotApplications(IBinder arg0, int displayId, int arg1, int arg2)
-            throws RemoteException {
+    public Bitmap screenshotApplications(IBinder arg0, int displayId, int arg1,
+            int arg2, boolean arg3) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
