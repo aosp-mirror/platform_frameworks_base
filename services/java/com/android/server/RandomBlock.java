@@ -27,13 +27,13 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 /**
- * A 4k block of random {@code byte}s.
+ * A block of 512 random {@code byte}s.
  */
 class RandomBlock {
 
     private static final String TAG = "RandomBlock";
     private static final boolean DEBUG = false;
-    private static final int BLOCK_SIZE = 4096;
+    private static final int BLOCK_SIZE = 512;
     private byte[] block = new byte[BLOCK_SIZE];
 
     private RandomBlock() { }
