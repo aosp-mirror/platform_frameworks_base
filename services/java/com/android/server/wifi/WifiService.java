@@ -83,6 +83,7 @@ import static com.android.server.wifi.WifiController.CMD_SCAN_ALWAYS_MODE_CHANGE
 import static com.android.server.wifi.WifiController.CMD_SCREEN_OFF;
 import static com.android.server.wifi.WifiController.CMD_SCREEN_ON;
 import static com.android.server.wifi.WifiController.CMD_SET_AP;
+import static com.android.server.wifi.WifiController.CMD_USER_PRESENT;
 import static com.android.server.wifi.WifiController.CMD_WIFI_TOGGLED;
 /**
  * WifiService handles remote WiFi operation requests by implementing
@@ -1084,6 +1085,8 @@ public final class WifiService extends IWifiManager.Stub {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 mWifiController.sendMessage(CMD_SCREEN_ON);
+            } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
+                mWifiController.sendMessage(CMD_USER_PRESENT);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mWifiController.sendMessage(CMD_SCREEN_OFF);
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
@@ -1120,6 +1123,7 @@ public final class WifiService extends IWifiManager.Stub {
     private void registerForBroadcasts() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_USER_PRESENT);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
