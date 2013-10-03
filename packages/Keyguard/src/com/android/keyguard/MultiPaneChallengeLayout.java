@@ -79,7 +79,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         final Resources res = getResources();
         mDisplayMetrics = res.getDisplayMetrics();
 
-        setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
     }
 
     public void setInsets(Rect insets) {

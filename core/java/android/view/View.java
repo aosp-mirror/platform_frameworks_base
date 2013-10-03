@@ -2448,24 +2448,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;
 
     /**
-     * Flag for {@link #setSystemUiVisibility(int)}: View would like the status bar to have
-     * transparency.
-     *
-     * <p>The transparency request may be denied if the bar is in another mode with a specific
-     * style, like {@link #SYSTEM_UI_FLAG_IMMERSIVE immersive mode}.
-     */
-    public static final int SYSTEM_UI_FLAG_TRANSPARENT_STATUS = 0x00001000;
-
-    /**
-     * Flag for {@link #setSystemUiVisibility(int)}: View would like the navigation bar to have
-     * transparency.
-     *
-     * <p>The transparency request may be denied if the bar is in another mode with a specific
-     * style, like {@link #SYSTEM_UI_FLAG_IMMERSIVE immersive mode}.
-     */
-    public static final int SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION = 0x00002000;
-
-    /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
      */
     public static final int STATUS_BAR_HIDDEN = SYSTEM_UI_FLAG_LOW_PROFILE;
@@ -2623,6 +2605,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag to specify that the hidden navigation bar would like to be shown.
      */
     public static final int NAVIGATION_BAR_UNHIDE = 0x20000000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to specify that the status bar is displayed in translucent mode.
+     */
+    public static final int STATUS_BAR_TRANSLUCENT = 0x40000000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to specify that the navigation bar is displayed in translucent mode.
+     */
+    public static final int NAVIGATION_BAR_TRANSLUCENT = 0x80000000;
 
     /**
      * @hide
@@ -16934,9 +16936,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
-     * {@link #SYSTEM_UI_FLAG_TRANSPARENT_STATUS},
-     * and {@link #SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION}.
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, and {@link #SYSTEM_UI_FLAG_IMMERSIVE}.
      */
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
@@ -16952,9 +16952,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
-     * {@link #SYSTEM_UI_FLAG_TRANSPARENT_STATUS},
-     * and {@link #SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION}.
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, and {@link #SYSTEM_UI_FLAG_IMMERSIVE}.
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;

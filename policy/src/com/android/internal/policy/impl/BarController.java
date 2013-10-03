@@ -23,6 +23,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManagerPolicy.WindowState;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -39,13 +40,14 @@ public class BarController {
     private static final int TRANSIENT_BAR_SHOWING = 1;
     private static final int TRANSIENT_BAR_HIDING = 2;
 
-    private static final int TRANSPARENT_ANIMATION_DELAY_MS = 1000;
+    private static final int TRANSLUCENT_ANIMATION_DELAY_MS = 1000;
 
     private final String mTag;
     private final int mTransientFlag;
     private final int mUnhideFlag;
-    private final int mTransparentFlag;
+    private final int mTranslucentFlag;
     private final int mStatusBarManagerId;
+    private final int mTranslucentWmFlag;
     private final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
     private IStatusBarService mStatusBarService;
@@ -54,15 +56,16 @@ public class BarController {
     private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
     private int mTransientBarState;
     private boolean mPendingShow;
-    private long mLastTransparent;
+    private long mLastTranslucent;
 
-    public BarController(String tag, int transientFlag, int unhideFlag, int transparentFlag,
-            int statusBarManagerId) {
+    public BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
+            int statusBarManagerId, int translucentWmFlag) {
         mTag = "BarController." + tag;
         mTransientFlag = transientFlag;
         mUnhideFlag = unhideFlag;
-        mTransparentFlag = transparentFlag;
+        mTranslucentFlag = translucentFlag;
         mStatusBarManagerId = statusBarManagerId;
+        mTranslucentWmFlag = translucentWmFlag;
         mHandler = new Handler();
     }
 
@@ -84,8 +87,8 @@ public class BarController {
         return mTransientBarState == TRANSIENT_BAR_SHOWING;
     }
 
-    public boolean wasRecentlyTransparent() {
-        return (SystemClock.uptimeMillis() - mLastTransparent) < TRANSPARENT_ANIMATION_DELAY_MS;
+    public boolean wasRecentlyTranslucent() {
+        return (SystemClock.uptimeMillis() - mLastTranslucent) < TRANSLUCENT_ANIMATION_DELAY_MS;
     }
 
     public void adjustSystemUiVisibilityLw(int oldVis, int vis) {
@@ -98,6 +101,22 @@ public class BarController {
             // sysui ready to unhide
             setBarShowingLw(true);
         }
+    }
+
+    public int applyTranslucentFlagLw(WindowState win, int vis, int oldVis) {
+        if (mWin != null) {
+            if (win != null && (win.getAttrs().privateFlags
+                    & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) == 0) {
+                if ((win.getAttrs().flags & mTranslucentWmFlag) != 0) {
+                    vis |= mTranslucentFlag;
+                } else {
+                    vis &= ~mTranslucentFlag;
+                }
+            } else {
+                vis = (vis & ~mTranslucentFlag) | (oldVis & mTranslucentFlag);
+            }
+        }
+        return vis;
     }
 
     public boolean setBarShowingLw(final boolean show) {
@@ -186,10 +205,10 @@ public class BarController {
         }
     }
 
-    public int updateVisibilityLw(boolean allowed, int oldVis, int vis) {
+    public int updateVisibilityLw(boolean transientAllowed, int oldVis, int vis) {
         if (mWin == null) return vis;
         if (mTransientBarState == TRANSIENT_BAR_SHOWING) { // transient bar requested
-            if (allowed) {
+            if (transientAllowed) {
                 vis |= mTransientFlag;
                 if ((oldVis & mTransientFlag) == 0) {
                     vis |= mUnhideFlag;  // tell sysui we're ready to unhide
@@ -202,8 +221,8 @@ public class BarController {
             vis |= mTransientFlag;  // ignore clear requests until transition completes
             vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;  // never show transient bars in low profile
         }
-        if ((vis & mTransparentFlag) != 0 || (oldVis & mTransparentFlag) != 0) {
-            mLastTransparent = SystemClock.uptimeMillis();
+        if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0) {
+            mLastTranslucent = SystemClock.uptimeMillis();
         }
         return vis;
     }
@@ -211,7 +230,7 @@ public class BarController {
     private void setTransientBarState(int state) {
         if (mWin != null && state != mTransientBarState) {
             if (mTransientBarState == TRANSIENT_BAR_SHOWING || state == TRANSIENT_BAR_SHOWING) {
-                mLastTransparent = SystemClock.uptimeMillis();
+                mLastTranslucent = SystemClock.uptimeMillis();
             }
             mTransientBarState = state;
             if (DEBUG) Slog.d(mTag, "mTransientBarState: " + transientBarStateToString(state));
