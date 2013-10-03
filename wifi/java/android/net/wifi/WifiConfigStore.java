@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -742,6 +743,26 @@ class WifiConfigStore {
         markAllNetworksDisabledExcept(INVALID_NETWORK_ID);
     }
 
+    boolean needsUnlockedKeyStore() {
+
+        // Any network using certificates to authenticate access requires
+        // unlocked key store; unless the certificates can be stored with
+        // hardware encryption
+
+        for(WifiConfiguration config : mConfiguredNetworks.values()) {
+
+            if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP)
+                    && config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+
+                if (config.enterpriseConfig.needsSoftwareBackedKeyStore()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private void writeIpAndProxyConfigurations() {
 
         /* Make a copy */
@@ -1223,7 +1244,6 @@ class WifiConfigStore {
                      * Keyguard settings may eventually be controlled by device policy.
                      * We check here if keystore is unlocked before installing
                      * credentials.
-                     * TODO: Figure a way to store these credentials for wifi alone
                      * TODO: Do we need a dialog here ?
                      */
                     if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
@@ -1583,6 +1603,7 @@ class WifiConfigStore {
         }
 
         config.enterpriseConfig.migrateCerts(mKeyStore);
+        config.enterpriseConfig.initializeSoftwareKeystoreFlag(mKeyStore);
     }
 
     private String removeDoubleQuotes(String string) {
