@@ -817,6 +817,10 @@ class ContextImpl extends Context {
             }
             if (!mFilesDir.exists()) {
                 if(!mFilesDir.mkdirs()) {
+                    if (mFilesDir.exists()) {
+                        // spurious failure; probably racing with another process for this app
+                        return mFilesDir;
+                    }
                     Log.w(TAG, "Unable to create files directory " + mFilesDir.getPath());
                     return null;
                 }
@@ -879,6 +883,10 @@ class ContextImpl extends Context {
             }
             if (!mCacheDir.exists()) {
                 if(!mCacheDir.mkdirs()) {
+                    if (mCacheDir.exists()) {
+                        // spurious failure; probably racing with another process for this app
+                        return mCacheDir;
+                    }
                     Log.w(TAG, "Unable to create cache directory " + mCacheDir.getAbsolutePath());
                     return null;
                 }
@@ -2136,18 +2144,21 @@ class ContextImpl extends Context {
             File dir = dirs[i];
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
-                    // Failing to mkdir() may be okay, since we might not have
-                    // enough permissions; ask vold to create on our behalf.
-                    final IMountService mount = IMountService.Stub.asInterface(
-                            ServiceManager.getService("mount"));
-                    int res = -1;
-                    try {
-                        res = mount.mkdirs(getPackageName(), dir.getAbsolutePath());
-                    } catch (RemoteException e) {
-                    }
-                    if (res != 0) {
-                        Log.w(TAG, "Failed to ensure directory: " + dir);
-                        dir = null;
+                    // recheck existence in case of cross-process race
+                    if (!dir.exists()) {
+                        // Failing to mkdir() may be okay, since we might not have
+                        // enough permissions; ask vold to create on our behalf.
+                        final IMountService mount = IMountService.Stub.asInterface(
+                                ServiceManager.getService("mount"));
+                        int res = -1;
+                        try {
+                            res = mount.mkdirs(getPackageName(), dir.getAbsolutePath());
+                        } catch (RemoteException e) {
+                        }
+                        if (res != 0) {
+                            Log.w(TAG, "Failed to ensure directory: " + dir);
+                            dir = null;
+                        }
                     }
                 }
             }
