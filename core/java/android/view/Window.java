@@ -712,6 +712,11 @@ public abstract class Window {
     public void addFlags(int flags) {
         setFlags(flags, flags);
     }
+
+    /** @hide */
+    public void addPrivateFlags(int flags) {
+        setPrivateFlags(flags, flags);
+    }
     
     /**
      * Convenience function to clear the flag bits as specified in flags, as
@@ -750,6 +755,14 @@ public abstract class Window {
             attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY;
         }
         mForcedWindowFlags |= mask;
+        if (mCallback != null) {
+            mCallback.onWindowAttributesChanged(attrs);
+        }
+    }
+
+    private void setPrivateFlags(int flags, int mask) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.privateFlags = (attrs.privateFlags & ~mask) | (flags & mask);
         if (mCallback != null) {
             mCallback.onWindowAttributesChanged(attrs);
         }

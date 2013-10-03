@@ -1754,6 +1754,9 @@ public interface WindowManager extends ViewManager {
             sb.append(" fl=#");
             sb.append(Integer.toHexString(flags));
             if (privateFlags != 0) {
+                if ((privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
+                    sb.append(" compatible=true");
+                }
                 sb.append(" pfl=0x").append(Integer.toHexString(privateFlags));
             }
             if (format != PixelFormat.OPAQUE) {
@@ -1783,9 +1786,6 @@ public interface WindowManager extends ViewManager {
             if (rotationAnimation != ROTATION_ANIMATION_ROTATE) {
                 sb.append(" rotAnim=");
                 sb.append(rotationAnimation);
-            }
-            if ((flags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
-                sb.append(" compatible=true");
             }
             if (systemUiVisibility != 0) {
                 sb.append(" sysui=0x");

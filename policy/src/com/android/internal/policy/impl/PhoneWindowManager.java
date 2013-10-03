@@ -1625,10 +1625,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
-            if (!compatInfo.supportsScreen()) {
-                win.addFlags(WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW);
-            }
-
             win.setDefaultIcon(icon);
             win.setDefaultLogo(logo);
 
@@ -1643,6 +1639,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             params.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
             params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+
+            if (!compatInfo.supportsScreen()) {
+                params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+            }
+
             params.setTitle("Starting " + packageName);
 
             wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
@@ -2711,7 +2712,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (mHideNavFakeWindow == null) {
                 mHideNavFakeWindow = mWindowManagerFuncs.addFakeWindow(
                         mHandler.getLooper(), mHideNavInputEventReceiverFactory,
-                        "hidden nav", WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER,
+                        "hidden nav", WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER, 0,
                         0, false, false, true);
             }
 

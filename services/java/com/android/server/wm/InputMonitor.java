@@ -166,7 +166,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
-            final WindowState child, int flags, final int type,
+            final WindowState child, int flags, int privateFlags, final int type,
             final boolean isVisible, final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
@@ -181,6 +181,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             child.getTouchableRegion(inputWindowHandle.touchableRegion);
         }
         inputWindowHandle.layoutParamsFlags = flags;
+        inputWindowHandle.layoutParamsPrivateFlags = privateFlags;
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
         inputWindowHandle.visible = isVisible;
@@ -274,6 +275,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 }
 
                 final int flags = child.mAttrs.flags;
+                final int privateFlags = child.mAttrs.privateFlags;
                 final int type = child.mAttrs.type;
 
                 final boolean hasFocus = (child == mInputFocus);
@@ -293,13 +295,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     final WindowState u = universeBackground.mWin;
                     if (u.mInputChannel != null && u.mInputWindowHandle != null) {
                         addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
-                                u.mAttrs.type, true, u == mInputFocus, false);
+                                u.mAttrs.privateFlags, u.mAttrs.type,
+                                true, u == mInputFocus, false);
                     }
                     addedUniverse = true;
                 }
 
                 if (child.mWinAnimator != universeBackground) {
-                    addInputWindowHandleLw(inputWindowHandle, child, flags, type,
+                    addInputWindowHandleLw(inputWindowHandle, child, flags, privateFlags, type,
                             isVisible, hasFocus, hasWallpaper);
                 }
             }

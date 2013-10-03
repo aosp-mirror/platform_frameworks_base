@@ -474,6 +474,7 @@ sp<InputWindowHandle> InputDispatcher::findTouchedWindowAtLocked(int32_t display
         const InputWindowInfo* windowInfo = windowHandle->getInfo();
         if (windowInfo->displayId == displayId) {
             int32_t flags = windowInfo->layoutParamsFlags;
+            int32_t privateFlags = windowInfo->layoutParamsPrivateFlags;
 
             if (windowInfo->visible) {
                 if (!(flags & InputWindowInfo::FLAG_NOT_TOUCHABLE)) {
@@ -486,7 +487,7 @@ sp<InputWindowHandle> InputDispatcher::findTouchedWindowAtLocked(int32_t display
                 }
             }
 
-            if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
+            if (privateFlags & InputWindowInfo::PRIVATE_FLAG_SYSTEM_ERROR) {
                 // Error window is on top but not visible, so touch is dropped.
                 return NULL;
             }
@@ -1215,13 +1216,14 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                 continue; // wrong display
             }
 
-            int32_t flags = windowInfo->layoutParamsFlags;
-            if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
+            int32_t privateFlags = windowInfo->layoutParamsPrivateFlags;
+            if (privateFlags & InputWindowInfo::PRIVATE_FLAG_SYSTEM_ERROR) {
                 if (topErrorWindowHandle == NULL) {
                     topErrorWindowHandle = windowHandle;
                 }
             }
 
+            int32_t flags = windowInfo->layoutParamsFlags;
             if (windowInfo->visible) {
                 if (! (flags & InputWindowInfo::FLAG_NOT_TOUCHABLE)) {
                     isTouchModal = (flags & (InputWindowInfo::FLAG_NOT_FOCUSABLE
