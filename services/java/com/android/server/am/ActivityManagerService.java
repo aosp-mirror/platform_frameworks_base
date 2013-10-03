@@ -254,7 +254,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     // Maximum number of recent tasks that we can remember.
-    static final int MAX_RECENT_TASKS = 20;
+    static final int MAX_RECENT_TASKS = ActivityManager.isLowRamDeviceStatic() ? 10 : 20;
 
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
