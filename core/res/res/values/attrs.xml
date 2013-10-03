@@ -2182,6 +2182,9 @@
             <enum name="yes" value="1" />
             <!-- The view is not important for accessibility. -->
             <enum name="no" value="2" />
+            <!-- The view is not important for accessibility, nor are any of its descendant
+                 views. -->
+            <enum name="noHideDescendants" value="4" />
         </attr>
 
         <!-- Indicates to accessibility services whether the user should be notified when
