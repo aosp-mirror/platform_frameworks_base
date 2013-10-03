@@ -478,7 +478,8 @@ public class SurfaceView extends View {
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                               ;
                 if (!getContext().getResources().getCompatibilityInfo().supportsScreen()) {
-                    mLayout.flags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+                    mLayout.privateFlags |=
+                            WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                 }
                 mLayout.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 

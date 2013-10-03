@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -72,10 +70,10 @@ final class AppErrorDialog extends BaseErrorDialog {
         }
 
         setTitle(res.getText(com.android.internal.R.string.aerr_title));
-        getWindow().addFlags(PRIVATE_FLAG_SYSTEM_ERROR);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Error: " + app.info.processName);
-        attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR
+                | WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
         if (app.persistent) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);

@@ -332,7 +332,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
         mSeq = seq;
-        mEnforceSizeCompat = (mAttrs.flags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
+        mEnforceSizeCompat = (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
