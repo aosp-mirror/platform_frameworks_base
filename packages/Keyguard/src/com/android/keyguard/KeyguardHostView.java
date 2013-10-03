@@ -134,6 +134,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         void userActivity();
     }
 
+    interface TransportControlCallback {
+        void userActivity();
+    }
+
     /*package*/ interface OnDismissAction {
         /* returns true if the dismiss should be deferred */
         boolean onDismiss();
@@ -1222,6 +1226,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mTransportControl = (KeyguardTransportControlView)
                     inflater.inflate(R.layout.keyguard_transport_control_view, this, false);
+            mTransportControl.setTransportControlCallback(new TransportControlCallback() {
+                public void userActivity() {
+                    mViewMediatorCallback.userActivity();
+                }
+            });
         }
         return mTransportControl;
     }
