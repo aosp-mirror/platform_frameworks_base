@@ -441,7 +441,6 @@ public class WindowManagerService extends IWindowManager.Stub
             = new ArrayList<IRotationWatcher>();
     int mDeferredRotationPauseCount;
 
-    final Rect mSystemDecorRect = new Rect();
     int mSystemDecorLayer = 0;
     final Rect mScreenRect = new Rect();
 
@@ -8204,7 +8203,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mRotation);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
-            mSystemDecorLayer = mPolicy.getSystemDecorRectLw(mSystemDecorRect);
+            mSystemDecorLayer = mPolicy.getSystemDecorLayerLw();
             mScreenRect.set(0, 0, dw, dh);
         }
 
@@ -10413,8 +10412,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 pw.println();
         if (dumpAll) {
-            pw.print("  mSystemDecorRect="); pw.print(mSystemDecorRect.toShortString());
-                    pw.print(" mSystemDecorLayer="); pw.print(mSystemDecorLayer);
+            pw.print(" mSystemDecorLayer="); pw.print(mSystemDecorLayer);
                     pw.print(" mScreenRect="); pw.println(mScreenRect.toShortString());
             if (mLastStatusBarVisibility != 0) {
                 pw.print("  mLastStatusBarVisibility=0x");

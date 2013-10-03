@@ -1100,12 +1100,14 @@ class WindowStateAnimator {
             } else {
                 applyDecorRect(mService.mScreenRect);
             }
-        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
-            // The universe background isn't cropped.
+        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
+                || w.mDecorFrame.isEmpty()) {
+            // The universe background isn't cropped, nor windows without policy decor.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
                     w.mCompatFrame.height());
         } else {
-            applyDecorRect(mService.mSystemDecorRect);
+            // Crop to the system decor specified by policy.
+            applyDecorRect(w.mDecorFrame);
         }
 
         if (!w.mSystemDecorRect.equals(w.mLastSystemDecorRect)) {
