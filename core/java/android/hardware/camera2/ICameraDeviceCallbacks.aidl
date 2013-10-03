@@ -25,6 +25,8 @@ interface ICameraDeviceCallbacks
      * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
      */
 
-    oneway void notifyCallback(int msgType, int ext1, int ext2);
-    oneway void onResultReceived(int frameId, in CameraMetadataNative result);
+    oneway void onCameraError(int errorCode);
+    oneway void onCameraIdle();
+    oneway void onCaptureStarted(int requestId, long timestamp);
+    oneway void onResultReceived(int requestId, in CameraMetadataNative result);
 }
