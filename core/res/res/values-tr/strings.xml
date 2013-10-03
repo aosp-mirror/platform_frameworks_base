@@ -246,10 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Uygulamaya, durum çubuğu olma izni verir."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"durum çubuğunu genişlet/daralt"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Uygulamaya, durum çubuğunu genişletip daraltma izni verir."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"kısayolları yükle"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana ekrana ekleme izni verir."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"kısayolların yüklemesini kaldır"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana ekrandan kaldırma izni verir."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"kısayolları yükleme"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana Ekrana ekleme izni verir."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"kısayolların yüklemesini kaldırma"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana Ekrandan kaldırma izni verir."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendir"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Uygulamaya, yapılan çağrıları işleme ve aranacak numarayı değiştirme izni verir. Bu izin, uygulamanın yapılan çağrıları izlemesine, yönlendirmesine ve önlemesine olanak sağlar."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"kısa mesajları al (SMS)"</string>
@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ayarlara eriş"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Uygulamaya, yerel Bluetooth telefonunu yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Uygulama tarafından yapılan Bluetooth eşleştirmelerine izin ver"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Uygulamaya, kullanıcının müdahalesi olmadan uzak cihazlarla eşleme izni verir."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Uygulamaya, kullanıcının müdahalesi olmadan uzak cihazlarla eşleme izni verir."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX\'e bağlan veya WiMAX bağlantısını kes"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Uygulamaya, WiMAX\'in etkin olup olmadığını belirleme ve bağlı tüm WiMAX ağlarıyla ilgili bilgilere erişme izni verir."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX durumunu değiştir"</string>
@@ -1112,6 +1115,8 @@
     <string name="capital_on" msgid="1544682755514494298">"AÇIK"</string>
     <string name="capital_off" msgid="6815870386972805832">"KAPALI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"İşlemi şunu kullanarak tamamla"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"Varsayılan olarak bu işlem için kullan."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Sistem ayarları &gt; Uygulamalar &gt; İndirilen bölümünden varsayılanı temizleyin."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"İşlem seçin"</string>
@@ -1628,6 +1633,8 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"İptal edildi"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"İçerik yazılırken hata oluştu"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"bilinmiyor"</string>
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
+    <skip />
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> hizmeti yüklendi"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Etkinleştirmek için hafifçe vurun"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Yönetici PIN\'ini girin"</string>

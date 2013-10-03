@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"приступ Bluetooth подешавањима"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да открије даљинске уређаје и упари се са њима."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозвољава апликацији да конфигурише локални Bluetooth телефон, као и да открије даљинске уређаје и упари се са њима."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"омогућавање упаривања апликације преко Bluetooth-а"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Омогућава апликацији да се упарује са удаљеним уређајима без интеракције корисника."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Омогућава апликацији да се упарује са удаљеним уређајима без интеракције корисника."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"повезивање и прекид везе са WiMAX-ом"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Дозвољава апликацији да утврди да ли је WiMAX омогућен, као и информације о било којим повезаним WiMAX мрежама."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промени WiMAX статус"</string>
@@ -1112,6 +1115,8 @@
     <string name="capital_on" msgid="1544682755514494298">"ДА"</string>
     <string name="capital_off" msgid="6815870386972805832">"НЕ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Довршавање радње помоћу"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"Подразумевано користи за ову радњу."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Обришите подразумевано подешавање у менију Подешавања система &gt; Апликације &gt; Преузето."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Изаберите радњу"</string>
@@ -1628,6 +1633,8 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Отказано је"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Грешка при исписивању садржаја"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"непознато"</string>
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
+    <skip />
     <string name="print_service_installed_title" msgid="2246317169444081628">"Услуга <xliff:g id="NAME">%s</xliff:g> је инсталирана"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Додирните да бисте омогућили"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Унесите PIN администратора"</string>

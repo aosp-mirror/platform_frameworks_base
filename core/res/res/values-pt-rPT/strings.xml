@@ -609,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"aceder às definições de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite à aplicação configurar o tablet Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que a aplicação configure o telemóvel Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"permitir a sincronização Bluetooth por aplicação"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Permite que a aplicação seja sincronizada com dispositivos remotos sem interação do utilizador."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Permite que a aplicação seja sincronizada com dispositivos remotos sem interação do utilizador."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ligar e desligar do WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite que a aplicação determine se o WiMAX está ativado e aceda a informações acerca de qualquer rede WiMAX que esteja ligada."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Alterar estado do WiMAX"</string>
@@ -1112,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"Ativado"</string>
     <string name="capital_off" msgid="6815870386972805832">"Desativado"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Concluir ação utilizando"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Selecionar uma aplicação para a página inicial"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Limpar a predefinição nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Escolha uma ação"</string>
@@ -1628,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erro ao escrever conteúdo"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"desconhecido"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Serviço de impressão não ativado"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Serviço <xliff:g id="NAME">%s</xliff:g> instalado"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Toque para ativar"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introduza o PIN de administrador"</string>
