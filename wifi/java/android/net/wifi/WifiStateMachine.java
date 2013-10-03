@@ -426,6 +426,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_IP_ADDRESS_UPDATED               = BASE + 140;
     /* An IP address was removed from our interface */
     static final int CMD_IP_ADDRESS_REMOVED               = BASE + 141;
+    /* Reload all networks and reconnect */
+    static final int CMD_RELOAD_TLS_AND_RECONNECT         = BASE + 142;
 
     /* Wifi state machine modes of operation */
     /* CONNECT_MODE - connect to any 'known' AP when it becomes available */
@@ -1317,6 +1319,14 @@ public class WifiStateMachine extends StateMachine {
      */
     public void reassociateCommand() {
         sendMessage(CMD_REASSOCIATE);
+    }
+
+    /**
+     * Reload networks and then reconnect; helps load correct data for TLS networks
+     */
+
+    public void reloadTlsNetworksAndReconnect() {
+        sendMessage(CMD_RELOAD_TLS_AND_RECONNECT);
     }
 
     /**
@@ -2455,6 +2465,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
+                case CMD_RELOAD_TLS_AND_RECONNECT:
                 case WifiMonitor.SUP_CONNECTION_EVENT:
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
@@ -3404,6 +3415,13 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_REASSOCIATE:
                     mWifiNative.reassociate();
+                    break;
+                case CMD_RELOAD_TLS_AND_RECONNECT:
+                    if (mWifiConfigStore.needsUnlockedKeyStore()) {
+                        logd("Reconnecting to give a chance to un-connected TLS networks");
+                        mWifiNative.disconnect();
+                        mWifiNative.reconnect();
+                    }
                     break;
                 case WifiManager.CONNECT_NETWORK:
                     /* The connect message can contain a network id passed as arg1 on message or
