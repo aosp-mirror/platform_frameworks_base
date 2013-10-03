@@ -38,24 +38,29 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="vertical">
-   
+
             <ImageView
-                android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dip"
                 android:src="@*android:drawable/ic_grayedout_printer"
-                android:contentDescription="@string/print_no_printers_found">
+                android:contentDescription="@string/print_searching_for_printers">
             </ImageView>
 
             <TextView
-                android:id="@+id/message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="?android:attr/textColorSecondary"
-                android:text="@string/print_no_printers_found">
+                android:text="@string/print_searching_for_printers">
             </TextView>
+
+            <ProgressBar
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                style="@android:style/Widget.Holo.ProgressBar.Horizontal">
+            </ProgressBar>
 
         </LinearLayout>
 
