@@ -1453,29 +1453,39 @@ class ContextImpl extends Context {
         }
     }
 
+    private void validateServiceIntent(Intent service) {
+        if (service.getComponent() == null && service.getPackage() == null) {
+            if (true || getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
+                Log.w(TAG, "Implicit intents with startService are not safe: " + service
+                        + " " + Debug.getCallers(2, 3));
+                //IllegalArgumentException ex = new IllegalArgumentException(
+                //        "Service Intent must be explicit: " + service);
+                //Log.e(TAG, "This will become an error", ex);
+                //throw ex;
+            }
+        }
+    }
+
     @Override
     public ComponentName startService(Intent service) {
         warnIfCallingFromSystemProcess();
-        return startServiceAsUser(service, mUser);
+        return startServiceCommon(service, mUser);
     }
 
     @Override
     public boolean stopService(Intent service) {
         warnIfCallingFromSystemProcess();
-        return stopServiceAsUser(service, mUser);
+        return stopServiceCommon(service, mUser);
     }
 
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
+        return startServiceCommon(service, user);
+    }
+
+    private ComponentName startServiceCommon(Intent service, UserHandle user) {
         try {
-            if (service.getComponent() == null && service.getPackage() == null) {
-                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
-                    IllegalArgumentException ex = new IllegalArgumentException(
-                            "Service Intent must be explicit: " + service);
-                    Log.e(TAG, "This will become an error", ex);
-                    //throw ex;
-                }
-            }
+            validateServiceIntent(service);
             service.prepareToLeaveProcess();
             ComponentName cn = ActivityManagerNative.getDefault().startService(
                 mMainThread.getApplicationThread(), service,
@@ -1499,15 +1509,12 @@ class ContextImpl extends Context {
 
     @Override
     public boolean stopServiceAsUser(Intent service, UserHandle user) {
+        return stopServiceCommon(service, user);
+    }
+
+    private boolean stopServiceCommon(Intent service, UserHandle user) {
         try {
-            if (service.getComponent() == null && service.getPackage() == null) {
-                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
-                    IllegalArgumentException ex = new IllegalArgumentException(
-                            "Service Intent must be explicit: " + service);
-                    Log.e(TAG, "This will become an error", ex);
-                    //throw ex;
-                }
-            }
+            validateServiceIntent(service);
             service.prepareToLeaveProcess();
             int res = ActivityManagerNative.getDefault().stopService(
                 mMainThread.getApplicationThread(), service,
@@ -1526,12 +1533,17 @@ class ContextImpl extends Context {
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
         warnIfCallingFromSystemProcess();
-        return bindServiceAsUser(service, conn, flags, Process.myUserHandle());
+        return bindServiceCommon(service, conn, flags, Process.myUserHandle());
     }
 
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            UserHandle user) {
+        return bindServiceCommon(service, conn, flags, user);
+    }
+
+    private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
         IServiceConnection sd;
         if (conn == null) {
@@ -1543,14 +1555,7 @@ class ContextImpl extends Context {
         } else {
             throw new RuntimeException("Not supported in system context");
         }
-        if (service.getComponent() == null && service.getPackage() == null) {
-            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
-                IllegalArgumentException ex = new IllegalArgumentException(
-                        "Service Intent must be explicit: " + service);
-                Log.e(TAG, "This will become an error", ex);
-                //throw ex;
-            }
-        }
+        validateServiceIntent(service);
         try {
             IBinder token = getActivityToken();
             if (token == null && (flags&BIND_AUTO_CREATE) == 0 && mPackageInfo != null
