@@ -13356,6 +13356,7 @@ package android.media {
     ctor public RemoteController(android.content.Context, android.os.Looper) throws java.lang.IllegalArgumentException;
     method public int clearArtworkConfiguration();
     method public android.media.RemoteController.MetadataEditor editMetadata();
+    method public long getEstimatedMediaPosition();
     method public int seekTo(long);
     method public int sendMediaKeyEvent(android.view.KeyEvent);
     method public int setArtworkConfiguration(int, int);
