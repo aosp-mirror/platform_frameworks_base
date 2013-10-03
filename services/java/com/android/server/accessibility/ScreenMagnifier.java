@@ -502,6 +502,7 @@ public final class ScreenMagnifier extends IMagnificationCallbacks.Stub
 
         public MagnifiedContentInteractonStateHandler(Context context) {
             mScaleGestureDetector = new ScaleGestureDetector(context, this);
+            mScaleGestureDetector.setQuickScaleEnabled(false);
             mGestureDetector = new GestureDetector(context, this);
         }
 
