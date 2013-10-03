@@ -3007,7 +3007,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Ensure policy decor includes status bar
                     dcf.top = mStableTop;
                 }
-                if ((sysUiFl & View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION) == 0) {
+                if ((sysUiFl & View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION) == 0
+                        && (sysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
                     // Ensure policy decor includes navigation bar
                     dcf.bottom = mStableBottom;
                     dcf.right = mStableRight;
