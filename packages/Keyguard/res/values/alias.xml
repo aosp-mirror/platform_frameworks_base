@@ -34,9 +34,6 @@
     <!-- Alias used to reference framework drawable in keyguard. -->
     <item type="drawable" name="ic_contact_picture">@*android:drawable/ic_contact_picture</item>
 
-    <!-- Alias used to reference framework drawable in keyguard. -->
-    <item type="drawable" name="ic_lock_idle_alarm">@*android:drawable/ic_lock_idle_alarm</item>
-
     <!-- Alias used to reference framework "OK" string in keyguard.  -->
     <item type="string" name="ok">@*android:string/ok</item>
 

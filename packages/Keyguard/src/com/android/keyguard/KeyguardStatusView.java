@@ -38,17 +38,9 @@ public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
     private static final String TAG = "KeyguardStatusView";
 
-    public static final int LOCK_ICON = 0; // R.drawable.ic_lock_idle_lock;
-    public static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
-    public static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
-    public static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
-
-    private SimpleDateFormat mDateFormat;
     private LockPatternUtils mLockPatternUtils;
 
-    private TextView mDateView;
     private TextView mAlarmStatusView;
-    private ClockView mClockView;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -81,21 +73,12 @@ public class KeyguardStatusView extends GridLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        Resources res = getContext().getResources();
-        final Locale locale = Locale.getDefault();
-        final String datePattern = res.getString(R.string.system_ui_date_pattern);
-        final String bestFormat = ICU.getBestDateTimePattern(datePattern, locale.toString());
-        mDateFormat = new SimpleDateFormat(bestFormat, locale);
-        mDateView = (TextView) findViewById(R.id.date);
+
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
-        mClockView = (ClockView) findViewById(R.id.clock_view);
         mLockPatternUtils = new LockPatternUtils(getContext());
 
-        // Use custom font in mDateView
-        mDateView.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
-
         // Required to get Marquee to work.
-        final View marqueeViews[] = { mDateView, mAlarmStatusView };
+        final View marqueeViews[] = { mAlarmStatusView };
         for (int i = 0; i < marqueeViews.length; i++) {
             View v = marqueeViews[i];
             if (v == null) {
@@ -107,8 +90,6 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     protected void refresh() {
-        mClockView.updateTime();
-        refreshDate();
         refreshAlarmStatus(); // might as well
     }
 
@@ -117,15 +98,10 @@ public class KeyguardStatusView extends GridLayout {
         String nextAlarm = mLockPatternUtils.getNextAlarm();
         if (!TextUtils.isEmpty(nextAlarm)) {
             mAlarmStatusView.setText(nextAlarm);
-            mAlarmStatusView.setCompoundDrawablesWithIntrinsicBounds(ALARM_ICON, 0, 0, 0);
             mAlarmStatusView.setVisibility(View.VISIBLE);
         } else {
             mAlarmStatusView.setVisibility(View.GONE);
         }
-    }
-
-    void refreshDate() {
-        mDateView.setText(mDateFormat.format(new Date()));
     }
 
     @Override
