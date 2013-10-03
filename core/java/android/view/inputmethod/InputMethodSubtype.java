@@ -459,12 +459,12 @@ public final class InputMethodSubtype implements Parcelable {
                 return (subtype.hashCode() == hashCode());
             }
             return (subtype.hashCode() == hashCode())
-                && (subtype.getNameResId() == getNameResId())
-                && (subtype.getMode().equals(getMode()))
-                && (subtype.getIconResId() == getIconResId())
                 && (subtype.getLocale().equals(getLocale()))
+                && (subtype.getMode().equals(getMode()))
                 && (subtype.getExtraValue().equals(getExtraValue()))
                 && (subtype.isAuxiliary() == isAuxiliary())
+                && (subtype.overridesImplicitlyEnabledSubtype()
+                        == overridesImplicitlyEnabledSubtype())
                 && (subtype.isAsciiCapable() == isAsciiCapable());
         }
         return false;
