@@ -48,9 +48,13 @@ public class DimLayer {
     /** Time in milliseconds to take to transition from mStartAlpha to mTargetAlpha */
     long mDuration;
 
-    DimLayer(WindowManagerService service, DisplayContent displayContent) {
-        mDisplayContent = displayContent;
-        final int displayId = displayContent.getDisplayId();
+    /** Owning stack */
+    final TaskStack mStack;
+
+    DimLayer(WindowManagerService service, TaskStack stack) {
+        mStack = stack;
+        mDisplayContent = stack.getDisplayContent();
+        final int displayId = mDisplayContent.getDisplayId();
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
         SurfaceControl.openTransaction();
         try {
@@ -160,22 +164,29 @@ public class DimLayer {
             return;
         }
 
-        /*
-        // Set surface size to screen size.
-        final DisplayInfo info = mDisplayContent.getDisplayInfo();
-        // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
-        // corner.
-        final int dw = (int) (info.logicalWidth * 1.5);
-        final int dh = (int) (info.logicalHeight * 1.5);
-        // back off position so 1/4 of Surface is before and 1/4 is after.
-        final float xPos = -1 * dw / 6;
-        final float yPos = -1 * dh / 6;
-        */
+        final int dw, dh;
+        final float xPos, yPos;
+        if (mStack.hasSibling()) {
+            dw = mBounds.width();
+            dh = mBounds.height();
+            xPos = mBounds.left;
+            yPos = mBounds.right;
+        } else {
+            // Set surface size to screen size.
+            final DisplayInfo info = mDisplayContent.getDisplayInfo();
+            // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
+            // corner.
+            dw = (int) (info.logicalWidth * 1.5);
+            dh = (int) (info.logicalHeight * 1.5);
+            // back off position so 1/4 of Surface is before and 1/4 is after.
+            xPos = -1 * dw / 6;
+            yPos = -1 * dh / 6;
+        }
 
         if (!mLastBounds.equals(mBounds) || mLayer != layer) {
             try {
-                mDimSurface.setPosition(mBounds.left, mBounds.top);
-                mDimSurface.setSize(mBounds.width(), mBounds.height());
+                mDimSurface.setPosition(xPos, yPos);
+                mDimSurface.setSize(dw, dh);
                 mDimSurface.setLayer(layer);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure setting size or layer", e);
