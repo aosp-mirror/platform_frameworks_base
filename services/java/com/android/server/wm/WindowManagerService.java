@@ -1232,10 +1232,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // the IME above it until it is completely gone so it doesn't drop
         // behind the dialog or its full-screen scrim.
         final WindowState curTarget = mInputMethodTarget;
-        if (curTarget != null && w != null
+        if (curTarget != null
                 && curTarget.isDisplayedLw()
                 && curTarget.isClosing()
-                && (curTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer)) {
+                && (w == null || curTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer)) {
             if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Current target higher, not changing");
             return windows.indexOf(curTarget) + 1;
         }
