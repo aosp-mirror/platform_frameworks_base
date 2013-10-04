@@ -219,6 +219,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         WallpaperData mWallpaper;
         IRemoteCallback mReply;
 
+        boolean mDimensionsChanged = false;
+
         public WallpaperConnection(WallpaperInfo info, WallpaperData wallpaper) {
             mInfo = info;
             mWallpaper = wallpaper;
@@ -262,6 +264,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         public void attachEngine(IWallpaperEngine engine) {
             synchronized (mLock) {
                 mEngine = engine;
+                if (mDimensionsChanged) {
+                    try {
+                        mEngine.setDesiredSize(mWallpaper.width, mWallpaper.height);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to set wallpaper dimensions", e);
+                    }
+                    mDimensionsChanged = false;
+                }
             }
         }
 
@@ -652,6 +662,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                         } catch (RemoteException e) {
                         }
                         notifyCallbacksLocked(wallpaper);
+                    } else if (wallpaper.connection.mService != null) {
+                        // We've attached to the service but the engine hasn't attached back to us
+                        // yet. This means it will be created with the previous dimensions, so we
+                        // need to update it to the new dimensions once it attaches.
+                        wallpaper.connection.mDimensionsChanged = true;
                     }
                 }
             }
