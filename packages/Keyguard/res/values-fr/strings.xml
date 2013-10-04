@@ -71,6 +71,12 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Bouton de pause"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Bouton de lecture"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Bouton d\'arrêt"</string>
+    <!-- no translation found for keyguard_accessibility_transport_thumbs_up_description (4535938129663903194) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_transport_thumbs_down_description (8101433677192177861) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_transport_heart_description (2336943232474689887) -->
+    <skip />
     <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Déverrouillez l\'appareil pour continuer."</string>
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Lancement annulé."</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Relâchez le widget \"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>\" pour le supprimer."</string>
