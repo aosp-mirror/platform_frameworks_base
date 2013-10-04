@@ -132,7 +132,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"태블릿 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"휴대전화 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장공간을 늘리세요."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"네트워크가 모니터링될 수 있음"</string>
-    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자가 모니터링"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자의 모니터링"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>에서 모니터링"</string>
     <string name="me" msgid="6545696007631404292">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"태블릿 옵션"</string>
@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"앱이 상태 표시줄이 되도록 허용합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"상태 표시줄 확장/축소"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"앱이 상태 표시줄을 확장하거나 축소할 수 있도록 허용합니다."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"바로가기 설치"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"애플리케이션이 사용자의 작업 없이 홈 화면 바로가기를 추가할 수 있도록 허용합니다."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"바로가기 제거"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"애플리케이션이 사용자의 작업 없이 홈 화면 바로가기를 삭제할 수 있도록 허용합니다."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"발신전화 경로 전환"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"앱이 발신 전화를 처리하고 전화를 걸 번호를 변경할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 발신 전화를 모니터링, 리디렉션 또는 차단할 수도 있습니다."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"문자 메시지 받기(SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"블루투스 설정에 액세스"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"앱이 로컬 블루투스 태블릿을 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"앱이 로컬 블루투스 휴대전화를 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"애플리케이션에서 블루투스 페어링 허용"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"앱이 사용자 상호작용 없이 원격 기기와 페어링할 수 있도록 허용합니다."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"앱이 사용자 상호작용 없이 원격 기기와 페어링할 수 있도록 허용합니다."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX 연결 및 연결 해제"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"앱이 WiMAX를 사용하도록 설정했는지 여부와 연결된 WiMAX 네트워크에 대한 정보를 결정할 수 있도록 허용합니다."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX 상태 변경"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"앱이 사용자 사전에 저장하고 있는 모든 단어, 이름, 문구 등을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"사용자 정의 사전에 단어 추가"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"앱이 사용자 사전에 새 단어를 입력할 수 있도록 허용합니다."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"보호된 저장소에 액세스 테스트"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"보호된 저장소에 액세스 테스트"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"앱이 향후 기기에서 사용할 수 있는 USB 저장소의 권한을 테스트하도록 허용합니다."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"앱이 미래의 기기에서 사용할 수 있는 SD 카드의 권한을 테스트하도록 허용합니다."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB 저장소의 콘텐츠 읽기"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD 카드의 콘텐츠 읽기"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"앱이 USB 저장소의 콘텐츠를 읽을 수 있도록 허용합니다."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"앱이 SD 카드의 콘텐츠를 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB 저장소의 콘텐츠 수정 또는 삭제"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD 카드의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"앱이 USB 저장소에 쓸 수 있도록 허용합니다."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"작업을 수행할 때 사용하는 애플리케이션"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"홈 앱 선택"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"이 작업에 대해 기본값으로 사용"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"시스템 설정 &gt; 앱 &gt; 다운로드로 이동하여 기본 설정을 지웁니다."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"작업 선택"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"취소됨"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"콘텐츠 작성 중 오류"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"알 수 없음"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"인쇄 서비스 사용하지 않음"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> 서비스 설치됨"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"사용하려면 탭하세요."</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"관리자 PIN 입력"</string>

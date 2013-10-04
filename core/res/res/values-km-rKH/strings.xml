@@ -163,9 +163,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"របៀប​ស្ងាត់"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"បិទ​សំឡេង"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"បើក​សំឡេង"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"របៀប​ជិះ​យន្តហោះ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ពេល​ជិះ​យន្តហោះ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"បាន​បើក​របៀប​ពេល​ជិះ​យន្ត​ហោះ"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀប​យន្តហោះ"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ប្រព័ន្ធ​​ Android"</string>
@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ឲ្យ​កម្មវិធី​ក្លាយ​ជា​របារ​ស្ថានភាព។"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ពង្រីក/បង្រួម​របារ​ស្ថាន​ភាព"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ឲ្យ​កម្មវិធី​ពង្រីក ឬ​បង្រួម​របារ​ស្ថានភាព។"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ដំឡើង​ផ្លូវកាត់"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​បន្ថែម​ផ្លូវកាត់​អេក្រង់​ដើម​ ដោយ​គ្មាន​​​អំពើ​ពី​អ្នក​ប្រើ។"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"លុប​ផ្លូវកាត់"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ឲ្យ​កម្មវិធី​លុប​ផ្លូវកាត់​អេក្រង់​ដើម​ដោយ​គ្មាន​អំពើ​ពី​អ្នកប្រើ។"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"នាំ​ផ្លូវ​ការ​ហៅ​ចេញ​ឡើងវិញ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"ឲ្យ​កម្មវិធី​ដំណើរការ​ការ​ហៅ​ចេញ និង​ប្ដូរ​លេខ​ត្រូវ​ហៅ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​តាមដាន ប្ដូរ​ទិស ឬ​ការពារ​ការ​ហៅ​ចេញ។"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ទទួល​សារ​អត្ថបទ (សារ SMS​)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ចូល​ដំណើរការ​​ការ​កំណត់​ប៊្លូធូស"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ឲ្យ​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​កុំព្យូទ័រ​បន្ទះ​ប៊្លូធូស​មូលដ្ឋាន និង​រកមើល ព្រម​ទាំង​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ។"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ឲ្យ​កម្មវិធី​មើល​​ការ​កំណត់​រចនាសម្ព័ន្ធ​ប៊្លូធូស​ក្នុង​ទូរស័ព្ទ ដើម្បី​រកមើល និង​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ។"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"ឲ្យ​ប៊្លូធូស​ផ្គូផ្គង​ជា​មួយ​កម្មវិធី"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ភ្ជាប់ និង​ផ្ដាច់​ពី WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ឲ្យ​កម្មវិធី​កំណត់​ថា​តើ WiMAX ត្រូវ​បាន​បើក និង​ព័ត៌មាន​អំពី​បណ្ដាញ WiMAX ដែល​ត្រូវ​បាន​តភ្ជាប់។"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ប្ដូរ​ស្ថានភាព WiMAX"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ឲ្យ​កម្មវិធី​អាន​ពាក្យ ឈ្មោះ និង​ឃ្លា​ទាំងអស់​ដែល​អ្នកប្រើ​អាច​​រក្សាទុក​ក្នុង​វចនានុក្រម​​អ្នកប្រើ។"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"បន្ថែម​ពាក្យ​ទៅ​វចនានុក្រម​កំណត់​ដោយ​អ្នកប្រើ"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"ឲ្យ​កម្មវិធី​សរសេរ​ពាក្យ​ថ្មី​ក្នុង​វចនានុក្រម​អ្នកប្រើ។"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"សាកល្បង​ចូល​ដំណើរការ​ការ​ផ្ទុក​ដែល​បាន​ការពារ"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"សាកល្បង​ចូល​ដំណើរការ​ការ​ផ្ទុក​ដែល​បាន​ការពារ"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"ឲ្យ​កម្មវិធី​សាកល្បង​សិទ្ធិ​សម្រាប់​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី ដែល​នឹង​អាច​ប្រើ​បាន​លើ​ឧបករណ៍​​ពេល​អនាគត។"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"ឲ្យ​កម្មវិធី​សាកល្បង​សិទ្ធិ​សម្រាប់​កាត​អេសឌី​ដែល​នឹង​អាច​ប្រើ​បាន​លើ​ឧបករណ៍​នា​ពេល​អនាគត។"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"អាន​មាតិកា​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​របស់​អ្នក"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"អាន​មាតិកា​​កាត​អេសឌី​របស់​អ្នក"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"ឲ្យ​កម្មវិធី​អាន​មាតិកា​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​របស់​អ្នក។"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ដើម្បី​អាន​មាតិកា​​កាត​អេសឌី​​របស់​អ្នក​។"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"កែ​ ឬ​លុប​មាតិកា​នៃ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​របស់​អ្នក"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"កែ ឬ​លុប​មាតិកា​កាត​អេសឌី"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ឲ្យ​កម្មវិធី​សរសេរ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"បើក"</string>
     <string name="capital_off" msgid="6815870386972805832">"បិទ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"បាន​បោះ​បង់"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"កំហុស​ក្នុង​ការ​សរសេរ​មាតិកា"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"មិន​ស្គាល់"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"មិន​បា​ន​បើក​សេវាកម្ម​បោះពុម្ព"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"បាន​ដំឡើង​សេវាកម្ម <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ប៉ះ ដើម្បី​បើក"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"បញ្ចូល​លេខ​កូដ​សម្ងាត់​អ្នក​គ្រប់គ្រង"</string>

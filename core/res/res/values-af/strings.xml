@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Laat die program toe om die statusbalk te wees."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"vou statusbalk in of uit"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Laat die program toe om die statusbalk uit te vou of in te vou."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installeer kortpaaie"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Stel \'n program in staat om Tuisskerm-kortpaaie by te voeg sonder gebruikerinmenging."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"deïnstalleer kortpaaie"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Laat die program toe om Tuisskerm-kortpaaie te verwyder sonder gebruikerinmenging."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"herlei uitgaande oproepe"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Laat die program toe om uitgaande oproepe te verwerk en die nommer wat geskakel moet word te verander. Hierdie toestemming laat die program toe om uitgaande oproepe te monitor, herlei, of te voorkom."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ontvang teksboodskappe (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"gaan in by Bluetooth-instellings"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Laat die program toe om die plaaslike Bluetooth-tablet op te stel, en om met afstandbeheer toestelle saam te bind."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Laat die program toe om die plaaslike Bluetooth-foon op te stel en te ontdek en met afgeleë toestelle saam te bind."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"laat program saambind deur Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Laat die program sonder gebruikerinteraksie met afgeleë toestelle saambind."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Laat die program sonder gebruikerinteraksie met afgeleë toestelle saambind."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"koppel aan en ontkoppel van WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Laat die program toe om te bepaal of WiMAX geaktiveer is en of enige WiMAX-netwerke gekoppel is."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Verander WiMAX-status"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Laat ’n program toe om alle woorde, name en frases wat die gebruiker moontlik in die gebruikerwoordeboek gestoor het, te lees."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"voeg woorde by gebruiker-gedefinieerde woordeboek"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"toets toegang tot beskermde berging"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"toets toegang tot beskermde berging"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Laat die program toe om \'n toestemming te toets vir USB-berging wat op toekomstige toestelle beskikbaar sal wees."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Laat die program toe om \'n toestemming vir die SD-kaart wat op toekomstige toestelle beskikbaar sal wees, te toets."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lees jou USB-berging se inhoud"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lees jou SD-kaart se inhoud"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Laat die program toe om die USB-geheue se inhoud te lees."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Laat die program toe om die inhoud van jou SD-kaart te lees."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-berging uit"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Verander of vee die inhoud van jou SD-kaart uit"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"AAN"</string>
     <string name="capital_off" msgid="6815870386972805832">"AF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Voltooi handeling met"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Kies \'n tuisprogram"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gebruik hierdie aksie by verstek."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vee die verstek instelling uit in Stelselinstellings &gt; Programme &gt; Afgelaai."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Kies \'n handeling"</string>
@@ -1571,16 +1579,16 @@
     <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
     <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
     <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
-    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
-    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
-    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
-    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8"</string>
-    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Brief"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Regeringsbrief"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Regs"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior regs"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Grootboek"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Poniepers"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Indekskaart 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Indekskaart 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Indekskaart 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarg"</string>
     <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
     <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
@@ -1624,8 +1632,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Gekanselleer"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Kon nie inhoud skryf nie"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"onbekend"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Drukdiens nie geaktiveer nie"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g>-diens geïnstalleer"</string>
-    <string name="print_service_installed_message" msgid="5897362931070459152">"tik om te aktiveer"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Tik om te aktiveer"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Voer administrateur-PIN in"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Voer PIN in"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Verkeerd"</string>

@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"የኹናቴ አሞሌ እንዲሆን ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"የሁኔታ አሞሌ ዘርጋ/ሰብስብ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"የሁኔታ አሞሌን ለመዝረጋት እና ለመሰብሰብ ለመተግበሪያው ይፈቅዳሉ።"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"አቋራጮችን ይጭናል"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"አንድ መተግበሪያ ያለተጠቃሚ ጣልቃ-ገብነት የመነሻ ማያ ገጽ አቋራጮችን እንዲያክል ያስችለዋል።"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"አቋራጮችን ያራግፋል"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"መተግበሪያው ያለተጠቃሚ ጣልቃ-ገብነት የመነሻ ማያ ገጽ አቋራጮችን እንዲያስወግድ ያስችለዋል።"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"የወጪ ጥሪዎች አቅጣጫ ቀይር"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"መተግበሪያው ወጪ ጥሪዎችን እንዲያስኬድና የሚደወለውን ቁጥር እንዲቀይር ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ወጪ ጥሪዎችን እንዲቆጣጠር፣ አቅጣጫ እንዲየስቀይር ወይም እንዲያግድ ይፈቅድለታል።"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"የፅሁፍ መልዕክቶችን ተቀበል (ኤስ.ኤም.ኤስ.)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"የብሉቱዝ ቅንብሮችን ድረስባቸው"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"በመተግበሪያ የብሉቱዝ ማጣመር ይፍቀዱ"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"መተግበሪያው ያለተጠቃሚ ጣልቃ-ገብነት ከርቀት መሣሪያዎች ጋር እንዲጣመር ያስችለዋል።"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"መተግበሪያው ያለተጠቃሚ ጣልቃ-ገብነት ከርቀት መሣሪያዎች ጋር እንዲጣመር ያስችለዋል።"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ከWiMAX ጋር ይገናኙ እና ያላቅቁ"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"መተግበሪያው WiMAX እንደነቃ እና ስለማናቸውም የተገናኙ የWiMAX አውታረ መረቦች መረጃ እንዲወስን ይፈቅድለታል።"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"የWiMAX ሁኔታ ለውጥ"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"መተግበሪያው ተጠቃሚው በተጠቃሚው መዝገበ-ቃላት አከማችቷቸው ሊሆኑ የሚችሉ ሁሉንም ቃላት፣ ስሞችና ሐረጋት እንዲያነባቸው ይፈቅድለታል።"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"በተጠቃሚ በተገለጸ መዝገበ ቃላት ላይ ቃላትን ያክላል"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"በተጠቃሚ መዝገበ ቃላት ውስጥ አዲስ ቃል እንዲጽፍ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ጥበቃ ወደሚደረግለት ማከማቻ ያለ መዳረሻን ፈትሽ"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ጥበቃ ወደሚደረግለት ማከማቻ ያለ መዳረሻን ፈትሽ"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"መተግበሪያው በወደፊት መሳሪዎች ላይ ለሚኖር የUSB ማህደረ ትውስታ ፈቃድ እንዲሞክር ይፈቅድለታል።"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"መተግበሪያው በወደፊት መሳሪዎች ላይ ለሚኖረው SD ካርድ ፈቃድ እንዲሞክር ይፈቅድለታል።"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"የUSB ማከማቻህን ይዘቶች አንብብ"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"የSD ካርድህን ይዘቶች አንብብ"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"መተግበሪያው የእርስዎ USB ማከማቻ ይዘቶችን እንዲያነብ ያስችለዋል።"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"መተግበሪያው የእርስዎ SD ካርድ ይዘቶችን እንዲያነብ ያስችለዋል።"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"የUSB ማከማቻዎን ይዘቶች ይቀይሩ ወይም ይሰርዙ"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"የSD ካርድህን ይዘቶች ቀይር ወይም ሰርዝ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ወደ USB ማህደረ ትውስታው ለመፃፍ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
@@ -1100,14 +1107,15 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> እያሄደ ነው"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"ተጨማሪ መረጃ ለማግኘት ወይም መተግበሪያውን ለማቆም ይንኩ።"</string>
     <string name="ok" msgid="5970060430562524910">"እሺ"</string>
-    <string name="cancel" msgid="6442560571259935130">"ይቅር"</string>
+    <string name="cancel" msgid="6442560571259935130">"ሰርዝ"</string>
     <string name="yes" msgid="5362982303337969312">"እሺ"</string>
-    <string name="no" msgid="5141531044935541497">"ይቅር"</string>
+    <string name="no" msgid="5141531044935541497">"ሰርዝ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ትኩረት"</string>
     <string name="loading" msgid="7933681260296021180">"በመጫን ላይ…"</string>
     <string name="capital_on" msgid="1544682755514494298">"በ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ውጪ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"... በመጠቀም ድርጊቱን አጠናቅ"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"የመነሻ መተግበሪያ ይምረጡ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ለዕርምጃ ነባሪ ተጠቀም።"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ነባሪ አጽዳ በስርዓት ቅንብሮች  ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ድርጊት ምረጥ"</string>
@@ -1577,9 +1585,9 @@
     <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"ጁኒየር ህጋዊ"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"የሒሳብ መዝገብ"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"ታብሎይድ"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"የኢንዴክስ ካርድ 3x5"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"የኢንዴክስ ካርድ 4x6"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"የኢንዴክስ ካርድ 5x8"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"መረጃ ጠቋሚ ካርድ 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"መረጃ ጠቋሚ ካርድ 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"መረጃ ጠቋሚ ካርድ 5x8"</string>
     <string name="mediasize_na_monarch" msgid="213639906956550754">"ሞናርክ"</string>
     <string name="mediasize_na_quarto" msgid="835778493593023223">"ኳርቶ"</string>
     <string name="mediasize_na_foolscap" msgid="1573911237983677138">"ፉልስካፕ"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ተትቷል"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ይዘት መጻፍ ላይ ስህተት"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"አይታወቅም"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"የህትመት አገልግሎት አልነቃም"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"የ<xliff:g id="NAME">%s</xliff:g> አገልግሎት ተጭኗል"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ለማንቃት መታ ያድርጉ"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"የአስተዳዳሪ ፒን ያስገቡ"</string>

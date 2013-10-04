@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Umožňuje aplikaci být stavovým řádkem."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"rozbalení a sbalení stavového řádku"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Umožňuje aplikaci rozbalit či sbalit stavový řádek."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalace zástupců"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Umožňuje aplikaci přidat zástupce na plochu bez zásahu uživatele."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"odinstalace zástupců"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Umožňuje aplikaci odebrat zástupce z plochy bez zásahu uživatele."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"přesměrování odchozích hovorů"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Umožňuje aplikaci zpracovávat odchozí hovory a měnit vytáčené číslo. Toto oprávnění umožňuje sledovat či přesměrovat odchozí hovory nebo jim zabránit."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"příjem textových zpráv (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"přístup do nastavení Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"povolit párování Bluetooth prostřednictvím aplikace"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Povoluje aplikaci provést bez zásahu uživatele spárování se vzdálenými zařízeními."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Povoluje aplikaci provést bez zásahu uživatele spárování se vzdálenými zařízeními."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"připojení a odpojení od sítě WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Umožňuje aplikaci zjistit, zda je povoleno připojení WiMAX, a také získat informace o všech připojených sítích WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Změnit stav připojení WiMAX"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Umožňuje aplikaci číst slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"přidávání slov do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Umožňuje aplikaci zapisovat nová slova do uživatelského slovníku."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testování přístupu do chráněného úložiště"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testování přístupu do chráněného úložiště"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Umožňuje aplikaci testovat oprávnění pro úložiště USB, které bude dostupné v budoucích zařízeních."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Umožňuje aplikaci testovat oprávnění pro kartu SD, která bude dostupná v budoucích zařízeních."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čtení obsahu v úložišti USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čtení obsahu na kartě SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Umožňuje aplikaci čtení obsahu USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Umožňuje aplikaci čtení obsahu karty SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"úprava nebo mazání obsahu v úložišti USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava nebo mazání obsahu na kartě SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikaci zapisovat do úložiště USB."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskou aplikaci"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v sekci Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Vyberte akci"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Zrušeno"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Při zápisu obsahu došlo k chybě"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"neznámé"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Tisková služba není povolena"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Služba <xliff:g id="NAME">%s</xliff:g> byla nainstalována"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Klepnutím povolíte"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Zadejte PIN administrátora"</string>

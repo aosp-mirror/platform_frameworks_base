@@ -145,7 +145,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ປິດສຽງຣິງໂທນ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ສັ່ນພ້ອມສຽງຣິງໂທນ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ເປີດສຽງໂທເຂົ້າແລ້ວ"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"ກຳລັງປິດລົງ..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"ກຳລັງປິດລະບົບລົງ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ແທັບເລັດຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ໂທລະສັບຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ທ່ານຕ້ອງການທີ່ຈະປິດບໍ່?"</string>
@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ອະນຸຍາດໃຫ້ແອັບຯເປັນແຖບສະຖານະ."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ຫຍໍ້/ຂະຫຍາຍ ແຖບສະຖານະ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ອະນຸຍາດໃຫ້ແອັບຯ ຂະຫຍາຍ ຫຼືຫຍໍ້ແຖບສະຖານະ."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ຕິດຕັ້ງທາງລັດ"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເພີ່ມທາງລັດໄດ້ ໂດຍບໍ່ຕ້ອງຮັບການຢືນຢັນຈາກຜູ່ໃຊ້."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ຖອນທາງລັດ"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນລຶບທາງລັດໃນໜ້າຫຼັກໄດ້ ໂດຍບໍ່ຕ້ອງຮັບການຢືນຢັນຈາກຜູ່ໃຊ້."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ປ່ຽນເສັ້ນທາງການໂທອອກ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"ອະນຸຍາດໃຫ້ແອັບຯປະມວນຜົນສາຍທີ່ໂທອອກ ແລະປ່ຽນໝາຍເລກທີ່ຈະໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດກວດສອບ, ໂອນສາຍ ຫຼືຂັດຂວາງບໍ່ໃຫ້ໂທອອກໄດ້."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ຮັບຂໍ້ຄວາມສັ້ນ (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ເຂົ້າເຖິງການຕັ້ງຄ່າ Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າແທັບເລັດ Bluetooth ພາຍໃນ ແລະຊອກຫາ ແລະເຊື່ອມຕໍ່ໄວ້ກັບອຸປະກອນພາຍນອກ."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າ Bluetooth ໃນໂທລະສັບ ເພື່ອຊອກຫາ ແລະການເຊື່ອມຕໍ່ກັບອຸປະກອນໄຮ້ສາຍພາຍນອກ."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຈັບຄູ່ Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຈາກ WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ອະນຸຍາດໃຫ້ແອັບຯກວດເບິ່ງວ່າ WiMAX ຖືກເປີດນຳໃຊ້ຢູ່ບໍ່ ແລະຂໍ້ມູນກ່ຽວກັບເຄືອຂ່າຍ WiMAX ອື່ນໆທີ່ກຳລັງເຊື່ອມຕໍ່ຢູ່."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ປ່ຽນສະຖານະ WiMAX"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ອະນຸຍາດແອັບຯອ່ານຄຳສັບ, ຊື່ ແລະປະໂຫຍກທັງໝົດທີ່ຜູ່ໃຊ້ອາດບັນທຶກໄວ້ໃນວັດຈະນານຸກົມຜູ່ໃຊ້."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ເພີ່ມຄຳສັບໃສ່ວັດຈະນານຸກົມທີ່ຜູ່ໃຊ້ກຳນົດເອງ"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"ອະນຸຍາດໃຫ້ແອັບຯຂຽນຄຳສັບໃໝ່ ໃສ່ວັດຈະນານຸກົມຜູ່ໃຊ້."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ທົດສອບການເຂົ້າເຖິງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ຖືກປ້ອງກັນໄວ້"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ທົດສອບການເຂົ້າເຖິງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ຖືກປ້ອງກັນໄວ້"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"ອະນຸຍາດໃຫ້ແອັບຯທົດສອບການອະນຸຍາດຂອງ ບ່ອນຈັດເກັບຂໍ້ມູນ USB ເຊິ່ງຈະຖືກໃຊ້ໃນອຸປະກອນໃນອະນາຄົດ."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"ອະນຸຍາດໃຫ້ແອັບຯ ທົດລອງສິດໃດນຶ່ງສຳລັບ SD card ທີ່ຈະມີໃນອຸປະກອນໃນອະນາຄົດ."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ອ່ານເນື້ອຫາຕ່າງໆໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານ"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ອ່ານເນື້ອຫາຕ່າງໆໃນ SD Card ຂອງທ່ານ"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານເນື້ອຫາຕ່າງໆໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານ."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານເນື້ອຫາຕ່າງໆໃນ SD Card ຂອງທ່ານ."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານ"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາຂອງ SD card ຂອງທ່ານ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ອະນຸຍາດໃຫ້ແອັບຯຂຽນຂໍ້ມູນໃສ່ບ່ອນຈັດເກັບຂໍ້ມູນ USB."</string>
@@ -1108,9 +1115,10 @@
     <string name="capital_on" msgid="1544682755514494298">"ເປີດ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ປິດ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ເຮັດວຽກໃຫ້ສຳເລັດໂດຍໃຊ້"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"ເລືອກແອັບຯ Home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ລຶບລ້າງຄ່າເລີ່ມຕົ້ນ ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ."</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"ເລືອກການປະຕິບັດ"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"ເລືອກການເຮັດວຽກ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ເລືອກແອັບຯສໍາລັບອຸປະກອນ USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ບໍ່ມີແອັບຯໃດສາມາດເຮັດວຽກນີ້ໄດ້."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ຍົກເລີກແລ້ວ"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ເນື້ອ​ໃນ​ການຂຽນຜິດພາດ"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"ບໍ່ຮູ້ຈັກ"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"ບໍລິການການພິມບໍ່ຖືກເປີດນຳໃຊ້"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"ຕິດຕັ້ງບໍລິການ <xliff:g id="NAME">%s</xliff:g> ແລ້ວ"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ແຕະເພື່ອເປີດໃຊ້"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"ໃສ່ PIN ຜູ່ເບິ່ງແຍງລະບົບ"</string>
