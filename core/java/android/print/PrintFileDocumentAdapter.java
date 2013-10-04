@@ -41,6 +41,8 @@ import java.io.OutputStream;
  * spooling the data, so you can delete the file if it is a
  * temporary one. To achieve this one must override {@link #onFinish()}
  * and delete the file yourself.
+ *
+ * @hide
  */
 public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
 
