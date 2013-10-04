@@ -35,6 +35,7 @@ import java.util.HashMap;
 public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     private static final String TAG = "CameraMetadataJV";
+    private final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     public CameraMetadataNative() {
         super();
@@ -400,11 +401,13 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
             int remaining = buffer.remaining();
             int arraySize = remaining / elementSize;
 
-            Log.v(TAG,
-                    String.format(
+            if (VERBOSE) {
+                Log.v(TAG,
+                        String.format(
                             "Attempting to unpack array (count = %d, element size = %d, bytes " +
-                                    "remaining = %d) for type %s",
+                            "remaining = %d) for type %s",
                             arraySize, elementSize, remaining, type));
+            }
 
             array = Array.newInstance(componentType, arraySize);
             for (int i = 0; i < arraySize; ++i) {
@@ -565,8 +568,9 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
                     "Expected values array to be the same size as the enumTypes values "
                             + values.length + " for type " + enumType);
         }
-
-        Log.v(TAG, "Registered enum values for type " + enumType + " values");
+        if (VERBOSE) {
+            Log.v(TAG, "Registered enum values for type " + enumType + " values");
+        }
 
         sEnumValues.put(enumType, values);
     }
@@ -654,14 +658,18 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     static {
         nativeClassInit();
 
-        Log.v(TAG, "Shall register metadata marshalers");
+        if (VERBOSE) {
+            Log.v(TAG, "Shall register metadata marshalers");
+        }
 
         // load built-in marshallers
         registerMarshaler(new MetadataMarshalRect());
         registerMarshaler(new MetadataMarshalSize());
         registerMarshaler(new MetadataMarshalString());
 
-        Log.v(TAG, "Registered metadata marshalers");
+        if (VERBOSE) {
+            Log.v(TAG, "Registered metadata marshalers");
+        }
     }
 
 }
