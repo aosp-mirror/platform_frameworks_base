@@ -7277,6 +7277,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
     field public static final java.lang.String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
     field public static final java.lang.String FEATURE_CAMERA_FRONT = "android.hardware.camera.front";
+    field public static final java.lang.String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
     field public static final java.lang.String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
     field public static final java.lang.String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";

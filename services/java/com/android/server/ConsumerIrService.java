@@ -39,6 +39,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.view.InputDevice;
 
+import java.lang.RuntimeException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -65,8 +66,12 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
         mWakeLock.setReferenceCounted(true);
 
         mHal = halOpen();
-        if (mHal == 0) {
-            Slog.w(TAG, "No IR HAL loaded");
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CONSUMER_IR)) {
+            if (mHal == 0) {
+                throw new RuntimeException("FEATURE_CONSUMER_IR present, but no IR HAL loaded!");
+            }
+        } else if (mHal != 0) {
+            throw new RuntimeException("IR HAL present, but FEATURE_CONSUMER_IR is not set!");
         }
     }
 
