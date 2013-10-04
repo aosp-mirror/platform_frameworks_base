@@ -440,8 +440,9 @@ public final class PrintSpoolerService extends Service {
                     if (fileForJobMap == null) {
                         fileForJobMap = new ArrayMap<PrintJobId, File>();
                     }
-                    String printJobIdString = file.getName().substring(0,
-                            PRINT_JOB_FILE_PREFIX.length());
+                    String printJobIdString = file.getName().substring(
+                            PRINT_JOB_FILE_PREFIX.length(),
+                            file.getName().indexOf('.'));
                     PrintJobId printJobId = PrintJobId.unflattenFromString(
                             printJobIdString);
                     fileForJobMap.put(printJobId, file);
