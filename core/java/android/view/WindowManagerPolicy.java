@@ -169,9 +169,11 @@ public interface WindowManagerPolicy {
          * This can be used as a hint for scrolling (avoiding resizing)
          * the window to make certain that parts of its content
          * are visible.
+         * @param decorFrame The decor frame specified by policy specific to this window,
+         * to use for proper cropping during animation.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
-                Rect overlayFrame, Rect contentFrame, Rect visibleFrame);
+                Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -824,19 +826,10 @@ public interface WindowManagerPolicy {
                               int displayRotation);
 
     /**
-     * Return the rectangle of the screen currently covered by system decorations.
-     * This will be called immediately after {@link #layoutWindowLw}.  It can
-     * fill in the rectangle to indicate any part of the screen that it knows
-     * for sure is covered by system decor such as the status bar.  The rectangle
-     * is initially set to the actual size of the screen, indicating nothing is
-     * covered.
-     *
-     * @param systemRect The rectangle of the screen that is not covered by
-     * system decoration.
-     * @return Returns the layer above which the system rectangle should
-     * not be applied.
+     * Returns the bottom-most layer of the system decor, above which no policy decor should
+     * be applied.
      */
-    public int getSystemDecorRectLw(Rect systemRect);
+    public int getSystemDecorLayerLw();
 
     /**
      * Return the rectangle of the screen that is available for applications to run in.
