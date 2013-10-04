@@ -470,6 +470,12 @@ public final class BroadcastQueue {
                     r.callingPid, r.resolvedType, filter.receiverList.uid);
         }
 
+        if (filter.receiverList.app == null || filter.receiverList.app.crashing) {
+            Slog.w(TAG, "Skipping deliver [" + mQueueName + "] " + r
+                    + " to " + filter.receiverList + ": process crashing");
+            skip = true;
+        }
+
         if (!skip) {
             // If this is not being sent as an ordered broadcast, then we
             // don't want to touch the fields that keep track of the current
@@ -565,8 +571,8 @@ public final class BroadcastQueue {
 
                 boolean isDead;
                 synchronized (mService.mPidsSelfLocked) {
-                    isDead = (mService.mPidsSelfLocked.get(
-                            mPendingBroadcast.curApp.pid) == null);
+                    ProcessRecord proc = mService.mPidsSelfLocked.get(mPendingBroadcast.curApp.pid);
+                    isDead = proc == null || proc.crashing;
                 }
                 if (!isDead) {
                     // It's still alive, so keep waiting
@@ -650,7 +656,7 @@ public final class BroadcastQueue {
                                 new Intent(r.intent), r.resultCode,
                                 r.resultData, r.resultExtras, false, false, r.userId);
                             // Set this to null so that the reference
-                            // (local and remote) isnt kept in the mBroadcastHistory.
+                            // (local and remote) isn't kept in the mBroadcastHistory.
                             r.resultTo = null;
                         } catch (RemoteException e) {
                             Slog.w(TAG, "Failure ["
@@ -803,10 +809,8 @@ public final class BroadcastQueue {
             }
             if (r.curApp != null && r.curApp.crashing) {
                 // If the target process is crashing, just skip it.
-                if (DEBUG_BROADCAST)  Slog.v(TAG,
-                        "Skipping deliver ordered ["
-                        + mQueueName + "] " + r + " to " + r.curApp
-                        + ": process crashing");
+                Slog.w(TAG, "Skipping deliver ordered [" + mQueueName + "] " + r
+                        + " to " + r.curApp + ": process crashing");
                 skip = true;
             }
 
