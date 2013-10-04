@@ -138,8 +138,8 @@
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Գրասալիկի ընտրանքները"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Հեռախոսի ընտրանքներ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Անձայն ռեժիմ"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"Միացնել անլար"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"Անլարը անջատել"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Միացնել անլար կապը"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"Անլար կապը անջատել"</string>
     <string name="screen_lock" msgid="799094655496098153">"էկրանի կողպեք"</string>
     <string name="power_off" msgid="4266614107412865048">"Անջատել"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Զանգակն անջատված է"</string>
@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ավարտել գործողությունը` օգտագործելով"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Ընտրեք հիմնական հավելվածը"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել լռելյայն այս գործողության համար:"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Մաքրել լռելյայնը Համակարգի կարգավորումներ &gt; Ծրագրեր &gt;Ներբեռնված էջից:"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Ընտրել գործողություն"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Չեղարկված է"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Բովանդակության գրելու սխալ"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"անհայտ"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Տպելու ծառայությունն ակտիվացված չէ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ծառայությունը տեղադրվել է"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Հպեք` միացնելու համար"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Մուտքագրեք կառավարչի PIN-ը"</string>
@@ -1650,26 +1652,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Կրկին փորձեք մի փոքր ուշ"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Սահահարվածեք վերից վար՝ ամբողջական էկրանից դուրս գալու համար"</string>
-    <!-- no translation found for done_label (2093726099505892398) -->
-    <skip />
-    <!-- no translation found for hour_picker_description (6698199186859736512) -->
-    <skip />
-    <!-- no translation found for minute_picker_description (8606010966873791190) -->
-    <skip />
-    <!-- no translation found for select_hours (6043079511766008245) -->
-    <skip />
-    <!-- no translation found for select_minutes (3974345615920336087) -->
-    <skip />
-    <!-- no translation found for day_picker_description (8990847925961297968) -->
-    <skip />
-    <!-- no translation found for year_picker_description (5524331207436052403) -->
-    <skip />
-    <!-- no translation found for select_day (7774759604701773332) -->
-    <skip />
-    <!-- no translation found for select_year (7952052866994196170) -->
-    <skip />
-    <!-- no translation found for item_is_selected (949687401682476608) -->
-    <skip />
-    <!-- no translation found for deleted_key (7659477886625566590) -->
-    <skip />
+    <string name="done_label" msgid="2093726099505892398">"Պատրաստ է"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Ժամերի ընտրություն թվատախտակից"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Րոպեների ընտրություն թվատախտակից"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Ընտրեք ժամը"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Ընտրեք րոպեն"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Ամսաթվի ընտրության պատուհան"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Տարիների ցանկ"</string>
+    <string name="select_day" msgid="7774759604701773332">"Ընտրեք ամիսն ու օրը"</string>
+    <string name="select_year" msgid="7952052866994196170">"Ընտրեք տարին"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"Ընտրված է <xliff:g id="ITEM">%1$s</xliff:g> տարրը"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> թիվը ջնջված է"</string>
 </resources>

@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completa l\'azione con"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Seleziona un\'app home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usa come predefinita per questa azione."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Cancella l\'applicazione predefinita in Impostazioni di sistema &gt; Applicazioni &gt; Scaricate."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Scegli un\'azione"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Annullato"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Errore nella scrittura dei contenuti"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"sconosciuto"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Servizio di stampa non attivo"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Servizio <xliff:g id="NAME">%s</xliff:g> installato"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Tocca per attivare"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Inserisci PIN amministratore"</string>
@@ -1655,7 +1657,7 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"Dispositivo di scorrimento circolare per i minuti"</string>
     <string name="select_hours" msgid="6043079511766008245">"Seleziona le ore"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Seleziona i minuti"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Griglia di giorni suddivisi per mese"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Griglia di giorni per mese"</string>
     <string name="year_picker_description" msgid="5524331207436052403">"Elenco degli anni"</string>
     <string name="select_day" msgid="7774759604701773332">"Seleziona mese e giorno"</string>
     <string name="select_year" msgid="7952052866994196170">"Seleziona anno"</string>

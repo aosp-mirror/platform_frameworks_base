@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"በ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ውጪ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"... በመጠቀም ድርጊቱን አጠናቅ"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"የመነሻ መተግበሪያ ይምረጡ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ለዕርምጃ ነባሪ ተጠቀም።"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ነባሪ አጽዳ በስርዓት ቅንብሮች  ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ድርጊት ምረጥ"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ተትቷል"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ይዘት መጻፍ ላይ ስህተት"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"አይታወቅም"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"የህትመት አገልግሎት አልነቃም"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"የ<xliff:g id="NAME">%s</xliff:g> አገልግሎት ተጭኗል"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ለማንቃት መታ ያድርጉ"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"የአስተዳዳሪ ፒን ያስገቡ"</string>

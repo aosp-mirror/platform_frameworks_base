@@ -542,7 +542,7 @@
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"بدء إعداد الجهاز اللوحي CDMA مباشرةً"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"بدء إعداد هاتف CDMA مباشرة"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"للسماح للتطبيق ببدء توفير CDMA. قد تبدأ التطبيقات الضارة توفير CDMA بدون الحاجة إلى ذلك."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"التحكم في تنبيهات تحديث الموقع"</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"التحكم في اشعارات تحديث الموقع"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"للسماح للتطبيق بتمكين/تعطيل إشعارات تحديث الموقع من اللاسلكي. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"الدخول إلى خصائص الإيداع"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"للسماح بدخول القراءة/الكتابة إلى الخصائص التي تم تحميلها بواسطة خدمة الإيداع. ليس للاستخدام بواسطة التطبيقات العادية."</string>
@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"تشغيل"</string>
     <string name="capital_off" msgid="6815870386972805832">"إيقاف"</string>
     <string name="whichApplication" msgid="4533185947064773386">"إكمال الإجراء باستخدام"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"تحديد تطبيق الشاشة الرئيسية"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"الاستخدام بشكل افتراضي لهذا الإجراء."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"يمكنك محو الإعدادات الافتراضية في إعدادات النظام &gt; التطبيقات &gt; ما تم تنزيله."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"اختيار إجراء"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ملغاة"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"حدث خطأ أثناء كتابة المحتوى"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"غير معروف"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"خدمة الطباعة ليست ممكّنة"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"تم تثبيت خدمة <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"انقر للتمكين."</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"أدخل رقم التعريف الشخصي للمشرف"</string>

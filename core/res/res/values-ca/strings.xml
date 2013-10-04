@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
     <string name="capital_off" msgid="6815870386972805832">"NO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completa l\'acció mitjançant"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Selecciona una aplicació d\'inici"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Tria una acció"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancel·lada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error en escriure el contingut"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"desconegut"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"El servei d\'impressió no està activat."</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"S\'ha instal·lat el servei <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Toca per activar-lo"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introdueix el PIN d\'administrador"</string>

@@ -1765,6 +1765,8 @@
     <string name="capital_on" msgid="1544682755514494298">"ACTIVÀ"</string>
     <string name="capital_off" msgid="6815870386972805832">"DEACTIVÀ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Cumplettar l\'acziun cun"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"Utilisar questa applicaziun sco standard per questa acziun."</string>
     <!-- no translation found for clearDefaultHintMsg (3252584689512077257) -->
     <skip />
@@ -2705,6 +2707,8 @@
     <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for reason_unknown (6048913880184628119) -->
+    <skip />
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
     <skip />
     <!-- no translation found for print_service_installed_title (2246317169444081628) -->
     <skip />

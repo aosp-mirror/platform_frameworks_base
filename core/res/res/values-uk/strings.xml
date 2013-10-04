@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"УВІМК"</string>
     <string name="capital_off" msgid="6815870386972805832">"ВИМК"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Завершити дію за доп."</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Виберіть програму"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Використ. за умовч. для цієї дії."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Очистити налаштування за умовчанням у меню Налаштування системи &gt; Програми &gt; Завантажені."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Виберіть дію"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Скасовано"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Помилка записування вмісту"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"невідомо"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Службу друку не ввімкнено"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Установлено службу <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Торкніться, щоб увімкнути"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Введіть PIN-код адміністратора"</string>
@@ -1655,8 +1657,8 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"Вибір хвилин на циферблаті"</string>
     <string name="select_hours" msgid="6043079511766008245">"Виберіть години"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Виберіть хвилини"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Дні місяця – ескізи"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"Роки – список"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Вікно вибору дати"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Меню вибору року"</string>
     <string name="select_day" msgid="7774759604701773332">"Виберіть місяць і день"</string>
     <string name="select_year" msgid="7952052866994196170">"Виберіть рік"</string>
     <string name="item_is_selected" msgid="949687401682476608">"Вибрано: <xliff:g id="ITEM">%1$s</xliff:g>"</string>

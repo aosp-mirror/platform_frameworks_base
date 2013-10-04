@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončiť akciu pomocou aplikácie"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskú aplikáciu"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použiť ako predvolené nastavenie pre túto akciu."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vymazať predvolené nastavenia v sekcii Nastavenia systému &gt; Aplikácie &gt; Prevzaté položky."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Zvoľte akciu"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Zrušené"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Pri zapisovaní obsahu došlo ku chybe"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"neznáme"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Tlačová služba nie je povolená"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Nainštalovaná služba: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Povoľte klepnutím"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Zadajte kód PIN správcu"</string>
@@ -1650,26 +1652,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Režim celej obraz. ukončíte posunutím nadol"</string>
-    <!-- no translation found for done_label (2093726099505892398) -->
-    <skip />
-    <!-- no translation found for hour_picker_description (6698199186859736512) -->
-    <skip />
-    <!-- no translation found for minute_picker_description (8606010966873791190) -->
-    <skip />
-    <!-- no translation found for select_hours (6043079511766008245) -->
-    <skip />
-    <!-- no translation found for select_minutes (3974345615920336087) -->
-    <skip />
-    <!-- no translation found for day_picker_description (8990847925961297968) -->
-    <skip />
-    <!-- no translation found for year_picker_description (5524331207436052403) -->
-    <skip />
-    <!-- no translation found for select_day (7774759604701773332) -->
-    <skip />
-    <!-- no translation found for select_year (7952052866994196170) -->
-    <skip />
-    <!-- no translation found for item_is_selected (949687401682476608) -->
-    <skip />
-    <!-- no translation found for deleted_key (7659477886625566590) -->
-    <skip />
+    <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Kruhový posúvač hodín"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Kruhový posúvač minút"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Vyberte hodiny"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Vyberte minúty"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Tabuľka dní v mesiaci"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Zoznam rokov"</string>
+    <string name="select_day" msgid="7774759604701773332">"Vyberte mesiac a deň"</string>
+    <string name="select_year" msgid="7952052866994196170">"Vyberte rok"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"Bola vybratá položka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"Číslo <xliff:g id="KEY">%1$s</xliff:g> bolo odstránené"</string>
 </resources>

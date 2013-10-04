@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"VKLOPLJENO"</string>
     <string name="capital_off" msgid="6815870386972805832">"IZKLOPLJENO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončanje dejanja z"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Izberite aplikacijo za začetno stran"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Privzeta uporaba za to dejanje."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Izbrišite privzeti program v sistemskih nastavitvah &gt; Programi &gt; Preneseno."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Izberite dejanje"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Preklicano"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Napaka pri pisanju vsebine"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"neznano"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Tiskalna storitev ni omogočena"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Storitev <xliff:g id="NAME">%s</xliff:g> je nameščena"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Če želite omogočiti, se dotaknite"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Vnesite skrbniški PIN"</string>
