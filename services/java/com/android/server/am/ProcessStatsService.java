@@ -97,6 +97,19 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         });
     }
 
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            if (!(e instanceof SecurityException)) {
+                Slog.wtf(TAG, "Process Stats Crash", e);
+            }
+            throw e;
+        }
+    }
+
     public ProcessStats.ProcessState getProcessStateLocked(String packageName,
             int uid, String processName) {
         return mProcessStats.getProcessStateLocked(packageName, uid, processName);
@@ -477,7 +490,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                     - moreStats.mTimePeriodStartRealtime, sb);
                             Slog.i(TAG, sb.toString());
                         } else {
-                            Slog.w(TAG, "Failure reading " + files.get(i) + "; "
+                            Slog.w(TAG, "Failure reading " + files.get(i-1) + "; "
                                     + moreStats.mReadError);
                             continue;
                         }
