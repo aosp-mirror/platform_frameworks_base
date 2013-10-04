@@ -230,13 +230,13 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"संग्रहण"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB संग्रहण में पहुंचें."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD कार्ड में पहुंचें."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"पहुंच-योग्यता सुविधाएं"</string>
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"आसान तरीका सुविधाएं"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"सहायक प्रौद्योगिकी के द्वारा अनुरोध की जा सकने वाली सुविधाएं."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री प्राप्त करें"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री का निरीक्षण करें जिससे आप सहभागिता कर रहे हैं."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श द्वारा एक्सप्लोर करें को चालू करें"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"स्पर्श किए गए आइटम ज़ोर से बोले जाएंगे और स्क्रीन को जेस्चर के उपयोग से एक्सप्लोर किया जा सकेगा."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"एन्हांस की गई वेब पहुंच-योग्यता चालू करें"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"एन्हांस की गई वेब आसान तरीका चालू करें"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"एप्स सामग्री को अधिक पहुंच-योग्य बनाने के लिए स्क्रिप्ट इंस्टॉल किए जा सकते हैं."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"आपके द्वारा लिखे हुए पाठ को ध्यान से देखें"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर और पासवर्ड जैसा व्यक्तिगत डेटा शामिल होता है."</string>
@@ -308,8 +308,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"एप्‍स को सिस्‍टम की आंतरिक स्‍थिति पुनर्प्राप्त करने देता है. दुर्भावनापूर्ण एप्‍स विभिन्‍न प्रकार की निजी और सुरक्षा जानकारी प्राप्त कर सकते हैं जिनकी उन्‍हें सामान्‍यत: आवश्‍यकता नहीं होती."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"स्‍क्रीन सामग्री पुनर्प्राप्त करें"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"एप्‍स को सक्रिय विंडो की सामग्री पुनर्प्राप्त करने देता है. दुर्भावनापूर्ण एप्‍स विंडो की संपूर्ण सामग्री प्राप्त कर सकते हैं और पासवर्ड को छोड़कर इसके सभी पाठ जांच सकते हैं."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"पहुंच-योग्यता को अस्थायी रूप से सक्षम करें"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"एप्स को उपकरण पर पहुंच-योग्यता को अस्थायी रूप से सक्षम करने देता है. दुर्भावनापूर्ण एप्स उपयोगकर्ता की सहमति के बिना पहुंच-योग्यता को सक्षम कर सकते हैं."</string>
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"आसान तरीका को अस्थायी रूप से सक्षम करें"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"एप्स को उपकरण पर आसान तरीका को अस्थायी रूप से सक्षम करने देता है. दुर्भावनापूर्ण एप्स उपयोगकर्ता की सहमति के बिना आसान तरीका को सक्षम कर सकते हैं."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"विंडो जानकारी प्राप्त करें"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"एप्‍स को विंडो प्रबंधक से windows के बारे में जानकारी प्राप्त करने देता है. दुर्भावनापूर्ण एप्‍स आंतरिक सिस्टम उपयोग के लिए अभिप्रेत जानकारी को प्राप्त कर सकते हैं."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"ईवेंट फ़िल्टर करें"</string>
@@ -363,8 +363,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"एप्स को अन्य एप्स के साथ सहभागिता करते समय भी आपके द्वारा दबाई जाने वाली कुंजियां देखने देता है (जैसे कोई पासवर्ड लिखना). सामान्‍य एप्‍स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"किसी इनपुट विधि से आबद्ध करें"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"धारक को किसी इनपुट विधि के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"पहुंच-योग्‍यता सेवा से आबद्ध करें"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"धारक को किसी पहुंच-योग्यता सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"आसान तरीका सेवा से आबद्ध करें"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"धारक को किसी आसान तरीका सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"प्रिंट सेवा से आबद्ध करें"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"धारक को किसी प्रिंट सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"प्रिंट स्पूलर सेवा से आबद्ध करें"</string>
@@ -1325,7 +1325,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> खाते के लिए अनुमति\nका अनुरोध किया गया."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"समन्वयन"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"पहुंच-योग्यता"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"आसान तरीका"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"सूचना श्रवणकर्ता"</string>
@@ -1537,9 +1537,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"आवाज़ को उपरोक्त सुझाव दिया गया स्तर तक बढ़ाएं?\nलंबे समय तक अधिक आवाज़ पर सुनने से आपकी सुनने की क्षमता को क्षति पहुंच सकती है."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"पहुंच-योग्यता को सक्षम करने के लिए दो अंगुलियों से नीचे दबाए रखें."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुंच-योग्यता रद्द की गई."</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"आसान तरीका को सक्षम करने के लिए दो अंगुलियों से नीचे दबाए रखें."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"आसान तरीका सक्षम कर दी है."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"आसान तरीका रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>

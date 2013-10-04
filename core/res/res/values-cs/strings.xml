@@ -610,8 +610,8 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"povolit párování Bluetooth prostřednictvím aplikace"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Povoluje aplikaci provést be zásahu uživatele spárování se vzdálenými zařízeními."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Povoluje aplikaci provést be zásahu uživatele spárování se vzdálenými zařízeními."</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Povoluje aplikaci provést bez zásahu uživatele spárování se vzdálenými zařízeními."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Povoluje aplikaci provést bez zásahu uživatele spárování se vzdálenými zařízeními."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"připojení a odpojení od sítě WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Umožňuje aplikaci zjistit, zda je povoleno připojení WiMAX, a také získat informace o všech připojených sítích WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Změnit stav připojení WiMAX"</string>

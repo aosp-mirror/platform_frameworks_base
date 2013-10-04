@@ -138,8 +138,8 @@
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Գրասալիկի ընտրանքները"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Հեռախոսի ընտրանքներ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Անձայն ռեժիմ"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"Միացնել անլար"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"Անլարը անջատել"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Միացնել անլար կապը"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"Անլար կապը անջատել"</string>
     <string name="screen_lock" msgid="799094655496098153">"էկրանի կողպեք"</string>
     <string name="power_off" msgid="4266614107412865048">"Անջատել"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Զանգակն անջատված է"</string>
@@ -1115,8 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ավարտել գործողությունը` օգտագործելով"</string>
-    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
-    <skip />
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Ընտրեք հիմնական հավելվածը"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել լռելյայն այս գործողության համար:"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Մաքրել լռելյայնը Համակարգի կարգավորումներ &gt; Ծրագրեր &gt;Ներբեռնված էջից:"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Ընտրել գործողություն"</string>
@@ -1633,8 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Չեղարկված է"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Բովանդակության գրելու սխալ"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"անհայտ"</string>
-    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
-    <skip />
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Տպելու ծառայությունն ակտիվացված չէ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ծառայությունը տեղադրվել է"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Հպեք` միացնելու համար"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Մուտքագրեք կառավարչի PIN-ը"</string>

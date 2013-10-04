@@ -1115,8 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"アプリケーションを選択"</string>
-    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
-    <skip />
+    <string name="whichHomeApplication" msgid="4616420172727326782">"ホームアプリを選択"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"常にこの操作で使用する"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]でデフォルト設定をクリアします。"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"操作の選択"</string>
@@ -1633,8 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"キャンセルされました"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"コンテンツの書き込み中にエラーが発生しました"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
-    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
-    <skip />
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"印刷サービスが有効ではありません"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"「<xliff:g id="NAME">%s</xliff:g>」サービスがインストールされました"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"有効にするにはタップしてください"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"管理者PINを入力"</string>

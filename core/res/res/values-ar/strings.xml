@@ -540,7 +540,7 @@
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"بدء إعداد الجهاز اللوحي CDMA مباشرةً"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"بدء إعداد هاتف CDMA مباشرة"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"للسماح للتطبيق ببدء توفير CDMA. قد تبدأ التطبيقات الضارة توفير CDMA بدون الحاجة إلى ذلك."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"التحكم في تنبيهات تحديث الموقع"</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"التحكم في اشعارات تحديث الموقع"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"للسماح للتطبيق بتمكين/تعطيل إشعارات تحديث الموقع من اللاسلكي. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"الدخول إلى خصائص الإيداع"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"للسماح بدخول القراءة/الكتابة إلى الخصائص التي تم تحميلها بواسطة خدمة الإيداع. ليس للاستخدام بواسطة التطبيقات العادية."</string>
