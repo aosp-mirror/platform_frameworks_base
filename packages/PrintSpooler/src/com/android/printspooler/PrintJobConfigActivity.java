@@ -57,7 +57,6 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -80,6 +79,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.printspooler.MediaSizeUtils.MediaSizeComparator;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -89,9 +90,9 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -150,26 +151,6 @@ public class PrintJobConfigActivity extends Activity {
     private static final Pattern PATTERN_PAGE_RANGE = Pattern.compile(
             "[\\s]*[0-9]*[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*?(([,])"
             + "[\\s]*[0-9]*[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*|[\\s]*)+");
-
-    // The list of countries where Letter is the default paper size. Culled from
-    // the OpenOffice wiki at http://wiki.openoffice.org/wiki/DefaultPaperSize.
-    private static final Set<String> sLetterDefaultCountries = new ArraySet<String>();
-    static {
-        sLetterDefaultCountries.add("US");
-        sLetterDefaultCountries.add("CA");
-        sLetterDefaultCountries.add("BZ");
-        sLetterDefaultCountries.add("CL");
-        sLetterDefaultCountries.add("CR");
-        sLetterDefaultCountries.add("GT");
-        sLetterDefaultCountries.add("NI");
-        sLetterDefaultCountries.add("PA");
-        sLetterDefaultCountries.add("PR");
-        sLetterDefaultCountries.add("SV");
-        sLetterDefaultCountries.add("VE");
-        sLetterDefaultCountries.add("MX");
-        sLetterDefaultCountries.add("CO");
-        sLetterDefaultCountries.add("PH");
-    }
 
     public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {PageRange.ALL_PAGES};
 
@@ -826,6 +807,8 @@ public class PrintJobConfigActivity extends Activity {
 
         private PrinterInfo mCurrentPrinter;
 
+        private final MediaSizeComparator mMediaSizeComparator;
+
         private final OnItemSelectedListener mOnItemSelectedListener =
                 new AdapterView.OnItemSelectedListener() {
             @Override
@@ -872,7 +855,11 @@ public class PrintJobConfigActivity extends Activity {
                         return;
                     }
                     SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(position);
-                    mCurrPrintAttributes.setMediaSize(mediaItem.value);
+                    if (mOrientationSpinner.getSelectedItemPosition() == 0) {
+                        mCurrPrintAttributes.setMediaSize(mediaItem.value.asPortrait());
+                    } else {
+                        mCurrPrintAttributes.setMediaSize(mediaItem.value.asLandscape());
+                    }
                     if (!hasErrors()) {
                         mController.update();
                     }
@@ -971,18 +958,22 @@ public class PrintJobConfigActivity extends Activity {
         private void updatePrintAttributes(PrinterCapabilitiesInfo capabilities) {
             PrintAttributes defaults = capabilities.getDefaults();
 
+            // Sort the media sizes based on the current locale.
+            List<MediaSize> sortedMediaSizes = new ArrayList<MediaSize>(
+                    capabilities.getMediaSizes());
+            Collections.sort(sortedMediaSizes, mMediaSizeComparator);
+
             // Media size.
             MediaSize currMediaSize = mCurrPrintAttributes.getMediaSize();
             if (currMediaSize == null) {
                 mCurrPrintAttributes.setMediaSize(defaults.getMediaSize());
             } else {
                 MediaSize currMediaSizePortrait = currMediaSize.asPortrait();
-                List<MediaSize> mediaSizes = capabilities.getMediaSizes();
-                final int mediaSizeCount = mediaSizes.size();
+                final int mediaSizeCount = sortedMediaSizes.size();
                 for (int i = 0; i < mediaSizeCount; i++) {
-                    MediaSize mediaSize = mediaSizes.get(i);
+                    MediaSize mediaSize = sortedMediaSizes.get(i);
                     if (currMediaSizePortrait.equals(mediaSize.asPortrait())) {
-                        mCurrPrintAttributes.setMediaSize(mediaSize);
+                        mCurrPrintAttributes.setMediaSize(currMediaSize);
                         break;
                     }
                 }
@@ -1148,6 +1139,7 @@ public class PrintJobConfigActivity extends Activity {
 
         public Editor() {
             // Destination.
+            mMediaSizeComparator = new MediaSizeComparator(PrintJobConfigActivity.this);
             mDestinationSpinnerAdapter = new DestinationAdapter();
             mDestinationSpinnerAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
@@ -1702,54 +1694,13 @@ public class PrintJobConfigActivity extends Activity {
             }
 
             if (!allOptionsEnabled) {
-                String minCopiesString = String.valueOf(MIN_COPIES);
-                if (!TextUtils.equals(mCopiesEditText.getText(), minCopiesString)) {
-                    mIgnoreNextCopiesChange = true;
-                    mCopiesEditText.setText(minCopiesString);
-                }
                 mCopiesEditText.setEnabled(false);
-
-                // Media size
-                if (mMediaSizeSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mOldMediaSizeSelectionIndex = AdapterView.INVALID_POSITION;
-                    mMediaSizeSpinner.setSelection(AdapterView.INVALID_POSITION);
-                }
                 mMediaSizeSpinner.setEnabled(false);
-
-                // Color mode
-                if (mColorModeSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mOldColorModeSelectionIndex = AdapterView.INVALID_POSITION;
-                    mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
-                }
                 mColorModeSpinner.setEnabled(false);
-
-                // Orientation
-                if (mOrientationSpinner.getSelectedItemPosition() != 0) {
-                    mIgnoreNextOrientationChange = true;
-                    mOrientationSpinner.setSelection(0);
-                }
                 mOrientationSpinner.setEnabled(false);
-
-                // Range
-                if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
-                    mIgnoreNextRangeOptionChange = true;
-                    mRangeOptionsSpinner.setSelection(0);
-                }
                 mRangeOptionsSpinner.setEnabled(false);
-                mRangeOptionsTitle.setText(getString(R.string.label_pages,
-                        getString(R.string.page_count_unknown)));
-                if (!TextUtils.equals(mPageRangeEditText.getText(), "")) {
-                    mIgnoreNextRangeChange = true;
-                    mPageRangeEditText.setText("");
-                }
-
                 mPageRangeEditText.setEnabled(false);
-                mPageRangeEditText.setVisibility(View.INVISIBLE);
-                mPageRangeTitle.setVisibility(View.INVISIBLE);
-
-                // Print
                 mPrintButton.setEnabled(false);
-
                 return false;
             } else {
                 boolean someAttributeSelectionChanged = false;
@@ -1759,7 +1710,9 @@ public class PrintJobConfigActivity extends Activity {
                 PrintAttributes defaultAttributes = printer.getCapabilities().getDefaults();
 
                 // Media size.
-                List<MediaSize> mediaSizes = capabilities.getMediaSizes();
+                // Sort the media sizes based on the current locale.
+                List<MediaSize> mediaSizes = new ArrayList<MediaSize>(capabilities.getMediaSizes());
+                Collections.sort(mediaSizes, mMediaSizeComparator);
 
                 // If the media sizes changed, we update the adapter and the spinner.
                 boolean mediaSizesChanged = false;
@@ -1783,7 +1736,7 @@ public class PrintJobConfigActivity extends Activity {
                     mMediaSizeSpinnerAdapter.clear();
                     for (int i = 0; i < mediaSizeCount; i++) {
                         MediaSize mediaSize = mediaSizes.get(i);
-                        if (mediaSize.equals(oldMediaSize)) {
+                        if (mediaSize.asPortrait().equals(oldMediaSize.asPortrait())) {
                             // Update the index of the old selection.
                             oldMediaSizeNewIndex = i;
                         }
@@ -1801,8 +1754,13 @@ public class PrintJobConfigActivity extends Activity {
                         final int mediaSizeIndex = Math.max(mediaSizes.indexOf(
                                 defaultAttributes.getMediaSize()), 0);
                         setMediaSizeSpinnerSelectionNoCallback(mediaSizeIndex);
-                        mCurrPrintAttributes.setMediaSize(mMediaSizeSpinnerAdapter
-                                .getItem(mediaSizeIndex).value);
+                        if (oldMediaSize.isPortrait()) {
+                            mCurrPrintAttributes.setMediaSize(mMediaSizeSpinnerAdapter
+                                    .getItem(mediaSizeIndex).value.asPortrait());
+                        } else {
+                            mCurrPrintAttributes.setMediaSize(mMediaSizeSpinnerAdapter
+                                    .getItem(mediaSizeIndex).value.asLandscape());
+                        }
                         someAttributeSelectionChanged = true;
                     }
                 }
@@ -2266,31 +2224,33 @@ public class PrintJobConfigActivity extends Activity {
                 notifyDataSetInvalidated();
             }
 
+
             private PrinterInfo createFakePdfPrinter() {
-                final MediaSize defaultMediaSize;
-                String currentCountry = getResources().getConfiguration().locale.getCountry();
-                if (sLetterDefaultCountries.contains(currentCountry)) {
-                    defaultMediaSize = MediaSize.NA_LETTER;
-                } else {
-                    defaultMediaSize = MediaSize.ISO_A4;
-                }
+                MediaSize defaultMediaSize = MediaSizeUtils.getDefault(PrintJobConfigActivity.this);
 
                 PrinterId printerId = new PrinterId(getComponentName(), "PDF printer");
 
-                PrinterCapabilitiesInfo capabilities =
-                        new PrinterCapabilitiesInfo.Builder(printerId)
-                    .addMediaSize(MediaSize.ISO_A4, MediaSize.ISO_A4 == defaultMediaSize)
-                    .addMediaSize(MediaSize.NA_LETTER, MediaSize.NA_LETTER == defaultMediaSize)
-                    .addResolution(new Resolution("PDF resolution", "PDF resolution",
-                            300, 300), true)
-                    .setColorModes(PrintAttributes.COLOR_MODE_COLOR
-                            | PrintAttributes.COLOR_MODE_MONOCHROME,
-                            PrintAttributes.COLOR_MODE_COLOR)
-                    .build();
+                PrinterCapabilitiesInfo.Builder builder =
+                        new PrinterCapabilitiesInfo.Builder(printerId);
+
+                String[] mediaSizeIds = getResources().getStringArray(
+                        R.array.pdf_printer_media_sizes);
+                final int mediaSizeIdCount = mediaSizeIds.length;
+                for (int i = 0; i < mediaSizeIdCount; i++) {
+                    String id = mediaSizeIds[i];
+                    MediaSize mediaSize = MediaSize.getStandardMediaSizeById(id);
+                    builder.addMediaSize(mediaSize, mediaSize.equals(defaultMediaSize));
+                }
+
+                builder.addResolution(new Resolution("PDF resolution", "PDF resolution",
+                            300, 300), true);
+                builder.setColorModes(PrintAttributes.COLOR_MODE_COLOR
+                        | PrintAttributes.COLOR_MODE_MONOCHROME,
+                        PrintAttributes.COLOR_MODE_COLOR);
 
                 return new PrinterInfo.Builder(printerId, getString(R.string.save_as_pdf),
                         PrinterInfo.STATUS_IDLE)
-                    .setCapabilities(capabilities)
+                    .setCapabilities(builder.build())
                     .build();
             }
         }
