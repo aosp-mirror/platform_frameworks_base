@@ -13104,7 +13104,7 @@ package android.net {
     method public int getUid();
   }
 
-  public deprecated class DhcpInfo implements android.os.Parcelable {
+  public class DhcpInfo implements android.os.Parcelable {
     ctor public DhcpInfo();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -14012,7 +14012,7 @@ package android.net.wifi {
     method public boolean enableNetwork(int, boolean);
     method public java.util.List<android.net.wifi.WifiConfiguration> getConfiguredNetworks();
     method public android.net.wifi.WifiInfo getConnectionInfo();
-    method public deprecated android.net.DhcpInfo getDhcpInfo();
+    method public android.net.DhcpInfo getDhcpInfo();
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
     method public boolean isScanAlwaysAvailable();
