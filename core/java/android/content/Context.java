@@ -1685,9 +1685,8 @@ public abstract class Context {
      * Request that a given application service be started.  The Intent
      * should contain either contain the complete class name of a specific service
      * implementation to start or a specific package name to target.  If the
-     * Intent is less specified, it will either throw an {@link IllegalArgumentException}
-     * (if the caller targets {@link android.os.Build.VERSION_CODES#KITKAT} or later),
-     * or which of multiple matching services it finds and uses will be undefined.  If this service
+     * Intent is less specified, it log a warning about this and which of the
+     * multiple matching services it finds and uses will be undefined.  If this service
      * is not already running, it will be instantiated and started (creating a
      * process for it if needed); if it is running then it remains running.
      *
