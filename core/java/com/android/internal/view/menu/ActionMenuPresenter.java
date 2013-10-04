@@ -216,6 +216,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
         super.updateMenuView(cleared);
 
+        ((View) mMenuView).requestLayout();
+
         if (mMenu != null) {
             final ArrayList<MenuItemImpl> actionItems = mMenu.getActionItems();
             final int count = actionItems.size();
