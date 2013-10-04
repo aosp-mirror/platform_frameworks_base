@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permet à l\'application de faire office de barre d\'état."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"Agrandir/réduire la barre d\'état"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permet à l\'application de réduire ou de développer la barre d\'état."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installer des raccourcis"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permettre à une application d\'ajouter des raccourcis à l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"désinstaller des raccourcis"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permettre à l\'application de supprimer des raccourcis de l\'écran d\'accueil sans l\'intervention de l\'utilisateur"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"transférer les appels sortants"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permet à l\'application de traiter les appels sortants et de modifier le numéro à composer. Cette autorisation lui permet de surveiller, rediriger ou empêcher les appels sortants."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recevoir des messages texte (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accéder aux paramètres Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet à l\'application de configurer la tablette Bluetooth locale, d\'identifier des appareils distants et de les associer à la tablette."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet à l\'application de configurer le téléphone Bluetooth local, d\'identifier des appareils distants et de les associer au téléphone."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"autoriser l\'application à s\'associer via le Bluetooth"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Permettre à l\'application de s\'associer aux appareils à distance sans intervention de l\'utilisateur"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Permettre à l\'application de s\'associer aux appareils à distance sans intervention de l\'utilisateur"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"se connecter au réseau WiMAX et s\'en déconnecter"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permet à l\'application de déterminer si le WiMAX est activé et d\'obtenir des informations sur tous les réseaux WiMAX connectés."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Modifier l\'état du WiMAX"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permet à l\'application d\'accéder aux mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ajouter des mots au dictionnaire personnel"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet à l\'application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"tester l\'accès à la mémoire de stockage protégée"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"tester l\'accès à la mémoire de stockage protégée"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permet à l\'application de tester une autorisation pour la mémoire de stockage USB qui sera ensuite proposée sur les futurs appareils."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permet à l\'application de tester une autorisation pour la carte SD qui sera ensuite proposée sur les futurs appareils."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"voir le contenu de la mémoire USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"voir le contenu de la carte SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permettre de lire contenu de la mémoire de stockage USB"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permettre à l\'application de lire le contenu de la carte SD"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifier ou supprimer le contenu de la mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifier ou supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet à l\'application de modifier le contenu de la mémoire de stockage USB."</string>
@@ -695,7 +702,7 @@
     <item msgid="7897544654242874543">"Bureau"</item>
     <item msgid="1103601433382158155">"Télécopie bureau"</item>
     <item msgid="1735177144948329370">"Télécopie domicile"</item>
-    <item msgid="603878674477207394">"Récepteur d\'appel"</item>
+    <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Autre"</item>
     <item msgid="9192514806975898961">"Personnalisé"</item>
   </string-array>
@@ -738,7 +745,7 @@
     <string name="phoneTypeWork" msgid="8863939667059911633">"Bureau"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Télécopie bureau"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Télécopie domicile"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"Téléavertisseur"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Autre"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Rappel"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Voiture"</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"OUI"</string>
     <string name="capital_off" msgid="6815870386972805832">"NON"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Continuer avec"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Sélectionner une application de l\'écran d\'accueil"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Pour supprimer les valeurs par défaut, accédez à Paramètres système &gt; Applications &gt; Téléchargements."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Sélectionnez une action"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Tâche annulée."</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erreur lors de la modification du contenu."</string>
     <string name="reason_unknown" msgid="6048913880184628119">"inconnu"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Service d\'impression désactivé."</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Service \"<xliff:g id="NAME">%s</xliff:g>\" installé"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Appuyer pour activer"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Saisir le code PIN d\'administrateur"</string>

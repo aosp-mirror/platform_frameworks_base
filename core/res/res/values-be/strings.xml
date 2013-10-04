@@ -249,6 +249,14 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дазваляе прыкладанням быць радком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разгарнуць/згарнуць радок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дазваляе прыкладанню разгортваць ці згортваць радок стану."</string>
+    <!-- no translation found for permlab_install_shortcut (4279070216371564234) -->
+    <skip />
+    <!-- no translation found for permdesc_install_shortcut (8341295916286736996) -->
+    <skip />
+    <!-- no translation found for permlab_uninstall_shortcut (4729634524044003699) -->
+    <skip />
+    <!-- no translation found for permdesc_uninstall_shortcut (6745743474265057975) -->
+    <skip />
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"перанакіраванне зыходзячых выклікіаў"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Дазваляе прыкладанням апрацоўваць выходныя выклікі і змяняць набіраны нумар. Дзякуючы гэтаму дазволу прыкладаннi могуць адсочваць, перанакіроўваць ці прадухіляць выходныя выклікі."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"атрыманне тэкставых паведамленняў (SMS)"</string>
@@ -633,6 +641,12 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"атрыманне доступу да налад прылады Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дазваляе прыкладанням наладжваць лакальны планшэт Bluetooth, выяўляць і падлучаць выдаленыя прылады."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дазваляе прыкладанням наладжваць лакальны тэлефон Bluetooth, а таксама знаходзіць выдаленыя прылады i падлучацца да ix."</string>
+    <!-- no translation found for permlab_bluetoothPriv (4009494246009513828) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothPriv (8045735193417468857) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetoothPriv (8045735193417468857) -->
+    <skip />
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"падключаць да WiMAX i адключаць ад яго"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Дазваляе прыкладанню вызначаць, ці ўключаны WiMAX, і інфармацыю пра любую сетку WiMAX, якая спалучана з iншымi."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Змяніць стан WiMAX"</string>
@@ -659,10 +673,12 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Дазваляе прыкладанням счытваць любыя словы, імёны і фразы, якія карыстальнік можа захоўваць у карыстальніцкім слоўніку."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Даданне слоў у карыстальнiцкі слоўнік"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дазваляе прыкладанням запісваць новыя словы ў карыстальніцкі слоўнік."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"выпрабавальны доступ да абароненага сховiшча"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"выпрабавальны доступ да абароненага сховiшча"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Дазваляе прыкладанню правяраць дазвол на USB-назапашвальнiк, якi будзе даступны для прылад у будучынi."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Дазваляе прыкладанню правяраць дазвол на SD-карту, якая будзе даступна для прылад у будучынi."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"чытанне змесціва USB-назапашв."</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"чытанне змесціва SD-карты"</string>
+    <!-- no translation found for permdesc_sdcardRead (3446988712598386079) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (2607362473654975411) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"зм. або выд. змес. USB-назап."</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"змяніць або выдаліць змесціва SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дазваляе прыкладаням выконваць запіс ва USB-назапашвальнік."</string>
@@ -1145,6 +1161,8 @@
     <string name="capital_on" msgid="1544682755514494298">"Уключыць"</string>
     <string name="capital_off" msgid="6815870386972805832">"Адключана"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Завяршыць дзеянне з дапамогай"</string>
+    <!-- no translation found for whichHomeApplication (4616420172727326782) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"Выкарыстоўваць па змаўчанні для гэтага дзеяння."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ачысціць па змаўчанні ў раздзеле \"Налады сістэмы &gt; Прыкладанні &gt; Спампаваныя\"."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Выберыце дзеянне"</string>
@@ -1748,6 +1766,8 @@
     <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for reason_unknown (6048913880184628119) -->
+    <skip />
+    <!-- no translation found for reason_service_unavailable (7824008732243903268) -->
     <skip />
     <!-- no translation found for print_service_installed_title (2246317169444081628) -->
     <skip />

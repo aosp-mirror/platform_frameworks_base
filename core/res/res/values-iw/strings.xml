@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"מאפשר לאפליקציה להופיע בשורת המצב."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"הרחב/כווץ את שורת המצב"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"מאפשר לאפליקציה להרחיב או לכווץ את שורת המצב."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"התקן קיצורי דרך"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"מאפשר לאפליקציה להוסיף קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"הסר התקנה של קיצורי דרך"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"מאפשר לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ניתוב מחדש של שיחות יוצאות"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"מאפשר לאפליקציה לעבד שיחות יוצאות ולשנות את המספר שיש לחייג. אישור זה מאפשר לאפליקציה לעקוב אחר שיחות יוצאות, לבצע הפניה מחדש שלהן או אף למנוע את ביצוען."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"קבלת הודעות טקסט (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"גישה להגדרות Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"מאפשר לאפליקציה להגדיר את תצורתו של הטאבלט המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"מאפשר לאפליקציה להגדיר את תצורתו של הטלפון המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"אפשר התאמת Bluetooth על ידי האפליקציה"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"מאפשרת לאפליקציה לבצע התאמה עם מכשירים מרוחקים ללא התערבות המשתמש."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"מאפשרת לאפליקציה לבצע התאמה עם מכשירים מרוחקים ללא התערבות המשתמש."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"התחברות והתנתקות מ-WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"מאפשר לאפליקציה לדעת האם WiNMAX מופעל, כמו גם לקבל מידע האם רשתות WiNMAX כלשהן מחוברות."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"שנה את מצב WiMAX"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"מאפשר לאפליקציה לקרוא את כל המילים, השמות והביטויים שהמשתמש אחסן במילון המשתמש."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"הוספת מילים למילון מוגדר-משתמש"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"מאפשר לאפליקציה לכתוב מילים חדשות במילון המשתמש."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"בדיקת גישה לאחסון מוגן"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"בדיקת גישה לאחסון מוגן"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"מאפשר לאפליקציה לבדוק אישור לאחסון USB שיהיה זמין במכשירים עתידיים."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"מאפשר לאפליקציה לבדוק אישור לכרטיס SD שיהיה זמין במכשירים עתידיים."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"קריאת התוכן של אחסון ה-USB שלך"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"קריאת התוכן של כרטיס ה-SD שלך"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"מאפשר לאפליקציה לקרוא את תוכן אחסון ה-USB שלך."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"מאפשר לאפליקציה לקרוא את תוכן כרטיס ה-SD שלך."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"שינוי או מחיקה של תוכן אחסון ה-USB שלך"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"שינוי או מחיקה של תוכן כרטיס ה-SD שלך"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"מאפשר לאפליקציה לכתוב להתקן האחסון מסוג USB."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
     <string name="whichApplication" msgid="4533185947064773386">"השלמת פעולה באמצעות"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"בחר אפליקציה לדף הבית"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"השתמש כברירת מחדל עבור פעולה זו."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"נקה את הגדרת המחדל ב\'הגדרות מערכת\' &lt;‏ Google Apps‏ &lt; \'הורדות\'."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"בחירת פעולה"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"בוטלה"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"שגיאה בכתיבת תוכן"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"לא ידוע"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"שירות ההדפסה לא הופעל"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"שירות <xliff:g id="NAME">%s</xliff:g> מותקן"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"הקש כדי להפעיל"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"הזן את מספר ה-PIN של מנהל המערכת"</string>

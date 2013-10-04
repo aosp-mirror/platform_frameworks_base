@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tillåter att appen visas i statusfältet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandera/komprimera statusfält"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Tillåter att appen expanderar eller komprimerar statusfältet."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"installera genvägar"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Tillåter att en app lägger till genvägar på startskärmen utan åtgärd från användaren."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"avinstallera genvägar"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Tillåter att appen tar bort genvägar på startskärmen utan åtgärd från användaren."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigera utgående samtal"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Tillåter att appen hanterar utgående samtal och ändrar numret som ska ringas upp. Med den här behörigheten kan appen övervaka, omdirigera eller förhindra utgående samtal."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ta emot textmeddelanden (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"tillåt Bluetooth-koppling för appen"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ändra WiMAX-status"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Tillåter att appen läser alla ord, namn och fraser som användaren har sparat i ordlistan."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"lägga till ord i den användardefinierade ordlistan"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillåter att appen anger nya ord i användarordlistan."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testa åtkomst till skyddad lagringsenhet"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testa åtkomst till skyddad lagringsenhet"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Tillåter att appen testar behörighet till USB-enheter för användning på framtida enheter."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Tillåter appen att testa behörighet till SD-kortet för användning på framtida enheter."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"läsa innehåll på USB-enheten"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"läsa innehållet på SD-kortet"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Låter appen läsa USB-innehåll."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Tillåter att appen läser innehållet på SD-kortet."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ändra eller ta bort innehåll på USB-enheten"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ändra eller ta bort innehåll på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Gör att app skriver till USB."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"PÅ"</string>
     <string name="capital_off" msgid="6815870386972805832">"AV"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Slutför åtgärd genom att använda"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Välj en app på startskärmen"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Använd som standard för denna åtgärd."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Rensa standardinställningar i Systeminställningar &gt; Appar &gt; Hämtat."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Välj en åtgärd"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Inställd"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Det gick inte att skriva innehållet"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"okänt"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Utskriftstjänsten har inte aktiverats"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Tjänsten <xliff:g id="NAME">%s</xliff:g> har installerats"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Tryck om du vill aktivera"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Ange administratörspinkod"</string>

@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Ļauj lietotnei būt par statusa joslu."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"izvērst/sakļaut statusa joslu"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Ļauj lietotnei izvērst vai sakļaut statusa joslu."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalēt saīsnes"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Ļauj lietojumprogrammai pievienot saīsnes sākuma ekrānam, nejautājot lietotājam."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"atinstalēt saīsnes"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Ļauj lietojumprogrammai noņemt saīsnes no sākuma ekrāna, nejautājot lietotājam."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"pārmaršrutēt izejošos zvanus"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Ļauj lietotnei apstrādāt izejošos zvanus un mainīt numuru, uz kuru tiks zvanīts. Ar šo atļauju lietotne var pārraudzīt, novirzīt vai neatļaut izejošos zvanus."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"saņemt īsziņas (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"piekļūt Bluetooth iestatījumiem"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ļauj lietotnei konfigurēt vietējo Bluetooth planšetdatoru, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ļauj lietotnei konfigurēt vietējo Bluetooth tālruni, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Bluetooth ierīču savienošana pārī, izmantojot lietojumprogrammu"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Ļauj lietotnei izveidot savienojumu pārī ar tālvadības ierīcēm bez lietotāju mijiedarbības."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Ļauj lietotnei izveidot savienojumu pārī ar tālvadības ierīcēm bez lietotāju mijiedarbības."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX savienojuma izveide un pārtraukšana"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ļauj lietotnei noteikt, vai WiMAX ir iespējots, un sniedz informāciju par visiem WiMAX tīkliem, ar kuriem ir izveidots savienojums."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX statusa mainīšana"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Ļauj lietotnei lasīt visus vārdus, nosaukumus un frāzes, ko lietotājs ir saglabājis lietotāja vārdnīcā."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"vārdu pievienošana lietotāja noteiktai vārdnīcai"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ļauj lietotnei rakstīt jaunus vārdus lietotāja vārdnīcā."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"aizsargātai krātuvei pieejamas piekļuves pārbaude"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"aizsargātai krātuvei pieejamas piekļuves pārbaude"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Ļauj lietotnei pārbaudīt USB krātuves atļauju; krātuve būs pieejama turpmākajās ierīcēs."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Ļauj lietotnei pārbaudīt atļauju SD kartei, kas būs pieejama turpmākajās ierīcēs."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lasīt USB atmiņas saturu"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lasīt SD kartes saturu"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Ļauj liet. lasīt USB atm. sat."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Ļauj lietotnei lasīt SD kartes saturu."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"mainīt vai dzēst USB atm. sat."</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kartes satura pārveidošana vai dzēšana"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ļauj lietotnei rakstīt USB atmiņā."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"IESLĒGT"</string>
     <string name="capital_off" msgid="6815870386972805832">"IZSLĒGT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Pabeigt darbību, izmantojot"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Sākuma ekrāna lietotnes atlase"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Pēc noklusējuma izmantot šai darbībai."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Notīriet noklusējuma iestatījumus šeit: Sistēmas iestatījumi &gt; Lietotnes &gt; Lejupielādētās."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Darbības izvēle"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Atcelts"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Rakstot saturu, radās kļūda."</string>
     <string name="reason_unknown" msgid="6048913880184628119">"nezināms"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Drukas pakalpojums nav iespējots."</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Instalēts pakalpojums <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Pieskarieties, lai iespējotu"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Administratora PIN ievadīšana"</string>

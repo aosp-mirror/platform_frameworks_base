@@ -246,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Mengizinkan apl menjadi bilah status."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"luaskan/ciutkan bilah status"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Mengizinkan apl memperluas atau menciutkan bilah status."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"memasang pintasan"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Mengizinkan aplikasi menambahkan pintasan Layar Utama tanpa tindakan dari pengguna."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"mencopot pemasangan pintasan"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ubah rute panggilan keluar"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Memungkinkan aplikasi memproses panggilan keluar dan mengubah nomor yang akan dipanggil. Izin ini memungkinkan aplikasi memantau, mengalihkan, atau mencegah panggilan keluar."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"terima pesan teks (SMS)"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses setelan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Mengizinkan apl mengonfigurasi tablet Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"memungkinkan penyandingan Bluetooth oleh Aplikasi"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Memungkinkan aplikasi disandingkan dengan perangkat jarak jauh tanpa interaksi pengguna."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Memungkinkan aplikasi disandingkan dengan perangkat jarak jauh tanpa interaksi pengguna."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambungkan dan putuskan dari WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang tersambung."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ubah status WiMAX"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Memungkinkan aplikasi membaca semua kata, nama, dan frasa yang mungkin disimpan oleh pengguna di kamus pengguna."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Menambahkan kata ke kamus yang ditentukan pengguna"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Mengizinkan apl menulis kata-kata baru ke dalam kamus pengguna."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Memungkinkan aplikasi menguji izin penyimpanan USB yang akan tersedia di perangkat mendatang."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Memungkinkan aplikasi menguji izin untuk kartu SD yang akan tersedia pada perangkat yang akan datang."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"baca konten simpanan USB Anda"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"baca konten kartu SD Anda"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Mengizinkan aplikasi membaca konten penyimpanan USB Anda."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Mengizinkan aplikasi membaca konten kartu SD Anda."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah/hapus isi penyimpanan USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"mengubah atau menghapus konten kartu SD Anda"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Mengizinkan apl menulis ke penyimpanan USB."</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"AKTIF"</string>
     <string name="capital_off" msgid="6815870386972805832">"MATI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tindakan lengkap menggunakan"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Pilih aplikasi beranda"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara default untuk tindakan ini."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus default di Setelan sistem &gt; Apl &gt; Terunduh."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Pilih tindakan"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Dibatalkan"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Terjadi kesalahan saat menulis konten"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"tak diketahui"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Layanan cetak tidak diaktifkan"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Layanan <xliff:g id="NAME">%s</xliff:g> telah terpasang"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Ketuk untuk mengaktifkan"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Masukkan PIN administrator"</string>

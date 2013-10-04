@@ -246,11 +246,15 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"允许以状态栏形式显示应用。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展开/收拢状态栏"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"允许应用展开或折叠状态栏。"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"安装快捷方式"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"允许应用自行添加主屏幕快捷方式。"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"卸载快捷方式"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"允许应用自行删除主屏幕快捷方式。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重新设置外拨电话的路径"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"允许该应用处理外拨电话以及更改要拨打的号码。此权限可让该应用监视、重定向或阻止外拨电话。"</string>
-    <string name="permlab_receiveSms" msgid="8673471768947895082">"接收文字讯息（短信）"</string>
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"接收讯息（短信）"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允许该应用接收和处理短信。这就意味着，该应用可能会监视发送到您设备的短信，或删除发送到您设备的短信而不向您显示。"</string>
-    <string name="permlab_receiveMms" msgid="1821317344668257098">"接收文字讯息（彩信）"</string>
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"接收讯息（彩信）"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允许该应用接收和处理彩信。这就意味着，该应用可能会监视发送到您设备的彩信，或删除发送到您设备的彩信而不向您显示。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收紧急广播"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允许应用接收和处理紧急广播消息。此权限仅适用于系统应用。"</string>
@@ -260,13 +264,13 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允许该应用发送短信。此权限可能会导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"发送“通过信息回复”事件"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"允许应用向其他信息应用发送请求，以便处理来电的“通过信息回复”事件。"</string>
-    <string name="permlab_readSms" msgid="8745086572213270480">"读取您的文字讯息（短信或彩信）"</string>
+    <string name="permlab_readSms" msgid="8745086572213270480">"读取您的讯息（短信或彩信）"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允许该应用读取您平板电脑或 SIM 卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"允许该应用读取您手机或 SIM 卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"编辑您的文字讯息（短信或彩信）"</string>
+    <string name="permlab_writeSms" msgid="3216950472636214774">"编辑您的讯息（短信或彩信）"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"允许应用对平板电脑或 SIM 卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"允许应用对手机或 SIM 卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
-    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收文字讯息 (WAP)"</string>
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收讯息 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
@@ -605,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"访问蓝牙设置"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允许应用配置本地蓝牙平板电脑，以及发现远程设备并进行配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允许应用配置本地蓝牙手机，以及发现远程设备并进行配对。"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"允许应用进行蓝牙配对"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"允许应用自行与远程设备配对。"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"允许应用自行与远程设备配对。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"建立或中断 WiMAX 网络连接"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"允许该应用确定是否启用了 WiMAX 以及连接的任何 WiMAX 网络的相关信息。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"更改 WiMAX 状态"</string>
@@ -631,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户词典中存储的所有字词、名称和词组。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的词典添加字词"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"允许应用测试以后的设备将支持的 USB 存储设备权限。"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"允许该应用测试将对以后的设备开放的 SD 卡权限。"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"读取您的 USB 存储设备中的内容"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"读取您的 SD 卡中的内容"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允许应用读取您 USB 存储设备中的内容。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"允许应用读取您 SD 卡的内容。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或删除您的 USB 存储设备中的内容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或删除您的 SD 卡中的内容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允许应用写入 USB 存储设备。"</string>
@@ -1108,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"打开"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用："</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"选择主屏幕应用"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"设为默认选项。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"在“系统设置”&gt;“应用”&gt;“已下载”中清除默认设置。"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"选择操作"</string>
@@ -1624,6 +1632,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"已取消"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"写入内容时出错"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"未知"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"未启用打印服务"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"已安装“<xliff:g id="NAME">%s</xliff:g>”服务"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"点按即可启用"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"输入管理员 PIN 码"</string>
