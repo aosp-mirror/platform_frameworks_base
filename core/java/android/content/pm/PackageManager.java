@@ -923,6 +923,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of communicating with
+     * consumer IR devices.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports one or more methods of
      * reporting current location.
      */
