@@ -561,7 +561,7 @@ public final class DocumentsContract {
 
         final ProviderInfo info = context.getPackageManager()
                 .resolveContentProvider(uri.getAuthority(), PackageManager.GET_META_DATA);
-        if (info.metaData != null && info.metaData.containsKey(
+        if (info != null && info.metaData != null && info.metaData.containsKey(
                 DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
             return true;
         }
