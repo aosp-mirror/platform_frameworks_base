@@ -217,7 +217,7 @@ public class AudioService extends IAudioService.Stub {
      * stream types that follow other stream behavior for volume settings
      * NOTE: do not create loops in aliases!
      * Some streams alias to different streams according to device category (phone or tablet) or
-     * use case (in call s off call...).See updateStreamVolumeAlias() for more details
+     * use case (in call vs off call...). See updateStreamVolumeAlias() for more details.
      *  mStreamVolumeAlias contains the default aliases for a voice capable device (phone) and
      *  STREAM_VOLUME_ALIAS_NON_VOICE for a non voice capable device (tablet).*/
     private final int[] STREAM_VOLUME_ALIAS = new int[] {
@@ -301,7 +301,7 @@ public class AudioService extends IAudioService.Stub {
     private int mRingerMode;
 
     /** @see System#MODE_RINGER_STREAMS_AFFECTED */
-    private int mRingerModeAffectedStreams;
+    private int mRingerModeAffectedStreams = 0;
 
     // Streams currently muted by ringer mode
     private int mRingerModeMutedStreams;
@@ -511,9 +511,11 @@ public class AudioService extends IAudioService.Stub {
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
 
+        // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
+        // array initialized by updateStreamVolumeAlias()
+        updateStreamVolumeAlias(false /*updateVolumes*/);
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
-        updateStreamVolumeAlias(false /*updateVolumes*/);
         createStreamStates();
 
         readAndSetLowRamDevice();
@@ -632,10 +634,15 @@ public class AudioService extends IAudioService.Stub {
         }
         if (isInCommunication()) {
             dtmfStreamAlias = AudioSystem.STREAM_VOICE_CALL;
+            mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
+        } else {
+            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
         }
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
+            // apply stream mute states according to new value of mRingerModeAffectedStreams
+            setRingerModeInt(getRingerMode(), false);
             sendMsg(mAudioHandler,
                     MSG_SET_ALL_VOLUMES,
                     SENDMSG_QUEUE,
@@ -702,37 +709,7 @@ public class AudioService extends IAudioService.Stub {
                                             mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
                                                             : AudioManager.VIBRATE_SETTING_OFF);
 
-            // make sure settings for ringer mode are consistent with device type: non voice capable
-            // devices (tablets) include media stream in silent mode whereas phones don't.
-            mRingerModeAffectedStreams = Settings.System.getIntForUser(cr,
-                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                    ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                     (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
-                     UserHandle.USER_CURRENT);
-
-            // ringtone, notification and system streams are always affected by ringer mode
-            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_RING)|
-                                            (1 << AudioSystem.STREAM_NOTIFICATION)|
-                                            (1 << AudioSystem.STREAM_SYSTEM);
-
-            if (mVoiceCapable) {
-                mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-            } else {
-                mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
-            }
-            synchronized (mCameraSoundForced) {
-                if (mCameraSoundForced) {
-                    mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                } else {
-                    mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                }
-            }
-
-            Settings.System.putIntForUser(cr,
-                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                    mRingerModeAffectedStreams,
-                    UserHandle.USER_CURRENT);
-
+            updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
         }
 
@@ -2553,6 +2530,50 @@ public class AudioService extends IAudioService.Stub {
         return (mRingerModeMutedStreams & (1 << streamType)) != 0;
     }
 
+    boolean updateRingerModeAffectedStreams() {
+        int ringerModeAffectedStreams;
+        // make sure settings for ringer mode are consistent with device type: non voice capable
+        // devices (tablets) include media stream in silent mode whereas phones don't.
+        ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
+                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
+                 UserHandle.USER_CURRENT);
+
+        // ringtone, notification and system streams are always affected by ringer mode
+        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_RING)|
+                                        (1 << AudioSystem.STREAM_NOTIFICATION)|
+                                        (1 << AudioSystem.STREAM_SYSTEM);
+
+        if (mVoiceCapable) {
+            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
+        } else {
+            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+        }
+        synchronized (mCameraSoundForced) {
+            if (mCameraSoundForced) {
+                ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+            } else {
+                ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+            }
+        }
+        if (mStreamVolumeAlias[AudioSystem.STREAM_DTMF] == AudioSystem.STREAM_RING) {
+            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
+        } else {
+            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
+        }
+
+        if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
+            Settings.System.putIntForUser(mContentResolver,
+                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                    ringerModeAffectedStreams,
+                    UserHandle.USER_CURRENT);
+            mRingerModeAffectedStreams = ringerModeAffectedStreams;
+            return true;
+        }
+        return false;
+    }
+
     public boolean isStreamAffectedByMute(int streamType) {
         return (mMuteAffectedStreams & (1 << streamType)) != 0;
     }
@@ -2948,13 +2969,25 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public synchronized void setAllIndexes(VolumeStreamState srcStream) {
-            Set set = srcStream.mIndex.entrySet();
+            int srcStreamType = srcStream.getStreamType();
+            // apply default device volume from source stream to all devices first in case
+            // some devices are present in this stream state but not in source stream state
+            int index = srcStream.getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
+            index = rescaleIndex(index, srcStreamType, mStreamType);
+            Set set = mIndex.entrySet();
             Iterator i = set.iterator();
             while (i.hasNext()) {
                 Map.Entry entry = (Map.Entry)i.next();
+                entry.setValue(index);
+            }
+            // Now apply actual volume for devices in source stream state
+            set = srcStream.mIndex.entrySet();
+            i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
                 int device = ((Integer)entry.getKey()).intValue();
-                int index = ((Integer)entry.getValue()).intValue();
-                index = rescaleIndex(index, srcStream.getStreamType(), mStreamType);
+                index = ((Integer)entry.getValue()).intValue();
+                index = rescaleIndex(index, srcStreamType, mStreamType);
 
                 setIndex(index, device);
             }
@@ -3643,29 +3676,11 @@ public class AudioService extends IAudioService.Stub {
             //       and mRingerModeAffectedStreams, so will leave this synchronized for now.
             //       mRingerModeMutedStreams and mMuteAffectedStreams are safe (only accessed once).
             synchronized (mSettingsLock) {
-                int ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
-                       Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                       ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                       (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
-                       UserHandle.USER_CURRENT);
-                if (mVoiceCapable) {
-                    ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-                } else {
-                    ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
-                }
-                synchronized (mCameraSoundForced) {
-                    if (mCameraSoundForced) {
-                        ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                    } else {
-                        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                    }
-                }
-                if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
+                if (updateRingerModeAffectedStreams()) {
                     /*
                      * Ensure all stream types that should be affected by ringer mode
                      * are in the proper state.
                      */
-                    mRingerModeAffectedStreams = ringerModeAffectedStreams;
                     setRingerModeInt(getRingerMode(), false);
                 }
                 readDockAudioSettings(mContentResolver);
