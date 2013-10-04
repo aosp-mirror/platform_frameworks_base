@@ -23774,6 +23774,8 @@ package android.telephony {
     method public java.lang.String getDeviceSoftwareVersion();
     method public java.lang.String getGroupIdLevel1();
     method public java.lang.String getLine1Number();
+    method public java.lang.String getMmsUAProfUrl();
+    method public java.lang.String getMmsUserAgent();
     method public java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
     method public java.lang.String getNetworkCountryIso();
     method public java.lang.String getNetworkOperator();
