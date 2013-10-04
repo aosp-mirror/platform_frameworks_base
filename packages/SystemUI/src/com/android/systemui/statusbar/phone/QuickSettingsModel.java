@@ -29,6 +29,7 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -89,6 +90,19 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     static class BrightnessState extends State {
         boolean autoBrightness;
+    }
+    static class InversionState extends State {
+        boolean toggled;
+        int type;
+    }
+    static class ContrastState extends State {
+        boolean toggled;
+        float contrast;
+        float brightness;
+    }
+    static class ColorSpaceState extends State {
+        boolean toggled;
+        int type;
     }
     public static class BluetoothState extends State {
         boolean connected = false;
@@ -198,12 +212,96 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch display inversion */
+    private class DisplayInversionObserver extends ContentObserver {
+        public DisplayInversionObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onInversionChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_QUICK_SETTING_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
+    /** ContentObserver to watch display contrast */
+    private class DisplayContrastObserver extends ContentObserver {
+        public DisplayContrastObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onContrastChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_QUICK_SETTING_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
+    /** ContentObserver to watch display color space adjustment */
+    private class DisplayColorSpaceObserver extends ContentObserver {
+        public DisplayColorSpaceObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onColorSpaceChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_QUICK_SETTING_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
     private final Context mContext;
     private final Handler mHandler;
     private final CurrentUserTracker mUserTracker;
     private final NextAlarmObserver mNextAlarmObserver;
     private final BugreportObserver mBugreportObserver;
     private final BrightnessObserver mBrightnessObserver;
+    private final DisplayInversionObserver mInversionObserver;
+    private final DisplayContrastObserver mContrastObserver;
+    private final DisplayColorSpaceObserver mColorSpaceObserver;
 
     private final boolean mHasMobileData;
 
@@ -259,6 +357,18 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mBrightnessCallback;
     private BrightnessState mBrightnessState = new BrightnessState();
 
+    private QuickSettingsTileView mInversionTile;
+    private RefreshCallback mInversionCallback;
+    private InversionState mInversionState = new InversionState();
+
+    private QuickSettingsTileView mContrastTile;
+    private RefreshCallback mContrastCallback;
+    private ContrastState mContrastState = new ContrastState();
+
+    private QuickSettingsTileView mColorSpaceTile;
+    private RefreshCallback mColorSpaceCallback;
+    private ColorSpaceState mColorSpaceState = new ColorSpaceState();
+
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
@@ -277,10 +387,17 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mContext = context;
         mHandler = new Handler();
         mUserTracker = new CurrentUserTracker(mContext) {
+            @Override
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
+                mInversionObserver.startObserving();
+                mContrastObserver.startObserving();
+                mColorSpaceObserver.startObserving();
                 onRotationLockChanged();
                 onBrightnessLevelChanged();
+                onInversionChanged();
+                onContrastChanged();
+                onColorSpaceChanged();
                 onNextAlarmChanged();
                 onBugreportChanged();
             }
@@ -292,6 +409,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBugreportObserver.startObserving();
         mBrightnessObserver = new BrightnessObserver(mHandler);
         mBrightnessObserver.startObserving();
+        mInversionObserver = new DisplayInversionObserver(mHandler);
+        mInversionObserver.startObserving();
+        mContrastObserver = new DisplayContrastObserver(mHandler);
+        mContrastObserver.startObserving();
+        mColorSpaceObserver = new DisplayColorSpaceObserver(mHandler);
+        mColorSpaceObserver.startObserving();
 
         ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -760,6 +883,90 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     void refreshBrightnessTile() {
         onBrightnessLevelChanged();
+    }
+
+    // Color inversion
+    void addInversionTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mInversionTile = view;
+        mInversionCallback = cb;
+        onInversionChanged();
+    }
+    public void onInversionChanged() {
+        final Resources res = mContext.getResources();
+        final ContentResolver cr = mContext.getContentResolver();
+        final int currentUserId = mUserTracker.getCurrentUserId();
+        final boolean quickSettingEnabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_QUICK_SETTING_ENABLED, 0,
+                currentUserId) == 1;
+        final boolean enabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, currentUserId) == 1;
+        final int type = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION, 0, currentUserId);
+        mInversionState.enabled = quickSettingEnabled;
+        mInversionState.toggled = enabled;
+        mInversionState.type = type;
+        // TODO: Add real icon assets.
+        mInversionState.iconId = enabled ? R.drawable.ic_qs_bluetooth_on
+                : R.drawable.ic_qs_bluetooth_off;
+        mInversionState.label = res.getString(R.string.quick_settings_inversion_label);
+        mInversionCallback.refreshView(mInversionTile, mInversionState);
+    }
+
+    // Contrast enhancement
+    void addContrastTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mContrastTile = view;
+        mContrastCallback = cb;
+        onContrastChanged();
+    }
+    public void onContrastChanged() {
+        final Resources res = mContext.getResources();
+        final ContentResolver cr = mContext.getContentResolver();
+        final int currentUserId = mUserTracker.getCurrentUserId();
+        final boolean quickSettingEnabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_QUICK_SETTING_ENABLED, 0,
+                currentUserId) == 1;
+        final boolean enabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST_ENABLED, 0, currentUserId) == 1;
+        final float contrast = Settings.Secure.getFloatForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_CONTRAST, 1, currentUserId);
+        final float brightness = Settings.Secure.getFloatForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_BRIGHTNESS, 0, currentUserId);
+        mContrastState.enabled = quickSettingEnabled;
+        mContrastState.toggled = enabled;
+        mContrastState.contrast = contrast;
+        mContrastState.brightness = brightness;
+        // TODO: Add real icon assets.
+        mContrastState.iconId = enabled ? R.drawable.ic_qs_bluetooth_on
+                : R.drawable.ic_qs_bluetooth_off;
+        mContrastState.label = res.getString(R.string.quick_settings_contrast_label);
+        mContrastCallback.refreshView(mContrastTile, mContrastState);
+    }
+
+    // Color space adjustment
+    void addColorSpaceTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mColorSpaceTile = view;
+        mColorSpaceCallback = cb;
+        onColorSpaceChanged();
+    }
+    public void onColorSpaceChanged() {
+        final Resources res = mContext.getResources();
+        final ContentResolver cr = mContext.getContentResolver();
+        final int currentUserId = mUserTracker.getCurrentUserId();
+        final boolean quickSettingEnabled = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_QUICK_SETTING_ENABLED, 0,
+                currentUserId) == 1;
+        final boolean enabled = Settings.Secure.getIntForUser(cr,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, currentUserId) == 1;
+        final int type = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER, 0, currentUserId);
+        mColorSpaceState.enabled = quickSettingEnabled;
+        mColorSpaceState.toggled = enabled;
+        mColorSpaceState.type = type;
+        // TODO: Add real icon assets.
+        mColorSpaceState.iconId = enabled ? R.drawable.ic_qs_bluetooth_on
+                : R.drawable.ic_qs_bluetooth_off;
+        mColorSpaceState.label = res.getString(R.string.quick_settings_color_space_label);
+        mColorSpaceCallback.refreshView(mColorSpaceTile, mColorSpaceState);
     }
 
     // SSL CA Cert warning.
