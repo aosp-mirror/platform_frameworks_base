@@ -28404,6 +28404,7 @@ package android.view {
     field public static final int HAPTIC_FEEDBACK_ENABLED = 268435456; // 0x10000000
     field public static final int IMPORTANT_FOR_ACCESSIBILITY_AUTO = 0; // 0x0
     field public static final int IMPORTANT_FOR_ACCESSIBILITY_NO = 2; // 0x2
+    field public static final int IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS = 4; // 0x4
     field public static final int IMPORTANT_FOR_ACCESSIBILITY_YES = 1; // 0x1
     field public static final int INVISIBLE = 4; // 0x4
     field public static final int KEEP_SCREEN_ON = 67108864; // 0x4000000

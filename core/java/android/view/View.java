@@ -2209,6 +2209,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int IMPORTANT_FOR_ACCESSIBILITY_NO = 0x00000002;
 
     /**
+     * The view is not important for accessibility, nor are any of its
+     * descendant views.
+     */
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS = 0x00000004;
+
+    /**
      * The default whether the view is important for accessibility.
      */
     static final int IMPORTANT_FOR_ACCESSIBILITY_DEFAULT = IMPORTANT_FOR_ACCESSIBILITY_AUTO;
@@ -2218,14 +2224,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * whether a view is important for accessibility.
      */
     static final int PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK = (IMPORTANT_FOR_ACCESSIBILITY_AUTO
-        | IMPORTANT_FOR_ACCESSIBILITY_YES | IMPORTANT_FOR_ACCESSIBILITY_NO)
+        | IMPORTANT_FOR_ACCESSIBILITY_YES | IMPORTANT_FOR_ACCESSIBILITY_NO
+        | IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
         << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
 
     /**
      * Shift for the bits in {@link #mPrivateFlags2} related to the
      * "accessibilityLiveRegion" attribute.
      */
-    static final int PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT = 22;
+    static final int PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT = 23;
 
     /**
      * Live region mode specifying that accessibility services should not
@@ -7137,12 +7144,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #IMPORTANT_FOR_ACCESSIBILITY_YES
      * @see #IMPORTANT_FOR_ACCESSIBILITY_NO
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
      * @see #IMPORTANT_FOR_ACCESSIBILITY_AUTO
      */
     @ViewDebug.ExportedProperty(category = "accessibility", mapping = {
             @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_AUTO, to = "auto"),
             @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_YES, to = "yes"),
-            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_NO, to = "no")
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_NO, to = "no"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS,
+                    to = "noHideDescendants")
         })
     public int getImportantForAccessibility() {
         return (mPrivateFlags2 & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK)
@@ -7212,6 +7222,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #IMPORTANT_FOR_ACCESSIBILITY_YES
      * @see #IMPORTANT_FOR_ACCESSIBILITY_NO
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
      * @see #IMPORTANT_FOR_ACCESSIBILITY_AUTO
      */
     public void setImportantForAccessibility(int mode) {
@@ -7239,19 +7250,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean isImportantForAccessibility() {
         final int mode = (mPrivateFlags2 & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK)
                 >> PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
-        switch (mode) {
-            case IMPORTANT_FOR_ACCESSIBILITY_YES:
-                return true;
-            case IMPORTANT_FOR_ACCESSIBILITY_NO:
-                return false;
-            case IMPORTANT_FOR_ACCESSIBILITY_AUTO:
-                return isActionableForAccessibility() || hasListenersForAccessibility()
-                        || getAccessibilityNodeProvider() != null
-                        || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE;
-            default:
-                throw new IllegalArgumentException("Unknown important for accessibility mode: "
-                        + mode);
+        if (mode == IMPORTANT_FOR_ACCESSIBILITY_NO
+                || mode == IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS) {
+            return false;
         }
+
+        // Check parent mode to ensure we're not hidden.
+        ViewParent parent = mParent;
+        while (parent instanceof View) {
+            if (((View) parent).getImportantForAccessibility()
+                    == IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS) {
+                return false;
+            }
+            parent = parent.getParent();
+        }
+
+        return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
+                || hasListenersForAccessibility() || getAccessibilityNodeProvider() != null
+                || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE;
     }
 
     /**
