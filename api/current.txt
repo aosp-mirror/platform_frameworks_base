@@ -3190,7 +3190,7 @@ package android.app {
     method public int noteOpNoThrow(java.lang.String, int, java.lang.String);
     method public int startOp(java.lang.String, int, java.lang.String);
     method public int startOpNoThrow(java.lang.String, int, java.lang.String);
-    method public void startWatchingMode(int, java.lang.String, android.app.AppOpsManager.OnOpChangedListener);
+    method public void startWatchingMode(java.lang.String, java.lang.String, android.app.AppOpsManager.OnOpChangedListener);
     method public void stopWatchingMode(android.app.AppOpsManager.OnOpChangedListener);
     field public static final int MODE_ALLOWED = 0; // 0x0
     field public static final int MODE_ERRORED = 2; // 0x2
