@@ -179,8 +179,8 @@ public class ChangeText extends Transition {
             startSelectionStart = startSelectionEnd = endSelectionStart = endSelectionEnd = -1;
         }
         if (!startText.equals(endText)) {
-            final int startColor = (Integer) startVals.get(PROPNAME_TEXT_COLOR);
-            final int endColor = (Integer) endVals.get(PROPNAME_TEXT_COLOR);
+            final int startColor;
+            final int endColor;
             if (mChangeBehavior != CHANGE_BEHAVIOR_IN) {
                 view.setText(startText);
                 if (view instanceof EditText) {
@@ -189,6 +189,7 @@ public class ChangeText extends Transition {
             }
             Animator anim;
             if (mChangeBehavior == CHANGE_BEHAVIOR_KEEP) {
+                startColor = endColor = 0;
                 anim = ValueAnimator.ofFloat(0, 1);
                 anim.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -203,6 +204,8 @@ public class ChangeText extends Transition {
                     }
                 });
             } else {
+                startColor = (Integer) startVals.get(PROPNAME_TEXT_COLOR);
+                endColor = (Integer) endVals.get(PROPNAME_TEXT_COLOR);
                 // Fade out start text
                 ValueAnimator outAnim = null, inAnim = null;
                 if (mChangeBehavior == CHANGE_BEHAVIOR_OUT_IN ||
