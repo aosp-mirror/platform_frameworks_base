@@ -36,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.print.PrintManager;
@@ -53,6 +54,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -357,11 +359,12 @@ public final class SelectPrinterFragment extends ListFragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater().inflate(
-                        R.layout.spinner_dropdown_item, parent, false);
+                        R.layout.printer_dropdown_item, parent, false);
             }
 
             CharSequence title = null;
             CharSequence subtitle = null;
+            Drawable icon = null;
 
             PrinterInfo printer = (PrinterInfo) getItem(position);
             title = printer.getName();
@@ -370,6 +373,7 @@ public final class SelectPrinterFragment extends ListFragment {
                 PackageInfo packageInfo = pm.getPackageInfo(printer.getId()
                         .getServiceName().getPackageName(), 0);
                 subtitle = packageInfo.applicationInfo.loadLabel(pm);
+                icon = packageInfo.applicationInfo.loadIcon(pm);
             } catch (NameNotFoundException nnfe) {
                 /* ignore */
             }
@@ -384,6 +388,15 @@ public final class SelectPrinterFragment extends ListFragment {
             } else {
                 subtitleView.setText(null);
                 subtitleView.setVisibility(View.GONE);
+            }
+
+
+            ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
+            if (icon != null) {
+                iconView.setImageDrawable(icon);
+                iconView.setVisibility(View.VISIBLE);
+            } else {
+                iconView.setVisibility(View.GONE);
             }
 
             return convertView;

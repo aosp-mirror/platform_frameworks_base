@@ -1613,7 +1613,6 @@ public class PrintJobConfigActivity extends Activity {
             mCopiesEditText = (EditText) findViewById(R.id.copies_edittext);
             mCopiesEditText.setText(MIN_COPIES_STRING);
             mCopiesEditText.addTextChangedListener(mCopiesTextWatcher);
-            mCopiesEditText.selectAll();
             if (!TextUtils.equals(mCopiesEditText.getText(), MIN_COPIES_STRING)) {
                 mIgnoreNextCopiesChange = true;
             }
@@ -1622,6 +1621,7 @@ public class PrintJobConfigActivity extends Activity {
 
             // Destination.
             mDestinationSpinner = (Spinner) findViewById(R.id.destination_spinner);
+            mDestinationSpinner.setDropDownWidth(ViewGroup.LayoutParams.MATCH_PARENT);
             mDestinationSpinner.setAdapter(mDestinationSpinnerAdapter);
             mDestinationSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
             if (mDestinationSpinnerAdapter.getCount() > 0 && mController.hasStarted()) {
@@ -1954,7 +1954,6 @@ public class PrintJobConfigActivity extends Activity {
                         && TextUtils.isEmpty(mCopiesEditText.getText())) {
                     mIgnoreNextCopiesChange = true;
                     mCopiesEditText.setText(String.valueOf(MIN_COPIES));
-                    mCopiesEditText.selectAll();
                     mCopiesEditText.requestFocus();
                 }
 
@@ -2150,6 +2149,8 @@ public class PrintJobConfigActivity extends Activity {
                     convertView = getLayoutInflater().inflate(
                             R.layout.printer_dropdown_item, parent, false);
                 }
+
+                convertView.getLayoutParams().width = mDestinationSpinner.getWidth();
 
                 CharSequence title = null;
                 CharSequence subtitle = null;
