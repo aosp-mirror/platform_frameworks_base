@@ -537,8 +537,8 @@ public class WebView extends AbsoluteLayout
 
         ensureProviderCreated();
         mProvider.init(javaScriptInterfaces, privateBrowsing);
-        // Post condition of creating a webview is the CookieSyncManager instance exists.
-        CookieSyncManager.createInstance(getContext());
+        // Post condition of creating a webview is the CookieSyncManager.getInstance() is allowed.
+        CookieSyncManager.setGetInstanceIsAllowed();
     }
 
     /**
