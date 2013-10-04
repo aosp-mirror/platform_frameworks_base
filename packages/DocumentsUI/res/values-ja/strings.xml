@@ -37,8 +37,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"ルートを非表示にする"</string>
     <string name="save_error" msgid="6167009778003223664">"ドキュメントを保存できませんでした"</string>
     <string name="create_error" msgid="3735649141335444215">"フォルダを作成できませんでした"</string>
-    <!-- no translation found for query_error (1222448261663503501) -->
-    <skip />
+    <string name="query_error" msgid="1222448261663503501">"ドキュメントのクエリに失敗しました"</string>
     <string name="root_recent" msgid="4470053704320518133">"最近"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"空き容量: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"ストレージサービス"</string>
