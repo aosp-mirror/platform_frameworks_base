@@ -240,12 +240,7 @@ public class TransitionManager {
                     }
                     transition.playTransition(sceneRoot);
 
-                    // Returning false from onPreDraw() skips the current frame. This is
-                    // necessary to avoid artifacts caused by resetting target views
-                    // to their proper end states for capturing. Waiting until the next
-                    // frame to draw allows these views to have their mid-transition
-                    // values set on them again and avoid artifacts.
-                    return false;
+                    return true;
                 }
             };
             observer.addOnPreDrawListener(listener);
