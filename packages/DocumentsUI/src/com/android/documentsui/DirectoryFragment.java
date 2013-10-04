@@ -216,6 +216,10 @@ public class DirectoryFragment extends Fragment {
             final View view = target.getChildAt(i);
             mRecycleListener.onMovedToScrapHeap(view);
         }
+
+        // Tear down any selection in progress
+        mListView.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+        mGridView.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
     }
 
     @Override
