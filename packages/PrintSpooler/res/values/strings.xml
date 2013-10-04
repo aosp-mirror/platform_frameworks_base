@@ -84,7 +84,7 @@
     <string name="choose_print_service">Choose print service</string>
 
     <!-- Title for the prompt shown as a placeholder if no printers are found while searching. [CHAR LIMIT=50] -->
-    <string name="print_no_printers_found">No printers found</string>
+    <string name="print_searching_for_printers">Searching for printers</string>
 
     <!-- Notifications -->
 
