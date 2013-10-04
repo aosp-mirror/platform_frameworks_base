@@ -35,7 +35,7 @@ import java.util.HashMap;
 public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     private static final String TAG = "CameraMetadataJV";
-    private final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     public CameraMetadataNative() {
         super();
