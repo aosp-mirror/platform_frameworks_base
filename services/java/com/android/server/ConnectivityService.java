@@ -3987,8 +3987,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 return timeOutMs;
             }
 
-            // Start off with notification off
-            setProvNotificationVisible(false, ConnectivityManager.TYPE_NONE, null, null);
+            // Start off with mobile notification off
+            setProvNotificationVisible(false, ConnectivityManager.TYPE_MOBILE_HIPRI, null, null);
 
             CheckMp checkMp = new CheckMp(mContext, this);
             CheckMp.CallBack cb = new CheckMp.CallBack() {
@@ -4013,7 +4013,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             }
                             if (TextUtils.isEmpty(url) == false) {
                                 if (DBG) log("CheckMp.onComplete: warm (redirected), url=" + url);
-                                setProvNotificationVisible(true, ni.getType(), ni.getExtraInfo(),
+                                setProvNotificationVisible(true,
+                                        ConnectivityManager.TYPE_MOBILE_HIPRI, ni.getExtraInfo(),
                                         url);
                             } else {
                                 if (DBG) log("CheckMp.onComplete: warm (redirected), no url");
@@ -4024,7 +4025,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             String url = getMobileProvisioningUrl();
                             if (TextUtils.isEmpty(url) == false) {
                                 if (DBG) log("CheckMp.onComplete: warm (no dns/tcp), url=" + url);
-                                setProvNotificationVisible(true, ni.getType(), ni.getExtraInfo(),
+                                setProvNotificationVisible(true,
+                                        ConnectivityManager.TYPE_MOBILE_HIPRI, ni.getExtraInfo(),
                                         url);
                             } else {
                                 if (DBG) log("CheckMp.onComplete: warm (no dns/tcp), no url");
@@ -4426,7 +4428,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void handleMobileProvisioningAction(String url) {
         // Notication mark notification as not visible
-        setProvNotificationVisible(false, ConnectivityManager.TYPE_NONE, null, null);
+        setProvNotificationVisible(false, ConnectivityManager.TYPE_MOBILE_HIPRI, null, null);
 
         // If provisioning network handle as a special case,
         // otherwise launch browser with the intent directly.
@@ -4512,14 +4514,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
 
             try {
-                notificationManager.notify(NOTIFICATION_ID, 1, notification);
+                notificationManager.notify(NOTIFICATION_ID, networkType, notification);
             } catch (NullPointerException npe) {
                 loge("setNotificaitionVisible: visible notificationManager npe=" + npe);
                 npe.printStackTrace();
             }
         } else {
             try {
-                notificationManager.cancel(NOTIFICATION_ID, 1);
+                notificationManager.cancel(NOTIFICATION_ID, networkType);
             } catch (NullPointerException npe) {
                 loge("setNotificaitionVisible: cancel notificationManager npe=" + npe);
                 npe.printStackTrace();
