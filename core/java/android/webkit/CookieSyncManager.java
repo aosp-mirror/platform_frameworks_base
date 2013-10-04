@@ -89,6 +89,10 @@ public final class CookieSyncManager extends WebSyncManager {
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }
+        // TODO: Remove this workaround after webview classic is no longer supported.
+        if (WebViewFactory.getProvider().getClass().getName().contains("WebViewClassic")) {
+            WebViewDatabase.getInstance(context);
+        }
 
         setGetInstanceIsAllowed();
         return getInstance();
