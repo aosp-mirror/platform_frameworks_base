@@ -26,9 +26,6 @@ import java.util.Arrays;
  */
 public final class PrintJobInfo implements Parcelable {
 
-    /** Undefined print job id. */
-    public static final int PRINT_JOB_ID_UNDEFINED = -1;
-
     /**
      * Constant for matching any print job state.
      *
@@ -356,6 +353,8 @@ public final class PrintJobInfo implements Parcelable {
      * Gets the optional tag assigned by a print service.
      *
      * @return The tag.
+     *
+     * @hide
      */
     public String getTag() {
         return mTag;

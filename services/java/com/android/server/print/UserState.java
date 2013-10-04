@@ -205,6 +205,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         for (int i = 0; i < cachedPrintJobCount; i++) {
             PrintJobInfo cachedPrintJob = cachedPrintJobs.get(i);
             result.put(cachedPrintJob.getId(), cachedPrintJob);
+            // Strip out the tag - it is visible only to print services.
+            // Also the cached print jobs are delivered only to apps, so
+            // stripping the tag of a cached print job is fine.
+            cachedPrintJob.setTag(null);
         }
 
         // Add everything else the spooler knows about.
@@ -215,6 +219,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             for (int i = 0; i < printJobCount; i++) {
                 PrintJobInfo printJob = printJobs.get(i);
                 result.put(printJob.getId(), printJob);
+                // Strip out the tag - it is visible only to print services.
+                printJob.setTag(null);
             }
         }
 
