@@ -98,7 +98,7 @@ final class ProcessRecord {
     boolean bad;                // True if disabled in the bad process list
     boolean killedByAm;         // True when proc has been killed by activity manager, not for RAM
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
-    String waitingToKill;       // Process is waiting to be killed when in the bg; reason
+    String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
     int lruSeq;                 // Sequence id for identifying LRU update cycles
