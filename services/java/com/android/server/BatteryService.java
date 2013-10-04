@@ -314,8 +314,6 @@ public final class BatteryService extends Binder {
                     + ", batteryLevel=" + mBatteryProps.batteryLevel
                     + ", batteryTechnology=" + mBatteryProps.batteryTechnology
                     + ", batteryVoltage=" + mBatteryProps.batteryVoltage
-                    + ", batteryCurrentNow=" + mBatteryProps.batteryCurrentNow
-                    + ", batteryChargeCounter=" + mBatteryProps.batteryChargeCounter
                     + ", batteryTemperature=" + mBatteryProps.batteryTemperature
                     + ", mBatteryLevelCritical=" + mBatteryLevelCritical
                     + ", mPlugType=" + mPlugType);
@@ -616,15 +614,6 @@ public final class BatteryService extends Binder {
                 pw.println("  level: " + mBatteryProps.batteryLevel);
                 pw.println("  scale: " + BATTERY_SCALE);
                 pw.println("  voltage: " + mBatteryProps.batteryVoltage);
-
-                if (mBatteryProps.batteryCurrentNow != Integer.MIN_VALUE) {
-                    pw.println("  current now: " + mBatteryProps.batteryCurrentNow);
-                }
-
-                if (mBatteryProps.batteryChargeCounter != Integer.MIN_VALUE) {
-                    pw.println("  charge counter: " + mBatteryProps.batteryChargeCounter);
-                }
-
                 pw.println("  temperature: " + mBatteryProps.batteryTemperature);
                 pw.println("  technology: " + mBatteryProps.batteryTechnology);
             } else if (args.length == 3 && "set".equals(args[0])) {
