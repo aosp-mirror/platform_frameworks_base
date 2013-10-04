@@ -31,7 +31,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"Susa"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> okukhethiwe"</string>
     <string name="sort_name" msgid="9183560467917256779">"Ngegama"</string>
-    <string name="sort_date" msgid="586080032956151448">"Kuguqulwe ngedethi"</string>
+    <string name="sort_date" msgid="586080032956151448">"Ngedethi yokuguqula"</string>
     <string name="sort_size" msgid="3350681319735474741">"Ngosayizi"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Bonisa izimpande"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Fihla izimpande"</string>
