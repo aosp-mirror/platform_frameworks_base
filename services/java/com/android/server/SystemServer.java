@@ -515,8 +515,9 @@ class ServerThread {
                     ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
                     networkStats.bindConnectivityManager(connectivity);
                     networkPolicy.bindConnectivityManager(connectivity);
-                    wifi.checkAndStartWifi();
+
                     wifiP2p.connectivityServiceReady();
+                    wifi.checkAndStartWifi();
                 } catch (Throwable e) {
                     reportWtf("starting Connectivity Service", e);
                 }
