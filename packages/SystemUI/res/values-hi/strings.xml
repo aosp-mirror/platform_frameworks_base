@@ -76,6 +76,8 @@
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"हाल ही के एप्‍स"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"खोजें"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"कैमरा"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धति‍ बटन स्विच करें."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"संगतता ज़ूम बटन."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"छोटी से बड़ी स्‍क्रीन पर ज़ूम करें."</string>
@@ -177,7 +179,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> उपकरण)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth बंद"</string>
-    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"स्वत: रोटेट"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"रोटेशन लॉक किया गया"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"इनपुट विधि"</string>
@@ -195,7 +197,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi बंद"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi प्रदर्शन"</string>
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"वायरलेस डिस्प्ले"</string>
-    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"चमक"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"नेटवर्क को\nमॉनीटर किया जा सकता है"</string>
 </resources>

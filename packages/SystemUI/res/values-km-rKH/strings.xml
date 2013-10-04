@@ -76,6 +76,8 @@
     <string name="accessibility_home" msgid="8217216074895377641">"គេហ​ទំព័រ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ម៉ឺនុយ"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"កម្មវិធី​ថ្មីៗ"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"ស្វែងរក"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"ម៉ាស៊ីន​ថត"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ប្ដូរ​ប៊ូតុង​វិធីសាស្ត្រ​បញ្ចូល។"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ប៊ូតុង​ពង្រីក​ត្រូវ​គ្នា។"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ពង្រីក/បង្រួម​​អេក្រង់​ពី​​ទៅធំ"</string>
@@ -130,7 +132,7 @@
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ជិះ​យន្តហោះ"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ថ្ម <xliff:g id="NUMBER">%d</xliff:g> ភាគរយ។"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ការ​កំណត់​ប្រព័ន្ធ​។"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ការ​ជូន​ដំណឹង។"</string>
@@ -149,7 +151,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ចល័ត <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ថ្ម <xliff:g id="STATE">%s</xliff:g> ។"</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"របៀប​ជិះ​យន្ត​ហោះ <xliff:g id="STATE">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"របៀបពេល​ជិះ​យន្ត​ហោះ <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ប៊្លូធូស <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"កំណត់​សំឡេង​រោទ៍​សម្រាប់ <xliff:g id="TIME">%s</xliff:g> ។"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"បាន​បិទ​ទិន្នន័យ 2G-3G"</string>
@@ -171,7 +173,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"ករណី Dessert"</string>
     <string name="start_dreams" msgid="7219575858348719790">"ស្រមើ​ស្រមៃ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"អ៊ីសឺរណិត"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"របៀប​​ជិះ​យន្តហោះ"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"របៀបពេល​​ជិះ​យន្តហោះ"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"បញ្ចូល​ថ្ម <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"បាន​បញ្ចូល​ពេញ"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ប៊្លូធូស"</string>

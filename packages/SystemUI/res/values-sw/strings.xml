@@ -74,6 +74,8 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Nyumbani"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Programu za hivi karibuni"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Tafuta"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Swichi kitufe cha mbinu ingizi."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Kichupo cha kukuza kwa utangamanifu"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kuza kidogo kwa skrini kubwa."</string>
@@ -180,7 +182,7 @@
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Mzunguko Umefungwa"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mbinu ya uingizaji"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Kutambua Eneo"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Eneo Limezimwa"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Kitambua eneo kimezimwa"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha midia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Simu za Dharura Pekee"</string>

@@ -29,9 +29,9 @@
     <item quantity="one" msgid="5854176083865845541">"تطبيق حديث واحد"</item>
     <item quantity="other" msgid="1040784359794890744">"%d من التطبيقات الحديثة"</item>
   </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي تنبيهات"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي اشعارات"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"التنبيهات"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"الإشعارات"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"توصيل الشاحن"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"انخفضت طاقة البطارية."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"المتبقي: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
@@ -43,7 +43,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"التدوير التلقائي للشاشة"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"كتم"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"تلقائي"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"التنبيهات"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"الإشعارات"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"تم إنشاء الاتصال بالإنترنت عن طريق البلوتوث."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"إعداد أسلوب الإدخال"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"لوحة مفاتيح فعلية"</string>
@@ -76,6 +76,8 @@
     <string name="accessibility_home" msgid="8217216074895377641">"الرئيسية"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"القائمة"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"التطبيقات الحديثة"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"بحث"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"الكاميرا"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"زر تبديل طريقة الإدخال."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"زر تكبير/تصغير للتوافق."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"استخدام التكبير/التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
