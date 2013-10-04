@@ -153,7 +153,7 @@ public final class RemoteController
          * @param state one of the playback states authorized
          *     in {@link RemoteControlClient#setPlaybackState(int)}.
          * @param stateChangeTimeMs the system time at which the state change was reported,
-         *     expressed in ms. Based on {@link android.os.SystemClock.elapsedRealtime()}.
+         *     expressed in ms. Based on {@link android.os.SystemClock#elapsedRealtime()}.
          * @param currentPosMs a positive value for the current media playback position expressed
          *     in ms, a negative value if the position is temporarily unknown.
          * @param speed  a value expressed as a ratio of 1x playback: 1.0f is normal playback,
