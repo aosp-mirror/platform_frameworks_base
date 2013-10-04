@@ -967,6 +967,12 @@
          If false, Content-disposition fragments are ignored -->
     <bool name="config_mms_content_disposition_support">true</bool>
 
+    <!-- MMS user agent string -->
+    <string name="config_mms_user_agent" translatable="false"></string>
+
+    <!-- MMS user agent prolfile url -->
+    <string name="config_mms_user_agent_profile_url" translatable="false"></string>
+
     <!-- National Language Identifier codes for the following two config items.
          (from 3GPP TS 23.038 V9.1.1 Table 6.2.1.2.4.1):
           0  - reserved
