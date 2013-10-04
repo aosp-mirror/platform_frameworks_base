@@ -63,7 +63,7 @@ public class KeyguardTransportControlView extends FrameLayout {
     protected static final boolean DEBUG = false;
     protected static final String TAG = "TransportControlView";
 
-    private static final boolean ANIMATE_TRANSITIONS = false;
+    private static final boolean ANIMATE_TRANSITIONS = true;
 
     private ViewGroup mMetadataContainer;
     private ViewGroup mInfoContainer;
