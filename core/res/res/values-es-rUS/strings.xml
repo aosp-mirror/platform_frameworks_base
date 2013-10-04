@@ -131,7 +131,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Demasiadas eliminaciones de <xliff:g id="CONTENT_TYPE">%s</xliff:g>"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Se ha agotado el espacio de almacenamiento de la tablet. Elimina algunos archivos para liberar espacio."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Se ha agotado el espacio de almacenamiento del dispositivo. Elimina algunos archivos para liberar espacio."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por un tercero desconocido"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Yo"</string>
@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"Sí"</string>
     <string name="capital_off" msgid="6815870386972805832">"No"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar la acción mediante"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Seleccionar una aplicación de la pantalla principal"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de manera predeterminada en esta acción."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Eliminar valores predeterminados en Configuración del sistema &gt; Aplicaciones &gt; Descargas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Seleccionar una acción"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error al escribir contenido"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"desconocido"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Servicio de impresión no habilitado"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Servicio de <xliff:g id="NAME">%s</xliff:g> instalado"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Presionar para habilitar"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Ingresar PIN de administrador"</string>
@@ -1650,26 +1652,15 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Vuelve a intentar más tarde."</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Salir de pantalla completa: deslizar abajo"</string>
-    <!-- no translation found for done_label (2093726099505892398) -->
-    <skip />
-    <!-- no translation found for hour_picker_description (6698199186859736512) -->
-    <skip />
-    <!-- no translation found for minute_picker_description (8606010966873791190) -->
-    <skip />
-    <!-- no translation found for select_hours (6043079511766008245) -->
-    <skip />
-    <!-- no translation found for select_minutes (3974345615920336087) -->
-    <skip />
-    <!-- no translation found for day_picker_description (8990847925961297968) -->
-    <skip />
-    <!-- no translation found for year_picker_description (5524331207436052403) -->
-    <skip />
-    <!-- no translation found for select_day (7774759604701773332) -->
-    <skip />
-    <!-- no translation found for select_year (7952052866994196170) -->
-    <skip />
-    <!-- no translation found for item_is_selected (949687401682476608) -->
-    <skip />
-    <!-- no translation found for deleted_key (7659477886625566590) -->
-    <skip />
+    <string name="done_label" msgid="2093726099505892398">"Listo"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Control deslizante circular de horas"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Control deslizante circular de minutos"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Seleccionar horas"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Seleccionar minutos"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Cuadrícula mensual de días"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"Lista de años"</string>
+    <string name="select_day" msgid="7774759604701773332">"Seleccionar mes y día"</string>
+    <string name="select_year" msgid="7952052866994196170">"Seleccionar año"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> borrado"</string>
 </resources>

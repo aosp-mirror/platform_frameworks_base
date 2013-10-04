@@ -1117,6 +1117,7 @@
     <string name="capital_on" msgid="1544682755514494298">"បើក"</string>
     <string name="capital_off" msgid="6815870386972805832">"បិទ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព"</string>
@@ -1633,6 +1634,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"បាន​បោះ​បង់"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"កំហុស​ក្នុង​ការ​សរសេរ​មាតិកា"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"មិន​ស្គាល់"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"មិន​បា​ន​បើក​សេវាកម្ម​បោះពុម្ព"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"បាន​ដំឡើង​សេវាកម្ម <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ប៉ះ ដើម្បី​បើក"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"បញ្ចូល​លេខ​កូដ​សម្ងាត់​អ្នក​គ្រប់គ្រង"</string>
