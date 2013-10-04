@@ -2145,6 +2145,10 @@ class MountService extends IMountService.Stub
             return -1;
         }
 
+        if (!appPath.endsWith("/")) {
+            appPath = appPath + "/";
+        }
+
         // Try translating the app path into a vold path, but require that it
         // belong to the calling package.
         String voldPath = maybeTranslatePathForVold(appPath,
@@ -2194,9 +2198,9 @@ class MountService extends IMountService.Stub
         }
 
         for (int i = 0; i < appPaths.length; i++) {
-            final String appPath = appPaths[i].getAbsolutePath();
+            final String appPath = appPaths[i].getAbsolutePath() + "/";
             if (path.startsWith(appPath)) {
-                path = new File(voldPaths[i], path.substring(appPath.length() + 1))
+                path = new File(voldPaths[i], path.substring(appPath.length()))
                         .getAbsolutePath();
                 if (!path.endsWith("/")) {
                     path = path + "/";
