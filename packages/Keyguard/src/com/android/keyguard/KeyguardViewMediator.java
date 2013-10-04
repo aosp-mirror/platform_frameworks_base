@@ -124,6 +124,7 @@ public class KeyguardViewMediator {
     private static final int SHOW_ASSISTANT = 14;
     private static final int DISPATCH_EVENT = 15;
     private static final int LAUNCH_CAMERA = 16;
+    private static final int DISMISS = 17;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -910,10 +911,14 @@ public class KeyguardViewMediator {
     /**
      * Dismiss the keyguard through the security layers.
      */
-    public void dismiss() {
+    public void handleDismiss() {
         if (mShowing && !mHidden) {
             mKeyguardViewManager.dismiss();
         }
+    }
+
+    public void dismiss() {
+        mHandler.sendEmptyMessage(DISMISS);
     }
 
     /**
@@ -1014,14 +1019,13 @@ public class KeyguardViewMediator {
     };
 
     public void keyguardDone(boolean authenticated, boolean wakeup) {
-        mKeyguardDonePending = false;
+        if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
+        EventLog.writeEvent(70000, 2);
         synchronized (this) {
-            EventLog.writeEvent(70000, 2);
-            if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
-            Message msg = mHandler.obtainMessage(KEYGUARD_DONE, authenticated ? 1 : 0,
-                    wakeup ? 1 : 0);
-            mHandler.sendMessage(msg);
+            mKeyguardDonePending = false;
         }
+        Message msg = mHandler.obtainMessage(KEYGUARD_DONE, authenticated ? 1 : 0, wakeup ? 1 : 0);
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -1037,31 +1041,31 @@ public class KeyguardViewMediator {
             switch (msg.what) {
                 case SHOW:
                     handleShow((Bundle) msg.obj);
-                    return ;
+                    break;
                 case HIDE:
                     handleHide();
-                    return ;
+                    break;
                 case RESET:
                     handleReset((Bundle) msg.obj);
-                    return ;
+                    break;
                 case VERIFY_UNLOCK:
                     handleVerifyUnlock();
-                    return;
+                    break;
                 case NOTIFY_SCREEN_OFF:
                     handleNotifyScreenOff();
-                    return;
+                    break;
                 case NOTIFY_SCREEN_ON:
                     handleNotifyScreenOn((IKeyguardShowCallback) msg.obj);
-                    return;
+                    break;
                 case KEYGUARD_DONE:
                     handleKeyguardDone(msg.arg1 != 0, msg.arg2 != 0);
-                    return;
+                    break;
                 case KEYGUARD_DONE_DRAWING:
                     handleKeyguardDoneDrawing();
-                    return;
+                    break;
                 case KEYGUARD_DONE_AUTHENTICATING:
                     keyguardDone(true, true);
-                    return;
+                    break;
                 case SET_HIDDEN:
                     handleSetHidden(msg.arg1 != 0);
                     break;
@@ -1078,6 +1082,9 @@ public class KeyguardViewMediator {
                     break;
                 case LAUNCH_CAMERA:
                     handleLaunchCamera();
+                    break;
+                case DISMISS:
+                    handleDismiss();
                     break;
             }
         }
@@ -1178,8 +1185,7 @@ public class KeyguardViewMediator {
 
     private void updateActivityLockScreenState() {
         try {
-            ActivityManagerNative.getDefault().setLockScreenShown(
-                    mShowing && !mHidden);
+            ActivityManagerNative.getDefault().setLockScreenShown(mShowing && !mHidden);
         } catch (RemoteException e) {
         }
     }
