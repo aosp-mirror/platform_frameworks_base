@@ -19366,7 +19366,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize PRC_1;
     field public static final android.print.PrintAttributes.MediaSize PRC_10;
-    field public static final android.print.PrintAttributes.MediaSize PRC_16k;
+    field public static final android.print.PrintAttributes.MediaSize PRC_16K;
     field public static final android.print.PrintAttributes.MediaSize PRC_2;
     field public static final android.print.PrintAttributes.MediaSize PRC_3;
     field public static final android.print.PrintAttributes.MediaSize PRC_4;
