@@ -116,10 +116,10 @@ public class SubtitleView extends View {
         // TODO: Move these to a default style.
         final Resources res = getContext().getResources();
         final DisplayMetrics m = res.getDisplayMetrics();
-        mCornerRadius = res.getDimension(com.android.internal.R.dimen.subtitle_corner_radius);
-        mOutlineWidth = res.getDimension(com.android.internal.R.dimen.subtitle_outline_width);
-        mShadowRadius = res.getDimension(com.android.internal.R.dimen.subtitle_shadow_radius);
-        mShadowOffsetX = res.getDimension(com.android.internal.R.dimen.subtitle_shadow_offset);
+        mCornerRadius = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_corner_radius);
+        mOutlineWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_outline_width);
+        mShadowRadius = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_shadow_radius);
+        mShadowOffsetX = res.getDimensionPixelSize(com.android.internal.R.dimen.subtitle_shadow_offset);
         mShadowOffsetY = mShadowOffsetX;
 
         mTextPaint = new TextPaint();
@@ -172,9 +172,12 @@ public class SubtitleView extends View {
         invalidate();
     }
 
+    /**
+     * Sets the text size in pixels.
+     *
+     * @param size the text size in pixels
+     */
     public void setTextSize(float size) {
-        final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-        final float pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, metrics);
         if (mTextPaint.getTextSize() != size) {
             mTextPaint.setTextSize(size);
             mInnerPaddingX = (int) (size * INNER_PADDING_RATIO + 0.5f);
