@@ -83,8 +83,11 @@
     <!-- Title for the alert dialog for selecting a print service. [CHAR LIMIT=50] -->
     <string name="choose_print_service">Choose print service</string>
 
-    <!-- Title for the prompt shown as a placeholder if no printers are found while searching. [CHAR LIMIT=50] -->
+    <!-- Title for the prompt shown as a placeholder if no printers are found while not searching. [CHAR LIMIT=50] -->
     <string name="print_searching_for_printers">Searching for printers</string>
+
+    <!-- Title for the prompt shown as a placeholder if there are no printers while searching. [CHAR LIMIT=50] -->
+    <string name="print_no_printers">No printers found</string>
 
     <!-- Notifications -->
 
