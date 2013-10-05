@@ -56,7 +56,7 @@
     <string name="printing_app_crashed">Printing app crashed</string>
 
     <!-- Title if the number of pages in a printed document is unknown. [CHAR LIMIT=20] -->
-    <string name="page_count_unknown">unavailable</string>
+    <string name="page_count_unknown">Pages</string>
 
     <!-- Title for the temporary dialog show while an app is generating a print job. [CHAR LIMIT=30] -->
     <string name="generating_print_job">Generating print job</string>
