@@ -678,6 +678,14 @@ final class ActivityStack {
             return null;
         }
 
+        TaskRecord tr = who.task;
+        if (tr.intent != null && (tr.intent.getFlags()
+                &Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0) {
+            // If this task is being excluded from recents, we don't want to take
+            // the expense of capturing a thumbnail, since we will never show it.
+            return null;
+        }
+
         Resources res = mService.mContext.getResources();
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
@@ -690,6 +698,7 @@ final class ActivityStack {
 
         if (w > 0) {
             if (who != mLastScreenshotActivity || mLastScreenshotBitmap == null
+                    || mLastScreenshotActivity.state == ActivityState.RESUMED
                     || mLastScreenshotBitmap.getWidth() != w
                     || mLastScreenshotBitmap.getHeight() != h) {
                 mLastScreenshotActivity = who;
