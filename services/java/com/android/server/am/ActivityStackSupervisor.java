@@ -288,22 +288,6 @@ public final class ActivityStackSupervisor {
         return mService.startHomeActivityLocked(mCurrentUser);
     }
 
-    final void setLaunchHomeTaskNextFlag(ActivityRecord sourceRecord, ActivityRecord r,
-            ActivityStack stack) {
-        if (stack == mHomeStack) {
-            return;
-        }
-        if ((sourceRecord == null && getLastStack() == mHomeStack) ||
-                (sourceRecord != null && sourceRecord.isHomeActivity())) {
-            if (r == null) {
-                r = stack.topRunningActivityLocked(null);
-            }
-            if (r != null && !r.isHomeActivity() && r.isRootActivity()) {
-                r.task.mOnTopOfHome = true;
-            }
-        }
-    }
-
     void setDismissKeyguard(boolean dismiss) {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen(" dismiss=" + dismiss);
         mDismissKeyguardOnNextActivity = dismiss;
@@ -1479,7 +1463,6 @@ public final class ActivityStackSupervisor {
                         // is the case, so this is it!  And for paranoia, make
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
-                            setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                             resumeTopActivitiesLocked(targetStack, null, options);
                         } else {
                             ActivityOptions.abort(options);
@@ -1575,9 +1558,6 @@ public final class ActivityStackSupervisor {
                         // don't use that intent!)  And for paranoia, make
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
-                            // Reset flag so it gets correctly reevaluated.
-                            intentActivity.task.mOnTopOfHome = false;
-                            setLaunchHomeTaskNextFlag(sourceRecord, intentActivity, targetStack);
                             targetStack.resumeTopActivityLocked(null, options);
                         } else {
                             ActivityOptions.abort(options);
@@ -1615,7 +1595,6 @@ public final class ActivityStackSupervisor {
                             // resumed the top activity.
                             topStack.mLastPausedActivity = null;
                             if (doResume) {
-                                setLaunchHomeTaskNextFlag(sourceRecord, null, topStack);
                                 resumeTopActivitiesLocked();
                             }
                             ActivityOptions.abort(options);
@@ -1694,7 +1673,6 @@ public final class ActivityStackSupervisor {
                     // resumed the top activity.
                     targetStack.mLastPausedActivity = null;
                     if (doResume) {
-                        setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                         targetStack.resumeTopActivityLocked(null);
                     }
                     ActivityOptions.abort(options);
@@ -1717,7 +1695,6 @@ public final class ActivityStackSupervisor {
                     top.deliverNewIntentLocked(callingUid, r.intent);
                     targetStack.mLastPausedActivity = null;
                     if (doResume) {
-                        setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                         targetStack.resumeTopActivityLocked(null);
                     }
                     return ActivityManager.START_DELIVERED_TO_TOP;
@@ -1751,7 +1728,6 @@ public final class ActivityStackSupervisor {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.userId, r.task.taskId);
         }
         ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
-        setLaunchHomeTaskNextFlag(sourceRecord, r, targetStack);
         targetStack.mLastPausedActivity = null;
         targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);
         mService.setFocusedActivityLocked(r);
