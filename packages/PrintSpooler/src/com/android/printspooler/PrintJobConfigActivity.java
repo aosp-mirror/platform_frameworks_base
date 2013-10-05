@@ -1862,18 +1862,17 @@ public class PrintJobConfigActivity extends Activity {
                         }
                     }
                     final int pageCount = mDocument.info.getPageCount();
-                    mRangeOptionsTitle.setText(getString(R.string.label_pages,
-                            (pageCount == PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
-                                    ? getString(R.string.page_count_unknown)
-                                    : String.valueOf(pageCount)));
+                    String title = (pageCount != PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
+                            ? getString(R.string.label_pages, String.valueOf(pageCount))
+                            : getString(R.string.page_count_unknown);
+                    mRangeOptionsTitle.setText(title);
                 } else {
                     if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
                         mIgnoreNextRangeOptionChange = true;
                         mRangeOptionsSpinner.setSelection(0);
                     }
                     mRangeOptionsSpinner.setEnabled(false);
-                    mRangeOptionsTitle.setText(getString(R.string.label_pages,
-                            getString(R.string.page_count_unknown)));
+                    mRangeOptionsTitle.setText(getString(R.string.page_count_unknown));
                     mPageRangeEditText.setEnabled(false);
                     mPageRangeEditText.setVisibility(View.INVISIBLE);
                     mPageRangeTitle.setVisibility(View.INVISIBLE);

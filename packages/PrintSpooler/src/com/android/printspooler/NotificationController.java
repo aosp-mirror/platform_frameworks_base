@@ -110,7 +110,7 @@ public class NotificationController {
                         printJob.getLabel()))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
-                .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.restart),
+                .addAction(R.drawable.ic_restart, mContext.getString(R.string.restart),
                         createRestartIntent(printJob.getId()))
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
