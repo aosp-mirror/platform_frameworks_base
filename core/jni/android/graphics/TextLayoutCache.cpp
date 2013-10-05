@@ -868,6 +868,7 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint) {
     hb_shape(font, mBuffer, NULL, 0);
     hb_font_destroy(font);
 
+    mShapingPaint.setTypeface(paint->getTypeface());
     return baseGlyphCount;
 }
 
