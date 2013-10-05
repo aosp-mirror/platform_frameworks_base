@@ -3421,13 +3421,9 @@ final class ActivityStack {
     /**
      * Reset local parameters because an app's activity died.
      * @param app The app of the activity that died.
-     * @return true if home should be launched next.
+     * @return result from removeHistoryRecordsForAppLocked.
      */
     boolean handleAppDiedLocked(ProcessRecord app) {
-        if (!containsApp(app)) {
-            return false;
-        }
-
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
                     "App died while pausing: " + mPausingActivity);
@@ -3438,30 +3434,7 @@ final class ActivityStack {
             mLastNoHistoryActivity = null;
         }
 
-        // Determine if the top task is exiting and should return to home. Do this before it gets
-        // removed in removeHistoryRecordsForAppsLocked.
-        boolean launchHomeNext = false;
-        TaskRecord topTask = mTaskHistory.get(mTaskHistory.size() - 1);
-        ArrayList<ActivityRecord> activities = topTask.mActivities;
-        int activityNdx;
-        for (activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord r = activities.get(activityNdx);
-            if (r.finishing) {
-                continue;
-            }
-            if (r.app != app) {
-                // This is the dying activity.
-                break;
-            }
-        }
-        if (activityNdx < 0) {
-            // All activities in task belong to app. Set launchHomeNext to task's value.
-            launchHomeNext = topTask.mOnTopOfHome;
-        }
-
-        removeHistoryRecordsForAppLocked(app);
-
-        return launchHomeNext;
+        return removeHistoryRecordsForAppLocked(app);
     }
 
     void handleAppCrashLocked(ProcessRecord app) {

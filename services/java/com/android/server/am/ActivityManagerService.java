@@ -3464,7 +3464,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             clearProfilerLocked();
         }
 
-        mStackSupervisor.handleAppDiedLocked(app, restarting);
+        // Remove this application's activities from active lists.
+        boolean hasVisibleActivities = mStackSupervisor.handleAppDiedLocked(app, restarting);
 
         app.activities.clear();
 
@@ -3474,6 +3475,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             Bundle info = new Bundle();
             info.putString("shortMsg", "Process crashed.");
             finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
+        }
+
+        if (!restarting) {
+            if (!mStackSupervisor.resumeTopActivitiesLocked()) {
+                // If there was nothing to resume, and we are not already
+                // restarting this process, but there is a visible activity that
+                // is hosted by the process...  then make sure all visible
+                // activities are running, taking care of restarting this
+                // process.
+                if (hasVisibleActivities) {
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                }
+            }
         }
     }
 

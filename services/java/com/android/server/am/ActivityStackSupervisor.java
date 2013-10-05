@@ -1926,30 +1926,12 @@ public final class ActivityStackSupervisor {
         return r;
     }
 
-    void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
-        boolean launchHomeTaskNext = false;
-        final ActivityStack focusedStack = getFocusedStack();
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            // Only update launchHomeTaskNext for the focused stack.
-            launchHomeTaskNext |= (stack.handleAppDiedLocked(app) && stack == focusedStack);
+    boolean handleAppDiedLocked(ProcessRecord app, boolean restarting) {
+        boolean hasVisibleActivities = false;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            hasVisibleActivities |= mStacks.get(stackNdx).handleAppDiedLocked(app);
         }
-
-        if (!restarting) {
-            if (launchHomeTaskNext) {
-                resumeHomeActivity(null);
-            } else {
-                if (!resumeTopActivitiesLocked(focusedStack, null, null)) {
-                    // If there was nothing to resume, and we are not already
-                    // restarting this process, but there is a visible activity that
-                    // is hosted by the process...  then make sure all visible
-                    // activities are running, taking care of restarting this
-                    // process.
-                    ensureActivitiesVisibleLocked(null, 0);
-                }
-            }
-        }
+        return hasVisibleActivities;
     }
 
     void closeSystemDialogsLocked() {
