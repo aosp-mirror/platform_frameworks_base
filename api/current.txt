@@ -19431,12 +19431,6 @@ package android.print {
     method public android.print.PrintDocumentInfo.Builder setPageCount(int);
   }
 
-  public class PrintFileDocumentAdapter extends android.print.PrintDocumentAdapter {
-    ctor public PrintFileDocumentAdapter(android.content.Context, java.io.File, android.print.PrintDocumentInfo);
-    method public void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
-    method public void onWrite(android.print.PageRange[], android.os.ParcelFileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
-  }
-
   public final class PrintJob {
     method public void cancel();
     method public android.print.PrintJobId getId();
@@ -19466,10 +19460,8 @@ package android.print {
     method public android.print.PageRange[] getPages();
     method public android.print.PrinterId getPrinterId();
     method public int getState();
-    method public java.lang.String getTag();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int PRINT_JOB_ID_UNDEFINED = -1; // 0xffffffff
     field public static final int STATE_BLOCKED = 4; // 0x4
     field public static final int STATE_CANCELED = 7; // 0x7
     field public static final int STATE_COMPLETED = 5; // 0x5
@@ -19564,6 +19556,7 @@ package android.printservice {
     method public android.printservice.PrintDocument getDocument();
     method public android.print.PrintJobId getId();
     method public android.print.PrintJobInfo getInfo();
+    method public java.lang.String getTag();
     method public boolean isBlocked();
     method public boolean isCancelled();
     method public boolean isCompleted();

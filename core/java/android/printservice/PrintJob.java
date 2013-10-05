@@ -301,6 +301,18 @@ public final class PrintJob {
         return false;
     }
 
+    /**
+     * Gets the print job tag.
+     *
+     * @return tag The tag or null.
+     *
+     * @see #setTag(String)
+     */
+    public String getTag() {
+        PrintService.throwIfNotCalledOnMainThread();
+        return getInfo().getTag();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
