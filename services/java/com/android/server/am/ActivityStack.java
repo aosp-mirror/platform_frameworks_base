@@ -1092,7 +1092,7 @@ final class ActivityStack {
                         int rIndex = task.mActivities.indexOf(r);
                         for ( --rIndex; rIndex >= 0; --rIndex) {
                             final ActivityRecord blocker = task.mActivities.get(rIndex);
-                            if (!blocker.finishing && blocker.visible) {
+                            if (!blocker.finishing) {
                                 if (DEBUG_VISBILITY) Slog.v(TAG, "Home visibility for " +
                                         r + " blocked by " + blocker);
                                 break;
