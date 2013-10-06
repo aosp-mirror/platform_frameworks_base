@@ -30,6 +30,22 @@ import java.util.ArrayList;
  * others play {@link #ORDERING_SEQUENTIAL}. For example, {@link AutoTransition}
  * uses a TransitionSet to sequentially play a Fade(Fade.OUT), followed by
  * a {@link ChangeBounds}, followed by a Fade(Fade.OUT) transition.
+ *
+ * <p>A TransitionSet can be described in a resource file by using the
+ * tag <code>transitionSet</code>, along with the standard
+ * attributes of {@link android.R.styleable#TransitionSet} and
+ * {@link android.R.styleable#Transition}. Child transitions of the
+ * TransitionSet object can be loaded by adding those child tags inside the
+ * enclosing <code>transitionSet</code> tag. For example, the following xml
+ * describes a TransitionSet that plays a Fade and then a ChangeBounds
+ * transition on the affected view targets:</p>
+ * <pre>
+ *     &lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+ *             android:ordering="sequential"&gt;
+ *         &lt;fade/&gt;
+ *         &lt;changeBounds/&gt;
+ *     &lt;/transitionSet&gt;
+ * </pre>
  */
 public class TransitionSet extends Transition {
 
