@@ -549,31 +549,26 @@ final class ActivityStack {
 
     /*
      * Move the activities around in the stack to bring a user to the foreground.
-     * @return whether there are any activities for the specified user.
      */
-    final boolean switchUserLocked(int userId) {
+    final void switchUserLocked(int userId) {
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
         }
         if (mCurrentUser == userId) {
-            return true;
+            return;
         }
         mCurrentUser = userId;
 
         // Move userId's tasks to the top.
-        boolean haveActivities = false;
         int index = mTaskHistory.size();
         for (int i = 0; i < index; ++i) {
             TaskRecord task = mTaskHistory.get(i);
             if (task.userId == userId) {
-                haveActivities = true;
                 mTaskHistory.remove(i);
                 mTaskHistory.add(task);
                 --index;
             }
         }
-
-        return haveActivities;
     }
 
     void minimalResumeActivityLocked(ActivityRecord r) {

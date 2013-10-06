@@ -70,6 +70,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import android.util.SparseBooleanArray;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -202,6 +203,9 @@ public final class ActivityStackSupervisor {
      * At that point the system is allowed to actually sleep.
      */
     final PowerManager.WakeLock mGoingToSleep;
+
+    /** State of the stacks when user switched, indexed by userId. */
+    SparseBooleanArray mUserHomeInFront = new SparseBooleanArray(2);
 
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
@@ -1960,6 +1964,10 @@ public final class ActivityStackSupervisor {
         }
     }
 
+    void removeUserLocked(int userId) {
+        mUserHomeInFront.delete(userId);
+    }
+
     /**
      * @return true if some activity was finished (or would have finished if doit were true).
      */
@@ -2278,17 +2286,17 @@ public final class ActivityStackSupervisor {
     }
 
     boolean switchUserLocked(int userId, UserStartedState uss) {
+        mUserHomeInFront.put(mCurrentUser, isFrontStack(mHomeStack));
+        final boolean homeInFront = mUserHomeInFront.get(userId, true);
         mCurrentUser = userId;
 
         mStartingUsers.add(uss);
-        boolean haveActivities = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            haveActivities |= mStacks.get(stackNdx).switchUserLocked(userId);
+            mStacks.get(stackNdx).switchUserLocked(userId);
         }
 
-        resumeTopActivitiesLocked();
-
-        return haveActivities;
+        moveHomeStack(homeInFront);
+        return homeInFront;
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {
@@ -2381,6 +2389,7 @@ public final class ActivityStackSupervisor {
         pw.print(prefix); pw.print("mStackState="); pw.println(stackStateToString(mStackState));
         pw.print(prefix); pw.println("mSleepTimeout: " + mSleepTimeout);
         pw.print(prefix); pw.println("mCurTaskId: " + mCurTaskId);
+        pw.print(prefix); pw.println("mUserHomeInFront: " + mUserHomeInFront);
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
