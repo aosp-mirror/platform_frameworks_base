@@ -1657,7 +1657,7 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"ตัวเลื่อนหมุนระบุนาที"</string>
     <string name="select_hours" msgid="6043079511766008245">"เลือกชั่วโมง"</string>
     <string name="select_minutes" msgid="3974345615920336087">"เลือกนาที"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"ตารางเดือนของวันที่"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"ตารางเดือนของวัน"</string>
     <string name="year_picker_description" msgid="5524331207436052403">"รายการปี"</string>
     <string name="select_day" msgid="7774759604701773332">"เลือกเดือนและวัน"</string>
     <string name="select_year" msgid="7952052866994196170">"เลือกปี"</string>
