@@ -1653,8 +1653,8 @@
     <string name="restr_pin_try_later" msgid="973144472490532377">"Reîncercați mai târziu"</string>
     <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Glisați în jos pt. a ieși din ecran complet"</string>
     <string name="done_label" msgid="2093726099505892398">"Terminat"</string>
-    <string name="hour_picker_description" msgid="6698199186859736512">"Indicator circular pentru ore"</string>
-    <string name="minute_picker_description" msgid="8606010966873791190">"Indicator circular pentru minute"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Selector circular pentru ore"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Selector circular pentru minute"</string>
     <string name="select_hours" msgid="6043079511766008245">"Selectați orele"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Selectați minutele"</string>
     <string name="day_picker_description" msgid="8990847925961297968">"Afișare pe luni"</string>
