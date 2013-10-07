@@ -368,6 +368,12 @@
     <skip />
     <!-- no translation found for quick_settings_brightness_dialog_auto_brightness_label (5064982743784071218) -->
     <skip />
+    <!-- no translation found for quick_settings_inversion_label (1666358784283020762) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_label (3319507551689108692) -->
+    <skip />
+    <!-- no translation found for quick_settings_color_space_label (853443689745584770) -->
+    <skip />
     <!-- no translation found for ssl_ca_cert_warning (9005954106902053641) -->
     <skip />
 </resources>
