@@ -178,6 +178,8 @@ public class PrintJobConfigActivity extends Activity {
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
+        setTitle(R.string.print_dialog);
+
         Bundle extras = getIntent().getExtras();
 
         PrintJobInfo printJob = extras.getParcelable(EXTRA_PRINT_JOB);

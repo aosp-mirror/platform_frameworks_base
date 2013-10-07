@@ -82,6 +82,8 @@ public final class SelectPrinterFragment extends ListFragment {
     private final ArrayList<PrintServiceInfo> mAddPrinterServices =
             new ArrayList<PrintServiceInfo>();
 
+    private AnnounceFilterResult mAnnounceFilterResult;
+
     public static interface OnPrinterSelectedListener {
         public void onPrinterSelected(PrinterId printerId);
     }
@@ -131,6 +133,18 @@ public final class SelectPrinterFragment extends ListFragment {
             public boolean onQueryTextChange(String searchString) {
                 ((DestinationAdapter) getListAdapter()).getFilter().filter(searchString);
                 return true;
+            }
+        });
+        searchView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                view.announceForAccessibility(getString(
+                        R.string.print_search_box_shown_utterance));
+            }
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                view.announceForAccessibility(getString(
+                        R.string.print_search_box_hidden_utterance));
             }
         });
 
@@ -245,6 +259,13 @@ public final class SelectPrinterFragment extends ListFragment {
         }
     }
 
+    private void announceSearchResult() {
+        if (mAnnounceFilterResult == null) {
+            mAnnounceFilterResult = new AnnounceFilterResult();
+        }
+        mAnnounceFilterResult.post();
+    }
+
     public static class AddPrinterAlertDialogFragment extends DialogFragment {
 
         private String mAddPrintServiceItem;
@@ -355,7 +376,9 @@ public final class SelectPrinterFragment extends ListFragment {
                 @Override
                 @SuppressWarnings("unchecked")
                 protected void publishResults(CharSequence constraint, FilterResults results) {
+                    final boolean resultCountChanged;
                     synchronized (mLock) {
+                        final int oldPrinterCount = mFilteredPrinters.size();
                         mLastSearchString = constraint;
                         mFilteredPrinters.clear();
                         if (results == null) {
@@ -364,6 +387,10 @@ public final class SelectPrinterFragment extends ListFragment {
                             List<PrinterInfo> printers = (List<PrinterInfo>) results.values;
                             mFilteredPrinters.addAll(printers);
                         }
+                        resultCountChanged = (oldPrinterCount != mFilteredPrinters.size());
+                    }
+                    if (resultCountChanged) {
+                        announceSearchResult();
                     }
                     notifyDataSetChanged();
                 }
@@ -478,6 +505,32 @@ public final class SelectPrinterFragment extends ListFragment {
                 mFilteredPrinters.clear();
             }
             notifyDataSetInvalidated();
+        }
+    }
+
+    private final class AnnounceFilterResult implements Runnable {
+        private static final int SEARCH_RESULT_ANNOUNCEMENT_DELAY = 1000; // 1 sec
+
+        public void post() {
+            remove();
+            getListView().postDelayed(this, SEARCH_RESULT_ANNOUNCEMENT_DELAY);
+        }
+
+        public void remove() {
+            getListView().removeCallbacks(this);
+        }
+
+        @Override
+        public void run() {
+            final int count = getListView().getAdapter().getCount();
+            final String text;
+            if (count <= 0) {
+                text = getString(R.string.print_no_printers);
+            } else {
+                text = getActivity().getResources().getQuantityString(
+                    R.plurals.print_search_result_count_utterance, count, count);
+            }
+            getListView().announceForAccessibility(text);
         }
     }
 }
