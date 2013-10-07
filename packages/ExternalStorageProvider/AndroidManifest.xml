@@ -11,9 +11,9 @@
             android:grantUriPermissions="true"
             android:exported="true"
             android:permission="android.permission.MANAGE_DOCUMENTS">
-            <meta-data
-                android:name="android.content.DOCUMENT_PROVIDER"
-                android:value="true" />
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
         </provider>
 
         <!-- TODO: find a better place for tests to live -->
@@ -24,9 +24,9 @@
             android:exported="true"
             android:permission="android.permission.MANAGE_DOCUMENTS"
             android:enabled="false">
-            <meta-data
-                android:name="android.content.DOCUMENT_PROVIDER"
-                android:value="true" />
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
         </provider>
     </application>
 </manifest>
