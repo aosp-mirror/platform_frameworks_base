@@ -30,7 +30,6 @@
     </style>
 
     <style name="PrintOptionEditTextStyle">
-         <item name="android:selectAllOnFocus">true</item>
          <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
          <item name="android:singleLine">true</item>
          <item name="android:ellipsize">end</item>

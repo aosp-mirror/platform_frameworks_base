@@ -1214,7 +1214,7 @@ public class PrintJobConfigActivity extends Activity {
 
                                 if (capabilitiesChanged || statusChanged) {
                                     // If something changed during update...
-                                    if (updateUi()) {
+                                    if (updateUi() || !mController.hasPerformedLayout()) {
                                         // Update the document.
                                         mController.update();
                                     }
@@ -1269,10 +1269,6 @@ public class PrintJobConfigActivity extends Activity {
 
             showUi(UI_EDITING_PRINT_JOB, null);
             bindUi();
-
-            mCurrentPrinter = mDestinationSpinnerAdapter.mFakePdfPrinter;
-            updatePrintAttributes(mCurrentPrinter.getCapabilities());
-
             updateUi();
         }
 
@@ -2001,11 +1997,10 @@ public class PrintJobConfigActivity extends Activity {
                 implements LoaderManager.LoaderCallbacks<List<PrinterInfo>>{
             private final List<PrinterInfo> mPrinters = new ArrayList<PrinterInfo>();
 
-            private final PrinterInfo mFakePdfPrinter;
+            private PrinterInfo mFakePdfPrinter;
 
             public DestinationAdapter() {
                 getLoaderManager().initLoader(LOADER_ID_PRINTERS_LOADER, null, this);
-                mFakePdfPrinter = createFakePdfPrinter();
             }
 
             public int getPrinterIndex(PrinterId printerId) {
@@ -2039,7 +2034,9 @@ public class PrintJobConfigActivity extends Activity {
 
             @Override
             public int getCount() {
-                return Math.min(mPrinters.size() + 2, DEST_ADAPTER_MAX_ITEM_COUNT);
+                final int additionalItemCount = (mFakePdfPrinter != null) ? 2 : 1;
+                return Math.min(mPrinters.size() + additionalItemCount,
+                        DEST_ADAPTER_MAX_ITEM_COUNT);
             }
 
             @Override
@@ -2055,14 +2052,14 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public Object getItem(int position) {
                 if (mPrinters.isEmpty()) {
-                    if (position == 0) {
+                    if (position == 0 && mFakePdfPrinter != null) {
                         return mFakePdfPrinter;
                     }
                 } else {
                     if (position < 1) {
                         return mPrinters.get(position);
                     }
-                    if (position == 1) {
+                    if (position == 1 && mFakePdfPrinter != null) {
                         return mFakePdfPrinter;
                     }
                     if (position < getCount() - 1) {
@@ -2075,14 +2072,14 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public long getItemId(int position) {
                 if (mPrinters.isEmpty()) {
-                    if (position == 0) {
+                    if (position == 0 && mFakePdfPrinter != null) {
                         return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
                     }
                     if (position == 1) {
                         return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
                     }
                 } else {
-                    if (position == 1) {
+                    if (position == 1 && mFakePdfPrinter != null) {
                         return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
                     }
                     if (position == getCount() - 1) {
@@ -2114,14 +2111,14 @@ public class PrintJobConfigActivity extends Activity {
                 Drawable icon = null;
 
                 if (mPrinters.isEmpty()) {
-                    if (position == 0) {
+                    if (position == 0 && mFakePdfPrinter != null) {
                         PrinterInfo printer = (PrinterInfo) getItem(position);
                         title = printer.getName();
                     } else if (position == 1) {
                         title = getString(R.string.all_printers);
                     }
                 } else {
-                    if (position == 1) {
+                    if (position == 1 && mFakePdfPrinter != null) {
                         PrinterInfo printer = (PrinterInfo) getItem(position);
                         title = printer.getName();
                     } else if (position == getCount() - 1) {
@@ -2174,6 +2171,16 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public void onLoadFinished(Loader<List<PrinterInfo>> loader,
                     List<PrinterInfo> printers) {
+                // If this is the first load, create the fake PDF printer.
+                // We do this to avoid flicker where the PDF printer is the
+                // only one and as soon as the loader loads the favorites
+                // it gets switched. Not a great user experience.
+                if (mFakePdfPrinter == null) {
+                    mCurrentPrinter = mFakePdfPrinter = createFakePdfPrinter();
+                    updatePrintAttributes(mCurrentPrinter.getCapabilities());
+                    updateUi();
+                }
+
                 // We rearrange the printers if the user selects a printer
                 // not shown in the initial short list. Therefore, we have
                 // to keep the printer order.
