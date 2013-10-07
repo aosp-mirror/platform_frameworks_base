@@ -55,8 +55,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final Object mLock = new Object();
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
-    private StateListener mDeviceListener;
-    private Handler mDeviceHandler;
+    private final StateListener mDeviceListener;
+    private final Handler mDeviceHandler;
+
+    private boolean mIdle = true;
 
     private final SparseArray<CaptureListenerHolder> mCaptureListenerMap =
             new SparseArray<CaptureListenerHolder>();
@@ -67,8 +69,72 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     private final String mCameraId;
 
-    public CameraDevice(String cameraId) {
+    // Runnables for all state transitions, except error, which needs the
+    // error code argument
+
+    private final Runnable mCallOnOpened = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onOpened(CameraDevice.this);
+            }
+        }
+    };
+
+    private final Runnable mCallOnUnconfigured = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onUnconfigured(CameraDevice.this);
+            }
+        }
+    };
+
+    private final Runnable mCallOnActive = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onActive(CameraDevice.this);
+            }
+        }
+    };
+
+    private final Runnable mCallOnBusy = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onBusy(CameraDevice.this);
+            }
+        }
+    };
+
+    private final Runnable mCallOnClosed = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onClosed(CameraDevice.this);
+            }
+        }
+    };
+
+    private final Runnable mCallOnIdle = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onIdle(CameraDevice.this);
+            }
+        }
+    };
+
+    private final Runnable mCallOnDisconnected = new Runnable() {
+        public void run() {
+            if (!CameraDevice.this.isClosed()) {
+                mDeviceListener.onDisconnected(CameraDevice.this);
+            }
+        }
+    };
+
+    public CameraDevice(String cameraId, StateListener listener, Handler handler) {
+        if (cameraId == null || listener == null || handler == null) {
+            throw new IllegalArgumentException("Null argument given");
+        }
         mCameraId = cameraId;
+        mDeviceListener = listener;
+        mDeviceHandler = handler;
         TAG = String.format("CameraDevice-%s-JV", mCameraId);
         DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     }
@@ -79,7 +145,12 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     public void setRemoteDevice(ICameraDeviceUser remoteDevice) {
         // TODO: Move from decorator to direct binder-mediated exceptions
-        mRemoteDevice = CameraBinderDecorator.newInstance(remoteDevice);
+        synchronized(mLock) {
+            mRemoteDevice = CameraBinderDecorator.newInstance(remoteDevice);
+
+            mDeviceHandler.post(mCallOnOpened);
+            mDeviceHandler.post(mCallOnUnconfigured);
+        }
     }
 
     @Override
@@ -89,7 +160,13 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     @Override
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
+        // Treat a null input the same an empty list
+        if (outputs == null) {
+            outputs = new ArrayList<Surface>();
+        }
         synchronized (mLock) {
+            checkIfCameraClosed();
+
             HashSet<Surface> addSet = new HashSet<Surface>(outputs);    // Streams to create
             List<Integer> deleteList = new ArrayList<Integer>();        // Streams to delete
 
@@ -105,9 +182,13 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 }
             }
 
-            try {
-                // TODO: mRemoteDevice.beginConfigure
+            mDeviceHandler.post(mCallOnBusy);
+            stopRepeating();
 
+            try {
+                mRemoteDevice.waitUntilIdle();
+
+                // TODO: mRemoteDevice.beginConfigure
                 // Delete all streams first (to free up HW resources)
                 for (Integer streamId : deleteList) {
                     mRemoteDevice.deleteStream(streamId);
@@ -126,13 +207,19 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             } catch (CameraRuntimeException e) {
                 if (e.getReason() == CAMERA_IN_USE) {
                     throw new IllegalStateException("The camera is currently busy." +
-                            " You must call waitUntilIdle before trying to reconfigure.");
+                            " You must wait until the previous operation completes.");
                 }
 
                 throw e.asChecked();
             } catch (RemoteException e) {
                 // impossible
                 return;
+            }
+
+            if (outputs.size() > 0) {
+                mDeviceHandler.post(mCallOnIdle);
+            } else {
+                mDeviceHandler.post(mCallOnUnconfigured);
             }
         }
     }
@@ -141,6 +228,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     public CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException {
         synchronized (mLock) {
+            checkIfCameraClosed();
 
             CameraMetadataNative templatedRequest = new CameraMetadataNative();
 
@@ -188,7 +276,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         }
 
         synchronized (mLock) {
-
+            checkIfCameraClosed();
             int requestId;
 
             try {
@@ -207,6 +295,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             if (repeating) {
                 mRepeatingRequestIdStack.add(requestId);
             }
+
+            if (mIdle) {
+                mDeviceHandler.post(mCallOnActive);
+            }
+            mIdle = false;
 
             return requestId;
         }
@@ -233,7 +326,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     public void stopRepeating() throws CameraAccessException {
 
         synchronized (mLock) {
-
+            checkIfCameraClosed();
             while (!mRepeatingRequestIdStack.isEmpty()) {
                 int requestId = mRepeatingRequestIdStack.pop();
 
@@ -270,20 +363,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public void setDeviceListener(StateListener listener, Handler handler) {
-        synchronized (mLock) {
-            if (listener != null) {
-                handler = checkHandler(handler);
-            }
-
-            mDeviceListener = listener;
-            mDeviceHandler = handler;
-        }
-    }
-
-    @Override
     public void flush() throws CameraAccessException {
         synchronized (mLock) {
+            checkIfCameraClosed();
+
+            mDeviceHandler.post(mCallOnBusy);
             try {
                 mRemoteDevice.flush();
             } catch (CameraRuntimeException e) {
@@ -297,9 +381,6 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     @Override
     public void close() {
-
-        // TODO: every method should throw IllegalStateException after close has been called
-
         synchronized (mLock) {
 
             try {
@@ -312,8 +393,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // impossible
             }
 
-            mRemoteDevice = null;
+            if (mRemoteDevice != null) {
+                mDeviceHandler.post(mCallOnClosed);
+            }
 
+            mRemoteDevice = null;
         }
     }
 
@@ -399,49 +483,44 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
         @Override
         public void onCameraError(final int errorCode) {
-            synchronized (mLock) {
-                if (CameraDevice.this.mDeviceListener == null) return;
-                final StateListener listener = CameraDevice.this.mDeviceListener;
-                Runnable r = null;
+            Runnable r = null;
+            if (isClosed()) return;
+
+            synchronized(mLock) {
                 switch (errorCode) {
                     case ERROR_CAMERA_DISCONNECTED:
-                        r = new Runnable() {
-                            public void run() {
-                                listener.onDisconnected(CameraDevice.this);
-                            }
-                        };
+                        r = mCallOnDisconnected;
                         break;
+                    default:
+                        Log.e(TAG, "Unknown error from camera device: " + errorCode);
+                        // no break
                     case ERROR_CAMERA_DEVICE:
                     case ERROR_CAMERA_SERVICE:
                         r = new Runnable() {
                             public void run() {
-                                listener.onError(CameraDevice.this, errorCode);
+                                if (!CameraDevice.this.isClosed()) {
+                                    mDeviceListener.onError(CameraDevice.this, errorCode);
+                                }
                             }
                         };
                         break;
-                    default:
-                        Log.e(TAG, "Unknown error from camera device: " + errorCode);
                 }
-                if (r != null) {
-                    CameraDevice.this.mDeviceHandler.post(r);
-                }
+                CameraDevice.this.mDeviceHandler.post(r);
             }
         }
 
         @Override
         public void onCameraIdle() {
+            if (isClosed()) return;
+
             if (DEBUG) {
                 Log.d(TAG, "Camera now idle");
             }
             synchronized (mLock) {
-                if (CameraDevice.this.mDeviceListener == null) return;
-                final StateListener listener = CameraDevice.this.mDeviceListener;
-                Runnable r = new Runnable() {
-                    public void run() {
-                        listener.onIdle(CameraDevice.this);
-                    }
-                };
-                CameraDevice.this.mDeviceHandler.post(r);
+                if (!CameraDevice.this.mIdle) {
+                    CameraDevice.this.mDeviceHandler.post(mCallOnIdle);
+                }
+                CameraDevice.this.mIdle = true;
             }
         }
 
@@ -461,14 +540,18 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 return;
             }
 
+            if (isClosed()) return;
+
             // Dispatch capture start notice
             holder.getHandler().post(
                 new Runnable() {
                     public void run() {
-                        holder.getListener().onCaptureStarted(
-                            CameraDevice.this,
-                            holder.getRequest(),
-                            timestamp);
+                        if (!CameraDevice.this.isClosed()) {
+                            holder.getListener().onCaptureStarted(
+                                CameraDevice.this,
+                                holder.getRequest(),
+                                timestamp);
+                        }
                     }
                 });
         }
@@ -503,6 +586,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 return;
             }
 
+            if (isClosed()) return;
+
             final CaptureRequest request = holder.getRequest();
             final CaptureResult resultAsCapture = new CaptureResult(result, request, requestId);
 
@@ -510,10 +595,12 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 new Runnable() {
                     @Override
                     public void run() {
-                        holder.getListener().onCaptureCompleted(
-                            CameraDevice.this,
-                            request,
-                            resultAsCapture);
+                        if (!CameraDevice.this.isClosed()){
+                            holder.getListener().onCaptureCompleted(
+                                CameraDevice.this,
+                                request,
+                                resultAsCapture);
+                        }
                     }
                 });
         }
@@ -539,6 +626,12 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private void checkIfCameraClosed() {
         if (mRemoteDevice == null) {
             throw new IllegalStateException("CameraDevice was already closed");
+        }
+    }
+
+    private boolean isClosed() {
+        synchronized(mLock) {
+            return (mRemoteDevice == null);
         }
     }
 }

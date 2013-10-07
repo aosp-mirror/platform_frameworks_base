@@ -197,26 +197,33 @@ public interface CameraDevice extends AutoCloseable {
      * if the format is user-visible, it must be one of android.scaler.availableFormats;
      * and the size must be one of android.scaler.available[Processed|Jpeg]Sizes).</p>
      *
-     * <p>To change the output, the camera device must be idle. The device is considered
-     * to be idle once all in-flight and pending capture requests have been processed,
-     * and all output image buffers from the captures have been sent to their destination
-     * Surfaces.</p>
+     * <p>When this method is called with valid Surfaces, the device will transition to the {@link
+     * StateListener#onBusy busy state}. Once configuration is complete, the device will transition
+     * into the {@link StateListener#onIdle idle state}. Capture requests using the newly-configured
+     * Surfaces may then be submitted with {@link #capture}, {@link #captureBurst}, {@link
+     * #setRepeatingRequest}, or {@link #setRepeatingBurst}.</p>
      *
-     * <p>To reach an idle state without cancelling any submitted captures, first
-     * stop any repeating request/burst with {@link #stopRepeating}, and then
-     * wait for the {@link StateListener#onIdle} callback to be
-     * called. To idle as fast as possible, use {@link #flush} and wait for the
-     * idle callback.</p>
+     * <p>If this method is called while the camera device is still actively processing previously
+     * submitted captures, then the following sequence of events occurs: The device transitions to
+     * the busy state and calls the {@link StateListener#onBusy} callback. Second, if a repeating
+     * request is set it is cleared.  Third, the device finishes up all in-flight and pending
+     * requests. Finally, once the device is idle, it then reconfigures its outputs, and calls the
+     * {@link StateListener#onIdle} method once it is again ready to accept capture
+     * requests. Therefore, no submitted work is discarded. To idle as fast as possible, use {@link
+     * #flush} and wait for the idle callback before calling configureOutputs. This will discard
+     * work, but reaches the new configuration sooner.</p>
      *
      * <p>Using larger resolution outputs, or more outputs, can result in slower
      * output rate from the device.</p>
      *
-     * <p>Configuring the outputs with an empty or null list will transition
-     * the camera into an {@link StateListener#onUnconfigured unconfigured state}.
-     * </p>
+     * <p>Configuring the outputs with an empty or null list will transition the camera into an
+     * {@link StateListener#onUnconfigured unconfigured state} instead of the {@link
+     * StateListener#onIdle idle state}.  </p>
      *
      * <p>Calling configureOutputs with the same arguments as the last call to
-     * configureOutputs has no effect.</p>
+     * configureOutputs has no effect, and the {@link StateListener#onBusy busy}
+     * and {@link StateListener#onIdle idle} state transitions will happen
+     * immediately.</p>
      *
      * @param outputs The new set of Surfaces that should be made available as
      * targets for captured image data.
@@ -228,7 +235,10 @@ public interface CameraDevice extends AutoCloseable {
      * @throws IllegalStateException if the camera device is not idle, or
      *                               if the camera device has been closed
      *
+     * @see StateListener#onBusy
      * @see StateListener#onIdle
+     * @see StateListener#onActive
+     * @see StateListener#onUnconfigured
      * @see #stopRepeating
      * @see #flush
      */
@@ -516,31 +526,6 @@ public interface CameraDevice extends AutoCloseable {
     public void waitUntilIdle() throws CameraAccessException;
 
     /**
-     * Set the listener object to call when an asynchronous device event occurs,
-     * such as errors or idle notifications.
-     *
-     * <p>The events reported here are device-wide; notifications about
-     * individual capture requests or capture results are reported through
-     * {@link CaptureListener}.</p>
-     *
-     * <p>If the camera device is idle when the listener is set, then the
-     * {@link StateListener#onIdle} method will be immediately called,
-     * even if the device has never been active before.
-     * </p>
-     *
-     * @param listener the CameraDeviceListener to send device-level event
-     * notifications to. Setting this to null will stop notifications.
-     * @param handler the handler on which the listener should be invoked, or
-     * {@code null} to use the current thread's {@link android.os.Looper looper}.
-     *
-     * @throws IllegalArgumentException if handler is null, the listener is
-     * not null, and the calling thread has no looper
-     *
-     * @hide
-     */
-    public void setDeviceListener(StateListener listener, Handler handler);
-
-    /**
      * Flush all captures currently pending and in-progress as fast as
      * possible.
      *
@@ -577,13 +562,24 @@ public interface CameraDevice extends AutoCloseable {
     public void flush() throws CameraAccessException;
 
     /**
-     * Close the connection to this camera device. After this call, all calls to
+     * Close the connection to this camera device.
+     *
+     * <p>After this call, all calls to
      * the camera device interface will throw a {@link IllegalStateException},
-     * except for calls to close().
+     * except for calls to close(). Once the device has fully shut down, the
+     * {@link StateListener#onClosed} callback will be called, and the camera is
+     * free to be re-opened.</p>
+     *
+     * <p>After this call, besides the final {@link StateListener#onClosed} call, no calls to the
+     * device's {@link StateListener} will occur, and any remaining submitted capture requests will
+     * not fire their {@link CaptureListener} callbacks.</p>
+     *
+     * <p>To shut down as fast as possible, call the {@link #flush} method and then {@link #close}
+     * once the flush completes. This will discard some capture requests, but results in faster
+     * shutdown.</p>
      */
     @Override
     public void close();
-    // TODO: We should decide on the behavior of in-flight requests should be on close.
 
     /**
      * <p>A listener for tracking the progress of a {@link CaptureRequest}
@@ -713,6 +709,9 @@ public interface CameraDevice extends AutoCloseable {
      * A listener for notifications about the state of a camera
      * device.
      *
+     * <p>A listener must be provided to the {@link CameraManager#openCamera}
+     * method to open a camera device.</p>
+     *
      * <p>These events include notifications about the device becoming idle (
      * allowing for {@link #configureOutputs} to be called), about device
      * disconnection, and about unexpected device errors.</p>
@@ -722,7 +721,7 @@ public interface CameraDevice extends AutoCloseable {
      * the {@link #capture}, {@link #captureBurst}, {@link
      * #setRepeatingRequest}, or {@link #setRepeatingBurst} methods.
      *
-     * @see #setDeviceListener
+     * @see CameraManager#openCamera
      */
     public static abstract class StateListener {
        /**
