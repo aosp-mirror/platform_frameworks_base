@@ -24,6 +24,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RemoteController.OnClientUpdateListener;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -2270,7 +2271,9 @@ public class AudioManager {
      * Registers a {@link RemoteController} instance for it to receive media metadata updates
      * and playback state information from applications using {@link RemoteControlClient}, and
      * control their playback.
-     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
+     * <p>Registration requires the {@link OnClientUpdateListener} listener to be one of the
+     * enabled notification listeners (see
+     * {@link android.service.notification.NotificationListenerService}).
      * @param rctlr the object to register.
      * @return true if the {@link RemoteController} was successfully registered, false if an
      *     error occurred, due to an internal system error, or insufficient permissions.
@@ -2280,14 +2283,17 @@ public class AudioManager {
             return false;
         }
         IAudioService service = getService();
+        final RemoteController.OnClientUpdateListener l = rctlr.getUpdateListener();
+        final ComponentName listenerComponent = new ComponentName(mContext, l.getClass());
         try {
             int[] artworkDimensions = rctlr.getArtworkSize();
-            boolean reg = service.registerRemoteControlDisplay(rctlr.getRcDisplay(),
-                    artworkDimensions[0]/*w*/, artworkDimensions[1]/*h*/);
+            boolean reg = service.registerRemoteController(rctlr.getRcDisplay(),
+                    artworkDimensions[0]/*w*/, artworkDimensions[1]/*h*/,
+                    listenerComponent);
             rctlr.setIsRegistered(reg);
             return reg;
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
+            Log.e(TAG, "Dead object in registerRemoteController " + e);
             return false;
         }
     }
@@ -2318,6 +2324,7 @@ public class AudioManager {
      * artwork size directly, or
      * {@link #remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay, int, int)} later if artwork
      * is not yet needed.
+     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
      * @param rcd the IRemoteControlDisplay
      */
     public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
@@ -2328,6 +2335,7 @@ public class AudioManager {
     /**
      * @hide
      * Registers a remote control display that will be sent information by remote control clients.
+     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
      * @param rcd
      * @param w the maximum width of the expected bitmap. Negative values indicate it is
      *   useless to send artwork.
