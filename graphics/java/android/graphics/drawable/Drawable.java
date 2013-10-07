@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.graphics.Insets;
+import android.graphics.Xfermode;
 import android.os.Trace;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -426,6 +427,15 @@ public abstract class Drawable {
      * any filters.
     */
     public abstract void setColorFilter(ColorFilter cf);
+
+    /**
+     * @hide Consider for future API inclusion
+     */
+    public void setXfermode(Xfermode mode) {
+        // Base implementation drops it on the floor for compatibility. Whee!
+        // TODO: For this to be included in the API proper, all framework drawables need impls.
+        // For right now only BitmapDrawable has it.
+    }
 
     /**
      * Specify a color and porterduff mode to be the colorfilter for this

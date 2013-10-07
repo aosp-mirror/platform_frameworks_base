@@ -22,6 +22,8 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataEditor;
@@ -83,8 +85,6 @@ public class KeyguardTransportControlView extends FrameLayout {
     private int mCurrentPlayState;
     private AudioManager mAudioManager;
     private RemoteController mRemoteController;
-
-    private int MARQUEE_VIEWS[] = { R.id.title, R.id.artist_album };
 
     private ImageView mBadge;
 
@@ -264,12 +264,8 @@ public class KeyguardTransportControlView extends FrameLayout {
 
     private void setEnableMarquee(boolean enabled) {
         if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
-        for (int i = 0; i < MARQUEE_VIEWS.length; i++) {
-            View v = findViewById(MARQUEE_VIEWS[i]);
-            if (v != null) {
-                v.setSelected(enabled);
-            }
-        }
+        if (mTrackTitle != null) mTrackTitle.setSelected(enabled);
+        if (mTrackArtistAlbum != null) mTrackTitle.setSelected(enabled);
     }
 
     @Override
@@ -334,6 +330,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         final ColorMatrix cm = new ColorMatrix();
         cm.setSaturation(0);
         mBadge.setColorFilter(new ColorMatrixColorFilter(cm));
+        mBadge.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
         mBadge.setImageAlpha(0xef);
     }
 
