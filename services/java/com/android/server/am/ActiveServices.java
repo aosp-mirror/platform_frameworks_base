@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.ArrayMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
@@ -166,7 +167,8 @@ public final class ActiveServices {
 
         static final int MSG_BG_START_TIMEOUT = 1;
 
-        ServiceMap(int userId) {
+        ServiceMap(Looper looper, int userId) {
+            super(looper);
             mUserId = userId;
         }
 
@@ -255,7 +257,7 @@ public final class ActiveServices {
     private ServiceMap getServiceMap(int callingUser) {
         ServiceMap smap = mServiceMap.get(callingUser);
         if (smap == null) {
-            smap = new ServiceMap(callingUser);
+            smap = new ServiceMap(mAm.mHandler.getLooper(), callingUser);
             mServiceMap.put(callingUser, smap);
         }
         return smap;
@@ -2417,7 +2419,11 @@ public final class ActiveServices {
             int[] users = mAm.getUsersLocked();
             if ("all".equals(name)) {
                 for (int user : users) {
-                    ArrayMap<ComponentName, ServiceRecord> alls = getServices(user);
+                    ServiceMap smap = mServiceMap.get(user);
+                    if (smap == null) {
+                        continue;
+                    }
+                    ArrayMap<ComponentName, ServiceRecord> alls = smap.mServicesByName;
                     for (int i=0; i<alls.size(); i++) {
                         ServiceRecord r1 = alls.valueAt(i);
                         services.add(r1);
@@ -2438,7 +2444,11 @@ public final class ActiveServices {
                 }
 
                 for (int user : users) {
-                    ArrayMap<ComponentName, ServiceRecord> alls = getServices(user);
+                    ServiceMap smap = mServiceMap.get(user);
+                    if (smap == null) {
+                        continue;
+                    }
+                    ArrayMap<ComponentName, ServiceRecord> alls = smap.mServicesByName;
                     for (int i=0; i<alls.size(); i++) {
                         ServiceRecord r1 = alls.valueAt(i);
                         if (componentName != null) {
