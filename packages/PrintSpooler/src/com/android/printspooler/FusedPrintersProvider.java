@@ -63,7 +63,6 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     private static final boolean DEBUG = false;
 
     private static final double WEIGHT_DECAY_COEFFICIENT = 0.95f;
-
     private static final int MAX_HISTORY_LENGTH = 50;
 
     private static final int MAX_FAVORITE_PRINTER_COUNT = 4;
@@ -388,25 +387,25 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                             + FusedPrintersProvider.this.hashCode());
                 }
 
-                // Ignore printer records whose target services are not installed.
+                // Ignore printer records whose target services are not enabled.
                 PrintManager printManager = (PrintManager) getContext()
                         .getSystemService(Context.PRINT_SERVICE);
                 List<PrintServiceInfo> services = printManager
-                        .getInstalledPrintServices();
+                        .getEnabledPrintServices();
 
-                Set<ComponentName> installedComponents = new ArraySet<ComponentName>();
+                Set<ComponentName> enabledComponents = new ArraySet<ComponentName>();
                 final int installedServiceCount = services.size();
                 for (int i = 0; i < installedServiceCount; i++) {
                     ServiceInfo serviceInfo = services.get(i).getResolveInfo().serviceInfo;
                     ComponentName componentName = new ComponentName(
                             serviceInfo.packageName, serviceInfo.name);
-                    installedComponents.add(componentName);
+                    enabledComponents.add(componentName);
                 }
 
                 final int printerCount = printers.size();
                 for (int i = printerCount - 1; i >= 0; i--) {
                     ComponentName printerServiceName = printers.get(i).getId().getServiceName();
-                    if (!installedComponents.contains(printerServiceName.getPackageName())) {
+                    if (!enabledComponents.contains(printerServiceName)) {
                         printers.remove(i);
                     }
                 }
