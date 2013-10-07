@@ -3193,6 +3193,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (task.userId == tr.userId
                     && ((task.affinity != null && task.affinity.equals(tr.affinity))
                     || (task.intent != null && task.intent.filterEquals(tr.intent)))) {
+                tr.disposeThumbnail();
                 mRecentTasks.remove(i);
                 i--;
                 N--;
@@ -3204,7 +3205,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (N >= MAX_RECENT_TASKS) {
-            mRecentTasks.remove(N-1);
+            mRecentTasks.remove(N-1).disposeThumbnail();
         }
         mRecentTasks.add(0, task);
     }
@@ -6742,6 +6743,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
+        tr.disposeThumbnail();
         mRecentTasks.remove(tr);
         mStackSupervisor.removeTask(tr);
         final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;

@@ -128,6 +128,16 @@ final class TaskRecord extends ThumbnailHolder {
         }
     }
 
+    void disposeThumbnail() {
+        super.disposeThumbnail();
+        for (int i=mActivities.size()-1; i>=0; i--) {
+            ThumbnailHolder thumb = mActivities.get(i).thumbHolder;
+            if (thumb != this) {
+                thumb.disposeThumbnail();
+            }
+        }
+    }
+
     ActivityRecord getTopActivity() {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
