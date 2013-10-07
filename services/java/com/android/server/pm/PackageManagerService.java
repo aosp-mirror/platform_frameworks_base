@@ -850,6 +850,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                                         null, null,
                                         res.pkg.applicationInfo.packageName, null, updateUsers);
+
+                                // treat asec-hosted packages like removable media on upgrade
+                                if (isForwardLocked(res.pkg) || isExternal(res.pkg)) {
+                                    if (DEBUG_INSTALL) {
+                                        Slog.i(TAG, "upgrading pkg " + res.pkg
+                                                + " is ASEC-hosted -> AVAILABLE");
+                                    }
+                                    int[] uidArray = new int[] { res.pkg.applicationInfo.uid };
+                                    ArrayList<String> pkgList = new ArrayList<String>(1);
+                                    pkgList.add(res.pkg.applicationInfo.packageName);
+                                    sendResourcesChangedBroadcast(true, false,
+                                            pkgList,uidArray, null);
+                                }
                             }
                             if (res.removedInfo.args != null) {
                                 // Remove the replaced package's older resources safely now
@@ -4643,6 +4656,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
         if ((parseFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
+            // If the package lives in an asec, tell everyone that the container is going
+            // away so they can clean up any references to its resources (which would prevent
+            // vold from being able to unmount the asec)
+            if (isForwardLocked(pkg) || isExternal(pkg)) {
+                if (DEBUG_INSTALL) {
+                    Slog.i(TAG, "upgrading pkg " + pkg + " is ASEC-hosted -> UNAVAILABLE");
+                }
+                final int[] uidArray = new int[] { pkg.applicationInfo.uid };
+                final ArrayList<String> pkgList = new ArrayList<String>(1);
+                pkgList.add(pkg.applicationInfo.packageName);
+                sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
+            }
+
+            // Post the request that it be killed now that the going-away broadcast is en route
             killApplication(pkg.applicationInfo.packageName,
                         pkg.applicationInfo.uid, "update pkg");
         }
@@ -10731,8 +10758,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-   private void sendResourcesChangedBroadcast(boolean mediaStatus, ArrayList<String> pkgList,
-            int uidArr[], IIntentReceiver finishedReceiver) {
+   private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
+           ArrayList<String> pkgList, int uidArr[], IIntentReceiver finishedReceiver) {
         int size = pkgList.size();
         if (size > 0) {
             // Send broadcasts here
@@ -10741,6 +10768,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     .toArray(new String[size]));
             if (uidArr != null) {
                 extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
+            }
+            if (replacing && !mediaStatus) {
+                extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
             }
             String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                     : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
@@ -10844,7 +10874,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         // Send a broadcast to let everyone know we are done processing
         if (pkgList.size() > 0) {
-            sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
+            sendResourcesChangedBroadcast(true, false, pkgList, uidArr, null);
         }
         // Force gc to avoid any stale parser references that we might have.
         if (doGc) {
@@ -10921,7 +10951,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // broadcast when packages get disabled, force a gc to clean things up.
         // and unload all the containers.
         if (pkgList.size() > 0) {
-            sendResourcesChangedBroadcast(false, pkgList, uidArr, new IIntentReceiver.Stub() {
+            sendResourcesChangedBroadcast(false, false, pkgList, uidArr,
+                    new IIntentReceiver.Stub() {
                 public void performReceive(Intent intent, int resultCode, String data,
                         Bundle extras, boolean ordered, boolean sticky,
                         int sendingUser) throws RemoteException {
@@ -11041,7 +11072,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                         // Send resources unavailable broadcast
-                        sendResourcesChangedBroadcast(false, pkgList, uidArr, null);
+                        sendResourcesChangedBroadcast(false, true, pkgList, uidArr, null);
                         // Update package code and resource paths
                         synchronized (mInstallLock) {
                             synchronized (mPackages) {
@@ -11119,7 +11150,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             }
                         }
                         // Send resources available broadcast
-                        sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
+                        sendResourcesChangedBroadcast(true, false, pkgList, uidArr, null);
                     }
                 }
                 if (returnCode != PackageManager.MOVE_SUCCEEDED) {
