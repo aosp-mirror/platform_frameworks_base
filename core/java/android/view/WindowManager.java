@@ -838,6 +838,44 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
 
+        /**
+         * Window flag: request a translucent status bar with minimal system-provided
+         * background protection.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowTranslucentStatus} attribute; this attribute
+         * is automatically set for you in the standard translucent decor themes
+         * such as
+         * {@link android.R.style#Theme_Holo_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_Holo_Light_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_DeviceDefault_NoActionBar_TranslucentDecor}, and
+         * {@link android.R.style#Theme_DeviceDefault_Light_NoActionBar_TranslucentDecor}.</p>
+         *
+         * <p>When this flag is enabled for a window, it automatically sets
+         * the system UI visibility flags {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+         * {@link View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.</p>
+         */
+        public static final int FLAG_TRANSLUCENT_STATUS = 0x04000000;
+
+        /**
+         * Window flag: request a translucent navigation bar with minimal system-provided
+         * background protection.
+         *
+         * <p>This flag can be controlled in your theme through the
+         * {@link android.R.attr#windowTranslucentNavigation} attribute; this attribute
+         * is automatically set for you in the standard translucent decor themes
+         * such as
+         * {@link android.R.style#Theme_Holo_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_Holo_Light_NoActionBar_TranslucentDecor},
+         * {@link android.R.style#Theme_DeviceDefault_NoActionBar_TranslucentDecor}, and
+         * {@link android.R.style#Theme_DeviceDefault_Light_NoActionBar_TranslucentDecor}.</p>
+         *
+         * <p>When this flag is enabled for a window, it automatically sets
+         * the system UI visibility flags {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
+         * {@link View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.</p>
+         */
+        public static final int FLAG_TRANSLUCENT_NAVIGATION = 0x08000000;
+
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.
 
@@ -956,7 +994,11 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED, equals = FLAG_HARDWARE_ACCELERATED,
                     name = "FLAG_HARDWARE_ACCELERATED"),
             @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
-                    name = "FLAG_LOCAL_FOCUS_MODE")
+                    name = "FLAG_LOCAL_FOCUS_MODE"),
+            @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_STATUS, equals = FLAG_TRANSLUCENT_STATUS,
+                    name = "FLAG_TRANSLUCENT_STATUS"),
+            @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_NAVIGATION, equals = FLAG_TRANSLUCENT_NAVIGATION,
+                    name = "FLAG_TRANSLUCENT_NAVIGATION")
         })
         public int flags;
 
@@ -1045,6 +1087,11 @@ public interface WindowManager extends ViewManager {
          * it is created.
          * {@hide} */
         public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
+
+        /** Window flag: maintain the previous transparent decor state when this window
+         * becomes top-most.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
 
         /**
          * Control flags that are private to the platform.
@@ -1576,6 +1623,8 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<18;
         /** {@hide} */
+        public static final int TRANSLUCENT_FLAGS_CHANGED = 1<<19;
+        /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
         // internal buffer to backup/restore parameters under compatibility mode.
@@ -1621,6 +1670,10 @@ public interface WindowManager extends ViewManager {
                 changes |= TYPE_CHANGED;
             }
             if (flags != o.flags) {
+                final int diff = flags ^ o.flags;
+                if ((diff & (FLAG_TRANSLUCENT_STATUS | FLAG_TRANSLUCENT_NAVIGATION)) != 0) {
+                    changes |= TRANSLUCENT_FLAGS_CHANGED;
+                }
                 flags = o.flags;
                 changes |= FLAGS_CHANGED;
             }

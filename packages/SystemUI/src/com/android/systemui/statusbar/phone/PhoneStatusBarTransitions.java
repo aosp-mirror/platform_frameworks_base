@@ -20,13 +20,12 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.view.View;
 
 import com.android.systemui.R;
 
 public final class PhoneStatusBarTransitions extends BarTransitions {
-    private static final float ICON_ALPHA_WHEN_TRANSPARENT = 1;
+    private static final float ICON_ALPHA_WHEN_NOT_OPAQUE = 1;
     private static final float ICON_ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK = 0.5f;
     private static final float ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK = 0;
 
@@ -59,7 +58,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
 
     private float getNonBatteryClockAlphaFor(int mode) {
         return mode == MODE_LIGHTS_OUT ? ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK
-                : isTransparent(mode) ? ICON_ALPHA_WHEN_TRANSPARENT
+                : !isOpaque(mode) ? ICON_ALPHA_WHEN_NOT_OPAQUE
                 : mIconAlphaWhenOpaque;
     }
 
@@ -68,8 +67,8 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                 : getNonBatteryClockAlphaFor(mode);
     }
 
-    private boolean isTransparent(int mode) {
-        return mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSPARENT;
+    private boolean isOpaque(int mode) {
+        return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT);
     }
 
     @Override

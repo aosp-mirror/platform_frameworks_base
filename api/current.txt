@@ -1226,6 +1226,8 @@ package android {
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c
     field public static final int windowTitleSize = 16842842; // 0x101005a
     field public static final int windowTitleStyle = 16842843; // 0x101005b
+    field public static final int windowTranslucentNavigation = 16843760; // 0x10103f0
+    field public static final int windowTranslucentStatus = 16843759; // 0x10103ef
     field public static final int writePermission = 16842760; // 0x1010008
     field public static final int x = 16842924; // 0x10100ac
     field public static final int xlargeScreens = 16843455; // 0x10102bf
@@ -1758,10 +1760,12 @@ package android {
     field public static final int Theme_DeviceDefault_Light_NoActionBar = 16974124; // 0x103012c
     field public static final int Theme_DeviceDefault_Light_NoActionBar_Fullscreen = 16974125; // 0x103012d
     field public static final int Theme_DeviceDefault_Light_NoActionBar_Overscan = 16974304; // 0x10301e0
+    field public static final int Theme_DeviceDefault_Light_NoActionBar_TranslucentDecor = 16974308; // 0x10301e4
     field public static final int Theme_DeviceDefault_Light_Panel = 16974139; // 0x103013b
     field public static final int Theme_DeviceDefault_NoActionBar = 16974121; // 0x1030129
     field public static final int Theme_DeviceDefault_NoActionBar_Fullscreen = 16974122; // 0x103012a
     field public static final int Theme_DeviceDefault_NoActionBar_Overscan = 16974303; // 0x10301df
+    field public static final int Theme_DeviceDefault_NoActionBar_TranslucentDecor = 16974307; // 0x10301e3
     field public static final int Theme_DeviceDefault_Panel = 16974138; // 0x103013a
     field public static final int Theme_DeviceDefault_Wallpaper = 16974140; // 0x103013c
     field public static final int Theme_DeviceDefault_Wallpaper_NoTitleBar = 16974141; // 0x103013d
@@ -1785,10 +1789,12 @@ package android {
     field public static final int Theme_Holo_Light_NoActionBar = 16974064; // 0x10300f0
     field public static final int Theme_Holo_Light_NoActionBar_Fullscreen = 16974065; // 0x10300f1
     field public static final int Theme_Holo_Light_NoActionBar_Overscan = 16974302; // 0x10301de
+    field public static final int Theme_Holo_Light_NoActionBar_TranslucentDecor = 16974306; // 0x10301e2
     field public static final int Theme_Holo_Light_Panel = 16973948; // 0x103007c
     field public static final int Theme_Holo_NoActionBar = 16973932; // 0x103006c
     field public static final int Theme_Holo_NoActionBar_Fullscreen = 16973933; // 0x103006d
     field public static final int Theme_Holo_NoActionBar_Overscan = 16974301; // 0x10301dd
+    field public static final int Theme_Holo_NoActionBar_TranslucentDecor = 16974305; // 0x10301e1
     field public static final int Theme_Holo_Panel = 16973947; // 0x103007b
     field public static final int Theme_Holo_Wallpaper = 16973949; // 0x103007d
     field public static final int Theme_Holo_Wallpaper_NoTitleBar = 16973950; // 0x103007e
@@ -28395,8 +28401,6 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 512; // 0x200
     field public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 256; // 0x100
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
-    field public static final int SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION = 8192; // 0x2000
-    field public static final int SYSTEM_UI_FLAG_TRANSPARENT_STATUS = 4096; // 0x1000
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
     field public static final int TEXT_ALIGNMENT_CENTER = 4; // 0x4
@@ -29132,6 +29136,8 @@ package android.view {
     field public static final int FLAG_SHOW_WHEN_LOCKED = 524288; // 0x80000
     field public static final int FLAG_SPLIT_TOUCH = 8388608; // 0x800000
     field public static final int FLAG_TOUCHABLE_WHEN_WAKING = 64; // 0x40
+    field public static final int FLAG_TRANSLUCENT_NAVIGATION = 134217728; // 0x8000000
+    field public static final int FLAG_TRANSLUCENT_STATUS = 67108864; // 0x4000000
     field public static final int FLAG_TURN_SCREEN_ON = 2097152; // 0x200000
     field public static final int FLAG_WATCH_OUTSIDE_TOUCH = 262144; // 0x40000
     field public static final int FORMAT_CHANGED = 8; // 0x8
