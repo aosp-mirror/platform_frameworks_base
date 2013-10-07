@@ -16,7 +16,13 @@
 
 package android.hardware.camera2.impl;
 
+import android.graphics.ImageFormat;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.Face;
 import android.hardware.camera2.Rational;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -36,6 +42,8 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     private static final String TAG = "CameraMetadataJV";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    // this should be in sync with HAL_PIXEL_FORMAT_BLOB defined in graphics.h
+    private static final int NATIVE_JPEG_FORMAT = 0x21;
 
     public CameraMetadataNative() {
         super();
@@ -84,16 +92,12 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Key<T> key) {
-        int tag = key.getTag();
-        byte[] values = readValues(tag);
-        if (values == null) {
-            return null;
+        T value = getOverride(key);
+        if (value != null) {
+            return value;
         }
 
-        int nativeType = getNativeType(tag);
-
-        ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
-        return unpackSingle(buffer, key.getType(), nativeType);
+        return getBase(key);
     }
 
     public void readFromParcel(Parcel in) {
@@ -110,24 +114,11 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
      * type to the key.
      */
     public <T> void set(Key<T> key, T value) {
-        int tag = key.getTag();
-
-        if (value == null) {
-            writeValues(tag, null);
+        if (setOverride(key, value)) {
             return;
         }
 
-        int nativeType = getNativeType(tag);
-
-        int size = packSingle(value, null, key.getType(), nativeType, /* sizeOnly */true);
-
-        // TODO: Optimization. Cache the byte[] and reuse if the size is big enough.
-        byte[] values = new byte[size];
-
-        ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
-        packSingle(value, buffer, key.getType(), nativeType, /*sizeOnly*/false);
-
-        writeValues(tag, values);
+        setBase(key, value);
     }
 
     // Keep up-to-date with camera_metadata.h
@@ -435,6 +426,157 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return (T) array;
     }
 
+    private <T> T getBase(Key<T> key) {
+        int tag = key.getTag();
+        byte[] values = readValues(tag);
+        if (values == null) {
+            return null;
+        }
+
+        int nativeType = getNativeType(tag);
+
+        ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
+        return unpackSingle(buffer, key.getType(), nativeType);
+    }
+
+    // Need overwrite some metadata that has different definitions between native
+    // and managed sides.
+    @SuppressWarnings("unchecked")
+    private <T> T getOverride(Key<T> key) {
+        if (key == CameraCharacteristics.SCALER_AVAILABLE_FORMATS) {
+            return (T) getAvailableFormats();
+        } else if (key == CaptureResult.STATISTICS_FACES) {
+            return (T) getFaces();
+        }
+
+        // For other keys, get() falls back to getBase()
+        return null;
+    }
+
+    private int[] getAvailableFormats() {
+        int[] availableFormats = getBase(CameraCharacteristics.SCALER_AVAILABLE_FORMATS);
+        for (int i = 0; i < availableFormats.length; i++) {
+            // JPEG has different value between native and managed side, need override.
+            if (availableFormats[i] == NATIVE_JPEG_FORMAT) {
+                availableFormats[i] = ImageFormat.JPEG;
+            }
+        }
+        return availableFormats;
+    }
+
+    private Face[] getFaces() {
+        final int FACE_LANDMARK_SIZE = 6;
+
+        Integer faceDetectMode = getBase(CaptureResult.STATISTICS_FACE_DETECT_MODE);
+        if (faceDetectMode == null) {
+            throw new AssertionError("Expect non-null face detect mode");
+        }
+
+        if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_OFF) {
+            return new Face[0];
+        }
+        if (faceDetectMode != CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE &&
+                faceDetectMode != CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
+            throw new AssertionError("Unknown face detect mode: " + faceDetectMode);
+        }
+
+        // Face scores and rectangles are required by SIMPLE and FULL mode.
+        byte[] faceScores = getBase(CaptureResult.STATISTICS_FACE_SCORES);
+        Rect[] faceRectangles = getBase(CaptureResult.STATISTICS_FACE_RECTANGLES);
+        if (faceScores == null || faceRectangles == null) {
+            throw new AssertionError("Expect face scores and rectangles to be non-null");
+        } else if (faceScores.length != faceRectangles.length) {
+            throw new AssertionError(
+                    String.format("Face score size(%d) doesn match face rectangle size(%d)!",
+                            faceScores.length, faceRectangles.length));
+        }
+
+        // Face id and landmarks are only required by FULL mode.
+        int[] faceIds = getBase(CaptureResult.STATISTICS_FACE_IDS);
+        int[] faceLandmarks = getBase(CaptureResult.STATISTICS_FACE_LANDMARKS);
+        int numFaces = faceScores.length;
+        if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
+            if (faceIds == null || faceLandmarks == null) {
+                throw new AssertionError("Expect face ids and landmarks to be non-null for " +
+                        "FULL mode");
+            } else if (faceIds.length != numFaces ||
+                    faceLandmarks.length != numFaces * FACE_LANDMARK_SIZE) {
+                throw new AssertionError(
+                        String.format("Face id size(%d), or face landmark size(%d) don't match " +
+                                "face number(%d)!",
+                                faceIds.length, faceLandmarks.length * FACE_LANDMARK_SIZE,
+                                numFaces));
+            }
+        }
+
+        Face[] faces = new Face[numFaces];
+        if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE) {
+            for (int i = 0; i < numFaces; i++) {
+                faces[i] = new Face(faceRectangles[i], faceScores[i]);
+            }
+        } else {
+            // CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL
+            for (int i = 0; i < numFaces; i++) {
+                Point leftEye = new Point(faceLandmarks[i*6], faceLandmarks[i*6+1]);
+                Point rightEye = new Point(faceLandmarks[i*6+2], faceLandmarks[i*6+3]);
+                Point mouth = new Point(faceLandmarks[i*6+4], faceLandmarks[i*6+5]);
+                faces[i] = new Face(faceRectangles[i], faceScores[i], faceIds[i],
+                        leftEye, rightEye, mouth);
+            }
+        }
+        return faces;
+    }
+
+    private <T> void setBase(Key<T> key, T value) {
+        int tag = key.getTag();
+
+        if (value == null) {
+            writeValues(tag, null);
+            return;
+        }
+
+        int nativeType = getNativeType(tag);
+
+        int size = packSingle(value, null, key.getType(), nativeType, /* sizeOnly */true);
+
+        // TODO: Optimization. Cache the byte[] and reuse if the size is big enough.
+        byte[] values = new byte[size];
+
+        ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
+        packSingle(value, buffer, key.getType(), nativeType, /*sizeOnly*/false);
+
+        writeValues(tag, values);
+    }
+
+    // Set the camera metadata override.
+    private <T> boolean setOverride(Key<T> key, T value) {
+        if (key == CameraCharacteristics.SCALER_AVAILABLE_FORMATS) {
+            return setAvailableFormats((int[]) value);
+        }
+
+        // For other keys, set() falls back to setBase().
+        return false;
+    }
+
+    private boolean setAvailableFormats(int[] value) {
+        int[] availableFormat = value;
+        if (value == null) {
+            // Let setBase() to handle the null value case.
+            return false;
+        }
+
+        int[] newValues = new int[availableFormat.length];
+        for (int i = 0; i < availableFormat.length; i++) {
+            newValues[i] = availableFormat[i];
+            if (availableFormat[i] == ImageFormat.JPEG) {
+                newValues[i] = NATIVE_JPEG_FORMAT;
+            }
+        }
+
+        setBase(CameraCharacteristics.SCALER_AVAILABLE_FORMATS, newValues);
+        return true;
+    }
+
     private long mMetadataPtr; // native CameraMetadata*
 
     private native long nativeAllocate();
@@ -538,7 +680,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
      * @hide
      */
     public byte[] readValues(int tag) {
-     // TODO: Optimization. Native code returns a ByteBuffer instead.
+        // TODO: Optimization. Native code returns a ByteBuffer instead.
         return nativeReadValues(tag);
     }
 

@@ -58,6 +58,9 @@ public final class Face {
      * Create a new face with all fields set.
      *
      * <p>The id, leftEyePosition, rightEyePosition, and mouthPosition are considered optional.
+     * They are only required when the {@link #CaptureResult} reports that the value of key
+     * {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} is
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_FULL}.
      * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
      * rightEyePosition, and mouthPosition may be independently null or not-null.</p>
@@ -107,7 +110,11 @@ public final class Face {
      * <p>The id, leftEyePosition, rightEyePosition, and mouthPosition are considered optional.
      * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
-     * rightEyePosition, and mouthPosition may be independently null or not-null.</p>
+     * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
+     * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link #CaptureResult},
+     * the face id of each face is expected to be {@value #ID_UNSUPPORTED}, the leftEyePosition,
+     * rightEyePosition, and mouthPositions are expected to be {@code null} for each face.</p>
      *
      * @param bounds Bounds of the face.
      * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
@@ -168,7 +175,10 @@ public final class Face {
      * <p>This is an optional field, may not be supported on all devices.
      * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
-     * rightEyePosition, and mouthPosition may be independently null or not-null.</p>
+     * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
+     * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link #CaptureResult},
+     * the face id of each face is expected to be {@value #ID_UNSUPPORTED}.</p>
      *
      * <p>This value will either be {@value #ID_UNSUPPORTED} or
      * otherwise greater than {@code 0}.</p>
@@ -219,7 +229,7 @@ public final class Face {
      * field, may not be supported on all devices. If not
      * supported, the value will always be set to null.
      * This value will  always be null only if {@link #getId()} returns
-     * {@value #ID_UNSUPPORTED}.</p> them are.
+     * {@value #ID_UNSUPPORTED}.</p>
      * </p>
      *
      * @return The mouth position, or {@code null} if unknown.
