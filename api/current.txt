@@ -7290,6 +7290,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.InstrumentationInfo> queryInstrumentation(java.lang.String, int);
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivities(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(android.content.ComponentName, android.content.Intent[], android.content.Intent, int);
+    method public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryIntentServices(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract deprecated void removePackageFromPreferred(java.lang.String);
@@ -7455,6 +7456,7 @@ package android.content.pm {
     ctor public ProviderInfo();
     ctor public ProviderInfo(android.content.pm.ProviderInfo);
     method public int describeContents();
+    method public void dump(android.util.Printer, java.lang.String);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public java.lang.String authority;
@@ -7488,6 +7490,7 @@ package android.content.pm {
     field public java.lang.CharSequence nonLocalizedLabel;
     field public int preferredOrder;
     field public int priority;
+    field public android.content.pm.ProviderInfo providerInfo;
     field public java.lang.String resolvePackageName;
     field public android.content.pm.ServiceInfo serviceInfo;
     field public int specificIndex;
@@ -21045,6 +21048,7 @@ package android.provider {
     field public static final java.lang.String EXTRA_ERROR = "error";
     field public static final java.lang.String EXTRA_INFO = "info";
     field public static final java.lang.String EXTRA_LOADING = "loading";
+    field public static final java.lang.String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";
   }
 
   public static final class DocumentsContract.Document {
@@ -24540,6 +24544,7 @@ package android.test.mock {
     method public java.util.List<android.content.pm.InstrumentationInfo> queryInstrumentation(java.lang.String, int);
     method public java.util.List<android.content.pm.ResolveInfo> queryIntentActivities(android.content.Intent, int);
     method public java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(android.content.ComponentName, android.content.Intent[], android.content.Intent, int);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(android.content.Intent, int);
     method public java.util.List<android.content.pm.ResolveInfo> queryIntentServices(android.content.Intent, int);
     method public java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public void removePackageFromPreferred(java.lang.String);

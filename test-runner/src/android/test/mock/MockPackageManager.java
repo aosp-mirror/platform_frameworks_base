@@ -282,6 +282,18 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public List<ResolveInfo> queryIntentContentProvidersAsUser(
+            Intent intent, int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentContentProviders(Intent intent, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public ProviderInfo resolveContentProvider(String name, int flags) {
         throw new UnsupportedOperationException();
