@@ -2210,6 +2210,24 @@ public abstract class PackageManager {
     public abstract List<ResolveInfo> queryIntentServicesAsUser(Intent intent,
             int flags, int userId);
 
+    /** {@hide} */
+    public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
+            Intent intent, int flags, int userId);
+
+    /**
+     * Retrieve all providers that can match the given intent.
+     *
+     * @param intent An intent containing all of the desired specification
+     *            (action, data, type, category, and/or component).
+     * @param flags Additional option flags.
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
+     *         ProviderInfo. These are ordered from best to worst match. If
+     *         there are no matching providers, an empty list is returned.
+     * @see #GET_INTENT_FILTERS
+     * @see #GET_RESOLVED_FILTER
+     */
+    public abstract List<ResolveInfo> queryIntentContentProviders(Intent intent, int flags);
+
     /**
      * Find a single content provider by its base path name.
      *
