@@ -58,8 +58,8 @@ public final class NavigationBarTransitions extends BarTransitions {
     @Override
     public void transitionTo(int mode, boolean animate) {
         mRequestedMode = mode;
-        if (mVertical && mode == MODE_TRANSPARENT) {
-            // fully transparent mode not allowed when vertical
+        if (mVertical && mode == MODE_TRANSLUCENT) {
+            // translucent mode not allowed when vertical
             mode = MODE_OPAQUE;
         }
         super.transitionTo(mode, animate);

@@ -2750,6 +2750,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN & (~getForcedWindowFlags()));
         }
 
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowTranslucentStatus,
+                false)) {
+            setFlags(FLAG_TRANSLUCENT_STATUS, FLAG_TRANSLUCENT_STATUS
+                    & (~getForcedWindowFlags()));
+        }
+
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowTranslucentNavigation,
+                false)) {
+            setFlags(FLAG_TRANSLUCENT_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION
+                    & (~getForcedWindowFlags()));
+        }
+
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowOverscan, false)) {
             setFlags(FLAG_LAYOUT_IN_OVERSCAN, FLAG_LAYOUT_IN_OVERSCAN&(~getForcedWindowFlags()));
         }
