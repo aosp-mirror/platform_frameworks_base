@@ -41,6 +41,12 @@ oneway interface IRemoteControlDisplay
             boolean clearing);
 
     /**
+     * Sets whether the controls of this display are enabled
+     * @param if false, the display shouldn't any commands
+     */
+    void setEnabled(boolean enabled);
+
+    /**
      * Sets the playback information (state, position and speed) of a client.
      * @param generationId the current generation ID as known by this client
      * @param state the current playback state, one of the following values:

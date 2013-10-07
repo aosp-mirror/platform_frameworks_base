@@ -232,6 +232,10 @@ public class KeyguardUpdateMonitor {
 
         }
 
+        public void setEnabled(boolean enabled) {
+            // no-op: this RemoteControlDisplay is not subject to being disabled.
+        }
+
         public void setCurrentClientId(int clientGeneration, PendingIntent mediaIntent,
                 boolean clearing) throws RemoteException {
             Message msg = mHandler.obtainMessage(MSG_SET_CURRENT_CLIENT_ID,

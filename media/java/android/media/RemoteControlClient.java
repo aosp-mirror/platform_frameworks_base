@@ -1049,6 +1049,7 @@ public class RemoteControlClient
         private int mArtworkExpectedWidth;
         private int mArtworkExpectedHeight;
         private boolean mWantsPositionSync = false;
+        private boolean mEnabled = true;
 
         DisplayInfoForClient(IRemoteControlDisplay rcd, int w, int h) {
             mRcDisplay = rcd;
@@ -1165,6 +1166,14 @@ public class RemoteControlClient
             }
         }
 
+        public void enableRemoteControlDisplay(IRemoteControlDisplay rcd, boolean enabled) {
+            // only post messages, we can't block here
+            if ((mEventHandler != null) && (rcd != null)) {
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
+                        MSG_DISPLAY_ENABLE, enabled ? 1 : 0, 0/*arg2 ignored*/, rcd));
+            }
+        }
+
         public void seekTo(int generationId, long timeMs) {
             // only post messages, we can't block here
             if (mEventHandler != null) {
@@ -1227,6 +1236,7 @@ public class RemoteControlClient
     private final static int MSG_DISPLAY_WANTS_POS_SYNC = 12;
     private final static int MSG_UPDATE_METADATA = 13;
     private final static int MSG_REQUEST_METADATA_ARTWORK = 14;
+    private final static int MSG_DISPLAY_ENABLE = 15;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -1290,6 +1300,9 @@ public class RemoteControlClient
                 case MSG_UPDATE_METADATA:
                     onUpdateMetadata(msg.arg1, msg.arg2, msg.obj);
                     break;
+                case MSG_DISPLAY_ENABLE:
+                    onDisplayEnable((IRemoteControlDisplay)msg.obj, msg.arg1 == 1);
+                    break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
             }
@@ -1315,13 +1328,15 @@ public class RemoteControlClient
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
-                try {
-                    di.mRcDisplay.setPlaybackState(mInternalClientGenId,
-                            mPlaybackState, mPlaybackStateChangeTimeMs, mPlaybackPositionMs,
-                            mPlaybackSpeed);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error in setPlaybackState(), dead display " + di.mRcDisplay, e);
-                    displayIterator.remove();
+                if (di.mEnabled) {
+                    try {
+                        di.mRcDisplay.setPlaybackState(mInternalClientGenId,
+                                mPlaybackState, mPlaybackStateChangeTimeMs, mPlaybackPositionMs,
+                                mPlaybackSpeed);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error in setPlaybackState(), dead display " + di.mRcDisplay, e);
+                        displayIterator.remove();
+                    }
                 }
             }
         }
@@ -1341,11 +1356,13 @@ public class RemoteControlClient
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
-                try {
-                    di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error in setMetadata(), dead display " + di.mRcDisplay, e);
-                    displayIterator.remove();
+                if (di.mEnabled) {
+                    try {
+                        di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error in setMetadata(), dead display " + di.mRcDisplay, e);
+                        displayIterator.remove();
+                    }
                 }
             }
         }
@@ -1367,13 +1384,15 @@ public class RemoteControlClient
             final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
-                try {
-                    di.mRcDisplay.setTransportControlInfo(mInternalClientGenId,
-                            mTransportControlFlags, mPlaybackPositionCapabilities);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error in setTransportControlFlags(), dead display " + di.mRcDisplay,
-                            e);
-                    displayIterator.remove();
+                if (di.mEnabled) {
+                    try {
+                        di.mRcDisplay.setTransportControlInfo(mInternalClientGenId,
+                                mTransportControlFlags, mPlaybackPositionCapabilities);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error in setTransportControlFlags(), dead display " + di.mRcDisplay,
+                                e);
+                        displayIterator.remove();
+                    }
                 }
             }
         }
@@ -1438,12 +1457,14 @@ public class RemoteControlClient
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
                 try {
-                    if ((di.mArtworkExpectedWidth > 0) && (di.mArtworkExpectedHeight > 0)) {
-                        Bitmap artwork = scaleBitmapIfTooBig(mOriginalArtwork,
-                                di.mArtworkExpectedWidth, di.mArtworkExpectedHeight);
-                        di.mRcDisplay.setAllMetadata(mInternalClientGenId, mMetadata, artwork);
-                    } else {
-                        di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
+                    if (di.mEnabled) {
+                        if ((di.mArtworkExpectedWidth > 0) && (di.mArtworkExpectedHeight > 0)) {
+                            Bitmap artwork = scaleBitmapIfTooBig(mOriginalArtwork,
+                                    di.mArtworkExpectedWidth, di.mArtworkExpectedHeight);
+                            di.mRcDisplay.setAllMetadata(mInternalClientGenId, mMetadata, artwork);
+                        } else {
+                            di.mRcDisplay.setMetadata(mInternalClientGenId, mMetadata);
+                        }
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error when setting metadata, dead display " + di.mRcDisplay, e);
@@ -1578,8 +1599,10 @@ public class RemoteControlClient
                         ((di.mArtworkExpectedWidth != w) || (di.mArtworkExpectedHeight != h))) {
                     di.mArtworkExpectedWidth = w;
                     di.mArtworkExpectedHeight = h;
-                    if (!sendArtworkToDisplay(di)) {
-                        displayIterator.remove();
+                    if (di.mEnabled) {
+                        if (!sendArtworkToDisplay(di)) {
+                            displayIterator.remove();
+                        }
                     }
                     break;
                 }
@@ -1597,17 +1620,32 @@ public class RemoteControlClient
             //  that gets upated, and whether the list has one entry that wants position sync
             while (displayIterator.hasNext()) {
                 final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
-                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
-                    di.mWantsPositionSync = wantsSync;
-                }
-                if (di.mWantsPositionSync) {
-                    newNeedsPositionSync = true;
+                if (di.mEnabled) {
+                    if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                        di.mWantsPositionSync = wantsSync;
+                    }
+                    if (di.mWantsPositionSync) {
+                        newNeedsPositionSync = true;
+                    }
                 }
             }
             mNeedsPositionSync = newNeedsPositionSync;
             if (oldNeedsPositionSync != mNeedsPositionSync) {
                 // update needed?
                 initiateCheckForDrift_syncCacheLock();
+            }
+        }
+    }
+
+    /** pre-condition rcd != null */
+    private void onDisplayEnable(IRemoteControlDisplay rcd, boolean enable) {
+        synchronized(mCacheLock) {
+            final Iterator<DisplayInfoForClient> displayIterator = mRcDisplays.iterator();
+            while (displayIterator.hasNext()) {
+                final DisplayInfoForClient di = (DisplayInfoForClient) displayIterator.next();
+                if (di.mRcDisplay.asBinder().equals(rcd.asBinder())) {
+                    di.mEnabled = enable;
+                }
             }
         }
     }

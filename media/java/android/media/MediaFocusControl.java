@@ -17,6 +17,7 @@
 package android.media;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -30,6 +31,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +48,7 @@ import android.speech.RecognizerIntent;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 
 import java.io.FileDescriptor;
@@ -78,6 +82,7 @@ public class MediaFocusControl implements OnFinished {
     private final AppOpsManager mAppOps;
     private final KeyguardManager mKeyguardManager;
     private final AudioService mAudioService;
+    private final NotificationListenerObserver mNotifListenerObserver;
 
     protected MediaFocusControl(Looper looper, Context cntxt,
             VolumeController volumeCtrl, AudioService as) {
@@ -111,6 +116,7 @@ public class MediaFocusControl implements OnFinished {
         mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
         mKeyguardManager =
                 (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mNotifListenerObserver = new NotificationListenerObserver();
 
         mHasRemotePlayback = false;
         mMainRemoteIsActive = false;
@@ -122,6 +128,182 @@ public class MediaFocusControl implements OnFinished {
         dumpRCStack(pw);
         dumpRCCStack(pw);
         dumpRCDList(pw);
+    }
+
+    //==========================================================================================
+    // Management of RemoteControlDisplay registration permissions
+    //==========================================================================================
+    private final static Uri ENABLED_NOTIFICATION_LISTENERS_URI =
+            Settings.Secure.getUriFor(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+
+    private class NotificationListenerObserver extends ContentObserver {
+
+        NotificationListenerObserver() {
+            super(mEventHandler);
+            mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (!ENABLED_NOTIFICATION_LISTENERS_URI.equals(uri) || selfChange) {
+                return;
+            }
+            if (DEBUG_RC) { Log.d(TAG, "NotificationListenerObserver.onChange()"); }
+            postReevaluateRemoteControlDisplays();
+        }
+    }
+
+    private final static int RCD_REG_FAILURE = 0;
+    private final static int RCD_REG_SUCCESS_PERMISSION = 1;
+    private final static int RCD_REG_SUCCESS_ENABLED_NOTIF = 2;
+
+    /**
+     * Checks a caller's authorization to register an IRemoteControlDisplay.
+     * Authorization is granted if one of the following is true:
+     * <ul>
+     * <li>the caller has android.Manifest.permission.MEDIA_CONTENT_CONTROL permission</li>
+     * <li>the caller's listener is one of the enabled notification listeners</li>
+     * </ul>
+     * @return RCD_REG_FAILURE if it's not safe to proceed with the IRemoteControlDisplay
+     *     registration.
+     */
+    private int checkRcdRegistrationAuthorization(ComponentName listenerComp) {
+        // MEDIA_CONTENT_CONTROL permission check
+        if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MEDIA_CONTENT_CONTROL)) {
+            if (DEBUG_RC) { Log.d(TAG, "ok to register Rcd: has MEDIA_CONTENT_CONTROL permission");}
+            return RCD_REG_SUCCESS_PERMISSION;
+        }
+
+        // ENABLED_NOTIFICATION_LISTENERS settings check
+        if (listenerComp != null) {
+            // this call is coming from an app, can't use its identity to read secure settings
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                final int currentUser = ActivityManager.getCurrentUser();
+                final String enabledNotifListeners = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                        currentUser);
+                if (enabledNotifListeners != null) {
+                    final String[] components = enabledNotifListeners.split(":");
+                    for (int i=0; i<components.length; i++) {
+                        final ComponentName component =
+                                ComponentName.unflattenFromString(components[i]);
+                        if (component != null) {
+                            if (listenerComp.equals(component)) {
+                                if (DEBUG_RC) { Log.d(TAG, "ok to register RCC: " + component +
+                                        " is authorized notification listener"); }
+                                return RCD_REG_SUCCESS_ENABLED_NOTIF;
+                            }
+                        }
+                    }
+                }
+                if (DEBUG_RC) { Log.d(TAG, "not ok to register RCD, " + listenerComp +
+                        " is not in list of ENABLED_NOTIFICATION_LISTENERS"); }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        return RCD_REG_FAILURE;
+    }
+
+    protected boolean registerRemoteController(IRemoteControlDisplay rcd, int w, int h,
+            ComponentName listenerComp) {
+        int reg = checkRcdRegistrationAuthorization(listenerComp);
+        if (reg != RCD_REG_FAILURE) {
+            registerRemoteControlDisplay_int(rcd, w, h, listenerComp);
+            return true;
+        } else {
+            Slog.w(TAG, "Access denied to process: " + Binder.getCallingPid() +
+                    ", must have permission " + android.Manifest.permission.MEDIA_CONTENT_CONTROL +
+                    " or be an enabled NotificationListenerService for registerRemoteController");
+            return false;
+        }
+    }
+
+    protected boolean registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
+        int reg = checkRcdRegistrationAuthorization(null);
+        if (reg != RCD_REG_FAILURE) {
+            registerRemoteControlDisplay_int(rcd, w, h, null);
+            return true;
+        } else {
+            Slog.w(TAG, "Access denied to process: " + Binder.getCallingPid() +
+                    ", must have permission " + android.Manifest.permission.MEDIA_CONTENT_CONTROL +
+                    " to register IRemoteControlDisplay");
+            return false;
+        }
+    }
+
+    private void postReevaluateRemoteControlDisplays() {
+        sendMsg(mEventHandler, MSG_REEVALUATE_RCD, SENDMSG_QUEUE, 0, 0, null, 0);
+    }
+
+    private void onReevaluateRemoteControlDisplays() {
+        if (DEBUG_RC) { Log.d(TAG, "onReevaluateRemoteControlDisplays()"); }
+        // read which components are enabled notification listeners
+        final int currentUser = ActivityManager.getCurrentUser();
+        final String enabledNotifListeners = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                currentUser);
+        if (DEBUG_RC) { Log.d(TAG, " > enabled list: " + enabledNotifListeners); }
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                // check whether the "enable" status of each RCD with a notification listener
+                // has changed
+                final String[] enabledComponents;
+                if (enabledNotifListeners == null) {
+                    enabledComponents = null;
+                } else {
+                    enabledComponents = enabledNotifListeners.split(":");
+                }
+                final Iterator<DisplayInfoForServer> displayIterator = mRcDisplays.iterator();
+                while (displayIterator.hasNext()) {
+                    final DisplayInfoForServer di =
+                            (DisplayInfoForServer) displayIterator.next();
+                    if (di.mClientNotifListComp != null) {
+                        boolean wasEnabled = di.mEnabled;
+                        di.mEnabled = isComponentInStringArray(di.mClientNotifListComp,
+                                enabledComponents);
+                        if (wasEnabled != di.mEnabled){
+                            try {
+                                // tell the RCD whether it's enabled
+                                di.mRcDisplay.setEnabled(di.mEnabled);
+                                // tell the RCCs about the change for this RCD
+                                enableRemoteControlDisplayForClient_syncRcStack(
+                                        di.mRcDisplay, di.mEnabled);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Error en/disabling RCD: ", e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param comp a non-null ComponentName
+     * @param enabledArray may be null
+     * @return
+     */
+    private boolean isComponentInStringArray(ComponentName comp, String[] enabledArray) {
+        if (enabledArray == null || enabledArray.length == 0) {
+            if (DEBUG_RC) { Log.d(TAG, " > " + comp + " is NOT enabled"); }
+            return false;
+        }
+        final String compString = comp.flattenToString();
+        for (int i=0; i<enabledArray.length; i++) {
+            if (compString.equals(enabledArray[i])) {
+                if (DEBUG_RC) { Log.d(TAG, " > " + compString + " is enabled"); }
+                return true;
+            }
+        }
+        if (DEBUG_RC) { Log.d(TAG, " > " + compString + " is NOT enabled"); }
+        return false;
     }
 
     //==========================================================================================
@@ -140,6 +322,7 @@ public class MediaFocusControl implements OnFinished {
     private static final int MSG_RCC_SEEK_REQUEST = 8;
     private static final int MSG_RCC_UPDATE_METADATA = 9;
     private static final int MSG_RCDISPLAY_INIT_INFO = 10;
+    private static final int MSG_REEVALUATE_RCD = 11;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -220,6 +403,10 @@ public class MediaFocusControl implements OnFinished {
                     // msg.obj is guaranteed to be non null
                     onRcDisplayInitInfo((IRemoteControlDisplay)msg.obj /*newRcd*/,
                             msg.arg1/*w*/, msg.arg2/*h*/);
+                    break;
+
+                case MSG_REEVALUATE_RCD:
+                    onReevaluateRemoteControlDisplays();
                     break;
             }
         }
@@ -1193,8 +1380,9 @@ public class MediaFocusControl implements OnFinished {
                 final DisplayInfoForServer di = (DisplayInfoForServer) displayIterator.next();
                 pw.println("  IRCD: " + di.mRcDisplay +
                         "  -- w:" + di.mArtworkExpectedWidth +
-                        "  -- h:" + di.mArtworkExpectedHeight+
-                        "  -- wantsPosSync:" + di.mWantsPositionSync);
+                        "  -- h:" + di.mArtworkExpectedHeight +
+                        "  -- wantsPosSync:" + di.mWantsPositionSync +
+                        "  -- " + (di.mEnabled ? "enabled" : "disabled"));
             }
         }
     }
@@ -1834,11 +2022,13 @@ public class MediaFocusControl implements OnFinished {
      */
     private class DisplayInfoForServer implements IBinder.DeathRecipient {
         /** may never be null */
-        private IRemoteControlDisplay mRcDisplay;
-        private IBinder mRcDisplayBinder;
+        private final IRemoteControlDisplay mRcDisplay;
+        private final IBinder mRcDisplayBinder;
         private int mArtworkExpectedWidth = -1;
         private int mArtworkExpectedHeight = -1;
         private boolean mWantsPositionSync = false;
+        private ComponentName mClientNotifListComp;
+        private boolean mEnabled = true;
 
         public DisplayInfoForServer(IRemoteControlDisplay rcd, int w, int h) {
             if (DEBUG_RC) Log.i(TAG, "new DisplayInfoForServer for " + rcd + " w=" + w + " h=" + h);
@@ -1911,6 +2101,23 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
+    private void enableRemoteControlDisplayForClient_syncRcStack(IRemoteControlDisplay rcd,
+            boolean enabled) {
+        // let all the remote control clients know whether the given display is enabled
+        //   (so the remote control stack traversal order doesn't matter).
+        final Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+        while(stackIterator.hasNext()) {
+            RemoteControlStackEntry rcse = stackIterator.next();
+            if(rcse.mRcClient != null) {
+                try {
+                    rcse.mRcClient.enableRemoteControlDisplay(rcd, enabled);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error connecting RCD to client: ", e);
+                }
+            }
+        }
+    }
+
     /**
      * Is the remote control display interface already registered
      * @param rcd
@@ -1937,8 +2144,11 @@ public class MediaFocusControl implements OnFinished {
      *   display doesn't need to receive artwork.
      * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
      *   display doesn't need to receive artwork.
+     * @param listenerComp the component for the listener interface, may be null if it's not needed
+     *   to verify it belongs to one of the enabled notification listeners
      */
-    protected void registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
+    private void registerRemoteControlDisplay_int(IRemoteControlDisplay rcd, int w, int h,
+            ComponentName listenerComp) {
         if (DEBUG_RC) Log.d(TAG, ">>> registerRemoteControlDisplay("+rcd+")");
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
@@ -1946,6 +2156,8 @@ public class MediaFocusControl implements OnFinished {
                     return;
                 }
                 DisplayInfoForServer di = new DisplayInfoForServer(rcd, w, h);
+                di.mEnabled = true;
+                di.mClientNotifListComp = listenerComp;
                 if (!di.init()) {
                     if (DEBUG_RC) Log.e(TAG, " error registering RCD");
                     return;
