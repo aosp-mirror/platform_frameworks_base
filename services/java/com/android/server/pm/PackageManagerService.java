@@ -9147,6 +9147,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    boolean locationIsPrivileged(File path) {
+        try {
+            final String privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app")
+                    .getCanonicalPath();
+            return path.getCanonicalPath().startsWith(privilegedAppDir);
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to access code path " + path);
+        }
+        return false;
+    }
+
     /*
      * Tries to delete system package.
      */
@@ -9202,9 +9213,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
+        int parseFlags = PackageParser.PARSE_MUST_BE_APK | PackageParser.PARSE_IS_SYSTEM;
+        if (locationIsPrivileged(disabledPs.codePath)) {
+            parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
+        }
         PackageParser.Package newPkg = scanPackageLI(disabledPs.codePath,
-                PackageParser.PARSE_MUST_BE_APK | PackageParser.PARSE_IS_SYSTEM,
-                SCAN_MONITOR | SCAN_NO_PATHS, 0, null);
+                parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0, null);
 
         if (newPkg == null) {
             Slog.w(TAG, "Failed to restore system package:" + newPs.name
