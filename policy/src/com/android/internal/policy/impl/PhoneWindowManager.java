@@ -163,9 +163,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     static final int SYSTEM_UI_CHANGING_LAYOUT =
               View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS
-            | View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION;
+            | View.SYSTEM_UI_FLAG_FULLSCREEN;
 
     /**
      * Keyguard stuff
@@ -560,14 +558,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final BarController mStatusBarController = new BarController("StatusBar",
             View.STATUS_BAR_TRANSIENT,
             View.STATUS_BAR_UNHIDE,
-            View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS,
-            StatusBarManager.WINDOW_STATUS_BAR);
+            View.STATUS_BAR_TRANSLUCENT,
+            StatusBarManager.WINDOW_STATUS_BAR,
+            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
     private final BarController mNavigationBarController = new BarController("NavigationBar",
             View.NAVIGATION_BAR_TRANSIENT,
             View.NAVIGATION_BAR_UNHIDE,
-            View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION,
-            StatusBarManager.WINDOW_NAVIGATION_BAR);
+            View.NAVIGATION_BAR_TRANSLUCENT,
+            StatusBarManager.WINDOW_NAVIGATION_BAR,
+            WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
     private TransientNavigationConfirmation mTransientNavigationConfirmation;
 
@@ -2699,9 +2699,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // drive nav being hidden only by whether it is requested.
             final int sysui = mLastSystemUiFlags;
             boolean navVisible = (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
-            boolean navTransparent = (sysui & View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION) != 0;
+            boolean navTranslucent = (sysui & View.NAVIGATION_BAR_TRANSLUCENT) != 0;
             boolean transientAllowed = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
-            navTransparent &= !transientAllowed;  // transient trumps transparent
+            navTranslucent &= !transientAllowed;  // transient trumps translucent
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -2738,7 +2738,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             - mNavigationBarHeightForRotation[displayRotation];
                     mTmpNavigationFrame.set(0, top, displayWidth, displayHeight - overscanBottom);
                     mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
-                    if (transientNavBarShowing || navTransparent) {
+                    if (transientNavBarShowing || navTranslucent) {
                         mNavigationBarController.setBarShowingLw(true);
                     } else if (navVisible) {
                         mNavigationBarController.setBarShowingLw(true);
@@ -2749,8 +2749,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // We currently want to hide the navigation UI.
                         mNavigationBarController.setBarShowingLw(false);
                     }
-                    if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()
-                            && !mNavigationBarController.wasRecentlyTransparent()) {
+                    if (navVisible && !navTranslucent && !mNavigationBar.isAnimatingLw()
+                            && !mNavigationBarController.wasRecentlyTranslucent()) {
                         // If the opaque nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
@@ -2762,7 +2762,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             - mNavigationBarWidthForRotation[displayRotation];
                     mTmpNavigationFrame.set(left, 0, displayWidth - overscanRight, displayHeight);
                     mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
-                    if (transientNavBarShowing || navTransparent) {
+                    if (transientNavBarShowing || navTranslucent) {
                         mNavigationBarController.setBarShowingLw(true);
                     } else if (navVisible) {
                         mNavigationBarController.setBarShowingLw(true);
@@ -2773,8 +2773,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // We currently want to hide the navigation UI.
                         mNavigationBarController.setBarShowingLw(false);
                     }
-                    if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()
-                            && !mNavigationBarController.wasRecentlyTransparent()) {
+                    if (navVisible && !navTranslucent && !mNavigationBar.isAnimatingLw()
+                            && !mNavigationBarController.wasRecentlyTranslucent()) {
                         // If the nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
@@ -2821,7 +2821,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
 
                 boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
-                boolean statusBarTransparent = (sysui & View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS) != 0;
+                boolean statusBarTranslucent = (sysui & View.STATUS_BAR_TRANSLUCENT) != 0;
 
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
@@ -2844,8 +2844,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mCurLeft, mCurTop, mCurRight, mCurBottom));
                 }
                 if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw()
-                        && !statusBarTransient && !statusBarTransparent
-                        && !mStatusBarController.wasRecentlyTransparent()) {
+                        && !statusBarTransient && !statusBarTranslucent
+                        && !mStatusBarController.wasRecentlyTranslucent()) {
                     // If the opaque status bar is currently requested to be visible,
                     // and not in the process of animating on or off, then
                     // we can tell the app that it is covered by it.
@@ -3004,15 +3004,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             dcf.top = mSystemTop;
             dcf.right = mSystemRight;
             dcf.bottom = mSystemBottom;
+            final boolean inheritTranslucentDecor = (attrs.privateFlags
+                    & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) != 0;
             if (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                    && attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW) {
-                if ((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0
-                        && (sysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
-                        && (sysUiFl & View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS) == 0) {
+                    && attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW
+                    && !inheritTranslucentDecor) {
+                if ((sysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
+                        && (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0
+                        && (fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0) {
                     // Ensure policy decor includes status bar
                     dcf.top = mStableTop;
                 }
-                if ((sysUiFl & View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION) == 0
+                if ((fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION) == 0
                         && (sysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
                     // Ensure policy decor includes navigation bar
                     dcf.bottom = mStableBottom;
@@ -3262,6 +3265,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + mRestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = mRestrictedScreenTop
                             + mRestrictedScreenHeight;
+                } else if (attrs.type == TYPE_TOAST || attrs.type == TYPE_SYSTEM_ALERT) {
+                    // Toasts are stable to interim decor changes.
+                    pf.left = df.left = of.left = cf.left = mStableLeft;
+                    pf.top = df.top = of.top = cf.top = mStableTop;
+                    pf.right = df.right = of.right = cf.right = mStableRight;
+                    pf.bottom = df.bottom = of.bottom = cf.bottom = mStableBottom;
                 } else {
                     pf.left = mContentLeft;
                     pf.top = mContentTop;
@@ -5069,22 +5078,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
+        // apply translucent bar vis flags
+        WindowState transWin = mKeyguard != null && mKeyguard.isVisibleLw() && !mHideLockScreen
+                ? mKeyguard
+                : mTopFullscreenOpaqueWindowState;
+        vis = mStatusBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
+        vis = mNavigationBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
+
         // prevent status bar interaction from clearing certain flags
         boolean statusBarHasFocus = win.getAttrs().type == TYPE_STATUS_BAR;
         if (statusBarHasFocus) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_IMMERSIVE
-                    | View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS
-                    | View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION;
-            vis = (vis & ~flags) | (mLastSystemUiFlags & flags);
+                    | View.STATUS_BAR_TRANSLUCENT
+                    | View.NAVIGATION_BAR_TRANSLUCENT;
+            vis = (vis & ~flags) | (oldVis & flags);
         }
 
         // update status bar
         boolean transientAllowed =
                 (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
         boolean hideStatusBarWM =
-                (win.getAttrs().flags
+                mTopFullscreenOpaqueWindowState != null &&
+                (mTopFullscreenOpaqueWindowState.getAttrs().flags
                         & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
         boolean hideStatusBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;

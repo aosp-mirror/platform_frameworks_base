@@ -41,15 +41,15 @@
             android:fadingEdge="horizontal"
             android:scrollbars="none"
             android:layout_gravity="right"
-            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
-            android:fitsSystemWindows="true">
+            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length">
 
             <LinearLayout android:id="@+id/recents_linear_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layoutDirection="ltr"
                 android:layout_gravity="left"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:fitsSystemWindows="true">
             </LinearLayout>
 
         </com.android.systemui.recent.RecentsHorizontalScrollView>

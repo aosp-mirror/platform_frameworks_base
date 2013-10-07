@@ -2078,6 +2078,13 @@
   <public type="attr" name="requireDeviceUnlock" id="0x010103ec" />
   <public type="attr" name="apduServiceBanner" id="0x010103ed" />
   <public type="attr" name="accessibilityLiveRegion" id="0x010103ee" />
+  <public type="attr" name="windowTranslucentStatus" id="0x010103ef" />
+  <public type="attr" name="windowTranslucentNavigation" id="0x010103f0" />
+
+  <public type="style" name="Theme.Holo.NoActionBar.TranslucentDecor" id="0x010301e1" />
+  <public type="style" name="Theme.Holo.Light.NoActionBar.TranslucentDecor" id="0x010301e2" />
+  <public type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" id="0x010301e3" />
+  <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" id="0x010301e4" />
 
 <!-- ===============================================================
      Resources added in version 20 of the platform

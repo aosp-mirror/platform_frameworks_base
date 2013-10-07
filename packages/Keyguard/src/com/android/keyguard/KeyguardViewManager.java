@@ -124,9 +124,9 @@ public class KeyguardViewManager {
         // activities. Other disabled bits are handled by the KeyguardViewMediator talking
         // directly to the status bar service.
         int visFlags = View.STATUS_BAR_DISABLE_HOME;
-        if (shouldEnableTransparentBars()) {
-            visFlags |= View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS
-                      | View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION;
+        if (shouldEnableTranslucentDecor()) {
+            mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                                       | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
         }
         if (DEBUG) Log.v(TAG, "show:setSystemUiVisibility(" + Integer.toHexString(visFlags)+")");
         mKeyguardHost.setSystemUiVisibility(visFlags);
@@ -143,9 +143,9 @@ public class KeyguardViewManager {
                 || res.getBoolean(R.bool.config_enableLockScreenRotation);
     }
 
-    private boolean shouldEnableTransparentBars() {
+    private boolean shouldEnableTranslucentDecor() {
         Resources res = mContext.getResources();
-        return res.getBoolean(R.bool.config_enableLockScreenTransparentBars);
+        return res.getBoolean(R.bool.config_enableLockScreenTranslucentDecor);
     }
 
     class ViewManagerHost extends FrameLayout {

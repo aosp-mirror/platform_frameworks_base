@@ -754,6 +754,11 @@ public final class ViewRootImpl implements ViewParent,
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
             mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
+            if ((mWindowAttributesChangesFlag
+                    & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
+                // Recompute system ui visibility.
+                mAttachInfo.mRecomputeGlobalAttributes = true;
+            }
             if (mWindowAttributes.packageName == null) {
                 mWindowAttributes.packageName = mBasePackageName;
             }
@@ -1026,6 +1031,7 @@ public final class ViewRootImpl implements ViewParent,
             mView.dispatchCollectViewAttributes(attachInfo, 0);
             attachInfo.mSystemUiVisibility &= ~attachInfo.mDisabledSystemUiVisibility;
             WindowManager.LayoutParams params = mWindowAttributes;
+            attachInfo.mSystemUiVisibility |= getImpliedSystemUiVisibility(params);
             if (attachInfo.mKeepScreenOn != oldScreenOn
                     || attachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
                     || attachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
@@ -1037,6 +1043,18 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         return false;
+    }
+
+    private int getImpliedSystemUiVisibility(WindowManager.LayoutParams params) {
+        int vis = 0;
+        // Translucent decor window flags imply stable system ui visibility.
+        if ((params.flags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) != 0) {
+            vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        }
+        if ((params.flags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION) != 0) {
+            vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        }
+        return vis;
     }
 
     private boolean measureHierarchy(final View host, final WindowManager.LayoutParams lp,
