@@ -169,7 +169,7 @@ public class TransitionInflater {
             } else if ("recolor".equals(name)) {
                 transition = new Recolor();
                 newTransition = true;
-            } else if ("set".equals(name)) {
+            } else if ("transitionSet".equals(name)) {
                 transition = new TransitionSet();
                 TypedArray a = mContext.obtainStyledAttributes(attrs,
                         com.android.internal.R.styleable.TransitionSet);
