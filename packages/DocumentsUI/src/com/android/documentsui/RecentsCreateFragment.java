@@ -109,6 +109,11 @@ public class RecentsCreateFragment extends Fragment {
             public void onLoadFinished(
                     Loader<List<DocumentStack>> loader, List<DocumentStack> data) {
                 mAdapter.swapStacks(data);
+
+                // When launched into empty recents, show drawer
+                if (mAdapter.isEmpty() && !state.stackTouched) {
+                    ((DocumentsActivity) context).setRootsDrawerOpen(true);
+                }
             }
 
             @Override
