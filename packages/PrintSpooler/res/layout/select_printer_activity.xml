@@ -48,6 +48,7 @@
             </ImageView>
 
             <TextView
+                android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
@@ -56,6 +57,7 @@
             </TextView>
 
             <ProgressBar
+                android:id="@+id/progress_bar"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
