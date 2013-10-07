@@ -487,6 +487,12 @@ public final class CameraCharacteristics extends CameraMetadata {
      * Gain factor from electrons to raw units when
      * ISO=100
      * </p>
+     *
+     * <b>Optional</b> - This value may be null on some devices.
+     *
+     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
+     * Present on all devices that report being FULL level hardware devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
      */
     public static final Key<Rational> SENSOR_BASE_GAIN_FACTOR =
             new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
@@ -502,6 +508,12 @@ public final class CameraCharacteristics extends CameraMetadata {
      * values above this, it can be a mix of analog and
      * digital
      * </p>
+     *
+     * <b>Optional</b> - This value may be null on some devices.
+     *
+     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
+     * Present on all devices that report being FULL level hardware devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
      */
     public static final Key<Integer> SENSOR_MAX_ANALOG_SENSITIVITY =
             new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
