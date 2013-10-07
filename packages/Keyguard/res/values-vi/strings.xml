@@ -71,12 +71,9 @@
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Nút tạm dừng"</string>
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Nút phát"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Nút dừng"</string>
-    <!-- no translation found for keyguard_accessibility_transport_thumbs_up_description (4535938129663903194) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_thumbs_down_description (8101433677192177861) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_transport_heart_description (2336943232474689887) -->
-    <skip />
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Bài hát được đánh dấu thích"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Bài hát được đánh dấu không thích"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Trái tim"</string>
     <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Mở khóa để tiếp tục"</string>
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Quá trình khởi chạy bị hủy"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Thả <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> để xóa."</string>
