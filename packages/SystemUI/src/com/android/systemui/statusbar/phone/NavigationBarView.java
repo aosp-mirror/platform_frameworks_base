@@ -391,7 +391,7 @@ public class NavigationBarView extends LinearLayout {
 
         final AccessibilityManager accessibilityManager =
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        if (accessibilityManager.isEnabled()) {
+        if (accessibilityManager.isEnabled() && accessibilityManager.isTouchExplorationEnabled()) {
             // In accessibility mode, we add a simple click handler since swipe is tough to
             // trigger near screen edges.
             View camera = getCameraButton();
