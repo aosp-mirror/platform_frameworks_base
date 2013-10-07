@@ -585,6 +585,22 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public List<ResolveInfo> queryIntentContentProvidersAsUser(
+            Intent intent, int flags, int userId) {
+        try {
+            return mPM.queryIntentContentProviders(intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()), flags, userId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentContentProviders(Intent intent, int flags) {
+        return queryIntentContentProvidersAsUser(intent, flags, mContext.getUserId());
+    }
+
+    @Override
     public ProviderInfo resolveContentProvider(String name,
                                                int flags) {
         try {
