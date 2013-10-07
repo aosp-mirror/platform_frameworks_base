@@ -295,6 +295,11 @@ public class DirectoryFragment extends Fragment {
 
                 updateDisplayState();
 
+                // When launched into empty recents, show drawer
+                if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched) {
+                    ((DocumentsActivity) context).setRootsDrawerOpen(true);
+                }
+
                 // Restore any previous instance state
                 final SparseArray<Parcelable> container = state.dirState.remove(mStateKey);
                 if (container != null && !getArguments().getBoolean(EXTRA_IGNORE_STATE, false)) {
