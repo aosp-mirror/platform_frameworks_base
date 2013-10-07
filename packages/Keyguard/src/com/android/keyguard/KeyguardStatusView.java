@@ -43,8 +43,6 @@ public class KeyguardStatusView extends GridLayout {
 
     private TextView mAlarmStatusView;
 
-    private final int MARQUEE_VIEWS[] = { R.id.alarm_status };
-
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -83,12 +81,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private void setEnableMarquee(boolean enabled) {
         if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
-        for (int i = 0; i < MARQUEE_VIEWS.length; i++) {
-            View v = findViewById(MARQUEE_VIEWS[i]);
-            if (v != null) {
-                v.setSelected(enabled);
-            }
-        }
+        if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
     }
 
     @Override
