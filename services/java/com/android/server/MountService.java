@@ -1227,6 +1227,9 @@ class MountService extends IMountService.Stub
                                     descriptionId, primary, removable, emulated, mtpReserve,
                                     allowMassStorage, maxFileSize, null);
                             addVolumeLocked(volume);
+
+                            // Until we hear otherwise, treat as unmounted
+                            mVolumeStates.put(volume.getPath(), Environment.MEDIA_UNMOUNTED);
                         }
                     }
 
@@ -2781,6 +2784,7 @@ class MountService extends IMountService.Stub
                 final StorageVolume v = mVolumes.get(i);
                 pw.print("    ");
                 pw.println(v.toString());
+                pw.println("      state=" + mVolumeStates.get(v.getPath()));
             }
         }
 
