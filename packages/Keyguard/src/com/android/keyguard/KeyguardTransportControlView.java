@@ -84,6 +84,8 @@ public class KeyguardTransportControlView extends FrameLayout {
     private AudioManager mAudioManager;
     private RemoteController mRemoteController;
 
+    private int MARQUEE_VIEWS[] = { R.id.title, R.id.artist_album };
+
     private ImageView mBadge;
 
     private boolean mSeekEnabled;
@@ -198,6 +200,16 @@ public class KeyguardTransportControlView extends FrameLayout {
 
     KeyguardHostView.TransportControlCallback mTransportControlCallback;
 
+    private final KeyguardUpdateMonitorCallback mUpdateMonitor
+            = new KeyguardUpdateMonitorCallback() {
+        public void onScreenTurnedOff(int why) {
+            setEnableMarquee(false);
+        };
+        public void onScreenTurnedOn() {
+            setEnableMarquee(true);
+        };
+    };
+
     public KeyguardTransportControlView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (DEBUG) Log.v(TAG, "Create TCV " + this);
@@ -250,6 +262,16 @@ public class KeyguardTransportControlView extends FrameLayout {
         mTransportControlCallback = transportControlCallback;
     }
 
+    private void setEnableMarquee(boolean enabled) {
+        if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
+        for (int i = 0; i < MARQUEE_VIEWS.length; i++) {
+            View v = findViewById(MARQUEE_VIEWS[i]);
+            if (v != null) {
+                v.setSelected(enabled);
+            }
+        }
+    }
+
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
@@ -257,9 +279,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         mMetadataContainer = (ViewGroup) findViewById(R.id.metadata_container);
         mBadge = (ImageView) findViewById(R.id.badge);
         mTrackTitle = (TextView) findViewById(R.id.title);
-        mTrackTitle.setSelected(true); // enable marquee
         mTrackArtistAlbum = (TextView) findViewById(R.id.artist_album);
-        mTrackArtistAlbum.setSelected(true);
         mTransientSeek = findViewById(R.id.transient_seek);
         mTransientSeekBar = (SeekBar) findViewById(R.id.transient_seek_bar);
         mTransientSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
@@ -273,6 +293,8 @@ public class KeyguardTransportControlView extends FrameLayout {
             view.setOnClickListener(mTransportCommandListener);
             view.setOnLongClickListener(mTransportShowSeekBarListener);
         }
+        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
+        setEnableMarquee(screenOn);
     }
 
     @Override
@@ -285,6 +307,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         }
         if (DEBUG) Log.v(TAG, "Registering TCV " + this);
         mAudioManager.registerRemoteController(mRemoteController);
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitor);
     }
 
     @Override
@@ -301,6 +324,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         super.onDetachedFromWindow();
         if (DEBUG) Log.v(TAG, "Unregistering TCV " + this);
         mAudioManager.unregisterRemoteController(mRemoteController);
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitor);
         mUserSeeking = false;
     }
 
