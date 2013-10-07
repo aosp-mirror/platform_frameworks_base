@@ -21,14 +21,14 @@
         android:title="@string/search"
         android:icon="@*android:drawable/ic_menu_search_holo_light"
         android:actionViewClass="android.widget.SearchView"
-        android:showAsAction="ifRoom"
+        android:showAsAction="ifRoom|collapseActionView"
         android:alphabeticShortcut="f"
         android:imeOptions="actionSearch">
     </item>
 
     <item
         android:id="@+id/action_add_printer"
-        android:title="@null"
+        android:title="@string/print_add_printer"
         android:icon="@*android:drawable/create_contact"
         android:showAsAction="ifRoom"
         android:alphabeticShortcut="a">
