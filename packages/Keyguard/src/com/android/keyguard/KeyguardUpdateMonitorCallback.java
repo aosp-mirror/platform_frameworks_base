@@ -19,6 +19,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.view.WindowManagerPolicy;
 
 import com.android.internal.telephony.IccCardConstants;
 
@@ -137,7 +138,23 @@ class KeyguardUpdateMonitorCallback {
      */
     void onEmergencyCallAction() { }
 
+    /**
+     * Called when the transport background changes.
+     * @param bitmap
+     */
     public void onSetBackground(Bitmap bitmap) {
-        // THIS SPACE FOR RENT
     }
+
+    /**
+     * Called when the screen turns on
+     */
+    public void onScreenTurnedOn() { }
+
+    /**
+     * Called when the screen turns off
+     * @param why {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER},
+     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT} or
+     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
+     */
+    public void onScreenTurnedOff(int why) { }
 }

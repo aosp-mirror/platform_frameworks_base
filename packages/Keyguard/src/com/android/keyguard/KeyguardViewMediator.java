@@ -599,6 +599,7 @@ public class KeyguardViewMediator {
                 doKeyguardLocked(null);
             }
         }
+        KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurndOff(why);
     }
 
     private void doKeyguardLaterLocked() {
@@ -664,6 +665,7 @@ public class KeyguardViewMediator {
                 notifyScreenOnLocked(callback);
             }
         }
+        KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurnedOn();
         maybeSendUserPresentBroadcast();
     }
 

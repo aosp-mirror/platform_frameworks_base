@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.View;
 import android.widget.GridLayout;
@@ -42,6 +43,8 @@ public class KeyguardStatusView extends GridLayout {
 
     private TextView mAlarmStatusView;
 
+    private final int MARQUEE_VIEWS[] = { R.id.alarm_status };
+
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -55,6 +58,14 @@ public class KeyguardStatusView extends GridLayout {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
                 refresh();
             }
+        };
+
+        public void onScreenTurnedOn() {
+            setEnableMarquee(true);
+        };
+
+        public void onScreenTurnedOff(int why) {
+            setEnableMarquee(false);
         };
     };
 
@@ -70,22 +81,23 @@ public class KeyguardStatusView extends GridLayout {
         super(context, attrs, defStyle);
     }
 
+    private void setEnableMarquee(boolean enabled) {
+        if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
+        for (int i = 0; i < MARQUEE_VIEWS.length; i++) {
+            View v = findViewById(MARQUEE_VIEWS[i]);
+            if (v != null) {
+                v.setSelected(enabled);
+            }
+        }
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mLockPatternUtils = new LockPatternUtils(getContext());
-
-        // Required to get Marquee to work.
-        final View marqueeViews[] = { mAlarmStatusView };
-        for (int i = 0; i < marqueeViews.length; i++) {
-            View v = marqueeViews[i];
-            if (v == null) {
-                throw new RuntimeException("Can't find widget at index " + i);
-            }
-            v.setSelected(true);
-        }
+        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
+        setEnableMarquee(screenOn);
         refresh();
     }
 
