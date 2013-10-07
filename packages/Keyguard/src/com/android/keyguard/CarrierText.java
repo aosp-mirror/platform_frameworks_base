@@ -47,6 +47,14 @@ public class CarrierText extends TextView {
             mSimState = simState;
             updateCarrierText(mSimState, mPlmn, mSpn);
         }
+
+        public void onScreenTurnedOff(int why) {
+            setSelected(false);
+        };
+
+        public void onScreenTurnedOn() {
+            setSelected(true);
+        };
     };
     /**
      * The status of this lock screen. Primarily used for widgets on LockScreen.
@@ -79,7 +87,8 @@ public class CarrierText extends TextView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mSeparator = getResources().getString(R.string.kg_text_message_separator);
-        setSelected(true); // Allow marquee to work.
+        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
+        setSelected(screenOn); // Allow marquee to work.
     }
 
     @Override

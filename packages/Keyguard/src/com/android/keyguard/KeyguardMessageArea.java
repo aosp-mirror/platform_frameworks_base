@@ -163,6 +163,12 @@ class KeyguardMessageArea extends TextView {
             mBatteryIsLow = status.isBatteryLow();
             update();
         }
+        public void onScreenTurnedOff(int why) {
+            setSelected(false);
+        };
+        public void onScreenTurnedOn() {
+            setSelected(true);
+        };
     };
 
     public KeyguardMessageArea(Context context) {
@@ -174,9 +180,6 @@ class KeyguardMessageArea extends TextView {
 
         mLockPatternUtils = new LockPatternUtils(context);
 
-        // This is required to ensure marquee works
-        setSelected(true);
-
         // Registering this callback immediately updates the battery state, among other things.
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
         mUpdateMonitor.registerCallback(mInfoCallback);
@@ -185,6 +188,12 @@ class KeyguardMessageArea extends TextView {
         mSeparator = getResources().getString(R.string.kg_text_message_separator);
 
         update();
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
+        setSelected(screenOn); // This is required to ensure marquee works
     }
 
     public void securityMessageChanged() {
