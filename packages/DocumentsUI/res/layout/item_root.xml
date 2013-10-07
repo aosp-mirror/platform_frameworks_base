@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:textAlignment="viewStart"
             style="@style/TextAppearance.Medium" />
 
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:textAlignment="viewStart"
             style="@style/TextAppearance.Small" />
 
