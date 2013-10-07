@@ -18,9 +18,11 @@ package com.android.mediaframeworktest.unit;
 
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.graphics.ImageFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.Face;
 import android.hardware.camera2.Rational;
 import android.hardware.camera2.Size;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -30,9 +32,6 @@ import static android.hardware.camera2.impl.CameraMetadataNative.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-
-import static org.junit.Assert.assertArrayEquals;
 
 /**
  * <pre>
@@ -57,6 +56,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     // Tags
     static final int ANDROID_COLOR_CORRECTION_MODE = ANDROID_COLOR_CORRECTION_START;
     static final int ANDROID_COLOR_CORRECTION_TRANSFORM = ANDROID_COLOR_CORRECTION_START + 1;
+    static final int ANDROID_COLOR_CORRECTION_GAINS = ANDROID_COLOR_CORRECTION_START + 2;
 
     static final int ANDROID_CONTROL_AE_ANTIBANDING_MODE = ANDROID_CONTROL_START;
     static final int ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION = ANDROID_CONTROL_START + 1;
@@ -131,7 +131,8 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     @SmallTest
     public void testGetTypeFromTag() {
         assertEquals(TYPE_BYTE, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_MODE));
-        assertEquals(TYPE_FLOAT, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_TRANSFORM));
+        assertEquals(TYPE_RATIONAL, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_TRANSFORM));
+        assertEquals(TYPE_FLOAT, CameraMetadataNative.getNativeType(ANDROID_COLOR_CORRECTION_GAINS));
         assertEquals(TYPE_BYTE, CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_ANTIBANDING_MODE));
         assertEquals(TYPE_INT32,
                 CameraMetadataNative.getNativeType(ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION));
@@ -187,30 +188,30 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         assertEquals(false, mMetadata.isEmpty());
 
         //
-        // android.colorCorrection.transform (3x3 matrix)
+        // android.colorCorrection.colorCorrectionGains (float x 4 array)
         //
 
-        final float[] transformMatrix = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        byte[] transformMatrixAsByteArray = new byte[transformMatrix.length * 4];
-        ByteBuffer transformMatrixByteBuffer =
-                ByteBuffer.wrap(transformMatrixAsByteArray).order(ByteOrder.nativeOrder());
-        for (float f : transformMatrix)
-            transformMatrixByteBuffer.putFloat(f);
+        final float[] colorCorrectionGains = new float[] { 1.0f, 2.0f, 3.0f, 4.0f};
+        byte[] colorCorrectionGainsAsByteArray = new byte[colorCorrectionGains.length * 4];
+        ByteBuffer colorCorrectionGainsByteBuffer =
+                ByteBuffer.wrap(colorCorrectionGainsAsByteArray).order(ByteOrder.nativeOrder());
+        for (float f : colorCorrectionGains)
+            colorCorrectionGainsByteBuffer.putFloat(f);
 
         // Read
-        assertNull(mMetadata.readValues(ANDROID_COLOR_CORRECTION_TRANSFORM));
-        mMetadata.writeValues(ANDROID_COLOR_CORRECTION_TRANSFORM, transformMatrixAsByteArray);
+        assertNull(mMetadata.readValues(ANDROID_COLOR_CORRECTION_GAINS));
+        mMetadata.writeValues(ANDROID_COLOR_CORRECTION_GAINS, colorCorrectionGainsAsByteArray);
 
         // Write
-        assertArrayEquals(transformMatrixAsByteArray,
-                mMetadata.readValues(ANDROID_COLOR_CORRECTION_TRANSFORM));
+        assertArrayEquals(colorCorrectionGainsAsByteArray,
+                mMetadata.readValues(ANDROID_COLOR_CORRECTION_GAINS));
 
         assertEquals(2, mMetadata.getEntryCount());
         assertEquals(false, mMetadata.isEmpty());
 
         // Erase
-        mMetadata.writeValues(ANDROID_COLOR_CORRECTION_TRANSFORM, null);
-        assertNull(mMetadata.readValues(ANDROID_COLOR_CORRECTION_TRANSFORM));
+        mMetadata.writeValues(ANDROID_COLOR_CORRECTION_GAINS, null);
+        assertNull(mMetadata.readValues(ANDROID_COLOR_CORRECTION_GAINS));
         assertEquals(1, mMetadata.getEntryCount());
     }
 
@@ -279,7 +280,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     @SmallTest
     public void testReadWritePrimitiveArray() {
         // int32 (n)
-        checkKeyGetAndSetArray("android.sensor.info.availableSensitivities", int[].class,
+        checkKeyGetAndSetArray("android.sensor.info.sensitivityRange", int[].class,
                 new int[] {
                         0xC0FFEE, 0xDEADF00D
                 });
@@ -379,7 +380,9 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 new AvailableFormat[] {
                         AvailableFormat.RAW_SENSOR,
                         AvailableFormat.YV12,
-                        AvailableFormat.IMPLEMENTATION_DEFINED
+                        AvailableFormat.IMPLEMENTATION_DEFINED,
+                        AvailableFormat.YCbCr_420_888,
+                        AvailableFormat.BLOB
                 });
 
     }
@@ -431,12 +434,13 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                         AvailableFormat.RAW_SENSOR,
                         AvailableFormat.YV12,
                         AvailableFormat.IMPLEMENTATION_DEFINED,
-                        AvailableFormat.YCbCr_420_888
+                        AvailableFormat.YCbCr_420_888,
+                        AvailableFormat.BLOB
                 });
 
-        Key<AeAntibandingMode> availableFormatsKey =
-                new Key<AeAntibandingMode>("android.scaler.availableFormats",
-                        AeAntibandingMode.class);
+        Key<AvailableFormat[]> availableFormatsKey =
+                new Key<AvailableFormat[]>("android.scaler.availableFormats",
+                        AvailableFormat[].class);
         byte[] availableFormatValues = mMetadata.readValues(CameraMetadataNative
                 .getTag(availableFormatsKey.getName()));
 
@@ -444,7 +448,8 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 0x20,
                 0x32315659,
                 0x22,
-                0x23
+                0x23,
+                0x21
         };
 
         ByteBuffer bf = ByteBuffer.wrap(availableFormatValues).order(ByteOrder.nativeOrder());
@@ -522,5 +527,116 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
     <T> void compareGeneric(T expected, T actual) {
         assertEquals(expected, actual);
+    }
+
+    @SmallTest
+    public void testReadWriteOverride() {
+        //
+        // android.scaler.availableFormats (int x n array)
+        //
+        int[] availableFormats = new int[] {
+                0x20,       // RAW_SENSOR
+                0x32315659, // YV12
+                0x11,       // YCrCb_420_SP
+                0x100,      // ImageFormat.JPEG
+                0x22,       // IMPLEMENTATION_DEFINED
+                0x23,       // YCbCr_420_888
+        };
+        int[] expectedIntValues = new int[] {
+                0x20,       // RAW_SENSOR
+                0x32315659, // YV12
+                0x11,       // YCrCb_420_SP
+                0x21,       // BLOB
+                0x22,       // IMPLEMENTATION_DEFINED
+                0x23,       // YCbCr_420_888
+        };
+        int availableFormatTag = CameraMetadataNative.getTag("android.scaler.availableFormats");
+
+        // Write
+        mMetadata.set(CameraCharacteristics.SCALER_AVAILABLE_FORMATS, availableFormats);
+
+        byte[] availableFormatValues = mMetadata.readValues(availableFormatTag);
+
+        ByteBuffer bf = ByteBuffer.wrap(availableFormatValues).order(ByteOrder.nativeOrder());
+
+        assertEquals(expectedIntValues.length * 4, availableFormatValues.length);
+        for (int i = 0; i < expectedIntValues.length; ++i) {
+            assertEquals(expectedIntValues[i], bf.getInt());
+        }
+        // Read
+        byte[] availableFormatsAsByteArray = new byte[expectedIntValues.length * 4];
+        ByteBuffer availableFormatsByteBuffer =
+                ByteBuffer.wrap(availableFormatsAsByteArray).order(ByteOrder.nativeOrder());
+        for (int value : expectedIntValues) {
+            availableFormatsByteBuffer.putInt(value);
+        }
+        mMetadata.writeValues(availableFormatTag, availableFormatsAsByteArray);
+
+        int[] resultFormats = mMetadata.get(CameraCharacteristics.SCALER_AVAILABLE_FORMATS);
+        assertNotNull("result available formats shouldn't be null", resultFormats);
+        assertArrayEquals(availableFormats, resultFormats);
+
+        //
+        // android.statistics.faces (Face x n array)
+        //
+        int[] expectedFaceIds = new int[] {1, 2, 3, 4, 5};
+        byte[] expectedFaceScores = new byte[] {10, 20, 30, 40, 50};
+        int numFaces = expectedFaceIds.length;
+        Rect[] expectedRects = new Rect[numFaces];
+        for (int i = 0; i < numFaces; i++) {
+            expectedRects[i] = new Rect(i*4 + 1, i * 4 + 2, i * 4 + 3, i * 4 + 4);
+        }
+        int[] expectedFaceLM = new int[] {
+                1, 2, 3, 4, 5, 6,
+                7, 8, 9, 10, 11, 12,
+                13, 14, 15, 16, 17, 18,
+                19, 20, 21, 22, 23, 24,
+                25, 26, 27, 28, 29, 30,
+        };
+        Point[] expectedFaceLMPoints = new Point[numFaces * 3];
+        for (int i = 0; i < numFaces; i++) {
+            expectedFaceLMPoints[i*3] = new Point(expectedFaceLM[i*6], expectedFaceLM[i*6+1]);
+            expectedFaceLMPoints[i*3+1] = new Point(expectedFaceLM[i*6+2], expectedFaceLM[i*6+3]);
+            expectedFaceLMPoints[i*3+2] = new Point(expectedFaceLM[i*6+4], expectedFaceLM[i*6+5]);
+        }
+
+        /**
+         * Read - FACE_DETECT_MODE == FULL
+         */
+        mMetadata.set(CaptureResult.STATISTICS_FACE_DETECT_MODE,
+                CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL);
+        mMetadata.set(CaptureResult.STATISTICS_FACE_IDS, expectedFaceIds);
+        mMetadata.set(CaptureResult.STATISTICS_FACE_SCORES, expectedFaceScores);
+        mMetadata.set(CaptureResult.STATISTICS_FACE_RECTANGLES, expectedRects);
+        mMetadata.set(CaptureResult.STATISTICS_FACE_LANDMARKS, expectedFaceLM);
+        Face[] resultFaces = mMetadata.get(CaptureResult.STATISTICS_FACES);
+        assertEquals(numFaces, resultFaces.length);
+        for (int i = 0; i < numFaces; i++) {
+            assertEquals(expectedFaceIds[i], resultFaces[i].getId());
+            assertEquals(expectedFaceScores[i], resultFaces[i].getScore());
+            assertEquals(expectedRects[i], resultFaces[i].getBounds());
+            assertEquals(expectedFaceLMPoints[i*3], resultFaces[i].getLeftEyePosition());
+            assertEquals(expectedFaceLMPoints[i*3+1], resultFaces[i].getRightEyePosition());
+            assertEquals(expectedFaceLMPoints[i*3+2], resultFaces[i].getMouthPosition());
+        }
+
+        /**
+         * Read - FACE_DETECT_MODE == SIMPLE
+         */
+        mMetadata.set(CaptureResult.STATISTICS_FACE_DETECT_MODE,
+                CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE);
+        mMetadata.set(CaptureResult.STATISTICS_FACE_SCORES, expectedFaceScores);
+        mMetadata.set(CaptureResult.STATISTICS_FACE_RECTANGLES, expectedRects);
+        Face[] resultSimpleFaces = mMetadata.get(CaptureResult.STATISTICS_FACES);
+        assertEquals(numFaces, resultSimpleFaces.length);
+        for (int i = 0; i < numFaces; i++) {
+            assertEquals(Face.ID_UNSUPPORTED, resultSimpleFaces[i].getId());
+            assertEquals(expectedFaceScores[i], resultSimpleFaces[i].getScore());
+            assertEquals(expectedRects[i], resultSimpleFaces[i].getBounds());
+            assertNull(resultSimpleFaces[i].getLeftEyePosition());
+            assertNull(resultSimpleFaces[i].getRightEyePosition());
+            assertNull(resultSimpleFaces[i].getMouthPosition());
+        }
+
     }
 }
