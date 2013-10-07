@@ -722,6 +722,12 @@ public final class CaptureResult extends CameraMetadata {
      * The thermal diode being queried should be inside the sensor PCB, or
      * somewhere close to it.
      * </p>
+     *
+     * <b>Optional</b> - This value may be null on some devices.
+     *
+     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
+     * Present on all devices that report being FULL level hardware devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
      */
     public static final Key<Float> SENSOR_TEMPERATURE =
             new Key<Float>("android.sensor.temperature", float.class);
