@@ -525,7 +525,7 @@ package android {
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
     field public static final int fragment = 16843491; // 0x10102e3
-    field public static final int fragmentBreadCrumbsStyle = 16843759; // 0x10103ef
+    field public static final int fragmentBreadCrumbsStyle = 16843761; // 0x10103f1
     field public static final int fragmentCloseEnterAnimation = 16843495; // 0x10102e7
     field public static final int fragmentCloseExitAnimation = 16843496; // 0x10102e8
     field public static final int fragmentFadeEnterAnimation = 16843497; // 0x10102e9
@@ -1867,7 +1867,7 @@ package android {
     field public static final int Widget_DeviceDefault_DropDownItem_Spinner = 16974178; // 0x1030162
     field public static final int Widget_DeviceDefault_EditText = 16974154; // 0x103014a
     field public static final int Widget_DeviceDefault_ExpandableListView = 16974155; // 0x103014b
-    field public static final int Widget_DeviceDefault_FragmentBreadCrumbs = 16974307; // 0x10301e3
+    field public static final int Widget_DeviceDefault_FragmentBreadCrumbs = 16974311; // 0x10301e7
     field public static final int Widget_DeviceDefault_GridView = 16974156; // 0x103014c
     field public static final int Widget_DeviceDefault_HorizontalScrollView = 16974171; // 0x103015b
     field public static final int Widget_DeviceDefault_ImageButton = 16974157; // 0x103014d
@@ -1901,7 +1901,7 @@ package android {
     field public static final int Widget_DeviceDefault_Light_DropDownItem_Spinner = 16974233; // 0x1030199
     field public static final int Widget_DeviceDefault_Light_EditText = 16974206; // 0x103017e
     field public static final int Widget_DeviceDefault_Light_ExpandableListView = 16974207; // 0x103017f
-    field public static final int Widget_DeviceDefault_Light_FragmentBreadCrumbs = 16974308; // 0x10301e4
+    field public static final int Widget_DeviceDefault_Light_FragmentBreadCrumbs = 16974312; // 0x10301e8
     field public static final int Widget_DeviceDefault_Light_GridView = 16974208; // 0x1030180
     field public static final int Widget_DeviceDefault_Light_HorizontalScrollView = 16974226; // 0x1030192
     field public static final int Widget_DeviceDefault_Light_ImageButton = 16974209; // 0x1030181
@@ -1989,7 +1989,7 @@ package android {
     field public static final int Widget_Holo_DropDownItem_Spinner = 16973995; // 0x10300ab
     field public static final int Widget_Holo_EditText = 16973971; // 0x1030093
     field public static final int Widget_Holo_ExpandableListView = 16973972; // 0x1030094
-    field public static final int Widget_Holo_FragmentBreadCrumbs = 16974305; // 0x10301e1
+    field public static final int Widget_Holo_FragmentBreadCrumbs = 16974309; // 0x10301e5
     field public static final int Widget_Holo_GridView = 16973973; // 0x1030095
     field public static final int Widget_Holo_HorizontalScrollView = 16973988; // 0x10300a4
     field public static final int Widget_Holo_ImageButton = 16973974; // 0x1030096
@@ -2023,7 +2023,7 @@ package android {
     field public static final int Widget_Holo_Light_DropDownItem_Spinner = 16974041; // 0x10300d9
     field public static final int Widget_Holo_Light_EditText = 16974014; // 0x10300be
     field public static final int Widget_Holo_Light_ExpandableListView = 16974015; // 0x10300bf
-    field public static final int Widget_Holo_Light_FragmentBreadCrumbs = 16974306; // 0x10301e2
+    field public static final int Widget_Holo_Light_FragmentBreadCrumbs = 16974310; // 0x10301e6
     field public static final int Widget_Holo_Light_GridView = 16974016; // 0x10300c0
     field public static final int Widget_Holo_Light_HorizontalScrollView = 16974034; // 0x10300d2
     field public static final int Widget_Holo_Light_ImageButton = 16974017; // 0x10300c1
