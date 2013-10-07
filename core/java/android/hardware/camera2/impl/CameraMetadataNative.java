@@ -92,6 +92,15 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Key<T> key) {
+
+        if (key == CaptureResult.STATISTICS_FACES) {
+            /**
+             * FIXME: Workaround for HAL bug that's missing FACE_DETECT_MODE
+             */
+            Log.w(TAG, "Expected non-null android.statistics.faceDetectMode");
+            return null;
+        }
+
         T value = getOverride(key);
         if (value != null) {
             return value;
