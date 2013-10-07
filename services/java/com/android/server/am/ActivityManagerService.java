@@ -15820,9 +15820,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                boolean haveActivities = mStackSupervisor.switchUserLocked(userId, uss);
-                if (!haveActivities) {
+                boolean homeInFront = mStackSupervisor.switchUserLocked(userId, uss);
+                if (homeInFront) {
                     startHomeActivityLocked(userId);
+                } else {
+                    mStackSupervisor.resumeTopActivitiesLocked();
                 }
 
                 EventLogTags.writeAmSwitchUser(userId);
@@ -16148,6 +16150,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException e) {
             }
         }
+
+        mStackSupervisor.removeUserLocked(userId);
     }
 
     @Override
