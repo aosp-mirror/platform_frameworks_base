@@ -282,7 +282,7 @@ public final class PrintAttributes implements Parcelable {
          */
         public static final MediaSize UNKNOWN_PORTRAIT =
                 new MediaSize("UNKNOWN_PORTRAIT", "android",
-                        R.string.mediasize_unknown_portrait, Integer.MAX_VALUE, 1);
+                        R.string.mediasize_unknown_portrait, 1, Integer.MAX_VALUE);
 
         /**
          * Unknown media size in landscape mode.
@@ -293,7 +293,7 @@ public final class PrintAttributes implements Parcelable {
          */
         public static final MediaSize UNKNOWN_LANDSCAPE =
                 new MediaSize("UNKNOWN_LANDSCAPE", "android",
-                        R.string.mediasize_unknown_landscape, 1, Integer.MAX_VALUE);
+                        R.string.mediasize_unknown_landscape, Integer.MAX_VALUE, 1);
 
         // ISO sizes
 
