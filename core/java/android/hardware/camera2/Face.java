@@ -58,7 +58,7 @@ public final class Face {
      * Create a new face with all fields set.
      *
      * <p>The id, leftEyePosition, rightEyePosition, and mouthPosition are considered optional.
-     * They are only required when the {@link #CaptureResult} reports that the value of key
+     * They are only required when the {@link CaptureResult} reports that the value of key
      * {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} is
      * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_FULL}.
      * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
@@ -112,7 +112,7 @@ public final class Face {
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
      * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
      * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
-     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link #CaptureResult},
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link CaptureResult},
      * the face id of each face is expected to be {@value #ID_UNSUPPORTED}, the leftEyePosition,
      * rightEyePosition, and mouthPositions are expected to be {@code null} for each face.</p>
      *
@@ -177,7 +177,7 @@ public final class Face {
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
      * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
      * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
-     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link #CaptureResult},
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link CaptureResult},
      * the face id of each face is expected to be {@value #ID_UNSUPPORTED}.</p>
      *
      * <p>This value will either be {@value #ID_UNSUPPORTED} or
