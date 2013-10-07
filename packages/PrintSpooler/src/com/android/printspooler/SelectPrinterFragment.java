@@ -43,6 +43,7 @@ import android.print.PrintManager;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -215,8 +216,7 @@ public final class SelectPrinterFragment extends ListFragment {
 
     public static class AddPrinterAlertDialogFragment extends DialogFragment {
 
-        private static final String DEFAULT_MARKET_QUERY_STRING =
-                "market://search?q=print";
+        private String mAddPrintServiceItem;
 
         @Override
         @SuppressWarnings("unchecked")
@@ -227,46 +227,55 @@ public final class SelectPrinterFragment extends ListFragment {
             final List<PrintServiceInfo> printServices = (List<PrintServiceInfo>) (List<?>)
                     getArguments().getParcelableArrayList(FRAGMRNT_ARGUMENT_PRINT_SERVICE_INFOS);
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                    getActivity(), android.R.layout.simple_list_item_1);
             final int printServiceCount = printServices.size();
             for (int i = 0; i < printServiceCount; i++) {
                 PrintServiceInfo printService = printServices.get(i);
                 adapter.add(printService.getResolveInfo().loadLabel(
                         getActivity().getPackageManager()).toString());
             }
+            final String searchUri = Settings.Secure.getString(getActivity().getContentResolver(),
+                    Settings.Secure.PRINT_SERVICE_SEARCH_URI);
+            final Intent marketIntent;
+            if (!TextUtils.isEmpty(searchUri)) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri));
+                if (getActivity().getPackageManager().resolveActivity(intent, 0) != null) {
+                    marketIntent = intent;
+                    mAddPrintServiceItem = getString(R.string.add_print_service_label);
+                    adapter.add(mAddPrintServiceItem);
+                } else {
+                    marketIntent = null;
+                }
+            } else {
+                marketIntent = null;
+            }
 
             builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    PrintServiceInfo printService = printServices.get(which);
-                    ComponentName componentName = new ComponentName(
-                            printService.getResolveInfo().serviceInfo.packageName,
-                            printService.getAddPrintersActivityName());
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.setComponent(componentName);
-                    try {
-                        startActivity(intent);
-                    } catch (ActivityNotFoundException anfe) {
-                        Log.w(LOG_TAG, "Couldn't start settings activity", anfe);
+                    String item = adapter.getItem(which);
+                    if (item == mAddPrintServiceItem) {
+                        try {
+                          startActivity(marketIntent);
+                      } catch (ActivityNotFoundException anfe) {
+                          Log.w(LOG_TAG, "Couldn't start add printer activity", anfe);
+                      }
+                    } else {
+                        PrintServiceInfo printService = printServices.get(which);
+                        ComponentName componentName = new ComponentName(
+                                printService.getResolveInfo().serviceInfo.packageName,
+                                printService.getAddPrintersActivityName());
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.setComponent(componentName);
+                        try {
+                            startActivity(intent);
+                        } catch (ActivityNotFoundException anfe) {
+                            Log.w(LOG_TAG, "Couldn't start settings activity", anfe);
+                        }
                     }
                 }
             });
-
-            Uri marketUri = Uri.parse(DEFAULT_MARKET_QUERY_STRING);
-            final Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            if (getActivity().getPackageManager().resolveActivity(marketIntent, 0) != null) {
-                builder.setPositiveButton(R.string.add_print_service_label,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            try {
-                                startActivity(marketIntent);
-                            } catch (ActivityNotFoundException anfe) {
-                                Log.w(LOG_TAG, "Couldn't start add printer activity", anfe);
-                            }
-                        }
-                    });
-            }
 
             return builder.create();
         }
