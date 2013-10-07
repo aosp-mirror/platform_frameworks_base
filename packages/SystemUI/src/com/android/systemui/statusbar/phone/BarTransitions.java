@@ -35,7 +35,7 @@ public class BarTransitions {
 
     public static final int MODE_OPAQUE = 0;
     public static final int MODE_SEMI_TRANSPARENT = 1;
-    public static final int MODE_TRANSPARENT = 2;
+    public static final int MODE_TRANSLUCENT = 2;
     public static final int MODE_LIGHTS_OUT = 3;
 
     public static final int LIGHTS_IN_DURATION = 250;
@@ -125,7 +125,7 @@ public class BarTransitions {
                 mColorDrawable.setColor(newColor);
             }
         }
-        if (oldColor != null && newColor == null && mColorDrawableShowing) {
+        if (newColor == null && mColorDrawableShowing) {
             if (DEBUG) Log.d(mTag, "Hide color layer");
             if (animate) {
                 mTransitionDrawable.reverseTransition(BACKGROUND_DURATION);
@@ -133,9 +133,8 @@ public class BarTransitions {
                 mTransitionDrawable.resetTransition();
             }
             mColorDrawableShowing = false;
-        } else if (oldColor == null && newColor != null && !mColorDrawableShowing) {
+        } else if (newColor != null && !mColorDrawableShowing) {
             if (DEBUG) Log.d(mTag, "Show color layer");
-            mTransitionDrawable.setCrossFadeEnabled(!animate);
             mTransitionDrawable.startTransition(animate ? BACKGROUND_DURATION : 0);
             mColorDrawableShowing = true;
         }
@@ -158,7 +157,7 @@ public class BarTransitions {
     public static String modeToString(int mode) {
         if (mode == MODE_OPAQUE) return "MODE_OPAQUE";
         if (mode == MODE_SEMI_TRANSPARENT) return "MODE_SEMI_TRANSPARENT";
-        if (mode == MODE_TRANSPARENT) return "MODE_TRANSPARENT";
+        if (mode == MODE_TRANSLUCENT) return "MODE_TRANSLUCENT";
         if (mode == MODE_LIGHTS_OUT) return "MODE_LIGHTS_OUT";
         throw new IllegalArgumentException("Unknown mode " + mode);
     }

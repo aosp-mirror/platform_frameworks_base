@@ -439,6 +439,14 @@
              or later. -->
         <attr name="windowCloseOnTouchOutside" format="boolean" />
 
+        <!-- Flag indicating whether this window requests a translucent status bar.  Corresponds
+             to {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_STATUS}. -->
+        <attr name="windowTranslucentStatus" format="boolean" />
+
+        <!-- Flag indicating whether this window requests a translucent navigation bar.  Corresponds
+             to {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION}. -->
+        <attr name="windowTranslucentNavigation" format="boolean" />
+
         <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
@@ -1594,6 +1602,8 @@
         <attr name="windowSplitActionBar" />
         <attr name="windowEnableSplitTouch" />
         <attr name="windowCloseOnTouchOutside" />
+        <attr name="windowTranslucentStatus" />
+        <attr name="windowTranslucentNavigation" />
         <!-- The minimum width the window is allowed to be, along the major
              axis of the screen.  That is, when in landscape.  Can be either
              an absolute dimension or a fraction of the screen size in that
