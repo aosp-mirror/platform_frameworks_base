@@ -57,6 +57,8 @@ public final class PrintManager {
 
     private static final String LOG_TAG = "PrintManager";
 
+    private static final boolean DEBUG = false;
+
     /** @hide */
     public static final int APP_ID_ANY = -2;
 
@@ -350,6 +352,16 @@ public final class PrintManager {
 
         private Handler mHandler; // Strong reference OK - cleared in finish()
 
+        private LayoutSpec mLastLayoutSpec;
+
+        private WriteSpec mLastWriteSpec;
+
+        private boolean mStartReqeusted;
+        private boolean mStarted;
+
+        private boolean mFinishRequested;
+        private boolean mFinished;
+
         public PrintDocumentAdapterDelegate(PrintDocumentAdapter documentAdapter, Looper looper) {
             mDocumentAdapter = documentAdapter;
             mHandler = new MyHandler(looper);
@@ -357,47 +369,102 @@ public final class PrintManager {
 
         @Override
         public void start() {
-            mHandler.sendEmptyMessage(MyHandler.MSG_START);
+            synchronized (mLock) {
+                // Started or finished - nothing to do.
+                if (mStartReqeusted || mFinishRequested) {
+                    return;
+                }
+
+                mStartReqeusted = true;
+
+                doPendingWorkLocked();
+            }
         }
 
         @Override
         public void layout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
                 ILayoutResultCallback callback, Bundle metadata, int sequence) {
             synchronized (mLock) {
-                if (mLayoutOrWriteCancellation != null) {
-                    mLayoutOrWriteCancellation.cancel();
+                // Start not called or finish called - nothing to do.
+                if (!mStartReqeusted || mFinishRequested) {
+                    return;
                 }
+
+                // Layout cancels write and overrides layout.
+                if (mLastWriteSpec != null) {
+                    IoUtils.closeQuietly(mLastWriteSpec.fd);
+                    mLastWriteSpec = null;
+                }
+
+                mLastLayoutSpec = new LayoutSpec();
+                mLastLayoutSpec.callback = callback;
+                mLastLayoutSpec.oldAttributes = oldAttributes;
+                mLastLayoutSpec.newAttributes = newAttributes;
+                mLastLayoutSpec.metadata = metadata;
+                mLastLayoutSpec.sequence = sequence;
+
+                // Cancel the previous cancellable operation.When the
+                // cancellation completes we will do the pending work.
+                if (cancelPreviousCancellableOperationLocked()) {
+                    return;
+                }
+
+                doPendingWorkLocked();
             }
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = oldAttributes;
-            args.arg2 = newAttributes;
-            args.arg3 = callback;
-            args.arg4 = metadata;
-            args.argi1 = sequence;
-            mHandler.removeMessages(MyHandler.MSG_LAYOUT);
-            mHandler.obtainMessage(MyHandler.MSG_LAYOUT, args).sendToTarget();
         }
 
         @Override
         public void write(PageRange[] pages, ParcelFileDescriptor fd,
                 IWriteResultCallback callback, int sequence) {
             synchronized (mLock) {
-                if (mLayoutOrWriteCancellation != null) {
-                    mLayoutOrWriteCancellation.cancel();
+                // Start not called or finish called - nothing to do.
+                if (!mStartReqeusted || mFinishRequested) {
+                    return;
                 }
+
+                // Write cancels previous writes.
+                if (mLastWriteSpec != null) {
+                    IoUtils.closeQuietly(mLastWriteSpec.fd);
+                    mLastWriteSpec = null;
+                }
+
+                mLastWriteSpec = new WriteSpec();
+                mLastWriteSpec.callback = callback;
+                mLastWriteSpec.pages = pages;
+                mLastWriteSpec.fd = fd;
+                mLastWriteSpec.sequence = sequence;
+
+                // Cancel the previous cancellable operation.When the
+                // cancellation completes we will do the pending work.
+                if (cancelPreviousCancellableOperationLocked()) {
+                    return;
+                }
+
+                doPendingWorkLocked();
             }
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = pages;
-            args.arg2 = fd;
-            args.arg3 = callback;
-            args.argi1 = sequence;
-            mHandler.removeMessages(MyHandler.MSG_WRITE);
-            mHandler.obtainMessage(MyHandler.MSG_WRITE, args).sendToTarget();
         }
 
         @Override
         public void finish() {
-            mHandler.sendEmptyMessage(MyHandler.MSG_FINISH);
+            synchronized (mLock) {
+                // Start not called or finish called - nothing to do.
+                if (!mStartReqeusted || mFinishRequested) {
+                    return;
+                }
+
+                mFinishRequested = true;
+
+                // When the current write or layout complete we
+                // will do the pending work.
+                if (mLastLayoutSpec != null || mLastWriteSpec != null) {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Waiting for current operation");
+                    }
+                    return;
+                }
+
+                doPendingWorkLocked();
+            }
         }
 
         private boolean isFinished() {
@@ -407,7 +474,49 @@ public final class PrintManager {
         private void doFinish() {
             mDocumentAdapter = null;
             mHandler = null;
-            mLayoutOrWriteCancellation = null;
+            synchronized (mLock) {
+                mLayoutOrWriteCancellation = null;
+            }
+        }
+
+        private boolean cancelPreviousCancellableOperationLocked() {
+            if (mLayoutOrWriteCancellation != null) {
+                mLayoutOrWriteCancellation.cancel();
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cancelling previous operation");
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private void doPendingWorkLocked() {
+            if (mStartReqeusted && !mStarted) {
+                mStarted = true;
+                mHandler.sendEmptyMessage(MyHandler.MSG_START);
+            } else if (mLastLayoutSpec != null) {
+                mHandler.sendEmptyMessage(MyHandler.MSG_LAYOUT);
+            } else if (mLastWriteSpec != null) {
+                mHandler.sendEmptyMessage(MyHandler.MSG_WRITE);
+            } else if (mFinishRequested && !mFinished) {
+                mFinished = true;
+                mHandler.sendEmptyMessage(MyHandler.MSG_FINISH);
+            }
+        }
+
+        private class LayoutSpec {
+            ILayoutResultCallback callback;
+            PrintAttributes oldAttributes;
+            PrintAttributes newAttributes;
+            Bundle metadata;
+            int sequence;
+        }
+
+        private class WriteSpec {
+            IWriteResultCallback callback;
+            PageRange[] pages;
+            ParcelFileDescriptor fd;
+            int sequence;
         }
 
         private final class MyHandler extends Handler {
@@ -431,41 +540,52 @@ public final class PrintManager {
                     } break;
 
                     case MSG_LAYOUT: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
-                        PrintAttributes newAttributes = (PrintAttributes) args.arg2;
-                        ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
-                        Bundle metadata = (Bundle) args.arg4;
-                        final int sequence = args.argi1;
-                        args.recycle();
+                        final CancellationSignal cancellation;
+                        final LayoutSpec layoutSpec;
 
-                        CancellationSignal cancellation = new CancellationSignal();
                         synchronized (mLock) {
+                            layoutSpec = mLastLayoutSpec;
+                            mLastLayoutSpec = null;
+                            cancellation = new CancellationSignal();
                             mLayoutOrWriteCancellation = cancellation;
                         }
 
-                        mDocumentAdapter.onLayout(oldAttributes, newAttributes, cancellation,
-                                new MyLayoutResultCallback(callback, sequence), metadata);
+                        if (layoutSpec != null) {
+                            if (DEBUG) {
+                                Log.i(LOG_TAG, "Performing layout");
+                            }
+                            mDocumentAdapter.onLayout(layoutSpec.oldAttributes,
+                                    layoutSpec.newAttributes, cancellation,
+                                    new MyLayoutResultCallback(layoutSpec.callback,
+                                            layoutSpec.sequence), layoutSpec.metadata);
+                        }
                     } break;
 
                     case MSG_WRITE: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        PageRange[] pages = (PageRange[]) args.arg1;
-                        ParcelFileDescriptor fd = (ParcelFileDescriptor) args.arg2;
-                        IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
-                        final int sequence = args.argi1;
-                        args.recycle();
+                        final CancellationSignal cancellation;
+                        final WriteSpec writeSpec;
 
-                        CancellationSignal cancellation = new CancellationSignal();
                         synchronized (mLock) {
+                            writeSpec= mLastWriteSpec;
+                            mLastWriteSpec = null;
+                            cancellation = new CancellationSignal();
                             mLayoutOrWriteCancellation = cancellation;
                         }
 
-                        mDocumentAdapter.onWrite(pages, fd, cancellation,
-                                new MyWriteResultCallback(callback, fd, sequence));
+                        if (writeSpec != null) {
+                            if (DEBUG) {
+                                Log.i(LOG_TAG, "Performing write");
+                            }
+                            mDocumentAdapter.onWrite(writeSpec.pages, writeSpec.fd,
+                                    cancellation, new MyWriteResultCallback(writeSpec.callback,
+                                            writeSpec.fd, writeSpec.sequence));
+                        }
                     } break;
 
                     case MSG_FINISH: {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Performing finish");
+                        }
                         mDocumentAdapter.onFinish();
                         doFinish();
                     } break;
@@ -533,6 +653,7 @@ public final class PrintManager {
             private void clearLocked() {
                 mLayoutOrWriteCancellation = null;
                 mCallback = null;
+                doPendingWorkLocked();
             }
         }
 
@@ -598,6 +719,7 @@ public final class PrintManager {
                 IoUtils.closeQuietly(mFd);
                 mCallback = null;
                 mFd = null;
+                doPendingWorkLocked();
             }
         }
     }
