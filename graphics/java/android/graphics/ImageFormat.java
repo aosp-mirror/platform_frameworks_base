@@ -187,10 +187,6 @@ public class ImageFormat {
      * == {@link android.media.Image.Plane#getPixelStride() vPlane.getPixelStride()};
      * ).</p>
      *
-     * <p>For example, the {@link android.media.Image} object can provide data
-     * in this format from a {@link android.hardware.camera2.CameraDevice}
-     * through a {@link android.media.ImageReader} object.</p>
-     *
      * @see android.media.Image
      * @see android.media.ImageReader
      * @see android.hardware.camera2.CameraDevice
@@ -207,6 +203,8 @@ public class ImageFormat {
      * needed information to interpret a raw sensor image must be queried from
      * the {@link android.hardware.camera2.CameraDevice} which produced the
      * image.</p>
+     *
+     * @hide
      */
     public static final int RAW_SENSOR = 0x20;
 

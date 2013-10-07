@@ -21,8 +21,7 @@ import java.lang.AutoCloseable;
 
 /**
  * <p>A single complete image buffer to use with a media source such as a
- * {@link MediaCodec} or a
- * {@link android.hardware.camera2.CameraDevice CameraDevice}.</p>
+ * {@link MediaCodec}.</p>
  *
  * <p>This class allows for efficient direct application access to the pixel
  * data of the Image through one or more
@@ -82,15 +81,6 @@ public abstract class Image implements AutoCloseable {
      *     The chroma planes have half the width and height of the luminance
      *     plane (4:2:0 subsampling). Each pixel sample in each plane has 8 bits.
      *     Each plane has its own row stride and pixel stride.</td>
-     * </tr>
-     * <tr>
-     *   <td>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</td>
-     *   <td>1</td>
-     *   <td>A single plane of raw sensor image data, with 16 bits per color
-     *     sample. The details of the layout need to be queried from the source of
-     *     the raw sensor data, such as
-     *     {@link android.hardware.camera2.CameraDevice CameraDevice}.
-     *   </td>
      * </tr>
      * </table>
      *

@@ -2371,6 +2371,7 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.hardware.camera2.CameraManager
+     * @hide
      */
     public static final String CAMERA_SERVICE = "camera";
 
