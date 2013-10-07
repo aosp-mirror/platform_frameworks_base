@@ -572,8 +572,8 @@ final class ActivityRecord {
     }
 
     boolean isRootActivity() {
-        ArrayList<ActivityRecord> activities = task.mActivities;
-        return activities.size() == 0 || this == task.mActivities.get(0);
+        final ArrayList<ActivityRecord> activities = task.mActivities;
+        return activities.size() == 0 || this == activities.get(0);
     }
 
     UriPermissionOwner getUriPermissionsLocked() {
