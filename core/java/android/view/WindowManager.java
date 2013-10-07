@@ -1088,7 +1088,7 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
 
-        /** Window flag: maintain the previous transparent decor state when this window
+        /** Window flag: maintain the previous translucent decor state when this window
          * becomes top-most.
          * {@hide} */
         public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
