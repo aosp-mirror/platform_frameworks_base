@@ -13408,34 +13408,29 @@ package android.media {
   }
 
   public final class RemoteController {
-    ctor public RemoteController(android.content.Context) throws java.lang.IllegalArgumentException;
-    ctor public RemoteController(android.content.Context, android.os.Looper) throws java.lang.IllegalArgumentException;
-    method public int clearArtworkConfiguration();
+    ctor public RemoteController(android.content.Context, android.media.RemoteController.OnClientUpdateListener) throws java.lang.IllegalArgumentException;
+    ctor public RemoteController(android.content.Context, android.media.RemoteController.OnClientUpdateListener, android.os.Looper) throws java.lang.IllegalArgumentException;
+    method public boolean clearArtworkConfiguration();
     method public android.media.RemoteController.MetadataEditor editMetadata();
     method public long getEstimatedMediaPosition();
-    method public int seekTo(long);
-    method public int sendMediaKeyEvent(android.view.KeyEvent);
-    method public int setArtworkConfiguration(int, int);
-    method public void setOnClientUpdateListener(android.media.RemoteController.OnClientUpdateListener);
-    method public int setSynchronizationMode(int);
-    field public static final int ERROR = -1; // 0xffffffff
-    field public static final int ERROR_BAD_VALUE = -2; // 0xfffffffe
+    method public boolean seekTo(long) throws java.lang.IllegalArgumentException;
+    method public boolean sendMediaKeyEvent(android.view.KeyEvent) throws java.lang.IllegalArgumentException;
+    method public boolean setArtworkConfiguration(int, int) throws java.lang.IllegalArgumentException;
+    method public boolean setSynchronizationMode(int) throws java.lang.IllegalArgumentException;
     field public static final int POSITION_SYNCHRONIZATION_CHECK = 1; // 0x1
     field public static final int POSITION_SYNCHRONIZATION_NONE = 0; // 0x0
-    field public static final int SUCCESS = 0; // 0x0
   }
 
   public class RemoteController.MetadataEditor extends android.media.MediaMetadataEditor {
     method public synchronized void apply();
   }
 
-  public static abstract class RemoteController.OnClientUpdateListener {
-    ctor public RemoteController.OnClientUpdateListener();
-    method public void onClientChange(boolean);
-    method public void onClientMetadataUpdate(android.media.RemoteController.MetadataEditor);
-    method public void onClientPlaybackStateUpdate(int);
-    method public void onClientPlaybackStateUpdate(int, long, long, float);
-    method public void onClientTransportControlUpdate(int);
+  public static abstract interface RemoteController.OnClientUpdateListener {
+    method public abstract void onClientChange(boolean);
+    method public abstract void onClientMetadataUpdate(android.media.RemoteController.MetadataEditor);
+    method public abstract void onClientPlaybackStateUpdate(int);
+    method public abstract void onClientPlaybackStateUpdate(int, long, long, float);
+    method public abstract void onClientTransportControlUpdate(int);
   }
 
   public final class ResourceBusyException extends android.media.MediaDrmException {

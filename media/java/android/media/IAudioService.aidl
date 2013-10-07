@@ -133,6 +133,8 @@ interface IAudioService {
 
     /**
      * Register an IRemoteControlDisplay.
+     * Success of registration is subject to a check on
+     *   the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission.
      * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
      * at the top of the stack to update the new display with its information.
      * @param rcd the IRemoteControlDisplay to register. No effect if null.
@@ -142,6 +144,16 @@ interface IAudioService {
      *   display doesn't need to receive artwork.
      */
     boolean registerRemoteControlDisplay(in IRemoteControlDisplay rcd, int w, int h);
+
+    /**
+     * Like registerRemoteControlDisplay, but with success being subject to a check on
+     *   the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission, and if it fails,
+     *   success is subject to listenerComp being one of the ENABLED_NOTIFICATION_LISTENERS
+     *   components.
+     */
+    boolean registerRemoteController(in IRemoteControlDisplay rcd, int w, int h,
+            in ComponentName listenerComp);
+
     /**
      * Unregister an IRemoteControlDisplay.
      * No effect if the IRemoteControlDisplay hasn't been successfully registered.

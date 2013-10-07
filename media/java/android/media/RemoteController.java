@@ -42,14 +42,14 @@ import android.view.KeyEvent;
  * <p>
  * A RemoteController shall be registered through
  * {@link AudioManager#registerRemoteController(RemoteController)} in order for the system to send
- * media event updates to the listener set in
- * {@link #setOnClientUpdateListener(OnClientUpdateListener)}. This listener is a subclass of
- * the {@link OnClientUpdateListener} abstract class. Override its methods to receive the
- * information published by the active {@link RemoteControlClient} instances.
- * By default an {@link OnClientUpdateListener} implementation will not receive bitmaps for album
- * art. Use {@link #setArtworkConfiguration(int, int)} to receive images as well.
+ * media event updates to the {@link OnClientUpdateListener} listener set in the class constructor.
+ * Implement the methods of the interface to receive the information published by the active
+ * {@link RemoteControlClient} instances.
+ * <br>By default an {@link OnClientUpdateListener} implementation will not receive bitmaps for
+ * album art. Use {@link #setArtworkConfiguration(int, int)} to receive images as well.
  * <p>
- * Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
+ * Registration requires the {@link OnClientUpdateListener} listener to be one of the enabled
+ * notification listeners (see {@link android.service.notification.NotificationListenerService}).
  */
 public final class RemoteController
 {
@@ -77,29 +77,38 @@ public final class RemoteController
     private PendingIntent mClientPendingIntentCurrent;
     private OnClientUpdateListener mOnClientUpdateListener;
     private PlaybackInfo mLastPlaybackInfo;
-    private int mLastTransportControlFlags = TRANSPORT_UNKNOWN;
     private int mArtworkWidth = -1;
     private int mArtworkHeight = -1;
+    private boolean mEnabled = true;
 
     /**
      * Class constructor.
-     * @param context non-null the {@link Context}, must be non-null
-     * @throws java.lang.IllegalArgumentException
+     * @param context the {@link Context}, must be non-null.
+     * @param updateListener the listener to be called whenever new client information is available,
+     *     must be non-null.
+     * @throws IllegalArgumentException
      */
-    public RemoteController(Context context) throws IllegalArgumentException {
-        this(context, null);
+    public RemoteController(Context context, OnClientUpdateListener updateListener)
+            throws IllegalArgumentException {
+        this(context, updateListener, null);
     }
 
     /**
      * Class constructor.
+     * @param context the {@link Context}, must be non-null.
+     * @param updateListener the listener to be called whenever new client information is available,
+     *     must be non-null.
      * @param looper the {@link Looper} on which to run the event loop,
      *     or null to use the current thread's looper.
-     * @param context the {@link Context}, must be non-null
      * @throws java.lang.IllegalArgumentException
      */
-    public RemoteController(Context context, Looper looper) throws IllegalArgumentException {
+    public RemoteController(Context context, OnClientUpdateListener updateListener, Looper looper)
+            throws IllegalArgumentException {
         if (context == null) {
             throw new IllegalArgumentException("Invalid null Context");
+        }
+        if (updateListener == null) {
+            throw new IllegalArgumentException("Invalid null OnClientUpdateListener");
         }
         if (looper != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -111,6 +120,7 @@ public final class RemoteController
                 throw new IllegalArgumentException("Calling thread not associated with a looper");
             }
         }
+        mOnClientUpdateListener = updateListener;
         mContext = context;
         mRcd = new RcDisplay();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -125,31 +135,31 @@ public final class RemoteController
 
 
     /**
-     * An abstract class definition for the callbacks to be invoked whenever media events, metadata
+     * Interface definition for the callbacks to be invoked whenever media events, metadata
      * and playback status are available.
      */
-    public static abstract class OnClientUpdateListener {
+    public interface OnClientUpdateListener {
         /**
-         * The method called whenever all information previously received through the other
+         * Called whenever all information, previously received through the other
          * methods of the listener, is no longer valid and is about to be refreshed.
          * This is typically called whenever a new {@link RemoteControlClient} has been selected
          * by the system to have its media information published.
          * @param clearing true if there is no selected RemoteControlClient and no information
          *     is available.
          */
-        public void onClientChange(boolean clearing) { }
+        public void onClientChange(boolean clearing);
 
         /**
-         * The method called whenever the playback state has changed.
+         * Called whenever the playback state has changed.
          * It is called when no information is known about the playback progress in the media and
          * the playback speed.
          * @param state one of the playback states authorized
          *     in {@link RemoteControlClient#setPlaybackState(int)}.
          */
-        public void onClientPlaybackStateUpdate(int state) { }
+        public void onClientPlaybackStateUpdate(int state);
         /**
-         * The method called whenever the playback state has changed, and playback position and
-         * speed are known.
+         * Called whenever the playback state has changed, and playback position
+         * and speed are known.
          * @param state one of the playback states authorized
          *     in {@link RemoteControlClient#setPlaybackState(int)}.
          * @param stateChangeTimeMs the system time at which the state change was reported,
@@ -161,15 +171,15 @@ public final class RemoteController
          *    playing (e.g. when state is {@link RemoteControlClient#PLAYSTATE_ERROR}).
          */
         public void onClientPlaybackStateUpdate(int state, long stateChangeTimeMs,
-                long currentPosMs, float speed) { }
+                long currentPosMs, float speed);
         /**
-         * The method called whenever the transport control flags have changed.
+         * Called whenever the transport control flags have changed.
          * @param transportControlFlags one of the flags authorized
          *     in {@link RemoteControlClient#setTransportControlFlags(int)}.
          */
-        public void onClientTransportControlUpdate(int transportControlFlags) { }
+        public void onClientTransportControlUpdate(int transportControlFlags);
         /**
-         * The method called whenever new metadata is available.
+         * Called whenever new metadata is available.
          * See the {@link MediaMetadataEditor#putLong(int, long)},
          *  {@link MediaMetadataEditor#putString(int, String)},
          *  {@link MediaMetadataEditor#putBitmap(int, Bitmap)}, and
@@ -177,39 +187,9 @@ public final class RemoteController
          *  can be queried.
          * @param metadataEditor the container of the new metadata.
          */
-        public void onClientMetadataUpdate(MetadataEditor metadataEditor) { }
+        public void onClientMetadataUpdate(MetadataEditor metadataEditor);
     };
 
-    /**
-     * Sets the listener to be called whenever new client information is available.
-     * This method can only be called on a registered RemoteController.
-     * @param l the update listener to be called.
-     */
-    public void setOnClientUpdateListener(OnClientUpdateListener l) {
-        synchronized(mInfoLock) {
-            mOnClientUpdateListener = l;
-            if (!mIsRegistered) {
-                // since the object is not registered, it hasn't received any information from
-                // RemoteControlClients yet, so we can exit here.
-                return;
-            }
-            if (mLastPlaybackInfo != null) {
-                sendMsg(mEventHandler, MSG_NEW_PLAYBACK_INFO, SENDMSG_REPLACE,
-                        mClientGenerationIdCurrent /*arg1*/, 0,
-                        mLastPlaybackInfo /*obj*/, 0 /*delay*/);
-            }
-            if (mLastTransportControlFlags != TRANSPORT_UNKNOWN) {
-                sendMsg(mEventHandler, MSG_NEW_TRANSPORT_INFO, SENDMSG_REPLACE,
-                        mClientGenerationIdCurrent /*arg1*/, mLastTransportControlFlags /*arg2*/,
-                        null /*obj*/, 0 /*delay*/);
-            }
-            if (mMetadataEditor != null) {
-                sendMsg(mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
-                        mClientGenerationIdCurrent /*arg1*/, 0 /*arg2*/,
-                        mMetadataEditor /*obj*/, 0 /*delay*/);
-            }
-        }
-    }
 
     /**
      * @hide
@@ -256,6 +236,7 @@ public final class RemoteController
         return -1;
     }
 
+
     /**
      * Send a simulated key event for a media button to be received by the current client.
      * To simulate a key press, you must first send a KeyEvent built with
@@ -280,17 +261,22 @@ public final class RemoteController
      *     {@link KeyEvent#KEYCODE_MEDIA_CLOSE},
      *     {@link KeyEvent#KEYCODE_MEDIA_EJECT},
      *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
+     * @return true if the event was successfully sent, false otherwise.
+     * @throws IllegalArgumentException
      */
-    public int sendMediaKeyEvent(KeyEvent keyEvent) {
+    public boolean sendMediaKeyEvent(KeyEvent keyEvent) throws IllegalArgumentException {
         if (!MediaFocusControl.isMediaKeyCode(keyEvent.getKeyCode())) {
-            Log.e(TAG, "Cannot use sendMediaKeyEvent() for a non-media key event");
-            return ERROR_BAD_VALUE;
+            throw new IllegalArgumentException("not a media key event");
         }
         final PendingIntent pi;
         synchronized(mInfoLock) {
             if (!mIsRegistered) {
                 Log.e(TAG, "Cannot use sendMediaKeyEvent() from an unregistered RemoteController");
-                return ERROR;
+                return false;
+            }
+            if (!mEnabled) {
+                Log.e(TAG, "Cannot use sendMediaKeyEvent() from a disabled RemoteController");
+                return false;
             }
             pi = mClientPendingIntentCurrent;
         }
@@ -301,47 +287,37 @@ public final class RemoteController
                 pi.send(mContext, 0, intent);
             } catch (CanceledException e) {
                 Log.e(TAG, "Error sending intent for media button down: ", e);
-                return ERROR;
+                return false;
             }
         } else {
             Log.i(TAG, "No-op when sending key click, no receiver right now");
-            return ERROR;
+            return false;
         }
-        return SUCCESS;
+        return true;
     }
-
-
-    // Error codes
-    /**
-     * Successful operation.
-     */
-    public  static final int SUCCESS            = 0;
-    /**
-     * Unspecified error.
-     */
-    public  static final int ERROR              = -1;
-    /**
-     * Operation failed due to bad parameter value.
-     */
-    public  static final int ERROR_BAD_VALUE    = -2;
 
 
     /**
      * Sets the new playback position.
      * This method can only be called on a registered RemoteController.
      * @param timeMs a 0 or positive value for the new playback position, expressed in ms.
-     * @return {@link #SUCCESS}, {@link #ERROR} or {@link #ERROR_BAD_VALUE}
+     * @return true if the command to set the playback position was successfully sent.
+     * @throws IllegalArgumentException
      */
-    public int seekTo(long timeMs) {
+    public boolean seekTo(long timeMs) throws IllegalArgumentException {
+        if (!mEnabled) {
+            Log.e(TAG, "Cannot use seekTo() from a disabled RemoteController");
+            return false;
+        }
         if (timeMs < 0) {
-            return ERROR_BAD_VALUE;
+            throw new IllegalArgumentException("illegal negative time value");
         }
         final int genId;
         synchronized (mGenLock) {
             genId = mClientGenerationIdCurrent;
         }
         mAudioManager.setRemoteControlClientPlaybackPosition(genId, timeMs);
-        return SUCCESS;
+        return true;
     }
 
 
@@ -350,9 +326,11 @@ public final class RemoteController
      * @param wantBitmap
      * @param width
      * @param height
-     * @return {@link #SUCCESS}, {@link #ERROR} or {@link #ERROR_BAD_VALUE}
+     * @return true if successful
+     * @throws IllegalArgumentException
      */
-    public int setArtworkConfiguration(boolean wantBitmap, int width, int height) {
+    public boolean setArtworkConfiguration(boolean wantBitmap, int width, int height)
+            throws IllegalArgumentException {
         synchronized (mInfoLock) {
             if (wantBitmap) {
                 if ((width > 0) && (height > 0)) {
@@ -361,8 +339,7 @@ public final class RemoteController
                     mArtworkWidth = width;
                     mArtworkHeight = height;
                 } else {
-                    Log.e(TAG, "Invalid dimensions");
-                    return ERROR_BAD_VALUE;
+                    throw new IllegalArgumentException("Invalid dimensions");
                 }
             } else {
                 mArtworkWidth = -1;
@@ -375,7 +352,7 @@ public final class RemoteController
               //    RemoteController.getArtworkSize() when AudioManager.registerRemoteController()
               //    is called.
         }
-        return SUCCESS;
+        return true;
     }
 
     /**
@@ -383,17 +360,18 @@ public final class RemoteController
      * No bitmaps will be received unless this has been specified.
      * @param width the maximum width in pixels
      * @param height  the maximum height in pixels
-     * @return {@link #SUCCESS}, {@link #ERROR} or {@link #ERROR_BAD_VALUE}
+     * @return true if the artwork dimension was successfully set.
+     * @throws IllegalArgumentException
      */
-    public int setArtworkConfiguration(int width, int height) {
+    public boolean setArtworkConfiguration(int width, int height) throws IllegalArgumentException {
         return setArtworkConfiguration(true, width, height);
     }
 
     /**
      * Prevents this RemoteController from receiving artwork images.
-     * @return {@link #SUCCESS}, {@link #ERROR}
+     * @return true if receiving artwork images was successfully disabled.
      */
-    public int clearArtworkConfiguration() {
+    public boolean clearArtworkConfiguration() {
         return setArtworkConfiguration(false, -1, -1);
     }
 
@@ -420,20 +398,20 @@ public final class RemoteController
      * Set the playback position synchronization mode.
      * Must be called on a registered RemoteController.
      * @param sync {@link #POSITION_SYNCHRONIZATION_NONE} or {@link #POSITION_SYNCHRONIZATION_CHECK}
-     * @return {@link #SUCCESS}, {@link #ERROR} or {@link #ERROR_BAD_VALUE}
+     * @return true if the synchronization mode was successfully set.
+     * @throws IllegalArgumentException
      */
-    public int setSynchronizationMode(int sync) {
+    public boolean setSynchronizationMode(int sync) throws IllegalArgumentException {
         if ((sync != POSITION_SYNCHRONIZATION_NONE) || (sync != POSITION_SYNCHRONIZATION_CHECK)) {
-            Log.e(TAG, "Unknown synchronization mode");
-            return ERROR_BAD_VALUE;
+            throw new IllegalArgumentException("Unknown synchronization mode " + sync);
         }
         if (!mIsRegistered) {
             Log.e(TAG, "Cannot set synchronization mode on an unregistered RemoteController");
-            return ERROR;
+            return false;
         }
         mAudioManager.remoteControlDisplayWantsPlaybackPositionSync(mRcd,
                 POSITION_SYNCHRONIZATION_CHECK == sync);
-        return SUCCESS;
+        return true;
     }
 
 
@@ -548,6 +526,11 @@ public final class RemoteController
             }
         }
 
+        public void setEnabled(boolean enabled) {
+            sendMsg(mEventHandler, MSG_DISPLAY_ENABLE, SENDMSG_REPLACE,
+                    enabled ? 1 : 0 /*arg1*/, 0, null /*obj*/, 0 /*delay*/);
+        }
+
         public void setPlaybackState(int genId, int state,
                 long stateChangeTimeMs, long currentPosMs, float speed) {
             if (DEBUG) {
@@ -642,6 +625,7 @@ public final class RemoteController
     private final static int MSG_NEW_TRANSPORT_INFO = 2;
     private final static int MSG_NEW_METADATA       = 3; // msg always has non-null obj parameter
     private final static int MSG_CLIENT_CHANGE      = 4;
+    private final static int MSG_DISPLAY_ENABLE     = 5;
 
     private class EventHandler extends Handler {
 
@@ -666,6 +650,9 @@ public final class RemoteController
                     break;
                 case MSG_CLIENT_CHANGE:
                     onClientChange(msg.arg1, msg.arg2 == 1);
+                    break;
+                case MSG_DISPLAY_ENABLE:
+                    onDisplayEnable(msg.arg1 == 1);
                     break;
                 default:
                     Log.e(TAG, "unknown event " + msg.what);
@@ -735,7 +722,6 @@ public final class RemoteController
         final OnClientUpdateListener l;
         synchronized(mInfoLock) {
             l = mOnClientUpdateListener;
-            mLastTransportControlFlags = transportControlFlags;
         }
         if (l != null) {
             l.onClientTransportControlUpdate(transportControlFlags);
@@ -797,6 +783,11 @@ public final class RemoteController
         }
     }
 
+    private void onDisplayEnable(boolean enabled) {
+        synchronized(mInfoLock) {
+            mEnabled = enabled;
+        }
+    }
 
     //==================================================
     private static class PlaybackInfo {
@@ -818,7 +809,7 @@ public final class RemoteController
      * Used by AudioManager to mark this instance as registered.
      * @param registered
      */
-    protected void setIsRegistered(boolean registered) {
+    void setIsRegistered(boolean registered) {
         synchronized (mInfoLock) {
             mIsRegistered = registered;
         }
@@ -829,7 +820,7 @@ public final class RemoteController
      * Used by AudioManager to access binder to be registered/unregistered inside MediaFocusControl
      * @return
      */
-    protected RcDisplay getRcDisplay() {
+    RcDisplay getRcDisplay() {
         return mRcd;
     }
 
@@ -838,11 +829,19 @@ public final class RemoteController
      * Used by AudioManager to read the current artwork dimension
      * @return array containing width (index 0) and height (index 1) of currently set artwork size
      */
-    protected int[] getArtworkSize() {
+    int[] getArtworkSize() {
         synchronized (mInfoLock) {
             int[] size = { mArtworkWidth, mArtworkHeight };
             return size;
         }
     }
 
+    /**
+     * @hide
+     * Used by AudioManager to access user listener receiving the client update notifications
+     * @return
+     */
+    OnClientUpdateListener getUpdateListener() {
+        return mOnClientUpdateListener;
+    }
 }
