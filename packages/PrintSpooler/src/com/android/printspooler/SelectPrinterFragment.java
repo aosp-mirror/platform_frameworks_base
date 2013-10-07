@@ -99,19 +99,19 @@ public final class SelectPrinterFragment extends ListFragment {
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
-                if (adapter.getCount() <= 0) {
+                if (!getActivity().isFinishing() && adapter.getCount() <= 0) {
                     updateEmptyView(adapter);
                 }
             }
 
             @Override
             public void onInvalidated() {
-                updateEmptyView(adapter);
+                if (!getActivity().isFinishing()) {
+                    updateEmptyView(adapter);
+                }
             }
         });
         setListAdapter(adapter);
-        View emptyView = getActivity().findViewById(R.id.empty_print_state);
-        getListView().setEmptyView(emptyView);
     }
 
     @Override
@@ -230,6 +230,10 @@ public final class SelectPrinterFragment extends ListFragment {
     }
 
     public void updateEmptyView(DestinationAdapter adapter) {
+        if (getListView().getEmptyView() == null) {
+            View emptyView = getActivity().findViewById(R.id.empty_print_state);
+            getListView().setEmptyView(emptyView);
+        }
         TextView titleView = (TextView) getActivity().findViewById(R.id.title);
         View progressBar = getActivity().findViewById(R.id.progress_bar);
         if (adapter.getUnfilteredCount() <= 0) {
