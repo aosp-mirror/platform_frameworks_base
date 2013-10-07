@@ -36,6 +36,7 @@
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
 #include "android_media_Utils.h"
+#include "android_media_ExtMediaPlayer.h"
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
@@ -648,6 +649,12 @@ android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     // create new listener and give it to MediaPlayer
     sp<JNIMediaPlayerListener> listener = new JNIMediaPlayerListener(env, thiz, weak_this);
     mp->setListener(listener);
+    if (JNIExtMediaPlayerListener::checkExtMedia(env, thiz)) {
+      ALOGD("QCMediaPlayer mediaplayer present");
+       sp<JNIExtMediaPlayerListener> extmedialistener = new JNIExtMediaPlayerListener(
+                                                            env, thiz, weak_this, listener);
+       mp->setListener(extmedialistener);
+    }
 
     // Stow our new C++ MediaPlayer in an opaque field in the Java object.
     setMediaPlayer(env, thiz, mp);
