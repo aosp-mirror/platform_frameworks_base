@@ -2819,7 +2819,14 @@ public class PackageParser {
                 continue;
             }
 
-            if (parser.getName().equals("meta-data")) {
+            if (parser.getName().equals("intent-filter")) {
+                ProviderIntentInfo intent = new ProviderIntentInfo(outInfo);
+                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
+                    return false;
+                }
+                outInfo.intents.add(intent);
+
+            } else if (parser.getName().equals("meta-data")) {
                 if ((outInfo.metaData=parseMetaData(res, parser, attrs,
                         outInfo.metaData, outError)) == null) {
                     return false;
@@ -3982,7 +3989,7 @@ public class PackageParser {
         return si;
     }
 
-    public final static class Provider extends Component {
+    public final static class Provider extends Component<ProviderIntentInfo> {
         public final ProviderInfo info;
         public boolean syncable;
 
@@ -4111,6 +4118,24 @@ public class PackageParser {
             sb.append(Integer.toHexString(System.identityHashCode(this)));
             sb.append(' ');
             service.appendComponentShortName(sb);
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
+    public static final class ProviderIntentInfo extends IntentInfo {
+        public final Provider provider;
+
+        public ProviderIntentInfo(Provider provider) {
+            this.provider = provider;
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("ProviderIntentInfo{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            provider.appendComponentShortName(sb);
             sb.append('}');
             return sb.toString();
         }

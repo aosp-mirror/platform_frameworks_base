@@ -21,9 +21,11 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -158,6 +160,9 @@ public class RootsCache {
     private class UpdateTask extends AsyncTask<Void, Void, Void> {
         private final String mFilterPackage;
 
+        private final Multimap<String, RootInfo> mTaskRoots = ArrayListMultimap.create();
+        private final HashSet<String> mTaskStoppedAuthorities = Sets.newHashSet();
+
         /**
          * Update all roots.
          */
@@ -177,53 +182,63 @@ public class RootsCache {
         protected Void doInBackground(Void... params) {
             final long start = SystemClock.elapsedRealtime();
 
-            final Multimap<String, RootInfo> roots = ArrayListMultimap.create();
-            final HashSet<String> stoppedAuthorities = Sets.newHashSet();
-
-            roots.put(mRecentsRoot.authority, mRecentsRoot);
+            mTaskRoots.put(mRecentsRoot.authority, mRecentsRoot);
 
             final ContentResolver resolver = mContext.getContentResolver();
             final PackageManager pm = mContext.getPackageManager();
-            final List<ProviderInfo> providers = pm.queryContentProviders(
+
+            // Pick up provider with action string
+            final Intent intent = new Intent(DocumentsContract.PROVIDER_INTERFACE);
+            final List<ResolveInfo> providers = pm.queryIntentContentProviders(intent, 0);
+            for (ResolveInfo info : providers) {
+                handleDocumentsProvider(info.providerInfo);
+            }
+
+            // Pick up legacy providers
+            final List<ProviderInfo> legacyProviders = pm.queryContentProviders(
                     null, -1, PackageManager.GET_META_DATA);
-            for (ProviderInfo info : providers) {
+            for (ProviderInfo info : legacyProviders) {
                 if (info.metaData != null && info.metaData.containsKey(
                         DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                    // Ignore stopped packages for now; we might query them
-                    // later during UI interaction.
-                    if ((info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
-                        if (LOGD) Log.d(TAG, "Ignoring stopped authority " + info.authority);
-                        stoppedAuthorities.add(info.authority);
-                        continue;
-                    }
-
-                    // Try using cached roots if filtering
-                    boolean cacheHit = false;
-                    if (mFilterPackage != null && !mFilterPackage.equals(info.packageName)) {
-                        synchronized (mLock) {
-                            if (roots.putAll(info.authority, mRoots.get(info.authority))) {
-                                if (LOGD) Log.d(TAG, "Used cached roots for " + info.authority);
-                                cacheHit = true;
-                            }
-                        }
-                    }
-
-                    // Cache miss, or loading everything
-                    if (!cacheHit) {
-                        roots.putAll(
-                                info.authority, loadRootsForAuthority(resolver, info.authority));
-                    }
+                    handleDocumentsProvider(info);
                 }
             }
 
             final long delta = SystemClock.elapsedRealtime() - start;
-            Log.d(TAG, "Update found " + roots.size() + " roots in " + delta + "ms");
+            Log.d(TAG, "Update found " + mTaskRoots.size() + " roots in " + delta + "ms");
             synchronized (mLock) {
-                mStoppedAuthorities = stoppedAuthorities;
-                mRoots = roots;
+                mRoots = mTaskRoots;
+                mStoppedAuthorities = mTaskStoppedAuthorities;
             }
             mFirstLoad.countDown();
             return null;
+        }
+
+        private void handleDocumentsProvider(ProviderInfo info) {
+            // Ignore stopped packages for now; we might query them
+            // later during UI interaction.
+            if ((info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+                if (LOGD) Log.d(TAG, "Ignoring stopped authority " + info.authority);
+                mTaskStoppedAuthorities.add(info.authority);
+                return;
+            }
+
+            // Try using cached roots if filtering
+            boolean cacheHit = false;
+            if (mFilterPackage != null && !mFilterPackage.equals(info.packageName)) {
+                synchronized (mLock) {
+                    if (mTaskRoots.putAll(info.authority, mRoots.get(info.authority))) {
+                        if (LOGD) Log.d(TAG, "Used cached roots for " + info.authority);
+                        cacheHit = true;
+                    }
+                }
+            }
+
+            // Cache miss, or loading everything
+            if (!cacheHit) {
+                mTaskRoots.putAll(info.authority,
+                        loadRootsForAuthority(mContext.getContentResolver(), info.authority));
+            }
         }
     }
 

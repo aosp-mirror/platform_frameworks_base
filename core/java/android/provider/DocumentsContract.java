@@ -70,7 +70,13 @@ public final class DocumentsContract {
     }
 
     /** {@hide} */
+    @Deprecated
     public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
+
+    /**
+     * Intent action used to identify {@link DocumentsProvider} instances.
+     */
+    public static final String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";
 
     /** {@hide} */
     public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";

@@ -123,6 +123,9 @@ interface IPackageManager {
     List<ResolveInfo> queryIntentServices(in Intent intent,
             String resolvedType, int flags, int userId);
 
+    List<ResolveInfo> queryIntentContentProviders(in Intent intent,
+            String resolvedType, int flags, int userId);
+
     /**
      * This implements getInstalledPackages via a "last returned row"
      * mechanism that is not exposed in the API. This is to get around the IPC
