@@ -36,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -94,7 +95,21 @@ public final class SelectPrinterFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setListAdapter(new DestinationAdapter());
+        final DestinationAdapter adapter = new DestinationAdapter();
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                if (adapter.getCount() <= 0) {
+                    updateEmptyView(adapter);
+                }
+            }
+
+            @Override
+            public void onInvalidated() {
+                updateEmptyView(adapter);
+            }
+        });
+        setListAdapter(adapter);
         View emptyView = getActivity().findViewById(R.id.empty_print_state);
         getListView().setEmptyView(emptyView);
     }
@@ -212,6 +227,18 @@ public final class SelectPrinterFragment extends ListFragment {
         newFragment.setArguments(arguments);
         transaction.add(newFragment, FRAGMRNT_TAG_ADD_PRINTER_DIALOG);
         transaction.commit();
+    }
+
+    public void updateEmptyView(DestinationAdapter adapter) {
+        TextView titleView = (TextView) getActivity().findViewById(R.id.title);
+        View progressBar = getActivity().findViewById(R.id.progress_bar);
+        if (adapter.getUnfilteredCount() <= 0) {
+            titleView.setText(R.string.print_searching_for_printers);
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            titleView.setText(R.string.print_no_printers);
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     public static class AddPrinterAlertDialogFragment extends DialogFragment {
@@ -337,6 +364,12 @@ public final class SelectPrinterFragment extends ListFragment {
                     notifyDataSetChanged();
                 }
             };
+        }
+
+        public int getUnfilteredCount() {
+            synchronized (mLock) {
+                return mPrinters.size();
+            }
         }
 
         @Override
