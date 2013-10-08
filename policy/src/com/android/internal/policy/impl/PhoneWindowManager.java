@@ -163,7 +163,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     static final int SYSTEM_UI_CHANGING_LAYOUT =
               View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.STATUS_BAR_TRANSLUCENT
+            | View.NAVIGATION_BAR_TRANSLUCENT;
 
     /**
      * Keyguard stuff
