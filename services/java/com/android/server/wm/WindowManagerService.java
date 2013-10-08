@@ -5206,6 +5206,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager.setInputFilter(filter);
     }
 
+    @Override
+    public void setTouchExplorationEnabled(boolean enabled) {
+        mPolicy.setTouchExplorationEnabled(enabled);
+    }
+
     public void setCurrentUser(final int newUserId) {
         synchronized (mWindowMap) {
             int oldUserId = mCurrentUserId;

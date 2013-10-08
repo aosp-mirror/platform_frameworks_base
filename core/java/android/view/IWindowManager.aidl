@@ -274,4 +274,11 @@ interface IWindowManager
      * @return The magnification spec if such or null.
      */
     MagnificationSpec getCompatibleMagnificationSpecForWindow(in IBinder windowToken);
+
+    /**
+     * Sets the current touch exploration state.
+     *
+     * @param enabled Whether touch exploration is enabled.
+     */
+    void setTouchExplorationEnabled(boolean enabled);
 }
