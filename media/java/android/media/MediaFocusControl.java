@@ -275,6 +275,13 @@ public class MediaFocusControl implements OnFinished {
                                 // tell the RCCs about the change for this RCD
                                 enableRemoteControlDisplayForClient_syncRcStack(
                                         di.mRcDisplay, di.mEnabled);
+                                // when enabling, refresh the information on the display
+                                if (di.mEnabled) {
+                                    sendMsg(mEventHandler, MSG_RCDISPLAY_INIT_INFO, SENDMSG_QUEUE,
+                                            di.mArtworkExpectedWidth /*arg1*/,
+                                            di.mArtworkExpectedHeight/*arg2*/,
+                                            di.mRcDisplay /*obj*/, 0/*delay*/);
+                                }
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Error en/disabling RCD: ", e);
                             }
