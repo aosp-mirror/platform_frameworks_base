@@ -555,6 +555,7 @@ public class PrintJobConfigActivity extends Activity {
                 // TODO: We need some UI for announcing an error.
                 mControllerState = CONTROLLER_STATE_FAILED;
                 Log.e(LOG_TAG, "Received invalid pages from the app");
+                mEditor.cancel();
                 PrintJobConfigActivity.this.finish();
             }
         }
@@ -1152,6 +1153,9 @@ public class PrintJobConfigActivity extends Activity {
                     if (!mFavoritePrinterSelected && mDestinationSpinnerAdapter.getCount() > 2) {
                         mFavoritePrinterSelected = true;
                         mDestinationSpinner.setSelection(0);
+                        // Workaround again the weird spinner behavior to notify for selection
+                        // change on the next layout pass as the current printer is used below.
+                        mCurrentPrinter = (PrinterInfo) mDestinationSpinnerAdapter.getItem(0);
                     }
 
                     // If there is a next printer to select and we succeed selecting
