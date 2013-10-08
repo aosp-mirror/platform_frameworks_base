@@ -24,9 +24,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Provides access to environment variables.
@@ -38,6 +40,7 @@ public class Environment {
     private static final String ENV_EMULATED_STORAGE_SOURCE = "EMULATED_STORAGE_SOURCE";
     private static final String ENV_EMULATED_STORAGE_TARGET = "EMULATED_STORAGE_TARGET";
     private static final String ENV_MEDIA_STORAGE = "MEDIA_STORAGE";
+    private static final String ENV_SECONDARY_STORAGE = "SECONDARY_STORAGE";
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
 
     /** {@hide} */
@@ -107,7 +110,6 @@ public class Environment {
     /** {@hide} */
     public static class UserEnvironment {
         // TODO: generalize further to create package-specific environment
-        // TODO: add support for secondary external storage
 
         /** External storage dirs, as visible to vold */
         private final File[] mExternalDirsForVold;
@@ -121,10 +123,14 @@ public class Environment {
             String rawExternalStorage = System.getenv(ENV_EXTERNAL_STORAGE);
             String rawEmulatedSource = System.getenv(ENV_EMULATED_STORAGE_SOURCE);
             String rawEmulatedTarget = System.getenv(ENV_EMULATED_STORAGE_TARGET);
+
             String rawMediaStorage = System.getenv(ENV_MEDIA_STORAGE);
             if (TextUtils.isEmpty(rawMediaStorage)) {
                 rawMediaStorage = "/data/media";
             }
+
+            ArrayList<File> externalForVold = Lists.newArrayList();
+            ArrayList<File> externalForApp = Lists.newArrayList();
 
             if (!TextUtils.isEmpty(rawEmulatedTarget)) {
                 // Device has emulated storage; external storage paths should have
@@ -135,8 +141,8 @@ public class Environment {
                 final File mediaBase = new File(rawMediaStorage);
 
                 // /storage/emulated/0
-                mExternalDirsForVold = new File[] { buildPath(emulatedSourceBase, rawUserId) };
-                mExternalDirsForApp = new File[] { buildPath(emulatedTargetBase, rawUserId) };
+                externalForVold.add(buildPath(emulatedSourceBase, rawUserId));
+                externalForApp.add(buildPath(emulatedTargetBase, rawUserId));
                 // /data/media/0
                 mEmulatedDirForDirect = buildPath(mediaBase, rawUserId);
 
@@ -148,11 +154,23 @@ public class Environment {
                 }
 
                 // /storage/sdcard0
-                mExternalDirsForVold = new File[] { new File(rawExternalStorage) };
-                mExternalDirsForApp = new File[] { new File(rawExternalStorage) };
+                externalForVold.add(new File(rawExternalStorage));
+                externalForApp.add(new File(rawExternalStorage));
                 // /data/media
                 mEmulatedDirForDirect = new File(rawMediaStorage);
             }
+
+            // Splice in any secondary storage paths, but only for owner
+            final String rawSecondaryStorage = System.getenv(ENV_SECONDARY_STORAGE);
+            if (!TextUtils.isEmpty(rawSecondaryStorage) && userId == UserHandle.USER_OWNER) {
+                for (String secondaryPath : rawSecondaryStorage.split(":")) {
+                    externalForVold.add(new File(secondaryPath));
+                    externalForApp.add(new File(secondaryPath));
+                }
+            }
+
+            mExternalDirsForVold = externalForVold.toArray(new File[externalForVold.size()]);
+            mExternalDirsForApp = externalForApp.toArray(new File[externalForApp.size()]);
         }
 
         @Deprecated
