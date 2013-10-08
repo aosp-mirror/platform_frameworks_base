@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerService.TAG;
 import android.app.ActivityManager.StackBoxInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Debug;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -322,7 +323,8 @@ class DisplayContent {
      * @return true if a change was made, false otherwise.
      */
     boolean moveHomeStackBox(boolean toTop) {
-        if (DEBUG_STACK) Slog.d(TAG, "moveHomeStackBox: toTop=" + toTop);
+        if (DEBUG_STACK) Slog.d(TAG, "moveHomeStackBox: toTop=" + toTop + " Callers=" +
+                Debug.getCallers(4));
         switch (mStackBoxes.size()) {
             case 0: throw new RuntimeException("moveHomeStackBox: No home StackBox!");
             case 1: return false; // Only the home StackBox exists.
