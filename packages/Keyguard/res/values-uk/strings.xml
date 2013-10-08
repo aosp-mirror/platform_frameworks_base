@@ -73,7 +73,7 @@
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Кнопка \"Зупинити\""</string>
     <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Подобається"</string>
     <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Не подобається"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Серце"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Рейтинг"</string>
     <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Розблокуйте, щоб продовжити"</string>
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Запуск скасовано"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Відпустіть <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>, щоб видалити."</string>
