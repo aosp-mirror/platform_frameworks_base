@@ -107,9 +107,6 @@ class QuickSettings {
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
     private AsyncTask<Void, Void, Pair<Boolean, Boolean>> mQueryCertTask;
 
-    private LevelListDrawable mBatteryLevels;
-    private LevelListDrawable mChargingBatteryLevels;
-
     boolean mTilesSetUp = false;
     boolean mUseDefaultAvatar = false;
 
@@ -133,11 +130,6 @@ class QuickSettings {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
         mHandler = new Handler();
-
-        Resources r = mContext.getResources();
-        mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
-        mChargingBatteryLevels =
-                (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
