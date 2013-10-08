@@ -48,7 +48,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private static final boolean DEBUG = false;
 
     // The drag handle is measured in dp above & below the top edge of the
-    // challenge view; these parameters change based on whether the challenge 
+    // challenge view; these parameters change based on whether the challenge
     // is open or closed.
     private static final int DRAG_HANDLE_CLOSED_ABOVE = 8; // dp
     private static final int DRAG_HANDLE_CLOSED_BELOW = 0; // dp
@@ -81,6 +81,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private int mScrollState;
     private OnChallengeScrolledListener mScrollListener;
     private OnBouncerStateChangedListener mBouncerListener;
+    private boolean mEnableChallengeDragging;
 
     public static final int SCROLL_STATE_IDLE = 0;
     public static final int SCROLL_STATE_DRAGGING = 1;
@@ -261,6 +262,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         setWillNotDraw(false);
         setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+    }
+
+    public void setEnableChallengeDragging(boolean enabled) {
+        mEnableChallengeDragging = enabled;
     }
 
     public void setInsets(Rect insets) {
@@ -573,7 +578,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     final float y = ev.getY(i);
                     if (!mIsBouncing && mActivePointerId == INVALID_POINTER
                                 && (crossedDragHandle(x, y, mGestureStartY)
-                                || (isInChallengeView(x, y) &&
+                                        && shouldEnableChallengeDragging()
+                                        || (isInChallengeView(x, y) &&
                                         mScrollState == SCROLL_STATE_SETTLING))) {
                         mActivePointerId = ev.getPointerId(i);
                         mGestureStartX = x;
@@ -581,7 +587,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         mGestureStartChallengeBottom = getChallengeBottom();
                         mDragging = true;
                         enableHardwareLayerForChallengeView();
-                    } else if (mChallengeShowing && isInChallengeView(x, y)) {
+                    } else if (mChallengeShowing && isInChallengeView(x, y)
+                            && shouldEnableChallengeDragging()) {
                         mBlockDrag = true;
                     }
                 }
@@ -594,6 +601,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
 
         return mDragging;
+    }
+
+    private boolean shouldEnableChallengeDragging() {
+        return mEnableChallengeDragging || !mChallengeShowing;
     }
 
     private boolean isChallengeInteractionBlocked() {
