@@ -296,6 +296,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
+    boolean mTouchExplorationEnabled = false;
 
     int mPointerLocationMode = 0; // guarded by mLock
 
@@ -1078,14 +1079,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHasNavigationBar = true;
         }
 
-        if (mHasNavigationBar) {
-            // The navigation bar is at the right in landscape; it seems always
-            // useful to hide it for showing a video.
-            mCanHideNavigationBar = true;
-        } else {
-            mCanHideNavigationBar = false;
-        }
-
         // For demo purposes, allow the rotation of the HDMI display to be controlled.
         // By default, HDMI locks rotation to landscape.
         if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
@@ -1103,6 +1096,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // $ adb shell setprop config.override_forced_orient true
                 // $ adb shell wm size reset
                 !"true".equals(SystemProperties.get("config.override_forced_orient"));
+    }
+
+    /**
+     * @return whether the navigation bar can be hidden, e.g. the device has a
+     *         navigation bar and touch exploration is not enabled
+     */
+    private boolean canHideNavigationBar() {
+        return mHasNavigationBar && !mTouchExplorationEnabled;
     }
 
     @Override
@@ -2585,7 +2586,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
             int availRight, availBottom;
-            if (mCanHideNavigationBar &&
+            if (canHideNavigationBar() &&
                     (systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 availRight = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                 availBottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
@@ -2702,6 +2703,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean navTranslucent = (sysui & View.NAVIGATION_BAR_TRANSLUCENT) != 0;
             boolean transientAllowed = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
             navTranslucent &= !transientAllowed;  // transient trumps translucent
+            navTranslucent &= isTranslucentNavigationAllowed();
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -2722,7 +2724,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // For purposes of positioning and showing the nav bar, if we have
             // decided that it can't be hidden (because of the screen aspect ratio),
             // then take that into account.
-            navVisible |= !mCanHideNavigationBar;
+            navVisible |= !canHideNavigationBar();
 
             boolean updateSysUiVisibility = false;
             if (mNavigationBar != null) {
@@ -3068,7 +3070,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         pf.right = df.right = of.right = mOverscanScreenLeft + mOverscanScreenWidth;
                         pf.bottom = df.bottom = of.bottom = mOverscanScreenTop
                                 + mOverscanScreenHeight;
-                    } else if (mCanHideNavigationBar
+                    } else if (canHideNavigationBar()
                             && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                             && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
@@ -3206,7 +3208,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             = mOverscanScreenLeft + mOverscanScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom
                             = mOverscanScreenTop + mOverscanScreenHeight;
-                } else if (mCanHideNavigationBar
+                } else if (canHideNavigationBar()
                         && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && (attrs.type == TYPE_TOAST
                             || (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
@@ -5096,6 +5098,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vis = (vis & ~flags) | (oldVis & flags);
         }
 
+        if (!isTranslucentNavigationAllowed()) {
+            vis &= ~View.NAVIGATION_BAR_TRANSLUCENT;
+        }
+
         // update status bar
         boolean transientAllowed =
                 (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
@@ -5146,6 +5152,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
     }
 
+    /**
+     * @return whether the navigation bar can be made translucent, e.g. touch
+     *         exploration is not enabled
+     */
+    private boolean isTranslucentNavigationAllowed() {
+        return !mTouchExplorationEnabled;
+    }
+
     // Use this instead of checking config_showNavigationBar so that it can be consistently
     // overridden by qemu.hw.mainkeys in the emulator.
     @Override
@@ -5186,6 +5200,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return true;
+    }
+
+    @Override
+    public void setTouchExplorationEnabled(boolean enabled) {
+        mTouchExplorationEnabled = enabled;
     }
 
     @Override
