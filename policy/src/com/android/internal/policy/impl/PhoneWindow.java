@@ -2338,6 +2338,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     originalView.getWindowToken());
             if (helper != null) {
                 helper.setPresenterCallback(mContextMenuCallback);
+            } else if (mContextMenuHelper != null) {
+                // No menu to show, but if we have a menu currently showing it just became blank.
+                // Close it.
+                mContextMenuHelper.dismiss();
             }
             mContextMenuHelper = helper;
             return helper != null;
