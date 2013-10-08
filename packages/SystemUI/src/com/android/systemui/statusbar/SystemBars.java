@@ -35,7 +35,7 @@ import java.io.PrintWriter;
  */
 public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
     private static final String TAG = "SystemBars";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final int WAIT_FOR_BARS_TO_DIE = 500;
 
     // manages the implementation coming from the remote process
