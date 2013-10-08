@@ -29,9 +29,11 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -62,6 +64,8 @@ public class PowerUI extends SystemUI {
     AlertDialog mLowBatteryDialog;
     TextView mBatteryLevelTextView;
 
+    private long mScreenOffTime = -1;
+
     public void start() {
 
         mLowBatteryAlertCloseLevel = mContext.getResources().getInteger(
@@ -71,10 +75,14 @@ public class PowerUI extends SystemUI {
         mLowBatteryReminderLevels[1] = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
 
+        final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mScreenOffTime = pm.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
+
         // Register for Intent broadcasts for...
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_POWER_CONNECTED);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
     }
 
@@ -126,19 +134,19 @@ public class PowerUI extends SystemUI {
                 int bucket = findBatteryLevelBucket(mBatteryLevel);
 
                 if (DEBUG) {
-                    Log.d(TAG, "buckets   ....." + mLowBatteryAlertCloseLevel
+                    Slog.d(TAG, "buckets   ....." + mLowBatteryAlertCloseLevel
                             + " .. " + mLowBatteryReminderLevels[0]
                             + " .. " + mLowBatteryReminderLevels[1]);
-                    Log.d(TAG, "level          " + oldBatteryLevel + " --> " + mBatteryLevel);
-                    Log.d(TAG, "status         " + oldBatteryStatus + " --> " + mBatteryStatus);
-                    Log.d(TAG, "plugType       " + oldPlugType + " --> " + mPlugType);
-                    Log.d(TAG, "invalidCharger " + oldInvalidCharger + " --> " + mInvalidCharger);
-                    Log.d(TAG, "bucket         " + oldBucket + " --> " + bucket);
-                    Log.d(TAG, "plugged        " + oldPlugged + " --> " + plugged);
+                    Slog.d(TAG, "level          " + oldBatteryLevel + " --> " + mBatteryLevel);
+                    Slog.d(TAG, "status         " + oldBatteryStatus + " --> " + mBatteryStatus);
+                    Slog.d(TAG, "plugType       " + oldPlugType + " --> " + mPlugType);
+                    Slog.d(TAG, "invalidCharger " + oldInvalidCharger + " --> " + mInvalidCharger);
+                    Slog.d(TAG, "bucket         " + oldBucket + " --> " + bucket);
+                    Slog.d(TAG, "plugged        " + oldPlugged + " --> " + plugged);
                 }
 
                 if (oldInvalidCharger == 0 && mInvalidCharger != 0) {
-                    Log.d(TAG, "showing invalid charger warning");
+                    Slog.d(TAG, "showing invalid charger warning");
                     showInvalidChargerDialog();
                     return;
                 } else if (oldInvalidCharger != 0 && mInvalidCharger == 0) {
@@ -163,21 +171,25 @@ public class PowerUI extends SystemUI {
                 } else if (mBatteryLevelTextView != null) {
                     showLowBatteryWarning();
                 }
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                mScreenOffTime = SystemClock.elapsedRealtime();
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                mScreenOffTime = -1;
             } else {
-                Log.w(TAG, "unknown intent: " + intent);
+                Slog.w(TAG, "unknown intent: " + intent);
             }
         }
     };
 
     void dismissLowBatteryWarning() {
         if (mLowBatteryDialog != null) {
-            Log.i(TAG, "closing low battery warning: level=" + mBatteryLevel);
+            Slog.i(TAG, "closing low battery warning: level=" + mBatteryLevel);
             mLowBatteryDialog.dismiss();
         }
     }
 
     void showLowBatteryWarning() {
-        Log.i(TAG,
+        Slog.i(TAG,
                 ((mBatteryLevelTextView == null) ? "showing" : "updating")
                 + " low battery warning: level=" + mBatteryLevel
                 + " [" + findBatteryLevelBucket(mBatteryLevel) + "]");
@@ -233,11 +245,23 @@ public class PowerUI extends SystemUI {
     }
 
     void playLowBatterySound() {
-        if (DEBUG) {
-            Log.i(TAG, "playing low battery sound. WOMP-WOMP!");
+        final ContentResolver cr = mContext.getContentResolver();
+
+        final int silenceAfter = Settings.Global.getInt(cr,
+                Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0);
+        final long offTime = SystemClock.elapsedRealtime() - mScreenOffTime;
+        if (silenceAfter > 0
+                && mScreenOffTime > 0
+                && offTime > silenceAfter) {
+            Slog.i(TAG, "screen off too long (" + offTime + "ms, limit " + silenceAfter
+                    + "ms): not waking up the user with low battery sound");
+            return;
         }
 
-        final ContentResolver cr = mContext.getContentResolver();
+        if (DEBUG) {
+            Slog.d(TAG, "playing low battery sound. pick-a-doop!"); // WOMP-WOMP is deprecated
+        }
+
         if (Settings.Global.getInt(cr, Settings.Global.POWER_SOUNDS_ENABLED, 1) == 1) {
             final String soundPath = Settings.Global.getString(cr,
                     Settings.Global.LOW_BATTERY_SOUND);
@@ -261,7 +285,7 @@ public class PowerUI extends SystemUI {
     }
 
     void showInvalidChargerDialog() {
-        Log.d(TAG, "showing invalid charger dialog");
+        Slog.d(TAG, "showing invalid charger dialog");
 
         dismissLowBatteryWarning();
 
@@ -301,6 +325,17 @@ public class PowerUI extends SystemUI {
         pw.println(Integer.toString(mPlugType));
         pw.print("mInvalidCharger=");
         pw.println(Integer.toString(mInvalidCharger));
+        pw.print("mScreenOffTime=");
+        pw.print(mScreenOffTime);
+        if (mScreenOffTime >= 0) {
+            pw.print(" (");
+            pw.print(SystemClock.elapsedRealtime() - mScreenOffTime);
+            pw.print(" ago)");
+        }
+        pw.println();
+        pw.print("soundTimeout=");
+        pw.println(Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0));
         pw.print("bucket: ");
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
     }
