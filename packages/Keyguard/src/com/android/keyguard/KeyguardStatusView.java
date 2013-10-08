@@ -17,23 +17,19 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
 import android.widget.GridLayout;
+import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
-
-import libcore.icu.ICU;
 
 public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
@@ -42,6 +38,7 @@ public class KeyguardStatusView extends GridLayout {
     private LockPatternUtils mLockPatternUtils;
 
     private TextView mAlarmStatusView;
+    private TextClock mDateView;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -58,10 +55,12 @@ public class KeyguardStatusView extends GridLayout {
             }
         };
 
+        @Override
         public void onScreenTurnedOn() {
             setEnableMarquee(true);
         };
 
+        @Override
         public void onScreenTurnedOff(int why) {
             setEnableMarquee(false);
         };
@@ -88,6 +87,7 @@ public class KeyguardStatusView extends GridLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
+        mDateView = (TextClock) findViewById(R.id.date_view);
         mLockPatternUtils = new LockPatternUtils(getContext());
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setEnableMarquee(screenOn);
@@ -95,7 +95,11 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     protected void refresh() {
-        refreshAlarmStatus(); // might as well
+        final String fmt = DateFormat.getBestDateTimePattern(Locale.getDefault(),
+                mContext.getResources().getString(R.string.abbrev_wday_month_day_no_year));
+        mDateView.setFormat24Hour(fmt);
+        mDateView.setFormat12Hour(fmt);
+        refreshAlarmStatus();
     }
 
     void refreshAlarmStatus() {
