@@ -435,6 +435,8 @@ public final class SelectPrinterFragment extends ListFragment {
                         R.layout.printer_dropdown_item, parent, false);
             }
 
+            convertView.setEnabled(isEnabled(position));
+
             CharSequence title = null;
             CharSequence subtitle = null;
             Drawable icon = null;
@@ -473,6 +475,12 @@ public final class SelectPrinterFragment extends ListFragment {
             }
 
             return convertView;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            PrinterInfo printer =  (PrinterInfo) getItem(position);
+            return printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE;
         }
 
         @Override
