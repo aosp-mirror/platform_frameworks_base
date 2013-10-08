@@ -226,7 +226,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_RESULTS = localLOGV || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
-    static final boolean DEBUG_STACK = localLOGV || false;
+    static final boolean DEBUG_STACK = localLOGV || true;
     static final boolean DEBUG_SWITCH = localLOGV || false;
     static final boolean DEBUG_TASKS = localLOGV || false;
     static final boolean DEBUG_THUMBNAILS = localLOGV || false;
