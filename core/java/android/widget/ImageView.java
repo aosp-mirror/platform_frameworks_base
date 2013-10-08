@@ -27,6 +27,7 @@ import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
+import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -73,6 +74,7 @@ public class ImageView extends View {
 
     // these are applied to the drawable
     private ColorFilter mColorFilter;
+    private Xfermode mXfermode;
     private int mAlpha = 255;
     private int mViewAlphaScale = 256;
     private boolean mColorMod = false;
@@ -1130,6 +1132,18 @@ public class ImageView extends View {
     }
 
     /**
+     * @hide Candidate for future API inclusion
+     */
+    public final void setXfermode(Xfermode mode) {
+        if (mXfermode != mode) {
+            mXfermode = mode;
+            mColorMod = true;
+            applyColorMod();
+            invalidate();
+        }
+    }
+
+    /**
      * Returns the active color filter for this ImageView.
      *
      * @return the active color filter for this ImageView
@@ -1205,6 +1219,7 @@ public class ImageView extends View {
         if (mDrawable != null && mColorMod) {
             mDrawable = mDrawable.mutate();
             mDrawable.setColorFilter(mColorFilter);
+            mDrawable.setXfermode(mXfermode);
             mDrawable.setAlpha(mAlpha * mViewAlphaScale >> 8);
         }
     }

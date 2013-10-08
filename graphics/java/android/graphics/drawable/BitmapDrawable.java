@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
@@ -527,6 +528,14 @@ public class BitmapDrawable extends Drawable {
     @Override
     public void setColorFilter(ColorFilter cf) {
         mBitmapState.mPaint.setColorFilter(cf);
+        invalidateSelf();
+    }
+
+    /**
+     * @hide Candidate for future API inclusion
+     */
+    public void setXfermode(Xfermode xfermode) {
+        mBitmapState.mPaint.setXfermode(xfermode);
         invalidateSelf();
     }
 

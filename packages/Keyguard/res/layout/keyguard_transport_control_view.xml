@@ -75,7 +75,8 @@
                 <SeekBar
                     android:id="@+id/transient_seek_bar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.TransportControl.SeekBar" />
                 <TextView
                     android:id="@+id/transient_seek_time_elapsed"
                     android:layout_width="wrap_content"
