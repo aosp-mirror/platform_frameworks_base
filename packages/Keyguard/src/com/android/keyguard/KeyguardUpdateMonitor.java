@@ -92,7 +92,8 @@ public class KeyguardUpdateMonitor {
     protected static final int MSG_SET_PLAYBACK_STATE = 316;
     protected static final int MSG_USER_INFO_CHANGED = 317;
     protected static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
-
+    private static final int MSG_SCREEN_TURNED_ON = 319;
+    private static final int MSG_SCREEN_TURNED_OFF = 320;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -126,6 +127,8 @@ public class KeyguardUpdateMonitor {
     private ContentObserver mDeviceProvisionedObserver;
 
     private boolean mSwitchingUser;
+
+    private boolean mScreenOn;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -184,6 +187,12 @@ public class KeyguardUpdateMonitor {
                     break;
                 case MSG_REPORT_EMERGENCY_CALL_ACTION:
                     handleReportEmergencyCallAction();
+                    break;
+                case MSG_SCREEN_TURNED_OFF:
+                    handleScreenTurnedOff(msg.arg1);
+                    break;
+                case MSG_SCREEN_TURNED_ON:
+                    handleScreenTurnedOn();
                     break;
             }
         }
@@ -409,6 +418,26 @@ public class KeyguardUpdateMonitor {
             sInstance = new KeyguardUpdateMonitor(context);
         }
         return sInstance;
+    }
+
+    protected void handleScreenTurnedOn() {
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onScreenTurnedOn();
+            }
+        }
+    }
+
+    protected void handleScreenTurnedOff(int arg1) {
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onScreenTurnedOff(arg1);
+            }
+        }
     }
 
     /**
@@ -1040,5 +1069,25 @@ public class KeyguardUpdateMonitor {
 
     public DisplayClientState getCachedDisplayClientState() {
         return mDisplayClientState;
+    }
+
+    // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
+    // (KeyguardViewMediator, KeyguardHostView)
+    public void dispatchScreenTurnedOn() {
+        synchronized (this) {
+            mScreenOn = true;
+        }
+        mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_ON);
+    }
+
+    public void dispatchScreenTurndOff(int why) {
+        synchronized(this) {
+            mScreenOn = false;
+        }
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SCREEN_TURNED_OFF, why, 0));
+    }
+
+    public boolean isScreenOn() {
+        return mScreenOn;
     }
 }
