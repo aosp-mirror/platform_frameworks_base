@@ -405,6 +405,12 @@ public class KeyguardHostView extends KeyguardViewBase {
             mAppWidgetContainer.setAddWidgetEnabled(false);
         }
         checkAppWidgetConsistency();
+
+        // Don't let the user drag the challenge down if widgets are disabled.
+        if (mSlidingChallengeLayout != null) {
+            mSlidingChallengeLayout.setEnableChallengeDragging(!widgetsDisabled());
+        }
+
         mSwitchPageRunnable.run();
         // This needs to be called after the pages are all added.
         mViewStateManager.showUsabilityHints();
