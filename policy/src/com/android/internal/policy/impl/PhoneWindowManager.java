@@ -2991,8 +2991,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.left = df.left = of.left = cf.left = vf.left = mDockLeft;
             pf.top = df.top = of.top = cf.top = vf.top = mDockTop;
             pf.right = df.right = of.right = cf.right = vf.right = mDockRight;
-            // IM dock windows always go above the nav bar.
-            pf.bottom = df.bottom = of.bottom = cf.bottom = vf.bottom = mStableBottom;
+            // IM dock windows layout below the nav bar...
+            pf.bottom = df.bottom = of.bottom = mRestrictedScreenTop + mRestrictedScreenHeight;
+            // ...with content insets above the nav bar
+            cf.bottom = vf.bottom = mStableBottom;
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();

@@ -78,6 +78,7 @@
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <drawable name="input_method_fullscreen_background_holo">@drawable/screen_background_holo_dark</drawable>
+    <color name="input_method_navigation_guard">#ff000000</color>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
