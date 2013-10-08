@@ -1419,6 +1419,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
                     userState.mUserId);
         }
+        try {
+            mWindowManagerService.setTouchExplorationEnabled(enabled);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean canRequestAndRequestsTouchExplorationLocked(Service service) {
