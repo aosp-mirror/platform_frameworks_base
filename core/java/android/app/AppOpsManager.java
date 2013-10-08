@@ -193,8 +193,8 @@ public class AppOpsManager {
             android.Manifest.permission.WRITE_CALL_LOG,
             android.Manifest.permission.READ_CALENDAR,
             android.Manifest.permission.WRITE_CALENDAR,
-            null, // no permission required for notifications
             android.Manifest.permission.ACCESS_WIFI_STATE,
+            null, // no permission required for notifications
             null, // neighboring cells shares the coarse location perm
             android.Manifest.permission.CALL_PHONE,
             android.Manifest.permission.READ_SMS,
