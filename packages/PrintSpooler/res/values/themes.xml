@@ -22,6 +22,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:colorBackgroundCacheHint">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
     </style>
 
     <style name="SelectPrinterActivityTheme" parent="@android:style/Theme.Holo.Light">
