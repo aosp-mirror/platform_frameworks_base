@@ -514,6 +514,9 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     }
 
     SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
+    if (data.get() == NULL) {
+        return nullObjectReturn("NewFromFD failed in nativeDecodeFileDescriptor");
+    }
     SkAutoTUnref<SkMemoryStream> stream(new SkMemoryStream(data));
 
     /* Allow purgeable iff we own the FD, i.e., in the puregeable and
