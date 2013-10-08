@@ -6755,7 +6755,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
         tr.disposeThumbnail();
         mRecentTasks.remove(tr);
-        mStackSupervisor.removeTask(tr);
         final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;
         Intent baseIntent = new Intent(
                 tr.intent != null ? tr.intent : tr.affinityIntent);
