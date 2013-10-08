@@ -113,7 +113,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
 
-    public static final boolean DEBUG_WINDOW_STATE = true;
+    public static final boolean DEBUG_WINDOW_STATE = false;
 
     public static final boolean SETTINGS_DRAG_SHORTCUT = true;
 
