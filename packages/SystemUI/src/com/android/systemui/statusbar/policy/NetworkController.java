@@ -514,13 +514,9 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     private final void updateTelephonySignalStrength() {
         if (!hasService()) {
             if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
-            if (!mSimState.iccCardExist()) {
-                mPhoneSignalIconId = R.drawable.stat_sys_no_sim;
-            } else {
-                mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-            }
-            mDataSignalIconId = mPhoneSignalIconId;
+            mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
             mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
+            mDataSignalIconId = R.drawable.stat_sys_signal_null;
         } else {
             if (mSignalStrength == null) {
                 if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
