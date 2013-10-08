@@ -784,8 +784,34 @@ public final class RemoteController
     }
 
     private void onDisplayEnable(boolean enabled) {
+        final OnClientUpdateListener l;
         synchronized(mInfoLock) {
             mEnabled = enabled;
+            l = this.mOnClientUpdateListener;
+        }
+        if (!enabled) {
+            // when disabling, reset all info sent to the user
+            final int genId;
+            synchronized (mGenLock) {
+                genId = mClientGenerationIdCurrent;
+            }
+            // send "stopped" state, happened "now", playback position is 0, speed 0.0f
+            final PlaybackInfo pi = new PlaybackInfo(RemoteControlClient.PLAYSTATE_STOPPED,
+                    SystemClock.elapsedRealtime() /*stateChangeTimeMs*/,
+                    0 /*currentPosMs*/, 0.0f /*speed*/);
+            sendMsg(mEventHandler, MSG_NEW_PLAYBACK_INFO, SENDMSG_REPLACE,
+                    genId /*arg1*/, 0 /*arg2, ignored*/, pi /*obj*/, 0 /*delay*/);
+            // send "blank" transport control info: no controls are supported
+            sendMsg(mEventHandler, MSG_NEW_TRANSPORT_INFO, SENDMSG_REPLACE,
+                    genId /*arg1*/, 0 /*arg2, no flags*/,
+                    null /*obj, ignored*/, 0 /*delay*/);
+            // send dummy metadata with empty string for title and artist, duration of 0
+            Bundle metadata = new Bundle(3);
+            metadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_TITLE), "");
+            metadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_ARTIST), "");
+            metadata.putLong(String.valueOf(MediaMetadataRetriever.METADATA_KEY_DURATION), 0);
+            sendMsg(mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
+                    genId /*arg1*/, 0 /*arg2, ignored*/, metadata /*obj*/, 0 /*delay*/);
         }
     }
 
