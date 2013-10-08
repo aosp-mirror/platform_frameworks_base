@@ -29,8 +29,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/clock_white"
-        android:format12Hour="@string/abbrev_wday_month_day_no_year"
-        android:format24Hour="@string/abbrev_wday_month_day_no_year"
         style="@style/widget_label"
         android:gravity="center"
         />
