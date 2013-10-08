@@ -3008,9 +3008,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             dcf.bottom = mSystemBottom;
             final boolean inheritTranslucentDecor = (attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) != 0;
-            if (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                    && attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW
-                    && !inheritTranslucentDecor) {
+            final boolean isAppWindow =
+                    attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW &&
+                    attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+            final boolean topAtRest =
+                    win == mTopFullscreenOpaqueWindowState && !win.isAnimatingLw();
+            if (isAppWindow && !inheritTranslucentDecor && !topAtRest) {
                 if ((sysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
                         && (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0
                         && (fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0) {
