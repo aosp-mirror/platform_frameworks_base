@@ -910,10 +910,20 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Sets the performed action that triggered this event.
+     * <p>
+     * Valid actions are defined in {@link AccessibilityNodeInfo}:
+     * <ul>
+     * <li>{@link AccessibilityNodeInfo#ACTION_ACCESSIBILITY_FOCUS}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_ACCESSIBILITY_FOCUS}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_FOCUS}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_SELECTION}
+     * <li>{@link AccessibilityNodeInfo#ACTION_CLICK}
+     * <li>etc.
+     * </ul>
      *
      * @param action The action.
-     *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @see AccessibilityNodeInfo#performAction(int)
      */
     public void setAction(int action) {
         enforceNotSealed();
