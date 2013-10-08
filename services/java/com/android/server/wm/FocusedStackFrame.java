@@ -63,7 +63,7 @@ class FocusedStackFrame {
     }
 
     private void draw(Rect bounds, int color) {
-        if (DEBUG_STACK) Slog.i(TAG, "draw: bounds=" + bounds.toShortString() +
+        if (false && DEBUG_STACK) Slog.i(TAG, "draw: bounds=" + bounds.toShortString() +
                 " color=" + Integer.toHexString(color));
         mTmpDrawRect.set(bounds);
         Canvas c = null;
@@ -100,7 +100,7 @@ class FocusedStackFrame {
     }
 
     private void positionSurface(Rect bounds) {
-        if (DEBUG_STACK) Slog.i(TAG, "positionSurface: bounds=" + bounds.toShortString());
+        if (false && DEBUG_STACK) Slog.i(TAG, "positionSurface: bounds=" + bounds.toShortString());
         mSurfaceControl.setSize(bounds.width(), bounds.height());
         mSurfaceControl.setPosition(bounds.left, bounds.top);
     }
@@ -108,7 +108,7 @@ class FocusedStackFrame {
     // Note: caller responsible for being inside
     // Surface.openTransaction() / closeTransaction()
     public void setVisibility(boolean on) {
-        if (DEBUG_STACK) Slog.i(TAG, "setVisibility: on=" + on +
+        if (false && DEBUG_STACK) Slog.i(TAG, "setVisibility: on=" + on +
                 " mLastBounds=" + mLastBounds.toShortString() +
                 " mBounds=" + mBounds.toShortString());
         if (mSurfaceControl == null) {
@@ -132,7 +132,7 @@ class FocusedStackFrame {
     }
 
     public void setBounds(Rect bounds) {
-        if (DEBUG_STACK) Slog.i(TAG, "setBounds: bounds=" + bounds);
+        if (false && DEBUG_STACK) Slog.i(TAG, "setBounds: bounds=" + bounds);
         mBounds.set(bounds);
     }
 
