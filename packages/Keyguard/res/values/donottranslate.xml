@@ -16,7 +16,5 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- String matching the lock screen format for displaying the date. -->
-    <string name="abbrev_wday_month_day_no_year">EEE, MMMM d</string>
-    <!-- Format for describing the date, for accessibility. -->
-    <string name="full_wday_month_day_no_year">EEEE, MMMM d</string>
+    <string name="abbrev_wday_month_day_no_year">EEEMMMMd</string>
 </resources>
