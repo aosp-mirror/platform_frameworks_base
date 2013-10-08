@@ -36,6 +36,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.lang.ref.WeakReference;
+
 /**
  * The RemoteController class is used to control media playback, display and update media metadata
  * and playback status, published by applications using the {@link RemoteControlClient} class.
@@ -122,7 +124,7 @@ public final class RemoteController
         }
         mOnClientUpdateListener = updateListener;
         mContext = context;
-        mRcd = new RcDisplay();
+        mRcd = new RcDisplay(this);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         if (ActivityManager.isLowRamDeviceStatic()) {
@@ -505,34 +507,51 @@ public final class RemoteController
 
     //==================================================
     // Implementation of IRemoteControlDisplay interface
-    private class RcDisplay extends IRemoteControlDisplay.Stub {
+    private static class RcDisplay extends IRemoteControlDisplay.Stub {
+        private final WeakReference<RemoteController> mController;
+
+        RcDisplay(RemoteController rc) {
+            mController = new WeakReference<RemoteController>(rc);
+        }
 
         public void setCurrentClientId(int genId, PendingIntent clientMediaIntent,
                 boolean clearing) {
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
             boolean isNew = false;
             synchronized(mGenLock) {
-                if (mClientGenerationIdCurrent != genId) {
-                    mClientGenerationIdCurrent = genId;
+                if (rc.mClientGenerationIdCurrent != genId) {
+                    rc.mClientGenerationIdCurrent = genId;
                     isNew = true;
                 }
             }
             if (clientMediaIntent != null) {
-                sendMsg(mEventHandler, MSG_NEW_PENDING_INTENT, SENDMSG_REPLACE,
+                sendMsg(rc.mEventHandler, MSG_NEW_PENDING_INTENT, SENDMSG_REPLACE,
                         genId /*arg1*/, 0, clientMediaIntent /*obj*/, 0 /*delay*/);
             }
             if (isNew || clearing) {
-                sendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
+                sendMsg(rc.mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
                         genId /*arg1*/, clearing ? 1 : 0, null /*obj*/, 0 /*delay*/);
             }
         }
 
         public void setEnabled(boolean enabled) {
-            sendMsg(mEventHandler, MSG_DISPLAY_ENABLE, SENDMSG_REPLACE,
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
+            sendMsg(rc.mEventHandler, MSG_DISPLAY_ENABLE, SENDMSG_REPLACE,
                     enabled ? 1 : 0 /*arg1*/, 0, null /*obj*/, 0 /*delay*/);
         }
 
         public void setPlaybackState(int genId, int state,
                 long stateChangeTimeMs, long currentPosMs, float speed) {
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "> new playback state: genId="+genId
                         + " state="+ state
@@ -542,65 +561,81 @@ public final class RemoteController
             }
 
             synchronized(mGenLock) {
-                if (mClientGenerationIdCurrent != genId) {
+                if (rc.mClientGenerationIdCurrent != genId) {
                     return;
                 }
             }
             final PlaybackInfo playbackInfo =
                     new PlaybackInfo(state, stateChangeTimeMs, currentPosMs, speed);
-            sendMsg(mEventHandler, MSG_NEW_PLAYBACK_INFO, SENDMSG_REPLACE,
+            sendMsg(rc.mEventHandler, MSG_NEW_PLAYBACK_INFO, SENDMSG_REPLACE,
                     genId /*arg1*/, 0, playbackInfo /*obj*/, 0 /*delay*/);
 
         }
 
         public void setTransportControlInfo(int genId, int transportControlFlags,
                 int posCapabilities) {
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
             synchronized(mGenLock) {
-                if (mClientGenerationIdCurrent != genId) {
+                if (rc.mClientGenerationIdCurrent != genId) {
                     return;
                 }
             }
-            sendMsg(mEventHandler, MSG_NEW_TRANSPORT_INFO, SENDMSG_REPLACE,
+            sendMsg(rc.mEventHandler, MSG_NEW_TRANSPORT_INFO, SENDMSG_REPLACE,
                     genId /*arg1*/, transportControlFlags /*arg2*/,
                     null /*obj*/, 0 /*delay*/);
         }
 
         public void setMetadata(int genId, Bundle metadata) {
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
             if (DEBUG) { Log.e(TAG, "setMetadata("+genId+")"); }
             if (metadata == null) {
                 return;
             }
             synchronized(mGenLock) {
-                if (mClientGenerationIdCurrent != genId) {
+                if (rc.mClientGenerationIdCurrent != genId) {
                     return;
                 }
             }
-            sendMsg(mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
+            sendMsg(rc.mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
                     genId /*arg1*/, 0 /*arg2*/,
                     metadata /*obj*/, 0 /*delay*/);
         }
 
         public void setArtwork(int genId, Bitmap artwork) {
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
             if (DEBUG) { Log.v(TAG, "setArtwork("+genId+")"); }
             synchronized(mGenLock) {
-                if (mClientGenerationIdCurrent != genId) {
+                if (rc.mClientGenerationIdCurrent != genId) {
                     return;
                 }
             }
             Bundle metadata = new Bundle(1);
             metadata.putParcelable(String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK), artwork);
-            sendMsg(mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
+            sendMsg(rc.mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
                     genId /*arg1*/, 0 /*arg2*/,
                     metadata /*obj*/, 0 /*delay*/);
         }
 
         public void setAllMetadata(int genId, Bundle metadata, Bitmap artwork) {
+            final RemoteController rc = mController.get();
+            if (rc == null) {
+                return;
+            }
             if (DEBUG) { Log.e(TAG, "setAllMetadata("+genId+")"); }
             if ((metadata == null) && (artwork == null)) {
                 return;
             }
             synchronized(mGenLock) {
-                if (mClientGenerationIdCurrent != genId) {
+                if (rc.mClientGenerationIdCurrent != genId) {
                     return;
                 }
             }
@@ -611,7 +646,7 @@ public final class RemoteController
                 metadata.putParcelable(String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK),
                         artwork);
             }
-            sendMsg(mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
+            sendMsg(rc.mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
                     genId /*arg1*/, 0 /*arg2*/,
                     metadata /*obj*/, 0 /*delay*/);
         }
