@@ -4636,15 +4636,14 @@ public final class ActivityThread {
             if (DEBUG_PROVIDER) Slog.v(TAG, "Cleaning up dead provider "
                     + provider + " " + prc.holder.info.name);
             mProviderRefCountMap.remove(provider);
-            if (prc.client != null && prc.client.mNames != null) {
-                for (String name : prc.client.mNames) {
-                    ProviderClientRecord pr = mProviderMap.get(name);
-                    if (pr != null && pr.mProvider.asBinder() == provider) {
-                        Slog.i(TAG, "Removing dead content provider: " + name);
-                        mProviderMap.remove(name);
-                    }
+            for (int i=mProviderMap.size()-1; i>=0; i--) {
+                ProviderClientRecord pr = mProviderMap.valueAt(i);
+                if (pr != null && pr.mProvider.asBinder() == provider) {
+                    Slog.i(TAG, "Removing dead content provider:" + pr.mProvider.toString());
+                    mProviderMap.removeAt(i);
                 }
             }
+
             if (fromClient) {
                 // We found out about this due to execution in our client
                 // code.  Tell the activity manager about it now, to ensure
