@@ -71,7 +71,7 @@ public class BarTransitions {
             mOpaque = 0xff0000ff;
             mSemiTransparent = 0x7f0000ff;
         } else {
-            mOpaque = res.getColor(R.drawable.system_bar_background);
+            mOpaque = res.getColor(R.color.system_bar_background_opaque);
             mSemiTransparent = res.getColor(R.color.system_bar_background_semi_transparent);
         }
 
