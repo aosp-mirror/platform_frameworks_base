@@ -566,6 +566,15 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             return;
         }
 
+        long ident = Binder.clearCallingIdentity();
+        try {
+            dumpInner(fd, pw, args);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void dumpInner(FileDescriptor fd, PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 
         boolean isCheckin = false;
