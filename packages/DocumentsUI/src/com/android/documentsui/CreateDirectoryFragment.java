@@ -73,7 +73,7 @@ public class CreateDirectoryFragment extends DialogFragment {
                 final DocumentsActivity activity = (DocumentsActivity) getActivity();
                 final DocumentInfo cwd = activity.getCurrentDirectory();
 
-                new CreateDirectoryTask(displayName).executeOnExecutor(
+                new CreateDirectoryTask(activity, cwd, displayName).executeOnExecutor(
                         ProviderExecutor.forAuthority(cwd.authority));
             }
         });
@@ -83,25 +83,26 @@ public class CreateDirectoryFragment extends DialogFragment {
     }
 
     private class CreateDirectoryTask extends AsyncTask<Void, Void, DocumentInfo> {
+        private final DocumentsActivity mActivity;
+        private final DocumentInfo mCwd;
         private final String mDisplayName;
 
-        public CreateDirectoryTask(String displayName) {
+        public CreateDirectoryTask(
+                DocumentsActivity activity, DocumentInfo cwd, String displayName) {
+            mActivity = activity;
+            mCwd = cwd;
             mDisplayName = displayName;
         }
 
         @Override
         protected DocumentInfo doInBackground(Void... params) {
-            final DocumentsActivity activity = (DocumentsActivity) getActivity();
-            final ContentResolver resolver = activity.getContentResolver();
-
-            final DocumentInfo cwd = activity.getCurrentDirectory();
-
+            final ContentResolver resolver = mActivity.getContentResolver();
             ContentProviderClient client = null;
             try {
                 client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                        resolver, cwd.derivedUri.getAuthority());
+                        resolver, mCwd.derivedUri.getAuthority());
                 final Uri childUri = DocumentsContract.createDocument(
-                        client, cwd.derivedUri, Document.MIME_TYPE_DIR, mDisplayName);
+                        client, mCwd.derivedUri, Document.MIME_TYPE_DIR, mDisplayName);
                 return DocumentInfo.fromUri(resolver, childUri);
             } catch (Exception e) {
                 Log.w(TAG, "Failed to create directory", e);
@@ -113,12 +114,11 @@ public class CreateDirectoryFragment extends DialogFragment {
 
         @Override
         protected void onPostExecute(DocumentInfo result) {
-            final DocumentsActivity activity = (DocumentsActivity) getActivity();
             if (result != null) {
                 // Navigate into newly created child
-                activity.onDocumentPicked(result);
+                mActivity.onDocumentPicked(result);
             } else {
-                Toast.makeText(activity, R.string.create_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mActivity, R.string.create_error, Toast.LENGTH_SHORT).show();
             }
         }
     }
