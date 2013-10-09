@@ -21,6 +21,19 @@ package android.animation;
  * values that represent ARGB colors.
  */
 public class ArgbEvaluator implements TypeEvaluator {
+    private static final ArgbEvaluator sInstance = new ArgbEvaluator();
+
+    /**
+     * Returns an instance of <code>ArgbEvaluator</code> that may be used in
+     * {@link ValueAnimator#setEvaluator(TypeEvaluator)}. The same instance may
+     * be used in multiple <code>Animator</code>s because it holds no state.
+     * @return An instance of <code>ArgbEvalutor</code>.
+     *
+     * @hide
+     */
+    public static ArgbEvaluator getInstance() {
+        return sInstance;
+    }
 
     /**
      * This function returns the calculated in-between value for a color

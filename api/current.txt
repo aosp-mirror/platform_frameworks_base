@@ -2527,6 +2527,8 @@ package android.animation {
     ctor public ObjectAnimator();
     method public java.lang.String getPropertyName();
     method public java.lang.Object getTarget();
+    method public static android.animation.ObjectAnimator ofArgb(java.lang.Object, java.lang.String, int...);
+    method public static android.animation.ObjectAnimator ofArgb(T, android.util.Property<T, java.lang.Integer>, int...);
     method public static android.animation.ObjectAnimator ofFloat(java.lang.Object, java.lang.String, float...);
     method public static android.animation.ObjectAnimator ofFloat(T, android.util.Property<T, java.lang.Float>, float...);
     method public static android.animation.ObjectAnimator ofInt(java.lang.Object, java.lang.String, int...);
@@ -2615,6 +2617,7 @@ package android.animation {
     method public long getStartDelay();
     method public android.animation.PropertyValuesHolder[] getValues();
     method public boolean isRunning();
+    method public static android.animation.ValueAnimator ofArgb(int...);
     method public static android.animation.ValueAnimator ofFloat(float...);
     method public static android.animation.ValueAnimator ofInt(int...);
     method public static android.animation.ValueAnimator ofObject(android.animation.TypeEvaluator, java.lang.Object...);
