@@ -41,8 +41,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"/>
 
-    <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
-
     <application
             android:allowClearUserData="true"
             android:label="@string/app_label"
