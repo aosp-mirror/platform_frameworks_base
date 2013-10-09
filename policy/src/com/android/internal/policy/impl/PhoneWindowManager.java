@@ -4287,12 +4287,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 })) {
                     return;
                 }
+                Slog.i(TAG, "No lock screen! waitForWindowDrawn false");
+
             } catch (RemoteException ex) {
                 // Can't happen in system process.
             }
         }
 
-        Slog.i(TAG, "No lock screen!");
+        Slog.i(TAG, "No lock screen! windowToken=" + windowToken);
         finishScreenTurningOn(screenOnListener);
     }
 
