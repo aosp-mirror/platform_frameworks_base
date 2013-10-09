@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -561,17 +562,23 @@ public class CallerInfo {
      *         is in.
      */
     private static String getCurrentCountryIso(Context context, Locale locale) {
-      String countryIso;
-      CountryDetector detector = (CountryDetector) context.getSystemService(
-          Context.COUNTRY_DETECTOR);
-      if (detector != null) {
-        countryIso = detector.detectCountry().getCountryIso();
-      } else {
-        countryIso = locale.getCountry();
-        Rlog.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
-              + countryIso);
-      }
-      return countryIso;
+        String countryIso = null;
+        CountryDetector detector = (CountryDetector) context.getSystemService(
+                Context.COUNTRY_DETECTOR);
+        if (detector != null) {
+            Country country = detector.detectCountry();
+            if (country != null) {
+                countryIso = country.getCountryIso();
+            } else {
+                Rlog.e(TAG, "CountryDetector.detectCountry() returned null.");
+            }
+        }
+        if (countryIso == null) {
+            countryIso = locale.getCountry();
+            Rlog.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
+                    + countryIso);
+        }
+        return countryIso;
     }
 
     /**
