@@ -292,7 +292,7 @@ public class DocumentsActivity extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             // Restore last stack for calling package
-            final String packageName = getCallingPackage();
+            final String packageName = getCallingPackageMaybeExtra();
             final Cursor cursor = getContentResolver()
                     .query(RecentsProvider.buildResume(packageName), null, null, null, null);
             try {
@@ -783,6 +783,11 @@ public class DocumentsActivity extends Activity {
         return mState.stack.peek();
     }
 
+    private String getCallingPackageMaybeExtra() {
+        final String extra = getIntent().getStringExtra(DocumentsContract.EXTRA_PACKAGE_NAME);
+        return (extra != null) ? extra : getCallingPackage();
+    }
+
     public Executor getCurrentExecutor() {
         final DocumentInfo cwd = getCurrentDirectory();
         if (cwd != null && cwd.authority != null) {
@@ -921,7 +926,7 @@ public class DocumentsActivity extends Activity {
         if (requestCode == CODE_FORWARD && resultCode != RESULT_CANCELED) {
 
             // Remember that we last picked via external app
-            final String packageName = getCallingPackage();
+            final String packageName = getCallingPackageMaybeExtra();
             final ContentValues values = new ContentValues();
             values.put(ResumeColumns.EXTERNAL, 1);
             getContentResolver().insert(RecentsProvider.buildResume(packageName), values);
@@ -1002,7 +1007,7 @@ public class DocumentsActivity extends Activity {
         }
 
         // Remember location for next app launch
-        final String packageName = getCallingPackage();
+        final String packageName = getCallingPackageMaybeExtra();
         values.clear();
         values.put(ResumeColumns.STACK, rawStack);
         values.put(ResumeColumns.EXTERNAL, 0);
