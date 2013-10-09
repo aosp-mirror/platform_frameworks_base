@@ -393,7 +393,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 mInversionObserver.startObserving();
                 mContrastObserver.startObserving();
                 mColorSpaceObserver.startObserving();
-                onRotationLockChanged();
+                refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onInversionChanged();
                 onContrastChanged();
