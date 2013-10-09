@@ -5807,6 +5807,7 @@ package android.content {
     method public static java.util.List<android.content.SyncInfo> getCurrentSyncs();
     method public static int getIsSyncable(android.accounts.Account, java.lang.String);
     method public static boolean getMasterSyncAutomatically();
+    method public java.util.List<android.content.UriPermission> getOutgoingPersistedUriPermissions();
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.accounts.Account, java.lang.String);
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.content.ComponentName);
     method public java.util.List<android.content.UriPermission> getPersistedUriPermissions();

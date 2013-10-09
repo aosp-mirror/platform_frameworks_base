@@ -1659,8 +1659,9 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Return list of all Uri permission grants that have been persisted for the
-     * calling app. Only persistable grants taken with
+     * Return list of all Uri permission grants that have been persisted by the
+     * calling app. That is, the returned permissions have been granted
+     * <em>to</em> the calling app. Only persistable grants taken with
      * {@link #takePersistableUriPermission(Uri, int)} are returned.
      *
      * @see #takePersistableUriPermission(Uri, int)
@@ -1668,7 +1669,23 @@ public abstract class ContentResolver {
      */
     public List<UriPermission> getPersistedUriPermissions() {
         try {
-            return ActivityManagerNative.getDefault().getPersistedUriPermissions().getList();
+            return ActivityManagerNative.getDefault()
+                    .getPersistedUriPermissions(mPackageName, true).getList();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Activity manager has died", e);
+        }
+    }
+
+    /**
+     * Return list of all persisted Uri permission grants that are hosted by the
+     * calling app. That is, the returned permissions have been granted
+     * <em>from</em> the calling app. Only grants taken with
+     * {@link #takePersistableUriPermission(Uri, int)} are returned.
+     */
+    public List<UriPermission> getOutgoingPersistedUriPermissions() {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getPersistedUriPermissions(mPackageName, false).getList();
         } catch (RemoteException e) {
             throw new RuntimeException("Activity manager has died", e);
         }
