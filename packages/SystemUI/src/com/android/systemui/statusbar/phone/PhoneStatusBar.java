@@ -1923,10 +1923,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
-        final boolean imeVisible = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
-        final int finalMode = imeVisible ? MODE_OPAQUE : mode;
         final boolean anim = (mScreenOn == null || mScreenOn) && windowState != WINDOW_STATE_HIDDEN;
-        transitions.transitionTo(finalMode, anim);
+        transitions.transitionTo(mode, anim);
     }
 
     private final Runnable mCheckBarModes = new Runnable() {
