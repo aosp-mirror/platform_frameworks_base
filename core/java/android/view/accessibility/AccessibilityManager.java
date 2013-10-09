@@ -91,23 +91,43 @@ public final class AccessibilityManager {
 
     boolean mIsTouchExplorationEnabled;
 
-    final CopyOnWriteArrayList<AccessibilityStateChangeListener> mAccessibilityStateChangeListeners =
-        new CopyOnWriteArrayList<AccessibilityStateChangeListener>();
+    private final CopyOnWriteArrayList<AccessibilityStateChangeListener>
+            mAccessibilityStateChangeListeners = new CopyOnWriteArrayList<
+                    AccessibilityStateChangeListener>();
+
+    private final CopyOnWriteArrayList<TouchExplorationStateChangeListener>
+            mTouchExplorationStateChangeListeners = new CopyOnWriteArrayList<
+                    TouchExplorationStateChangeListener>();
 
     /**
-     * Listener for the system accessibility state. To listen for changes to the accessibility
-     * state on the device, implement this interface and register it with the system by
-     * calling {@link AccessibilityManager#addAccessibilityStateChangeListener
-     * addAccessibilityStateChangeListener()}.
+     * Listener for the system accessibility state. To listen for changes to the
+     * accessibility state on the device, implement this interface and register
+     * it with the system by calling {@link #addAccessibilityStateChangeListener}.
      */
     public interface AccessibilityStateChangeListener {
 
         /**
-         * Called back on change in the accessibility state.
+         * Called when the accessibility enabled state changes.
          *
          * @param enabled Whether accessibility is enabled.
          */
         public void onAccessibilityStateChanged(boolean enabled);
+    }
+
+    /**
+     * Listener for the system touch exploration state. To listen for changes to
+     * the touch exploration state on the device, implement this interface and
+     * register it with the system by calling
+     * {@link #addTouchExplorationStateChangeListener}.
+     */
+    public interface TouchExplorationStateChangeListener {
+
+        /**
+         * Called when the touch exploration enabled state changes.
+         *
+         * @param enabled Whether touch exploration is enabled.
+         */
+        public void onTouchExplorationStateChanged(boolean enabled);
     }
 
     final IAccessibilityManagerClient.Stub mClient = new IAccessibilityManagerClient.Stub() {
@@ -363,37 +383,73 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Sets the current state.
+     * Registers a {@link TouchExplorationStateChangeListener} for changes in
+     * the global touch exploration state of the system.
+     *
+     * @param listener The listener.
+     * @return True if successfully registered.
+     */
+    public boolean addTouchExplorationStateChangeListener(
+            TouchExplorationStateChangeListener listener) {
+        return mTouchExplorationStateChangeListeners.add(listener);
+    }
+
+    /**
+     * Unregisters a {@link TouchExplorationStateChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if successfully unregistered.
+     */
+    public boolean removeTouchExplorationStateChangeListener(
+            TouchExplorationStateChangeListener listener) {
+        return mTouchExplorationStateChangeListeners.remove(listener);
+    }
+
+    /**
+     * Sets the current state and notifies listeners, if necessary.
      *
      * @param stateFlags The state flags.
      */
     private void setState(int stateFlags) {
-        final boolean accessibilityEnabled = (stateFlags & STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
-        setAccessibilityState(accessibilityEnabled);
-        mIsTouchExplorationEnabled = (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
-    }
-
-    /**
-     * Sets the enabled state.
-     *
-     * @param isEnabled The accessibility state.
-     */
-    private void setAccessibilityState(boolean isEnabled) {
+        final boolean enabled = (stateFlags & STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
+        final boolean touchExplorationEnabled =
+                (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
         synchronized (mHandler) {
-            if (isEnabled != mIsEnabled) {
-                mIsEnabled = isEnabled;
-                notifyAccessibilityStateChanged();
+            mIsEnabled = enabled;
+            mIsTouchExplorationEnabled = touchExplorationEnabled;
+
+            if (enabled != mIsEnabled) {
+                notifyAccessibilityStateChangedLh();
+            }
+
+            if (touchExplorationEnabled != mIsTouchExplorationEnabled) {
+                notifyTouchExplorationStateChangedLh();
             }
         }
     }
 
     /**
      * Notifies the registered {@link AccessibilityStateChangeListener}s.
+     * <p>
+     * The caller must be locked on {@link #mHandler}.
      */
-    private void notifyAccessibilityStateChanged() {
+    private void notifyAccessibilityStateChangedLh() {
         final int listenerCount = mAccessibilityStateChangeListeners.size();
         for (int i = 0; i < listenerCount; i++) {
             mAccessibilityStateChangeListeners.get(i).onAccessibilityStateChanged(mIsEnabled);
+        }
+    }
+
+    /**
+     * Notifies the registered {@link TouchExplorationStateChangeListener}s.
+     * <p>
+     * The caller must be locked on {@link #mHandler}.
+     */
+    private void notifyTouchExplorationStateChangedLh() {
+        final int listenerCount = mTouchExplorationStateChangeListeners.size();
+        for (int i = 0; i < listenerCount; i++) {
+            mTouchExplorationStateChangeListeners.get(i)
+                    .onTouchExplorationStateChanged(mIsTouchExplorationEnabled);
         }
     }
 
