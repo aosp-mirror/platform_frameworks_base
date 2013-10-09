@@ -2957,8 +2957,10 @@ public class WifiStateMachine extends StateMachine {
 
             if (mOperationalMode != CONNECT_MODE) {
                 mWifiNative.disconnect();
-                mWifiConfigStore.disableAllNetworks();
-                setWifiState(WIFI_STATE_DISABLED);
+                if (mOperationalMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
+                    mWifiConfigStore.disableAllNetworks();
+                    setWifiState(WIFI_STATE_DISABLED);
+                }
                 transitionTo(mScanModeState);
             } else {
                 /* Driver stop may have disabled networks, enable right after start */
