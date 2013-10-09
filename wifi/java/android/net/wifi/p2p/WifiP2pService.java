@@ -1080,6 +1080,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         @Override
         public void exit() {
+            sendP2pDiscoveryChangedBroadcast(false);
             sendP2pStateChangedBroadcast(false);
             mNetworkInfo.setIsAvailable(false);
         }
