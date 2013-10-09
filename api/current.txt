@@ -28464,6 +28464,7 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_FULLSCREEN = 4; // 0x4
     field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
     field public static final int SYSTEM_UI_FLAG_IMMERSIVE = 2048; // 0x800
+    field public static final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 4096; // 0x1000
     field public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 1024; // 0x400
     field public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 512; // 0x200
     field public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 256; // 0x100
