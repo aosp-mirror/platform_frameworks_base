@@ -74,6 +74,9 @@ public final class DocumentsContract {
     public static final String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";
 
     /** {@hide} */
+    public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
+
+    /** {@hide} */
     public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
     /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
