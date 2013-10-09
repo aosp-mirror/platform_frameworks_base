@@ -1167,11 +1167,19 @@ public class NotificationManagerService extends INotificationManager.Stub
                     }
                     if (packageChanged) {
                         // We cancel notifications for packages which have just been disabled
-                        final int enabled = mContext.getPackageManager()
-                                .getApplicationEnabledSetting(pkgName);
-                        if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                                || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-                            cancelNotifications = false;
+                        try {
+                            final int enabled = mContext.getPackageManager()
+                                    .getApplicationEnabledSetting(pkgName);
+                            if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                                    || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+                                cancelNotifications = false;
+                            }
+                        } catch (IllegalArgumentException e) {
+                            // Package doesn't exist; probably racing with uninstall.
+                            // cancelNotifications is already true, so nothing to do here.
+                            if (DBG) {
+                                Slog.i(TAG, "Exception trying to look up app enabled setting", e);
+                            }
                         }
                     }
                     pkgList = new String[]{pkgName};
