@@ -1160,7 +1160,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case GET_PERSISTED_URI_PERMISSIONS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            final ParceledListSlice<UriPermission> perms = getPersistedUriPermissions();
+            final String packageName = data.readString();
+            final boolean incoming = data.readInt() != 0;
+            final ParceledListSlice<UriPermission> perms = getPersistedUriPermissions(
+                    packageName, incoming);
             reply.writeNoException();
             perms.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             return true;
@@ -3500,10 +3503,13 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public ParceledListSlice<UriPermission> getPersistedUriPermissions() throws RemoteException {
+    public ParceledListSlice<UriPermission> getPersistedUriPermissions(
+            String packageName, boolean incoming) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeInt(incoming ? 1 : 0);
         mRemote.transact(GET_PERSISTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
         reply.readException();
         final ParceledListSlice<UriPermission> perms = ParceledListSlice.CREATOR.createFromParcel(

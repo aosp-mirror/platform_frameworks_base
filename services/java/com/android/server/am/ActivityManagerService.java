@@ -6489,26 +6489,53 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public ParceledListSlice<android.content.UriPermission> getPersistedUriPermissions() {
+    public ParceledListSlice<android.content.UriPermission> getPersistedUriPermissions(
+            String packageName, boolean incoming) {
         enforceNotIsolatedCaller("getPersistedUriPermissions");
+        Preconditions.checkNotNull(packageName, "packageName");
 
+        final int callingUid = Binder.getCallingUid();
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            final int packageUid = pm.getPackageUid(packageName, UserHandle.getUserId(callingUid));
+            if (packageUid != callingUid) {
+                throw new SecurityException(
+                        "Package " + packageName + " does not belong to calling UID " + callingUid);
+            }
+        } catch (RemoteException e) {
+            throw new SecurityException("Failed to verify package name ownership");
+        }
+
+        final ArrayList<android.content.UriPermission> result = Lists.newArrayList();
         synchronized (this) {
-            final int callingUid = Binder.getCallingUid();
-            final ArrayList<android.content.UriPermission> result = Lists.newArrayList();
-            final ArrayMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
-            if (perms == null) {
-                Slog.w(TAG, "No permission grants found for UID " + callingUid);
+            if (incoming) {
+                final ArrayMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
+                if (perms == null) {
+                    Slog.w(TAG, "No permission grants found for " + packageName);
+                } else {
+                    final int size = perms.size();
+                    for (int i = 0; i < size; i++) {
+                        final UriPermission perm = perms.valueAt(i);
+                        if (packageName.equals(perm.targetPkg) && perm.persistedModeFlags != 0) {
+                            result.add(perm.buildPersistedPublicApiObject());
+                        }
+                    }
+                }
             } else {
-                final int size = perms.size();
+                final int size = mGrantedUriPermissions.size();
                 for (int i = 0; i < size; i++) {
-                    final UriPermission perm = perms.valueAt(i);
-                    if (perm.persistedModeFlags != 0) {
-                        result.add(perm.buildPersistedPublicApiObject());
+                    final ArrayMap<Uri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
+                    final int permsSize = perms.size();
+                    for (int j = 0; j < permsSize; j++) {
+                        final UriPermission perm = perms.valueAt(j);
+                        if (packageName.equals(perm.sourcePkg) && perm.persistedModeFlags != 0) {
+                            result.add(perm.buildPersistedPublicApiObject());
+                        }
                     }
                 }
             }
-            return new ParceledListSlice<android.content.UriPermission>(result);
         }
+        return new ParceledListSlice<android.content.UriPermission>(result);
     }
 
     @Override

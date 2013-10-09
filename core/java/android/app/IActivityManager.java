@@ -215,7 +215,8 @@ public interface IActivityManager extends IInterface {
             int mode) throws RemoteException;
     public void takePersistableUriPermission(Uri uri, int modeFlags) throws RemoteException;
     public void releasePersistableUriPermission(Uri uri, int modeFlags) throws RemoteException;
-    public ParceledListSlice<UriPermission> getPersistedUriPermissions() throws RemoteException;
+    public ParceledListSlice<UriPermission> getPersistedUriPermissions(
+            String packageName, boolean incoming) throws RemoteException;
 
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting)
             throws RemoteException;
