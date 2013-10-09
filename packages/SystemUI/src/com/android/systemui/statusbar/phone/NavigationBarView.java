@@ -37,10 +37,10 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -88,6 +88,18 @@ public class NavigationBarView extends LinearLayout {
 
     // used to disable the camera icon in navbar when disabled by DPM
     private boolean mCameraDisabledByDpm;
+
+    // simplified click handler to be used when device is in accessibility mode
+    private final OnClickListener mAccessibilityClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.camera_button) {
+                KeyguardTouchDelegate.getInstance(getContext()).launchCamera();
+            } else if (v.getId() == R.id.search_light) {
+                KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
+            }
+        }
+    };
 
     private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
         @Override
@@ -392,44 +404,49 @@ public class NavigationBarView extends LinearLayout {
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
 
-
-        final AccessibilityManager accessibilityManager =
-                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        if (accessibilityManager.isEnabled() && accessibilityManager.isTouchExplorationEnabled()) {
-            // In accessibility mode, we add a simple click handler since swipe is tough to
-            // trigger near screen edges.
-            View camera = getCameraButton();
-            View searchLight = getSearchLight();
-            if (camera != null || searchLight != null) {
-                OnClickListener listener = new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        launchForAccessibilityClick(v);
-                    }
-                };
-                if (camera != null) {
-                    camera.setOnClickListener(listener);
-                }
-                if (searchLight != null) {
-                    searchLight.setOnClickListener(listener);
-                }
-            }
-        } else {
-            // Add a touch handler for camera icon for all view orientations.
-            for (int i = 0; i < mRotatedViews.length; i++) {
-                View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
-                if (cameraButton != null) {
-                    cameraButton.setOnTouchListener(mCameraTouchListener);
-                }
-            }
-        }
+        watchForAccessibilityChanges();
     }
 
-    protected void launchForAccessibilityClick(View v) {
-        if (v == getCameraButton()) {
-            KeyguardTouchDelegate.getInstance(getContext()).launchCamera();
-        } else if (v == getSearchLight()) {
-            KeyguardTouchDelegate.getInstance(getContext()).showAssistant();
+    private void watchForAccessibilityChanges() {
+        final AccessibilityManager am =
+                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+
+        // Set the initial state
+        enableAccessibility(am.isTouchExplorationEnabled());
+
+        // Watch for changes
+        am.addTouchExplorationStateChangeListener(new TouchExplorationStateChangeListener() {
+            @Override
+            public void onTouchExplorationStateChanged(boolean enabled) {
+                enableAccessibility(enabled);
+            }
+        });
+    }
+
+    private void enableAccessibility(boolean touchEnabled) {
+        Log.v(TAG, "touchEnabled:"  + touchEnabled);
+
+        // Add a touch handler or accessibility click listener for camera and search buttons
+        // for all view orientations.
+        final OnClickListener onClickListener = touchEnabled ? mAccessibilityClickListener : null;
+        final OnTouchListener onTouchListener = touchEnabled ? null : mCameraTouchListener;
+        boolean hasCamera = false;
+        for (int i = 0; i < mRotatedViews.length; i++) {
+            final View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
+            final View searchLight = mRotatedViews[i].findViewById(R.id.search_light);
+            if (cameraButton != null) {
+                hasCamera = true;
+                cameraButton.setOnTouchListener(onTouchListener);
+                cameraButton.setOnClickListener(onClickListener);
+            }
+            if (searchLight != null) {
+                searchLight.setOnClickListener(onClickListener);
+            }
+        }
+        if (hasCamera) {
+            // Warm up KeyguardTouchDelegate so it's ready by the time the camera button is touched.
+            // This will connect to KeyguardService so that touch events are processed.
+            KeyguardTouchDelegate.getInstance(mContext);
         }
     }
 
