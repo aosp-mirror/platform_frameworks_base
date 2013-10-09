@@ -95,6 +95,7 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Objects;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
+import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1277,6 +1278,11 @@ public final class ActivityThread {
                 }
             }
         }
+
+        @Override
+        public void scheduleInstallProvider(ProviderInfo provider) {
+            queueOrSendMessage(H.INSTALL_PROVIDER, provider);
+        }
     }
 
     private class H extends Handler {
@@ -1325,6 +1331,7 @@ public final class ActivityThread {
         public static final int UNSTABLE_PROVIDER_DIED  = 142;
         public static final int REQUEST_ASSIST_CONTEXT_EXTRAS = 143;
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
+        public static final int INSTALL_PROVIDER        = 145;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1373,6 +1380,7 @@ public final class ActivityThread {
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
                     case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
+                    case INSTALL_PROVIDER: return "INSTALL_PROVIDER";
                 }
             }
             return Integer.toString(code);
@@ -1589,6 +1597,9 @@ public final class ActivityThread {
                     break;
                 case TRANSLUCENT_CONVERSION_COMPLETE:
                     handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
+                    break;
+                case INSTALL_PROVIDER:
+                    handleInstallProvider((ProviderInfo) msg.obj);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2328,6 +2339,10 @@ public final class ActivityThread {
         if (r != null) {
             r.activity.onTranslucentConversionComplete(drawComplete);
         }
+    }
+
+    public void handleInstallProvider(ProviderInfo info) {
+        installContentProviders(mInitialApplication, Lists.newArrayList(info));
     }
 
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
