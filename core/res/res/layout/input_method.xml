@@ -18,7 +18,7 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.inputmethod.InputMethodRoot xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -52,4 +52,4 @@
         android:layout_height="wrap_content"
         android:visibility="gone">
     </FrameLayout>
-</LinearLayout>
+</com.android.internal.inputmethod.InputMethodRoot>
