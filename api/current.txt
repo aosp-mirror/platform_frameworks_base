@@ -2521,6 +2521,7 @@ package android.animation {
     method public static android.animation.ObjectAnimator ofInt(T, android.util.Property<T, java.lang.Integer>, int...);
     method public static android.animation.ObjectAnimator ofObject(java.lang.Object, java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
     method public static android.animation.ObjectAnimator ofObject(T, android.util.Property<T, V>, android.animation.TypeEvaluator<V>, V...);
+    method public static android.animation.ObjectAnimator ofObject(T, android.util.Property<T, P>, android.animation.TypeConverter<V, P>, android.animation.TypeEvaluator<V>, V...);
     method public static android.animation.ObjectAnimator ofPropertyValuesHolder(java.lang.Object, android.animation.PropertyValuesHolder...);
     method public void setAutoCancel(boolean);
     method public void setProperty(android.util.Property);
@@ -2538,6 +2539,8 @@ package android.animation {
     method public static android.animation.PropertyValuesHolder ofKeyframe(android.util.Property, android.animation.Keyframe...);
     method public static android.animation.PropertyValuesHolder ofObject(java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
     method public static android.animation.PropertyValuesHolder ofObject(android.util.Property, android.animation.TypeEvaluator<V>, V...);
+    method public static android.animation.PropertyValuesHolder ofObject(android.util.Property<?, V>, android.animation.TypeConverter<T, V>, android.animation.TypeEvaluator<T>, T...);
+    method public void setConverter(android.animation.TypeConverter);
     method public void setEvaluator(android.animation.TypeEvaluator);
     method public void setFloatValues(float...);
     method public void setIntValues(int...);
@@ -2564,6 +2567,12 @@ package android.animation {
 
   public abstract interface TimeInterpolator {
     method public abstract float getInterpolation(float);
+  }
+
+  public abstract class TypeConverter {
+    ctor public TypeConverter(java.lang.Class<T>, java.lang.Class<V>);
+    method public abstract V convert(T);
+    method public T convertBack(V);
   }
 
   public abstract interface TypeEvaluator {

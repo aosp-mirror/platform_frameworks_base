@@ -191,7 +191,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     /**
      * Constructs and returns an ObjectAnimator that animates between int values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
+     * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
@@ -211,7 +211,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     /**
      * Constructs and returns an ObjectAnimator that animates between int values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
+     * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
@@ -229,7 +229,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     /**
      * Constructs and returns an ObjectAnimator that animates between float values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
+     * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
@@ -249,7 +249,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     /**
      * Constructs and returns an ObjectAnimator that animates between float values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
+     * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
@@ -268,7 +268,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     /**
      * Constructs and returns an ObjectAnimator that animates between Object values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
+     * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
@@ -293,7 +293,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     /**
      * Constructs and returns an ObjectAnimator that animates between Object values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
+     * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
@@ -312,6 +312,32 @@ public final class ObjectAnimator extends ValueAnimator {
         anim.setObjectValues(values);
         anim.setEvaluator(evaluator);
         return anim;
+    }
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates between Object values. A single
+     * value implies that that value is the one being animated to. Two values imply starting
+     * and ending values. More than two values imply a starting value, values to animate through
+     * along the way, and an ending value (these values will be distributed evenly across
+     * the duration of the animation). This variant supplies a <code>TypeConverter</code> to
+     * convert from the animated values to the type of the property. If only one value is
+     * supplied, the <code>TypeConverter</code> must implement
+     * {@link TypeConverter#convertBack(Object)} to retrieve the current value.
+     *
+     * @param target The object whose property is to be animated.
+     * @param property The property being animated.
+     * @param converter Converts the animated object to the Property type.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    public static <T, V, P> ObjectAnimator ofObject(T target, Property<T, P> property,
+            TypeConverter<V, P> converter, TypeEvaluator<V> evaluator, V... values) {
+        PropertyValuesHolder pvh = PropertyValuesHolder.ofObject(property, converter, evaluator,
+                values);
+        return ofPropertyValuesHolder(target, pvh);
     }
 
     /**
