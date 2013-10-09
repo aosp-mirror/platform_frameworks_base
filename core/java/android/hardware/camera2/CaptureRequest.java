@@ -82,6 +82,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     private CaptureRequest(CaptureRequest source) {
         mSettings = new CameraMetadataNative(source.mSettings);
         mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
+        mUserTag = source.mUserTag;
     }
 
     /**
