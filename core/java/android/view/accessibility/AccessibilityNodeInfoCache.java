@@ -86,7 +86,9 @@ public class AccessibilityNodeInfoCache {
                     refreshCachedNode(event.getSourceNodeId());
                 } break;
                 case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
-                    clearSubTreeLocked(event.getSourceNodeId());
+                    synchronized (mLock) {
+                        clearSubTreeLocked(event.getSourceNodeId());
+                    }
                 } break;
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
                     synchronized (mLock) {
