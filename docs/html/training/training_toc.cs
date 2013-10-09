@@ -423,7 +423,22 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
-
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/beam-files/index.html"
+             description=
+             "How to transfer files between devices using the NFC Android Beam feature."
+             >Sharing Files with NFC</a>
+        </div>
+        <ul>
+            <li>
+                <a href="<?cs var:toroot ?>training/beam-files/send-files.html"
+                >Sending Files to Another Device</a>
+            </li>
+            <li><a href="<?cs var:toroot ?>training/beam-files/receive-files.html"
+            >Receiving Files from Another Device</a></li>
+        </ul>
+       </li>
        <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/network-ops/index.html"
@@ -498,7 +513,7 @@ include the action bar on devices running Android 2.1 or higher."
            "How to design a robust conflict resolution strategy for apps that save data to the cloud."
            >Resolving Cloud Save Conflicts
           </a>
-          </li>
+        </li>
       </li>
       <li class="nav-section">
         <div class="nav-section-header">
@@ -1181,7 +1196,6 @@ include the action bar on devices running Android 2.1 or higher."
       </a>
     </div>
     <ul>
-
       <li>
         <a href="<?cs var:toroot ?>training/articles/security-tips.html"
            description=
