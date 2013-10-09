@@ -2423,6 +2423,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag for {@link #setSystemUiVisibility(int)}: View would like to remain interactive when
+     * hiding the navigation bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.  If this flag is
+     * not set, {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION} will be force cleared by the system on any
+     * user interaction.
+     * <p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only
+     * has an effect when used in combination with that flag.</p>
+     */
+    public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like to remain interactive when
      * hiding the status bar with {@link #SYSTEM_UI_FLAG_FULLSCREEN} and/or hiding the navigation
      * bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.  Use this flag to create an immersive
      * experience while also hiding the system bars.  If this flag is not set,
@@ -2437,7 +2447,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only has an effect when used in combination
      * with one or both of those flags.</p>
      */
-    public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;
+    public static final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 0x00001000;
 
     /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
@@ -16934,7 +16944,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, and {@link #SYSTEM_UI_FLAG_IMMERSIVE}.
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
+     * and {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY}.
      */
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
@@ -16950,7 +16961,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, and {@link #SYSTEM_UI_FLAG_IMMERSIVE}.
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
+     * and {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY}.
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
