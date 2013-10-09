@@ -92,23 +92,16 @@ public class NavigationBarView extends LinearLayout {
     private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
         @Override
         public boolean onTouch(View cameraButtonView, MotionEvent event) {
-            View searchLight = getSearchLight();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     // disable search gesture while interacting with camera
                     mDelegateHelper.setDisabled(true);
-                    cameraButtonView.animate().alpha(0.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
-                    if (searchLight != null) {
-                        searchLight.animate().alpha(0.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
-                    }
+                    transitionCameraAndSearchButtonAlpha(0.0f);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     mDelegateHelper.setDisabled(false);
-                    cameraButtonView.animate().alpha(1.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
-                    if (searchLight != null) {
-                        searchLight.animate().alpha(1.0f).setDuration(CAMERA_BUTTON_FADE_DURATION);
-                    }
+                    transitionCameraAndSearchButtonAlpha(1.0f);
                     break;
             }
             return KeyguardTouchDelegate.getInstance(getContext()).dispatch(event);
@@ -156,6 +149,17 @@ public class NavigationBarView extends LinearLayout {
 
         mCameraDisabledByDpm = isCameraDisabledByDpm();
         watchForDevicePolicyChanges();
+    }
+
+    protected void transitionCameraAndSearchButtonAlpha(float alpha) {
+        View cameraButtonView = getCameraButton();
+        if (cameraButtonView != null) {
+            cameraButtonView.animate().alpha(alpha).setDuration(CAMERA_BUTTON_FADE_DURATION);
+        }
+        View searchLight = getSearchLight();
+        if (searchLight != null) {
+            searchLight.animate().alpha(alpha).setDuration(CAMERA_BUTTON_FADE_DURATION);
+        }
     }
 
     private void watchForDevicePolicyChanges() {
