@@ -293,17 +293,16 @@ public class AccountManagerService
         return mUserManager;
     }
 
-    private UserAccounts initUser(int userId) {
-        synchronized (mUsers) {
-            UserAccounts accounts = mUsers.get(userId);
-            if (accounts == null) {
-                accounts = new UserAccounts(mContext, userId);
-                mUsers.append(userId, accounts);
-                purgeOldGrants(accounts);
-                validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
-            }
-            return accounts;
+    /* Caller should lock mUsers */
+    private UserAccounts initUserLocked(int userId) {
+        UserAccounts accounts = mUsers.get(userId);
+        if (accounts == null) {
+            accounts = new UserAccounts(mContext, userId);
+            mUsers.append(userId, accounts);
+            purgeOldGrants(accounts);
+            validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
         }
+        return accounts;
     }
 
     private void purgeOldGrantsAll() {
@@ -427,7 +426,7 @@ public class AccountManagerService
         synchronized (mUsers) {
             UserAccounts accounts = mUsers.get(userId);
             if (accounts == null) {
-                accounts = initUser(userId);
+                accounts = initUserLocked(userId);
                 mUsers.append(userId, accounts);
             }
             return accounts;
@@ -1798,16 +1797,14 @@ public class AccountManagerService
 
     private AccountAndUser[] getAccounts(int[] userIds) {
         final ArrayList<AccountAndUser> runningAccounts = Lists.newArrayList();
-        synchronized (mUsers) {
-            for (int userId : userIds) {
-                UserAccounts userAccounts = getUserAccounts(userId);
-                if (userAccounts == null) continue;
-                synchronized (userAccounts.cacheLock) {
-                    Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
-                            Binder.getCallingUid(), null);
-                    for (int a = 0; a < accounts.length; a++) {
-                        runningAccounts.add(new AccountAndUser(accounts[a], userId));
-                    }
+        for (int userId : userIds) {
+            UserAccounts userAccounts = getUserAccounts(userId);
+            if (userAccounts == null) continue;
+            synchronized (userAccounts.cacheLock) {
+                Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
+                        Binder.getCallingUid(), null);
+                for (int a = 0; a < accounts.length; a++) {
+                    runningAccounts.add(new AccountAndUser(accounts[a], userId));
                 }
             }
         }
@@ -2858,7 +2855,8 @@ public class AccountManagerService
                 || callingUid == Process.myUid()) {
             return unfiltered;
         }
-        if (mUserManager.getUserInfo(userAccounts.userId).isRestricted()) {
+        UserInfo user = mUserManager.getUserInfo(userAccounts.userId);
+        if (user != null && user.isRestricted()) {
             String[] packages = mPackageManager.getPackagesForUid(callingUid);
             // If any of the packages is a white listed package, return the full set,
             // otherwise return non-shared accounts only.
