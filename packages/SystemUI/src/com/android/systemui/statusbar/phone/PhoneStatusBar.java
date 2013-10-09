@@ -647,6 +647,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     @Override
+    protected void onShowSearchPanel() {
+        if (mNavigationBarView != null) {
+            mNavigationBarView.transitionCameraAndSearchButtonAlpha(0.0f);
+        }
+    }
+
+    @Override
+    protected void onHideSearchPanel() {
+        if (mNavigationBarView != null) {
+            mNavigationBarView.transitionCameraAndSearchButtonAlpha(1.0f);
+        }
+    }
+
+    @Override
     protected View getStatusBarView() {
         return mStatusBarView;
     }
