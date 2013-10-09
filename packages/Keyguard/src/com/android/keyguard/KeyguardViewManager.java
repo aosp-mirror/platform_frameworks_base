@@ -420,6 +420,7 @@ public class KeyguardViewManager {
     public synchronized void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
         mScreenOn = true;
+        final IBinder token = mKeyguardHost == null ? null : mKeyguardHost.getWindowToken();
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
 
@@ -432,10 +433,6 @@ public class KeyguardViewManager {
                     mKeyguardHost.post(new Runnable() {
                         @Override
                         public void run() {
-                            IBinder token = null;
-                            if (mKeyguardHost.getVisibility() == View.VISIBLE) {
-                                token = mKeyguardHost.getWindowToken();
-                            }
                             try {
                                 callback.onShown(token);
                             } catch (RemoteException e) {
@@ -445,7 +442,7 @@ public class KeyguardViewManager {
                     });
                 } else {
                     try {
-                        callback.onShown(null);
+                        callback.onShown(token);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Exception calling onShown():", e);
                     }
@@ -453,7 +450,7 @@ public class KeyguardViewManager {
             }
         } else if (callback != null) {
             try {
-                callback.onShown(null);
+                callback.onShown(token);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception calling onShown():", e);
             }
