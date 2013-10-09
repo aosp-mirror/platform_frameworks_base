@@ -618,6 +618,15 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case SCHEDULE_INSTALL_PROVIDER_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ProviderInfo provider = ProviderInfo.CREATOR.createFromParcel(data);
+            scheduleInstallProvider(provider);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1246,6 +1255,15 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeInt(state);
         mRemote.transact(SET_PROCESS_STATE_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void scheduleInstallProvider(ProviderInfo provider) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        provider.writeToParcel(data, 0);
+        mRemote.transact(SCHEDULE_INSTALL_PROVIDER_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }
