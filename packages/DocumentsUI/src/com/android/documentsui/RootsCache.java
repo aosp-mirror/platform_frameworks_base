@@ -194,16 +194,6 @@ public class RootsCache {
                 handleDocumentsProvider(info.providerInfo);
             }
 
-            // Pick up legacy providers
-            final List<ProviderInfo> legacyProviders = pm.queryContentProviders(
-                    null, -1, PackageManager.GET_META_DATA);
-            for (ProviderInfo info : legacyProviders) {
-                if (info.metaData != null && info.metaData.containsKey(
-                        DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                    handleDocumentsProvider(info);
-                }
-            }
-
             final long delta = SystemClock.elapsedRealtime() - start;
             Log.d(TAG, "Update found " + mTaskRoots.size() + " roots in " + delta + "ms");
             synchronized (mLock) {

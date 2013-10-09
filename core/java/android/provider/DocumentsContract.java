@@ -23,8 +23,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -68,10 +67,6 @@ public final class DocumentsContract {
 
     private DocumentsContract() {
     }
-
-    /** {@hide} */
-    @Deprecated
-    public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
 
     /**
      * Intent action used to identify {@link DocumentsProvider} instances.
@@ -565,11 +560,13 @@ public final class DocumentsContract {
             return false;
         }
 
-        final ProviderInfo info = context.getPackageManager()
-                .resolveContentProvider(uri.getAuthority(), PackageManager.GET_META_DATA);
-        if (info != null && info.metaData != null && info.metaData.containsKey(
-                DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-            return true;
+        final Intent intent = new Intent(PROVIDER_INTERFACE);
+        final List<ResolveInfo> infos = context.getPackageManager()
+                .queryIntentContentProviders(intent, 0);
+        for (ResolveInfo info : infos) {
+            if (uri.getAuthority().equals(info.providerInfo.authority)) {
+                return true;
+            }
         }
         return false;
     }
