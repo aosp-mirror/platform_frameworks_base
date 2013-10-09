@@ -4247,6 +4247,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 addrTried ++) {
 
                             // Choose the address at random but make sure its type is supported
+                            // TODO: This doesn't work 100% of the time, because we may end up
+                            // trying the same invalid address more than once and ignoring one
+                            // of the valid addresses.
                             InetAddress hostAddr = addresses[rand.nextInt(addresses.length)];
                             if (((hostAddr instanceof Inet4Address) && linkHasIpv4)
                                     || ((hostAddr instanceof Inet6Address) && linkHasIpv6)) {
@@ -4271,10 +4274,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             }
 
                             // Rewrite the url to have numeric address to use the specific route.
-                            // I also set the "Connection" to "Close" as by default "Keep-Alive"
-                            // is used which is useless in this case.
-                            URL newUrl = new URL(orgUri.getScheme() + "://"
-                                    + hostAddr.getHostAddress() + orgUri.getPath());
+                            URL newUrl = new URL(orgUri.getScheme(),
+                                    hostAddr.getHostAddress(), orgUri.getPath());
                             log("isMobileOk: newUrl=" + newUrl);
 
                             HttpURLConnection urlConn = null;
@@ -4287,6 +4288,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 urlConn.setReadTimeout(SOCKET_TIMEOUT_MS);
                                 urlConn.setUseCaches(false);
                                 urlConn.setAllowUserInteraction(false);
+                                // Set the "Connection" to "Close" as by default "Keep-Alive"
+                                // is used which is useless in this case.
                                 urlConn.setRequestProperty("Connection", "close");
                                 int responseCode = urlConn.getResponseCode();
 
