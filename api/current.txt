@@ -5759,6 +5759,7 @@ package android.content {
     method public static java.util.List<android.content.SyncInfo> getCurrentSyncs();
     method public static int getIsSyncable(android.accounts.Account, java.lang.String);
     method public static boolean getMasterSyncAutomatically();
+    method public java.util.List<android.content.UriPermission> getOutgoingPersistedUriPermissions();
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.accounts.Account, java.lang.String);
     method public java.util.List<android.content.UriPermission> getPersistedUriPermissions();
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String);
