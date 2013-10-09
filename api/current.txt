@@ -2549,6 +2549,7 @@ package android.animation {
 
   public class RectEvaluator implements android.animation.TypeEvaluator {
     ctor public RectEvaluator();
+    ctor public RectEvaluator(android.graphics.Rect);
     method public android.graphics.Rect evaluate(float, android.graphics.Rect, android.graphics.Rect);
   }
 
