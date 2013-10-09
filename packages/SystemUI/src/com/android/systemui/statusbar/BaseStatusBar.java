@@ -570,12 +570,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                  if (DEBUG) Log.d(TAG, "opening search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
                      mSearchPanelView.show(true, true);
+                     onShowSearchPanel();
                  }
                  break;
              case MSG_CLOSE_SEARCH_PANEL:
                  if (DEBUG) Log.d(TAG, "closing search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
                      mSearchPanelView.show(false, true);
+                     onHideSearchPanel();
                  }
                  break;
             }
@@ -605,6 +607,12 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void workAroundBadLayerDrawableOpacity(View v) {
+    }
+
+    protected void onHideSearchPanel() {
+    }
+
+    protected void onShowSearchPanel() {
     }
 
     public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
