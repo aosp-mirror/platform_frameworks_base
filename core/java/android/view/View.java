@@ -9035,10 +9035,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
              */
             mPrivateFlags |= PFLAG_DRAWN;
 
-            if (((mViewFlags & VISIBILITY_MASK) == INVISIBLE) && hasFocus()) {
+            if (((mViewFlags & VISIBILITY_MASK) == INVISIBLE)) {
                 // root view becoming invisible shouldn't clear focus and accessibility focus
                 if (getRootView() != this) {
-                    clearFocus();
+                    if (hasFocus()) clearFocus();
                     clearAccessibilityFocus();
                 }
             }
