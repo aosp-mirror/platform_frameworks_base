@@ -670,7 +670,6 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static void enablePlatformNotifications() {
-        checkThread();
         getFactory().getStatics().setPlatformNotificationsEnabled(true);
     }
 
@@ -683,7 +682,6 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static void disablePlatformNotifications() {
-        checkThread();
         getFactory().getStatics().setPlatformNotificationsEnabled(false);
     }
 
@@ -1691,7 +1689,6 @@ public class WebView extends AbsoluteLayout
      * @param enabled whether to enable web contents debugging
      */
     public static void setWebContentsDebuggingEnabled(boolean enabled) {
-        checkThread();
         getFactory().getStatics().setWebContentsDebuggingEnabled(enabled);
     }
 
@@ -1704,7 +1701,6 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public static synchronized PluginList getPluginList() {
-        checkThread();
         return new PluginList();
     }
 
@@ -2058,13 +2054,18 @@ public class WebView extends AbsoluteLayout
         return WebViewFactory.getProvider();
     }
 
-    private static void checkThread() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+    private final Looper mWebViewThread = Looper.myLooper();
+
+    private void checkThread() {
+        // Ignore mWebViewThread == null because this can be called during in the super class
+        // constructor, before this class's own constructor has even started.
+        if (mWebViewThread != null && Looper.myLooper() != mWebViewThread) {
             Throwable throwable = new Throwable(
-                    "Warning: A WebView method was called on thread '" +
+                    "A WebView method was called on thread '" +
                     Thread.currentThread().getName() + "'. " +
-                    "All WebView methods must be called on the UI thread. " +
-                    "Future versions of WebView may not support use on other threads.");
+                    "All WebView methods must be called on the same thread. " +
+                    "(Expected Looper " + mWebViewThread + " called on " + Looper.myLooper() +
+                    ", FYI main Looper is " + Looper.getMainLooper() + ")");
             Log.w(LOGTAG, Log.getStackTraceString(throwable));
             StrictMode.onWebViewMethodCalledOnWrongThread(throwable);
 
