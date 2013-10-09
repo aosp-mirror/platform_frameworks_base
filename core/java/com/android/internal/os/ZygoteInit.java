@@ -322,6 +322,9 @@ public class ZygoteInit {
                 // Restore default.
                 runtime.setTargetHeapUtilization(defaultUtilization);
 
+                // Fill in dex caches with classes, fields, and methods brought in by preloading.
+                runtime.preloadDexCaches();
+
                 Debug.stopAllocCounting();
 
                 // Bring back root. We'll need it later.
