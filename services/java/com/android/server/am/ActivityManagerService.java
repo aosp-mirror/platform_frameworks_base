@@ -7529,16 +7529,30 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     + cpr.appInfo.packageName + ": " + e);
                         }
 
-                        ProcessRecord proc = startProcessLocked(cpi.processName,
-                                cpr.appInfo, false, 0, "content provider",
-                                new ComponentName(cpi.applicationInfo.packageName,
-                                        cpi.name), false, false, false);
-                        if (proc == null) {
-                            Slog.w(TAG, "Unable to launch app "
-                                    + cpi.applicationInfo.packageName + "/"
-                                    + cpi.applicationInfo.uid + " for provider "
-                                    + name + ": process is bad");
-                            return null;
+                        // Use existing process if already started
+                        ProcessRecord proc = getProcessRecordLocked(
+                                cpi.processName, cpr.appInfo.uid, false);
+                        if (proc != null) {
+                            if (DEBUG_PROVIDER) {
+                                Slog.d(TAG, "Installing in existing process " + proc);
+                            }
+                            proc.pubProviders.put(cpi.name, cpr);
+                            try {
+                                proc.thread.scheduleInstallProvider(cpi);
+                            } catch (RemoteException e) {
+                            }
+                        } else {
+                            proc = startProcessLocked(cpi.processName,
+                                    cpr.appInfo, false, 0, "content provider",
+                                    new ComponentName(cpi.applicationInfo.packageName,
+                                            cpi.name), false, false, false);
+                            if (proc == null) {
+                                Slog.w(TAG, "Unable to launch app "
+                                        + cpi.applicationInfo.packageName + "/"
+                                        + cpi.applicationInfo.uid + " for provider "
+                                        + name + ": process is bad");
+                                return null;
+                            }
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
