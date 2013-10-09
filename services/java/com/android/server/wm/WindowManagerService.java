@@ -9468,9 +9468,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 //Slog.i(TAG, "Waiting for drawn " + win + ": removed="
                 //        + win.mRemoved + " visible=" + win.isVisibleLw()
                 //        + " shown=" + win.mSurfaceShown);
-                if (win.mRemoved || !win.isVisibleLw()) {
-                    // Window has been removed or made invisible; no draw
-                    // will now happen, so stop waiting.
+                if (win.mRemoved) {
+                    // Window has been removed; no draw will now happen, so stop waiting.
                     Slog.w(TAG, "Aborted waiting for drawn: " + pair.first);
                     try {
                         pair.second.sendResult(null);
@@ -9505,6 +9504,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     checkDrawnWindowsLocked();
                     return true;
                 }
+                Slog.i(TAG, "waitForWindowDrawn: win null");
             }
         }
         return false;
