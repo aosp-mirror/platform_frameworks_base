@@ -1454,6 +1454,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         mInsets.set(insets);
         if (mSlidingChallengeLayout != null) mSlidingChallengeLayout.setInsets(mInsets);
         if (mMultiPaneChallengeLayout != null) mMultiPaneChallengeLayout.setInsets(mInsets);
+
+        final CameraWidgetFrame cameraWidget = findCameraPage();
+        if (cameraWidget != null) cameraWidget.setInsets(mInsets);
     }
 
     @Override
