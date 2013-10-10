@@ -61,7 +61,4 @@
          to enable use of the new Release 9 tables for Indic languages. -->
     <!-- <integer-array name="config_sms_enabled_locking_shift_tables"></integer-array> -->
 
-    <!-- Whether safe headphone volume is enabled or not (country specific). -->
-    <bool name="config_safe_media_volume_enabled">true</bool>
-
 </resources>
