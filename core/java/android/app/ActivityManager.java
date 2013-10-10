@@ -1463,7 +1463,10 @@ public class ActivityManager {
 
     /**
      * Permits an application to erase its own data from disk.  This is equivalent to
-     * the user choosing to clear the app's data from within the device settings UI.
+     * the user choosing to clear the app's data from within the device settings UI.  It
+     * erases all dynamic data associated with the app -- its private data and data in its
+     * private area on external storage -- but does not remove the installed application
+     * itself, nor any OBB files.
      *
      * @return {@code true} if the application successfully requested that the application's
      *     data be erased; {@code false} otherwise.
@@ -2253,7 +2256,9 @@ public class ActivityManager {
      * not be done on a UI thread.  The data will be written to the given file
      * descriptor as text.  An application must hold the
      * {@link android.Manifest.permission#DUMP} permission to make this call.
-     * @param fd The file descriptor that the dump should be written to.
+     * @param fd The file descriptor that the dump should be written to.  The file
+     * descriptor is <em>not</em> closed by this function; the caller continues to
+     * own it.
      * @param packageName The name of the package that is to be dumped.
      */
     public void dumpPackageState(FileDescriptor fd, String packageName) {
