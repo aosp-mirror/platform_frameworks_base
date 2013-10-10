@@ -142,7 +142,6 @@ public final class BluetoothMap implements BluetoothProfile {
                 try {
                     mService = null;
                     mContext.unbindService(mConnection);
-                    mConnection = null;
                 } catch (Exception re) {
                     Log.e(TAG,"",re);
                 }
@@ -370,7 +369,7 @@ public final class BluetoothMap implements BluetoothProfile {
         return PRIORITY_OFF;
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) log("Proxy object connected");
             mService = IBluetoothMap.Stub.asInterface(service);

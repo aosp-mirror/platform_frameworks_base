@@ -197,7 +197,6 @@ public class BluetoothPbap {
                 try {
                     mService = null;
                     mContext.unbindService(mConnection);
-                    mConnection = null;
                 } catch (Exception re) {
                     Log.e(TAG,"",re);
                 }
@@ -300,7 +299,7 @@ public class BluetoothPbap {
         }
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) log("Proxy object connected");
             mService = IBluetoothPbap.Stub.asInterface(service);
