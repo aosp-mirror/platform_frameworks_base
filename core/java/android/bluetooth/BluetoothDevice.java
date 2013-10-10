@@ -322,7 +322,8 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Broadcast Action: This intent is used to broadcast PAIRING REQUEST
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} to
+     * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PAIRING_REQUEST =
