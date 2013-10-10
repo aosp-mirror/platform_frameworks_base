@@ -3386,9 +3386,9 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
         Task task = new Task(atoken, stack, userId);
+        mTaskIdToTask.put(taskId, task);
         stack.addTask(task, true);
         stack.getDisplayContent().moveStack(stack, true);
-        mTaskIdToTask.put(taskId, task);
         return task;
     }
 
@@ -4724,23 +4724,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return index;
     }
 
-    private void moveHomeTasksLocked(boolean toTop) {
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
-        if (toTop ^ displayContent.homeOnTop()) {
-            final ArrayList<Task> tasks = displayContent.getHomeStack().getTasks();
-            final int numTasks = tasks.size();
-            for (int i = 0; i < numTasks; ++i) {
-                if (toTop) {
-                    // Keep pulling the bottom task off and moving it to the top.
-                    moveTaskToTop(tasks.get(0).taskId);
-                } else {
-                    // Keep pulling the top task off and moving it to the bottom.
-                    moveTaskToBottom(tasks.get(numTasks - 1).taskId);
-                }
-            }
-        }
-    }
-
     void moveStackWindowsLocked(TaskStack stack) {
         DisplayContent displayContent = stack.getDisplayContent();
 
@@ -4797,15 +4780,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 final TaskStack stack = task.mStack;
                 final DisplayContent displayContent = task.getDisplayContent();
                 final boolean isHomeStackTask = stack.isHomeStack();
-                final boolean homeIsOnTop = displayContent.homeOnTop();
-                if (!isHomeStackTask && homeIsOnTop) {
-                    // First move move the home tasks all to the bottom to rearrange the windows.
-                    moveHomeTasksLocked(false);
-                    // Now move the stack itself.
-                    displayContent.moveHomeStackBox(false);
-                } else if (isHomeStackTask && !homeIsOnTop) {
-                    // Move the stack to the top.
-                    displayContent.moveHomeStackBox(true);
+                if (isHomeStackTask != displayContent.homeOnTop()) {
+                    // First move the stack itself.
+                    displayContent.moveHomeStackBox(isHomeStackTask);
                 }
                 stack.moveTaskToTop(task);
                 displayContent.moveStack(stack, true);
