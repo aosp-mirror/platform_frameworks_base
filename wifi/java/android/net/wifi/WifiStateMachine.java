@@ -2957,8 +2957,8 @@ public class WifiStateMachine extends StateMachine {
 
             if (mOperationalMode != CONNECT_MODE) {
                 mWifiNative.disconnect();
+                mWifiConfigStore.disableAllNetworks();
                 if (mOperationalMode == SCAN_ONLY_WITH_WIFI_OFF_MODE) {
-                    mWifiConfigStore.disableAllNetworks();
                     setWifiState(WIFI_STATE_DISABLED);
                 }
                 transitionTo(mScanModeState);
