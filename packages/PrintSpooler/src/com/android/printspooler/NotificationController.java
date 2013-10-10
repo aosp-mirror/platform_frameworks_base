@@ -17,11 +17,14 @@
 package com.android.printspooler;
 
 import android.app.Notification;
+import android.app.Notification.InboxStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -34,6 +37,9 @@ import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is responsible for updating the print notifications
@@ -60,29 +66,50 @@ public class NotificationController {
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    public void onPrintJobStateChanged(PrintJobInfo printJob) {
-        if (DEBUG) {
-            Log.i(LOG_TAG, "onPrintJobStateChanged() printJobId: "
-                    + printJob.getId().flattenToString() + " state:"
-                    + PrintJobInfo.stateToString(printJob.getState()));
-        }
-        switch (printJob.getState()) {
-            case PrintJobInfo.STATE_QUEUED:
-            case PrintJobInfo.STATE_STARTED: {
-                createPrintingNotification(printJob);
-            } break;
+    public void onUpdateNotifications(List<PrintJobInfo> printJobs) {
+        List<PrintJobInfo> notifyPrintJobs = new ArrayList<PrintJobInfo>();
 
+        final int printJobCount = printJobs.size();
+        for (int i = 0; i < printJobCount; i++) {
+            PrintJobInfo printJob = printJobs.get(i);
+            if (shouldNotifyForState(printJob.getState())) {
+                notifyPrintJobs.add(printJob);
+            }
+        }
+
+        updateNotification(notifyPrintJobs);
+    }
+
+    private void updateNotification(List<PrintJobInfo> printJobs) {
+        if (printJobs.size() <= 0) {
+            removeNotification();
+        } else if (printJobs.size() == 1) {
+            createSimpleNotification(printJobs.get(0));
+        } else {
+            createStackedNotification(printJobs);
+        }
+    }
+
+    private void createSimpleNotification(PrintJobInfo printJob) {
+        switch (printJob.getState()) {
             case PrintJobInfo.STATE_FAILED: {
                 createFailedNotification(printJob);
             } break;
 
-            case PrintJobInfo.STATE_COMPLETED:
-            case PrintJobInfo.STATE_CANCELED: {
-                removeNotification(printJob.getId());
+            case PrintJobInfo.STATE_BLOCKED: {
+                if (!printJob.isCancelling()) {
+                    createBlockedNotification(printJob);
+                } else {
+                    createCancellingNotification(printJob);
+                }
             } break;
 
-            case PrintJobInfo.STATE_BLOCKED: {
-                createBlockedNotification(printJob);
+            default: {
+                if (!printJob.isCancelling()) {
+                    createPrintingNotification(printJob);
+                } else {
+                    createCancellingNotification(printJob);
+                }
             } break;
         }
     }
@@ -90,24 +117,22 @@ public class NotificationController {
     private void createPrintingNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentIntent(createContentIntent(printJob.getId()))
-                .setSmallIcon(com.android.internal.R.drawable.ic_print)
-                .setContentTitle(mContext.getString(R.string.printing_notification_title_template,
-                        printJob.getLabel()))
+                .setSmallIcon(computeNotificationIcon(printJob))
+                .setContentTitle(computeNotificationTitle(printJob))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);
-        mNotificationManager.notify(printJob.getId().flattenToString(), 0, builder.build());
+        mNotificationManager.notify(0, builder.build());
     }
 
     private void createFailedNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentIntent(createContentIntent(printJob.getId()))
-                .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
-                .setContentTitle(mContext.getString(R.string.failed_notification_title_template,
-                        printJob.getLabel()))
+                .setSmallIcon(computeNotificationIcon(printJob))
+                .setContentTitle(computeNotificationTitle(printJob))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
                 .addAction(R.drawable.ic_restart, mContext.getString(R.string.restart),
@@ -116,32 +141,109 @@ public class NotificationController {
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);
-        mNotificationManager.notify(printJob.getId().flattenToString(), 0, builder.build());
+        mNotificationManager.notify(0, builder.build());
     }
 
     private void createBlockedNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentIntent(createContentIntent(printJob.getId()))
-                .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
-                .setContentTitle(mContext.getString(R.string.blocked_notification_title_template,
-                        printJob.getLabel()))
+                .setSmallIcon(computeNotificationIcon(printJob))
+                .setContentTitle(computeNotificationTitle(printJob))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);
-        mNotificationManager.notify(printJob.getId().flattenToString(), 0, builder.build());
+           mNotificationManager.notify(0, builder.build());
     }
 
-    private void removeNotification(PrintJobId printJobId) {
-        mNotificationManager.cancel(printJobId.flattenToString(), 0);
+    private void createCancellingNotification(PrintJobInfo printJob) {
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setContentIntent(createContentIntent(printJob.getId()))
+                .setSmallIcon(computeNotificationIcon(printJob))
+                .setContentTitle(computeNotificationTitle(printJob))
+                .setContentText(printJob.getPrinterName())
+                .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
+                .setShowWhen(true);
+        mNotificationManager.notify(0, builder.build());
+    }
+
+    private void createStackedNotification(List<PrintJobInfo> printJobs) {
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setContentIntent(createContentIntent(null))
+                .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
+                .setShowWhen(true);
+
+        final int printJobCount = printJobs.size();
+
+        InboxStyle inboxStyle = new InboxStyle();
+        inboxStyle.setBigContentTitle(String.format(mContext.getResources().getQuantityText(
+                R.plurals.composite_notification_title_template,
+                printJobCount).toString(), printJobCount));
+
+        for (int i = printJobCount - 1; i>= 0; i--) {
+            PrintJobInfo printJob = printJobs.get(i);
+            if (i == printJobCount - 1) {
+                builder.setLargeIcon(((BitmapDrawable) mContext.getResources().getDrawable(
+                        computeNotificationIcon(printJob))).getBitmap());
+                builder.setSmallIcon(com.android.internal.R.drawable.ic_print);
+                builder.setContentTitle(computeNotificationTitle(printJob));
+                builder.setContentText(printJob.getPrinterName());
+            }
+            inboxStyle.addLine(computeNotificationTitle(printJob));
+        }
+
+        builder.setNumber(printJobCount);
+        builder.setStyle(inboxStyle);
+
+        mNotificationManager.notify(0, builder.build());
+    }
+
+    private String computeNotificationTitle(PrintJobInfo printJob) {
+        switch (printJob.getState()) {
+            case PrintJobInfo.STATE_FAILED: {
+                return mContext.getString(R.string.failed_notification_title_template,
+                        printJob.getLabel());
+            }
+
+            case PrintJobInfo.STATE_BLOCKED: {
+                if (!printJob.isCancelling()) {
+                    return mContext.getString(R.string.blocked_notification_title_template,
+                            printJob.getLabel());
+                } else {
+                    return mContext.getString(
+                            R.string.cancelling_notification_title_template,
+                            printJob.getLabel());
+                }
+            }
+
+            default: {
+                if (!printJob.isCancelling()) {
+                    return mContext.getString(R.string.printing_notification_title_template,
+                            printJob.getLabel());
+                } else {
+                    return mContext.getString(
+                            R.string.cancelling_notification_title_template,
+                            printJob.getLabel());
+                }
+            }
+        }
+    }
+
+    private void removeNotification() {
+        mNotificationManager.cancel(0);
     }
 
     private PendingIntent createContentIntent(PrintJobId printJobId) {
         Intent intent = new Intent(Settings.ACTION_PRINT_SETTINGS);
-        intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId.flattenToString());
-        return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        if (printJobId != null) {
+            intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId.flattenToString());
+            intent.setData(Uri.fromParts("printjob", printJobId.flattenToString(), null));
+        }
+        return PendingIntent.getActivity(mContext, 0, intent, 0);
     }
 
     private PendingIntent createCancelIntent(PrintJobInfo printJob) {
@@ -158,6 +260,36 @@ public class NotificationController {
         intent.setAction(INTENT_ACTION_RESTART_PRINTJOB + "_" + printJobId.flattenToString());
         intent.putExtra(EXTRA_PRINT_JOB_ID, printJobId);
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+    }
+
+    private static boolean shouldNotifyForState(int state) {
+        switch (state) {
+            case PrintJobInfo.STATE_QUEUED:
+            case PrintJobInfo.STATE_STARTED:
+            case PrintJobInfo.STATE_FAILED:
+            case PrintJobInfo.STATE_COMPLETED:
+            case PrintJobInfo.STATE_CANCELED:
+            case PrintJobInfo.STATE_BLOCKED: {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static int computeNotificationIcon(PrintJobInfo printJob) {
+        switch (printJob.getState()) {
+            case PrintJobInfo.STATE_FAILED:
+            case PrintJobInfo.STATE_BLOCKED: {
+                return com.android.internal.R.drawable.ic_print_error;
+            }
+            default: {
+                if (!printJob.isCancelling()) {
+                    return com.android.internal.R.drawable.ic_print;
+                } else {
+                    return R.drawable.stat_notify_cancelling;
+                }
+            }
+        }
     }
 
     public static final class NotificationBroadcastReceiver extends BroadcastReceiver {
@@ -183,20 +315,6 @@ public class NotificationController {
                 Log.i(LOG_TAG, "handleCancelPrintJob() printJobId:" + printJobId);
             }
 
-            // Put up a notification that we are trying to cancel.
-            NotificationManager notificationManager = (NotificationManager)
-                    context.getSystemService(Context.NOTIFICATION_SERVICE);
-            Notification.Builder builder = new Notification.Builder(context)
-                    .setSmallIcon(R.drawable.stat_notify_cancelling)
-                    .setContentTitle(context.getString(
-                            R.string.cancelling_notification_title_template,
-                            printJobLabel))
-                    .setContentText(printerName)
-                    .setWhen(System.currentTimeMillis())
-                    .setOngoing(true)
-                    .setShowWhen(true);
-            notificationManager.notify(printJobId.flattenToString(), 0, builder.build());
-
             // Call into the print manager service off the main thread since
             // the print manager service may end up binding to the print spooler
             // service which binding is handled on the main thread.
@@ -217,8 +335,8 @@ public class NotificationController {
                     // done on another thread and until it finishes the spooler has
                     // to be kept around.
                     try {
-                    IPrintManager printManager = IPrintManager.Stub.asInterface(
-                            ServiceManager.getService(Context.PRINT_SERVICE));
+                        IPrintManager printManager = IPrintManager.Stub.asInterface(
+                                ServiceManager.getService(Context.PRINT_SERVICE));
                         printManager.cancelPrintJob(printJobId, PrintManager.APP_ID_ANY,
                                 UserHandle.myUserId());
                     } catch (RemoteException re) {
