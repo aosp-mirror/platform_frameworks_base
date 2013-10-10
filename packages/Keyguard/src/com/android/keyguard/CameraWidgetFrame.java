@@ -19,11 +19,13 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,15 +57,17 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private final WindowManager mWindowManager;
     private final Point mRenderedSize = new Point();
     private final int[] mTmpLoc = new int[2];
-    private final Rect mTmpRect = new Rect();
 
     private long mLaunchCameraStart;
     private boolean mActive;
     private boolean mTransitioning;
     private boolean mDown;
 
+    private final Rect mInsets = new Rect();
+
     private FixedSizeFrameLayout mPreview;
     private View mFullscreenPreview;
+    private View mFakeNavBar;
 
     private final Runnable mTransitionToCameraRunnable = new Runnable() {
         @Override
@@ -211,10 +215,11 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     private void render() {
         final View root = getRootView();
-        final int width = root.getWidth();
-        final int height = root.getHeight();
+        final int width = root.getWidth() - mInsets.right;    // leave room
+        final int height = root.getHeight() - mInsets.bottom; // for bars
         if (mRenderedSize.x == width && mRenderedSize.y == height) {
-            if (DEBUG) Log.d(TAG, String.format("Already rendered at size=%sx%s", width, height));
+            if (DEBUG) Log.d(TAG, String.format("Already rendered at size=%sx%s %d%%",
+                    width, height, (int)(100*mPreview.getScaleX())));
             return;
         }
         if (width == 0 || height == 0) {
@@ -246,8 +251,8 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         mPreview.setTranslationY(pvTransY);
 
         mRenderedSize.set(width, height);
-        if (DEBUG) Log.d(TAG, String.format("Rendered camera widget size=%sx%s instance=%s",
-                width, height, instanceId()));
+        if (DEBUG) Log.d(TAG, String.format("Rendered camera widget size=%sx%s %d%% instance=%s",
+                width, height, (int)(100*mPreview.getScaleX()), instanceId()));
     }
 
     private void transitionToCamera() {
@@ -257,24 +262,34 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
         enableWindowExitAnimation(false);
 
+        final int navHeight = mInsets.bottom;
+        final int navWidth = mInsets.right;
+
         mPreview.getLocationInWindow(mTmpLoc);
         final float pvHeight = mPreview.getHeight() * mPreview.getScaleY();
         final float pvCenter = mTmpLoc[1] + pvHeight / 2f;
 
         final ViewGroup root = (ViewGroup) getRootView();
+
+        if (DEBUG) {
+            Log.d(TAG, "root = " + root.getLeft() + "," + root.getTop() + " "
+                    + root.getWidth() + "x" + root.getHeight());
+        }
+
         if (mFullscreenPreview == null) {
             mFullscreenPreview = getPreviewWidget(mContext, mWidgetInfo);
             mFullscreenPreview.setClickable(false);
-            root.addView(mFullscreenPreview);
+            root.addView(mFullscreenPreview, new FrameLayout.LayoutParams(
+                        root.getWidth() - navWidth,
+                        root.getHeight() - navHeight));
         }
 
-        root.getWindowVisibleDisplayFrame(mTmpRect);
-        final float fsHeight = mTmpRect.height();
-        final float fsCenter = mTmpRect.top + fsHeight / 2;
+        final float fsHeight = root.getHeight() - navHeight;
+        final float fsCenter = root.getTop() + fsHeight / 2;
 
-        final float fsScaleY = pvHeight / fsHeight;
+        final float fsScaleY = mPreview.getScaleY();
         final float fsTransY = pvCenter - fsCenter;
-        final float fsScaleX = mPreview.getScaleX();
+        final float fsScaleX = fsScaleY;
 
         mPreview.setVisibility(View.GONE);
         mFullscreenPreview.setVisibility(View.VISIBLE);
@@ -290,6 +305,36 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
             .setDuration(WIDGET_ANIMATION_DURATION)
             .withEndAction(mPostTransitionToCameraEndAction)
             .start();
+
+        if (navHeight > 0 || navWidth > 0) {
+            final boolean atBottom = navHeight > 0;
+            if (mFakeNavBar == null) {
+                mFakeNavBar = new View(mContext);
+                mFakeNavBar.setBackgroundColor(Color.BLACK);
+                root.addView(mFakeNavBar, new FrameLayout.LayoutParams(
+                            atBottom ? FrameLayout.LayoutParams.MATCH_PARENT
+                                     : navWidth,
+                            atBottom ? navHeight
+                                     : FrameLayout.LayoutParams.MATCH_PARENT,
+                            atBottom ? Gravity.BOTTOM|Gravity.FILL_HORIZONTAL
+                                     : Gravity.RIGHT|Gravity.FILL_VERTICAL));
+                mFakeNavBar.setPivotY(navHeight);
+                mFakeNavBar.setPivotX(navWidth);
+            }
+            mFakeNavBar.setAlpha(0f);
+            if (atBottom) {
+                mFakeNavBar.setScaleY(0.5f);
+            } else {
+                mFakeNavBar.setScaleX(0.5f);
+            }
+            mFakeNavBar.setVisibility(View.VISIBLE);
+            mFakeNavBar.animate()
+                .alpha(1f)
+                .scaleY(1f)
+                .scaleY(1f)
+                .setDuration(WIDGET_ANIMATION_DURATION)
+                .start();
+        }
         mCallbacks.onLaunchingCamera();
     }
 
@@ -397,6 +442,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
             mFullscreenPreview.animate().cancel();
             mFullscreenPreview.setVisibility(View.GONE);
         }
+        if (mFakeNavBar != null) {
+            mFakeNavBar.animate().cancel();
+            mFakeNavBar.setVisibility(View.GONE);
+        }
         enableWindowExitAnimation(true);
     }
 
@@ -404,6 +453,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (DEBUG) Log.d(TAG, String.format("onSizeChanged new=%sx%s old=%sx%s at %s",
                 w, h, oldw, oldh, SystemClock.uptimeMillis()));
+        if ((w != oldw && oldw > 0) || (h != oldh && oldh > 0)) {
+            // we can't trust the old geometry anymore; force a re-render
+            mRenderedSize.x = mRenderedSize.y = -1;
+        }
         mHandler.post(mRenderRunnable);
         super.onSizeChanged(w, h, oldw, oldh);
     }
@@ -453,5 +506,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     private String instanceId() {
         return Integer.toHexString(hashCode());
+    }
+
+    public void setInsets(Rect insets) {
+        if (DEBUG) Log.d(TAG, "setInsets: " + insets);
+        mInsets.set(insets);
     }
 }
