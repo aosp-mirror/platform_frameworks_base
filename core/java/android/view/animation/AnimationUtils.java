@@ -324,6 +324,8 @@ public class AnimationUtils {
                 interpolator = new AnticipateOvershootInterpolator(c, attrs);
             } else if (name.equals("bounceInterpolator")) {
                 interpolator = new BounceInterpolator(c, attrs);
+            } else if (name.equals("pathInterpolator")) {
+                interpolator = new PathInterpolator(c, attrs);
             } else {
                 throw new RuntimeException("Unknown interpolator name: " + parser.getName());
             }
