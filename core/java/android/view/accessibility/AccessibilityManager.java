@@ -415,14 +415,18 @@ public final class AccessibilityManager {
         final boolean touchExplorationEnabled =
                 (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
         synchronized (mHandler) {
+            final boolean wasEnabled = mIsEnabled;
+            final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
+
+            // Ensure listeners get current state from isZzzEnabled() calls.
             mIsEnabled = enabled;
             mIsTouchExplorationEnabled = touchExplorationEnabled;
 
-            if (enabled != mIsEnabled) {
+            if (wasEnabled != enabled) {
                 notifyAccessibilityStateChangedLh();
             }
 
-            if (touchExplorationEnabled != mIsTouchExplorationEnabled) {
+            if (wasTouchExplorationEnabled != touchExplorationEnabled) {
                 notifyTouchExplorationStateChangedLh();
             }
         }
