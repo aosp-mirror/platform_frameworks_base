@@ -773,7 +773,8 @@
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
 
-    <!-- Allows applications to pair bluetooth devices without user interaction -->
+    <!-- Allows applications to pair bluetooth devices without user interaction.
+         This is not available to third party applications. -->
     <permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
         android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
         android:protectionLevel="system|signature"
@@ -1110,7 +1111,8 @@
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip" />
 
-    <!-- Allows an application to request CallHandlerService implementations. -->
+    <!-- Allows an application to request CallHandlerService implementations.
+         @hide -->
     <permission android:name="android.permission.BIND_CALL_SERVICE"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
         android:protectionLevel="system|signature"
@@ -1956,13 +1958,15 @@
 
     <!-- Must be required by a {@link android.nfc.cardemulation.HostApduService}
          or {@link android.nfc.cardemulation.OffHostApduService} to ensure that only
-         the system can bind to it. -->
+         the system can bind to it.
+         @hide -->
     <permission android:name="android.permission.BIND_NFC_SERVICE"
         android:label="@string/permlab_bindNfcService"
         android:description="@string/permdesc_bindNfcService"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by the PrintSpooler to ensure that only the system can bind to it. -->
+    <!-- Must be required by the PrintSpooler to ensure that only the system can bind to it.
+         @hide -->
     <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
         android:label="@string/permlab_bindPrintSpoolerService"
         android:description="@string/permdesc_bindPrintSpoolerService"
@@ -1997,7 +2001,8 @@
         android:protectionLevel="signature" />
 
     <!-- Required to add or remove another application as a device admin.
-         <p/>Not for use by third-party applications. -->
+         <p>Not for use by third-party applications.
+         @hide -->
     <permission android:name="android.permission.MANAGE_DEVICE_ADMINS"
         android:label="@string/permlab_manageDeviceAdmins"
         android:description="@string/permdesc_manageDeviceAdmins"
