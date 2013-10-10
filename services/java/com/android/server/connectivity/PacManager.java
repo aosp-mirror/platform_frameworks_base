@@ -27,6 +27,7 @@ import android.content.ServiceConnection;
 import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -89,6 +90,9 @@ public class PacManager {
     private boolean mHasSentBroadcast;
     private boolean mHasDownloaded;
 
+    private Handler mConnectivityHandler;
+    private int mProxyMessage;
+
     /**
      * Used for locking when setting mProxyService and all references to mPacUrl or mCurrentPac.
      */
@@ -128,7 +132,7 @@ public class PacManager {
         }
     }
 
-    public PacManager(Context context) {
+    public PacManager(Context context, Handler handler, int proxyMessage) {
         mContext = context;
         mLastPort = -1;
 
@@ -136,6 +140,8 @@ public class PacManager {
                 context, 0, new Intent(ACTION_PAC_REFRESH), 0);
         context.registerReceiver(new PacRefreshIntentReceiver(),
                 new IntentFilter(ACTION_PAC_REFRESH));
+        mConnectivityHandler = handler;
+        mProxyMessage = proxyMessage;
     }
 
     private AlarmManager getAlarmManager() {
@@ -156,6 +162,10 @@ public class PacManager {
      */
     public synchronized boolean setCurrentProxyScriptUrl(ProxyProperties proxy) {
         if (!TextUtils.isEmpty(proxy.getPacFileUrl())) {
+            if (proxy.getPacFileUrl().equals(mPacUrl)) {
+                // Allow to send broadcast, nothing to do.
+                return false;
+            }
             synchronized (mProxyLock) {
                 mPacUrl = proxy.getPacFileUrl();
             }
@@ -356,16 +366,7 @@ public class PacManager {
     }
 
     private void sendPacBroadcast(ProxyProperties proxy) {
-        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
-            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        mConnectivityHandler.sendMessage(mConnectivityHandler.obtainMessage(mProxyMessage, proxy));
     }
 
     private synchronized void sendProxyIfNeeded() {

@@ -353,6 +353,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_SAMPLE_INTERVAL_ELAPSED = 15;
 
+    /**
+     * PAC manager has received new port.
+     */
+    private static final int EVENT_PROXY_HAS_CHANGED = 16;
+
     /** Handler used for internal events. */
     private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
@@ -679,7 +684,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 },
                 new IntentFilter(filter));
 
-        mPacManager = new PacManager(mContext);
+        mPacManager = new PacManager(mContext, mHandler, EVENT_PROXY_HAS_CHANGED);
 
         filter = new IntentFilter();
         filter.addAction(CONNECTED_TO_PROVISIONING_NETWORK_ACTION);
@@ -3122,6 +3127,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 case EVENT_SAMPLE_INTERVAL_ELAPSED: {
                     handleNetworkSamplingTimeout();
+                    break;
+                }
+                case EVENT_PROXY_HAS_CHANGED: {
+                    handleApplyDefaultProxy((ProxyProperties)msg.obj);
                     break;
                 }
             }
