@@ -76,7 +76,6 @@ android.app.ActivityThread$ProviderClientRecord
 android.app.ActivityThread$ProviderKey
 android.app.ActivityThread$ProviderRefCount
 android.app.ActivityThread$ReceiverData
-android.app.ActivityThread$ResourcesKey
 android.app.ActivityThread$ResultData
 android.app.ActivityThread$ServiceArgsData
 android.app.ActivityThread$StopInfo
@@ -796,7 +795,6 @@ android.os.storage.StorageVolume$1
 android.preference.CheckBoxPreference
 android.preference.GenericInflater
 android.preference.GenericInflater$Parent
-android.preference.OnDependencyChangeListener
 android.preference.Preference
 android.preference.Preference$OnPreferenceChangeInternalListener
 android.preference.Preference$OnPreferenceChangeListener
@@ -971,7 +969,6 @@ android.view.Choreographer$CallbackRecord
 android.view.Choreographer$FrameDisplayEventReceiver
 android.view.Choreographer$FrameHandler
 android.view.CollapsibleActionView
-android.view.CompatibilityInfoHolder
 android.view.ContextMenu
 android.view.ContextMenu$ContextMenuInfo
 android.view.ContextThemeWrapper
@@ -1313,10 +1310,8 @@ android.widget.EdgeEffect
 android.widget.EditText
 android.widget.Editor
 android.widget.Editor$Blink
-android.widget.Editor$EasyEditSpanController
 android.widget.Editor$InputContentType
 android.widget.Editor$InputMethodState
-android.widget.Editor$UserDictionaryListener
 android.widget.ExpandableListView
 android.widget.Filter
 android.widget.Filter$FilterListener
@@ -1946,7 +1941,6 @@ java.lang.UnsafeByteSequence
 java.lang.UnsatisfiedLinkError
 java.lang.UnsupportedOperationException
 java.lang.VMClassLoader
-java.lang.VMThread
 java.lang.VerifyError
 java.lang.VirtualMachineError
 java.lang.Void
@@ -2310,7 +2304,6 @@ java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter
 java.util.concurrent.locks.ReentrantReadWriteLock$WriteLock
 java.util.jar.Attributes
 java.util.jar.Attributes$Name
-java.util.jar.InitManifest
 java.util.jar.JarEntry
 java.util.jar.JarFile
 java.util.jar.JarFile$1JarFileEnumerator
