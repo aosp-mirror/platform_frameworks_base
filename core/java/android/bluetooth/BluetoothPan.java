@@ -155,23 +155,34 @@ public final class BluetoothPan implements BluetoothProfile {
 
     /*package*/ void close() {
         if (VDBG) log("close()");
-        if (mConnection != null) {
-            mContext.unbindService(mConnection);
-            mConnection = null;
+
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.unregisterStateChangeCallback(mStateChangeCallback);
+            } catch (RemoteException re) {
+                Log.w(TAG,"Unable to unregister BluetoothStateChangeCallback",re);
+            }
+        }
+
+        synchronized (mConnection) {
+            if (mPanService != null) {
+                try {
+                    mPanService = null;
+                    mContext.unbindService(mConnection);
+                } catch (Exception re) {
+                    Log.e(TAG,"",re);
+                }
+            }
         }
         mServiceListener = null;
-        try {
-            mAdapter.getBluetoothManager().unregisterStateChangeCallback(mStateChangeCallback);
-        } catch (RemoteException re) {
-            Log.w(TAG,"Unable to register BluetoothStateChangeCallback",re);
-        }
     }
 
     protected void finalize() {
         close();
     }
 
-    private IBluetoothStateChangeCallback mStateChangeCallback = new IBluetoothStateChangeCallback.Stub() {
+    final private IBluetoothStateChangeCallback mStateChangeCallback = new IBluetoothStateChangeCallback.Stub() {
 
         @Override
         public void onBluetoothStateChange(boolean on) throws RemoteException {
@@ -339,7 +350,7 @@ public final class BluetoothPan implements BluetoothProfile {
         return false;
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "BluetoothPAN Proxy object connected");
             mPanService = IBluetoothPan.Stub.asInterface(service);
