@@ -691,7 +691,6 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public static void freeMemoryForTests() {
-        checkThread();
         getFactory().getStatics().freeMemoryForTests();
     }
 
