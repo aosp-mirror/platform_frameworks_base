@@ -513,7 +513,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
         }
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
             mService = IBluetoothA2dp.Stub.asInterface(service);
