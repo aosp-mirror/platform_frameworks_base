@@ -3535,10 +3535,7 @@ public class WifiStateMachine extends StateMachine {
 
         @Override
         public void exit() {
-            // if we're leaving before this is done, cleanup
-            if (mDhcpActive) {
-                handlePostDhcpSetup();
-            }
+            handleNetworkDisconnect();
         }
 
         @Override
