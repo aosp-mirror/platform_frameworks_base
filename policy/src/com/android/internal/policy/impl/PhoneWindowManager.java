@@ -5211,6 +5211,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public int getInputMethodWindowVisibleHeightLw() {
+        return mDockBottom - mCurBottom;
+    }
+
+    @Override
     public void setCurrentUserLw(int newUserId) {
         mCurrentUserId = newUserId;
         if (mKeyguardDelegate != null) {

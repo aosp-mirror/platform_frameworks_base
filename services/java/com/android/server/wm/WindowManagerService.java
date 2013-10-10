@@ -10146,6 +10146,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public int getInputMethodWindowVisibleHeight() {
+        synchronized (mWindowMap) {
+            return mPolicy.getInputMethodWindowVisibleHeightLw();
+        }
+    }
+
     @Override
     public boolean hasNavigationBar() {
         return mPolicy.hasNavigationBar();

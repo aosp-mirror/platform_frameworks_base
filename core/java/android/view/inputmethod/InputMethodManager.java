@@ -1840,6 +1840,21 @@ public final class InputMethodManager {
     }
 
     /**
+     * @return The current height of the input method window.
+     * @hide
+     */
+    public int getInputMethodWindowVisibleHeight() {
+        synchronized (mH) {
+            try {
+                return mService.getInputMethodWindowVisibleHeight();
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return 0;
+            }
+        }
+    }
+
+    /**
      * Force switch to the last used input method and subtype. If the last input method didn't have
      * any subtypes, the framework will simply switch to the last input method with no subtype
      * specified.
