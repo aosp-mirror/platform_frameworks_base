@@ -2767,14 +2767,22 @@ public class Editor {
                     // way to assign them a valid range after replacement
                     if (suggestionSpansStarts[i] <= spanStart &&
                             suggestionSpansEnds[i] >= spanEnd) {
+                        // When the SpansEnd beyond the length of mTextView here should avoid it.
+                        int nTextLen = mTextView.getText().length();
+                        int spansEnd = suggestionSpansEnds[i] + lengthDifference;
+                        int realSpansEnd = spansEnd > nTextLen ? nTextLen : spansEnd;
                         mTextView.setSpan_internal(suggestionSpans[i], suggestionSpansStarts[i],
-                                suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
+                                realSpansEnd, suggestionSpansFlags[i]);
                     }
                 }
 
                 // Move cursor at the end of the replaced word
                 final int newCursorPosition = spanEnd + lengthDifference;
-                mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
+                // When the SpansEnd beyond the length of mTextView here should avoid it.
+                int textLen = mTextView.getText().length();
+                int realNewCursorPosition = newCursorPosition > textLen ? textLen
+                        : newCursorPosition;
+                mTextView.setCursorPosition_internal(realNewCursorPosition, realNewCursorPosition);
             }
 
             hide();
