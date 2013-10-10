@@ -34,6 +34,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -308,6 +309,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshBluetoothTile();
         refreshBrightnessTile();
         refreshRotationLockTile();
+        refreshRssiTile();
     }
 
     // Settings
@@ -499,6 +501,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
+    }
+
+    void refreshRssiTile() {
+        // We reinflate the original view due to potential styling changes that may have
+        // taken place due to a configuration change.
+        mRSSITile.reinflateContent(LayoutInflater.from(mContext));
     }
 
     // Bluetooth
