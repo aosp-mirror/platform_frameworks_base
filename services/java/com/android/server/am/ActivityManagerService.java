@@ -14267,6 +14267,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        boolean mayBeTop = false;
+
         for (int is = app.services.size()-1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                         || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
@@ -14427,18 +14429,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
                                 schedGroup = Process.THREAD_GROUP_DEFAULT;
                             }
-                            if (clientProcState <=
-                                    ActivityManager.PROCESS_STATE_PERSISTENT_UI &&
-                                    clientProcState >=
-                                            ActivityManager.PROCESS_STATE_PERSISTENT) {
-                                // Persistent processes don't allow us to become top.
-                                // However the top process DOES allow us to become top,
-                                // because in that case we are running because the current
-                                // top process wants us, so we should be counted as part
-                                // of the top set and not just running for some random
-                                // unknown reason in the background.
-                                clientProcState =
-                                        ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                            if (clientProcState <= ActivityManager.PROCESS_STATE_TOP) {
+                                if (clientProcState == ActivityManager.PROCESS_STATE_TOP) {
+                                    // Special handling of clients who are in the top state.
+                                    // We *may* want to consider this process to be in the
+                                    // top state as well, but only if there is not another
+                                    // reason for it to be running.  Being on the top is a
+                                    // special state, meaning you are specifically running
+                                    // for the current top app.  If the process is already
+                                    // running in the background for some other reason, it
+                                    // is more important to continue considering it to be
+                                    // in the background state.
+                                    mayBeTop = true;
+                                    clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+                                } else {
+                                    // Special handling for above-top states (persistent
+                                    // processes).  These should not bring the current process
+                                    // into the top state, since they are not on top.  Instead
+                                    // give them the best state after that.
+                                    clientProcState =
+                                            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                                }
                             }
                         } else {
                             if (clientProcState <
@@ -14526,18 +14537,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.adjSourceOom = clientAdj;
                     app.adjTarget = cpr.name;
                 }
-                if (clientProcState <=
-                        ActivityManager.PROCESS_STATE_PERSISTENT_UI &&
-                        clientProcState >=
-                                ActivityManager.PROCESS_STATE_PERSISTENT) {
-                    // Persistent processes don't allow us to become top.
-                    // However the top process DOES allow us to become top,
-                    // because in that case we are running because the current
-                    // top process wants us, so we should be counted as part
-                    // of the top set and not just running for some random
-                    // unknown reason in the background.
-                    clientProcState =
-                            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                if (clientProcState <= ActivityManager.PROCESS_STATE_TOP) {
+                    if (clientProcState == ActivityManager.PROCESS_STATE_TOP) {
+                        // Special handling of clients who are in the top state.
+                        // We *may* want to consider this process to be in the
+                        // top state as well, but only if there is not another
+                        // reason for it to be running.  Being on the top is a
+                        // special state, meaning you are specifically running
+                        // for the current top app.  If the process is already
+                        // running in the background for some other reason, it
+                        // is more important to continue considering it to be
+                        // in the background state.
+                        mayBeTop = true;
+                        clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+                    } else {
+                        // Special handling for above-top states (persistent
+                        // processes).  These should not bring the current process
+                        // into the top state, since they are not on top.  Instead
+                        // give them the best state after that.
+                        clientProcState =
+                                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                    }
                 }
                 if (procState > clientProcState) {
                     procState = clientProcState;
@@ -14561,6 +14581,28 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
                     procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
                 }
+            }
+        }
+
+        if (mayBeTop && procState > ActivityManager.PROCESS_STATE_TOP) {
+            // A client of one of our services or providers is in the top state.  We
+            // *may* want to be in the top state, but not if we are already running in
+            // the background for some other reason.  For the decision here, we are going
+            // to pick out a few specific states that we want to remain in when a client
+            // is top (states that tend to be longer-term) and otherwise allow it to go
+            // to the top state.
+            switch (procState) {
+                case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
+                case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                case ActivityManager.PROCESS_STATE_SERVICE:
+                    // These all are longer-term states, so pull them up to the top
+                    // of the background states, but not all the way to the top state.
+                    procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                    break;
+                default:
+                    // Otherwise, top is a better choice, so take it.
+                    procState = ActivityManager.PROCESS_STATE_TOP;
+                    break;
             }
         }
 
