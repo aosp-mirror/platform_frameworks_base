@@ -627,9 +627,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     void refreshRssiTile() {
-        // We reinflate the original view due to potential styling changes that may have
-        // taken place due to a configuration change.
-        mRSSITile.reinflateContent(LayoutInflater.from(mContext));
+        if (mRSSITile != null) {
+            // We reinflate the original view due to potential styling changes that may have
+            // taken place due to a configuration change.
+            mRSSITile.reinflateContent(LayoutInflater.from(mContext));
+        }
     }
 
     // Bluetooth
