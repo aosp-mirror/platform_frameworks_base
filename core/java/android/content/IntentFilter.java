@@ -722,6 +722,14 @@ public class IntentFilter implements Parcelable {
      * included in the filter, then an Intent's data must match one of
      * them.  If no scheme specific parts are included, then only the scheme must match.
      *
+     * <p>The "scheme specific part" that this matches against is the string returned
+     * by {@link android.net.Uri#getSchemeSpecificPart() Uri.getSchemeSpecificPart}.
+     * For Uris that contain a path, this kind of matching is not generally of interest,
+     * since {@link #addDataAuthority(String, String)} and
+     * {@link #addDataPath(String, int)} can provide a better mechanism for matching
+     * them.  However, for Uris that do not contain a path, the authority and path
+     * are empty, so this is the only way to match against the non-scheme part.</p>
+     *
      * @param ssp Either a raw string that must exactly match the scheme specific part
      * path, or a simple pattern, depending on <var>type</var>.
      * @param type Determines how <var>ssp</var> will be compared to
