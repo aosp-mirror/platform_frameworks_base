@@ -17,15 +17,15 @@
 package com.android.internal.inputmethod;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 public class InputMethodRoot extends LinearLayout {
-    private final Rect mGuardRect = new Rect();
-    private final Paint mGuardPaint = new Paint();
+
+    private View mNavigationGuard;
 
     public InputMethodRoot(Context context) {
         this(context, null);
@@ -37,25 +37,19 @@ public class InputMethodRoot extends LinearLayout {
 
     public InputMethodRoot(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
-        setWillNotDraw(false);
-        mGuardPaint.setColor(context.getResources()
-                .getColor(com.android.internal.R.color.input_method_navigation_guard));
     }
 
     @Override
     protected boolean fitSystemWindows(Rect insets) {
-        setPadding(0, 0, 0, insets.bottom);
+        if (mNavigationGuard == null) {
+            mNavigationGuard = findViewById(com.android.internal.R.id.navigationGuard);
+        }
+        if (mNavigationGuard == null) {
+            return super.fitSystemWindows(insets);
+        }
+        ViewGroup.LayoutParams lp = mNavigationGuard.getLayoutParams();
+        lp.height = insets.bottom;
+        mNavigationGuard.setLayoutParams(lp);
         return true;
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        // draw navigation bar guard
-        final int w = getMeasuredWidth();
-        final int h = getMeasuredHeight();
-        mGuardRect.set(0, h - getPaddingBottom(), w, h);
-        canvas.drawRect(mGuardRect, mGuardPaint);
     }
 }
