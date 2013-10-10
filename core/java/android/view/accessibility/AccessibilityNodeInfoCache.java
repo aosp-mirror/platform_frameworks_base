@@ -67,11 +67,12 @@ public class AccessibilityNodeInfoCache {
         if (ENABLED) {
             final int eventType = event.getEventType();
             switch (eventType) {
+                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END:
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                    // If the active window changes, clear the cache.
                     final int windowId = event.getWindowId();
-                    // If a new window, we clear the cache.
                     if (mWindowId != windowId) {
                         mWindowId = windowId;
                         clear();
