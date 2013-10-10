@@ -311,13 +311,13 @@ final class StringBlock {
      * the color black is returned instead.
      *
      * @param color The color as a string. Can be a resource reference,
-     *              HTML hexadecimal, octal or a name
+     *              hexadecimal, octal or a name
      * @param foreground True if the color will be used as the foreground color,
      *                   false otherwise
      *
      * @return A CharacterStyle
      *
-     * @see Color#getHtmlColor(String)
+     * @see Color#parseColor(String)
      */
     private static CharacterStyle getColor(String color, boolean foreground) {
         int c = 0xff000000;
@@ -336,7 +336,11 @@ final class StringBlock {
                     }
                 }
             } else {
-                c = Color.getHtmlColor(color);
+                try {
+                    c = Color.parseColor(color);
+                } catch (IllegalArgumentException e) {
+                    c = Color.BLACK;
+                }
             }
         }
 
