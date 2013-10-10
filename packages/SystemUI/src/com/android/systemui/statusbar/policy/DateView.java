@@ -50,7 +50,8 @@ public class DateView extends TextView {
                     || Intent.ACTION_TIME_CHANGED.equals(action)
                     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)
                     || Intent.ACTION_LOCALE_CHANGED.equals(action)) {
-                if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                if (Intent.ACTION_LOCALE_CHANGED.equals(action)
+                        || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                     // need to get a fresh date format
                     mDateFormat = null;
                 }
