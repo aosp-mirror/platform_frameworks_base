@@ -408,6 +408,9 @@ public class SyncRequest implements Parcelable {
             if (mSyncTarget != SYNC_TARGET_UNKNOWN) {
                 throw new IllegalArgumentException("Sync target has already been defined.");
             }
+            if (authority != null && authority.length() == 0) {
+                throw new IllegalArgumentException("Authority must be non-empty");
+            }
             mSyncTarget = SYNC_TARGET_ADAPTER;
             mAccount = account;
             mAuthority = authority;

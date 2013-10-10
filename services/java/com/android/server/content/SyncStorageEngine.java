@@ -1357,12 +1357,12 @@ public class SyncStorageEngine extends Handler {
      *
      * @param account the account we want to check
      * @param authority the authority whose row should be selected
-     * @return the SyncStatusInfo for the authority
+     * @return the SyncStatusInfo for the authority or null if none found.
      */
     public SyncStatusInfo getStatusByAccountAndAuthority(Account account, int userId,
             String authority) {
         if (account == null || authority == null) {
-          throw new IllegalArgumentException();
+          return null;
         }
         synchronized (mAuthorities) {
             final int N = mSyncStatus.size();

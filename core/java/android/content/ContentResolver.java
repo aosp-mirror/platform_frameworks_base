@@ -1914,12 +1914,6 @@ public abstract class ContentResolver {
     public static void addPeriodicSync(Account account, String authority, Bundle extras,
             long pollFrequency) {
         validateSyncExtrasBundle(extras);
-        if (account == null) {
-            throw new IllegalArgumentException("account must not be null");
-        }
-        if (authority == null) {
-            throw new IllegalArgumentException("authority must not be null");
-        }
         if (extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
                 || extras.getBoolean(SYNC_EXTRAS_DO_NOT_RETRY, false)
                 || extras.getBoolean(SYNC_EXTRAS_IGNORE_BACKOFF, false)
@@ -1949,12 +1943,6 @@ public abstract class ContentResolver {
      */
     public static void removePeriodicSync(Account account, String authority, Bundle extras) {
         validateSyncExtrasBundle(extras);
-        if (account == null) {
-            throw new IllegalArgumentException("account must not be null");
-        }
-        if (authority == null) {
-            throw new IllegalArgumentException("authority must not be null");
-        }
         try {
             getContentService().removePeriodicSync(account, authority, extras);
         } catch (RemoteException e) {
@@ -1972,12 +1960,6 @@ public abstract class ContentResolver {
      * @return a list of PeriodicSync objects. This list may be empty but will never be null.
      */
     public static List<PeriodicSync> getPeriodicSyncs(Account account, String authority) {
-        if (account == null) {
-            throw new IllegalArgumentException("account must not be null");
-        }
-        if (authority == null) {
-            throw new IllegalArgumentException("authority must not be null");
-        }
         try {
             return getContentService().getPeriodicSyncs(account, authority);
         } catch (RemoteException e) {
