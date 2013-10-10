@@ -7559,7 +7559,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // Use existing process if already started
                         ProcessRecord proc = getProcessRecordLocked(
                                 cpi.processName, cpr.appInfo.uid, false);
-                        if (proc != null) {
+                        if (proc != null && proc.thread != null) {
                             if (DEBUG_PROVIDER) {
                                 Slog.d(TAG, "Installing in existing process " + proc);
                             }
