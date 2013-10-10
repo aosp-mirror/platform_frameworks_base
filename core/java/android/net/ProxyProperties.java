@@ -178,7 +178,7 @@ public class ProxyProperties implements Parcelable {
         // If PAC URL is present in either then they must be equal.
         // Other parameters will only be for fall back.
         if (!TextUtils.isEmpty(mPacFileUrl)) {
-            return mPacFileUrl.equals(p.getPacFileUrl());
+            return mPacFileUrl.equals(p.getPacFileUrl()) && mPort == p.mPort;
         }
         if (!TextUtils.isEmpty(p.getPacFileUrl())) {
             return false;
@@ -219,6 +219,7 @@ public class ProxyProperties implements Parcelable {
         if (mPacFileUrl != null) {
             dest.writeByte((byte)1);
             dest.writeString(mPacFileUrl);
+            dest.writeInt(mPort);
             return;
         } else {
             dest.writeByte((byte)0);
@@ -244,7 +245,9 @@ public class ProxyProperties implements Parcelable {
                 String host = null;
                 int port = 0;
                 if (in.readByte() != 0) {
-                    return new ProxyProperties(in.readString());
+                    String url = in.readString();
+                    int localPort = in.readInt();
+                    return new ProxyProperties(url, localPort);
                 }
                 if (in.readByte() != 0) {
                     host = in.readString();
