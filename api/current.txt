@@ -4410,6 +4410,8 @@ package android.app {
     method public void clear() throws java.io.IOException;
     method public void clearWallpaperOffsets(android.os.IBinder);
     method public void forgetLoadedWallpaper();
+    method public android.graphics.drawable.Drawable getBuiltInDrawable();
+    method public android.graphics.drawable.Drawable getBuiltInDrawable(int, int, boolean, float, float);
     method public android.content.Intent getCropAndSetWallpaperIntent(android.net.Uri);
     method public int getDesiredMinimumHeight();
     method public int getDesiredMinimumWidth();
