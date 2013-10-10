@@ -1455,12 +1455,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Report to the system that your app is now fully drawn.  This is only used
-     * to help instrument app launch times, so that the app can report when it is
-     * fully in a usable state; without this, all the system can determine is when
-     * its window is first drawn and displayed.  To participate in app launch time
+     * Report to the system that your app is now fully drawn, purely for diagnostic
+     * purposes (calling it does not impact the visible behavior of the activity).
+     * This is only used to help instrument application launch times, so that the
+     * app can report when it is fully in a usable state; without this, the only thing
+     * the system itself can determine is the point at which the activity's window
+     * is <em>first</em> drawn and displayed.  To participate in app launch time
      * measurement, you should always call this method after first launch (when
-     * {@link #onCreate(android.os.Bundle)} is called) at the point where you have
+     * {@link #onCreate(android.os.Bundle)} is called), at the point where you have
      * entirely drawn your UI and populated with all of the significant data.  You
      * can safely call this method any time after first launch as well, in which case
      * it will simply be ignored.
