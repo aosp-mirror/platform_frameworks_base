@@ -255,6 +255,31 @@ final class RemotePrintSpooler {
         return false;
     }
 
+    public final void setPrintJobCancelling(PrintJobId printJobId, boolean cancelling) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setPrintJobCancelling(printJobId,
+                    cancelling);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error setting print job cancelling.", re);
+        } catch (TimeoutException te) {
+            Slog.e(LOG_TAG, "Error setting print job cancelling.", te);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
+                        + "] setPrintJobCancelling()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
     public final void removeObsoletePrintJobs() {
         throwIfCalledOnMainThread();
         synchronized (mLock) {

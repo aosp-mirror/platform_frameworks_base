@@ -230,6 +230,11 @@ public final class PrintSpoolerService extends Service {
             protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
                 PrintSpoolerService.this.dump(fd, writer, args);
             }
+
+            @Override
+            public void setPrintJobCancelling(PrintJobId printJobId, boolean cancelling) {
+                PrintSpoolerService.this.setPrintJobCancelling(printJobId, cancelling);
+            }
         };
     }
 
@@ -459,8 +464,6 @@ public final class PrintSpoolerService extends Service {
                 fileForJobMap.remove(printJob.getId());
             }
 
-            // Update the notification.
-            mNotificationController.onPrintJobStateChanged(printJob);
             switch (printJob.getState()) {
                 case PrintJobInfo.STATE_QUEUED:
                 case PrintJobInfo.STATE_STARTED:
@@ -473,6 +476,11 @@ public final class PrintSpoolerService extends Service {
                             getString(R.string.no_connection_to_printer));
                 } break;
             }
+        }
+
+        if (!mPrintJobs.isEmpty()) {
+            // Update the notification.
+            mNotificationController.onUpdateNotifications(mPrintJobs);
         }
 
         // Delete the orphan files.
@@ -586,7 +594,7 @@ public final class PrintSpoolerService extends Service {
 
                 printJob.setState(state);
                 printJob.setStateReason(error);
-                mNotificationController.onPrintJobStateChanged(printJob);
+                printJob.setCancelling(false);
 
                 if (DEBUG_PRINT_JOB_LIFECYCLE) {
                     Slog.i(LOG_TAG, "[STATE CHANGED] " + printJob);
@@ -626,6 +634,8 @@ public final class PrintSpoolerService extends Service {
                         HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
                         printJob);
                 mHandlerCaller.executeOrSendMessage(message);
+
+                mNotificationController.onUpdateNotifications(mPrintJobs);
             }
         }
 
@@ -692,6 +702,24 @@ public final class PrintSpoolerService extends Service {
             }
         }
         return false;
+    }
+
+    public void setPrintJobCancelling(PrintJobId printJobId, boolean cancelling) {
+        synchronized (mLock) {
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
+            if (printJob != null) {
+                printJob.setCancelling(cancelling);
+                if (shouldPersistPrintJob(printJob)) {
+                    mPersistanceManager.writeStateLocked();
+                }
+                mNotificationController.onUpdateNotifications(mPrintJobs);
+
+                Message message = mHandlerCaller.obtainMessageO(
+                        HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
+                        printJob);
+                mHandlerCaller.executeOrSendMessage(message);
+            }
+        }
     }
 
     public void setPrintJobCopiesNoPersistence(PrintJobId printJobId, int copies) {
@@ -783,6 +811,7 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_COPIES = "copies";
         private static final String ATTR_PRINTER_NAME = "printerName";
         private static final String ATTR_STATE_REASON = "stateReason";
+        private static final String ATTR_CANCELLING = "cancelling";
 
         private static final String TAG_MEDIA_SIZE = "mediaSize";
         private static final String TAG_RESOLUTION = "resolution";
@@ -881,6 +910,8 @@ public final class PrintSpoolerService extends Service {
                     if (!TextUtils.isEmpty(stateReason)) {
                         serializer.attribute(null, ATTR_STATE_REASON, stateReason);
                     }
+                    serializer.attribute(null, ATTR_CANCELLING, String.valueOf(
+                            printJob.isCancelling()));
 
                     PrinterId printerId = printJob.getPrinterId();
                     if (printerId != null) {
@@ -1073,6 +1104,9 @@ public final class PrintSpoolerService extends Service {
             printJob.setPrinterName(printerName);
             String stateReason = parser.getAttributeValue(null, ATTR_STATE_REASON);
             printJob.setStateReason(stateReason);
+            String cancelling = parser.getAttributeValue(null, ATTR_CANCELLING);
+            printJob.setCancelling(!TextUtils.isEmpty(cancelling)
+                    ? Boolean.parseBoolean(cancelling) : false);
 
             parser.next();
 
