@@ -58,8 +58,13 @@
         <activity
             android:name=".PrintJobConfigActivity"
             android:configChanges="orientation|screenSize"
-            android:exported="false"
+            android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
             android:theme="@style/PrintJobConfigActivityTheme">
+            <intent-filter>
+                <action android:name="android.print.PRINT_DILAOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="printjob" android:pathPattern="*" />
+            </intent-filter>
         </activity>
 
         <activity
