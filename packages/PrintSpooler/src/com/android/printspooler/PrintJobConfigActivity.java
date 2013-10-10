@@ -456,6 +456,7 @@ public class PrintJobConfigActivity extends Activity {
                 // Then update the print jobs's pages as we will not do a write
                 // and we usually update the pages in the write complete callback.
                 updatePrintJobPages(mDocument.pages, mRequestedPages);
+                mEditor.updateUi();
                 if (mEditor.isDone()) {
                     requestCreatePdfFileOrFinish();
                 }
