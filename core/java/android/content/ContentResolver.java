@@ -368,9 +368,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * <p>
      * Query the given URI, returning a {@link Cursor} over the result set.
-     * </p>
      * <p>
      * For best performance, the caller should follow these guidelines:
      * <ul>
@@ -405,9 +403,8 @@ public abstract class ContentResolver {
     }
 
     /**
-     * <p>
-     * Query the given URI, returning a {@link Cursor} over the result set.
-     * </p>
+     * Query the given URI, returning a {@link Cursor} over the result set
+     * with optional support for cancellation.
      * <p>
      * For best performance, the caller should follow these guidelines:
      * <ul>
