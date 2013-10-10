@@ -736,9 +736,9 @@ class TouchExplorer implements EventStreamTransformation {
                         + "there is at least one pointer down!");
             }
             case MotionEvent.ACTION_UP: {
+                mAms.onTouchInteractionEnd();
                 // Announce the end of a the touch interaction.
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-                mAms.onTouchInteractionEnd();
                 mLongPressingPointerId = -1;
                 mLongPressingPointerDeltaX = 0;
                 mLongPressingPointerDeltaY = 0;
@@ -822,6 +822,7 @@ class TouchExplorer implements EventStreamTransformation {
         AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
         if (accessibilityManager.isEnabled()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(type);
+            event.setWindowId(mAms.getActiveWindowId());
             accessibilityManager.sendAccessibilityEvent(event);
             switch (type) {
                 case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START: {
