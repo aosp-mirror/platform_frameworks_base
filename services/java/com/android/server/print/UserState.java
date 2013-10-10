@@ -240,6 +240,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         if (printJobInfo == null) {
             return;
         }
+
+        // Take a note that we are trying to cancel the job.
+        mSpooler.setPrintJobCancelling(printJobId, true);
+
         if (printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
             ComponentName printServiceName = printJobInfo.getPrinterId().getServiceName();
             RemotePrintService printService = null;

@@ -121,6 +121,12 @@
     <!-- Template for the notificaiton label for a blocked print job. [CHAR LIMIT=25] -->
     <string name="blocked_notification_title_template">Printer blocked <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
+    <!-- Template for the notificaiton label for a composite (multiple items) print jobs notification. [CHAR LIMIT=25] -->
+    <plurals name="composite_notification_title_template">
+        <item quantity="one"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print job</item>
+        <item quantity="other"><xliff:g id="print_job_name" example="foo.jpg">%1$d</xliff:g> print jobs</item>
+    </plurals>
+
     <!-- Label for the notification button for cancelling a print job. [CHAR LIMIT=25] -->
     <string name="cancel">Cancel</string>
 

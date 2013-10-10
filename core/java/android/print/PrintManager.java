@@ -48,6 +48,7 @@ import java.util.Map;
  * <p>
  * To obtain a handle to the print manager do the following:
  * </p>
+ * 
  * <pre>
  * PrintManager printManager =
  *         (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
@@ -58,6 +59,9 @@ public final class PrintManager {
     private static final String LOG_TAG = "PrintManager";
 
     private static final boolean DEBUG = false;
+
+    private static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 1;
+    private static final int MSG_NOTIFY_PRINT_JOB_STATE_CHANGED = 2;
 
     /** @hide */
     public static final int APP_ID_ANY = -2;
@@ -81,18 +85,17 @@ public final class PrintManager {
 
         /**
          * Callback notifying that a print job state changed.
-         *
+         * 
          * @param printJobId The print job id.
          */
-        public void onPrintJobsStateChanged(PrintJobId printJobId);
+        public void onPrintJobStateChanged(PrintJobId printJobId);
     }
 
     /**
      * Creates a new instance.
-     *
+     * 
      * @param context The current context in which to operate.
      * @param service The backing system service.
-     *
      * @hide
      */
     public PrintManager(Context context, IPrintManager service, int userId, int appId) {
@@ -104,14 +107,29 @@ public final class PrintManager {
         mHandler = new Handler(context.getMainLooper(), null, false) {
             @Override
             public void handleMessage(Message message) {
-                SomeArgs args = (SomeArgs) message.obj;
-                Context context = (Context) args.arg1;
-                IntentSender intent = (IntentSender) args.arg2;
-                args.recycle();
-                try {
-                    context.startIntentSender(intent, null, 0, 0, 0);
-                } catch (SendIntentException sie) {
-                    Log.e(LOG_TAG, "Couldn't start print job config activity.", sie);
+                switch (message.what) {
+                    case MSG_START_PRINT_JOB_CONFIG_ACTIVITY: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        Context context = (Context) args.arg1;
+                        IntentSender intent = (IntentSender) args.arg2;
+                        args.recycle();
+                        try {
+                            context.startIntentSender(intent, null, 0, 0, 0);
+                        } catch (SendIntentException sie) {
+                            Log.e(LOG_TAG, "Couldn't start print job config activity.", sie);
+                        }
+                    }
+                        break;
+
+                    case MSG_NOTIFY_PRINT_JOB_STATE_CHANGED: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        PrintJobStateChangeListener listener =
+                                (PrintJobStateChangeListener) args.arg1;
+                        PrintJobId printJobId = (PrintJobId) args.arg2;
+                        args.recycle();
+                        listener.onPrintJobStateChanged(printJobId);
+                    }
+                        break;
                 }
             }
         };
@@ -119,10 +137,10 @@ public final class PrintManager {
 
     /**
      * Creates an instance that can access all print jobs.
-     *
+     * 
      * @param userId The user id for which to get all print jobs.
-     * @return An instance if the caller has the permission to access
-     * all print jobs, null otherwise.
+     * @return An instance if the caller has the permission to access all print
+     *         jobs, null otherwise.
      * @hide
      */
     public PrintManager getGlobalPrintManagerForUser(int userId) {
@@ -140,9 +158,8 @@ public final class PrintManager {
 
     /**
      * Adds a listener for observing the state of print jobs.
-     *
+     * 
      * @param listener The listener to add.
-     *
      * @hide
      */
     public void addPrintJobStateChangeListener(PrintJobStateChangeListener listener) {
@@ -151,7 +168,7 @@ public final class PrintManager {
                     PrintJobStateChangeListenerWrapper>();
         }
         PrintJobStateChangeListenerWrapper wrappedListener =
-                new PrintJobStateChangeListenerWrapper(listener);
+                new PrintJobStateChangeListenerWrapper(listener, mHandler);
         try {
             mService.addPrintJobStateChangeListener(wrappedListener, mAppId, mUserId);
             mPrintJobStateChangeListeners.put(listener, wrappedListener);
@@ -162,9 +179,8 @@ public final class PrintManager {
 
     /**
      * Removes a listener for observing the state of print jobs.
-     *
+     * 
      * @param listener The listener to remove.
-     *
      * @hide
      */
     public void removePrintJobStateChangeListener(PrintJobStateChangeListener listener) {
@@ -188,11 +204,9 @@ public final class PrintManager {
 
     /**
      * Gets a print job given its id.
-     *
+     * 
      * @return The print job list.
-     *
      * @see PrintJob
-     *
      * @hide
      */
     public PrintJob getPrintJob(PrintJobId printJobId) {
@@ -209,9 +223,8 @@ public final class PrintManager {
 
     /**
      * Gets the print jobs for this application.
-     *
+     * 
      * @return The print job list.
-     *
      * @see PrintJob
      */
     public List<PrintJob> getPrintJobs() {
@@ -249,9 +262,9 @@ public final class PrintManager {
     }
 
     /**
-     * Creates a print job for printing a {@link PrintDocumentAdapter} with default print
-     * attributes.
-     *
+     * Creates a print job for printing a {@link PrintDocumentAdapter} with
+     * default print attributes.
+     * 
      * @param printJobName A name for the new print job.
      * @param documentAdapter An adapter that emits the document to print.
      * @param attributes The default print job attributes.
@@ -279,9 +292,8 @@ public final class PrintManager {
 
     /**
      * Gets the list of enabled print services.
-     *
+     * 
      * @return The enabled service list or an empty list.
-     *
      * @hide
      */
     public List<PrintServiceInfo> getEnabledPrintServices() {
@@ -298,9 +310,8 @@ public final class PrintManager {
 
     /**
      * Gets the list of installed print services.
-     *
+     * 
      * @return The installed service list or an empty list.
-     *
      * @hide
      */
     public List<PrintServiceInfo> getInstalledPrintServices() {
@@ -337,7 +348,8 @@ public final class PrintManager {
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = manager.mContext;
                 args.arg2 = intent;
-                manager.mHandler.obtainMessage(0, args).sendToTarget();
+                manager.mHandler.obtainMessage(MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
+                        args).sendToTarget();
             }
         }
     }
@@ -348,7 +360,8 @@ public final class PrintManager {
 
         private CancellationSignal mLayoutOrWriteCancellation;
 
-        private PrintDocumentAdapter mDocumentAdapter; // Strong reference OK - cleared in finish()
+        private PrintDocumentAdapter mDocumentAdapter; // Strong reference OK -
+                                                       // cleared in finish()
 
         private Handler mHandler; // Strong reference OK - cleared in finish()
 
@@ -537,7 +550,8 @@ public final class PrintManager {
                 switch (message.what) {
                     case MSG_START: {
                         mDocumentAdapter.onStart();
-                    } break;
+                    }
+                        break;
 
                     case MSG_LAYOUT: {
                         final CancellationSignal cancellation;
@@ -559,14 +573,15 @@ public final class PrintManager {
                                     new MyLayoutResultCallback(layoutSpec.callback,
                                             layoutSpec.sequence), layoutSpec.metadata);
                         }
-                    } break;
+                    }
+                        break;
 
                     case MSG_WRITE: {
                         final CancellationSignal cancellation;
                         final WriteSpec writeSpec;
 
                         synchronized (mLock) {
-                            writeSpec= mLastWriteSpec;
+                            writeSpec = mLastWriteSpec;
                             mLastWriteSpec = null;
                             cancellation = new CancellationSignal();
                             mLayoutOrWriteCancellation = cancellation;
@@ -580,7 +595,8 @@ public final class PrintManager {
                                     cancellation, new MyWriteResultCallback(writeSpec.callback,
                                             writeSpec.fd, writeSpec.sequence));
                         }
-                    } break;
+                    }
+                        break;
 
                     case MSG_FINISH: {
                         if (DEBUG) {
@@ -588,7 +604,8 @@ public final class PrintManager {
                         }
                         mDocumentAdapter.onFinish();
                         doFinish();
-                    } break;
+                    }
+                        break;
 
                     default: {
                         throw new IllegalArgumentException("Unknown message: "
@@ -727,17 +744,26 @@ public final class PrintManager {
     private static final class PrintJobStateChangeListenerWrapper extends
             IPrintJobStateChangeListener.Stub {
         private final WeakReference<PrintJobStateChangeListener> mWeakListener;
+        private final WeakReference<Handler> mWeakHandler;
 
-        public PrintJobStateChangeListenerWrapper(PrintJobStateChangeListener listener) {
+        public PrintJobStateChangeListenerWrapper(PrintJobStateChangeListener listener,
+                Handler handler) {
             mWeakListener = new WeakReference<PrintJobStateChangeListener>(listener);
+            mWeakHandler = new WeakReference<Handler>(handler);
         }
 
         @Override
         public void onPrintJobStateChanged(PrintJobId printJobId) {
+            Handler handler = mWeakHandler.get();
             PrintJobStateChangeListener listener = mWeakListener.get();
-            if (listener != null) {
-                listener.onPrintJobsStateChanged(printJobId);
+            if (handler != null && listener != null) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = listener;
+                args.arg2 = printJobId;
+                handler.obtainMessage(MSG_NOTIFY_PRINT_JOB_STATE_CHANGED,
+                        args).sendToTarget();
             }
         }
     }
+
 }

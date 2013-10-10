@@ -153,6 +153,9 @@ public final class PrintJobInfo implements Parcelable {
     /** Information about the printed document. */
     private PrintDocumentInfo mDocumentInfo;
 
+    /** Whether we are trying to cancel this print job. */
+    private boolean mCanceling;
+
     /** @hide*/
     public PrintJobInfo() {
         /* do nothing */
@@ -174,6 +177,7 @@ public final class PrintJobInfo implements Parcelable {
         mPageRanges = other.mPageRanges;
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
+        mCanceling = other.mCanceling;
     }
 
     private PrintJobInfo(Parcel parcel) {
@@ -201,6 +205,7 @@ public final class PrintJobInfo implements Parcelable {
         if (parcel.readInt() == 1) {
             mDocumentInfo = PrintDocumentInfo.CREATOR.createFromParcel(parcel);
         }
+        mCanceling = (parcel.readInt() == 1);
     }
 
     /**
@@ -503,6 +508,28 @@ public final class PrintJobInfo implements Parcelable {
         mDocumentInfo = info;
     }
 
+    /**
+     * Gets whether this print is being cancelled.
+     *
+     * @return True if the print job is being cancelled.
+     *
+     * @hide
+     */
+    public boolean isCancelling() {
+        return mCanceling;
+    }
+
+    /**
+     * Sets whether this print is being cancelled.
+     *
+     * @param cancelling True if the print job is being cancelled.
+     *
+     * @hide
+     */
+    public void setCancelling(boolean cancelling) {
+        mCanceling = cancelling;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -539,6 +566,7 @@ public final class PrintJobInfo implements Parcelable {
         } else {
             parcel.writeInt(0);
         }
+        parcel.writeInt(mCanceling ? 1 : 0);
     }
 
     @Override
@@ -556,6 +584,7 @@ public final class PrintJobInfo implements Parcelable {
                 ? mAttributes.toString() : null));
         builder.append(", documentInfo: " + (mDocumentInfo != null
                 ? mDocumentInfo.toString() : null));
+        builder.append(", cancelling: " + mCanceling);
         builder.append(", pages: " + (mPageRanges != null
                 ? Arrays.toString(mPageRanges) : null));
         builder.append("}");
