@@ -62,7 +62,6 @@ public class WifiInfo implements Parcelable {
     private String mBSSID;
     private WifiSsid mWifiSsid;
     private int mNetworkId;
-    private boolean mHiddenSSID;
     /** Received Signal Strength Indicator */
     private int mRssi;
 
@@ -86,7 +85,6 @@ public class WifiInfo implements Parcelable {
         mSupplicantState = SupplicantState.UNINITIALIZED;
         mRssi = -9999;
         mLinkSpeed = -1;
-        mHiddenSSID = false;
     }
 
     /**
@@ -99,7 +97,6 @@ public class WifiInfo implements Parcelable {
             mBSSID = source.mBSSID;
             mWifiSsid = source.mWifiSsid;
             mNetworkId = source.mNetworkId;
-            mHiddenSSID = source.mHiddenSSID;
             mRssi = source.mRssi;
             mLinkSpeed = source.mLinkSpeed;
             mIpAddress = source.mIpAddress;
@@ -110,8 +107,6 @@ public class WifiInfo implements Parcelable {
 
     void setSSID(WifiSsid wifiSsid) {
         mWifiSsid = wifiSsid;
-        // network is considered not hidden by default
-        mHiddenSSID = false;
     }
 
     /**
@@ -244,12 +239,7 @@ public class WifiInfo implements Parcelable {
      * SSID-specific probe request must be used for scans.
      */
     public boolean getHiddenSSID() {
-        return mHiddenSSID;
-    }
-
-    /** {@hide} */
-    public void setHiddenSSID(boolean hiddenSSID) {
-        mHiddenSSID = hiddenSSID;
+        return mWifiSsid.isHidden();
     }
 
    /**
