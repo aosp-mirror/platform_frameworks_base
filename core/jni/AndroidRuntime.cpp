@@ -1023,7 +1023,8 @@ static int javaDetachThread(void)
     void** args = (void**) malloc(3 * sizeof(void*));   // javaThreadShell must free
     int result;
 
-    assert(threadName != NULL);
+    if (!threadName)
+        threadName = "unnamed thread";
 
     args[0] = (void*) entryFunction;
     args[1] = userData;
