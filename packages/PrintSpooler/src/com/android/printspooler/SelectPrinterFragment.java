@@ -168,6 +168,14 @@ public final class SelectPrinterFragment extends ListFragment {
     }
 
     @Override
+    public void onPause() {
+        if (mAnnounceFilterResult != null) {
+            mAnnounceFilterResult.remove();
+        }
+        super.onPause();
+    }
+
+    @Override
     public void onListItemClick(ListView list, View view, int position, long id) {
         PrinterInfo printer = (PrinterInfo) list.getAdapter().getItem(position);
         Activity activity = getActivity();
@@ -266,11 +274,13 @@ public final class SelectPrinterFragment extends ListFragment {
         }
     }
 
-    private void announceSearchResult() {
-        if (mAnnounceFilterResult == null) {
-            mAnnounceFilterResult = new AnnounceFilterResult();
+    private void announceSearchResultIfNeeded() {
+        if (AccessibilityManager.getInstance(getActivity()).isEnabled()) {
+            if (mAnnounceFilterResult == null) {
+                mAnnounceFilterResult = new AnnounceFilterResult();
+            }
+            mAnnounceFilterResult.post();
         }
-        mAnnounceFilterResult.post();
     }
 
     public static class AddPrinterAlertDialogFragment extends DialogFragment {
@@ -397,7 +407,7 @@ public final class SelectPrinterFragment extends ListFragment {
                         resultCountChanged = (oldPrinterCount != mFilteredPrinters.size());
                     }
                     if (resultCountChanged) {
-                        announceSearchResult();
+                        announceSearchResultIfNeeded();
                     }
                     notifyDataSetChanged();
                 }
