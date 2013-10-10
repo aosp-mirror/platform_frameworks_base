@@ -458,7 +458,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
         return BluetoothProfile.PRIORITY_OFF;
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
             mService = IBluetoothInputDevice.Stub.asInterface(service);
