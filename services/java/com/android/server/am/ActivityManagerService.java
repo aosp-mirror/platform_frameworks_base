@@ -6640,6 +6640,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         return list;
     }
 
+    TaskRecord getMostRecentTask() {
+        return mRecentTasks.get(0);
+    }
+
     @Override
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) {
