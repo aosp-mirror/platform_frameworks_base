@@ -89,8 +89,6 @@ import com.android.printspooler.MediaSizeUtils.MediaSizeComparator;
 
 import libcore.io.IoUtils;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -2189,9 +2187,10 @@ public class PrintJobConfigActivity extends Activity {
 
             @Override
             public int getCount() {
-                final int additionalItemCount = (mFakePdfPrinter != null) ? 2 : 1;
-                return Math.min(mPrinters.size() + additionalItemCount,
-                        DEST_ADAPTER_MAX_ITEM_COUNT);
+                if (mFakePdfPrinter == null) {
+                    return 0;
+                }
+                return Math.min(mPrinters.size() + 2, DEST_ADAPTER_MAX_ITEM_COUNT);
             }
 
             @Override
@@ -2227,14 +2226,12 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public long getItemId(int position) {
                 if (mPrinters.isEmpty()) {
-                    if (position == 0) {
-                        if (mFakePdfPrinter != null) {
+                    if (mFakePdfPrinter != null) {
+                        if (position == 0) {
                             return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
-                        } else {
+                        } else if (position == 1) {
                             return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
                         }
-                    } else if (position == 1) {
-                        return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
                     }
                 } else {
                     if (position == 1 && mFakePdfPrinter != null) {
