@@ -156,18 +156,20 @@ public class NetworkInfo implements Parcelable {
     /** {@hide} */
     public NetworkInfo(NetworkInfo source) {
         if (source != null) {
-            mNetworkType = source.mNetworkType;
-            mSubtype = source.mSubtype;
-            mTypeName = source.mTypeName;
-            mSubtypeName = source.mSubtypeName;
-            mState = source.mState;
-            mDetailedState = source.mDetailedState;
-            mReason = source.mReason;
-            mExtraInfo = source.mExtraInfo;
-            mIsFailover = source.mIsFailover;
-            mIsRoaming = source.mIsRoaming;
-            mIsAvailable = source.mIsAvailable;
-            mIsConnectedToProvisioningNetwork = source.mIsConnectedToProvisioningNetwork;
+            synchronized (source) {
+                mNetworkType = source.mNetworkType;
+                mSubtype = source.mSubtype;
+                mTypeName = source.mTypeName;
+                mSubtypeName = source.mSubtypeName;
+                mState = source.mState;
+                mDetailedState = source.mDetailedState;
+                mReason = source.mReason;
+                mExtraInfo = source.mExtraInfo;
+                mIsFailover = source.mIsFailover;
+                mIsRoaming = source.mIsRoaming;
+                mIsAvailable = source.mIsAvailable;
+                mIsConnectedToProvisioningNetwork = source.mIsConnectedToProvisioningNetwork;
+            }
         }
     }
 
