@@ -1616,7 +1616,7 @@
   <java-symbol type="anim" name="push_up_out" />
   <java-symbol type="anim" name="lock_screen_wallpaper_behind_enter" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
- 
+
   <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="dimen" name="status_bar_icon_size" />
   <java-symbol type="dimen" name="system_bar_icon_size" />
@@ -1738,6 +1738,7 @@
   <!-- From Chromium-WebView -->
   <java-symbol type="attr" name="actionModeWebSearchDrawable" />
   <java-symbol type="string" name="websearch" />
+  <java-symbol type="drawable" name="ic_media_video_poster" />
 
   <!-- From SubtitleView -->
   <java-symbol type="dimen" name="subtitle_corner_radius" />
