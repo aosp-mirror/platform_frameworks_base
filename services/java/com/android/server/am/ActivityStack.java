@@ -674,8 +674,8 @@ final class ActivityStack {
         }
 
         TaskRecord tr = who.task;
-        if (tr.intent != null && (tr.intent.getFlags()
-                &Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0) {
+        if (mService.getMostRecentTask() != tr && tr.intent != null &&
+                (tr.intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0) {
             // If this task is being excluded from recents, we don't want to take
             // the expense of capturing a thumbnail, since we will never show it.
             return null;
