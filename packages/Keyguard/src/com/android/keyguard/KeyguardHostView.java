@@ -90,9 +90,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
     private int mAppWidgetToShow;
 
-    private boolean mCheckAppWidgetConsistencyOnBootCompleted = false;
-    private boolean mCleanupAppWidgetsOnBootCompleted = false;
-
     protected OnDismissAction mDismissAction;
 
     protected int mFailedAttempts;
@@ -117,8 +114,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private KeyguardMultiUserSelectorView mKeyguardMultiUserSelectorView;
 
-    private boolean mIsScreenOn;
-
     protected int mClientGeneration;
 
     protected boolean mShowSecurityWhenReturn;
@@ -126,6 +121,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     private final Rect mInsets = new Rect();
 
     private MyOnClickHandler mOnClickHandler = new MyOnClickHandler(this);
+
+    private Runnable mPostBootCompletedRunnable;
 
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
@@ -185,8 +182,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetHost = new AppWidgetHost(userContext, APPWIDGET_HOST_ID, mOnClickHandler,
                 Looper.myLooper());
 
-        cleanupAppWidgetIds();
-
         mAppWidgetManager = AppWidgetManager.getInstance(userContext);
 
         mSecurityModel = new KeyguardSecurityModel(context);
@@ -228,27 +223,21 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void cleanupAppWidgetIds() {
-        // Since this method may delete a widget (which we can't do until boot completed) we
-        // may have to defer it until after boot complete.
-        if (!KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
-            mCleanupAppWidgetsOnBootCompleted = true;
-            return;
-        }
-        if (!mSafeModeEnabled && !widgetsDisabled()) {
-            // Clean up appWidgetIds that are bound to lockscreen, but not actually used
-            // This is only to clean up after another bug: we used to not call
-            // deleteAppWidgetId when a user manually deleted a widget in keyguard. This code
-            // shouldn't have to run more than once per user. AppWidgetProviders rely on callbacks
-            // that are triggered by deleteAppWidgetId, which is why we're doing this
-            int[] appWidgetIdsInKeyguardSettings = mLockPatternUtils.getAppWidgets();
-            int[] appWidgetIdsBoundToHost = mAppWidgetHost.getAppWidgetIds();
-            for (int i = 0; i < appWidgetIdsBoundToHost.length; i++) {
-                int appWidgetId = appWidgetIdsBoundToHost[i];
-                if (!contains(appWidgetIdsInKeyguardSettings, appWidgetId)) {
-                    Log.d(TAG, "Found a appWidgetId that's not being used by keyguard, deleting id "
-                            + appWidgetId);
-                    mAppWidgetHost.deleteAppWidgetId(appWidgetId);
-                }
+        if (mSafeModeEnabled || widgetsDisabled()) return;
+
+        // Clean up appWidgetIds that are bound to lockscreen, but not actually used
+        // This is only to clean up after another bug: we used to not call
+        // deleteAppWidgetId when a user manually deleted a widget in keyguard. This code
+        // shouldn't have to run more than once per user. AppWidgetProviders rely on callbacks
+        // that are triggered by deleteAppWidgetId, which is why we're doing this
+        int[] appWidgetIdsInKeyguardSettings = mLockPatternUtils.getAppWidgets();
+        int[] appWidgetIdsBoundToHost = mAppWidgetHost.getAppWidgetIds();
+        for (int i = 0; i < appWidgetIdsBoundToHost.length; i++) {
+            int appWidgetId = appWidgetIdsBoundToHost[i];
+            if (!contains(appWidgetIdsInKeyguardSettings, appWidgetId)) {
+                Log.d(TAG, "Found a appWidgetId that's not being used by keyguard, deleting id "
+                        + appWidgetId);
+                mAppWidgetHost.deleteAppWidgetId(appWidgetId);
             }
         }
     }
@@ -266,14 +255,9 @@ public class KeyguardHostView extends KeyguardViewBase {
             new KeyguardUpdateMonitorCallback() {
         @Override
         public void onBootCompleted() {
-            if (mCheckAppWidgetConsistencyOnBootCompleted) {
-                checkAppWidgetConsistency();
-                mSwitchPageRunnable.run();
-                mCheckAppWidgetConsistencyOnBootCompleted = false;
-            }
-            if (mCleanupAppWidgetsOnBootCompleted) {
-                cleanupAppWidgetIds();
-                mCleanupAppWidgetsOnBootCompleted = false;
+            if (mPostBootCompletedRunnable != null) {
+                mPostBootCompletedRunnable.run();
+                mPostBootCompletedRunnable = null;
             }
         }
         @Override
@@ -398,12 +382,29 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         setBackButtonEnabled(false);
 
-        addDefaultWidgets();
-
-        addWidgetsFromSettings();
-        if (!shouldEnableAddWidget()) {
-            mAppWidgetContainer.setAddWidgetEnabled(false);
+        if (KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
+            updateAndAddWidgets();
+        } else {
+            // We can't add widgets until after boot completes because AppWidgetHost may try
+            // to contact the providers.  Do it later.
+            mPostBootCompletedRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    updateAndAddWidgets();
+                }
+            };
         }
+
+        showPrimarySecurityScreen(false);
+        updateSecurityViews();
+        enableUserSelectorIfNecessary();
+    }
+
+    private void updateAndAddWidgets() {
+        cleanupAppWidgetIds();
+        addDefaultWidgets();
+        addWidgetsFromSettings();
+        maybeEnableAddButton();
         checkAppWidgetConsistency();
 
         // Don't let the user drag the challenge down if widgets are disabled.
@@ -411,12 +412,17 @@ public class KeyguardHostView extends KeyguardViewBase {
             mSlidingChallengeLayout.setEnableChallengeDragging(!widgetsDisabled());
         }
 
+        // Select the appropriate page
         mSwitchPageRunnable.run();
+
         // This needs to be called after the pages are all added.
         mViewStateManager.showUsabilityHints();
+    }
 
-        showPrimarySecurityScreen(false);
-        updateSecurityViews();
+    private void maybeEnableAddButton() {
+        if (!shouldEnableAddWidget()) {
+            mAppWidgetContainer.setAddWidgetEnabled(false);
+        }
     }
 
     private void setBackButtonEnabled(boolean enabled) {
@@ -646,7 +652,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void showAlmostAtWipeDialog(int attempts, int remaining) {
-        int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
         String message = mContext.getString(R.string.kg_failed_attempts_almost_at_wipe,
                 attempts, remaining);
         showDialog(null, message);
@@ -1025,7 +1030,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
-        mIsScreenOn = true;
         showPrimarySecurityScreen(false);
         getSecurityView(mCurrentSecuritySelection).onResume(KeyguardSecurityView.SCREEN_ON);
 
@@ -1045,14 +1049,15 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
                 Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
-        mIsScreenOn = false;
         // Once the screen turns off, we no longer consider this to be first boot and we want the
         // biometric unlock to start next time keyguard is shown.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
         // We use mAppWidgetToShow to show a particular widget after you add it-- once the screen
         // turns off we reset that behavior
         clearAppWidgetToShow();
-        checkAppWidgetConsistency();
+        if (KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
+            checkAppWidgetConsistency();
+        }
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
         CameraWidgetFrame cameraPage = findCameraPage();
@@ -1224,8 +1229,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mAppWidgetContainer.addWidget(cameraWidget);
             }
         }
-
-        enableUserSelectorIfNecessary();
     }
 
     /**
@@ -1311,12 +1314,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     public void checkAppWidgetConsistency() {
-        // Since this method may bind a widget (which we can't do until boot completed) we
-        // may have to defer it until after boot complete.
-        if (!KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
-            mCheckAppWidgetConsistencyOnBootCompleted = true;
-            return;
-        }
         final int childCount = mAppWidgetContainer.getChildCount();
         boolean widgetPageExists = false;
         for (int i = 0; i < childCount; i++) {
