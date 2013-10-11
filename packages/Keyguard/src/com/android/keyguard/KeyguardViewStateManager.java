@@ -17,12 +17,14 @@ package com.android.keyguard;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 public class KeyguardViewStateManager implements
         SlidingChallengeLayout.OnChallengeScrolledListener,
         ChallengeLayout.OnBouncerStateChangedListener {
 
+    private static final String TAG = "KeyguardViewStateManager";
     private KeyguardWidgetPager mKeyguardWidgetPager;
     private ChallengeLayout mChallengeLayout;
     private KeyguardHostView mKeyguardHostView;
@@ -100,18 +102,20 @@ public class KeyguardViewStateManager implements
     }
 
     public void fadeOutSecurity(int duration) {
-        ((View) mKeyguardSecurityContainer).animate().alpha(0).setDuration(duration);
+        ((View) mKeyguardSecurityContainer).animate().alpha(0f).setDuration(duration).start();
     }
 
     public void fadeInSecurity(int duration) {
-        ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration);
+        ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration).start();
     }
 
     public void onPageBeginMoving() {
         if (mChallengeLayout.isChallengeOverlapping() &&
                 mChallengeLayout instanceof SlidingChallengeLayout) {
             SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
-            scl.fadeOutChallenge();
+            if (!mKeyguardWidgetPager.isWarping()) {
+                scl.fadeOutChallenge();
+            }
             mPageIndexOnPageBeginMoving = mKeyguardWidgetPager.getCurrentPage();
         }
         // We use mAppWidgetToShow to show a particular widget after you add it--
@@ -133,7 +137,9 @@ public class KeyguardViewStateManager implements
     public void onPageSwitching(View newPage, int newPageIndex) {
         if (mKeyguardWidgetPager != null && mChallengeLayout instanceof SlidingChallengeLayout) {
             boolean isCameraPage = newPage instanceof CameraWidgetFrame;
-            ((SlidingChallengeLayout) mChallengeLayout).setChallengeInteractive(!isCameraPage);
+            SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
+            scl.setChallengeInteractive(!isCameraPage);
+            if (isCameraPage) scl.fadeOutChallenge();
         }
 
         // If the page we're settling to is the same as we started on, and the action of
@@ -174,13 +180,15 @@ public class KeyguardViewStateManager implements
     }
 
     public void onPageBeginWarp() {
-        // fadeOutSecurity(WARP_FADE_DURATION);
-        // mKeyguardWidgetPager.showNonWarpViews(WARP_FADE_DURATION, false);
+        fadeOutSecurity(SlidingChallengeLayout.CHALLENGE_FADE_OUT_DURATION);
+        View frame = mKeyguardWidgetPager.getPageAt(mKeyguardWidgetPager.getPageWarpIndex());
+        ((KeyguardWidgetFrame)frame).showFrame(this);
     }
 
     public void onPageEndWarp() {
-        // fadeInSecurity(WARP_FADE_DURATION);
-        // mKeyguardWidgetPager.showNonWarpViews(WARP_FADE_DURATION, true);
+        fadeInSecurity(SlidingChallengeLayout.CHALLENGE_FADE_IN_DURATION);
+        View frame = mKeyguardWidgetPager.getPageAt(mKeyguardWidgetPager.getPageWarpIndex());
+        ((KeyguardWidgetFrame)frame).hideFrame(this);
     }
 
     private int getChallengeTopRelativeToFrame(KeyguardWidgetFrame frame, int top) {
