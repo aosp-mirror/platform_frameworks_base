@@ -147,7 +147,7 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"已删除<xliff:g id="APP">%s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"已关闭通知。"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知栏。"</string>
-    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快速设置。"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快捷设置。"</string>
     <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"最近使用的应用。"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用户：<xliff:g id="USER">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>，<xliff:g id="NETWORK">%2$s</xliff:g>"</string>
@@ -201,11 +201,8 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"无线显示"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
-    <!-- no translation found for quick_settings_inversion_label (1666358784283020762) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_label (3319507551689108692) -->
-    <skip />
-    <!-- no translation found for quick_settings_color_space_label (853443689745584770) -->
-    <skip />
+    <string name="quick_settings_inversion_label" msgid="1666358784283020762">"颜色反转模式"</string>
+    <string name="quick_settings_contrast_label" msgid="3319507551689108692">"增强对比度模式"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"颜色校正模式"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"网络可能会\n受到监控"</string>
 </resources>
