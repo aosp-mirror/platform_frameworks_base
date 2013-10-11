@@ -553,7 +553,7 @@ android.content.Context#sendOrderedBroadcast sendOrderedBroadcast()},
 or an explicit intent to a specific application component.</p>
 
 <p>Note that ordered broadcasts can be “consumed” by a recipient, so they
-may not be delivered to all applications.  If you are sending an intent that muse be delivered
+may not be delivered to all applications.  If you are sending an intent that must be delivered
 to a specific receiver, then you must use an explicit intent that declares the receiver
 by nameintent.</p>
 
