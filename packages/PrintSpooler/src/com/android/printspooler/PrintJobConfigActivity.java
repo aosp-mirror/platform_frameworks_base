@@ -59,12 +59,14 @@ import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -75,6 +77,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -1409,7 +1412,9 @@ public class PrintJobConfigActivity extends Activity {
                                         postSwitchCallback.run();
                                     }
                                 }
-                            });
+                            },
+                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
                         } break;
                     }
                 } break;
@@ -1426,7 +1431,9 @@ public class PrintJobConfigActivity extends Activity {
                                         postSwitchCallback.run();
                                     }
                                 }
-                            });
+                            },
+                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
                         } break;
                     }
                 } break;
@@ -1474,7 +1481,8 @@ public class PrintJobConfigActivity extends Activity {
             getLayoutInflater().inflate(showLayoutId, contentContainer, true);
         }
 
-        private void animateUiSwitch(int showLayoutId, final Runnable postAnimateCommand) {
+        private void animateUiSwitch(int showLayoutId, final Runnable postAnimateCommand,
+                final LayoutParams containerParams) {
             // Find everything we will shuffle around.
             final ViewGroup contentContainer = (ViewGroup) findViewById(R.id.content_container);
             final View hidingView = contentContainer.getChildAt(0);
@@ -1510,6 +1518,8 @@ public class PrintJobConfigActivity extends Activity {
                             contentContainer.removeAllViews();
                             contentContainer.setScaleY(1.0f);
                             contentContainer.addView(showingView);
+
+                            contentContainer.setLayoutParams(containerParams);
 
                             // Third animation - show the new content.
                             AutoCancellingAnimator.animate(showingView).withLayer().alpha(1.0f)

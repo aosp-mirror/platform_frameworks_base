@@ -24,6 +24,8 @@ public class PrintDialogFrame extends FrameLayout {
 
     public final int mMaxWidth;
 
+    public int mHeight;
+
     public PrintDialogFrame(Context context, AttributeSet attrs) {
         super(context, attrs);
         mMaxWidth = context.getResources().getDimensionPixelSize(
@@ -32,13 +34,36 @@ public class PrintDialogFrame extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        if (widthMode == MeasureSpec.AT_MOST) {
-            final int receivedWidth = MeasureSpec.getSize(widthMeasureSpec);
-            final int computedWidth = Math.min(mMaxWidth, receivedWidth);
-            widthMeasureSpec = MeasureSpec.makeMeasureSpec(computedWidth,
-                    MeasureSpec.EXACTLY);
-        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int measuredWidth  = getMeasuredWidth();
+        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        switch (widthMode) {
+            case MeasureSpec.UNSPECIFIED: {
+                measuredWidth = mMaxWidth;
+            } break;
+
+            case MeasureSpec.AT_MOST: {
+                final int receivedWidth = MeasureSpec.getSize(widthMeasureSpec);
+                measuredWidth = Math.min(mMaxWidth, receivedWidth);
+            } break;
+        }
+
+        mHeight = Math.max(mHeight, getMeasuredHeight());
+
+        int measuredHeight  = getMeasuredHeight();
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        switch (heightMode) {
+            case MeasureSpec.UNSPECIFIED: {
+                measuredHeight = mHeight;
+            } break;
+
+             case MeasureSpec.AT_MOST: {
+                final int receivedHeight = MeasureSpec.getSize(heightMeasureSpec);
+                measuredHeight = Math.min(mHeight, receivedHeight);
+            } break;
+        }
+
+        setMeasuredDimension(measuredWidth, measuredHeight);
     }
 }
