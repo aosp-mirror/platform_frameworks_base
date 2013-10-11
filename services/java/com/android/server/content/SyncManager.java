@@ -67,6 +67,7 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
@@ -2009,8 +2010,11 @@ public class SyncManager {
             for (Pair<AuthorityInfo, SyncStatusInfo> info : infos) {
                 final AuthorityInfo authorityInfo = info.first;
                 final SyncStatusInfo status = info.second;
-                // skip the sync if the account of this operation no longer
-                // exists
+                if (TextUtils.isEmpty(authorityInfo.authority)) {
+                    Log.e(TAG, "Got an empty provider string. Skipping: " + authorityInfo);
+                    continue;
+                }
+                // skip the sync if the account of this operation no longer exists
                 if (!containsAccountAndUser(
                         accounts, authorityInfo.account, authorityInfo.userId)) {
                     continue;

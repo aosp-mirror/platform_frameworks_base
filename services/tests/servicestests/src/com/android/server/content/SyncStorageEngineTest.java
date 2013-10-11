@@ -670,6 +670,61 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(0, engine.getIsSyncable(account, 0, "other3"));
         assertEquals(1, engine.getIsSyncable(account, 0, "other4"));
     }
+
+    /**
+     * Verify that the API cannot cause a run-time reboot by passing in the empty string as an
+     * authority. The problem here is that
+     * {@link SyncStorageEngine#getOrCreateAuthorityLocked(account, provider)} would register
+     * an empty authority which causes a RTE in {@link SyncManager#scheduleReadyPeriodicSyncs()}.
+     * This is not strictly a SSE test, but it does depend on the SSE data structures.
+     */
+    @SmallTest
+    public void testExpectedIllegalArguments() throws Exception {
+        try {
+            ContentResolver.setSyncAutomatically(account1, "", true);
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.addPeriodicSync(account1, "", Bundle.EMPTY, 84000L);
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.removePeriodicSync(account1, "", Bundle.EMPTY);
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.cancelSync(account1, "");
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.setIsSyncable(account1, "", 0);
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.cancelSync(account1, "");
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.requestSync(account1, "", Bundle.EMPTY);
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        try {
+            ContentResolver.getSyncStatus(account1, "");
+            fail("empty provider string should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {}
+
+        // Make sure we aren't blocking null account/provider for those functions that use it
+        // to specify ALL accounts/providers.
+        ContentResolver.requestSync(null, null, Bundle.EMPTY);
+        ContentResolver.cancelSync(null, null);
+    }
 }
 
 class TestContext extends ContextWrapper {
