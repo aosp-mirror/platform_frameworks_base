@@ -16,26 +16,18 @@
 <resources>
 
     <string-array name="pdf_printer_media_sizes" translatable="false">
-        <item>JIS_B10</item>
-        <item>JIS_B9</item>
-        <item>JIS_B8</item>
-        <item>JIS_B7</item>
-        <item>JIS_b6</item>
-        <item>JIS_b5</item>
-        <item>JIS_b4</item>
-        <item>JIS_b3</item>
-        <item>JIS_b2</item>
-        <item>JIS_b1</item>
-        <item>JIS_b0</item>
-        <item>JIS_EXEC</item>
-        <item>JPN_CHOU4</item>
-        <item>JPN_CHOU3</item>
-        <item>JPN_CHOU2</item>
-        <item>JPN_HAGAKI</item>
-        <item>JPN_OUFUKU</item>
-        <item>JPN_KAHU</item>
-        <item>JPN_KAKU2</item>
-        <item>JPN_YOU4</item>
+        <item>NA_LETTER</item>
+        <item>NA_GOVT_LETTER</item>
+        <item>NA_LEGAL</item>
+        <item>NA_JUNIOR_LEGAL</item>
+        <item>NA_LEDGER</item>
+        <item>NA_TABLOID</item>
+        <item>NA_INDEX_3X5</item>
+        <item>NA_INDEX_4X6</item>
+        <item>NA_INDEX_5X8</item>
+        <item>NA_MONARCH</item>
+        <item>NA_QUARTO</item>
+        <item>NA_FOOLSCAP</item>
     </string-array>
 
 </resources>
