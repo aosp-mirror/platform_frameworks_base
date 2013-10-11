@@ -44,7 +44,7 @@
     <string name="label_pages">Pages (<xliff:g id="page_count" example="5">%1$s</xliff:g>)</string>
 
     <!-- Page range exmple used as a hint of how to specify such. [CHAR LIMIT=20] -->
-    <string name="pages_range_example">e.g. 1&#8211;5, 8, 11&#8211;13</string>
+    <string name="pages_range_example">e.g. 1&#8212;5,8,11&#8212;13</string>
 
     <!-- Title for the pring preview button .[CHAR LIMIT=30] -->
     <string name="print_preview">Print preview</string>
@@ -141,6 +141,9 @@
 
     <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
     <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
+
+    <!-- Default message of an alert dialog for app error while generating a print job. [CHAR LIMIT=50] -->
+    <string name="print_error_default_message">Couldn\'t generate print job</string>
 
     <!-- Arrays -->
 
