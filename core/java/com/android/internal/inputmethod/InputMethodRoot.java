@@ -40,6 +40,12 @@ public class InputMethodRoot extends LinearLayout {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        requestFitSystemWindows();
+    }
+
+    @Override
     protected boolean fitSystemWindows(Rect insets) {
         if (mNavigationGuard == null) {
             mNavigationGuard = findViewById(com.android.internal.R.id.navigationGuard);
