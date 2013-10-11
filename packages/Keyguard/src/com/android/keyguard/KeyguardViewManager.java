@@ -85,6 +85,7 @@ public class KeyguardViewManager {
         public void onSetBackground(Bitmap bmp) {
             mKeyguardHost.setCustomBackground(bmp != null ?
                     new BitmapDrawable(mContext.getResources(), bmp) : null);
+            updateShowWallpaper(bmp == null);
         }
     };
 
@@ -379,6 +380,16 @@ public class KeyguardViewManager {
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
     }
 
+    void updateShowWallpaper(boolean show) {
+        if (show) {
+            mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        } else {
+            mWindowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        }
+
+        mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
+    }
+
     public void setNeedsInput(boolean needsInput) {
         mNeedsInput = needsInput;
         if (mWindowLayoutParams != null) {
@@ -489,6 +500,7 @@ public class KeyguardViewManager {
                             lastView.cleanUp();
                             // Let go of any large bitmaps.
                             mKeyguardHost.setCustomBackground(null);
+                            updateShowWallpaper(true);
                             mKeyguardHost.removeView(lastView);
                         }
                     }
