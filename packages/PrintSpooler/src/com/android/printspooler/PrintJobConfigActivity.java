@@ -19,9 +19,11 @@ package com.android.printspooler;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.LoaderManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
@@ -52,6 +54,7 @@ import android.print.PrintManager;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
+import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -66,9 +69,9 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -83,6 +86,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.printspooler.MediaSizeUtils.MediaSizeComparator;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,8 +105,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import libcore.io.IoUtils;
-
 /**
  * Activity for configuring a print job.
  */
@@ -110,9 +113,6 @@ public class PrintJobConfigActivity extends Activity {
     private static final String LOG_TAG = "PrintJobConfigActivity";
 
     private static final boolean DEBUG = false;
-
-    public static final String EXTRA_PRINT_DOCUMENT_ADAPTER = "printDocumentAdapter";
-    public static final String EXTRA_PRINT_JOB = "printJob";
 
     public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
 
@@ -177,6 +177,10 @@ public class PrintJobConfigActivity extends Activity {
 
     private Dialog mGeneratingPrintJobDialog;
 
+    private PrintSpoolerProvider mSpoolerProvider;
+
+    private String mCallingPackageName;
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -185,13 +189,13 @@ public class PrintJobConfigActivity extends Activity {
 
         Bundle extras = getIntent().getExtras();
 
-        PrintJobInfo printJob = extras.getParcelable(EXTRA_PRINT_JOB);
+        PrintJobInfo printJob = extras.getParcelable(PrintManager.EXTRA_PRINT_JOB);
         if (printJob == null) {
             throw new IllegalArgumentException("printJob cannot be null");
         }
 
         mPrintJobId = printJob.getId();
-        mIPrintDocumentAdapter = extras.getBinder(EXTRA_PRINT_DOCUMENT_ADAPTER);
+        mIPrintDocumentAdapter = extras.getBinder(PrintManager.EXTRA_PRINT_DOCUMENT_ADAPTER);
         if (mIPrintDocumentAdapter == null) {
             throw new IllegalArgumentException("PrintDocumentAdapter cannot be null");
         }
@@ -201,13 +205,9 @@ public class PrintJobConfigActivity extends Activity {
             mCurrPrintAttributes.copyFrom(attributes);
         }
 
-        setContentView(R.layout.print_job_config_activity_container);
+        mCallingPackageName = extras.getString(DocumentsContract.EXTRA_PACKAGE_NAME);
 
-        mDocument = new Document();
-        mController = new PrintController(new RemotePrintDocumentAdapter(
-                IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter),
-                PrintSpoolerService.peekInstance().generateFileForPrintJob(mPrintJobId)));
-        mEditor = new Editor();
+        setContentView(R.layout.print_job_config_activity_container);
 
         try {
             mIPrintDocumentAdapter.linkToDeath(mDeathRecipient, 0);
@@ -216,14 +216,31 @@ public class PrintJobConfigActivity extends Activity {
             return;
         }
 
-        mController.initialize();
-        mEditor.initialize();
+        mDocument = new Document();
+        mEditor = new Editor();
+
+        mSpoolerProvider = new PrintSpoolerProvider(this,
+                new Runnable() {
+            @Override
+            public void run() {
+                // We got the spooler so unleash the UI.
+                mController = new PrintController(new RemotePrintDocumentAdapter(
+                        IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter),
+                        mSpoolerProvider.getSpooler().generateFileForPrintJob(mPrintJobId)));
+                mController.initialize();
+
+                mEditor.initialize();
+                mEditor.postCreate();
+            }
+        });
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mEditor.refreshCurrentPrinter();
+        if (mSpoolerProvider.getSpooler() != null) {
+            mEditor.refreshCurrentPrinter();
+        }
     }
 
     @Override
@@ -235,10 +252,10 @@ public class PrintJobConfigActivity extends Activity {
             mController.finish();
         }
         if (mEditor.isPrintConfirmed() && mController.isFinished()) {
-            PrintSpoolerService.peekInstance().setPrintJobState(mPrintJobId,
+            mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
                     PrintJobInfo.STATE_QUEUED, null);
         } else {
-            PrintSpoolerService.peekInstance().setPrintJobState(mPrintJobId,
+            mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
                     PrintJobInfo.STATE_CANCELED, null);
         }
         mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
@@ -246,6 +263,7 @@ public class PrintJobConfigActivity extends Activity {
             mGeneratingPrintJobDialog.dismiss();
             mGeneratingPrintJobDialog = null;
         }
+        mSpoolerProvider.destroy();
         super.onDestroy();
     }
 
@@ -367,7 +385,7 @@ public class PrintJobConfigActivity extends Activity {
                 // we handle writing as usual.
                 handleOnLayoutFinished(mDocument.info, false, mRequestCounter.get());
             } else {
-                PrintSpoolerService.peekInstance().setPrintJobAttributesNoPersistence(
+                mSpoolerProvider.getSpooler().setPrintJobAttributesNoPersistence(
                         mPrintJobId, mCurrPrintAttributes);
 
                 mMetadata.putBoolean(PrintDocumentAdapter.EXTRA_PRINT_PREVIEW,
@@ -412,7 +430,7 @@ public class PrintJobConfigActivity extends Activity {
             if (infoChanged) {
                 mDocument.info = info;
                 // Set the info.
-                PrintSpoolerService.peekInstance().setPrintJobPrintDocumentInfoNoPersistence(
+                mSpoolerProvider.getSpooler().setPrintJobPrintDocumentInfoNoPersistence(
                         mPrintJobId, info);
             }
 
@@ -420,7 +438,7 @@ public class PrintJobConfigActivity extends Activity {
             // drop the pages since we have to fetch them again.
             if (infoChanged || layoutChanged) {
                 mDocument.pages = null;
-                PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(
+                mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(
                         mPrintJobId, null);
             }
 
@@ -499,12 +517,12 @@ public class PrintJobConfigActivity extends Activity {
             mControllerState = CONTROLLER_STATE_WRITE_COMPLETED;
 
             // Update the document size.
-            File file = PrintSpoolerService.peekInstance()
+            File file = mSpoolerProvider.getSpooler()
                     .generateFileForPrintJob(mPrintJobId);
             mDocument.info.setDataSize(file.length());
 
             // Update the print job with the updated info.
-            PrintSpoolerService.peekInstance().setPrintJobPrintDocumentInfoNoPersistence(
+            mSpoolerProvider.getSpooler().setPrintJobPrintDocumentInfoNoPersistence(
                     mPrintJobId, mDocument.info);
 
             // Update which pages we have fetched.
@@ -528,12 +546,12 @@ public class PrintJobConfigActivity extends Activity {
             if (Arrays.equals(writtenPages, requestedPages)) {
                 // We got a document with exactly the pages we wanted. Hence,
                 // the printer has to print all pages in the data.
-                PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
+                mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(mPrintJobId,
                         ALL_PAGES_ARRAY);
             } else if (Arrays.equals(writtenPages, ALL_PAGES_ARRAY)) {
                 // We requested specific pages but got all of them. Hence,
                 // the printer has to print only the requested pages.
-                PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
+                mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(mPrintJobId,
                         requestedPages);
             } else if (PageRangeUtils.contains(writtenPages, requestedPages)) {
                 // We requested specific pages and got more but not all pages.
@@ -543,7 +561,7 @@ public class PrintJobConfigActivity extends Activity {
                 final int offset = -writtenPages[0].getStart();
                 PageRange[] offsetPages = Arrays.copyOf(requestedPages, requestedPages.length);
                 PageRangeUtils.offset(offsetPages, offset);
-                PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
+                mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(mPrintJobId,
                         offsetPages);
             } else if (Arrays.equals(requestedPages, ALL_PAGES_ARRAY)
                     && writtenPages.length == 1 && writtenPages[0].getStart() == 0
@@ -551,7 +569,7 @@ public class PrintJobConfigActivity extends Activity {
                 // We requested all pages via the special constant and got all
                 // of them as an explicit enumeration. Hence, the printer has
                 // to print only the requested pages.
-                PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(mPrintJobId,
+                mSpoolerProvider.getSpooler().setPrintJobPagesNoPersistence(mPrintJobId,
                         writtenPages);
             } else {
                 // We did not get the pages we requested, then the application
@@ -566,11 +584,12 @@ public class PrintJobConfigActivity extends Activity {
 
         private void requestCreatePdfFileOrFinish() {
             if (mEditor.isPrintingToPdf()) {
-                PrintJobInfo printJob = PrintSpoolerService.peekInstance()
+                PrintJobInfo printJob = mSpoolerProvider.getSpooler()
                         .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.setType("application/pdf");
                 intent.putExtra(Intent.EXTRA_TITLE, printJob.getLabel());
+                intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, mCallingPackageName);
                 startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
             } else {
                 PrintJobConfigActivity.this.finish();
@@ -741,12 +760,12 @@ public class PrintJobConfigActivity extends Activity {
                 InputStream in = null;
                 OutputStream out = null;
                 try {
-                    PrintJobInfo printJob = PrintSpoolerService.peekInstance()
+                    PrintJobInfo printJob = mSpoolerProvider.getSpooler()
                             .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
                     if (printJob == null) {
                         return null;
                     }
-                    File file = PrintSpoolerService.peekInstance()
+                    File file = mSpoolerProvider.getSpooler()
                             .generateFileForPrintJob(mPrintJobId);
                     in = new FileInputStream(file);
                     out = getContentResolver().openOutputStream(uri);
@@ -789,21 +808,21 @@ public class PrintJobConfigActivity extends Activity {
         private EditText mPageRangeEditText;
 
         private Spinner mDestinationSpinner;
-        private final DestinationAdapter mDestinationSpinnerAdapter;
+        private DestinationAdapter mDestinationSpinnerAdapter;
 
         private Spinner mMediaSizeSpinner;
-        private final ArrayAdapter<SpinnerItem<MediaSize>> mMediaSizeSpinnerAdapter;
+        private ArrayAdapter<SpinnerItem<MediaSize>> mMediaSizeSpinnerAdapter;
 
         private Spinner mColorModeSpinner;
-        private final ArrayAdapter<SpinnerItem<Integer>> mColorModeSpinnerAdapter;
+        private ArrayAdapter<SpinnerItem<Integer>> mColorModeSpinnerAdapter;
 
         private Spinner mOrientationSpinner;
-        private final  ArrayAdapter<SpinnerItem<Integer>> mOrientationSpinnerAdapter;
+        private  ArrayAdapter<SpinnerItem<Integer>> mOrientationSpinnerAdapter;
 
         private Spinner mRangeOptionsSpinner;
-        private final ArrayAdapter<SpinnerItem<Integer>> mRangeOptionsSpinnerAdapter;
+        private ArrayAdapter<SpinnerItem<Integer>> mRangeOptionsSpinnerAdapter;
 
-        private final SimpleStringSplitter mStringCommaSplitter =
+        private SimpleStringSplitter mStringCommaSplitter =
                 new SimpleStringSplitter(',');
 
         private View mContentContainer;
@@ -814,7 +833,7 @@ public class PrintJobConfigActivity extends Activity {
 
         private PrinterInfo mCurrentPrinter;
 
-        private final MediaSizeComparator mMediaSizeComparator;
+        private MediaSizeComparator mMediaSizeComparator;
 
         private final OnItemSelectedListener mOnItemSelectedListener =
                 new AdapterView.OnItemSelectedListener() {
@@ -823,6 +842,11 @@ public class PrintJobConfigActivity extends Activity {
                 if (spinner == mDestinationSpinner) {
                     if (mIgnoreNextDestinationChange) {
                         mIgnoreNextDestinationChange = false;
+                        return;
+                    }
+
+                    if (position == AdapterView.INVALID_POSITION) {
+                        updateUi();
                         return;
                     }
 
@@ -836,7 +860,7 @@ public class PrintJobConfigActivity extends Activity {
                     mCurrentPrinter = (PrinterInfo) mDestinationSpinnerAdapter
                             .getItem(position);
 
-                    PrintSpoolerService.peekInstance().setPrintJobPrinterNoPersistence(
+                    mSpoolerProvider.getSpooler().setPrintJobPrinterNoPersistence(
                             mPrintJobId, mCurrentPrinter);
 
                     if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE) {
@@ -1053,7 +1077,7 @@ public class PrintJobConfigActivity extends Activity {
                 }
 
                 mCopiesEditText.setError(null);
-                PrintSpoolerService.peekInstance().setPrintJobCopiesNoPersistence(
+                mSpoolerProvider.getSpooler().setPrintJobCopiesNoPersistence(
                         mPrintJobId, copies);
                 updateUi();
 
@@ -1145,6 +1169,10 @@ public class PrintJobConfigActivity extends Activity {
         private boolean mFavoritePrinterSelected;
 
         public Editor() {
+            showUi(UI_EDITING_PRINT_JOB, null);
+        }
+
+        public void postCreate() {
             // Destination.
             mMediaSizeComparator = new MediaSizeComparator(PrintJobConfigActivity.this);
             mDestinationSpinnerAdapter = new DestinationAdapter();
@@ -1621,7 +1649,7 @@ public class PrintJobConfigActivity extends Activity {
             if (!TextUtils.equals(mCopiesEditText.getText(), MIN_COPIES_STRING)) {
                 mIgnoreNextCopiesChange = true;
             }
-            PrintSpoolerService.peekInstance().setPrintJobCopiesNoPersistence(
+            mSpoolerProvider.getSpooler().setPrintJobCopiesNoPersistence(
                     mPrintJobId, MIN_COPIES);
 
             // Destination.
@@ -1629,7 +1657,7 @@ public class PrintJobConfigActivity extends Activity {
             mDestinationSpinner.setDropDownWidth(ViewGroup.LayoutParams.MATCH_PARENT);
             mDestinationSpinner.setAdapter(mDestinationSpinnerAdapter);
             mDestinationSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
-            if (mDestinationSpinnerAdapter.getCount() > 0 && mController.hasStarted()) {
+            if (mDestinationSpinnerAdapter.getCount() > 0) {
                 mIgnoreNextDestinationChange = true;
             }
 
@@ -2089,10 +2117,13 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public long getItemId(int position) {
                 if (mPrinters.isEmpty()) {
-                    if (position == 0 && mFakePdfPrinter != null) {
-                        return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
-                    }
-                    if (position == 1) {
+                    if (position == 0) {
+                        if (mFakePdfPrinter != null) {
+                            return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
+                        } else {
+                            return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
+                        }
+                    } else if (position == 1) {
                         return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
                     }
                 } else {
@@ -2482,6 +2513,43 @@ public class PrintJobConfigActivity extends Activity {
             if (!mCancelled) {
                 mEndCallback.run();
             }
+        }
+    }
+
+    private static final class PrintSpoolerProvider implements ServiceConnection {
+        private final Context mContext;
+        private final Runnable mCallback;
+
+        private PrintSpoolerService mSpooler;
+
+        public PrintSpoolerProvider(Context context, Runnable callback) {
+            mContext = context;
+            mCallback = callback;
+            Intent intent = new Intent(mContext, PrintSpoolerService.class);
+            mContext.bindService(intent, this, 0);
+        }
+
+        public PrintSpoolerService getSpooler() {
+            return mSpooler;
+        }
+
+        public void destroy() {
+            if (mSpooler != null) {
+                mContext.unbindService(this);
+            }
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mSpooler = ((PrintSpoolerService.PrintSpooler) service).getService();
+            if (mSpooler != null) {
+                mCallback.run();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            /* do noting - we are in the same process */
         }
     }
 }
