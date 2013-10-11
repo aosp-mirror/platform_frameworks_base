@@ -188,11 +188,13 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     public void onPageBeginWarp() {
+        showOutlinesAndSidePages();
         mViewStateManager.onPageBeginWarp();
     }
 
     @Override
     public void onPageEndWarp() {
+        hideOutlinesAndSidePages();
         mViewStateManager.onPageEndWarp();
     }
 
@@ -495,7 +497,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     public float getAlphaForPage(int screenCenter, int index, boolean showSidePages) {
-        if (getPageWarpIndex() != -1) {
+        if (isWarping()) {
             return index == getPageWarpIndex() ? 1.0f : 0.0f;
         }
         if (showSidePages) {
@@ -949,17 +951,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                     // to keep event dispatch happy.
                     mCameraEventInProgress = true;
                     userActivity();
-                    startWarp(cameraPage);
+                    startPageWarp(cameraPage);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     mCameraEventInProgress = false;
-                    endWarp = true;
+                    endWarp = isWarping();
                     break;
             }
             dispatchTouchEvent(event);
             // This has to happen after the event has been handled by the real widget pager
-            if (endWarp) endWarp();
+            if (endWarp) stopPageWarp();
         }
         endCameraEvent();
     }
