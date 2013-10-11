@@ -11,8 +11,8 @@
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"ເຢຍລະມັນ"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"ຝຣັ່ງ"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ຝຣັ່ງ (ຄານາດາ)"</string>
-    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ຣັດຊຽນ"</string>
-    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"ຣັດຊຽນ, ແບບ Mac"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ຣັດເຊຍ"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"ຣັດຊຽຍ, ແບບ Mac"</string>
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"ສະແປນນິດ"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"ສະວິສ ຝຣັ່ງ"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"ສະວິສ ເຢຍລະມັນ"</string>
