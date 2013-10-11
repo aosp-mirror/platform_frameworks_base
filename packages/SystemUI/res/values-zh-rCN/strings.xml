@@ -147,7 +147,7 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"已删除<xliff:g id="APP">%s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"已关闭通知。"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知栏。"</string>
-    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快速设置。"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快捷设置。"</string>
     <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"最近使用的应用。"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用户：<xliff:g id="USER">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>，<xliff:g id="NETWORK">%2$s</xliff:g>"</string>
