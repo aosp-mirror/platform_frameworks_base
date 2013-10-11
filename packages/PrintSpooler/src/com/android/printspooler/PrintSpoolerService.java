@@ -689,7 +689,6 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_PACKAGE_NAME = "packageName";
         private static final String ATTR_STATE = "state";
         private static final String ATTR_APP_ID = "appId";
-        private static final String ATTR_USER_ID = "userId";
         private static final String ATTR_TAG = "tag";
         private static final String ATTR_CREATION_TIME = "creationTime";
         private static final String ATTR_COPIES = "copies";
@@ -778,7 +777,6 @@ public final class PrintSpoolerService extends Service {
                     serializer.attribute(null, ATTR_LABEL, printJob.getLabel().toString());
                     serializer.attribute(null, ATTR_STATE, String.valueOf(printJob.getState()));
                     serializer.attribute(null, ATTR_APP_ID, String.valueOf(printJob.getAppId()));
-                    serializer.attribute(null, ATTR_USER_ID, String.valueOf(printJob.getUserId()));
                     String tag = printJob.getTag();
                     if (tag != null) {
                         serializer.attribute(null, ATTR_TAG, tag);
@@ -976,8 +974,6 @@ public final class PrintSpoolerService extends Service {
             printJob.setState(state);
             final int appId = Integer.parseInt(parser.getAttributeValue(null, ATTR_APP_ID));
             printJob.setAppId(appId);
-            final int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USER_ID));
-            printJob.setUserId(userId);
             String tag = parser.getAttributeValue(null, ATTR_TAG);
             printJob.setTag(tag);
             String creationTime = parser.getAttributeValue(null, ATTR_CREATION_TIME);
