@@ -88,8 +88,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public static final int SCROLL_STATE_SETTLING = 2;
     public static final int SCROLL_STATE_FADING = 3;
 
-    private static final int CHALLENGE_FADE_OUT_DURATION = 100;
-    private static final int CHALLENGE_FADE_IN_DURATION = 160;
+    public static final int CHALLENGE_FADE_OUT_DURATION = 100;
+    public static final int CHALLENGE_FADE_IN_DURATION = 160;
 
     private static final int MAX_SETTLE_DURATION = 600; // ms
 
