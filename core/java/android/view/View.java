@@ -9764,15 +9764,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns whether this View has content which overlaps. This function, intended to be
-     * overridden by specific View types, is an optimization when alpha is set on a view. If
-     * rendering overlaps in a view with alpha < 1, that view is drawn to an offscreen buffer
-     * and then composited it into place, which can be expensive. If the view has no overlapping
-     * rendering, the view can draw each primitive with the appropriate alpha value directly.
-     * An example of overlapping rendering is a TextView with a background image, such as a
-     * Button. An example of non-overlapping rendering is a TextView with no background, or
-     * an ImageView with only the foreground image. The default implementation returns true;
-     * subclasses should override if they have cases which can be optimized.
+     * Returns whether this View has content which overlaps.
+     *
+     * <p>This function, intended to be overridden by specific View types, is an optimization when
+     * alpha is set on a view. If rendering overlaps in a view with alpha < 1, that view is drawn to
+     * an offscreen buffer and then composited into place, which can be expensive. If the view has
+     * no overlapping rendering, the view can draw each primitive with the appropriate alpha value
+     * directly. An example of overlapping rendering is a TextView with a background image, such as
+     * a Button. An example of non-overlapping rendering is a TextView with no background, or an
+     * ImageView with only the foreground image. The default implementation returns true; subclasses
+     * should override if they have cases which can be optimized.</p>
+     *
+     * <p>The current implementation of the saveLayer and saveLayerAlpha methods in {@link Canvas}
+     * necessitates that a View return true if it uses the methods internally without passing the
+     * {@link Canvas#CLIP_TO_LAYER_SAVE_FLAG}.</p>
      *
      * @return true if the content in this view might overlap, false otherwise.
      */
