@@ -19,7 +19,7 @@ package android.hardware;
 /**
  * Used for receiving a notification when a flush() has been successfully completed.
  */
-public interface FlushCompleteListener {
+public interface SensorEventListener2 extends SensorEventListener {
     /**
      * Called after flush() is completed. This flush() could have been initiated by this application
      * or some other application. All the events in the batch at the point when the flush was called
@@ -28,7 +28,7 @@ public interface FlushCompleteListener {
      *
      * @param sensor The {@link android.hardware.Sensor Sensor} on which flush was called.
      *
-     * @see android.hardware.SensorManager#flush(Sensor)
+     * @see android.hardware.SensorManager#flush(SensorEventListener)
      */
     public void onFlushCompleted(Sensor sensor);
 }
