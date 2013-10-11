@@ -1247,6 +1247,21 @@ public class PrintJobConfigActivity extends Activity {
                                     return;
                                 }
 
+                                // If the current printer became unavailable or its
+                                // capabilities go away, we update the UI and add a
+                                // timeout to declare the printer as unavailable.
+                                if ((mCurrentPrinter.getStatus() != PrinterInfo.STATUS_UNAVAILABLE
+                                        && printer.getStatus() == PrinterInfo.STATUS_UNAVAILABLE)
+                                    || (mCurrentPrinter.getCapabilities() != null
+                                        && printer.getCapabilities() == null)) {
+                                    if (!mCapabilitiesTimeout.isPosted()) {
+                                        mCapabilitiesTimeout.post();
+                                        mCurrentPrinter.copyFrom(printer);
+                                        updateUi();
+                                        return;
+                                    }
+                                }
+
                                 // We just refreshed the current printer.
                                 if (printer.getCapabilities() != null
                                         && mCapabilitiesTimeout.isPosted()) {
