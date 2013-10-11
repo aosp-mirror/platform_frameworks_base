@@ -3,18 +3,16 @@ page.metaDescription=Get your apps ready for Google Play for Education.
 excludeFromSuggestions=true
 @jd:body
 
-<div style="position:absolute;margin-left: 636px;
+   <div style="position:absolute;margin-left: 636px;
             margin-top:-76px;color:#777;">If you're interested<br>
             <a href="{@docRoot}distribute/googleplay/edu/contact.html"
             class="go-link"
             style="display: block;text-align: right;">SIGN UP</a></div>
 
-<div
-style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">You
-can now include your apps in the Google Play for Education <a
-href="{@docRoot}distribute/googleplay/edu/start.html#program">pilot program</a>,
-getting it into the hands of participating schools and key influencers in the
-education technology community. See <a href="start.html">Get Started</a> to
+<div style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">You
+can now include your educational apps in the recently launched Google Play for Education program,
+getting it into the hands of participating schools and key influencers in the education technology
+community. See <a href="start.html">Get Started</a> to
 learn how to participate. </div>
 
 <p>The sections below list the guidelines and requirements for apps
@@ -229,14 +227,9 @@ Play for Education environment:</p>
 <ul>
 <li><em>Android version</em> &mdash; Test the app on devices running Android
 4.2. Google Play for Education devices will be running Android 4.2 or higher
-(API level 17).</li>
+(API level 17+).</li>
 <li><em>Proxy server</em> &mdash; Test the app in network environment that uses
 proxies. Many schools use proxies.</li>
-<li><em>Secondary user account</em> &mdash; Test the app using a secondary user
-account. Most Google Play for Education users will not be using the primary <a
-href="{@docRoot}about/versions/jelly-bean.html#42-multiuser">multiuser</a>
-account on their devices. For testing, create a secondary multiuser account on
-your tablet.</li>
 <li><em>No location services</em> &mdash; Test the app to make sure it works
 properly with location services disabled. Many schools will disable location
 services for student devices.</li>
@@ -249,4 +242,3 @@ devices.</li>
 <li><em>No access to network</em> &mdash; Test the app to make sure it works
 properly when the device cannot connect to the internet. </li>
 </ul>
-
