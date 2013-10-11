@@ -60,8 +60,47 @@ public final class PrintManager {
 
     private static final boolean DEBUG = false;
 
-    private static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 1;
-    private static final int MSG_NOTIFY_PRINT_JOB_STATE_CHANGED = 2;
+    private static final int MSG_NOTIFY_PRINT_JOB_STATE_CHANGED = 1;
+
+    /**
+     * The action for launching the print dialog activity.
+     *
+     * @hide
+     */
+    public static final String ACTION_PRINT_DIALOG = "android.print.PRINT_DIALOG";
+
+    /**
+     * Extra with the intent for starting the print dialog.
+     * <p>
+     * <strong>Type:</strong> {@link android.content.IntentSender}
+     * </p>
+     *
+     * @hide
+     */
+    public static final String EXTRA_PRINT_DIALOG_INTENT =
+            "android.print.intent.extra.EXTRA_PRINT_DIALOG_INTENT";
+
+    /**
+     * Extra with a print job.
+     * <p>
+     * <strong>Type:</strong> {@link android.print.PrintJobInfo}
+     * </p>
+     *
+     * @hide
+     */
+    public static final String EXTRA_PRINT_JOB =
+            "android.print.intent.extra.EXTRA_PRINT_JOB";
+
+    /**
+     * Extra with the print document adapter to be printed.
+     * <p>
+     * <strong>Type:</strong> {@link android.print.IPrintDocumentAdapter}
+     * </p>
+     *
+     * @hide
+     */
+    public static final String EXTRA_PRINT_DOCUMENT_ADAPTER =
+            "android.print.intent.extra.EXTRA_PRINT_DOCUMENT_ADAPTER";
 
     /** @hide */
     public static final int APP_ID_ANY = -2;
@@ -73,8 +112,6 @@ public final class PrintManager {
     private final int mUserId;
 
     private final int mAppId;
-
-    private final PrintClient mPrintClient;
 
     private final Handler mHandler;
 
@@ -103,24 +140,10 @@ public final class PrintManager {
         mService = service;
         mUserId = userId;
         mAppId = appId;
-        mPrintClient = new PrintClient(this);
         mHandler = new Handler(context.getMainLooper(), null, false) {
             @Override
             public void handleMessage(Message message) {
                 switch (message.what) {
-                    case MSG_START_PRINT_JOB_CONFIG_ACTIVITY: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        Context context = (Context) args.arg1;
-                        IntentSender intent = (IntentSender) args.arg2;
-                        args.recycle();
-                        try {
-                            context.startIntentSender(intent, null, 0, 0, 0);
-                        } catch (SendIntentException sie) {
-                            Log.e(LOG_TAG, "Couldn't start print job config activity.", sie);
-                        }
-                    }
-                        break;
-
                     case MSG_NOTIFY_PRINT_JOB_STATE_CHANGED: {
                         SomeArgs args = (SomeArgs) message.obj;
                         PrintJobStateChangeListener listener =
@@ -128,8 +151,7 @@ public final class PrintManager {
                         PrintJobId printJobId = (PrintJobId) args.arg2;
                         args.recycle();
                         listener.onPrintJobStateChanged(printJobId);
-                    }
-                        break;
+                    } break;
                 }
             }
         };
@@ -279,10 +301,20 @@ public final class PrintManager {
         PrintDocumentAdapterDelegate delegate = new PrintDocumentAdapterDelegate(documentAdapter,
                 mContext.getMainLooper());
         try {
-            PrintJobInfo printJob = mService.print(printJobName, mPrintClient, delegate,
-                    attributes, mAppId, mUserId);
-            if (printJob != null) {
-                return new PrintJob(printJob, this);
+            Bundle result = mService.print(printJobName, delegate,
+                    attributes, mContext.getPackageName(), mAppId, mUserId);
+            if (result != null) {
+                PrintJobInfo printJob = result.getParcelable(EXTRA_PRINT_JOB);
+                IntentSender intent = result.getParcelable(EXTRA_PRINT_DIALOG_INTENT);
+                if (printJob == null || intent == null) {
+                    return null;
+                }
+                try {
+                    mContext.startIntentSender(intent, null, 0, 0, 0);
+                    return new PrintJob(printJob, this);
+                } catch (SendIntentException sie) {
+                    Log.e(LOG_TAG, "Couldn't start print job config activity.", sie);
+                }
             }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error creating a print job", re);
@@ -331,27 +363,6 @@ public final class PrintManager {
      */
     public PrinterDiscoverySession createPrinterDiscoverySession() {
         return new PrinterDiscoverySession(mService, mContext, mUserId);
-    }
-
-    private static final class PrintClient extends IPrintClient.Stub {
-
-        private final WeakReference<PrintManager> mWeakPrintManager;
-
-        public PrintClient(PrintManager manager) {
-            mWeakPrintManager = new WeakReference<PrintManager>(manager);
-        }
-
-        @Override
-        public void startPrintJobConfigActivity(IntentSender intent) {
-            PrintManager manager = mWeakPrintManager.get();
-            if (manager != null) {
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = manager.mContext;
-                args.arg2 = intent;
-                manager.mHandler.obtainMessage(MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
-                        args).sendToTarget();
-            }
-        }
     }
 
     private static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub {

@@ -31,10 +31,10 @@ import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.print.IPrintClient;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintManager;
@@ -45,6 +45,7 @@ import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.internal.R;
@@ -96,19 +97,19 @@ public final class PrintManagerService extends IPrintManager.Stub {
     }
 
     @Override
-    public PrintJobInfo print(String printJobName, final IPrintClient client,
-            final IPrintDocumentAdapter documentAdapter, PrintAttributes attributes,
-            int appId, int userId) {
+    public Bundle print(String printJobName, IPrintDocumentAdapter adapter,
+            PrintAttributes attributes, String packageName, int appId, int userId) {
         final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        String resolvedPackageName = resolveCallingPackageNameEnforcingSecurity(packageName);
         final UserState userState;
         synchronized (mLock) {
             userState = getOrCreateUserStateLocked(resolvedUserId);
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return userState.print(printJobName, client, documentAdapter,
-                    attributes, resolvedAppId);
+            return userState.print(printJobName, adapter, attributes,
+                    resolvedPackageName, resolvedAppId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -603,6 +604,21 @@ public final class PrintManagerService extends IPrintManager.Stub {
         }
         throw new IllegalArgumentException("Calling user can be changed to only "
                 + "UserHandle.USER_CURRENT or UserHandle.USER_CURRENT_OR_SELF.");
+    }
+
+    private String resolveCallingPackageNameEnforcingSecurity(String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return null;
+        }
+        String[] packages = mContext.getPackageManager().getPackagesForUid(
+                Binder.getCallingUid());
+        final int packageCount = packages.length;
+        for (int i = 0; i < packageCount; i++) {
+            if (packageName.equals(packages[i])) {
+                return packageName;
+            }
+        }
+        return null;
     }
 
     private void showEnableInstalledPrintServiceNotification(ComponentName component,
