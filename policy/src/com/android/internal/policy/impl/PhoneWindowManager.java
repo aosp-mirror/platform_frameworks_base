@@ -42,6 +42,7 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -3647,7 +3648,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * @return Whether music is being played right now.
+     * @return Whether music is being played right now "locally" (e.g. on the device's speakers
+     *    or wired headphones) or "remotely" (e.g. on a device using the Cast protocol and
+     *    controlled by this device, or through remote submix).
      */
     boolean isMusicActive() {
         final AudioManager am = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
@@ -3655,7 +3658,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Log.w(TAG, "isMusicActive: couldn't get AudioManager reference");
             return false;
         }
-        return am.isMusicActive();
+        return am.isLocalOrRemoteMusicActive();
     }
 
     /**
@@ -3668,19 +3671,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
         try {
-            // since audio is playing, we shouldn't have to hold a wake lock
+            // when audio is playing locally, we shouldn't have to hold a wake lock
             // during the call, but we do it as a precaution for the rare possibility
-            // that the music stops right before we call this
+            // that the music stops right before we call this.
+            // Otherwise we might also be in a remote playback case.
             // TODO: Actually handle MUTE.
             mBroadcastWakeLock.acquire();
-            audioService.adjustStreamVolume(stream,
-                keycode == KeyEvent.KEYCODE_VOLUME_UP
-                            ? AudioManager.ADJUST_RAISE
-                            : AudioManager.ADJUST_LOWER,
-                    0,
-                    mContext.getOpPackageName());
+            if (stream == AudioSystem.STREAM_MUSIC) {
+                audioService.adjustLocalOrRemoteStreamVolume(stream,
+                        keycode == KeyEvent.KEYCODE_VOLUME_UP
+                                ? AudioManager.ADJUST_RAISE
+                                : AudioManager.ADJUST_LOWER,
+                        mContext.getOpPackageName());
+            } else {
+                audioService.adjustStreamVolume(stream,
+                        keycode == KeyEvent.KEYCODE_VOLUME_UP
+                                ? AudioManager.ADJUST_RAISE
+                                : AudioManager.ADJUST_LOWER,
+                        0,
+                        mContext.getOpPackageName());
+            }
         } catch (RemoteException e) {
-            Log.w(TAG, "IAudioService.adjustStreamVolume() threw RemoteException " + e);
+            Log.w(TAG, "IAudioService.adjust*StreamVolume() threw RemoteException " + e);
         } finally {
             mBroadcastWakeLock.release();
         }
