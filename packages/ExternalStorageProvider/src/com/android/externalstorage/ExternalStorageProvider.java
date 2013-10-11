@@ -73,7 +73,11 @@ public class ExternalStorageProvider extends DocumentsProvider {
         mIdToRoot = Maps.newHashMap();
         mIdToPath = Maps.newHashMap();
 
-        // TODO: support multiple storage devices
+        // TODO: support multiple storage devices, requiring that volume serial
+        // number be burned into rootId so we can identify files from different
+        // volumes. currently we only use a static rootId for emulated storage,
+        // since that storage never changes.
+        if (!Environment.isExternalStorageEmulated()) return true;
 
         try {
             final String rootId = "primary";
@@ -182,8 +186,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
         row.add(Document.COLUMN_DISPLAY_NAME, displayName);
         row.add(Document.COLUMN_SIZE, file.length());
         row.add(Document.COLUMN_MIME_TYPE, mimeType);
-        row.add(Document.COLUMN_LAST_MODIFIED, file.lastModified());
         row.add(Document.COLUMN_FLAGS, flags);
+
+        // Only publish dates reasonably after epoch
+        long lastModified = file.lastModified();
+        if (lastModified > 31536000000L) {
+            row.add(Document.COLUMN_LAST_MODIFIED, lastModified);
+        }
     }
 
     @Override
