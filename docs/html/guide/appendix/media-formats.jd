@@ -217,9 +217,17 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 </tr>
 
 <tr>
-<td>WEBP</td>
-<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.0+)</small></td>
-<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.0+)</small></td>
+<td>WebP</td>
+<td style="text-align: center;" nowrap>
+  <big>&bull;</big><br>
+  <small>(Android 4.0+)</small><br>
+  <small>(Lossless, Transparency, Android 4.2.1+)</small>
+</td>
+<td style="text-align: center;" nowrap>
+  <big>&bull;</big><br>
+  <small>(Android 4.0+)</small><br>
+  <small>(Lossless, Transparency, Android 4.2.1+)</small>
+</td>
 <td>&nbsp;</td>
 <td>
   WebP (.webp)</td>
