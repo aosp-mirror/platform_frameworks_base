@@ -129,9 +129,6 @@ public final class PrintJobInfo implements Parcelable {
     /** The id of the app that created the job. */
     private int mAppId;
 
-    /** The id of the user that created the job. */
-    private int mUserId;
-
     /** Optional tag assigned by a print service.*/
     private String mTag;
 
@@ -169,7 +166,6 @@ public final class PrintJobInfo implements Parcelable {
         mPrinterName = other.mPrinterName;
         mState = other.mState;
         mAppId = other.mAppId;
-        mUserId = other.mUserId;
         mTag = other.mTag;
         mCreationTime = other.mCreationTime;
         mCopies = other.mCopies;
@@ -187,7 +183,6 @@ public final class PrintJobInfo implements Parcelable {
         mPrinterName = parcel.readString();
         mState = parcel.readInt();
         mAppId = parcel.readInt();
-        mUserId = parcel.readInt();
         mTag = parcel.readString();
         mCreationTime = parcel.readLong();
         mCopies = parcel.readInt();
@@ -330,28 +325,6 @@ public final class PrintJobInfo implements Parcelable {
      */
     public void setAppId(int appId) {
         mAppId = appId;
-    }
-
-    /**
-     * Gets the owning user id.
-     *
-     * @return The user id.
-     *
-     * @hide
-     */
-    public int getUserId() {
-        return mUserId;
-    }
-
-    /**
-     * Sets the owning user id.
-     *
-     * @param userId The user id.
-     *
-     * @hide
-     */
-    public void setUserId(int userId) {
-        mUserId = userId;
     }
 
     /**
@@ -543,7 +516,6 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeString(mPrinterName);
         parcel.writeInt(mState);
         parcel.writeInt(mAppId);
-        parcel.writeInt(mUserId);
         parcel.writeString(mTag);
         parcel.writeLong(mCreationTime);
         parcel.writeInt(mCopies);
