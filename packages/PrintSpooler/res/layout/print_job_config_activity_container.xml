@@ -15,9 +15,12 @@
 -->
 
 <com.android.printspooler.PrintDialogFrame xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/content_container"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:background="@color/container_background">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <FrameLayout
+        android:id="@+id/content_container"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/container_background">
+    </FrameLayout>
 </com.android.printspooler.PrintDialogFrame>
