@@ -4874,8 +4874,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean hasOverlappingRendering() {
+        // horizontal fading edge causes SaveLayerAlpha, which doesn't support alpha modulation
         return ((getBackground() != null && getBackground().getCurrent() != null)
-                || mText instanceof Spannable || hasSelection());
+                || mText instanceof Spannable || hasSelection()
+                || isHorizontalFadingEdgeEnabled());
     }
 
     /**
