@@ -12,7 +12,7 @@
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Франц"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Франц (Канад)"</string>
     <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Орос"</string>
-    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Орос, Mac стиль"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Орос, Maк стиль"</string>
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Испани"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"Швейцарийн Франц"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Швейцарийн Герман"</string>
@@ -29,7 +29,7 @@
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Унгар"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Исланд"</string>
     <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"Бразил"</string>
-    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"Португали"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"Португал"</string>
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Словак"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Словени"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Турк"</string>
