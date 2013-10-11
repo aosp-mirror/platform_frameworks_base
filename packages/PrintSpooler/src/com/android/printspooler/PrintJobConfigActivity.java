@@ -89,6 +89,8 @@ import com.android.printspooler.MediaSizeUtils.MediaSizeComparator;
 
 import libcore.io.IoUtils;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -357,6 +359,10 @@ public class PrintJobConfigActivity extends Activity {
             return mControllerState >= CONTROLLER_STATE_LAYOUT_COMPLETED;
         }
 
+        public boolean isPerformingLayout() {
+            return mControllerState == CONTROLLER_STATE_LAYOUT_STARTED;
+        }
+
         public boolean isWorking() {
             return mControllerState == CONTROLLER_STATE_LAYOUT_STARTED
                     || mControllerState == CONTROLLER_STATE_WRITE_STARTED;
@@ -372,9 +378,18 @@ public class PrintJobConfigActivity extends Activity {
             if (!mController.hasStarted()) {
                 mController.start();
             }
+
+            // If the print attributes are the same and we are performing
+            // a layout, then we have to wait for it to completed which will
+            // trigger writing of the necessary pages.
+            final boolean printAttributesChanged = printAttributesChanged();
+            if (!printAttributesChanged && isPerformingLayout()) {
+                return;
+            }
+
             // If print is confirmed we always do a layout since the previous
             // ones were for preview and this one is for printing.
-            if (!printAttributesChanged() && !mEditor.isPrintConfirmed()) {
+            if (!printAttributesChanged && !mEditor.isPrintConfirmed()) {
                 if (mDocument.info == null) {
                     // We are waiting for the result of a layout, so do nothing.
                     return;
@@ -492,14 +507,20 @@ public class PrintJobConfigActivity extends Activity {
                     mRequestCounter.incrementAndGet());
         }
 
-        private void handleOnLayoutFailed(CharSequence error, int sequence) {
+        private void handleOnLayoutFailed(final CharSequence error, int sequence) {
             if (mRequestCounter.get() != sequence) {
                 return;
             }
             mControllerState = CONTROLLER_STATE_FAILED;
-            // TODO: We need some UI for announcing an error.
-            Log.e(LOG_TAG, "Error during layout: " + error);
-            PrintJobConfigActivity.this.finish();
+            mEditor.showUi(Editor.UI_ERROR, new Runnable() {
+                @Override
+                public void run() {
+                    if (!TextUtils.isEmpty(error)) {
+                        TextView messageView = (TextView) findViewById(R.id.message);
+                        messageView.setText(error);
+                    }
+                }
+            });
         }
 
         private void handleOnWriteFinished(PageRange[] pages, int sequence) {
@@ -596,13 +617,20 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
-        private void handleOnWriteFailed(CharSequence error, int sequence) {
+        private void handleOnWriteFailed(final CharSequence error, int sequence) {
             if (mRequestCounter.get() != sequence) {
                 return;
             }
             mControllerState = CONTROLLER_STATE_FAILED;
-            Log.e(LOG_TAG, "Error during write: " + error);
-            PrintJobConfigActivity.this.finish();
+            mEditor.showUi(Editor.UI_ERROR, new Runnable() {
+                @Override
+                public void run() {
+                    if (!TextUtils.isEmpty(error)) {
+                        TextView messageView = (TextView) findViewById(R.id.message);
+                        messageView.setText(error);
+                    }
+                }
+            });
         }
 
         private boolean equalsIgnoreSize(PrintDocumentInfo lhs, PrintDocumentInfo rhs) {
@@ -800,6 +828,7 @@ public class PrintJobConfigActivity extends Activity {
         private static final int UI_NONE = 0;
         private static final int UI_EDITING_PRINT_JOB = 1;
         private static final int UI_GENERATING_PRINT_JOB = 2;
+        private static final int UI_ERROR = 3;
 
         private EditText mCopiesEditText;
 
@@ -1310,6 +1339,21 @@ public class PrintJobConfigActivity extends Activity {
             updateUi();
         }
 
+        public void reselectCurrentPrinter() {
+            if (mCurrentPrinter != null) {
+                // TODO: While the data did not change and we set the adapter
+                // to a newly inflated spinner, the latter does not show the
+                // current item unless we poke the adapter. This requires more
+                // investigation. Maybe an optimization in AdapterView does not
+                // call into the adapter if the view is not visible which is the
+                // case when we set the adapter.
+                mDestinationSpinnerAdapter.notifyDataSetChanged();
+                final int position = mDestinationSpinnerAdapter.getPrinterIndex(
+                        mCurrentPrinter.getId());
+                mDestinationSpinner.setSelection(position);
+            }
+        }
+
         public void refreshCurrentPrinter() {
             PrinterInfo printer = (PrinterInfo) mDestinationSpinner.getSelectedItem();
             if (printer != null) {
@@ -1407,7 +1451,10 @@ public class PrintJobConfigActivity extends Activity {
                 return;
             }
 
-            switch (mCurrentUi) {
+            final int oldUi = mCurrentUi;
+            mCurrentUi = ui;
+
+            switch (oldUi) {
                 case UI_NONE: {
                     switch (ui) {
                         case UI_EDITING_PRINT_JOB: {
@@ -1444,6 +1491,21 @@ public class PrintJobConfigActivity extends Activity {
                             new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                                     ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
                         } break;
+
+                        case UI_ERROR: {
+                            animateUiSwitch(R.layout.print_job_config_activity_content_error,
+                                    new Runnable() {
+                                @Override
+                                public void run() {
+                                    registerOkButtonClickListener();
+                                    if (postSwitchCallback != null) {
+                                        postSwitchCallback.run();
+                                    }
+                                }
+                            },
+                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+                        } break;
                     }
                 } break;
 
@@ -1463,11 +1525,43 @@ public class PrintJobConfigActivity extends Activity {
                             new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                     ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
                         } break;
+
+                        case UI_ERROR: {
+                            animateUiSwitch(R.layout.print_job_config_activity_content_error,
+                                    new Runnable() {
+                                @Override
+                                public void run() {
+                                    registerOkButtonClickListener();
+                                    if (postSwitchCallback != null) {
+                                        postSwitchCallback.run();
+                                    }
+                                }
+                            },
+                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+                        } break;
+                    }
+                } break;
+
+                case UI_ERROR: {
+                    switch (ui) {
+                        case UI_EDITING_PRINT_JOB: {
+                            animateUiSwitch(R.layout.print_job_config_activity_content_editing,
+                                    new Runnable() {
+                                @Override
+                                public void run() {
+                                    registerPrintButtonClickListener();
+                                    if (postSwitchCallback != null) {
+                                        postSwitchCallback.run();
+                                    }
+                                }
+                            },
+                            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+                        } break;
                     }
                 } break;
             }
-
-            mCurrentUi = ui;
         }
 
         private void registerPrintButtonClickListener() {
@@ -1503,13 +1597,33 @@ public class PrintJobConfigActivity extends Activity {
             });
         }
 
+        private void registerOkButtonClickListener() {
+            Button okButton = (Button) findViewById(R.id.ok_button);
+            okButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mEditor.showUi(Editor.UI_EDITING_PRINT_JOB, new Runnable() {
+                        @Override
+                        public void run() {
+                            // Start over with a clean slate.
+                            mOldPrintAttributes.clear();
+                            mController.initialize();
+                            mEditor.initialize();
+                            mEditor.bindUi();
+                            mEditor.reselectCurrentPrinter();
+                        }
+                    });
+                }
+            });
+        }
+
         private void doUiSwitch(int showLayoutId) {
             ViewGroup contentContainer = (ViewGroup) findViewById(R.id.content_container);
             contentContainer.removeAllViews();
             getLayoutInflater().inflate(showLayoutId, contentContainer, true);
         }
 
-        private void animateUiSwitch(int showLayoutId, final Runnable postAnimateCommand,
+        private void animateUiSwitch(int showLayoutId, final Runnable beforeShowNewUiAction,
                 final LayoutParams containerParams) {
             // Find everything we will shuffle around.
             final ViewGroup contentContainer = (ViewGroup) findViewById(R.id.content_container);
@@ -1538,7 +1652,7 @@ public class PrintJobConfigActivity extends Activity {
                             / (float) contentContainer.getHeight();
 
                     // Second animation - resize the container.
-                    AutoCancellingAnimator.animate(contentContainer).scaleY(scaleY).withLayer()
+                    AutoCancellingAnimator.animate(contentContainer).scaleY(scaleY)
                             .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -1549,14 +1663,10 @@ public class PrintJobConfigActivity extends Activity {
 
                             contentContainer.setLayoutParams(containerParams);
 
+                            beforeShowNewUiAction.run();
+
                             // Third animation - show the new content.
-                            AutoCancellingAnimator.animate(showingView).withLayer().alpha(1.0f)
-                                    .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    postAnimateCommand.run();
-                                }
-                            });
+                            AutoCancellingAnimator.animate(showingView).alpha(1.0f);
                         }
                     });
                 }
