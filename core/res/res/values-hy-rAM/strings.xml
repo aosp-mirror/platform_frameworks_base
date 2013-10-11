@@ -1116,7 +1116,7 @@
     <string name="loading" msgid="7933681260296021180">"Բեռնում..."</string>
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"ավարտել գործողությունը` օգտագործելով"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Ավարտել գործողությունը` օգտագործելով"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Ընտրեք հիմնական հավելվածը"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել լռելյայն այս գործողության համար:"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Մաքրել լռելյայնը Համակարգի կարգավորումներ &gt; Ծրագրեր &gt;Ներբեռնված էջից:"</string>
