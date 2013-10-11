@@ -8520,6 +8520,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // example, when this transition is being done behind
             // the lock screen.
             if (!mPolicy.allowAppAnimationsLw()) {
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                        "Animations disallowed by keyguard or dream.");
                 animLp = null;
             }
 
@@ -8562,8 +8564,7 @@ public class WindowManagerService extends IWindowManager.Stub
             NN = mClosingApps.size();
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mClosingApps.get(i);
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "Now closing app " + wtoken);
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
                 wtoken.mAppAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 wtoken.mAppAnimator.animation = null;
@@ -10412,7 +10413,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 pw.println();
         if (dumpAll) {
-            pw.print(" mSystemDecorLayer="); pw.print(mSystemDecorLayer);
+            pw.print("  mSystemDecorLayer="); pw.print(mSystemDecorLayer);
                     pw.print(" mScreenRect="); pw.println(mScreenRect.toShortString());
             if (mLastStatusBarVisibility != 0) {
                 pw.print("  mLastStatusBarVisibility=0x");

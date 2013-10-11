@@ -3509,7 +3509,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
-                mKeyguardDelegate.setHidden(true);
+                if (!mShowingDream) {
+                    mKeyguardDelegate.setHidden(true);
+                }
             } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
                 // This is the case of keyguard isSecure() and not mHideLockScreen.
                 if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
@@ -3550,9 +3552,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public boolean allowAppAnimationsLw() {
-        if (mKeyguard != null && mKeyguard.isVisibleLw() && !mKeyguard.isAnimatingLw()) {
-            // If keyguard is currently visible, no reason to animate
-            // behind it.
+        if (mKeyguard != null && mKeyguard.isVisibleLw() || mShowingDream) {
+            // If keyguard or dreams is currently visible, no reason to animate behind it.
             return false;
         }
         return true;
