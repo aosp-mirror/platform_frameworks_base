@@ -751,6 +751,26 @@ public class AudioService extends IAudioService.Stub {
     ///////////////////////////////////////////////////////////////////////////
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
+    /** @see AudioManager#isLocalOrRemoteMusicActive() */
+    public boolean isLocalOrRemoteMusicActive() {
+        if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+            // local / wired / BT playback active
+            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): local");
+            return true;
+        }
+        if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+            // remote "cast-like" playback active
+            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): has PLAYBACK_TYPE_REMOTE");
+            return true;
+        }
+        if (AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, 0)) {
+            // remote submix playback active
+            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): remote submix");
+            return true;
+        }
+        if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): no");
+        return false;
+    }
 
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustVolume(int direction, int flags, String callingPackage) {
@@ -763,10 +783,10 @@ public class AudioService extends IAudioService.Stub {
     public void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
             String callingPackage) {
         if (DEBUG_VOL) Log.d(TAG, "adjustLocalOrRemoteStreamVolume(dir="+direction+")");
-        if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-            mMediaFocusControl.adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
-        } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+        if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
             adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0, callingPackage);
+        } else if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+            mMediaFocusControl.adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
         }
     }
 
@@ -2612,6 +2632,17 @@ public class AudioService extends IAudioService.Stub {
         return (isOffhook || getMode() == AudioManager.MODE_IN_COMMUNICATION);
     }
 
+    /**
+     * For code clarity for getActiveStreamType(int)
+     * @param delay_ms max time since last STREAM_MUSIC activity to consider
+     * @return true if STREAM_MUSIC is active in streams handled by AudioFlinger now or
+     *     in the last "delay_ms" ms.
+     */
+    private boolean isAfMusicActiveRecently(int delay_ms) {
+        return AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, delay_ms)
+                || AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, delay_ms);
+    }
+
     private int getActiveStreamType(int suggestedStreamType) {
         if (mVoiceCapable) {
             if (isInCommunication()) {
@@ -2624,23 +2655,22 @@ public class AudioService extends IAudioService.Stub {
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                // Having the suggested stream be USE_DEFAULT_STREAM_TYPE is how remote control
-                // volume can have priority over STREAM_MUSIC
-                if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                    return STREAM_REMOTE_MUSIC;
-                } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC,
-                            DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
-                } else {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
-                    return AudioSystem.STREAM_RING;
+                } else
+                    if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
+                    {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                        return STREAM_REMOTE_MUSIC;
+                    } else {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
+                        return AudioSystem.STREAM_RING;
                 }
-            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+            } else if (isAfMusicActiveRecently(0)) {
                 if (DEBUG_VOL)
                     Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                 return AudioSystem.STREAM_MUSIC;
@@ -2666,14 +2696,17 @@ public class AudioService extends IAudioService.Stub {
                 if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                 return AudioSystem.STREAM_NOTIFICATION;
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-                    // Having the suggested stream be USE_DEFAULT_STREAM_TYPE is how remote control
-                    // volume can have priority over STREAM_MUSIC
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                    return STREAM_REMOTE_MUSIC;
+                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
+                    return AudioSystem.STREAM_MUSIC;
+                } else
+                    if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
+                    {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                        return STREAM_REMOTE_MUSIC;
                 } else {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
                     return AudioSystem.STREAM_MUSIC;
                 }
             } else {
