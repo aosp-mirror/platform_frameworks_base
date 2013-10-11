@@ -45,7 +45,8 @@
             android:allowClearUserData="true"
             android:label="@string/app_label"
             android:allowBackup= "false"
-            android:supportsRtl="true">
+            android:supportsRtl="true"
+            android:icon="@*android:drawable/ic_print">
 
         <service
             android:name=".PrintSpoolerService"
@@ -59,7 +60,7 @@
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
             android:theme="@style/PrintJobConfigActivityTheme">
             <intent-filter>
-                <action android:name="android.print.PRINT_DILAOG" />
+                <action android:name="android.print.PRINT_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="printjob" android:pathPattern="*" />
             </intent-filter>
