@@ -37,6 +37,8 @@ interface IAudioService {
 
     void adjustVolume(int direction, int flags, String callingPackage);
 
+    boolean isLocalOrRemoteMusicActive();
+
     oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
             String callingPackage);
 
