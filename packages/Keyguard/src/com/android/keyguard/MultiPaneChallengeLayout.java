@@ -195,11 +195,9 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             // and that the window is LAYOUT_IN_SCREEN.
             virtualHeight = mDisplayMetrics.heightPixels - root.getPaddingTop() - mInsets.top;
         }
-        if (lp.childType == LayoutParams.CHILD_TYPE_WIDGET ||
-                lp.childType == LayoutParams.CHILD_TYPE_USER_SWITCHER) {
-            // Always measure the widget pager/user switcher as if there were no IME insets
-            // on the window. We want to avoid resizing widgets when possible as it can
-            // be ugly/expensive. This lets us simply clip them instead.
+        if (lp.childType == LayoutParams.CHILD_TYPE_USER_SWITCHER) {
+            // Always measure the user switcher as if there were no IME insets
+            // on the window.
             return virtualHeight - heightUsed;
         } else if (lp.childType == LayoutParams.CHILD_TYPE_PAGE_DELETE_DROP_TARGET) {
             return height;
