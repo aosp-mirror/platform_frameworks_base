@@ -72,7 +72,7 @@
     <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Speel-knoppie"</string>
     <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Stop-knoppie"</string>
     <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Laaik baie"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Duim omlaag"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Laaik niks"</string>
     <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Hart"</string>
     <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Ontsluit om voort te gaan"</string>
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Begin gekanselleer"</string>
