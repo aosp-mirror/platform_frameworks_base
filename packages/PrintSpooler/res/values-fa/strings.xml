@@ -25,7 +25,8 @@
     <string name="label_color" msgid="1108690305218188969">"رنگی"</string>
     <string name="label_orientation" msgid="2853142581990496477">"جهت"</string>
     <string name="label_pages" msgid="6300874667546617333">"صفحات (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <string name="pages_range_example" msgid="4069269138547562081">"به عنوان مثال، ۵-۱، ۸، ۱۳-۱۱"</string>
+    <!-- no translation found for pages_range_example (8558694453556945172) -->
+    <skip />
     <string name="print_preview" msgid="8010217796057763343">"پیش‌نمایش چاپ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"نصب نمایشگر PDF برای پیش‌نمایش"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"برنامه چاپ خراب شد"</string>
@@ -51,13 +52,17 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"در حال لغو <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"خطای چاپگر <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"چاپگر، کار <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> را مسدود کرد"</string>
-    <!-- no translation found for composite_notification_title_template:one (5866624638054847057) -->
-    <!-- no translation found for composite_notification_title_template:other (8746611264734222865) -->
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"کار چاپ <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"کارهای چاپ <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"لغو"</string>
     <string name="restart" msgid="2472034227037808749">"راه‌اندازی مجدد"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"اتصال با چاپگر برقرار نیست"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"نامعلوم"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> - در دسترس نیست"</string>
+    <!-- no translation found for print_error_default_message (8568506918983980567) -->
+    <skip />
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"سیاه و سفید"</item>
     <item msgid="2762241247228983754">"رنگی"</item>
