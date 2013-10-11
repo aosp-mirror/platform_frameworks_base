@@ -40,14 +40,6 @@ static const char* const kClassPathName = "android/media/AudioRecord";
 struct fields_t {
     // these fields provide access from C++ to the...
     jmethodID postNativeEventInJava; //... event post callback method
-    int       PCM16;                 //...  format constants
-    int       PCM8;                  //...  format constants
-    int       AMRNB;                 //...  format constants
-    int       AMRWB;                 //...  format constants
-    int       EVRC;                  //...  format constants
-    int       EVRCB;                 //...  format constants
-    int       EVRCWB;                //...  format constants
-    int       EVRCNW;                //...  format constants
     jfieldID  nativeRecorderInJavaObj; // provides access to the C++ AudioRecord object
     jfieldID  nativeCallbackCookie;    // provides access to the AudioRecord callback data
 };
@@ -63,6 +55,12 @@ struct audiorecord_callback_cookie {
 // keep these values in sync with AudioFormat.java
 #define ENCODING_PCM_16BIT 2
 #define ENCODING_PCM_8BIT  3
+#define ENCODING_AMRNB     100
+#define ENCODING_AMRWB     101
+#define ENCODING_EVRC      102
+#define ENCODING_EVRCB     103
+#define ENCODING_EVRCWB    104
+#define ENCODING_EVRCNW    105
 
 static Mutex sLock;
 static SortedVector <audiorecord_callback_cookie *> sAudioRecordCallBackCookies;
@@ -165,24 +163,29 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
     env->SetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj, (int)ar.get());
     return old;
 }
+
 int getformatrec(int audioformat)
 {
-    if(audioformat==javaAudioRecordFields.PCM16)
+    switch (audioformat) {
+    case ENCODING_PCM_16BIT:
         return AUDIO_FORMAT_PCM_16_BIT;
-    else if(audioformat==javaAudioRecordFields.AMRNB)
-        return AUDIO_FORMAT_AMR_NB;
-    else if(audioformat==javaAudioRecordFields.AMRWB)
-        return AUDIO_FORMAT_AMR_WB;
-    else if(audioformat==javaAudioRecordFields.EVRC)
-        return AUDIO_FORMAT_EVRC;
-    else if(audioformat==javaAudioRecordFields.EVRCB)
-        return AUDIO_FORMAT_EVRCB;
-    else if(audioformat==javaAudioRecordFields.EVRCWB)
-        return AUDIO_FORMAT_EVRCWB;
-    else if(audioformat==javaAudioRecordFields.EVRCNW)
-        return AUDIO_FORMAT_EVRCNW;
-    else
+    case ENCODING_PCM_8BIT:
         return AUDIO_FORMAT_PCM_8_BIT;
+    case ENCODING_AMRNB:
+        return AUDIO_FORMAT_AMR_NB;
+    case ENCODING_AMRWB:
+        return AUDIO_FORMAT_AMR_WB;
+    case ENCODING_EVRC:
+        return AUDIO_FORMAT_EVRC;
+    case ENCODING_EVRCB:
+        return AUDIO_FORMAT_EVRCB;
+    case ENCODING_EVRCWB:
+        return AUDIO_FORMAT_EVRCWB;
+    case ENCODING_EVRCNW:
+        return AUDIO_FORMAT_EVRCNW;
+    default:
+        return AUDIO_FORMAT_PCM_8_BIT;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -203,21 +206,21 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     uint32_t nbChannels = popcount(channelMask);
 
     // compare the format against the Java constants
-    if ((audioFormat != javaAudioRecordFields.PCM16)
-        && (audioFormat != javaAudioRecordFields.PCM8)
-        && (audioFormat != javaAudioRecordFields.AMRNB)
-        && (audioFormat != javaAudioRecordFields.AMRWB)
-        && (audioFormat != javaAudioRecordFields.EVRC)
-        && (audioFormat != javaAudioRecordFields.EVRCB)
-        && (audioFormat != javaAudioRecordFields.EVRCWB)
-        && (audioFormat != javaAudioRecordFields.EVRCNW)) {
-        ALOGE("Error creating AudioRecord: unsupported audio format.");
-        return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
+     if ((audioFormat != ENCODING_PCM_16BIT)
+         && (audioFormat != ENCODING_PCM_8BIT)
+         && (audioFormat != ENCODING_AMRNB)
+         && (audioFormat != ENCODING_AMRWB)
+         && (audioFormat != ENCODING_EVRC)
+         && (audioFormat != ENCODING_EVRCB)
+         && (audioFormat != ENCODING_EVRCWB)
+         && (audioFormat != ENCODING_EVRCNW)) {
+         ALOGE("Error creating AudioRecord: unsupported audio format.");
+         return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
     }
     int bytesPerSample;
-    if(audioFormat == javaAudioRecordFields.PCM16)
+    if(audioFormat == ENCODING_PCM_16BIT)
         bytesPerSample = 2;
-    else if((audioFormat == javaAudioRecordFields.AMRWB) &&
+    else if((audioFormat == ENCODING_AMRWB) &&
             ((uint32_t)source != AUDIO_SOURCE_VOICE_COMMUNICATION))
         bytesPerSample = 61;
     else
@@ -564,9 +567,9 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
         return -1;
     }
     int bytesPerSample;
-    if(audioFormat == javaAudioRecordFields.PCM16)
+    if(audioFormat == ENCODING_PCM_16BIT)
         bytesPerSample = 2;
-    else if(audioFormat == javaAudioRecordFields.AMRWB)
+    else if(audioFormat == ENCODING_AMRWB)
         bytesPerSample = 61;
     else
         bytesPerSample = 1;
