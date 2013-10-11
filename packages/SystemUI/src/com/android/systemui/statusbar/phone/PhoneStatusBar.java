@@ -343,7 +343,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
-        mDisplay.getSize(mCurrentDisplaySize);
+        updateDisplaySize();
 
         super.start(); // calls createAndAddWindows()
 
@@ -2304,6 +2304,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     // called by makeStatusbar and also by PhoneStatusBarView
     void updateDisplaySize() {
         mDisplay.getMetrics(mDisplayMetrics);
+        mDisplay.getSize(mCurrentDisplaySize);
         if (DEBUG_GESTURES) {
             mGestureRec.tag("display",
                     String.format("%dx%d", mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
@@ -2475,7 +2476,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (DEBUG) {
             Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
         }
-        mDisplay.getSize(mCurrentDisplaySize);
+        updateDisplaySize(); // populates mDisplayMetrics
 
         updateResources();
         repositionNavigationBar();
