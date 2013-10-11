@@ -180,7 +180,9 @@ public class SubtitleView extends View {
             mInnerPaddingX = (int) (size * INNER_PADDING_RATIO + 0.5f);
 
             mHasMeasurements = false;
-            forceLayout();
+
+            requestLayout();
+            invalidate();
         }
     }
 
@@ -189,7 +191,9 @@ public class SubtitleView extends View {
             mTextPaint.setTypeface(typeface);
 
             mHasMeasurements = false;
-            forceLayout();
+
+            requestLayout();
+            invalidate();
         }
     }
 
@@ -198,7 +202,9 @@ public class SubtitleView extends View {
             mAlignment = textAlignment;
 
             mHasMeasurements = false;
-            forceLayout();
+
+            requestLayout();
+            invalidate();
         }
     }
 
