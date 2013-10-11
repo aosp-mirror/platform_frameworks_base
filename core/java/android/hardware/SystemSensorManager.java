@@ -93,17 +93,20 @@ public class SystemSensorManager extends SensorManager {
     /** @hide */
     @Override
     protected boolean registerListenerImpl(SensorEventListener listener, Sensor sensor,
-            int delayUs, Handler handler, int maxBatchReportLatencyUs, int reservedFlags,
-            FlushCompleteListener flushCompleteListener) {
-        if (sensor == null) throw new IllegalArgumentException("sensor cannot be null");
-        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
-        if (reservedFlags != 0) throw new IllegalArgumentException("reservedFlags should be zero");
-        if (delayUs < 0) throw new IllegalArgumentException("rateUs should be positive");
-        if (maxBatchReportLatencyUs < 0)
-            throw new IllegalArgumentException("maxBatchReportLatencyUs should be positive");
+            int delayUs, Handler handler, int maxBatchReportLatencyUs, int reservedFlags) {
+        if (listener == null || sensor == null) {
+            Log.e(TAG, "sensor or listener is null");
+            return false;
+        }
         // Trigger Sensors should use the requestTriggerSensor call.
-        if (Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT)
-            throw new IllegalArgumentException("Trigger Sensors cannot use registerListener");
+        if (Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT) {
+            Log.e(TAG, "Trigger Sensors should use the requestTriggerSensor.");
+            return false;
+        }
+        if (maxBatchReportLatencyUs < 0 || delayUs < 0) {
+            Log.e(TAG, "maxBatchReportLatencyUs and delayUs should be non-negative");
+            return false;
+        }
 
         // Invariants to preserve:
         // - one Looper per SensorEventListener
@@ -113,7 +116,7 @@ public class SystemSensorManager extends SensorManager {
             SensorEventQueue queue = mSensorListeners.get(listener);
             if (queue == null) {
                 Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
-                queue = new SensorEventQueue(listener, looper, this, flushCompleteListener);
+                queue = new SensorEventQueue(listener, looper, this);
                 if (!queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs, reservedFlags)) {
                     queue.dispose();
                     return false;
@@ -200,16 +203,17 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
-    protected boolean flushImpl(Sensor sensor) {
-        if (sensor == null) throw new IllegalArgumentException("sensor cannot be null");
-        if(Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT)
-            throw new IllegalArgumentException("Trigger Sensors cannot call flush");
+    protected boolean flushImpl(SensorEventListener listener) {
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
 
-        FlushEventQueue queue = new FlushEventQueue(mMainLooper, this);
-        if (queue.flushSensor(sensor) != 0) {
-            return false;
+        synchronized (mSensorListeners) {
+            SensorEventQueue queue = mSensorListeners.get(listener);
+            if (queue == null) {
+                return false;
+            } else {
+                return (queue.flush() == 0);
+            }
         }
-        return true;
     }
 
     /*
@@ -224,7 +228,7 @@ public class SystemSensorManager extends SensorManager {
                 int maxBatchReportLatencyUs, int reservedFlags);
         private static native int nativeDisableSensor(int eventQ, int handle);
         private static native void nativeDestroySensorEventQueue(int eventQ);
-        private static native int nativeFlushSensor(int eventQ, int handle);
+        private static native int nativeFlushSensor(int eventQ);
         private int nSensorEventQueue;
         private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
         protected final SparseIntArray mSensorAccuracies = new SparseIntArray();
@@ -291,10 +295,9 @@ public class SystemSensorManager extends SensorManager {
             return false;
         }
 
-        public int flushSensor(Sensor sensor) {
+        public int flush() {
             if (nSensorEventQueue == 0) throw new NullPointerException();
-            if (sensor == null) throw new NullPointerException();
-            return nativeFlushSensor(nSensorEventQueue, sensor.getHandle());
+            return nativeFlushSensor(nSensorEventQueue);
         }
 
         public boolean hasSensors() {
@@ -347,14 +350,12 @@ public class SystemSensorManager extends SensorManager {
 
     static final class SensorEventQueue extends BaseEventQueue {
         private final SensorEventListener mListener;
-        private final FlushCompleteListener mFlushCompleteListener;
         private final SparseArray<SensorEvent> mSensorsEvents = new SparseArray<SensorEvent>();
 
         public SensorEventQueue(SensorEventListener listener, Looper looper,
-                SystemSensorManager manager, FlushCompleteListener flushCompleteListener) {
+                SystemSensorManager manager) {
             super(looper, manager);
             mListener = listener;
-            mFlushCompleteListener = flushCompleteListener;
         }
 
         public void addSensorEvent(Sensor sensor) {
@@ -408,9 +409,9 @@ public class SystemSensorManager extends SensorManager {
 
         @SuppressWarnings("unused")
         protected void dispatchFlushCompleteEvent(int handle) {
-            final Sensor sensor = sHandleToSensor.get(handle);
-            if (mFlushCompleteListener != null) {
-                mFlushCompleteListener.onFlushCompleted(sensor);
+            if (mListener instanceof SensorEventListener2) {
+                final Sensor sensor = sHandleToSensor.get(handle);
+                ((SensorEventListener2)mListener).onFlushCompleted(sensor);
             }
             return;
         }
@@ -458,32 +459,6 @@ public class SystemSensorManager extends SensorManager {
             mManager.cancelTriggerSensorImpl(mListener, sensor, false);
 
             mListener.onTrigger(t);
-        }
-
-        @SuppressWarnings("unused")
-        protected void dispatchFlushCompleteEvent(int handle) {
-        }
-    }
-
-    static final class FlushEventQueue extends BaseEventQueue {
-        public FlushEventQueue(Looper looper, SystemSensorManager manager) {
-            super(looper, manager);
-        }
-
-        @SuppressWarnings("unused")
-        @Override
-        protected void dispatchSensorEvent(int handle, float[] values, int accuracy,
-                long timestamp) {
-        }
-
-        @Override
-        @SuppressWarnings("unused")
-        protected void addSensorEvent(Sensor sensor) {
-        }
-
-        @Override
-        @SuppressWarnings("unused")
-        protected void removeSensorEvent(Sensor sensor) {
         }
 
         @SuppressWarnings("unused")
