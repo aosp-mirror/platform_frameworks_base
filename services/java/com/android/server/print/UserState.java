@@ -16,16 +16,20 @@
 
 package com.android.server.print;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -33,7 +37,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.print.IPrintClient;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrinterDiscoveryObserver;
@@ -44,6 +47,7 @@ import android.print.PrintManager;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -158,9 +162,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mSpooler.removeObsoletePrintJobs();
     }
 
-    public PrintJobInfo print(String printJobName, final IPrintClient client,
-            final IPrintDocumentAdapter documentAdapter, PrintAttributes attributes,
-            int appId) {
+    @SuppressWarnings("deprecation")
+    public Bundle print(String printJobName, IPrintDocumentAdapter adapter,
+            PrintAttributes attributes, String packageName, int appId) {
         // Create print job place holder.
         final PrintJobInfo printJob = new PrintJobInfo();
         printJob.setId(new PrintJobId());
@@ -169,9 +173,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         printJob.setAttributes(attributes);
         printJob.setState(PrintJobInfo.STATE_CREATED);
         printJob.setCopies(1);
+        printJob.setCreationTime(System.currentTimeMillis());
 
         // Track this job so we can forget it when the creator dies.
-        if (!mPrintJobForAppCache.onPrintJobCreated(client.asBinder(), appId,
+        if (!mPrintJobForAppCache.onPrintJobCreated(adapter.asBinder(), appId,
                 printJob)) {
             // Not adding a print job means the client is dead - done.
             return null;
@@ -181,12 +186,31 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                mSpooler.createPrintJob(printJob, client, documentAdapter);
+                mSpooler.createPrintJob(printJob);
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
 
-        return printJob;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Intent intent = new Intent(PrintManager.ACTION_PRINT_DIALOG);
+            intent.setData(Uri.fromParts("printjob", printJob.getId().flattenToString(), null));
+            intent.putExtra(PrintManager.EXTRA_PRINT_DOCUMENT_ADAPTER, adapter.asBinder());
+            intent.putExtra(PrintManager.EXTRA_PRINT_JOB, printJob);
+            intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, packageName);
+
+            IntentSender intentSender = PendingIntent.getActivity(
+                    mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
+                    | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
+
+            Bundle result = new Bundle();
+            result.putParcelable(PrintManager.EXTRA_PRINT_JOB, printJob);
+            result.putParcelable(PrintManager.EXTRA_PRINT_DIALOG_INTENT, intentSender);
+
+            return result;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     public List<PrintJobInfo> getPrintJobInfos(int appId) {

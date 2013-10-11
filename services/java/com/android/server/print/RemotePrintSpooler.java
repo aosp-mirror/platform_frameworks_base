@@ -26,8 +26,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.print.IPrintClient;
-import android.print.IPrintDocumentAdapter;
 import android.print.IPrintSpooler;
 import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
@@ -130,15 +128,14 @@ final class RemotePrintSpooler {
         return null;
     }
 
-    public final void createPrintJob(PrintJobInfo printJob, IPrintClient client,
-            IPrintDocumentAdapter documentAdapter) {
+    public final void createPrintJob(PrintJobInfo printJob) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
         try {
-            getRemoteInstanceLazy().createPrintJob(printJob, client, documentAdapter);
+            getRemoteInstanceLazy().createPrintJob(printJob);
         } catch (RemoteException re) {
             Slog.e(LOG_TAG, "Error creating print job.", re);
         } catch (TimeoutException te) {

@@ -16,18 +16,14 @@
 
 package com.android.printspooler;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.print.IPrintClient;
-import android.print.IPrintDocumentAdapter;
 import android.print.IPrintSpooler;
 import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
@@ -50,7 +46,6 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 
 import libcore.io.IoUtils;
@@ -132,110 +127,7 @@ public final class PrintSpoolerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return new IPrintSpooler.Stub() {
-            @Override
-            public void getPrintJobInfos(IPrintSpoolerCallbacks callback,
-                    ComponentName componentName, int state, int appId, int sequence)
-                    throws RemoteException {
-                List<PrintJobInfo> printJobs = null;
-                try {
-                    printJobs = PrintSpoolerService.this.getPrintJobInfos(
-                            componentName, state, appId);
-                } finally {
-                    callback.onGetPrintJobInfosResult(printJobs, sequence);
-                }
-            }
-
-            @Override
-            public void getPrintJobInfo(PrintJobId printJobId, IPrintSpoolerCallbacks callback,
-                    int appId, int sequence) throws RemoteException {
-                PrintJobInfo printJob = null;
-                try {
-                    printJob = PrintSpoolerService.this.getPrintJobInfo(printJobId, appId);
-                } finally {
-                    callback.onGetPrintJobInfoResult(printJob, sequence);
-                }
-            }
-
-            @SuppressWarnings("deprecation")
-            @Override
-            public void createPrintJob(PrintJobInfo printJob, IPrintClient client,
-                IPrintDocumentAdapter printAdapter) throws RemoteException {
-                PrintSpoolerService.this.createPrintJob(printJob);
-
-                Intent intent = new Intent(printJob.getId().flattenToString());
-                intent.setClass(PrintSpoolerService.this, PrintJobConfigActivity.class);
-                intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_DOCUMENT_ADAPTER,
-                        printAdapter.asBinder());
-                intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_JOB, printJob);
-
-                IntentSender sender = PendingIntent.getActivity(
-                        PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                        | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
-
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
-                        printJob);
-                mHandlerCaller.executeOrSendMessage(message);
-
-                message = mHandlerCaller.obtainMessageOO(
-                        HandlerCallerCallback.MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
-                        client, sender);
-                mHandlerCaller.executeOrSendMessage(message);
-
-                printJob.setCreationTime(System.currentTimeMillis());
-            }
-
-            @Override
-            public void setPrintJobState(PrintJobId printJobId, int state, String error,
-                    IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
-                boolean success = false;
-                try {
-                    success = PrintSpoolerService.this.setPrintJobState(
-                            printJobId, state, error);
-                } finally {
-                    callback.onSetPrintJobStateResult(success, sequece);
-                }
-            }
-
-            @Override
-            public void setPrintJobTag(PrintJobId printJobId, String tag,
-                    IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
-                boolean success = false;
-                try {
-                    success = PrintSpoolerService.this.setPrintJobTag(printJobId, tag);
-                } finally {
-                    callback.onSetPrintJobTagResult(success, sequece);
-                }
-            }
-
-            @Override
-            public void writePrintJobData(ParcelFileDescriptor fd, PrintJobId printJobId) {
-                PrintSpoolerService.this.writePrintJobData(fd, printJobId);
-            }
-
-            @Override
-            public void setClient(IPrintSpoolerClient client) {
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_SET_CLIENT, client);
-                mHandlerCaller.executeOrSendMessage(message);
-            }
-
-            @Override
-            public void removeObsoletePrintJobs() {
-                PrintSpoolerService.this.removeObsoletePrintJobs();
-            }
-
-            @Override
-            protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-                PrintSpoolerService.this.dump(fd, writer, args);
-            }
-
-            @Override
-            public void setPrintJobCancelling(PrintJobId printJobId, boolean cancelling) {
-                PrintSpoolerService.this.setPrintJobCancelling(printJobId, cancelling);
-            }
-        };
+        return new PrintSpooler();
     }
 
     @Override
@@ -286,12 +178,11 @@ public final class PrintSpoolerService extends Service {
 
     private final class HandlerCallerCallback implements HandlerCaller.Callback {
         public static final int MSG_SET_CLIENT = 1;
-        public static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 2;
-        public static final int MSG_ON_PRINT_JOB_QUEUED = 3;
-        public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 4;
-        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 5;
-        public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 6;
-        public static final int MSG_ON_PRINT_JOB_STATE_CHANGED = 7;
+        public static final int MSG_ON_PRINT_JOB_QUEUED = 2;
+        public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 3;
+        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 4;
+        public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 5;
+        public static final int MSG_ON_PRINT_JOB_STATE_CHANGED = 6;
 
         @Override
         public void executeMessage(Message message) {
@@ -305,18 +196,6 @@ public final class PrintSpoolerService extends Service {
                             mHandlerCaller.sendMessageDelayed(msg,
                                     CHECK_ALL_PRINTJOBS_HANDLED_DELAY);
                         }
-                    }
-                } break;
-
-                case MSG_START_PRINT_JOB_CONFIG_ACTIVITY: {
-                    SomeArgs args = (SomeArgs) message.obj;
-                    IPrintClient client = (IPrintClient) args.arg1;
-                    IntentSender sender = (IntentSender) args.arg2;
-                    args.recycle();
-                    try {
-                        client.startPrintJobConfigActivity(sender);
-                    } catch (RemoteException re) {
-                        Slog.i(LOG_TAG, "Error starting print job config activity!", re);
                     }
                 } break;
 
@@ -426,6 +305,11 @@ public final class PrintSpoolerService extends Service {
         synchronized (mLock) {
             addPrintJobLocked(printJob);
             setPrintJobState(printJob.getId(), PrintJobInfo.STATE_CREATED, null);
+
+            Message message = mHandlerCaller.obtainMessageO(
+                    HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
+                    printJob);
+            mHandlerCaller.executeOrSendMessage(message);
         }
     }
 
@@ -1275,6 +1159,91 @@ public final class PrintSpoolerService extends Service {
                 return false;
             }
             return true;
+        }
+    }
+
+    final class PrintSpooler extends IPrintSpooler.Stub {
+        @Override
+        public void getPrintJobInfos(IPrintSpoolerCallbacks callback,
+                ComponentName componentName, int state, int appId, int sequence)
+                throws RemoteException {
+            List<PrintJobInfo> printJobs = null;
+            try {
+                printJobs = PrintSpoolerService.this.getPrintJobInfos(
+                        componentName, state, appId);
+            } finally {
+                callback.onGetPrintJobInfosResult(printJobs, sequence);
+            }
+        }
+
+        @Override
+        public void getPrintJobInfo(PrintJobId printJobId, IPrintSpoolerCallbacks callback,
+                int appId, int sequence) throws RemoteException {
+            PrintJobInfo printJob = null;
+            try {
+                printJob = PrintSpoolerService.this.getPrintJobInfo(printJobId, appId);
+            } finally {
+                callback.onGetPrintJobInfoResult(printJob, sequence);
+            }
+        }
+
+        @Override
+        public void createPrintJob(PrintJobInfo printJob) {
+            PrintSpoolerService.this.createPrintJob(printJob);
+        }
+
+        @Override
+        public void setPrintJobState(PrintJobId printJobId, int state, String error,
+                IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
+            boolean success = false;
+            try {
+                success = PrintSpoolerService.this.setPrintJobState(
+                        printJobId, state, error);
+            } finally {
+                callback.onSetPrintJobStateResult(success, sequece);
+            }
+        }
+
+        @Override
+        public void setPrintJobTag(PrintJobId printJobId, String tag,
+                IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
+            boolean success = false;
+            try {
+                success = PrintSpoolerService.this.setPrintJobTag(printJobId, tag);
+            } finally {
+                callback.onSetPrintJobTagResult(success, sequece);
+            }
+        }
+
+        @Override
+        public void writePrintJobData(ParcelFileDescriptor fd, PrintJobId printJobId) {
+            PrintSpoolerService.this.writePrintJobData(fd, printJobId);
+        }
+
+        @Override
+        public void setClient(IPrintSpoolerClient client) {
+            Message message = mHandlerCaller.obtainMessageO(
+                    HandlerCallerCallback.MSG_SET_CLIENT, client);
+            mHandlerCaller.executeOrSendMessage(message);
+        }
+
+        @Override
+        public void removeObsoletePrintJobs() {
+            PrintSpoolerService.this.removeObsoletePrintJobs();
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+            PrintSpoolerService.this.dump(fd, writer, args);
+        }
+
+        @Override
+        public void setPrintJobCancelling(PrintJobId printJobId, boolean cancelling) {
+            PrintSpoolerService.this.setPrintJobCancelling(printJobId, cancelling);
+        }
+
+        public PrintSpoolerService getService() {
+            return PrintSpoolerService.this;
         }
     }
 }
