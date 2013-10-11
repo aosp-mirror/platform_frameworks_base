@@ -16,9 +16,9 @@
 
 package android.print;
 
+import android.os.Bundle;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
-import android.print.IPrintClient;
 import android.print.PrintJobId;
 import android.print.IPrintJobStateChangeListener;
 import android.print.PrinterId;
@@ -34,9 +34,8 @@ import android.printservice.PrintServiceInfo;
 interface IPrintManager {
     List<PrintJobInfo> getPrintJobInfos(int appId, int userId);
     PrintJobInfo getPrintJobInfo(in PrintJobId printJobId, int appId, int userId);
-    PrintJobInfo print(String printJobName, in IPrintClient client,
-            in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
-            int appId, int userId);
+    Bundle print(String printJobName, in IPrintDocumentAdapter printAdapter,
+            in PrintAttributes attributes, String packageName, int appId, int userId);
     void cancelPrintJob(in PrintJobId printJobId, int appId, int userId);
     void restartPrintJob(in PrintJobId printJobId, int appId, int userId);
 
