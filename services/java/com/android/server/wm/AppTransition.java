@@ -722,7 +722,7 @@ public class AppTransition implements Dump {
     @Override
     public void dump(PrintWriter pw) {
         pw.print(" " + this);
-        pw.print(" mAppTransitionState="); pw.println(appStateToString());
+        pw.print("  mAppTransitionState="); pw.println(appStateToString());
         if (mNextAppTransitionType != NEXT_TRANSIT_TYPE_NONE) {
             pw.print("  mNextAppTransitionType="); pw.println(transitTypeToString());
         }
