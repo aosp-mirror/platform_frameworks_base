@@ -83,7 +83,9 @@ import java.util.Set;
  * for an IntentFilter to match an Intent, three conditions must hold:
  * the <strong>action</strong> and <strong>category</strong> must match, and
  * the data (both the <strong>data type</strong> and
- * <strong>data scheme+authority+path</strong> if specified) must match.
+ * <strong>data scheme+authority+path</strong> if specified) must match
+ * (see {@link #match(ContentResolver, Intent, boolean, String)} for more details
+ * on how the data fields match).
  *
  * <p><strong>Action</strong> matches if any of the given values match the
  * Intent action; if the filter specifies no actions, then it will only match
@@ -976,7 +978,11 @@ public class IntentFilter implements Parcelable {
      * Match this filter against an Intent's data (type, scheme and path). If
      * the filter does not specify any types and does not specify any
      * schemes/paths, the match will only succeed if the intent does not
-     * also specify a type or data.
+     * also specify a type or data.  If the filter does not specify any schemes,
+     * it will implicitly match intents with no scheme, or the schemes "content:"
+     * or "file:" (basically performing a MIME-type only match).  If the filter
+     * does not specify any MIME types, the Intent also must not specify a MIME
+     * type.
      *
      * <p>Be aware that to match against an authority, you must also specify a base
      * scheme the authority is in.  To match against a data path, both a scheme
