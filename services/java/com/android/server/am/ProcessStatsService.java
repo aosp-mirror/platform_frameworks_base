@@ -473,11 +473,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     current.setDataPosition(0);
                     ProcessStats stats = ProcessStats.CREATOR.createFromParcel(current);
                     current.recycle();
-                    int i = 0;
-                    while (i < files.size() && (stats.mTimePeriodEndRealtime
+                    int i = files.size()-1;
+                    while (i >= 0 && (stats.mTimePeriodEndRealtime
                             - stats.mTimePeriodStartRealtime) < minTime) {
                         AtomicFile file = new AtomicFile(new File(files.get(i)));
-                        i++;
+                        i--;
                         ProcessStats moreStats = new ProcessStats(false);
                         readLocked(moreStats, file);
                         if (moreStats.mReadError == null) {
@@ -490,7 +490,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                     - moreStats.mTimePeriodStartRealtime, sb);
                             Slog.i(TAG, sb.toString());
                         } else {
-                            Slog.w(TAG, "Failure reading " + files.get(i-1) + "; "
+                            Slog.w(TAG, "Failure reading " + files.get(i+1) + "; "
                                     + moreStats.mReadError);
                             continue;
                         }
