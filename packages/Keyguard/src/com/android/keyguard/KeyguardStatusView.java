@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -39,6 +40,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private TextView mAlarmStatusView;
     private TextClock mDateView;
+    private TextClock mClockView;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -88,6 +90,7 @@ public class KeyguardStatusView extends GridLayout {
         super.onFinishInflate();
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mDateView = (TextClock) findViewById(R.id.date_view);
+        mClockView = (TextClock) findViewById(R.id.clock_view);
         mLockPatternUtils = new LockPatternUtils(getContext());
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setEnableMarquee(screenOn);
@@ -95,10 +98,27 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     protected void refresh() {
-        final String fmt = DateFormat.getBestDateTimePattern(Locale.getDefault(),
-                mContext.getResources().getString(R.string.abbrev_wday_month_day_no_year));
-        mDateView.setFormat24Hour(fmt);
-        mDateView.setFormat12Hour(fmt);
+        Resources res = mContext.getResources();
+        Locale locale = Locale.getDefault();
+        final String dateFormat = DateFormat.getBestDateTimePattern(locale,
+                res.getString(R.string.abbrev_wday_month_day_no_year));
+
+        mDateView.setFormat24Hour(dateFormat);
+        mDateView.setFormat12Hour(dateFormat);
+
+        // 12-hour clock.
+        // CLDR insists on adding an AM/PM indicator even though it wasn't in the skeleton
+        // format.  The following code removes the AM/PM indicator if we didn't want it.
+        final String clock12skel = res.getString(R.string.clock_12hr_format);
+        String clock12hr = DateFormat.getBestDateTimePattern(locale, clock12skel);
+        clock12hr = clock12skel.contains("a") ? clock12hr : clock12hr.replaceAll("a", "").trim();
+        mClockView.setFormat12Hour(clock12hr);
+
+        // 24-hour clock
+        final String clock24skel = res.getString(R.string.clock_24hr_format);
+        final String clock24hr = DateFormat.getBestDateTimePattern(locale, clock24skel);
+        mClockView.setFormat24Hour(clock24hr);
+
         refreshAlarmStatus();
     }
 
