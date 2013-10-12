@@ -730,6 +730,7 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_NAME = "name";
         private static final String ATTR_PAGE_COUNT = "pageCount";
         private static final String ATTR_CONTENT_TYPE = "contentType";
+        private static final String ATTR_DATA_SIZE = "dataSize";
 
         private final AtomicFile mStatePersistFile;
 
@@ -893,6 +894,8 @@ public final class PrintSpoolerService extends Service {
                                 documentInfo.getContentType()));
                         serializer.attribute(null, ATTR_PAGE_COUNT, String.valueOf(
                                 documentInfo.getPageCount()));
+                        serializer.attribute(null, ATTR_DATA_SIZE, String.valueOf(
+                                documentInfo.getDataSize()));
                         serializer.endTag(null, TAG_DOCUMENT_INFO);
                     }
 
@@ -1111,10 +1114,13 @@ public final class PrintSpoolerService extends Service {
                         ATTR_PAGE_COUNT));
                 final int contentType = Integer.parseInt(parser.getAttributeValue(null,
                         ATTR_CONTENT_TYPE));
+                final int dataSize = Integer.parseInt(parser.getAttributeValue(null,
+                        ATTR_DATA_SIZE));
                 PrintDocumentInfo info = new PrintDocumentInfo.Builder(name)
                         .setPageCount(pageCount)
                         .setContentType(contentType).build();
                 printJob.setDocumentInfo(info);
+                info.setDataSize(dataSize);
                 parser.next();
                 skipEmptyTextTags(parser);
                 expect(parser, XmlPullParser.END_TAG, TAG_DOCUMENT_INFO);
