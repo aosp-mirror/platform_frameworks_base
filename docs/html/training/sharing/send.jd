@@ -1,9 +1,9 @@
-page.title=Sending Content to Other Apps
-parent.title=Sharing Content
+page.title=Sending Simple Data to Other Apps
+parent.title=Sharing Simple Data
 parent.link=index.html
 
 trainingnavtop=true
-next.title=Receiving Content from Other Apps
+next.title=Receiving Simple Data from Other Apps
 next.link=receive.html
 
 @jd:body
@@ -29,22 +29,22 @@ Intent Filters</a></li>
 </div>
 </div>
 
-<p>When you construct an intent, you must specify the action you want the intent to "trigger." 
-Android defines several actions, including {@link android.content.Intent#ACTION_SEND} which, as 
-you can probably guess, indicates that the intent is sending data from one activity to another, 
-even across process boundaries. To send data to another activity, all you need to do is specify 
-the data and its type, the system will identify compatible receiving activities and display them 
-to the user (if there are multiple options) or immediately start the activity (if there is only 
-one option). Similarly, you can advertise the data types that your activities support receiving 
+<p>When you construct an intent, you must specify the action you want the intent to "trigger."
+Android defines several actions, including {@link android.content.Intent#ACTION_SEND} which, as
+you can probably guess, indicates that the intent is sending data from one activity to another,
+even across process boundaries. To send data to another activity, all you need to do is specify
+the data and its type, the system will identify compatible receiving activities and display them
+to the user (if there are multiple options) or immediately start the activity (if there is only
+one option). Similarly, you can advertise the data types that your activities support receiving
 from other applications by specifying them in your manifest.</p>
 
-<p>Sending and receiving data between applications with intents is most commonly used for social 
-sharing of content. Intents allow users to share information quickly and easily, using their 
+<p>Sending and receiving data between applications with intents is most commonly used for social
+sharing of content. Intents allow users to share information quickly and easily, using their
 favorite applications.</p>
 
-<p><strong>Note:</strong> The best way to add a share action item to an 
-{@link android.app.ActionBar} is to use {@link android.widget.ShareActionProvider}, which became 
-available in API level 14. {@link android.widget.ShareActionProvider} is discussed in the lesson 
+<p><strong>Note:</strong> The best way to add a share action item to an
+{@link android.app.ActionBar} is to use {@link android.widget.ShareActionProvider}, which became
+available in API level 14. {@link android.widget.ShareActionProvider} is discussed in the lesson
 about <a href="shareaction.html">Adding an Easy Share Action</a>.</p>
 
 
@@ -58,10 +58,10 @@ on a handset.
 </p>
 </div>
 
-<p>The most straightforward and common use of the {@link android.content.Intent#ACTION_SEND} 
-action is sending text content from one activity to another. For example, the built-in Browser 
-app can share the URL of the currently-displayed page as text with any application. This is useful 
-for sharing an article or website with friends via email or social networking. Here is the code to 
+<p>The most straightforward and common use of the {@link android.content.Intent#ACTION_SEND}
+action is sending text content from one activity to another. For example, the built-in Browser
+app can share the URL of the currently-displayed page as text with any application. This is useful
+for sharing an article or website with friends via email or social networking. Here is the code to
 implement this type of sharing:</p>
 
 <pre>
@@ -72,12 +72,12 @@ sendIntent.setType(&quot;text/plain&quot;);
 startActivity(sendIntent);
 </pre>
 
-<p>If there's an installed application with a filter that matches 
-{@link android.content.Intent#ACTION_SEND} and MIME type text/plain, the Android system will run 
-it; if more than one application matches, the system displays a disambiguation dialog (a "chooser") 
-that allows the user to choose an app. If you call 
+<p>If there's an installed application with a filter that matches
+{@link android.content.Intent#ACTION_SEND} and MIME type text/plain, the Android system will run
+it; if more than one application matches, the system displays a disambiguation dialog (a "chooser")
+that allows the user to choose an app. If you call
 {@link android.content.Intent#createChooser(android.content.Intent, CharSequence)
-Intent.createChooser()} 
+Intent.createChooser()}
 for the intent, Android will <strong>always</strong> display the chooser. This has some
 advantages:</p>
 
@@ -100,17 +100,17 @@ startActivity(<strong>Intent.createChooser(sendIntent, getResources().getText(R.
 
 <p>The resulting dialog is shown in figure 1.</p>
 
-<p>Optionally, you can set some standard extras for the intent: 
-{@link android.content.Intent#EXTRA_EMAIL}, {@link android.content.Intent#EXTRA_CC}, 
-{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}. However, 
-if the receiving application is not designed to use them, nothing will happen. You can use 
-custom extras as well, but there's no effect unless the receiving application understands them. 
+<p>Optionally, you can set some standard extras for the intent:
+{@link android.content.Intent#EXTRA_EMAIL}, {@link android.content.Intent#EXTRA_CC},
+{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}. However,
+if the receiving application is not designed to use them, nothing will happen. You can use
+custom extras as well, but there's no effect unless the receiving application understands them.
 Typically, you'd use custom extras defined by the receiving application itself.</p>
 
-<p class="note"><strong>Note:</strong> Some e-mail applications, such as Gmail, expect a 
-{@link java.lang.String String[]} for extras like {@link android.content.Intent#EXTRA_EMAIL} and 
-{@link android.content.Intent#EXTRA_CC}, use 
-{@link android.content.Intent#putExtra(String,String[]) putExtra(String, String[])} to add these 
+<p class="note"><strong>Note:</strong> Some e-mail applications, such as Gmail, expect a
+{@link java.lang.String String[]} for extras like {@link android.content.Intent#EXTRA_EMAIL} and
+{@link android.content.Intent#EXTRA_CC}, use
+{@link android.content.Intent#putExtra(String,String[]) putExtra(String, String[])} to add these
 to your intent.</p>
 
 
