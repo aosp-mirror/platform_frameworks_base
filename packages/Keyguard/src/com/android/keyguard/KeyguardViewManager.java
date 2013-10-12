@@ -431,7 +431,18 @@ public class KeyguardViewManager {
     public synchronized void onScreenTurnedOn(final IKeyguardShowCallback callback) {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
         mScreenOn = true;
-        final IBinder token = mKeyguardHost == null ? null : mKeyguardHost.getWindowToken();
+        final IBinder token;
+
+        // If keyguard is disabled, we need to inform PhoneWindowManager with a null
+        // token so it doesn't wait for us to draw...
+        final boolean disabled =
+                mLockPatternUtils.isLockScreenDisabled() && !mLockPatternUtils.isSecure();
+        if (mKeyguardHost == null || disabled) {
+            token = null;
+        } else {
+            token = mKeyguardHost.getWindowToken();
+        }
+
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
 
