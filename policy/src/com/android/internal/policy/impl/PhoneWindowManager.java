@@ -297,6 +297,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
     boolean mTouchExplorationEnabled = false;
+    boolean mTranslucentDecorEnabled = true;
 
     int mPointerLocationMode = 0; // guarded by mLock
 
@@ -901,6 +902,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
         mLidControlsSleep = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_lidControlsSleep);
+        mTranslucentDecorEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableTranslucentDecor);
         readConfigurationDependentBehaviors();
 
         // register for dock events
@@ -2703,7 +2706,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
             boolean navAllowedHidden = immersive || immersiveSticky;
             navTranslucent &= !immersiveSticky;  // transient trumps translucent
-            navTranslucent &= isTranslucentNavigationAllowed();
+            navTranslucent &= areTranslucentBarsAllowed();
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -2824,6 +2827,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
                 boolean statusBarTranslucent = (sysui & View.STATUS_BAR_TRANSLUCENT) != 0;
+                statusBarTranslucent &= areTranslucentBarsAllowed();
 
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
@@ -5116,8 +5120,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vis = (vis & ~flags) | (oldVis & flags);
         }
 
-        if (!isTranslucentNavigationAllowed()) {
-            vis &= ~View.NAVIGATION_BAR_TRANSLUCENT;
+        if (!areTranslucentBarsAllowed()) {
+            vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT);
         }
 
         // update status bar
@@ -5182,11 +5186,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * @return whether the navigation bar can be made translucent, e.g. touch
-     *         exploration is not enabled
+     * @return whether the navigation or status bar can be made translucent
+     *
+     * This should return true unless touch exploration is not enabled or
+     * R.boolean.config_enableTranslucentDecor is false.
      */
-    private boolean isTranslucentNavigationAllowed() {
-        return !mTouchExplorationEnabled;
+    private boolean areTranslucentBarsAllowed() {
+        return mTranslucentDecorEnabled && !mTouchExplorationEnabled;
     }
 
     // Use this instead of checking config_showNavigationBar so that it can be consistently

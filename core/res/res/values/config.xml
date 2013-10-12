@@ -588,6 +588,9 @@
     <!-- Disable lockscreen translucent decor by default -->
     <bool name="config_enableLockScreenTranslucentDecor">false</bool>
 
+    <!-- Enable translucent decor by default -->
+    <bool name="config_enableTranslucentDecor">true</bool>
+
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
     <bool name="config_enable_puk_unlock_screen">true</bool>
