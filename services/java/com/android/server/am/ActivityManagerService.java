@@ -3466,7 +3466,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Remove this application's activities from active lists.
-        boolean hasVisibleActivities = mStackSupervisor.handleAppDiedLocked(app, restarting);
+        boolean hasVisibleActivities = mStackSupervisor.handleAppDiedLocked(app);
 
         app.activities.clear();
 
