@@ -25,7 +25,8 @@
     <string name="label_color" msgid="1108690305218188969">"颜色"</string>
     <string name="label_orientation" msgid="2853142581990496477">"方向"</string>
     <string name="label_pages" msgid="6300874667546617333">"页数 (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <string name="pages_range_example" msgid="4069269138547562081">"例如：1–5、8、11–13"</string>
+    <!-- no translation found for pages_range_example (8558694453556945172) -->
+    <skip />
     <string name="print_preview" msgid="8010217796057763343">"打印预览"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"安装 PDF 查看器以便预览"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"打印应用崩溃了"</string>
@@ -58,6 +59,8 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"未与打印机建立连接"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"未知"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> - 无法使用"</string>
+    <!-- no translation found for print_error_default_message (8568506918983980567) -->
+    <skip />
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"黑白"</item>
     <item msgid="2762241247228983754">"彩色"</item>
