@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -72,6 +73,7 @@ public class WallpaperManager {
      * an intent; instead, use {@link #getCropAndSetWallpaperIntent}.
      * <p>Input:  {@link Intent#getData} is the URI of the image to crop and set as wallpaper.
      * <p>Output: RESULT_OK if user decided to crop/set the wallpaper, RESULT_CANCEL otherwise
+     * Activities that support this intent should specify a MIME filter of "image/*"
      */
     public static final String ACTION_CROP_AND_SET_WALLPAPER =
             "android.service.wallpaper.CROP_AND_SET_WALLPAPER";
@@ -657,8 +659,19 @@ public class WallpaperManager {
      * that supports cropping wallpapers, it will be preferred as the default.
      * Use this method instead of directly creating a {@link #ACTION_CROP_AND_SET_WALLPAPER}
      * intent.
+     *
+     * @param imageUri The image URI that will be set in the intent. The must be a content
+     *                 URI and its provider must resolve its type to "image/*"
+     *
+     * @throws IllegalArgumentException if the URI is not a content URI or its MIME type is
+     *         not "image/*"
      */
     public Intent getCropAndSetWallpaperIntent(Uri imageUri) {
+        if (!ContentResolver.SCHEME_CONTENT.equals(imageUri.getScheme())) {
+            throw new IllegalArgumentException("Image URI must be of the "
+                    + ContentResolver.SCHEME_CONTENT + " scheme type");
+        }
+
         final PackageManager packageManager = mContext.getPackageManager();
         Intent cropAndSetWallpaperIntent =
                 new Intent(ACTION_CROP_AND_SET_WALLPAPER, imageUri);
@@ -680,7 +693,17 @@ public class WallpaperManager {
 
         // fallback crop activity
         cropAndSetWallpaperIntent.setPackage("com.android.wallpapercropper");
-        return cropAndSetWallpaperIntent;
+        List<ResolveInfo> cropAppList = packageManager.queryIntentActivities(
+                cropAndSetWallpaperIntent, 0);
+        if (cropAppList.size() > 0) {
+            return cropAndSetWallpaperIntent;
+        }
+        // If the URI is not of the right type, or for some reason the system wallpaper
+        // cropper doesn't exist, return null
+        throw new IllegalArgumentException("Cannot use passed URI to set wallpaper; " +
+            "check that the type returned by ContentProvider matches image/*");
+
+        return null;
     }
 
     /**
