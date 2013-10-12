@@ -56,6 +56,12 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected boolean shouldLockout(long deadline) {
+        // SIM PIN doesn't have a timed lockout
+        return false;
+    }
+
+    @Override
     protected int getPasswordTextViewId() {
         return R.id.pinEntry;
     }
@@ -169,7 +175,7 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
     @Override
     protected void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText().toString();
-        
+
         if (entry.length() < 4) {
             // otherwise, display a message to the user, and don't submit.
             mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint, true);

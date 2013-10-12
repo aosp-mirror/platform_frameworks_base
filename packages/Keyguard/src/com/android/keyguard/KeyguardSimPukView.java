@@ -107,6 +107,12 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected boolean shouldLockout(long deadline) {
+        // SIM PUK doesn't have a timed lockout
+        return false;
+    }
+
+    @Override
     protected int getPasswordTextViewId() {
         return R.id.pinEntry;
     }
