@@ -131,7 +131,7 @@ public final class PrintJobInfo implements Parcelable {
     /** The name of the printer - internally used */
     private String mPrinterName;
 
-    /** The status of the print job. */
+    /** The state of the print job. */
     private int mState;
 
     /** The id of the app that created the job. */
@@ -555,7 +555,7 @@ public final class PrintJobInfo implements Parcelable {
         builder.append("PrintJobInfo{");
         builder.append("label: ").append(mLabel);
         builder.append(", id: ").append(mId);
-        builder.append(", status: ").append(stateToString(mState));
+        builder.append(", state: ").append(stateToString(mState));
         builder.append(", printer: " + mPrinterId);
         builder.append(", tag: ").append(mTag);
         builder.append(", creationTime: " + mCreationTime);
@@ -582,6 +582,9 @@ public final class PrintJobInfo implements Parcelable {
             }
             case STATE_STARTED: {
                 return "STATE_STARTED";
+            }
+            case STATE_BLOCKED: {
+                return "STATE_BLOCKED";
             }
             case STATE_FAILED: {
                 return "STATE_FAILED";
