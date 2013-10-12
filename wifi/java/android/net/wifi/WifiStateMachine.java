@@ -1031,7 +1031,8 @@ public class WifiStateMachine extends StateMachine {
             int dist, distSd;
             long tsf = 0;
             dist = distSd = ScanResult.UNSPECIFIED;
-            long now = SystemClock.elapsedRealtime();
+            final long now = SystemClock.elapsedRealtime();
+            final int bssidStrLen = BSSID_STR.length();
 
             while (true) {
                 while (n < splitData.length) {
@@ -1068,7 +1069,8 @@ public class WifiStateMachine extends StateMachine {
                     } else if (splitData[n].equals(TRUNCATED)) {
                         batchedScanResult.truncated = true;
                     } else if (splitData[n].startsWith(BSSID_STR)) {
-                        bssid = splitData[n].substring(BSSID_STR.length());
+                        bssid = new String(splitData[n].getBytes(), bssidStrLen,
+                                splitData[n].length() - bssidStrLen);
                     } else if (splitData[n].startsWith(FREQ_STR)) {
                         try {
                             freq = Integer.parseInt(splitData[n].substring(FREQ_STR.length()));
@@ -1864,10 +1866,12 @@ public class WifiStateMachine extends StateMachine {
         synchronized(mScanResultCache) {
             mScanResults = new ArrayList<ScanResult>();
             String[] lines = scanResults.split("\n");
+            final int bssidStrLen = BSSID_STR.length();
+            final int flagLen = FLAGS_STR.length();
 
             for (String line : lines) {
                 if (line.startsWith(BSSID_STR)) {
-                    bssid = line.substring(BSSID_STR.length());
+                    bssid = new String(line.getBytes(), bssidStrLen, line.length() - bssidStrLen);
                 } else if (line.startsWith(FREQ_STR)) {
                     try {
                         freq = Integer.parseInt(line.substring(FREQ_STR.length()));
@@ -1891,7 +1895,7 @@ public class WifiStateMachine extends StateMachine {
                         tsf = 0;
                     }
                 } else if (line.startsWith(FLAGS_STR)) {
-                    flags = line.substring(FLAGS_STR.length());
+                    flags = new String(line.getBytes(), flagLen, line.length() - flagLen);
                 } else if (line.startsWith(SSID_STR)) {
                     wifiSsid = WifiSsid.createFromAsciiEncoded(
                             line.substring(SSID_STR.length()));
