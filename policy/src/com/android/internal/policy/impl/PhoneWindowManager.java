@@ -532,7 +532,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.Secure.TRANSIENT_NAV_CONFIRMATIONS), false, this,
+                    Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -570,7 +570,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             StatusBarManager.WINDOW_NAVIGATION_BAR,
             WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
-    private TransientNavigationConfirmation mTransientNavigationConfirmation;
+    private ImmersiveModeConfirmation mImmersiveModeConfirmation;
 
     private SystemGesturesPointerEventListener mSystemGestures;
 
@@ -953,7 +953,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // no-op
                     }
                 });
-        mTransientNavigationConfirmation = new TransientNavigationConfirmation(mContext);
+        mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext);
         mWindowManagerFuncs.registerPointerEventListener(mSystemGestures);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -1169,8 +1169,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHasSoftInput = hasSoftInput;
                 updateRotation = true;
             }
-            if (mTransientNavigationConfirmation != null) {
-                mTransientNavigationConfirmation.loadSetting();
+            if (mImmersiveModeConfirmation != null) {
+                mImmersiveModeConfirmation.loadSetting();
             }
         }
         if (updateRotation) {
@@ -2699,15 +2699,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final int sysui = mLastSystemUiFlags;
             boolean navVisible = (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
             boolean navTranslucent = (sysui & View.NAVIGATION_BAR_TRANSLUCENT) != 0;
-            boolean transientAllowed = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
-            navTranslucent &= !transientAllowed;  // transient trumps translucent
+            boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
+            boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
+            boolean navAllowedHidden = immersive || immersiveSticky;
+            navTranslucent &= !immersiveSticky;  // transient trumps translucent
             navTranslucent &= isTranslucentNavigationAllowed();
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
             // detect when the user presses anywhere to bring back the nav
             // bar and ensure the application doesn't see the event.
-            if (navVisible || transientAllowed) {
+            if (navVisible || navAllowedHidden) {
                 if (mHideNavFakeWindow != null) {
                     mHideNavFakeWindow.dismiss();
                     mHideNavFakeWindow = null;
@@ -3945,8 +3947,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
-                    mTransientNavigationConfirmation.onPowerKeyDown(isScreenOn, event.getDownTime(),
-                            isTransientNavigationAllowed(mLastSystemUiFlags));
+                    mImmersiveModeConfirmation.onPowerKeyDown(isScreenOn, event.getDownTime(),
+                            isImmersiveMode(mLastSystemUiFlags));
                     if (isScreenOn && !mPowerKeyTriggered
                             && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                         mPowerKeyTriggered = true;
@@ -4225,7 +4227,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (sb) mStatusBarController.showTransient();
                 if (nb) mNavigationBarController.showTransient();
-                mTransientNavigationConfirmation.confirmCurrentPrompt();
+                mImmersiveModeConfirmation.confirmCurrentPrompt();
                 updateSystemUiVisibilityLw();
             }
         }
@@ -5108,6 +5110,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_IMMERSIVE
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.STATUS_BAR_TRANSLUCENT
                     | View.NAVIGATION_BAR_TRANSLUCENT;
             vis = (vis & ~flags) | (oldVis & flags);
@@ -5118,53 +5121,64 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // update status bar
-        boolean transientAllowed =
-                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
+        boolean immersiveSticky =
+                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
         boolean hideStatusBarWM =
                 mTopFullscreenOpaqueWindowState != null &&
                 (mTopFullscreenOpaqueWindowState.getAttrs().flags
                         & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
         boolean hideStatusBarSysui =
                 (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
+        boolean hideNavBarSysui =
+                (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
         boolean transientStatusBarAllowed =
                 mStatusBar != null && (
                 hideStatusBarWM
-                || (hideStatusBarSysui && transientAllowed)
+                || (hideStatusBarSysui && immersiveSticky)
                 || statusBarHasFocus);
 
-        if (mStatusBarController.isTransientShowing()
-                && !transientStatusBarAllowed && hideStatusBarSysui) {
+        boolean transientNavBarAllowed =
+                mNavigationBar != null &&
+                hideNavBarSysui && immersiveSticky;
+
+        boolean denyTransientStatus = mStatusBarController.isTransientShowing()
+                && !transientStatusBarAllowed && hideStatusBarSysui;
+        boolean denyTransientNav = mNavigationBarController.isTransientShowing()
+                && !transientNavBarAllowed;
+        if (denyTransientStatus || denyTransientNav) {
             // clear the clearable flags instead
-            int newVal = mResettingSystemUiFlags | View.SYSTEM_UI_CLEARABLE_FLAGS;
-            if (newVal != mResettingSystemUiFlags) {
-                mResettingSystemUiFlags = newVal;
-                mWindowManagerFuncs.reevaluateStatusBarVisibility();
-            }
+            clearClearableFlagsLw();
         }
 
         vis = mStatusBarController.updateVisibilityLw(transientStatusBarAllowed, oldVis, vis);
 
         // update navigation bar
-        boolean oldTransientNav = isTransientNavigationAllowed(oldVis);
-        boolean isTransientNav = isTransientNavigationAllowed(vis);
-        if (win != null && oldTransientNav != isTransientNav) {
+        boolean oldImmersiveMode = isImmersiveMode(oldVis);
+        boolean newImmersiveMode = isImmersiveMode(vis);
+        if (win != null && oldImmersiveMode != newImmersiveMode) {
             final String pkg = win.getOwningPackage();
-            mTransientNavigationConfirmation.transientNavigationChanged(pkg, isTransientNav);
+            mImmersiveModeConfirmation.immersiveModeChanged(pkg, newImmersiveMode);
         }
-        vis = mNavigationBarController.updateVisibilityLw(isTransientNav, oldVis, vis);
 
-        // don't send low profile updates if the system bars are hidden
-        if (mStatusBarController.isHidden() && mNavigationBarController.isHidden()) {
-            vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
-        }
+        vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
+
         return vis;
     }
 
-    private boolean isTransientNavigationAllowed(int vis) {
+    private void clearClearableFlagsLw() {
+        int newVal = mResettingSystemUiFlags | View.SYSTEM_UI_CLEARABLE_FLAGS;
+        if (newVal != mResettingSystemUiFlags) {
+            mResettingSystemUiFlags = newVal;
+            mWindowManagerFuncs.reevaluateStatusBarVisibility();
+        }
+    }
+
+    private boolean isImmersiveMode(int vis) {
+        final int flags = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
-                && (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
+                && (vis & flags) != 0;
     }
 
     /**

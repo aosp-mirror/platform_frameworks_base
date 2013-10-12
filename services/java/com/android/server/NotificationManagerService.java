@@ -1550,11 +1550,9 @@ public class NotificationManagerService extends INotificationManager.Stub
     private void scheduleTimeoutLocked(ToastRecord r)
     {
         mHandler.removeCallbacksAndMessages(r);
-        if (r.duration != Toast.LENGTH_INFINITE) {
-            Message m = Message.obtain(mHandler, MESSAGE_TIMEOUT, r);
-            long delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
-            mHandler.sendMessageDelayed(m, delay);
-        }
+        Message m = Message.obtain(mHandler, MESSAGE_TIMEOUT, r);
+        long delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
+        mHandler.sendMessageDelayed(m, delay);
     }
 
     private void handleTimeout(ToastRecord record)
