@@ -42,7 +42,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroupOverlay;
 import android.widget.AbsListView.OnScrollListener;
-
 import com.android.internal.R;
 
 /**
@@ -1381,7 +1380,10 @@ class FastScroller {
     }
 
     private boolean isPointInsideY(float y) {
-        return y >= mThumbImage.getTop() && y <= mThumbImage.getBottom();
+        final float offset = mThumbImage.getTranslationY();
+        final float top = mThumbImage.getTop() + offset;
+        final float bottom = mThumbImage.getBottom() + offset;
+        return y >= top && y <= bottom;
     }
 
     /**
