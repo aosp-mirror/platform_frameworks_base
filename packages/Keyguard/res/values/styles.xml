@@ -52,13 +52,13 @@
         <item name="android:windowEnterAnimation">@anim/lock_screen_enter</item>
         <item name="android:windowExitAnimation">@anim/lock_screen_exit</item>
     </style>
-    
+
     <!-- Built-in clock widget stuff -->
     <style name="widget_label">
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:textSize">@dimen/kg_status_line_font_size</item>
+        <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
     <style name="big_thin">
         <item name="android:textSize">@dimen/big_font_size</item>
