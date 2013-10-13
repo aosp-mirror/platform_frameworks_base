@@ -37,6 +37,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrinterDiscoveryObserver;
@@ -199,9 +200,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             intent.putExtra(PrintManager.EXTRA_PRINT_JOB, printJob);
             intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, packageName);
 
-            IntentSender intentSender = PendingIntent.getActivity(
+            IntentSender intentSender = PendingIntent.getActivityAsUser(
                     mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                    | PendingIntent.FLAG_CANCEL_CURRENT).getIntentSender();
+                    | PendingIntent.FLAG_CANCEL_CURRENT, null, new UserHandle(mUserId))
+                    .getIntentSender();
 
             Bundle result = new Bundle();
             result.putParcelable(PrintManager.EXTRA_PRINT_JOB, printJob);
