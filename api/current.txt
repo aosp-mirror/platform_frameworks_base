@@ -7305,6 +7305,8 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_SENSOR_GYROSCOPE = "android.hardware.sensor.gyroscope";
     field public static final java.lang.String FEATURE_SENSOR_LIGHT = "android.hardware.sensor.light";
     field public static final java.lang.String FEATURE_SENSOR_PROXIMITY = "android.hardware.sensor.proximity";
+    field public static final java.lang.String FEATURE_SENSOR_STEP_COUNTER = "android.hardware.sensor.stepcounter";
+    field public static final java.lang.String FEATURE_SENSOR_STEP_DETECTOR = "android.hardware.sensor.stepdetector";
     field public static final java.lang.String FEATURE_SIP = "android.software.sip";
     field public static final java.lang.String FEATURE_SIP_VOIP = "android.software.sip.voip";
     field public static final java.lang.String FEATURE_TELEPHONY = "android.hardware.telephony";
