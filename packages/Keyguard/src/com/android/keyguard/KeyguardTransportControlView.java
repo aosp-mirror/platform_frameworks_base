@@ -511,7 +511,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         if ((flags & flag) != 0) {
             view.setVisibility(View.VISIBLE);
         } else {
-            view.setVisibility(View.GONE);
+            view.setVisibility(View.INVISIBLE);
         }
     }
 
