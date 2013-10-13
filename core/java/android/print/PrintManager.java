@@ -146,11 +146,14 @@ public final class PrintManager {
                 switch (message.what) {
                     case MSG_NOTIFY_PRINT_JOB_STATE_CHANGED: {
                         SomeArgs args = (SomeArgs) message.obj;
-                        PrintJobStateChangeListener listener =
-                                (PrintJobStateChangeListener) args.arg1;
-                        PrintJobId printJobId = (PrintJobId) args.arg2;
+                        PrintJobStateChangeListenerWrapper wrapper =
+                                (PrintJobStateChangeListenerWrapper) args.arg1;
+                        PrintJobStateChangeListener listener = wrapper.getListener();
+                        if (listener != null) {
+                            PrintJobId printJobId = (PrintJobId) args.arg2;
+                            listener.onPrintJobStateChanged(printJobId);
+                        }
                         args.recycle();
-                        listener.onPrintJobStateChanged(printJobId);
                     } break;
                 }
             }
@@ -217,6 +220,7 @@ public final class PrintManager {
         if (mPrintJobStateChangeListeners.isEmpty()) {
             mPrintJobStateChangeListeners = null;
         }
+        wrappedListener.destroy();
         try {
             mService.removePrintJobStateChangeListener(wrappedListener, mUserId);
         } catch (RemoteException re) {
@@ -769,12 +773,19 @@ public final class PrintManager {
             PrintJobStateChangeListener listener = mWeakListener.get();
             if (handler != null && listener != null) {
                 SomeArgs args = SomeArgs.obtain();
-                args.arg1 = listener;
+                args.arg1 = this;
                 args.arg2 = printJobId;
                 handler.obtainMessage(MSG_NOTIFY_PRINT_JOB_STATE_CHANGED,
                         args).sendToTarget();
             }
         }
-    }
 
+        public void destroy() {
+            mWeakListener.clear();
+        }
+
+        public PrintJobStateChangeListener getListener() {
+            return mWeakListener.get();
+        }
+    }
 }

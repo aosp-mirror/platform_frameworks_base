@@ -189,7 +189,7 @@ public class NotificationController {
             if (i == printJobCount - 1) {
                 builder.setLargeIcon(((BitmapDrawable) mContext.getResources().getDrawable(
                         computeNotificationIcon(printJob))).getBitmap());
-                builder.setSmallIcon(com.android.internal.R.drawable.ic_print);
+                builder.setSmallIcon(computeNotificationIcon(printJob));
                 builder.setContentTitle(computeNotificationTitle(printJob));
                 builder.setContentText(printJob.getPrinterName());
             }
