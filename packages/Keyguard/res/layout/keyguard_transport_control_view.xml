@@ -94,67 +94,12 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textSize="12dp" />
             </RelativeLayout>
-            <LinearLayout
-                android:id="@+id/transient_rating"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:visibility="invisible">
-                <RatingBar
-                    android:id="@+id/transient_rating_bar_stars"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <LinearLayout
-                    android:id="@+id/transient_rating_thumbs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1">
-                        <ImageButton
-                            android:id="@+id/btn_thumbs_up"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_media_previous"
-                            android:background="?android:attr/selectableItemBackground"
-                            android:minWidth="48dp"
-                            android:minHeight="48dp"
-                            android:contentDescription="@string/keyguard_accessibility_transport_thumbs_up_description"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1">
-                        <ImageButton
-                            android:id="@+id/btn_thumbs_down"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_media_next"
-                            android:background="?android:attr/selectableItemBackground"
-                            android:minWidth="48dp"
-                            android:minHeight="48dp"
-                            android:contentDescription="@string/keyguard_accessibility_transport_thumbs_down_description"/>
-                    </FrameLayout>
-                </LinearLayout>
-                <ToggleButton
-                    android:id="@+id/transient_rating_heart"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="invisible"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:contentDescription="@string/keyguard_accessibility_transport_heart_description" />
-            </LinearLayout>
         </FrameLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="5dip">
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
