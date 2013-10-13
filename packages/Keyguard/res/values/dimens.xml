@@ -149,11 +149,11 @@
     used on tablets; on phones, this size is determined by the space left by the
     security mode. -->
     <dimen name="kg_small_widget_height">160dp</dimen>
-    
+
     <!-- Default clock parameters -->
     <dimen name="bottom_text_spacing_digital">-8dp</dimen>
     <dimen name="label_font_size">14dp</dimen>
-    <dimen name="widget_label_font_size">12dp</dimen>
+    <dimen name="widget_label_font_size">14dp</dimen>
     <dimen name="widget_big_font_size">80dp</dimen>
     <dimen name="big_font_size">120dp</dimen>
 

@@ -60,4 +60,8 @@
 
     <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
+
+    <!-- Default clock parameters -->
+    <dimen name="widget_label_font_size">19dp</dimen>
+
 </resources>
