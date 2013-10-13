@@ -268,7 +268,9 @@ public final class PrintSpoolerService extends Service {
                         || (state == PrintJobInfo.STATE_ANY_VISIBLE_TO_CLIENTS
                             && isStateVisibleToUser(printJob.getState()))
                         || (state == PrintJobInfo.STATE_ANY_ACTIVE
-                            && isActiveState(printJob.getState()));
+                            && isActiveState(printJob.getState()))
+                        || (state == PrintJobInfo.STATE_ANY_SCHEDULED
+                            && isScheduledState(printJob.getState()));
                 if (sameComponent && sameAppId && sameState) {
                     if (foundPrintJobs == null) {
                         foundPrintJobs = new ArrayList<PrintJobInfo>();
@@ -552,6 +554,12 @@ public final class PrintSpoolerService extends Service {
     private boolean isObsoleteState(int printJobState) {
         return (isTeminalState(printJobState)
                 || printJobState == PrintJobInfo.STATE_QUEUED);
+    }
+
+    private boolean isScheduledState(int printJobState) {
+        return printJobState == PrintJobInfo.STATE_QUEUED
+                || printJobState == PrintJobInfo.STATE_STARTED
+                || printJobState == PrintJobInfo.STATE_BLOCKED;
     }
 
     private boolean isActiveState(int printJobState) {
