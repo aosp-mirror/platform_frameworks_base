@@ -254,6 +254,9 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         if (isStarted() && mDiscoverySession != null
                 && mDiscoverySession.isPrinterDiscoveryStarted()) {
             if (mTrackedPrinter != null) {
+                if (mTrackedPrinter.equals(printerId)) {
+                    return;
+                }
                 mDiscoverySession.stopPrinterStateTracking(mTrackedPrinter);
             }
             mTrackedPrinter = printerId;
