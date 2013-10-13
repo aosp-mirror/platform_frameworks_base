@@ -82,11 +82,16 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline();
-        if (deadline != 0) {
+        if (shouldLockout(deadline)) {
             handleAttemptLockout(deadline);
         } else {
             resetState();
         }
+    }
+
+    // Allow subclasses to override this behavior
+    protected boolean shouldLockout(long deadline) {
+        return deadline != 0;
     }
 
     protected abstract int getPasswordTextViewId();
