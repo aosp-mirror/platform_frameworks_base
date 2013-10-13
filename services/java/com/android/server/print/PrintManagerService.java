@@ -474,7 +474,8 @@ public final class PrintManagerService extends IPrintManager.Stub {
                     ComponentName component = new ComponentName(serviceInfo.packageName,
                             serviceInfo.name);
                     String label = serviceInfo.loadLabel(mContext.getPackageManager()).toString();
-                    showEnableInstalledPrintServiceNotification(component, label);
+                    showEnableInstalledPrintServiceNotification(component, label,
+                            getChangingUserId());
                 }
             }
 
@@ -622,12 +623,14 @@ public final class PrintManagerService extends IPrintManager.Stub {
     }
 
     private void showEnableInstalledPrintServiceNotification(ComponentName component,
-            String label) {
+            String label, int userId) {
+        UserHandle userHandle = new UserHandle(userId);
+
         Intent intent = new Intent(Settings.ACTION_PRINT_SETTINGS);
         intent.putExtra(EXTRA_PRINT_SERVICE_COMPONENT_NAME, component.flattenToString());
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT, null);
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT, null, userHandle);
 
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_print)
@@ -642,6 +645,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         String notificationTag = getClass().getName() + ":" + component.flattenToString();
-        notificationManager.notify(notificationTag, 0, builder.build());
+        notificationManager.notifyAsUser(notificationTag, 0, builder.build(),
+                userHandle);
     }
 }
