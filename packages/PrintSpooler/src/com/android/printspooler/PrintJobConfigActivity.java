@@ -760,6 +760,7 @@ public class PrintJobConfigActivity extends Activity {
                         public void run() {
                             mEditor.initialize();
                             mEditor.bindUi();
+                            mEditor.reselectCurrentPrinter();
                             mEditor.updateUi();
                         }
                     });
