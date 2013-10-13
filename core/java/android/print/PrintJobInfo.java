@@ -48,6 +48,14 @@ public final class PrintJobInfo implements Parcelable {
     public static final int STATE_ANY_ACTIVE = -3;
 
     /**
+     * Constant for matching any scheduled, i.e. delivered to a print
+     * service, print job state.
+     *
+     * @hide
+     */
+    public static final int STATE_ANY_SCHEDULED = -4;
+
+    /**
      * Print job state: The print job is being created but not yet
      * ready to be printed.
      * <p>
