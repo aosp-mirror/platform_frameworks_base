@@ -1408,9 +1408,9 @@ public final class ViewRootImpl implements ViewParent,
 
                 final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
-                if (!mDrawDuringWindowsAnimating) {
-                    mWindowsAnimating |=
-                            (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_ANIMATING) != 0;
+                if (!mDrawDuringWindowsAnimating &&
+                        (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_ANIMATING) != 0) {
+                    mWindowsAnimating = true;
                 }
 
                 if (DEBUG_LAYOUT) Log.v(TAG, "relayout: frame=" + frame.toShortString()
@@ -3798,6 +3798,9 @@ public final class ViewRootImpl implements ViewParent,
             if (q.mEvent instanceof KeyEvent) {
                 return processKeyEvent(q);
             } else {
+                // If delivering a new non-key event, make sure the window is
+                // now allowed to start updating.
+                handleDispatchDoneAnimating();
                 final int source = q.mEvent.getSource();
                 if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                     return processPointerEvent(q);
@@ -3811,6 +3814,12 @@ public final class ViewRootImpl implements ViewParent,
 
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
+
+            if (event.getAction() != KeyEvent.ACTION_UP) {
+                // If delivering a new key event, make sure the window is
+                // now allowed to start updating.
+                handleDispatchDoneAnimating();
+            }
 
             // Deliver the key to the view hierarchy.
             if (mView.dispatchKeyEvent(event)) {
