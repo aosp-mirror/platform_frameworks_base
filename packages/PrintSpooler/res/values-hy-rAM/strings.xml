@@ -25,8 +25,7 @@
     <string name="label_color" msgid="1108690305218188969">"Գույնը"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Դիրքավորում"</string>
     <string name="label_pages" msgid="6300874667546617333">"Էջեր (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <!-- no translation found for pages_range_example (8558694453556945172) -->
-    <skip />
+    <string name="pages_range_example" msgid="8558694453556945172">"օր.՝ 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Տպելու նախադիտում"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Նախադիտման համար տեղադրեք PDF դիտարկիչ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Տպելու ծրագիրը վթարի է ենթարկվել"</string>
@@ -52,15 +51,16 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>-ը չեղարկվում է"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Տպիչի սխալ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Տպիչն արգելափակել է <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>-ը"</string>
-    <!-- no translation found for composite_notification_title_template:one (5866624638054847057) -->
-    <!-- no translation found for composite_notification_title_template:other (8746611264734222865) -->
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> տպման աշխատանք"</item>
+    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> տպման աշխատանքներ"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"Չեղարկել"</string>
     <string name="restart" msgid="2472034227037808749">"Վերագործարկել"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Տպիչի հետ կապ չկա"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"անհայտ"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> տպիչն անհասանելի է"</string>
-    <!-- no translation found for print_error_default_message (8568506918983980567) -->
-    <skip />
+    <string name="print_error_default_message" msgid="8568506918983980567">"Չկարողացանք մշակել տպման աշխատանքը"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Սև ու սպիտակ"</item>
     <item msgid="2762241247228983754">"Գույնը"</item>

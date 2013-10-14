@@ -25,8 +25,7 @@
     <string name="label_color" msgid="1108690305218188969">"Couleur"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientation"</string>
     <string name="label_pages" msgid="6300874667546617333">"Pages (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <!-- no translation found for pages_range_example (8558694453556945172) -->
-    <skip />
+    <string name="pages_range_example" msgid="8558694453556945172">"ex. : 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Aperçu avant impression"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Installer un lecteur PDF pour afficher l\'aperçu"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"L\'application à l\'origine de l\'impression a planté"</string>
@@ -61,8 +60,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Aucune connexion à l\'imprimante."</string>
     <string name="reason_unknown" msgid="5507940196503246139">"inconnue"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – indisponible"</string>
-    <!-- no translation found for print_error_default_message (8568506918983980567) -->
-    <skip />
+    <string name="print_error_default_message" msgid="8568506918983980567">"Impossible de générer la tâche d\'impression."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Noir et blanc"</item>
     <item msgid="2762241247228983754">"Couleur"</item>
