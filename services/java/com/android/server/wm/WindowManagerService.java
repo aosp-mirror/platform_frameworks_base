@@ -3014,7 +3014,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 TAG, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
 
             inTouchMode = mInTouchMode;
-            animating = mAnimator.mAnimating;
+            animating = mAnimator.mAnimating && win.mWinAnimator.isAnimating();
             if (animating && !mRelayoutWhileAnimating.contains(win)) {
                 mRelayoutWhileAnimating.add(win);
             }
