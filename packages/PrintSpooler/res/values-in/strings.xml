@@ -52,8 +52,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Membatalkan <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Ada kesalahan printer <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printer memblokir <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for composite_notification_title_template:one (5866624638054847057) -->
-    <!-- no translation found for composite_notification_title_template:other (8746611264734222865) -->
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"Tugas cetak <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"Tugas cetak <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"Batal"</string>
     <string name="restart" msgid="2472034227037808749">"Mulai Ulang"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Tidak ada sambungan ke printer"</string>

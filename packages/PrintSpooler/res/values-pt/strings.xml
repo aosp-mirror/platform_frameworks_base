@@ -25,8 +25,7 @@
     <string name="label_color" msgid="1108690305218188969">"Cor"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientação"</string>
     <string name="label_pages" msgid="6300874667546617333">"Páginas (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <!-- no translation found for pages_range_example (8558694453556945172) -->
-    <skip />
+    <string name="pages_range_example" msgid="8558694453556945172">"Ex.: 1–5, 8, 11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Visualização de impressão"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Instalar o visualizador de PDF"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"O aplicativo de impressão falhou"</string>
@@ -52,15 +51,16 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Cancelando <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Erro ao imprimir <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"A impressora bloqueou <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for composite_notification_title_template:one (5866624638054847057) -->
-    <!-- no translation found for composite_notification_title_template:other (8746611264734222865) -->
+  <plurals name="composite_notification_title_template">
+    <item quantity="one" msgid="5866624638054847057">"Trabalho de impressão <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"Trabalhos de impressão <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+  </plurals>
     <string name="cancel" msgid="4373674107267141885">"Cancelar"</string>
     <string name="restart" msgid="2472034227037808749">"Reiniciar"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Sem conexão com a impressora"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"desconhecido"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – não disponível"</string>
-    <!-- no translation found for print_error_default_message (8568506918983980567) -->
-    <skip />
+    <string name="print_error_default_message" msgid="8568506918983980567">"Não foi possível gerar o trabalho de impressão"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Preto e branco"</item>
     <item msgid="2762241247228983754">"Cor"</item>
