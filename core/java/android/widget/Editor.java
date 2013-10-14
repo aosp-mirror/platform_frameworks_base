@@ -800,6 +800,8 @@ public class Editor {
 
     private boolean isOffsetVisible(int offset) {
         Layout layout = mTextView.getLayout();
+        if (layout == null) return false;
+
         final int line = layout.getLineForOffset(offset);
         final int lineBottom = layout.getLineBottom(line);
         final int primaryHorizontal = (int) layout.getPrimaryHorizontal(offset);
