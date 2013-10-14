@@ -278,12 +278,16 @@ public final class ActivityStackSupervisor {
         }
     }
 
-    boolean resumeHomeActivity(ActivityRecord prev) {
+    void moveHomeToTop() {
         moveHomeStack(true);
+        mHomeStack.moveHomeTaskToTop();
+    }
+
+    boolean resumeHomeActivity(ActivityRecord prev) {
+        moveHomeToTop();
         if (prev != null) {
             prev.task.mOnTopOfHome = false;
         }
-        mHomeStack.moveHomeTaskToTop();
         ActivityRecord r = mHomeStack.topRunningActivityLocked(null);
         if (r != null && r.isHomeActivity()) {
             mService.setFocusedActivityLocked(r);
@@ -625,7 +629,7 @@ public final class ActivityStackSupervisor {
     }
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
-        moveHomeStack(true);
+        moveHomeToTop();
         startActivityLocked(null, intent, null, aInfo, null, null, 0, 0, 0, null, 0,
                 null, false, null);
     }
@@ -1906,7 +1910,7 @@ public final class ActivityStackSupervisor {
         return r;
     }
 
-    boolean handleAppDiedLocked(ProcessRecord app, boolean restarting) {
+    boolean handleAppDiedLocked(ProcessRecord app) {
         boolean hasVisibleActivities = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             hasVisibleActivities |= mStacks.get(stackNdx).handleAppDiedLocked(app);
