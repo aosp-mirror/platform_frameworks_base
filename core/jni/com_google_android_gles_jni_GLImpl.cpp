@@ -183,7 +183,7 @@ getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
             if (array) {
                 releasePointer(_env, array, buf, 0);
             }
-            buf = buf + offset;
+            buf = (char*)buf + offset;
         } else {
             jniThrowException(_env, "java/lang/IllegalArgumentException",
                               "Must use a native order direct Buffer");
