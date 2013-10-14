@@ -92,15 +92,6 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Key<T> key) {
-
-        if (key.equals(CaptureResult.STATISTICS_FACES)) {
-            /**
-             * FIXME: Workaround for HAL bug that's missing FACE_DETECT_MODE
-             */
-            Log.w(TAG, "Expected non-null android.statistics.faceDetectMode");
-            return null;
-        }
-
         T value = getOverride(key);
         if (value != null) {
             return value;
@@ -478,45 +469,52 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     private Face[] getFaces() {
         final int FACE_LANDMARK_SIZE = 6;
 
-        Integer faceDetectMode = getBase(CaptureResult.STATISTICS_FACE_DETECT_MODE);
+        Integer faceDetectMode = get(CaptureResult.STATISTICS_FACE_DETECT_MODE);
         if (faceDetectMode == null) {
-            throw new AssertionError("Expect non-null face detect mode");
-        }
-
-        if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_OFF) {
-            return new Face[0];
-        }
-        if (faceDetectMode != CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE &&
-                faceDetectMode != CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
-            throw new AssertionError("Unknown face detect mode: " + faceDetectMode);
+            Log.w(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
+            faceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE;
+        } else {
+            if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_OFF) {
+                return new Face[0];
+            }
+            if (faceDetectMode != CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE &&
+                    faceDetectMode != CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
+                Log.w(TAG, "Unknown face detect mode: " + faceDetectMode);
+                return new Face[0];
+            }
         }
 
         // Face scores and rectangles are required by SIMPLE and FULL mode.
-        byte[] faceScores = getBase(CaptureResult.STATISTICS_FACE_SCORES);
-        Rect[] faceRectangles = getBase(CaptureResult.STATISTICS_FACE_RECTANGLES);
+        byte[] faceScores = get(CaptureResult.STATISTICS_FACE_SCORES);
+        Rect[] faceRectangles = get(CaptureResult.STATISTICS_FACE_RECTANGLES);
         if (faceScores == null || faceRectangles == null) {
-            throw new AssertionError("Expect face scores and rectangles to be non-null");
+            Log.w(TAG, "Expect face scores and rectangles to be non-null");
+            return new Face[0];
         } else if (faceScores.length != faceRectangles.length) {
-            throw new AssertionError(
-                    String.format("Face score size(%d) doesn match face rectangle size(%d)!",
-                            faceScores.length, faceRectangles.length));
+            Log.w(TAG, String.format("Face score size(%d) doesn match face rectangle size(%d)!",
+                    faceScores.length, faceRectangles.length));
         }
 
+        // To be safe, make number of faces is the minimal of all face info metadata length.
+        int numFaces = Math.min(faceScores.length, faceRectangles.length);
         // Face id and landmarks are only required by FULL mode.
-        int[] faceIds = getBase(CaptureResult.STATISTICS_FACE_IDS);
-        int[] faceLandmarks = getBase(CaptureResult.STATISTICS_FACE_LANDMARKS);
-        int numFaces = faceScores.length;
+        int[] faceIds = get(CaptureResult.STATISTICS_FACE_IDS);
+        int[] faceLandmarks = get(CaptureResult.STATISTICS_FACE_LANDMARKS);
         if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
             if (faceIds == null || faceLandmarks == null) {
-                throw new AssertionError("Expect face ids and landmarks to be non-null for " +
-                        "FULL mode");
-            } else if (faceIds.length != numFaces ||
-                    faceLandmarks.length != numFaces * FACE_LANDMARK_SIZE) {
-                throw new AssertionError(
-                        String.format("Face id size(%d), or face landmark size(%d) don't match " +
-                                "face number(%d)!",
-                                faceIds.length, faceLandmarks.length * FACE_LANDMARK_SIZE,
-                                numFaces));
+                Log.w(TAG, "Expect face ids and landmarks to be non-null for FULL mode," +
+                        "fallback to SIMPLE mode");
+                faceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE;
+            } else {
+                if (faceIds.length != numFaces ||
+                        faceLandmarks.length != numFaces * FACE_LANDMARK_SIZE) {
+                    Log.w(TAG, String.format("Face id size(%d), or face landmark size(%d) don't" +
+                            "match face number(%d)!",
+                            faceIds.length, faceLandmarks.length * FACE_LANDMARK_SIZE, numFaces));
+                }
+                // To be safe, make number of faces is the minimal of all face info metadata length.
+                numFaces = Math.min(numFaces, faceIds.length);
+                numFaces = Math.min(numFaces, faceLandmarks.length / FACE_LANDMARK_SIZE);
             }
         }
 
