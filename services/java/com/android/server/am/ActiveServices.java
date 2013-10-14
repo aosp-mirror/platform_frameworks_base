@@ -1494,7 +1494,7 @@ public final class ActiveServices {
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when unbinding service "
                                 + r.shortName, e);
-                        serviceDoneExecutingLocked(r, true, true);
+                        serviceProcessGoneLocked(r);
                     }
                 }
             }
@@ -1544,7 +1544,7 @@ public final class ActiveServices {
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when destroying service "
                             + r.shortName, e);
-                    serviceDoneExecutingLocked(r, true, true);
+                    serviceProcessGoneLocked(r);
                 }
                 updateServiceForegroundLocked(r.app, false);
             } else {
@@ -1570,7 +1570,7 @@ public final class ActiveServices {
             r.tracker.setStarted(false, memFactor, now);
             r.tracker.setBound(false, memFactor, now);
             if (r.executeNesting == 0) {
-                r.tracker.clearCurrentOwner(r);
+                r.tracker.clearCurrentOwner(r, false);
                 r.tracker = null;
             }
         }
@@ -1629,7 +1629,7 @@ public final class ActiveServices {
                     s.app.thread.scheduleUnbindService(s, b.intent.intent.getIntent());
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when unbinding service " + s.shortName, e);
-                    serviceDoneExecutingLocked(s, true, true);
+                    serviceProcessGoneLocked(s);
                 }
             }
 
@@ -1708,6 +1708,16 @@ public final class ActiveServices {
         }
     }
 
+    private void serviceProcessGoneLocked(ServiceRecord r) {
+        if (r.tracker != null) {
+            int memFactor = mAm.mProcessStats.getMemFactorLocked();
+            long now = SystemClock.uptimeMillis();
+            r.tracker.setExecuting(false, memFactor, now);
+            r.tracker.setBound(false, memFactor, now);
+        }
+        serviceDoneExecutingLocked(r, true, true);
+    }
+
     private void serviceDoneExecutingLocked(ServiceRecord r, boolean inDestroying,
             boolean finishing) {
         if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
@@ -1747,7 +1757,7 @@ public final class ActiveServices {
                 r.tracker.setExecuting(false, mAm.mProcessStats.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
                 if (finishing) {
-                    r.tracker.clearCurrentOwner(r);
+                    r.tracker.clearCurrentOwner(r, false);
                     r.tracker = null;
                 }
             }
