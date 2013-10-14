@@ -1104,6 +1104,14 @@ include the action bar on devices running Android 2.1 or higher."
     <ul>
 
       <li>
+        <a href="<?cs var:toroot ?>training/articles/memory.html"
+           description=
+           "How to keep your app's memory footprint small in order to improve performance
+           on a variety of mobile devices."
+          >Managing Your App's Memory</a>
+      </li>
+
+      <li>
         <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
            description=
            "How to optimize your app's performance in various ways to improve its
