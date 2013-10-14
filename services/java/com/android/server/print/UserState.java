@@ -798,17 +798,17 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             BackgroundThread.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    failActivePrintJobsForServiceInternal(serviceName);
+                    failScheduledPrintJobsForServiceInternal(serviceName);
                 }
             });
         } else {
-            failActivePrintJobsForServiceInternal(serviceName);
+            failScheduledPrintJobsForServiceInternal(serviceName);
         }
     }
 
-    private void failActivePrintJobsForServiceInternal(ComponentName serviceName) {
+    private void failScheduledPrintJobsForServiceInternal(ComponentName serviceName) {
         List<PrintJobInfo> printJobs = mSpooler.getPrintJobInfos(serviceName,
-                PrintJobInfo.STATE_ANY_ACTIVE, PrintManager.APP_ID_ANY);
+                PrintJobInfo.STATE_ANY_SCHEDULED, PrintManager.APP_ID_ANY);
         if (printJobs == null) {
             return;
         }
