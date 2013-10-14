@@ -381,7 +381,7 @@
     <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
     <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
 
-    <!-- width of TransientNavigationConfirmation (-1 for match_parent) -->
+    <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
 
 </resources>

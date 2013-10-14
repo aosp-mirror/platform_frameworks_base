@@ -4491,8 +4491,8 @@
     <!-- PIN entry dialog tells the user to not enter a PIN for a while. [CHAR LIMIT=none] -->
     <string name="restr_pin_try_later">Try again later</string>
 
-    <!-- Cling help message when hiding the transient navigation bar [CHAR LIMIT=none] -->
-    <string name="transient_navigation_confirmation">Swipe down from the top to exit full screen.</string>
+    <!-- Cling help message when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">Swipe down from the top to exit full screen.</string>
 
     <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
     <string name="done_label">Done</string>
