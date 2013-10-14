@@ -682,7 +682,7 @@ final class RemotePrintService implements DeathRecipient {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return service.mSpooler.getPrintJobInfos(service.mComponentName,
-                            PrintJobInfo.STATE_ANY_VISIBLE_TO_CLIENTS, PrintManager.APP_ID_ANY);
+                            PrintJobInfo.STATE_ANY_SCHEDULED, PrintManager.APP_ID_ANY);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
