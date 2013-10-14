@@ -192,33 +192,91 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/sharing/index.html"
-             description=
-             "How to take your app interaction to the next level by sharing
-             information with other apps, receive information back, and provide a simple and
-             scalable way to perform Share actions with user content."
-            >Sharing Content</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/sharing/send.html">
-            Sending Content to Other Apps
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/sharing/receive.html">
-            Receiving Content from Other Apps
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/sharing/shareaction.html">
-            Adding an Easy Share Action
-          </a>
-          </li>
-        </ul>
-      </li>
     </ul>
   </li><!-- end getting started -->
-
+    <li class="nav-section">
+        <div class="nav-section-header">
+            <a href="<?cs var:toroot ?>training/building-content-sharing.html">
+            <span class="small">Building Apps with</span><br/>Content Sharing
+            </a>
+        </div>
+        <ul>
+            <li class="nav-section">
+                <div class="nav-section-header">
+                    <a href="<?cs var:toroot ?>training/sharing/index.html"
+                    description=
+                    "How to take your app interaction to the next level by sharing
+                    information with other apps, receive information back, and provide a simple and
+                    scalable way to perform Share actions with user content."
+                    >Sharing Simple Data</a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/sharing/send.html">
+                        Sending Simple Data to Other Apps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/sharing/receive.html">
+                        Receiving Simple Data from Other Apps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/sharing/shareaction.html">
+                        Adding an Easy Share Action
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-section">
+                <div class="nav-section-header">
+                    <a href="<?cs var:toroot?>training/secure-file-sharing/index.html"
+                    description=
+                    "How to provide secure access to a file associated with your app using a content
+                    URI and temporary access permissions."
+                    >Sharing Files</a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/setup-sharing.html">
+                        Setting Up File Sharing
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/share-file.html">
+                        Sharing a File
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/request-file.html">
+                        Requesting a Shared File
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/retrieve-info.html">
+                        Retrieving File Information
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-section">
+                <div class="nav-section-header">
+                    <a href="<?cs var:toroot ?>training/beam-files/index.html"
+                    description=
+                    "How to transfer files between devices using the NFC Android Beam feature."
+                    >Sharing Files with NFC</a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/beam-files/send-files.html"
+                        >Sending Files to Another Device</a>
+                    </li>
+                    <li><a href="<?cs var:toroot ?>training/beam-files/receive-files.html"
+                    >Receiving Files from Another Device</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
 
 
 
@@ -423,22 +481,6 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/beam-files/index.html"
-             description=
-             "How to transfer files between devices using the NFC Android Beam feature."
-             >Sharing Files with NFC</a>
-        </div>
-        <ul>
-            <li>
-                <a href="<?cs var:toroot ?>training/beam-files/send-files.html"
-                >Sending Files to Another Device</a>
-            </li>
-            <li><a href="<?cs var:toroot ?>training/beam-files/receive-files.html"
-            >Receiving Files from Another Device</a></li>
-        </ul>
-       </li>
        <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/network-ops/index.html"
