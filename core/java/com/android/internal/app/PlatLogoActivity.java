@@ -79,7 +79,7 @@ public class PlatLogoActivity extends Activity {
         letter.setTextSize(300);
         letter.setTextColor(0xFFFFFFFF);
         letter.setGravity(Gravity.CENTER);
-        letter.setText(String.valueOf(Build.VERSION.RELEASE).substring(0, 1));
+        letter.setText(String.valueOf(Build.ID).substring(0, 1));
 
         final int p = (int)(4 * metrics.density);
 
