@@ -1928,8 +1928,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private void checkBarModes() {
         if (mDemoMode) return;
-        checkBarMode((mInteractingWindows & StatusBarManager.WINDOW_STATUS_BAR) != 0 ? MODE_OPAQUE
-                : mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
+        int sbMode = mStatusBarMode;
+        if (panelsEnabled() && (mInteractingWindows & StatusBarManager.WINDOW_STATUS_BAR) != 0) {
+            // if panels are expandable, force the status bar opaque on any interaction
+            sbMode = MODE_OPAQUE;
+        }
+        checkBarMode(sbMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             checkBarMode(mNavigationBarMode,
                     mNavigationBarWindowState, mNavigationBarView.getBarTransitions());
