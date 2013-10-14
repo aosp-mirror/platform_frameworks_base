@@ -356,4 +356,6 @@
     <!-- Outline width for video subtitles. -->
     <dimen name="subtitle_outline_width">2dp</dimen>
 
+    <!-- width of TransientNavigationConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">-1px</dimen>
 </resources>
