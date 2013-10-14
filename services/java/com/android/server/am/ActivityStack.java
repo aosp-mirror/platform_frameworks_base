@@ -2628,7 +2628,7 @@ final class ActivityStack {
         if (task != null && task.removeActivity(r)) {
             if (DEBUG_STACK) Slog.i(TAG,
                     "removeActivityFromHistoryLocked: last activity removed from " + this);
-            if (task == topTask() && task.mOnTopOfHome) {
+            if (mStackSupervisor.isFrontStack(this) && task == topTask() && task.mOnTopOfHome) {
                 mStackSupervisor.moveHomeToTop();
             }
             mStackSupervisor.removeTask(task);
