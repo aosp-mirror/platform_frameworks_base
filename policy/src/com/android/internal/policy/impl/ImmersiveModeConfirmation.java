@@ -49,11 +49,11 @@ import com.android.internal.R;
 import java.util.Arrays;
 
 /**
- *  Helper to manage showing/hiding a confirmation prompt when the transient navigation bar
- *  is hidden.
+ *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
+ *  entering immersive mode.
  */
-public class TransientNavigationConfirmation {
-    private static final String TAG = "TransientNavigationConfirmation";
+public class ImmersiveModeConfirmation {
+    private static final String TAG = "ImmersiveModeConfirmation";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_SHOW_EVERY_TIME = false; // super annoying, use with caution
 
@@ -70,12 +70,12 @@ public class TransientNavigationConfirmation {
     private String mPanicPackage;
     private WindowManager mWindowManager;
 
-    public TransientNavigationConfirmation(Context context) {
+    public ImmersiveModeConfirmation(Context context) {
         mContext = context;
         mHandler = new H();
         mShowDelayMs = getNavBarExitDuration() * 3;
         mPanicThresholdMs = context.getResources()
-                .getInteger(R.integer.config_transient_navigation_confirmation_panic);
+                .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
     }
@@ -91,7 +91,7 @@ public class TransientNavigationConfirmation {
         String packages = null;
         try {
             packages = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.TRANSIENT_NAV_CONFIRMATIONS,
+                    Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                     UserHandle.USER_CURRENT);
             if (packages != null) {
                 mConfirmedPackages.addAll(Arrays.asList(packages.split(",")));
@@ -107,7 +107,7 @@ public class TransientNavigationConfirmation {
         try {
             final String packages = TextUtils.join(",", mConfirmedPackages);
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.TRANSIENT_NAV_CONFIRMATIONS,
+                    Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                     packages,
                     UserHandle.USER_CURRENT);
             if (DEBUG) Slog.d(TAG, "Saved packages=" + packages);
@@ -116,12 +116,12 @@ public class TransientNavigationConfirmation {
         }
     }
 
-    public void transientNavigationChanged(String pkg, boolean isNavTransient) {
+    public void immersiveModeChanged(String pkg, boolean isImmersiveMode) {
         if (pkg == null) {
             return;
         }
         mHandler.removeMessages(H.SHOW);
-        if (isNavTransient) {
+        if (isImmersiveMode) {
             mLastPackage = pkg;
             if (DEBUG_SHOW_EVERY_TIME || !mConfirmedPackages.contains(pkg)) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(H.SHOW, pkg), mShowDelayMs);
@@ -132,13 +132,13 @@ public class TransientNavigationConfirmation {
         }
     }
 
-    public void onPowerKeyDown(boolean isScreenOn, long time, boolean transientNavigationAllowed) {
+    public void onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode) {
         if (mPanicPackage != null && !isScreenOn && (time - mPanicTime < mPanicThresholdMs)) {
             // turning the screen back on within the panic threshold
             unconfirmPackage(mPanicPackage);
         }
-        if (isScreenOn && transientNavigationAllowed) {
-            // turning the screen off, remember if we were hiding the transient nav
+        if (isScreenOn && inImmersiveMode) {
+            // turning the screen off, remember if we were in immersive mode
             mPanicTime = time;
             mPanicPackage = mLastPackage;
         } else {
@@ -153,7 +153,7 @@ public class TransientNavigationConfirmation {
 
     private void unconfirmPackage(String pkg) {
         if (pkg != null) {
-            if (DEBUG) Slog.d(TAG, "Unconfirming transient navigation for " + pkg);
+            if (DEBUG) Slog.d(TAG, "Unconfirming immersive mode confirmation for " + pkg);
             mConfirmedPackages.remove(pkg);
             saveSetting();
         }
@@ -161,8 +161,7 @@ public class TransientNavigationConfirmation {
 
     private void handleHide() {
         if (mClingWindow != null) {
-            if (DEBUG) Slog.d(TAG,
-                    "Hiding transient navigation confirmation for " + mPromptPackage);
+            if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation for " + mPromptPackage);
             mWindowManager.removeView(mClingWindow);
             mClingWindow = null;
         }
@@ -179,7 +178,7 @@ public class TransientNavigationConfirmation {
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                 ,
                 PixelFormat.TRANSLUCENT);
-        lp.setTitle("TransientNavigationConfirmation");
+        lp.setTitle("ImmersiveModeConfirmation");
         lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
         lp.gravity = Gravity.FILL;
         return lp;
@@ -230,7 +229,7 @@ public class TransientNavigationConfirmation {
 
             // create the confirmation cling
             mClingLayout = (ViewGroup)
-                    View.inflate(getContext(), R.layout.transient_navigation_cling, null);
+                    View.inflate(getContext(), R.layout.immersive_mode_cling, null);
 
             final Button ok = (Button) mClingLayout.findViewById(R.id.ok);
             ok.setOnClickListener(new OnClickListener() {
@@ -292,7 +291,7 @@ public class TransientNavigationConfirmation {
 
     private void handleShow(String pkg) {
         mPromptPackage = pkg;
-        if (DEBUG) Slog.d(TAG, "Showing transient navigation confirmation for " + pkg);
+        if (DEBUG) Slog.d(TAG, "Showing immersive mode confirmation for " + pkg);
 
         mClingWindow = new ClingWindowView(mContext, confirmAction(pkg));
 
@@ -311,7 +310,7 @@ public class TransientNavigationConfirmation {
             @Override
             public void run() {
                 if (pkg != null && !mConfirmedPackages.contains(pkg)) {
-                    if (DEBUG) Slog.d(TAG, "Confirming transient navigation for " + pkg);
+                    if (DEBUG) Slog.d(TAG, "Confirming immersive mode for " + pkg);
                     mConfirmedPackages.add(pkg);
                     saveSetting();
                 }
