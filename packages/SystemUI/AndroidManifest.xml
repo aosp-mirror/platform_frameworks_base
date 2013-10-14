@@ -235,6 +235,9 @@
             </intent-filter>
         </receiver>
 
+        <service android:name=".CPUInfoService"
+                android:exported="false" />
+
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
@@ -536,6 +539,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
                 <action android:name="android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
     </application>
