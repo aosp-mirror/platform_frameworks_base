@@ -16,11 +16,13 @@
 
 package com.android.internal.policy.impl;
 
-import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -166,6 +168,31 @@ public class TransientNavigationConfirmation {
         }
     }
 
+    public WindowManager.LayoutParams getClingWindowLayoutParams() {
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_TOAST,
+                0
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                ,
+                PixelFormat.TRANSLUCENT);
+        lp.setTitle("TransientNavigationConfirmation");
+        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
+        lp.gravity = Gravity.FILL;
+        return lp;
+    }
+
+    public FrameLayout.LayoutParams getBubbleLayoutParams() {
+        return new FrameLayout.LayoutParams(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.immersive_mode_cling_width),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER_HORIZONTAL | Gravity.TOP);
+    }
+
     private class ClingWindowView extends FrameLayout {
         private static final int BGCOLOR = 0x80000000;
         private static final int OFFSET_DP = 48;
@@ -173,6 +200,18 @@ public class TransientNavigationConfirmation {
         private final Runnable mConfirm;
         private final ColorDrawable mColor = new ColorDrawable(0);
         private ValueAnimator mColorAnim;
+        private ViewGroup mClingLayout;
+
+        private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                    if (mClingLayout != null && mClingLayout.getParent() != null) {
+                        mClingLayout.setLayoutParams(getBubbleLayoutParams());
+                    }
+                }
+            }
+        };
 
         public ClingWindowView(Context context, Runnable confirm) {
             super(context);
@@ -190,23 +229,20 @@ public class TransientNavigationConfirmation {
             float density = metrics.density;
 
             // create the confirmation cling
-            final ViewGroup clingLayout = (ViewGroup)
+            mClingLayout = (ViewGroup)
                     View.inflate(getContext(), R.layout.transient_navigation_cling, null);
 
-            final Button ok = (Button) clingLayout.findViewById(R.id.ok);
+            final Button ok = (Button) mClingLayout.findViewById(R.id.ok);
             ok.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mConfirm.run();
                 }
             });
-            addView(clingLayout, new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
-            ));
+            addView(mClingLayout, getBubbleLayoutParams());
 
             if (ActivityManager.isHighEndGfx()) {
-                final View bubble = clingLayout.findViewById(R.id.text);
+                final View bubble = mClingLayout.findViewById(R.id.text);
                 bubble.setAlpha(0f);
                 bubble.setTranslationY(-OFFSET_DP*density);
                 bubble.animate()
@@ -238,6 +274,13 @@ public class TransientNavigationConfirmation {
             } else {
                 mColor.setColor(BGCOLOR);
             }
+
+            mContext.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED));
+        }
+
+        @Override
+        public void onDetachedFromWindow() {
+            mContext.unregisterReceiver(mReceiver);
         }
 
         @Override
@@ -259,19 +302,7 @@ public class TransientNavigationConfirmation {
               | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
         // show the confirmation
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_TOAST,
-                0
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                ,
-                PixelFormat.TRANSLUCENT);
-        lp.setTitle("TransientNavigationConfirmation");
-        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
-        lp.gravity = Gravity.FILL;
+        WindowManager.LayoutParams lp = getClingWindowLayoutParams();
         mWindowManager.addView(mClingWindow, lp);
     }
 
