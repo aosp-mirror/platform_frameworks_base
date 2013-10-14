@@ -139,6 +139,7 @@
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-ui.html"><span class="en">Optimizing your UI</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-tracing.html"><span class="en">Profiling with Traceview and dmtracedump</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/systrace.html"><span class="en">Analysing Display and Performance with Systrace</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-devtools.html"><span class="en">Using the Dev Tools App</span></a></li>
     </ul>
   </li>
