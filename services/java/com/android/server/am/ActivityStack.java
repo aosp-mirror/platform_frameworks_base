@@ -2628,10 +2628,10 @@ final class ActivityStack {
         if (task != null && task.removeActivity(r)) {
             if (DEBUG_STACK) Slog.i(TAG,
                     "removeActivityFromHistoryLocked: last activity removed from " + this);
-            mStackSupervisor.removeTask(task);
-            if (task.mOnTopOfHome) {
+            if (task == topTask() && task.mOnTopOfHome) {
                 mStackSupervisor.moveHomeToTop();
             }
+            mStackSupervisor.removeTask(task);
         }
         r.takeFromHistory();
         removeTimeoutsForActivityLocked(r);
