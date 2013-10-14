@@ -441,7 +441,7 @@ class FastScroller {
         updateLayout();
     }
 
-    public void onItemCountChanged(int oldTotalItemCount, int totalItemCount) {
+    public void onItemCountChanged(int totalItemCount) {
         final int visibleItemCount = mList.getChildCount();
         final boolean hasMoreItems = totalItemCount - visibleItemCount > 0;
         if (hasMoreItems && mState != STATE_DRAGGING) {
@@ -1095,12 +1095,14 @@ class FastScroller {
         final float thumbMiddle = position * range + offset;
         thumbImage.setTranslationY(thumbMiddle - thumbImage.getHeight() / 2);
 
+        final float previewPos = mOverlayPosition == OVERLAY_AT_THUMB ? thumbMiddle : 0;
+
         // Center the preview on the thumb, constrained to the list bounds.
         final ImageView previewImage = mPreviewImage;
         final float previewHalfHeight = previewImage.getHeight() / 2f;
         final float minP = top + previewHalfHeight;
         final float maxP = bottom - previewHalfHeight;
-        final float previewMiddle = MathUtils.constrain(thumbMiddle, minP, maxP);
+        final float previewMiddle = MathUtils.constrain(previewPos, minP, maxP);
         final float previewTop = previewMiddle - previewHalfHeight;
         previewImage.setTranslationY(previewTop);
 
