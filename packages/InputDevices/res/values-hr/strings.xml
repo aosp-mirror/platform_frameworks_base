@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Uređaji za unos"</string>
-    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Androidova tipkovnica"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android tipkovnica"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"engleska (UK)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"engleska (SAD)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"engleska (SAD), međunarodna"</string>

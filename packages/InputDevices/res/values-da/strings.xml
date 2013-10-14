@@ -14,8 +14,8 @@
     <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Russisk"</string>
     <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Russisk, Mac-stil"</string>
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Spansk"</string>
-    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"schweizisk fransk"</string>
-    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"schweizertysk"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"Schweizisk fransk"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Schweizertysk"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belgisk"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bulgarsk"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"Italiensk"</string>
@@ -33,5 +33,5 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Slovakisk"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Slovensk"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Tyrkisk"</string>
-    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ukrainsk"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ukrainsk"</string>
 </resources>

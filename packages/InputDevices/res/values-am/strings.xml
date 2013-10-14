@@ -16,22 +16,22 @@
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"ስፓኒሽ"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"የስዊዝ ፈረንሳይኛ"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"የስዊዝ ጀርመን"</string>
-    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"ቤልጂየምኛ"</string>
-    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ቡልጋሪኛ"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"ቤልጂየም"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ቡልጋሪያ"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"ጣሊያንኛ"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"ዴኒሽ"</string>
-    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ኖርዌጂያን"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ኖርዌጂያ"</string>
     <string name="keyboard_layout_swedish" msgid="732959109088479351">"ስዊድንኛ"</string>
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ፊኒሽ"</string>
-    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ክሮሽያንኛ"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ክሮሽያ"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"ቼክ"</string>
-    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ኤስቶኒያኛ"</string>
-    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ሀንጋሪያኛ"</string>
-    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"አይስላንድኛ"</string>
-    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"የብራዚል"</string>
-    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"ፖርቹጋልኛ"</string>
-    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ስሎቫክኛ"</string>
-    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ስሎቪኛ"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ኤስቶኒያ"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ሀንጋሪ"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"አይስላንድ"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ብራዚል"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"ፖርቹጋል"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ስሎቫክ"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ስሎቫኒያ"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ቱርክኛ"</string>
-    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ዩክረኒኛ"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ዩክሬን"</string>
 </resources>
