@@ -4379,7 +4379,7 @@ public final class Settings {
         public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
 
         /** @hide */
-        public static final String TRANSIENT_NAV_CONFIRMATIONS = "transient_nav_confirmations";
+        public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
         /**
          * This is the query URI for finding a print service to install.

@@ -138,12 +138,6 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/submenu_exit</item>
     </style>
 
-    <!-- {@hide} -->
-    <style name="Animation.ToastBar">
-        <item name="windowEnterAnimation">@anim/toast_bar_enter</item>
-        <item name="windowExitAnimation">@anim/toast_bar_exit</item>
-    </style>
-
     <style name="Animation.TypingFilter">
         <item name="windowEnterAnimation">@anim/grow_fade_in_center</item>
         <item name="windowExitAnimation">@anim/shrink_fade_out_center</item>

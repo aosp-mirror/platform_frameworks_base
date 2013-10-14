@@ -44,7 +44,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/transient_navigation_confirmation"
+                android:text="@string/immersive_mode_confirmation"
                 android:textColor="#80000000"
                 android:textSize="16sp"
                 />

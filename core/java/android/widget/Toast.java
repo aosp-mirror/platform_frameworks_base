@@ -75,9 +75,6 @@ public class Toast {
      */
     public static final int LENGTH_LONG = 1;
 
-    /** @hide */
-    public static final int LENGTH_INFINITE = 2;
-
     final Context mContext;
     final TN mTN;
     int mDuration;
@@ -294,61 +291,6 @@ public class Toast {
         tv.setText(s);
     }
 
-    /** @hide */
-    public static Toast makeBar(Context context, int resId, int duration) {
-        return makeBar(context, context.getResources().getText(resId), duration);
-    }
-
-    /** @hide */
-    public static Toast makeBar(Context context, CharSequence text, int duration) {
-        Toast result = new Toast(context);
-
-        LayoutInflater inflate = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflate.inflate(com.android.internal.R.layout.toast_bar, null);
-        ((TextView)v.findViewById(android.R.id.message)).setText(text);
-        v.findViewById(android.R.id.button1).setVisibility(View.GONE);
-
-        result.mNextView = v;
-        result.mDuration = duration;
-        result.mTN.mParams.alpha = 0.9f;
-        result.mTN.mParams.windowAnimations = com.android.internal.R.style.Animation_ToastBar;
-
-        return result;
-    }
-
-    /** @hide */
-    public Toast setAction(int resId, Runnable action) {
-        return setAction(mContext.getResources().getText(resId), action);
-    }
-
-    /** @hide */
-    public Toast setAction(CharSequence actionText, final Runnable action) {
-        if (mNextView != null) {
-            TextView text1 = (TextView)mNextView.findViewById(android.R.id.text1);
-            View button1 =  mNextView.findViewById(android.R.id.button1);
-            if (text1 != null && button1 != null) {
-                text1.setText(actionText);
-                button1.setVisibility(View.VISIBLE);
-                button1.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (action != null) {
-                            action.run();
-                        }
-                    }});
-                return setInteractive(true);
-            }
-        }
-        throw new RuntimeException("This Toast was not created with Toast.makeBar()");
-    }
-
-    /** @hide */
-    public Toast setInteractive(boolean interactive) {
-        mTN.setInteractive(interactive);
-        return this;
-    }
-
     // =======================================================================================
     // All the gunk below is the interaction with the Notification Service, which handles
     // the proper ordering of these system-wide.
@@ -405,16 +347,9 @@ public class Toast {
             params.windowAnimations = com.android.internal.R.style.Animation_Toast;
             params.type = WindowManager.LayoutParams.TYPE_TOAST;
             params.setTitle("Toast");
-            setInteractive(false);
-        }
-
-        private void setInteractive(boolean interactive) {
-            mParams.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | (interactive
-                            ? (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
-                            : WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
 
         /**
