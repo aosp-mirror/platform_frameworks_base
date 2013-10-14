@@ -69,8 +69,10 @@ public class BatteryMeterView extends View implements DemoMode {
     private final Rect mBoltFrame = new Rect();
 
     private class BatteryTracker extends BroadcastReceiver {
+        public static final int UNKNOWN_LEVEL = -1;
+
         // current battery status
-        int level;
+        int level = UNKNOWN_LEVEL;
         String percentStr;
         int plugType;
         boolean plugged;
@@ -148,7 +150,11 @@ public class BatteryMeterView extends View implements DemoMode {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(ACTION_LEVEL_TEST);
-        getContext().registerReceiver(mTracker, filter);
+        final Intent sticky = getContext().registerReceiver(mTracker, filter);
+        if (sticky != null) {
+            // preload the battery level
+            mTracker.onReceive(getContext(), sticky);
+        }
     }
 
     @Override
@@ -256,6 +262,9 @@ public class BatteryMeterView extends View implements DemoMode {
     public void draw(Canvas c) {
         BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
         final int level = tracker.level;
+
+        if (level == BatteryTracker.UNKNOWN_LEVEL) return;
+
         float drawFrac = (float) level / 100f;
         final int pt = getPaddingTop();
         final int pl = getPaddingLeft();
