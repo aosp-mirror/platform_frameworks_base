@@ -1629,10 +1629,12 @@ final class ActivityStack {
     private void insertTaskAtTop(TaskRecord task) {
         // If this is being moved to the top by another activity or being launched from the home
         // activity, set mOnTopOfHome accordingly.
-        final boolean fromHome = mStackSupervisor.getLastStack().isHomeStack();
+        ActivityStack lastStack = mStackSupervisor.getLastStack();
+        final boolean fromHome = lastStack == null ? true : lastStack.isHomeStack();
         if (!isHomeStack() && (fromHome || topTask() != task)) {
             task.mOnTopOfHome = fromHome;
         }
+
         mTaskHistory.remove(task);
         // Now put task at top.
         int stackNdx = mTaskHistory.size();
