@@ -64,4 +64,7 @@
     <!-- New TimePicker dimensions. -->
     <dimen name="timepicker_left_side_width">250dip</dimen>
 
+    <!-- width of TransientNavigationConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">380dp</dimen>
+
 </resources>
