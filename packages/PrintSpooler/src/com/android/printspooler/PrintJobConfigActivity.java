@@ -69,6 +69,7 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -861,6 +862,16 @@ public class PrintJobConfigActivity extends Activity {
         private PrinterInfo mCurrentPrinter;
 
         private MediaSizeComparator mMediaSizeComparator;
+
+        private final OnFocusChangeListener mFocusListener = new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                EditText editText = (EditText) view;
+                if (!TextUtils.isEmpty(editText.getText())) {
+                    editText.setSelection(editText.getText().length());
+                }
+            }
+        };
 
         private final OnItemSelectedListener mOnItemSelectedListener =
                 new AdapterView.OnItemSelectedListener() {
@@ -1767,7 +1778,9 @@ public class PrintJobConfigActivity extends Activity {
 
             // Copies
             mCopiesEditText = (EditText) findViewById(R.id.copies_edittext);
+            mCopiesEditText.setOnFocusChangeListener(mFocusListener);
             mCopiesEditText.setText(MIN_COPIES_STRING);
+            mCopiesEditText.setSelection(mCopiesEditText.getText().length());
             mCopiesEditText.addTextChangedListener(mCopiesTextWatcher);
             if (!TextUtils.equals(mCopiesEditText.getText(), MIN_COPIES_STRING)) {
                 mIgnoreNextCopiesChange = true;
@@ -1820,6 +1833,7 @@ public class PrintJobConfigActivity extends Activity {
             // Page range
             mPageRangeTitle = (TextView) findViewById(R.id.page_range_title);
             mPageRangeEditText = (EditText) findViewById(R.id.page_range_edittext);
+            mPageRangeEditText.setOnFocusChangeListener(mFocusListener);
             mPageRangeEditText.addTextChangedListener(mRangeTextWatcher);
 
             // Print button
