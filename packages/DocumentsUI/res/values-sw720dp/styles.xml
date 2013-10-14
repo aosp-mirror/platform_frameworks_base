@@ -20,5 +20,6 @@
         <item name="android:windowBackground">@*android:drawable/dialog_full_holo_light</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@*android:style/Animation.Holo.Dialog</item>
     </style>
 </resources>
