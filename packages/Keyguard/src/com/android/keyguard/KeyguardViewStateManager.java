@@ -139,7 +139,13 @@ public class KeyguardViewStateManager implements
             boolean isCameraPage = newPage instanceof CameraWidgetFrame;
             SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
             scl.setChallengeInteractive(!isCameraPage);
-            if (isCameraPage) scl.fadeOutChallenge();
+            if (isCameraPage) {
+                scl.fadeOutChallenge();
+            }
+            final int currentFlags = mKeyguardWidgetPager.getSystemUiVisibility();
+            final int newFlags = isCameraPage ? (currentFlags | View.STATUS_BAR_DISABLE_SEARCH)
+                    : (currentFlags & ~View.STATUS_BAR_DISABLE_SEARCH);
+            mKeyguardWidgetPager.setSystemUiVisibility(newFlags);
         }
 
         // If the page we're settling to is the same as we started on, and the action of
