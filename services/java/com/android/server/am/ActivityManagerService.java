@@ -6413,9 +6413,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int callingUid = Binder.getCallingUid();
             final UriPermission perm = findUriPermissionLocked(callingUid, uri);
             if (perm == null) {
-                Slog.w(TAG, "No permission grant found for UID " + callingUid + " and Uri "
-                        + uri.toSafeString());
-                return;
+                throw new SecurityException("No permission grant found for UID " + callingUid
+                        + " and Uri " + uri.toSafeString());
             }
 
             boolean persistChanged = perm.takePersistableModes(modeFlags);
