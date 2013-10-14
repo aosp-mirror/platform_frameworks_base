@@ -29,13 +29,6 @@ import android.util.Log;
  */
 public final class WebViewFactory {
 
-    private static final String FORCE_PROVIDER_PROPERTY = "webview.force_provider";
-    private static final String FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM = "chromium";
-    private static final String FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC = "classic";
-
-    // Default Provider factory class name.
-    // TODO: When the Chromium powered WebView is ready, it should be the default factory class.
-    private static final String DEFAULT_WEBVIEW_FACTORY = "android.webkit.WebViewClassic$Factory";
     private static final String CHROMIUM_WEBVIEW_FACTORY =
             "com.android.webview.chromium.WebViewChromiumFactoryProvider";
 
@@ -72,7 +65,7 @@ public final class WebViewFactory {
     /** @hide */
     public static boolean useExperimentalWebView() {
         // TODO: Remove callers of this method then remove it.
-        return isChromiumWebViewEnabled();
+        return true;
     }
 
     /** @hide */
@@ -84,7 +77,7 @@ public final class WebViewFactory {
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
-            // us honest and minimize usage of WebViewClassic internals when binding the proxy.
+            // us honest and minimize usage of WebView internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
 
             Class<WebViewFactoryProvider> providerClass;
@@ -118,25 +111,7 @@ public final class WebViewFactory {
         }
     }
 
-    // We allow a system property to specify that we should use the experimental Chromium powered
-    // WebView. This enables us to switch between implementations at runtime.
-    private static boolean isChromiumWebViewEnabled() {
-        String forceProviderName = SystemProperties.get(FORCE_PROVIDER_PROPERTY);
-        if (forceProviderName.isEmpty()) return true;
-
-        Log.i(LOGTAG, String.format("Provider overridden by property: %s=%s",
-                FORCE_PROVIDER_PROPERTY, forceProviderName));
-        if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM)) return true;
-        if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC)) return false;
-        Log.e(LOGTAG, String.format("Unrecognized provider: %s", forceProviderName));
-        return true;
-    }
-
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
-        if (isChromiumWebViewEnabled()) {
-            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
-        } else  {
-            return (Class<WebViewFactoryProvider>) Class.forName(DEFAULT_WEBVIEW_FACTORY);
-        }
+        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
     }
 }
