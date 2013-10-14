@@ -21,7 +21,6 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
@@ -131,7 +130,11 @@ final class UriPermission {
      * @return if mode changes should trigger persisting.
      */
     boolean takePersistableModes(int modeFlags) {
-        Preconditions.checkFlagsArgument(modeFlags, persistableModeFlags);
+        if ((modeFlags & persistableModeFlags) != modeFlags) {
+            throw new SecurityException("Requested flags 0x"
+                    + Integer.toHexString(modeFlags) + ", but only 0x"
+                    + Integer.toHexString(persistableModeFlags) + " are allowed");
+        }
 
         final int before = persistedModeFlags;
         persistedModeFlags |= (persistableModeFlags & modeFlags);
