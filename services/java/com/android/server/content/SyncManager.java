@@ -68,6 +68,7 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
@@ -2149,6 +2150,13 @@ public class SyncManager {
             for (Pair<AuthorityInfo, SyncStatusInfo> info : infos) {
                 final AuthorityInfo authorityInfo = info.first;
                 final SyncStatusInfo status = info.second;
+
+                if (TextUtils.isEmpty(authorityInfo.target.provider)) {
+                    Log.e(TAG, "Got an empty provider string. Skipping: "
+                        + authorityInfo.target.provider);
+                    continue;
+                }
+
                 if (!isDispatchable(authorityInfo.target)) {
                     continue;
                 }

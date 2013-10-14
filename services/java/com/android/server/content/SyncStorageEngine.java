@@ -1486,9 +1486,9 @@ public class SyncStorageEngine extends Handler {
      */
     public SyncStatusInfo getStatusByAuthority(EndPoint info) {
         if (info.target_provider && (info.account == null || info.provider == null)) {
-          throw new IllegalArgumentException();
+            return null;
         } else if (info.target_service && info.service == null) {
-            throw new IllegalArgumentException();
+            return null;
         }
         synchronized (mAuthorities) {
             final int N = mSyncStatus.size();

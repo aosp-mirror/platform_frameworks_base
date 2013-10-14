@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -344,12 +345,9 @@ public final class ContentService extends IContentService.Stub {
      * and
      *   anonymous OR provider sync.
      * Depending on the request, we enqueue to suit in the SyncManager.
-     * @param request
+     * @param request The request object. Validation of this object is done by its builder.
      */
     public void sync(SyncRequest request) {
-        Bundle extras = request.getBundle();
-        ContentResolver.validateSyncExtrasBundle(extras);
-
         int userId = UserHandle.getCallingUserId();
         int callerUid = Binder.getCallingUid();
         // This makes it so that future permission checks will be in the context of this
@@ -357,8 +355,11 @@ public final class ContentService extends IContentService.Stub {
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
-            if (syncManager == null) return;
+            if (syncManager == null) {
+                return;
+            }
 
+            Bundle extras = request.getBundle();
             long flextime = request.getSyncFlexTime();
             long runAtTime = request.getSyncRunTime();
             if (request.isPeriodic()) {
@@ -412,9 +413,13 @@ public final class ContentService extends IContentService.Stub {
      * null.
      * @param cname cancel syncs running on this service, or null for provider/account.
      */
+    @Override
     public void cancelSync(Account account, String authority, ComponentName cname) {
-        int userId = UserHandle.getCallingUserId();
+        if (authority != null && authority.length() == 0) {
+            throw new IllegalArgumentException("Authority must be non-empty");
+        }
 
+        int userId = UserHandle.getCallingUserId();
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -491,8 +496,8 @@ public final class ContentService extends IContentService.Stub {
     public boolean getSyncAutomatically(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -508,10 +513,13 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void setSyncAutomatically(Account account, String providerName, boolean sync) {
+        if (TextUtils.isEmpty(providerName)) {
+            throw new IllegalArgumentException("Authority must be non-empty");
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -525,12 +533,19 @@ public final class ContentService extends IContentService.Stub {
     }
 
     /** Old API. Schedule periodic sync with default flex time. */
+    @Override
     public void addPeriodicSync(Account account, String authority, Bundle extras,
             long pollFrequency) {
+        if (account == null) {
+            throw new IllegalArgumentException("Account must not be null");
+        }
+        if (TextUtils.isEmpty(authority)) {
+            throw new IllegalArgumentException("Authority must not be empty.");
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         if (pollFrequency < 60) {
             Slog.w(TAG, "Requested poll frequency of " + pollFrequency
                     + " seconds being rounded up to 60 seconds.");
@@ -553,10 +568,16 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public void removePeriodicSync(Account account, String authority, Bundle extras) {
+        if (account == null) {
+            throw new IllegalArgumentException("Account must not be null");
+        }
+        if (TextUtils.isEmpty(authority)) {
+            throw new IllegalArgumentException("Authority must not be empty");
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             getSyncManager().getSyncStorageEngine()
@@ -568,13 +589,20 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+
     public List<PeriodicSync> getPeriodicSyncs(Account account, String providerName,
             ComponentName cname) {
+        if (account == null) {
+            throw new IllegalArgumentException("Account must not be null");
+        }
+        if (TextUtils.isEmpty(providerName)) {
+            throw new IllegalArgumentException("Authority must not be empty");
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserHandle.getCallingUserId();
-        int callerUid = Binder.getCallingUid();
 
+        int callerUid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             if (cname == null) {
@@ -611,10 +639,13 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public void setIsSyncable(Account account, String providerName, int syncable) {
+        if (TextUtils.isEmpty(providerName)) {
+            throw new IllegalArgumentException("Authority must not be empty");
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -670,8 +701,8 @@ public final class ContentService extends IContentService.Stub {
     public boolean getMasterSyncAutomatically() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -688,8 +719,8 @@ public final class ContentService extends IContentService.Stub {
     public void setMasterSyncAutomatically(boolean flag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -729,8 +760,8 @@ public final class ContentService extends IContentService.Stub {
     public List<SyncInfo> getCurrentSyncs() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        int userId = UserHandle.getCallingUserId();
 
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             return getSyncManager().getSyncStorageEngine().getCurrentSyncs(userId);
@@ -740,8 +771,12 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public SyncStatusInfo getSyncStatus(Account account, String authority, ComponentName cname) {
+        if (TextUtils.isEmpty(authority)) {
+            throw new IllegalArgumentException("Authority must not be empty");
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
+
         int userId = UserHandle.getCallingUserId();
         int callerUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
@@ -768,8 +803,9 @@ public final class ContentService extends IContentService.Stub {
     public boolean isSyncPending(Account account, String authority, ComponentName cname) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        int userId = UserHandle.getCallingUserId();
+
         int callerUid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return false;
