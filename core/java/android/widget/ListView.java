@@ -508,7 +508,6 @@ public class ListView extends AbsListView {
         requestLayout();
     }
 
-
     /**
      * The list is empty. Clear everything out.
      */
