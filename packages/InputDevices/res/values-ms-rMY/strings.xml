@@ -4,7 +4,7 @@
     <string name="app_label" msgid="8016145283189546017">"Peranti Input"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Papan kekunci Android"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Bahasa Inggeris (UK)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Bahasa Inggeris (Australia)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Bahasa Inggeris (AS)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Bahasa Inggeris (AS), gaya A/bangsa"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Bahasa Inggeris (AS), gaya Colemak"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Bahasa Inggeris (AS), gaya Dvorak"</string>
