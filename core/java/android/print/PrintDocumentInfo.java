@@ -193,7 +193,7 @@ public final class PrintDocumentInfo implements Parcelable {
         builder.append("name=").append(mName);
         builder.append(", pageCount=").append(mPageCount);
         builder.append(", contentType=").append(contentTyepToString(mContentType));
-        builder.append(", size=").append(mDataSize);
+        builder.append(", dataSize=").append(mDataSize);
         builder.append("}");
         return builder.toString();
     }
