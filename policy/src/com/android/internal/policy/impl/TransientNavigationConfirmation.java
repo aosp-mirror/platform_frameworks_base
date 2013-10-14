@@ -170,11 +170,13 @@ public class TransientNavigationConfirmation {
         private static final int BGCOLOR = 0x80000000;
         private static final int OFFSET_DP = 48;
 
+        private final Runnable mConfirm;
         private final ColorDrawable mColor = new ColorDrawable(0);
         private ValueAnimator mColorAnim;
 
-        public ClingWindowView(Context context) {
+        public ClingWindowView(Context context, Runnable confirm) {
             super(context);
+            mConfirm = confirm;
             setClickable(true);
             setBackground(mColor);
         }
@@ -195,7 +197,7 @@ public class TransientNavigationConfirmation {
             ok.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    handleHide();
+                    mConfirm.run();
                 }
             });
             addView(clingLayout, new FrameLayout.LayoutParams(
@@ -249,7 +251,7 @@ public class TransientNavigationConfirmation {
         mPromptPackage = pkg;
         if (DEBUG) Slog.d(TAG, "Showing transient navigation confirmation for " + pkg);
 
-        mClingWindow = new ClingWindowView(mContext);
+        mClingWindow = new ClingWindowView(mContext, confirmAction(pkg));
 
         // we will be hiding the nav bar, so layout as if it's already hidden
         mClingWindow.setSystemUiVisibility(
