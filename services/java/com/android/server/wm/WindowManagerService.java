@@ -1855,10 +1855,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Now stick it in.
                 if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
                     Slog.v(TAG, "Moving wallpaper " + wallpaper
-                            + " from " + oldIndex + " to " + foundI);
+                            + " from " + oldIndex + " to " + 0);
                 }
 
-                windows.add(foundI, wallpaper);
+                windows.add(0, wallpaper);
                 mWindowsChanged = true;
                 changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
             }
@@ -4669,6 +4669,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
+            }
+        }
+        // Never put an app window underneath wallpaper.
+        for (int pos = NW - 1; pos >= 0; pos--) {
+            if (windows.get(pos).mIsWallpaper) {
+                if (DEBUG_REORDER) Slog.v(TAG, "Found wallpaper @" + pos);
+                return pos + 1;
             }
         }
         return 0;
