@@ -1248,13 +1248,20 @@ public class PrintJobConfigActivity extends Activity {
                                     continue;
                                 }
 
+                                // If nothing changed - done.
+                                if (mCurrentPrinter.equals(printer)) {
+                                    return;
+                                }
+
                                 // If the current printer became available and has no
                                 // capabilities, we refresh it.
                                 if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE
                                         && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE
-                                        && printer.getCapabilities() == null
-                                        && !mCapabilitiesTimeout.isPosted()) {
-                                    mCapabilitiesTimeout.post();
+                                        && printer.getCapabilities() == null) {
+                                    if (!mCapabilitiesTimeout.isPosted()) {
+                                        mCapabilitiesTimeout.post();
+                                    }
+                                    mCurrentPrinter.copyFrom(printer);
                                     refreshCurrentPrinter();
                                     return;
                                 }
@@ -1268,10 +1275,10 @@ public class PrintJobConfigActivity extends Activity {
                                         && printer.getCapabilities() == null)) {
                                     if (!mCapabilitiesTimeout.isPosted()) {
                                         mCapabilitiesTimeout.post();
-                                        mCurrentPrinter.copyFrom(printer);
-                                        updateUi();
-                                        return;
                                     }
+                                    mCurrentPrinter.copyFrom(printer);
+                                    updateUi();
+                                    return;
                                 }
 
                                 // We just refreshed the current printer.
