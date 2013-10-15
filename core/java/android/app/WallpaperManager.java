@@ -221,24 +221,9 @@ public class WallpaperManager {
         
         private static final int MSG_CLEAR_WALLPAPER = 1;
         
-        private final Handler mHandler;
-        
         Globals(Looper looper) {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
-            mHandler = new Handler(looper) {
-                @Override
-                public void handleMessage(Message msg) {
-                    switch (msg.what) {
-                        case MSG_CLEAR_WALLPAPER:
-                            synchronized (this) {
-                                mWallpaper = null;
-                                mDefaultWallpaper = null;
-                            }
-                            break;
-                    }
-                }
-            };
         }
         
         public void onWallpaperChanged() {
@@ -247,7 +232,10 @@ public class WallpaperManager {
              * to null so if the user requests the wallpaper again then we'll
              * fetch it.
              */
-            mHandler.sendEmptyMessage(MSG_CLEAR_WALLPAPER);
+            synchronized (this) {
+                mWallpaper = null;
+                mDefaultWallpaper = null;
+            }
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
@@ -280,7 +268,6 @@ public class WallpaperManager {
             synchronized (this) {
                 mWallpaper = null;
                 mDefaultWallpaper = null;
-                mHandler.removeMessages(MSG_CLEAR_WALLPAPER);
             }
         }
 
