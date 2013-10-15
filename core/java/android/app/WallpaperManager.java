@@ -278,6 +278,7 @@ public class WallpaperManager {
             synchronized (this) {
                 mWallpaper = null;
                 mDefaultWallpaper = null;
+                mHandler.removeMessages(MSG_CLEAR_WALLPAPER);
             }
         }
 
