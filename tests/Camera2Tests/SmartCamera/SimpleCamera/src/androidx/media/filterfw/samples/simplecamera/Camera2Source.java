@@ -20,9 +20,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraProperties;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.os.Handler;
@@ -56,7 +57,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
     private CameraDevice mCamera;
     private RenderScript mRS;
     private Surface mSurface;
-    private CameraProperties mProperties;
+    private CameraCharacteristics mProperties;
     private CameraTestThread mLooperThread;
     private int mHeight = 480;
     private int mWidth = 640;
@@ -92,7 +93,8 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
         }
 
         @Override
-        public void onCaptureFailed(CameraDevice camera, CaptureRequest request) {
+        public void onCaptureFailed(CameraDevice camera, CaptureRequest request,
+                CaptureFailure failure) {
             // TODO Auto-generated method stub
             Log.v(TAG, "onCaptureFailed is being called");
         }
@@ -198,7 +200,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
         }
         mProperties = null;
         try {
-            mProperties = mCamera.getProperties();
+            mProperties = mCameraManager.getCameraCharacteristics(mCamera.getId());
         } catch (CameraAccessException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -228,7 +230,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
 
             // FIXME: Hardcoded value because ORIENTATION returns null, Qualcomm
             // bug
-            Integer orientation = mProperties.get(CameraProperties.SENSOR_ORIENTATION);
+            Integer orientation = mProperties.get(CameraCharacteristics.SENSOR_ORIENTATION);
             float temp;
             if (orientation != null) {
                 temp = orientation.floatValue();
