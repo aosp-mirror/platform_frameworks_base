@@ -33,6 +33,18 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class can be used to query the state of
+ * NFC card emulation services.
+ *
+ * For a general introduction into NFC card emulation,
+ * please read the <a href="{@docRoot}guide/topics/nfc/ce.html">
+ * NFC card emulation developer guide</a>.</p>
+ *
+ * <p class="note">Use of this class requires the
+ * {@link PackageManager#FEATURE_NFC_HOST_CARD_EMULATION} to be present
+ * on the device.
+ */
 public final class CardEmulation {
     static final String TAG = "CardEmulation";
 
@@ -50,32 +62,28 @@ public final class CardEmulation {
             "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
 
     /**
-     * The category extra for {@link #ACTION_CHANGE_DEFAULT}
+     * The category extra for {@link #ACTION_CHANGE_DEFAULT}.
      *
      * @see #ACTION_CHANGE_DEFAULT
      */
     public static final String EXTRA_CATEGORY = "category";
 
     /**
-     * The ComponentName object passed in as a parcelable
-     * extra for {@link #ACTION_CHANGE_DEFAULT}
+     * The service {@link ComponentName} object passed in as an
+     * extra for {@link #ACTION_CHANGE_DEFAULT}.
      *
      * @see #ACTION_CHANGE_DEFAULT
      */
     public static final String EXTRA_SERVICE_COMPONENT = "component";
 
     /**
-     * The payment category can be used to indicate that an AID
-     * represents a payment application.
+     * Category used for NFC payment services.
      */
     public static final String CATEGORY_PAYMENT = "payment";
 
     /**
-     * If an AID group does not contain a category, or the
-     * specified category is not defined by the platform version
-     * that is parsing the AID group, all AIDs in the group will
-     * automatically be categorized under the {@link #CATEGORY_OTHER}
-     * category.
+     * Category that can be used for all other card emulation
+     * services.
      */
     public static final String CATEGORY_OTHER = "other";
 
@@ -83,49 +91,23 @@ public final class CardEmulation {
      * Return value for {@link #getSelectionModeForCategory(String)}.
      *
      * <p>In this mode, the user has set a default service for this
-     *    AID category. If a remote reader selects any of the AIDs
+     *    category.
+     *
+     * <p>When using ISO-DEP card emulation with {@link HostApduService}
+     *    or {@link OffHostApduService}, if a remote NFC device selects
+     *    any of the Application IDs (AIDs)
      *    that the default service has registered in this category,
      *    that service will automatically be bound to to handle
      *    the transaction.
-     *
-     * <p>There are still cases where a service that is
-     *    not the default for a category can selected:
-     *    <p>
-     *    If a remote reader selects an AID in this category
-     *    that is not handled by the default service, and there is a set
-     *    of other services {S} that do handle this AID, the
-     *    user is asked if he wants to use any of the services in
-     *    {S} instead.
-     *    <p>
-     *    As a special case, if the size of {S} is one, containing a single service X,
-     *    and all AIDs X has registered in this category are not
-     *    registered by any other service, then X will be
-     *    selected automatically without asking the user.
-     *    <p>Example:
-     *    <ul>
-     *    <li>Service A registers AIDs "1", "2" and "3" in the category
-     *    <li>Service B registers AIDs "3" and "4" in the category
-     *    <li>Service C registers AIDs "5" and "6" in the category
-     *    </ul>
-     *    In this case, the following will happen when service A
-     *    is the default:
-     *    <ul>
-     *    <li>Reader selects AID "1", "2" or "3": service A is invoked automatically
-     *    <li>Reader selects AID "4": the user is asked to confirm he
-     *        wants to use service B, because its AIDs overlap with service A.
-     *    <li>Reader selects AID "5" or "6": service C is invoked automatically,
-     *        because all AIDs it has asked for are only registered by C,
-     *        and there is no overlap.
-     *    </ul>
-     *
      */
     public static final int SELECTION_MODE_PREFER_DEFAULT = 0;
 
     /**
      * Return value for {@link #getSelectionModeForCategory(String)}.
      *
-     * <p>In this mode, whenever an AID of this category is selected,
-     *    the user is asked which service he wants to use to handle
+     * <p>In this mode, when using ISO-DEP card emulation with {@link HostApduService}
+     *    or {@link OffHostApduService}, whenever an Application ID (AID) of this category
+     *    is selected, the user is asked which service he wants to use to handle
      *    the transaction, even if there is only one matching service.
      */
     public static final int SELECTION_MODE_ALWAYS_ASK = 1;
@@ -133,13 +115,16 @@ public final class CardEmulation {
     /**
      * Return value for {@link #getSelectionModeForCategory(String)}.
      *
-     * <p>In this mode, the user will only be asked to select a service
-     *    if the selected AID has been registered by multiple applications.
+     * <p>In this mode, when using ISO-DEP card emulation with {@link HostApduService}
+     *    or {@link OffHostApduService}, the user will only be asked to select a service
+     *    if the Application ID (AID) selected by the reader has been registered by multiple
+     *    services. If there is only one service that has registered for the AID,
+     *    that service will be invoked directly.
      */
     public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2;
 
     static boolean sIsInitialized = false;
-    static HashMap<Context, CardEmulation> sCardEmus = new HashMap();
+    static HashMap<Context, CardEmulation> sCardEmus = new HashMap<Context, CardEmulation>();
     static INfcCardEmulation sService;
 
     final Context mContext;
@@ -149,6 +134,12 @@ public final class CardEmulation {
         sService = service;
     }
 
+    /**
+     * Helper to get an instance of this class.
+     *
+     * @param adapter A reference to an NfcAdapter object.
+     * @return
+     */
     public static synchronized CardEmulation getInstance(NfcAdapter adapter) {
         if (adapter == null) throw new NullPointerException("NfcAdapter is null");
         Context context = adapter.getContext();
@@ -188,12 +179,19 @@ public final class CardEmulation {
      * the default service to handle a card emulation category.
      *
      * <p>Note that if {@link #getSelectionModeForCategory(String)}
-     * returns {@link #SELECTION_MODE_ALWAYS_ASK}, this method will always
-     * return false.
+     * returns {@link #SELECTION_MODE_ALWAYS_ASK} or {@link #SELECTION_MODE_ASK_IF_CONFLICT},
+     * this method will always return false. That is because in these
+     * selection modes a default can't be set at the category level. For categories where
+     * the selection mode is {@link #SELECTION_MODE_ALWAYS_ASK} or
+     * {@link #SELECTION_MODE_ASK_IF_CONFLICT}, use
+     * {@link #isDefaultServiceForAid(ComponentName, String)} to determine whether a service
+     * is the default for a specific AID.
      *
      * @param service The ComponentName of the service
      * @param category The category
      * @return whether service is currently the default service for the category.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      */
     public boolean isDefaultServiceForCategory(ComponentName service, String category) {
         try {
@@ -222,7 +220,9 @@ public final class CardEmulation {
      *
      * @param service The ComponentName of the service
      * @param aid The ISO7816-4 Application ID
-     * @return
+     * @return whether the service is the default handler for the specified AID
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      */
     public boolean isDefaultServiceForAid(ComponentName service, String aid) {
         try {
@@ -244,16 +244,16 @@ public final class CardEmulation {
     }
 
     /**
-     * Returns the application selection mode for the passed in category.
+     * Returns the service selection mode for the passed in category.
      * Valid return values are:
      * <p>{@link #SELECTION_MODE_PREFER_DEFAULT} the user has requested a default
-     *    application for this category, which will be preferred.
+     *    service for this category, which will be preferred.
      * <p>{@link #SELECTION_MODE_ALWAYS_ASK} the user has requested to be asked
-     *    every time what app he would like to use in this category.
+     *    every time what service he would like to use in this category.
      * <p>{@link #SELECTION_MODE_ASK_IF_CONFLICT} the user will only be asked
      *    to pick a service if there is a conflict.
      * @param category The category, for example {@link #CATEGORY_PAYMENT}
-     * @return
+     * @return the selection mode for the passed in category
      */
     public int getSelectionModeForCategory(String category) {
         if (CATEGORY_PAYMENT.equals(category)) {
@@ -314,6 +314,7 @@ public final class CardEmulation {
             }
         }
     }
+
     /**
      * @hide
      */
