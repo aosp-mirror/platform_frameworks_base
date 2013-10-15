@@ -68,9 +68,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.SparseArray;
+import android.util.SparseIntArray;
 
-import android.util.SparseBooleanArray;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -204,8 +203,8 @@ public final class ActivityStackSupervisor {
      */
     final PowerManager.WakeLock mGoingToSleep;
 
-    /** State of the stacks when user switched, indexed by userId. */
-    SparseBooleanArray mUserHomeInFront = new SparseBooleanArray(2);
+    /** Stack id of the front stack when user switched, indexed by userId. */
+    SparseIntArray mUserStackInFront = new SparseIntArray(2);
 
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
@@ -1927,7 +1926,7 @@ public final class ActivityStackSupervisor {
     }
 
     void removeUserLocked(int userId) {
-        mUserHomeInFront.delete(userId);
+        mUserStackInFront.delete(userId);
     }
 
     /**
@@ -2248,8 +2247,8 @@ public final class ActivityStackSupervisor {
     }
 
     boolean switchUserLocked(int userId, UserStartedState uss) {
-        mUserHomeInFront.put(mCurrentUser, isFrontStack(mHomeStack));
-        final boolean homeInFront = mUserHomeInFront.get(userId, true);
+        mUserStackInFront.put(mCurrentUser, getFocusedStack().getStackId());
+        final int restoreStackId = mUserStackInFront.get(userId, HOME_STACK_ID);
         mCurrentUser = userId;
 
         mStartingUsers.add(uss);
@@ -2257,7 +2256,13 @@ public final class ActivityStackSupervisor {
             mStacks.get(stackNdx).switchUserLocked(userId);
         }
 
+        ActivityStack stack = getStack(restoreStackId);
+        if (stack == null) {
+            stack = mHomeStack;
+        }
+        final boolean homeInFront = stack.isHomeStack();
         moveHomeStack(homeInFront);
+        mWindowManager.moveTaskToTop(stack.topTask().taskId);
         return homeInFront;
     }
 
@@ -2351,7 +2356,7 @@ public final class ActivityStackSupervisor {
         pw.print(prefix); pw.print("mStackState="); pw.println(stackStateToString(mStackState));
         pw.print(prefix); pw.println("mSleepTimeout: " + mSleepTimeout);
         pw.print(prefix); pw.println("mCurTaskId: " + mCurTaskId);
-        pw.print(prefix); pw.println("mUserHomeInFront: " + mUserHomeInFront);
+        pw.print(prefix); pw.println("mUserStackInFront: " + mUserStackInFront);
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
