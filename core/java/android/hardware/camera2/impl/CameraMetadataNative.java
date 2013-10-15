@@ -93,7 +93,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     @Override
     public <T> T get(Key<T> key) {
 
-        if (key == CaptureResult.STATISTICS_FACES) {
+        if (key.equals(CaptureResult.STATISTICS_FACES)) {
             /**
              * FIXME: Workaround for HAL bug that's missing FACE_DETECT_MODE
              */
@@ -452,10 +452,12 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     // and managed sides.
     @SuppressWarnings("unchecked")
     private <T> T getOverride(Key<T> key) {
-        if (key == CameraCharacteristics.SCALER_AVAILABLE_FORMATS) {
+        if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
             return (T) getAvailableFormats();
-        } else if (key == CaptureResult.STATISTICS_FACES) {
+        } else if (key.equals(CaptureResult.STATISTICS_FACES)) {
             return (T) getFaces();
+        } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
+            return (T) fixFaceRectangles();
         }
 
         // For other keys, get() falls back to getBase()
@@ -536,6 +538,25 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         return faces;
     }
 
+    // Face rectangles are defined as (left, top, right, bottom) instead of
+    // (left, top, width, height) at the native level, so the normal Rect
+    // conversion that does (l, t, w, h) -> (l, t, r, b) is unnecessary. Undo
+    // that conversion here for just the faces.
+    private Rect[] fixFaceRectangles() {
+        Rect[] faceRectangles = getBase(CaptureResult.STATISTICS_FACE_RECTANGLES);
+        if (faceRectangles == null) return null;
+
+        Rect[] fixedFaceRectangles = new Rect[faceRectangles.length];
+        for (int i = 0; i < faceRectangles.length; i++) {
+            fixedFaceRectangles[i] = new Rect(
+                    faceRectangles[i].left,
+                    faceRectangles[i].top,
+                    faceRectangles[i].right - faceRectangles[i].left,
+                    faceRectangles[i].bottom - faceRectangles[i].top);
+        }
+        return fixedFaceRectangles;
+    }
+
     private <T> void setBase(Key<T> key, T value) {
         int tag = key.getTag();
 
@@ -559,7 +580,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     // Set the camera metadata override.
     private <T> boolean setOverride(Key<T> key, T value) {
-        if (key == CameraCharacteristics.SCALER_AVAILABLE_FORMATS) {
+        if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
             return setAvailableFormats((int[]) value);
         }
 
