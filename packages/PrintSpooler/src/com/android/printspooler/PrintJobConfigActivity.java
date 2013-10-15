@@ -2175,10 +2175,17 @@ public class PrintJobConfigActivity extends Activity {
                 mIsPosted = false;
                 if (mDestinationSpinner.getSelectedItemPosition() >= 0) {
                     View itemView = mDestinationSpinner.getSelectedView();
-                    TextView titleView = (TextView) itemView.findViewById(R.id.title);
-                    String title = getString(R.string.printer_unavailable,
-                            mCurrentPrinter.getName());
-                    titleView.setText(title);
+                    TextView titleView = (TextView) itemView.findViewById(R.id.subtitle);
+                    try {
+                        PackageInfo packageInfo = getPackageManager().getPackageInfo(
+                                mCurrentPrinter.getId().getServiceName().getPackageName(), 0);
+                        CharSequence service = packageInfo.applicationInfo.loadLabel(
+                                getPackageManager());
+                        String subtitle = getString(R.string.printer_unavailable, service.toString());
+                        titleView.setText(subtitle);
+                    } catch (NameNotFoundException nnfe) {
+                        /* ignore */
+                    }
                 }
             }
         }
