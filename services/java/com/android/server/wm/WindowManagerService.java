@@ -187,7 +187,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
-    static final boolean DEBUG_STACK = true;
+    static final boolean DEBUG_STACK = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -1852,13 +1852,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                // Now stick it in.
+                // Now stick it in. For apps over wallpaper keep the wallpaper at the bottommost
+                // layer. For keyguard over wallpaper put the wallpaper under the keyguard.
+                int insertionIndex = 0;
+                if (visible && foundW != null) {
+                    final int type = foundW.mAttrs.type;
+                    if (type == TYPE_KEYGUARD || type == TYPE_KEYGUARD_SCRIM) {
+                        insertionIndex = windows.indexOf(foundW);
+                    }
+                }
                 if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
                     Slog.v(TAG, "Moving wallpaper " + wallpaper
-                            + " from " + oldIndex + " to " + 0);
+                            + " from " + oldIndex + " to " + insertionIndex);
                 }
 
-                windows.add(0, wallpaper);
+                windows.add(insertionIndex, wallpaper);
                 mWindowsChanged = true;
                 changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
             }
