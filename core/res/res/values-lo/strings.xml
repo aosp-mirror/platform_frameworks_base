@@ -1583,6 +1583,5 @@
     <item quantity="one" msgid="4835639969503729874">"PIN ​ບໍ່​ຖືກ​ຕ້ອງ​. ລອງໃໝ່ໃນອີກ 1 ວິນາທີ."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN ບໍ່​ຖືກ​ຕ້ອງ​. ລອງໃໝ່ໃນອີກ <xliff:g id="COUNT">%d</xliff:g> ວິ​ນາ​ທີ​."</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"ປັດຢູ່ຂອບຂອງໜ້າຈໍເພື່ອສະແດງແຖບ"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"ປັດຢູ່ຂອບຂອງໜ້າຈໍເພື່ອສະແດງແຖບຂອງລະບົບ"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"ປັດຢູ່ຂອບຂອງໜ້າຈໍເພື່ອສະແດງແຖບ"</string>
 </resources>

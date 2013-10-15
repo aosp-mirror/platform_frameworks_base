@@ -1583,6 +1583,5 @@
     <item quantity="one" msgid="4835639969503729874">"არასწორი PIN. სცადეთ ისევ 1 წამში."</item>
     <item quantity="other" msgid="8030607343223287654">"არასწორი PIN. სცადეთ ისევ <xliff:g id="COUNT">%d</xliff:g> წამში."</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"გაასრიალეთ ეკრანის კიდეზე ზოლის გამოსაჩენად"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"გაასრიალეთ ეკრანის კიდიდან სისტემის ზოლის გამოსაჩენად"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"გაასრიალეთ ეკრანის კიდეზე ზოლის გამოსაჩენად"</string>
 </resources>

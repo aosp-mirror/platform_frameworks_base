@@ -1579,6 +1579,5 @@
     <item quantity="one" msgid="4835639969503729874">"Буруу PIN. 1 секундын дараа дахин оролдоно уу."</item>
     <item quantity="other" msgid="8030607343223287654">"Буруу PIN. <xliff:g id="COUNT">%d</xliff:g> секундын дараа дахин оролдоно уу."</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Баганыг харуулахын тулд дэлгэцийн ирмэгийг шудрана уу"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Системийн баганыг гаргахын тулд дэлгэцийн ирмэгээс шудрана уу"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Баганыг харуулахын тулд дэлгэцийн ирмэгийг шудрана уу"</string>
 </resources>

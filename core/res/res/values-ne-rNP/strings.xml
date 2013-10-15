@@ -1584,6 +1584,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"पछि पुनः प्रयास गर्नुहोस्"</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"पट्टि देखिने बनाउन स्क्रिनको छेउमा स्वाइप गर्नुहोस्"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"प्रणाली पट्टि देखिने बनाउन स्क्रिनको छेउबाट स्वाइप गर्नुहोस्"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"पट्टि देखिने बनाउन स्क्रिनको छेउमा स्वाइप गर्नुहोस्"</string>
 </resources>

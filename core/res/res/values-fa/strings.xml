@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"امتحان پس از <xliff:g id="COUNT">%d</xliff:g> ثانیه"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"بعداً دوباره امتحان کنید"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"برای خروج از تمام صفحه از بالا به پایین بکشید"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"برای خروج از تمام صفحه از بالا به پایین بکشید"</string>
 </resources>
