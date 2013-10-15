@@ -1179,7 +1179,8 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             mLayoutRequested = true;
 
-            if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
+            if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
+                    || lp.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
                 // NOTE -- system code, won't try to do compat mode.
                 Point size = new Point();
                 mDisplay.getRealSize(size);
@@ -1273,7 +1274,8 @@ public final class ViewRootImpl implements ViewParent,
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowSizeMayChange = true;
 
-                    if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
+                    if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
+                            || lp.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
                         // NOTE -- system code, won't try to do compat mode.
                         Point size = new Point();
                         mDisplay.getRealSize(size);
