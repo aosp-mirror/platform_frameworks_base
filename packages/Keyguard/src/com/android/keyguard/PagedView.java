@@ -1553,6 +1553,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             if (mTouchState == TOUCH_STATE_SCROLLING) {
                 final int activePointerId = mActivePointerId;
                 final int pointerIndex = ev.findPointerIndex(activePointerId);
+
+                if (pointerIndex == -1) return true;
+
                 final float x = ev.getX(pointerIndex);
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
