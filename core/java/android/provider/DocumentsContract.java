@@ -28,7 +28,9 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -42,8 +44,10 @@ import libcore.io.IoUtils;
 import libcore.io.Libcore;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -75,6 +79,15 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
+
+    /**
+     * Included in {@link AssetFileDescriptor#getExtras()} when returned
+     * thumbnail should be rotated.
+     *
+     * @see MediaStore.Images.ImageColumns#ORIENTATION
+     * @hide
+     */
+    public static final String EXTRA_ORIENTATION = "android.content.extra.ORIENTATION";
 
     /** {@hide} */
     public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
@@ -657,6 +670,7 @@ public final class DocumentsContract {
         openOpts.putParcelable(DocumentsContract.EXTRA_THUMBNAIL_SIZE, size);
 
         AssetFileDescriptor afd = null;
+        Bitmap bitmap = null;
         try {
             afd = client.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts, signal);
 
@@ -688,21 +702,36 @@ public final class DocumentsContract {
 
             opts.inJustDecodeBounds = false;
             opts.inSampleSize = Math.min(widthSample, heightSample);
-            Log.d(TAG, "Decoding with sample size " + opts.inSampleSize);
             if (is != null) {
                 is.reset();
-                return BitmapFactory.decodeStream(is, null, opts);
+                bitmap = BitmapFactory.decodeStream(is, null, opts);
             } else {
                 try {
                     Libcore.os.lseek(fd, offset, SEEK_SET);
                 } catch (ErrnoException e) {
                     e.rethrowAsIOException();
                 }
-                return BitmapFactory.decodeFileDescriptor(fd, null, opts);
+                bitmap = BitmapFactory.decodeFileDescriptor(fd, null, opts);
+            }
+
+            // Transform the bitmap if requested. We use a side-channel to
+            // communicate the orientation, since EXIF thumbnails don't contain
+            // the rotation flags of the original image.
+            final Bundle extras = afd.getExtras();
+            final int orientation = (extras != null) ? extras.getInt(EXTRA_ORIENTATION, 0) : 0;
+            if (orientation != 0) {
+                final int width = bitmap.getWidth();
+                final int height = bitmap.getHeight();
+
+                final Matrix m = new Matrix();
+                m.setRotate(orientation, width / 2, height / 2);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, m, false);
             }
         } finally {
             IoUtils.closeQuietly(afd);
         }
+
+        return bitmap;
     }
 
     /**
@@ -769,5 +798,45 @@ public final class DocumentsContract {
         in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(documentUri));
 
         client.call(METHOD_DELETE_DOCUMENT, null, in);
+    }
+
+    /**
+     * Open the given image for thumbnail purposes, using any embedded EXIF
+     * thumbnail if available, and providing orientation hints from the parent
+     * image.
+     *
+     * @hide
+     */
+    public static AssetFileDescriptor openImageThumbnail(File file) throws FileNotFoundException {
+        final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                file, ParcelFileDescriptor.MODE_READ_ONLY);
+        Bundle extras = null;
+
+        try {
+            final ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+
+            switch (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1)) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    extras = new Bundle(1);
+                    extras.putInt(EXTRA_ORIENTATION, 90);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    extras = new Bundle(1);
+                    extras.putInt(EXTRA_ORIENTATION, 180);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    extras = new Bundle(1);
+                    extras.putInt(EXTRA_ORIENTATION, 270);
+                    break;
+            }
+
+            final long[] thumb = exif.getThumbnailRange();
+            if (thumb != null) {
+                return new AssetFileDescriptor(pfd, thumb[0], thumb[1], extras);
+            }
+        } catch (IOException e) {
+        }
+
+        return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH, extras);
     }
 }
