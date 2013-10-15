@@ -16,6 +16,7 @@
 package com.android.server;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.internal.os.HandlerCaller;
@@ -179,6 +180,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<String, InputMethodInfo>();
     private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
             new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
+    private final InputMethodSubtypeSwitchingController mSwitchingController =
+            new InputMethodSubtypeSwitchingController();
 
     // Used to bring IME service up to visible adjustment while it is being shown.
     final ServiceConnection mVisibleConnection = new ServiceConnection() {
@@ -2240,6 +2243,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public int getInputMethodWindowVisibleHeight() {
         return mWindowManagerService.getInputMethodWindowVisibleHeight();
+    }
+
+    @Override
+    public void notifyTextCommitted() {
+        if (DEBUG) {
+            Slog.d(TAG, "Got the notification of commitText");
+        }
+        final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+        if (imi != null) {
+            mSwitchingController.onCommitText(imi, mCurrentSubtype);
+        }
     }
 
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
