@@ -7565,11 +7565,13 @@ package android.content.res {
 
   public class AssetFileDescriptor implements java.io.Closeable android.os.Parcelable {
     ctor public AssetFileDescriptor(android.os.ParcelFileDescriptor, long, long);
+    ctor public AssetFileDescriptor(android.os.ParcelFileDescriptor, long, long, android.os.Bundle);
     method public void close() throws java.io.IOException;
     method public java.io.FileInputStream createInputStream() throws java.io.IOException;
     method public java.io.FileOutputStream createOutputStream() throws java.io.IOException;
     method public int describeContents();
     method public long getDeclaredLength();
+    method public android.os.Bundle getExtras();
     method public java.io.FileDescriptor getFileDescriptor();
     method public long getLength();
     method public android.os.ParcelFileDescriptor getParcelFileDescriptor();
