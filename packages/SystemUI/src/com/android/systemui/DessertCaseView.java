@@ -96,6 +96,13 @@ public class DessertCaseView extends FrameLayout {
             1f,  0f,  0f,  0f, 0f
     };
 
+    private static final float[] ALPHA_MASK = {
+            0f,  0f,  0f,  0f, 255f,
+            0f,  0f,  0f,  0f, 255f,
+            0f,  0f,  0f,  0f, 255f,
+            0f,  0f,  0f,  1f, 0f
+    };
+
     private static final float[] WHITE_MASK = {
             0f,  0f,  0f,  0f, 255f,
             0f,  0f,  0f,  0f, 255f,
@@ -162,13 +169,22 @@ public class DessertCaseView extends FrameLayout {
         for (int[] list : new int[][] { PASTRIES, RARE_PASTRIES, XRARE_PASTRIES, XXRARE_PASTRIES }) {
             for (int resid : list) {
                 final BitmapDrawable d = new BitmapDrawable(res,
-                        BitmapFactory.decodeResource(res, resid, opts));
-                d.setColorFilter(new ColorMatrixColorFilter(MASK));
+                        convertToAlphaMask(BitmapFactory.decodeResource(res, resid, opts)));
+                d.setColorFilter(new ColorMatrixColorFilter(ALPHA_MASK));
                 d.setBounds(0, 0, mCellSize, mCellSize);
                 mDrawables.append(resid, d);
             }
         }
         if (DEBUG) setWillNotDraw(false);
+    }
+
+    private static Bitmap convertToAlphaMask(Bitmap b) {
+        Bitmap a = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ALPHA_8);
+        Canvas c = new Canvas(a);
+        Paint pt = new Paint();
+        pt.setColorFilter(new ColorMatrixColorFilter(MASK));
+        c.drawBitmap(b, 0.0f, 0.0f, pt);
+        return a;
     }
 
     public void start() {
@@ -273,9 +289,9 @@ public class DessertCaseView extends FrameLayout {
 
             final float which = frand();
             final Drawable d;
-            if (which < 0.001f) {
+            if (which < 0.0005f) {
                 d = mDrawables.get(pick(XXRARE_PASTRIES));
-            } else if (which < 0.01f) {
+            } else if (which < 0.005f) {
                 d = mDrawables.get(pick(XRARE_PASTRIES));
             } else if (which < 0.5f) {
                 d = mDrawables.get(pick(RARE_PASTRIES));
@@ -288,8 +304,7 @@ public class DessertCaseView extends FrameLayout {
                 v.getOverlay().add(d);
             }
 
-            final Paint paint = new Paint();
-            v.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+            v.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
             lp.width = lp.height = mCellSize;
             addView(v, lp);
