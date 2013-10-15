@@ -335,12 +335,7 @@ final class ServiceRecord extends Binder {
 
     public void forceClearTracker() {
         if (tracker != null) {
-            int memFactor = ams.mProcessStats.getMemFactorLocked();
-            long now = SystemClock.uptimeMillis();
-            tracker.setStarted(false, memFactor, now);
-            tracker.setBound(false, memFactor, now);
-            tracker.setExecuting(false, memFactor, now);
-            tracker.clearCurrentOwner(this);
+            tracker.clearCurrentOwner(this, true);
             tracker = null;
         }
     }

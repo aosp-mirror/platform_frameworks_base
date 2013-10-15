@@ -253,7 +253,7 @@ public final class Log {
      * @param msg The message you would like logged.
      */
     public static int wtf(String tag, String msg) {
-        return wtf(tag, msg, null);
+        return wtf(LOG_ID_MAIN, tag, msg, null, false);
     }
 
     /**
@@ -262,7 +262,7 @@ public final class Log {
      * @hide
      */
     public static int wtfStack(String tag, String msg) {
-        return wtfStack(LOG_ID_MAIN, tag, msg);
+        return wtf(LOG_ID_MAIN, tag, msg, null, true);
     }
 
     /**
@@ -272,7 +272,7 @@ public final class Log {
      * @param tr An exception to log.
      */
     public static int wtf(String tag, Throwable tr) {
-        return wtf(tag, tr.getMessage(), tr);
+        return wtf(LOG_ID_MAIN, tag, tr.getMessage(), tr, false);
     }
 
     /**
@@ -283,18 +283,13 @@ public final class Log {
      * @param tr An exception to log.  May be null.
      */
     public static int wtf(String tag, String msg, Throwable tr) {
-        return wtf(LOG_ID_MAIN, tag, msg, tr);
+        return wtf(LOG_ID_MAIN, tag, msg, tr, false);
     }
 
-    static int wtfStack(int logId, String tag, String msg) {
-        TerribleFailure here = new TerribleFailure("here", null);
-        here.fillInStackTrace();
-        return wtf(logId, tag, msg, here);
-    }
-
-    static int wtf(int logId, String tag, String msg, Throwable tr) {
+    static int wtf(int logId, String tag, String msg, Throwable tr, boolean localStack) {
         TerribleFailure what = new TerribleFailure(msg, tr);
-        int bytes = println_native(logId, ASSERT, tag, msg + '\n' + getStackTraceString(tr));
+        int bytes = println_native(logId, ASSERT, tag, msg + '\n'
+                + getStackTraceString(localStack ? what : tr));
         sWtfHandler.onTerribleFailure(tag, what);
         return bytes;
     }
