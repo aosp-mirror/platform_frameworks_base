@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Zama futhi kumasekhondi angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Zama futhi emva kwesikhathi"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Swayipha ngezansi kusuka ngaphezulu ukuze uphume kusikrini esigcwele"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Swayipha ngezansi kusuka ngaphezulu ukuze uphume kusikrini esigcwele"</string>
 </resources>

@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"សូម​ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"សូម​ព្យាយាម​ម្ដងទៀត​នៅ​ពេល​ក្រោយ។"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"អូស​​​ចុះក្រោម ដើម្បី​ចេញ​ពី​ការ​បង្ហាញ​ពេញ​អេក្រង់"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"អូស​​​ចុះក្រោម ដើម្បី​ចេញ​ពី​ការ​បង្ហាញ​ពេញ​អេក្រង់"</string>
 </resources>

@@ -1583,6 +1583,5 @@
     <item quantity="one" msgid="4835639969503729874">"PIN salah. Cuba lagi dalam masa 1 saat."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN salah. Cuba lagi dalam masa <xliff:g id="COUNT">%d</xliff:g> saat."</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Leret bhg tepi skrin utk serlah bar"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Leret dari tepi skrin untuk menampakkan bar sistem"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Leret bhg tepi skrin utk serlah bar"</string>
 </resources>

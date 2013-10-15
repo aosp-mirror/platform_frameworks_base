@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒後に再試行"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"全画面表示を終了するには、上から下にスワイプ"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"全画面表示を終了するには、上から下にスワイプ"</string>
 </resources>

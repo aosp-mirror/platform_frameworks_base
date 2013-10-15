@@ -1584,6 +1584,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> saniyə sonra təkrar yoxlayın"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Daha sonra yenidən yoxlayın."</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Paneli göstərmək üçün ekranın küncünü sürüşdürün"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sistem panelini göstərmək üçün ekranın küncündən sürüşdürün"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Paneli göstərmək üçün ekranın küncünü sürüşdürün"</string>
 </resources>

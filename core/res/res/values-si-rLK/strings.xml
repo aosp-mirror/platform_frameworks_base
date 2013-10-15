@@ -1587,6 +1587,5 @@
     <item quantity="other" msgid="4730868920742952817">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සහ කරන්න"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"තීරුව අනාවරණයට තිරයේ කෙලවර අදින්න"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"පද්ධති තීරුව අනාවරණයට තිරයේ කෙලවරින් අදින්න"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"තීරුව අනාවරණයට තිරයේ කෙලවර අදින්න"</string>
 </resources>

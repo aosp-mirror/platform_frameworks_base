@@ -1583,6 +1583,5 @@
     <item quantity="one" msgid="4835639969503729874">"លេខ​កូដ​ PIN មិន​ត្រឹមត្រូវ។ ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល ១ វិនាទី។"</item>
     <item quantity="other" msgid="8030607343223287654">"លេខ​កូដ​ PIN មិន​ត្រឹមត្រូវ។ ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី​។"</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"អូស​គែម​អេក្រង់ ដើម្បី​បង្ហាញ​របារ"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"អូស​ពី​គែម​អេក្រង់ ដើម្បី​បង្ហាញ​របារ​ប្រព័ន្ធ"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"អូស​គែម​អេក្រង់ ដើម្បី​បង្ហាញ​របារ"</string>
 </resources>

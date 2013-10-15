@@ -1581,6 +1581,5 @@
     <item quantity="one" msgid="4835639969503729874">"PIN-ը սխալ է: Փորձեք կրկին 1 վայրկյանից:"</item>
     <item quantity="other" msgid="8030607343223287654">"PIN-ը սխալ է: Փորձեք կրկին <xliff:g id="COUNT">%d</xliff:g> վայրկյանից:"</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Սահեցրեք էկրանի եզրով՝ գոտին բացելու համար"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Սահեցրեք էկրանի եզրով՝ համակարգային գոտին բացելու համար"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Սահեցրեք էկրանի եզրով՝ գոտին բացելու համար"</string>
 </resources>

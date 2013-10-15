@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Повтор через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Повторите попытку позже."</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Чтобы вернуться в обычный режим, проведите пальцем вниз"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Чтобы вернуться в обычный режим, проведите пальцем вниз"</string>
 </resources>

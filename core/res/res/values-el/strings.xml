@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Επανάληψη σε <xliff:g id="COUNT">%d</xliff:g> δευτ."</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Δοκιμάστε ξανά αργότερα"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Σάρωση προς τα κάτω για έξοδο από πλήρη οθόνη"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Σάρωση προς τα κάτω για έξοδο από πλήρη οθόνη"</string>
 </resources>
