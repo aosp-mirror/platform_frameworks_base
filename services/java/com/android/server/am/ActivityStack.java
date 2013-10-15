@@ -581,6 +581,7 @@ final class ActivityStack {
         mService.addRecentTaskLocked(r.task);
         completeResumeLocked(r);
         mStackSupervisor.checkReadyForSleepLocked();
+        setLaunchTime(r);
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
     }
 
