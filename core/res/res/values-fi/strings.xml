@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Yritä uud. <xliff:g id="COUNT">%d</xliff:g> s kul."</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Yritä myöhemmin uudelleen"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Poistu koko näytön tilasta liu\'uttamalla alas"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Poistu koko näytön tilasta liu\'uttamalla alas"</string>
 </resources>

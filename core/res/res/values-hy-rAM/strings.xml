@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Կրկին փորձեք <xliff:g id="COUNT">%d</xliff:g> վայրկյանից"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Կրկին փորձեք մի փոքր ուշ"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Սահահարվածեք վերից վար՝ ամբողջական էկրանից դուրս գալու համար"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Սահահարվածեք վերից վար՝ ամբողջական էկրանից դուրս գալու համար"</string>
 </resources>

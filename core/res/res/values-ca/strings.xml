@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Torna-ho a provar d\'aquí a <xliff:g id="COUNT">%d</xliff:g> segons"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Fes llis. dit avall per sortir de pant. comp."</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Fes llis. dit avall per sortir de pant. comp."</string>
 </resources>

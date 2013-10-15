@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Proovige uuesti <xliff:g id="COUNT">%d</xliff:g> sekundi pärast"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Proovige hiljem uuesti"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Täisekraani sulgemiseks pühkige ülevalt alla"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Täisekraani sulgemiseks pühkige ülevalt alla"</string>
 </resources>

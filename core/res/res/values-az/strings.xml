@@ -1579,6 +1579,5 @@
     <item quantity="one" msgid="4835639969503729874">"Yanlış PİN. 1 saniyə sonra təkrar sınayın."</item>
     <item quantity="other" msgid="8030607343223287654">"Yanlış PİN. <xliff:g id="COUNT">%d</xliff:g> saniyə sonra təkrar sınayın."</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Paneli göstərmək üçün ekranın küncünü sürüşdürün"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sistem panelini göstərmək üçün ekranın küncündən sürüşdürün"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Paneli göstərmək üçün ekranın küncünü sürüşdürün"</string>
 </resources>

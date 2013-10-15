@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> saniye içinde tekrar deneyin"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Daha sonra tekrar deneyin"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Tam ekrandan çıkmak için aşağıya hızlıca kaydırın"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Tam ekrandan çıkmak için aşağıya hızlıca kaydırın"</string>
 </resources>

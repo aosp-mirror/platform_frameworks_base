@@ -1583,6 +1583,5 @@
     <item quantity="one" msgid="4835639969503729874">"Vale PIN-kood. Proovige 1 s pärast."</item>
     <item quantity="other" msgid="8030607343223287654">"Vale PIN-kood. Proovige <xliff:g id="COUNT">%d</xliff:g> s pärast."</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Riba kuvam. pühkige ekraani serva"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Süsteemiriba kuvamiseks pühkige ekraani servast"</string>
+    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Riba kuvam. pühkige ekraani serva"</string>
 </resources>
