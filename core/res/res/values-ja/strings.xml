@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>での削除が多すぎます。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"タブレットのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"端末のストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ネットワークが監視される場合があります"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"不明な第三者"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>によって監視される場合があります"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"タブレットオプション"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"携帯電話オプション"</string>
@@ -243,6 +246,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ステータスバーへの表示をアプリに許可します。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ステータスバーの展開/折りたたみをアプリに許可します。"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ショートカットのインストール"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ユーザー操作なしでホーム画面にショートカットを追加することをアプリに許可します。"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ショートカットのアンインストール"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ユーザー操作なしでホーム画面のショートカットを削除することをアプリに許可します。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"発信先の変更"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"通話の発信とダイヤルする番号の変更をアプリに許可します。これにより、アプリが発信を監視、転送、阻止できるようになります。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"テキストメッセージ（SMS）の受信"</string>
@@ -360,8 +367,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ユーザー補助サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"印刷サービスへのバインド"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"印刷サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"すべての印刷ジョブへのアクセス"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"別のアプリが作成した印刷ジョブにアクセスすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"印刷スプーラサービスへのバインド"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"印刷スプーラサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFCサービスへのバインド"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFCカードをエミュレートしているアプリにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
@@ -407,6 +414,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"システムの各種ログファイルの読み取りをアプリに許可します。許可すると、アプリでは携帯端末の使用に関する全般的な情報を読み取れるようになります。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"再生用にメディア デコーダーを使用"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"インストール済みのメディアデコーダーを使用して再生用にデコードすることをアプリに許可します。"</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"信頼できる認証情報の管理"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"CA証明書を信頼できる認証情報としてインストールしたりアンインストールしたりすることをアプリに許可します。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"diagグループが所有するリソース（/dev内のファイルなど）の読み書きをアプリに許可します。許可すると、システムの安定性とセキュリティに影響が生じる可能性があります。メーカー/通信事業者によるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"アプリのコンポーネントの有効/無効化"</string>
@@ -451,7 +460,7 @@
     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"携帯端末に保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"所有者に通知せずに、カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"カレンダーの予定の変更や追加を行う、所有者に通知せずにゲストにメールを送信する場合がある"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ユーザーがタブレットから編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ユーザーが携帯端末から編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"仮の位置情報でテスト"</string>
@@ -468,22 +477,20 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlingerの低レベルの機能の使用をアプリに許可します。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"フレームバッファの読み取り"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"フレームバッファの内容の読み取りをアプリに許可します。"</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlingerへのアクセス"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlingerの低レベルの機能を使用することをアプリに許可します。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fiディスプレイの設定"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wi-Fiディスプレイを設定して接続することをアプリに許可します。"</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fiディスプレイの制御"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wi-Fiディスプレイの低レベル機能を制御することをアプリに許可します。"</string>
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"音声出力のキャプチャ"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"音声出力のキャプチャとリダイレクトをアプリに許可します。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"注目ワード検出"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"注目ワード検出での音声キャプチャをアプリに許可します。キャプチャはバックグラウンドで発生しますが、その他の音声キャプチャ（例: ビデオ録画）を妨げることはありません。"</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"動画出力のキャプチャ"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"動画出力のキャプチャとリダイレクトをアプリに許可します。"</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"セキュリティ保護された動画出力のキャプチャ"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"セキュリティ保護された動画出力のキャプチャとリダイレクトをアプリに許可します。"</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"メディア再生とメタデータアクセスの制御"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"メディア再生の制御やメディア情報（書籍名、著者など）へのアクセスをアプリに許可します。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
@@ -547,6 +554,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"端末のスリープを無効にする"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"携帯端末のスリープを無効にすることをアプリに許可します。"</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"赤外線の送信"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"タブレットの赤外線送信機能の使用をアプリに許可します。"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"携帯電話の赤外線送信機能の使用をアプリに許可します。"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"タブレットの電源ON/OFF"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"電源のON/OFF"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"タブレットの電源のON/OFFをアプリに許可します。"</string>
@@ -599,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ローカルのBluetoothタブレットを設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetooth携帯端末を設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"アプリによるBluetoothペア設定を許可"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ユーザーの操作なしでリモート端末とペア設定することをアプリに許可します。"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ユーザーの操作なしでリモート端末とペア設定することをアプリに許可します。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXへの接続と切断"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
@@ -625,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"単語リストに登録されているすべての語句や名前を読み取ることをアプリに許可します。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"単語リストへの語句の追加"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"単語リストに新しい語句を書き込むことをアプリに許可します。"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"今後追加する端末で使用できるUSBストレージの権限のテストをアプリに許可します。"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"今後追加するデバイスで使用できるSDカードの権限のテストをアプリに許可します。"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USBストレージの読み取り"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SDカードのコンテンツの読み取り"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"USBストレージのコンテンツの読み取りをアプリに許可します。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"SDカードのコンテンツの読み取りをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USBストレージのコンテンツの変更または削除"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SDカードのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USBストレージへの書き込みをアプリに許可します。"</string>
@@ -643,6 +656,8 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"キャッシュファイルシステムの読み書きをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"インターネット通話の発着信"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"インターネット通話の発着信にSIPサービスを使用することをアプリに許可します。"</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"通話画面とのインタラクション"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"通話画面をユーザーに表示するタイミングと方法の制御をアプリに許可します。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ネットワーク使用履歴の読み取り"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"特定のネットワークやアプリに関するネットワーク使用履歴の読み取りをアプリに許可します。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ネットワークポリシーの管理"</string>
@@ -657,6 +672,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"通知リスナーサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"携帯通信会社が提供する設定アプリの呼び出し"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"携帯通信会社が提供する設定アプリを呼び出すことを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ネットワーク状況監視のためのリッスン"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ネットワーク状況を監視するためリッスンすることをアプリに許可します。通常のアプリで必要になることはありません。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"画面ロック解除パスワードの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
@@ -1098,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"アプリケーションを選択"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"ホームアプリを選択"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"常にこの操作で使用する"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]でデフォルト設定をクリアします。"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"操作の選択"</string>
@@ -1451,7 +1469,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"すべて表示"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"操作の選択"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"共有"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"端末がロックされています。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
     <string name="sending" msgid="3245653681008218030">"送信中..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ブラウザを起動しますか？"</string>
@@ -1529,48 +1546,98 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"このアプリでは制限付きプロフィールのアカウントはサポートしていません"</string>
     <string name="app_not_found" msgid="3429141853498927379">"この操作を行うアプリが見つかりません"</string>
     <string name="revoke" msgid="5404479185228271586">"取り消し"</string>
-    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"ISO A0"</string>
-    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"ISO A1"</string>
-    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"ISO A2"</string>
-    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"ISO A3"</string>
-    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"ISO A4"</string>
-    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"ISO A5"</string>
-    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"ISO A6"</string>
-    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"ISO A7"</string>
-    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"ISO A8"</string>
-    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"ISO A9"</string>
-    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"ISO A10"</string>
-    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"ISO B0"</string>
-    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"ISO B1"</string>
-    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"ISO B2"</string>
-    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"ISO B3"</string>
-    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"ISO B4"</string>
-    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"ISO B5"</string>
-    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"ISO B6"</string>
-    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"ISO B7"</string>
-    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"ISO B8"</string>
-    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"ISO B9"</string>
-    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"ISO B10"</string>
-    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"ISO C0"</string>
-    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"ISO C1"</string>
-    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"ISO C2"</string>
-    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"ISO C3"</string>
-    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"ISO C4"</string>
-    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"ISO C5"</string>
-    <string name="mediaSize_iso_c6" msgid="566666105260346930">"ISO C6"</string>
-    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"ISO C7"</string>
-    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
-    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
-    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
-    <string name="mediaSize_na_letter" msgid="4191805615829472953">"レター"</string>
-    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"ガバメントレター"</string>
-    <string name="mediaSize_na_legal" msgid="6697982988283823150">"リーガル"</string>
-    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"ジュニアリーガル"</string>
-    <string name="mediaSize_na_ledger" msgid="281871464896601236">"レジャー"</string>
-    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"タブロイド"</string>
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"レター"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"ガバメントレター"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"リーガル"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"ジュニアリーガル"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"レジャー"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"タブロイド"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"インデックスカード3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"インデックスカード4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"インデックスカード5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"モナーク"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"クォート"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"フールスキャップ"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"長4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"長3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"長2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"はがき"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"往復"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"角2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"洋4"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"縦向き不明"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"横向き不明"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"キャンセルされました"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"コンテンツの書き込み中にエラーが発生しました"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"印刷サービスが有効ではありません"</string>
+    <string name="print_service_installed_title" msgid="2246317169444081628">"「<xliff:g id="NAME">%s</xliff:g>」サービスがインストールされました"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"有効にするにはタップしてください"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"管理者PINを入力"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PINを入力"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"間違っています"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"現在のPIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"新しいPIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"新しいPINの確認"</string>
@@ -1578,7 +1645,9 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINが一致しません。もう一度お試しください。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PINが短すぎます。4桁以上にしてください。"</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PINが正しくありません。1秒後にもう一度お試しください。"</item>
-    <item quantity="other" msgid="8030607343223287654">"PINが正しくありません。<xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください。"</item>
+    <item quantity="one" msgid="311050995198548675">"1秒後に再試行"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒後に再試行"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"全画面表示を終了するには、上から下にスワイプ"</string>
 </resources>
