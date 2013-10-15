@@ -93,6 +93,7 @@ public final class SelectPrinterFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        getActivity().getActionBar().setIcon(R.drawable.ic_menu_print);
     }
 
     @Override
