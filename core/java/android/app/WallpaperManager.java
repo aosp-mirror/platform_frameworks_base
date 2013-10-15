@@ -459,7 +459,7 @@ public class WallpaperManager {
                     float right = left + outWidth;
                     float top = (inHeight - outHeight) * verticalAlignment;
                     float bottom = top + outHeight;
-                    cropRectF = new RectF(bottom, left, right, top);
+                    cropRectF = new RectF(left, top, right, bottom);
                 }
                 Rect roundedTrueCrop = new Rect();
                 cropRectF.roundOut(roundedTrueCrop);
