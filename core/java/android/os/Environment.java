@@ -686,7 +686,8 @@ public class Environment {
      *         {@link #MEDIA_BAD_REMOVAL}, or {@link #MEDIA_UNMOUNTABLE}.
      */
     public static String getExternalStorageState() {
-        return getStorageState(getExternalStorageDirectory());
+        final File externalDir = sCurrentUser.getExternalDirsForApp()[0];
+        return getStorageState(externalDir);
     }
 
     /**
