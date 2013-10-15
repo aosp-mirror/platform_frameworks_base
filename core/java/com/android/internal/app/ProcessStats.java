@@ -2918,29 +2918,38 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
-        public void clearCurrentOwner(Object owner) {
+        public void clearCurrentOwner(Object owner, boolean silently) {
             if (mOwner == owner) {
-                mOwner = null;
                 mProc.decActiveServices(mName);
                 if (mStartedState != STATE_NOTHING || mBoundState != STATE_NOTHING
                         || mExecState != STATE_NOTHING) {
                     long now = SystemClock.uptimeMillis();
                     if (mStartedState != STATE_NOTHING) {
-                        Slog.wtfStack(TAG, "Service owner " + owner + " cleared while started: pkg="
-                                + mPackage + " service=" + mName + " proc=" + mProc);
+                        if (!silently) {
+                            Slog.wtfStack(TAG, "Service owner " + owner
+                                    + " cleared while started: pkg=" + mPackage + " service="
+                                    + mName + " proc=" + mProc);
+                        }
                         setStarted(false, 0, now);
                     }
                     if (mBoundState != STATE_NOTHING) {
-                        Slog.wtfStack(TAG, "Service owner " + owner + " cleared while bound: pkg="
-                                + mPackage + " service=" + mName + " proc=" + mProc);
+                        if (!silently) {
+                            Slog.wtfStack(TAG, "Service owner " + owner
+                                    + " cleared while bound: pkg=" + mPackage + " service="
+                                    + mName + " proc=" + mProc);
+                        }
                         setBound(false, 0, now);
                     }
                     if (mExecState != STATE_NOTHING) {
-                        Slog.wtfStack(TAG, "Service owner " + owner + " cleared while exec: pkg="
-                                + mPackage + " service=" + mName + " proc=" + mProc);
+                        if (!silently) {
+                            Slog.wtfStack(TAG, "Service owner " + owner
+                                    + " cleared while exec: pkg=" + mPackage + " service="
+                                    + mName + " proc=" + mProc);
+                        }
                         setExecuting(false, 0, now);
                     }
                 }
+                mOwner = null;
             }
         }
 
