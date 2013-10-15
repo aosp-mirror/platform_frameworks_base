@@ -162,7 +162,7 @@ public class PacManager {
      */
     public synchronized boolean setCurrentProxyScriptUrl(ProxyProperties proxy) {
         if (!TextUtils.isEmpty(proxy.getPacFileUrl())) {
-            if (proxy.getPacFileUrl().equals(mPacUrl)) {
+            if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
                 // Allow to send broadcast, nothing to do.
                 return false;
             }
