@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Prøv igen om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Prøv igen senere"</string>
-    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Stryg ned fra toppen for at stoppe fuld skærm"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Stryg ned fra toppen for at afslutte fuld skærm"</string>
 </resources>

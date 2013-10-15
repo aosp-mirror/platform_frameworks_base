@@ -1142,7 +1142,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> ծրագիրը (գործընթաց <xliff:g id="PROCESS">%2$s</xliff:g>) խախտել է իր ինքնահարկադրված Խիստ ռեժիմ  քաղաքականությունը:"</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը խախտել է իր ինքնահարկադրված Խիստ ռեժիմ քաղաքականությունը:"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android-ը նորացվում է..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"Հավելվածը օպտիմալացվում է <xliff:g id="NUMBER_0">%1$d</xliff:g>-ից <xliff:g id="NUMBER_1">%2$d</xliff:g>-ի:"</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"Օպտիմալացվում է հավելված <xliff:g id="NUMBER_0">%1$d</xliff:g>-ը <xliff:g id="NUMBER_1">%2$d</xliff:g>-ից:"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Բեռնումն ավարտվում է:"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>-ն աշխատում է"</string>
@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Կրկին փորձեք <xliff:g id="COUNT">%d</xliff:g> վայրկյանից"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Կրկին փորձեք մի փոքր ուշ"</string>
-    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"Սահահարվածեք վերից վար՝ ամբողջական էկրանից դուրս գալու համար"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Սահահարվածեք վերից վար՝ ամբողջական էկրանից դուրս գալու համար:"</string>
 </resources>

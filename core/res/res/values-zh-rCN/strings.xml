@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒后重试"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <string name="immersive_mode_confirmation" msgid="8554991488096662508">"从顶部向下滑动即可退出全屏模式"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"从顶部向下滑动即可退出全屏模式"</string>
 </resources>
