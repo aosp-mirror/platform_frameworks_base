@@ -310,6 +310,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshBrightnessTile();
         refreshRotationLockTile();
         refreshRssiTile();
+        refreshLocationTile();
     }
 
     // Settings
@@ -580,6 +581,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mLocationTile = view;
         mLocationCallback = cb;
         mLocationCallback.refreshView(mLocationTile, mLocationState);
+    }
+
+    void refreshLocationTile() {
+        if (mLocationTile != null) {
+            onLocationSettingsChanged(mLocationState.enabled);
+        }
     }
 
     @Override
