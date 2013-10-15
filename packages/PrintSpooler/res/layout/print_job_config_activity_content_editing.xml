@@ -107,7 +107,7 @@
                     android:layout_marginStart="36dip"
                     android:textAppearance="@style/PrintOptionTitleTextAppearance"
                     android:labelFor="@+id/range_options_spinner"
-                    android:text="@string/label_pages">
+                    android:text="@string/page_count_unknown">
                 </TextView>
 
                 <Spinner
