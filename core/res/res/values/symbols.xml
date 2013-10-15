@@ -940,7 +940,6 @@
   <java-symbol type="string" name="restr_pin_try_later" />
   <java-symbol type="string" name="write_fail_reason_cancelled" />
   <java-symbol type="string" name="write_fail_reason_cannot_write" />
-  <java-symbol type="string" name="transient_navigation_confirmation" />
   <java-symbol type="string" name="ssl_ca_cert_noti_by_unknown" />
   <java-symbol type="string" name="ssl_ca_cert_noti_managed" />
   <java-symbol type="string" name="ssl_ca_cert_warning" />
