@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"በ<xliff:g id="COUNT">%d</xliff:g> ሰከንዶች ውስጥ እንደገና ይሞክሩ"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ቆይተው እንደገና ይሞክሩ"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"ከሙሉ ገጽ ማያ ለመውጣት ከላይ ወደታች ጣትዎን ያንቀሳቅሱ"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"ከሙሉ ገጽ ማያ ለመውጣት ጣትዎን ከላይ ወደታች ያንሸራትቱ።"</string>
     <string name="done_label" msgid="2093726099505892398">"ተከናውኗል"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"የሰዓታት ክብ ተንሸራታች"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"የደቂቃዎች ክብ ተንሸራታች"</string>

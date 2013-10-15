@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"សូម​ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"សូម​ព្យាយាម​ម្ដងទៀត​នៅ​ពេល​ក្រោយ។"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"អូស​​​ចុះក្រោម ដើម្បី​ចេញ​ពី​ការ​បង្ហាញ​ពេញ​អេក្រង់"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"អូស​​​ចុះក្រោម ដើម្បី​ចេញ​ពី​ការ​បង្ហាញ​ពេញ​អេក្រង់"</string>
     <string name="done_label" msgid="2093726099505892398">"រួចរាល់"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"គ្រាប់​រំកិល​រង្វង់​ម៉ោង"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"គ្រាប់​រំកិល​រង្វង់​នាទី"</string>

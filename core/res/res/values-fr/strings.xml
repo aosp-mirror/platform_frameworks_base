@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Réessayer dans <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Veuillez réessayer ultérieurement."</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Balayer vers le bas pour quitter le plein écran"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Balayer vers le bas pour quitter le plein écran"</string>
     <string name="done_label" msgid="2093726099505892398">"OK"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Curseur circulaire des heures"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Curseur circulaire des minutes"</string>

@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Tente novamente em <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Tente novamente mais tarde"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Deslize para baixo para sair da tela inteira"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Deslize de cima para baixo para sair da tela inteira"</string>
     <string name="done_label" msgid="2093726099505892398">"Concluído"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Controle deslizante circular das horas"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Controle deslizante circular dos minutos"</string>

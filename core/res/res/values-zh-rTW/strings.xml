@@ -255,7 +255,7 @@
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收簡訊 (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理簡訊。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收簡訊 (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理 MMS 訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理多媒體訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收緊急廣播"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允許應用程式接收及處理緊急廣播訊息，只有系統應用程式可以具備這項權限。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
@@ -761,7 +761,7 @@
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"公司行動電話"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"公司呼叫器"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"助理"</string>
-    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"多媒體簡訊"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"自訂"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"生日"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"週年紀念日"</string>
@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> 秒後再試一次"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"從頂端往下滑動即可結束全螢幕"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下滑動即可結束全螢幕。"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"小時數環狀滑桿"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"分鐘數環狀滑桿"</string>

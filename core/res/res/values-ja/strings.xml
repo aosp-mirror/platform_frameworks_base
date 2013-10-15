@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒後に再試行"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"全画面表示を終了するには、上から下にスワイプ"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"全画面表示を終了するには、上から下にスワイプ"</string>
     <string name="done_label" msgid="2093726099505892398">"完了"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"円形スライダー（時）"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"円形スライダー（分）"</string>

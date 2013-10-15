@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Покушајте опет за <xliff:g id="COUNT">%d</xliff:g> сек"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Покушајте поново касније"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Превуците надоле од врха за излаз из целог екрана"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Превуците прстом одозго надоле да бисте изашли из целог екрана."</string>
     <string name="done_label" msgid="2093726099505892398">"Готово"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Кружни клизач за сате"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Кружни клизач за минуте"</string>
