@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -696,7 +697,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int NO_ID = -1;
 
+    /**
+     * Signals that compatibility booleans have been initialized according to
+     * target SDK versions.
+     */
+    private static boolean sCompatibilityDone = false;
+
+    /**
+     * Use the old (broken) way of building MeasureSpecs.
+     */
     private static boolean sUseBrokenMakeMeasureSpec = false;
+
+    /**
+     * Ignore any optimizations using the measure cache.
+     */
+    private static boolean sIgnoreMeasureCache = false;
 
     /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
@@ -3520,10 +3535,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
 
-        if (!sUseBrokenMakeMeasureSpec && context != null &&
-                context.getApplicationInfo().targetSdkVersion <= JELLY_BEAN_MR1) {
+        if (!sCompatibilityDone && context != null) {
+            final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+
             // Older apps may need this compatibility hack for measurement.
-            sUseBrokenMakeMeasureSpec = true;
+            sUseBrokenMakeMeasureSpec = targetSdkVersion <= JELLY_BEAN_MR1;
+
+            // Older apps expect onMeasure() to always be called on a layout pass, regardless
+            // of whether a layout was requested on that View.
+            sIgnoreMeasureCache = targetSdkVersion < KITKAT;
+
+            sCompatibilityDone = true;
         }
     }
 
@@ -16572,7 +16594,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             int cacheIndex = (mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ? -1 :
                     mMeasureCache.indexOfKey(key);
-            if (cacheIndex < 0) {
+            if (cacheIndex < 0 || sIgnoreMeasureCache) {
                 // measure ourselves, this should set the measured dimension flag back
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
                 mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
