@@ -702,8 +702,6 @@ public class WallpaperManager {
         // cropper doesn't exist, return null
         throw new IllegalArgumentException("Cannot use passed URI to set wallpaper; " +
             "check that the type returned by ContentProvider matches image/*");
-
-        return null;
     }
 
     /**
