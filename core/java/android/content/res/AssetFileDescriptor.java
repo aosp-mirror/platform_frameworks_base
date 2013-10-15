@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -42,17 +43,35 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
     private final ParcelFileDescriptor mFd;
     private final long mStartOffset;
     private final long mLength;
-    
+    private final Bundle mExtras;
+
     /**
      * Create a new AssetFileDescriptor from the given values.
+     *
      * @param fd The underlying file descriptor.
      * @param startOffset The location within the file that the asset starts.
-     * This must be 0 if length is UNKNOWN_LENGTH.
+     *            This must be 0 if length is UNKNOWN_LENGTH.
      * @param length The number of bytes of the asset, or
-     * {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
+     *            {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
      */
     public AssetFileDescriptor(ParcelFileDescriptor fd, long startOffset,
             long length) {
+        this(fd, startOffset, length, null);
+    }
+
+    /**
+     * Create a new AssetFileDescriptor from the given values.
+     *
+     * @param fd The underlying file descriptor.
+     * @param startOffset The location within the file that the asset starts.
+     *            This must be 0 if length is UNKNOWN_LENGTH.
+     * @param length The number of bytes of the asset, or
+     *            {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
+     * @param extras additional details that can be used to interpret the
+     *            underlying file descriptor. May be null.
+     */
+    public AssetFileDescriptor(ParcelFileDescriptor fd, long startOffset,
+            long length, Bundle extras) {
         if (fd == null) {
             throw new IllegalArgumentException("fd must not be null");
         }
@@ -63,8 +82,9 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
         mFd = fd;
         mStartOffset = startOffset;
         mLength = length;
+        mExtras = extras;
     }
-    
+
     /**
      * The AssetFileDescriptor contains its own ParcelFileDescriptor, which
      * in addition to the normal FileDescriptor object also allows you to close
@@ -88,7 +108,15 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
     public long getStartOffset() {
         return mStartOffset;
     }
-    
+
+    /**
+     * Returns any additional details that can be used to interpret the
+     * underlying file descriptor. May be null.
+     */
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     /**
      * Returns the total number of bytes of this asset entry's data.  May be
      * {@link #UNKNOWN_LENGTH} if the asset extends to the end of the file.
@@ -307,25 +335,37 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
             super.write(oneByte);
         }
     }
-    
-    
+
     /* Parcelable interface */
+    @Override
     public int describeContents() {
         return mFd.describeContents();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         mFd.writeToParcel(out, flags);
         out.writeLong(mStartOffset);
         out.writeLong(mLength);
+        if (mExtras != null) {
+            out.writeInt(1);
+            out.writeBundle(mExtras);
+        } else {
+            out.writeInt(0);
+        }
     }
 
     AssetFileDescriptor(Parcel src) {
         mFd = ParcelFileDescriptor.CREATOR.createFromParcel(src);
         mStartOffset = src.readLong();
         mLength = src.readLong();
+        if (src.readInt() != 0) {
+            mExtras = src.readBundle();
+        } else {
+            mExtras = null;
+        }
     }
-    
+
     public static final Parcelable.Creator<AssetFileDescriptor> CREATOR
             = new Parcelable.Creator<AssetFileDescriptor>() {
         public AssetFileDescriptor createFromParcel(Parcel in) {
