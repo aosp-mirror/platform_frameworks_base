@@ -131,6 +131,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"同時刪除太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g>。"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"平板電腦的儲存空間已滿。請刪除一些檔案，以釋放出可用空間。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手機儲存空間已滿。請刪除一些檔案，以釋放可用空間。"</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"網路可能會受到監控"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"受到不明的第三方監控"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"受到 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 監控"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板電腦選項"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"電話選項"</string>
@@ -243,12 +246,16 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"允許應用程式以狀態列顯示。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展開/收攏狀態列"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"允許應用程式展開或收合狀態列。"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"安裝捷徑"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"允許應用程式自動新增主螢幕捷徑。"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"解除安裝捷徑"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"允許應用程式自動移除主螢幕捷徑。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重設撥號路徑"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"允許應用程式處理撥出電話及更改撥打的號碼。這項權限可讓應用程式監控、轉接或阻止撥出的電話。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收簡訊 (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理簡訊。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收簡訊 (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理 MMS 訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理多媒體訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收緊急廣播"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允許應用程式接收及處理緊急廣播訊息，只有系統應用程式可以具備這項權限。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
@@ -360,8 +367,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允許應用程式繫結至協助工具服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"繫結至列印服務"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"允許應用程式繫結至列印服務的頂層介面 (一般應用程式並不需要)。"</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"存取所有列印工作"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"允許應用程式存取其他應用程式所建立的列印工作 (一般應用程式並不需要)。"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"繫結至列印多工緩衝處理器服務"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"允許應用程式繫結至列印多工緩衝處理器服務的頂層介面 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"繫結至 NFC 服務"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"允許應用程式繫結至模擬 NFC 卡的應用程式 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>
@@ -407,6 +414,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的手機使用資訊，可能包含您的個人或私人資訊。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒體解碼器進行播放"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允許應用程式使用任何已安裝的媒體解碼器進行解碼以播放影片。"</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理信任的憑證"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允許應用程式安裝 CA 憑證 (做為信任的憑證) 及解除安裝 CA 憑證。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允許應用程式讀取或寫入診斷群組擁有的任何資源，例如 /dev 底下的檔案。這可能會影響系統的穩定性和安全性，因此應由製造商或電信業者操作，且只用在特定硬體診斷。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"啟用或停用應用程式元件"</string>
@@ -468,22 +477,20 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允許應用程式使用 SurfaceFlinger 的低階功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"讀取框架緩衝"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"允許應用程式讀取畫面緩衝區的內容。"</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"存取 InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"允許應用程式使用 InputFlinger 的低階功能。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 Wi-Fi 顯示裝置"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 Wi-Fi 顯示裝置。"</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 Wi-Fi 顯示裝置"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"擷取音訊輸出"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音訊輸出。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"熱門字詞偵測"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取音訊用於熱門字詞偵測。擷取作業可在背景執行，但並未禁止使用其他音訊擷取工具 (例如攝錄影機)。"</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"擷取視訊輸出"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允許應用程式擷取及重新導向視訊輸出。"</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"擷取安全視訊輸出"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"允許應用程式擷取及重新導向安全視訊輸出。"</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"控制媒體播放與中繼資料存取權"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"允許應用程式控制媒體播放及存取媒體資訊 (標題、作者...)。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
@@ -547,6 +554,9 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手機進入待命狀態"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"允許應用程式防止平板電腦進入休眠狀態。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"允許應用程式防止手機進入休眠狀態。"</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"傳送紅外線"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"允許應用程式使用平板電腦的紅外線傳送器。"</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"允許應用程式使用手機的紅外線傳送器。"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"開啟或關閉平板電腦"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"開啟或關閉電源"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允許應用程式開啟或關閉平板電腦。"</string>
@@ -599,6 +609,9 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"存取藍牙設定"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允許應用程式設定本機藍牙平板電腦，以及搜尋遠端裝置並配對連線。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允許應用程式設定本機藍牙手機，以及搜尋遠端裝置並配對連線。"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"允許應用程式執行藍牙配對"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"允許應用程式自動與遠端裝置配對。"</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"允許應用程式自動與遠端裝置配對。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"建立或中斷與 WiMAX 網路的連線"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"允許應用程式判斷是否已啟用 WiMAX，以及判讀任何已連上 WiMAX 網路的相關資訊。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"變更 WiMAX 狀態"</string>
@@ -625,10 +638,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"允許應用程式讀取使用者儲存在使用者字典內的所有字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"將字詞加入使用者定義的字典"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允許應用程式將新字詞寫入使用者的字典。"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"測試能否存取受保護的儲存裝置"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"測試能否存取受保護的儲存裝置"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"允許應用程式測試未來裝置將支援的 USB 儲存權限。"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"允許應用程式測試未來裝置將支援的 SD 卡權限。"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"讀取 USB 儲存裝置的內容"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"讀取 SD 卡的內容"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允許應用程式讀取 USB 儲存裝置的內容。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"允許應用程式讀取 SD 卡的內容。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或刪除 USB 儲存裝置的內容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或刪除 SD 卡的內容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允許應用程式寫入 USB 儲存裝置。"</string>
@@ -643,6 +656,8 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"撥打/接聽網路電話"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"允許應用程式使用 SIP 服務撥打/接聽網路電話。"</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"與來電過濾互動"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"允許應用程式控制來電過濾的顯示時機與方式。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網路用量紀錄"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允許應用程式讀取特定網路和應用程式的網路使用記錄。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理網路政策"</string>
@@ -657,6 +672,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"叫用行動通訊業者提供的設定應用程式"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允許應用程式叫用行動通訊業者提供的設定應用程式 (一般應用程式並不需要)。"</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"監聽網路狀況觀察資訊"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"允許應用程式監聽網路狀況觀察資訊 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
@@ -674,7 +691,7 @@
     <string name="policylab_expirePassword" msgid="885279151847254056">"設定螢幕上鎖密碼到期日"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"控制螢幕上鎖密碼的變更頻率。"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"設定儲存裝置加密"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"必須為儲存的應用程式資料加密。"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"必須為儲存的應用程式資料進行加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相機"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有裝置相機。"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"停用鍵盤保護框上的功能"</string>
@@ -724,7 +741,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"自訂"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"住家"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"行動裝置"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"手機"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"公司"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"公司傳真"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"住家傳真"</string>
@@ -742,7 +759,7 @@
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"公司行動電話"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"公司呼叫器"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"助理"</string>
-    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"多媒體簡訊"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"自訂"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"生日"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"週年紀念日"</string>
@@ -1098,6 +1115,7 @@
     <string name="capital_on" msgid="1544682755514494298">"開啟"</string>
     <string name="capital_off" msgid="6815870386972805832">"關閉"</string>
     <string name="whichApplication" msgid="4533185947064773386">"選擇要使用的應用程式"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"選取主螢幕應用程式"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"設為預設應用程式。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"前往 [系統設定] &gt; [應用程式] &gt; [下載] 清除預設值。"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"選擇一種動作"</string>
@@ -1451,7 +1469,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"全部顯示"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"選擇活動"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"分享活動"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
     <string name="sending" msgid="3245653681008218030">"傳送中…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"啟動「瀏覽器」嗎？"</string>
@@ -1529,48 +1546,98 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"這個應用程式不支援設有限制的個人資料所屬帳戶"</string>
     <string name="app_not_found" msgid="3429141853498927379">"找不到支援此操作的應用程式"</string>
     <string name="revoke" msgid="5404479185228271586">"撤銷"</string>
-    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"ISO A0"</string>
-    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"ISO A1"</string>
-    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"ISO A2"</string>
-    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"ISO A3"</string>
-    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"ISO A4"</string>
-    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"ISO A5"</string>
-    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"ISO A6"</string>
-    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"ISO A7"</string>
-    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"ISO A8"</string>
-    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"ISO A9"</string>
-    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"ISO A10"</string>
-    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"ISO B0"</string>
-    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"ISO B1"</string>
-    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"ISO B2"</string>
-    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"ISO B3"</string>
-    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"ISO B4"</string>
-    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"ISO B5"</string>
-    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"ISO B6"</string>
-    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"ISO B7"</string>
-    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"ISO B8"</string>
-    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"ISO B9"</string>
-    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"ISO B10"</string>
-    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"ISO C0"</string>
-    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"ISO C1"</string>
-    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"ISO C2"</string>
-    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"ISO C3"</string>
-    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"ISO C4"</string>
-    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"ISO C5"</string>
-    <string name="mediaSize_iso_c6" msgid="566666105260346930">"ISO C6"</string>
-    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"ISO C7"</string>
-    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
-    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
-    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
-    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Letter"</string>
-    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Government Letter"</string>
-    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Legal"</string>
-    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
-    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
-    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Letter"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Government Letter"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Legal"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Index Card 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Index Card 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Index Card 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"不明縱向紙張"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"不明橫向紙張"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"已取消"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"寫入內容時發生錯誤"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"列印服務尚未啟用"</string>
+    <string name="print_service_installed_title" msgid="2246317169444081628">"已安裝「<xliff:g id="NAME">%s</xliff:g>」服務"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"輕按啟用"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"輸入管理員 PIN"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"輸入 PIN"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"不正確"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"目前的 PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"新 PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"確認新 PIN"</string>
@@ -1578,7 +1645,9 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN 不符，請再試一次。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN 長度太短，至少必須為 4 位數。"</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PIN 不正確，請於 1 秒後再試一次。"</item>
-    <item quantity="other" msgid="8030607343223287654">"PIN 不正確，請於 <xliff:g id="COUNT">%d</xliff:g> 秒後再試一次。"</item>
+    <item quantity="one" msgid="311050995198548675">"1 秒後再試一次"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> 秒後再試一次"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下滑動即可結束全螢幕。"</string>
 </resources>
