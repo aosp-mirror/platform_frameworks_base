@@ -2167,15 +2167,20 @@ public class AccountManagerService
                  * this can be very bad when those apps are in the system like
                  * the System Settings.
                  */
-                PackageManager pm = mContext.getPackageManager();
-                ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-                int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
                 int authenticatorUid = Binder.getCallingUid();
-                if (PackageManager.SIGNATURE_MATCH !=
-                        pm.checkSignatures(authenticatorUid, targetUid)) {
-                    throw new SecurityException(
-                            "Activity to be started with KEY_INTENT must " +
-                            "share Authenticator's signatures");
+                long bid = Binder.clearCallingIdentity();
+                try {
+                    PackageManager pm = mContext.getPackageManager();
+                    ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
+                    int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
+                    if (PackageManager.SIGNATURE_MATCH !=
+                            pm.checkSignatures(authenticatorUid, targetUid)) {
+                        throw new SecurityException(
+                                "Activity to be started with KEY_INTENT must " +
+                               "share Authenticator's signatures");
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(bid);
                 }
             }
             if (result != null
