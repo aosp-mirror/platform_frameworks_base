@@ -1427,7 +1427,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 if (Math.abs(deltaX) >= 1.0f) {
                     mTouchX += deltaX;
                     mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
-                    if (!mDeferScrollUpdate) {
+                    if (isWarping()) {
+                        KeyguardWidgetFrame v = (KeyguardWidgetFrame) getPageAt(mPageWarpIndex);
+                        v.setTranslationX(v.getTranslationX() - deltaX);
+                    } else if (!mDeferScrollUpdate) {
                         scrollBy((int) deltaX, 0);
                         if (DEBUG) Log.d(TAG, "onTouchEvent().Scrolling: " + deltaX);
                     } else {
@@ -1806,10 +1809,11 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void snapToDestination() {
+        final int newPage = getPageNearestToCenterOfScreen();
         if (isWarping()) {
-            cancelWarpAnimation("snapToDestination");
+            cancelWarpAnimation("snapToDestination", mCurrentPage != newPage);
         }
-        snapToPage(getPageNearestToCenterOfScreen(), getPageSnapDuration());
+        snapToPage(newPage, getPageSnapDuration());
     }
 
     private int getPageSnapDuration() {
@@ -1841,7 +1845,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         int halfScreenSize = getViewportWidth() / 2;
 
         if (isWarping()) {
-            cancelWarpAnimation("snapToPageWithVelocity");
+            cancelWarpAnimation("snapToPageWithVelocity", mCurrentPage != whichPage);
         }
 
         if (DEBUG) Log.d(TAG, "snapToPage.getChildOffset(): " + getChildOffset(whichPage));
@@ -2699,13 +2703,19 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     };
 
-    private void cancelWarpAnimation(String msg) {
+    private void cancelWarpAnimation(String msg, boolean abortAnimation) {
         if (DEBUG_WARP) Log.v(TAG, "cancelWarpAnimation(" + msg + ")");
-        // We're done with the animation, let the scroller take over the positioning
-        KeyguardWidgetFrame v = (KeyguardWidgetFrame) getPageAt(mPageWarpIndex);
-        v.animate().cancel();
-        v.setTranslationX(0f);
-        scrollBy((int) Math.round(v.getTranslationX() - mWarpPeekAmount), 0);
+        if (abortAnimation) {
+            // We're done with the animation and moving to a new page.  Let the scroller
+            // take over the animation.
+            KeyguardWidgetFrame v = (KeyguardWidgetFrame) getPageAt(mPageWarpIndex);
+            v.animate().cancel();
+            // Make the scroll amount match the current warp position.
+            scrollBy(Math.round(-v.getTranslationX()), 0);
+            v.setTranslationX(0);
+        } else {
+            animateWarpPageOffScreen("canceled", true);
+        }
     }
 
     private boolean isAnimatingWarpPage() {
