@@ -27,6 +27,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.webkit.MimeTypeMap;
 
@@ -313,19 +314,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             String documentId, Point sizeHint, CancellationSignal signal)
             throws FileNotFoundException {
         final File file = getFileForDocId(documentId);
-        final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
-                file, ParcelFileDescriptor.MODE_READ_ONLY);
-
-        try {
-            final ExifInterface exif = new ExifInterface(file.getAbsolutePath());
-            final long[] thumb = exif.getThumbnailRange();
-            if (thumb != null) {
-                return new AssetFileDescriptor(pfd, thumb[0], thumb[1]);
-            }
-        } catch (IOException e) {
-        }
-
-        return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH);
+        return DocumentsContract.openImageThumbnail(file);
     }
 
     private static String getTypeForFile(File file) {
