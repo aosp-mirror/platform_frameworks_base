@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -61,6 +62,8 @@ import android.util.SparseArray;
 public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
     private static final boolean LOCAL_LOGV = false;
+
+    private static final boolean USER_CHECK_THROWS = true;
 
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
@@ -522,6 +525,14 @@ public class SettingsProvider extends ContentProvider {
 
     // Lazy initialize the database helper and caches for this user, if necessary
     private DatabaseHelper getOrEstablishDatabase(int callingUser) {
+        if (callingUser >= Process.SYSTEM_UID) {
+            if (USER_CHECK_THROWS) {
+                throw new IllegalArgumentException("Uid rather than user handle: " + callingUser);
+            } else {
+                Slog.wtf(TAG, "establish db for uid rather than user: " + callingUser);
+            }
+        }
+
         long oldId = Binder.clearCallingIdentity();
         try {
             DatabaseHelper dbHelper = mOpenHelpers.get(callingUser);
