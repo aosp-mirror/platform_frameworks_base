@@ -209,6 +209,12 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
+        public int getInputMethodWindowVisibleHeight() throws RemoteException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
     public void updateStatusIcon(IBinder arg0, String arg1, int arg2) throws RemoteException {
         // TODO Auto-generated method stub
 
