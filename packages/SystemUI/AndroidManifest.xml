@@ -200,7 +200,8 @@
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
-            android:configChanges="orientation|screenSize"
+            android:screenOrientation="locked"
+            android:process=":sweetsweetdesserts"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -215,6 +216,7 @@
             android:exported="true"
             android:label="@string/dessert_case"
             android:enabled="false"
+            android:process=":sweetsweetdesserts"
             >
             <intent-filter>
                 <action android:name="android.service.dreams.DreamService" />
