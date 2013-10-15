@@ -8,7 +8,7 @@
                  android:process="system"
                  android:backupAgent="SettingsBackupAgent"
                  android:killAfterRestore="false"
-                 android:icon="@drawable/ic_launcher_settings">
+                 android:icon="@mipmap/ic_launcher_settings">
                  
     <!-- todo add: android:neverEncrypt="true" -->
 
