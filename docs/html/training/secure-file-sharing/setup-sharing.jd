@@ -30,6 +30,14 @@ trainingnavtop=true
     implementation of {@link android.support.v4.content.FileProvider} to your app, and how to
     specify the files you want to offer to other apps.
 </p>
+
+<p class="note">
+  <strong>Note:</strong> The {@link android.support.v4.content.FileProvider} class is part of the
+  <a href="{@docRoot}tools/support-library/features.html#v4">v4 Support Library</a>. For information
+  about including this library in your application, see
+  <a href="{@docRoot}tools/support-library/setup.html">Support Library Setup</a>.
+</p>
+
 <h2 id="DefineProvider">Specify the FileProvider</h2>
 <p>
     Defining a {@link android.support.v4.content.FileProvider} for your app requires an entry in
