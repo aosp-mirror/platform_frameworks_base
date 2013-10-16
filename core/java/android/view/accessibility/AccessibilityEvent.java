@@ -722,7 +722,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     int mAction;
     int mContentChangeTypes;
 
-    private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
+    private ArrayList<AccessibilityRecord> mRecords;
 
     /*
      * Hide constructor from clients.
@@ -755,11 +755,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     @Override
     public void setSealed(boolean sealed) {
         super.setSealed(sealed);
-        List<AccessibilityRecord> records = mRecords;
-        final int recordCount = records.size();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = records.get(i);
-            record.setSealed(sealed);
+        final List<AccessibilityRecord> records = mRecords;
+        if (records != null) {
+            final int recordCount = records.size();
+            for (int i = 0; i < recordCount; i++) {
+                AccessibilityRecord record = records.get(i);
+                record.setSealed(sealed);
+            }
         }
     }
 
@@ -769,7 +771,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return The number of records.
      */
     public int getRecordCount() {
-        return mRecords.size();
+        return mRecords == null ? 0 : mRecords.size();
     }
 
     /**
@@ -781,6 +783,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public void appendRecord(AccessibilityRecord record) {
         enforceNotSealed();
+        if (mRecords == null) {
+            mRecords = new ArrayList<AccessibilityRecord>();
+        }
         mRecords.add(record);
     }
 
@@ -791,6 +796,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return The record at the specified index.
      */
     public AccessibilityRecord getRecord(int index) {
+        if (mRecords == null) {
+            throw new IndexOutOfBoundsException("Invalid index " + index + ", size is 0");
+        }
         return mRecords.get(index);
     }
 
@@ -964,11 +972,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         AccessibilityEvent eventClone = AccessibilityEvent.obtain();
         eventClone.init(event);
 
-        final int recordCount = event.mRecords.size();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = event.mRecords.get(i);
-            AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
-            eventClone.mRecords.add(recordClone);
+        if (event.mRecords != null) {
+            final int recordCount = event.mRecords.size();
+            eventClone.mRecords = new ArrayList<AccessibilityRecord>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                final AccessibilityRecord record = event.mRecords.get(i);
+                final AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
+                eventClone.mRecords.add(recordClone);
+            }
         }
 
         return eventClone;
@@ -1013,9 +1024,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mContentChangeTypes = 0;
         mPackageName = null;
         mEventTime = 0;
-        while (!mRecords.isEmpty()) {
-            AccessibilityRecord record = mRecords.remove(0);
-            record.recycle();
+        if (mRecords != null) {
+            while (!mRecords.isEmpty()) {
+                AccessibilityRecord record = mRecords.remove(0);
+                record.recycle();
+            }
         }
     }
 
@@ -1037,11 +1050,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
         // Read the records.
         final int recordCount = parcel.readInt();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = AccessibilityRecord.obtain();
-            readAccessibilityRecordFromParcel(record, parcel);
-            record.mConnectionId = mConnectionId;
-            mRecords.add(record);
+        if (recordCount > 0) {
+            mRecords = new ArrayList<AccessibilityRecord>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                AccessibilityRecord record = AccessibilityRecord.obtain();
+                readAccessibilityRecordFromParcel(record, parcel);
+                record.mConnectionId = mConnectionId;
+                mRecords.add(record);
+            }
         }
     }
 
@@ -1147,8 +1163,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             builder.append("; ContentChangeTypes: ").append(mContentChangeTypes);
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             builder.append("; mSourceNodeId: ").append(mSourceNodeId);
-            for (int i = 0; i < mRecords.size(); i++) {
-                AccessibilityRecord record = mRecords.get(i);
+            for (int i = 0; i < getRecordCount(); i++) {
+                final AccessibilityRecord record = getRecord(i);
                 builder.append("  Record ");
                 builder.append(i);
                 builder.append(":");
