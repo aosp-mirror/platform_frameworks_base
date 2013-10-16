@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Επανάληψη σε <xliff:g id="COUNT">%d</xliff:g> δευτ."</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Δοκιμάστε ξανά αργότερα"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Σάρωση προς τα κάτω για έξοδο από πλήρη οθόνη"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Σάρωση προς τα κάτω για έξοδο από πλήρη οθόνη"</string>
     <string name="done_label" msgid="2093726099505892398">"Τέλος"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Κυκλικό ρυθμιστικό ωρών"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Κυκλικό ρυθμιστικό λεπτών"</string>

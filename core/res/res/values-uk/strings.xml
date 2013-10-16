@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Повтор за <xliff:g id="COUNT">%d</xliff:g> с"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Спробуйте пізніше"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Проведіть пальцем зверху вниз, щоб зменшити"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Проведіть пальцем зверху вниз, щоб вийти з повноекранного режиму."</string>
     <string name="done_label" msgid="2093726099505892398">"Готово"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Вибір годин на циферблаті"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Вибір хвилин на циферблаті"</string>

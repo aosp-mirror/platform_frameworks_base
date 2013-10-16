@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> सेकंड में पुन: प्रयास करें"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"बाद में पुनः प्रयास करें"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"पूर्ण स्क्रीन से बाहर आने हेतु ऊपर से नीचे स्वाइप करें"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"पूर्ण स्क्रीन से बाहर आने के लिए ऊपर से नीचे स्वाइप करें."</string>
     <string name="done_label" msgid="2093726099505892398">"पूर्ण"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"मिनटों का चक्राकार स्लाइडर"</string>

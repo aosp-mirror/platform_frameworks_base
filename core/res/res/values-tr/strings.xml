@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> saniye içinde tekrar deneyin"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Daha sonra tekrar deneyin"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Tam ekrandan çıkmak için aşağıya hızlıca kaydırın"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Tam ekrandan çıkmak için aşağıya hızlıca kaydırın"</string>
     <string name="done_label" msgid="2093726099505892398">"Bitti"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Saat kaydırma çemberi"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Dakika kaydırma çemberi"</string>

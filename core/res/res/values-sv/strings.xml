@@ -832,7 +832,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Försök igen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Försök igen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Laddar (<xliff:g id="PERCENT">%%</xliff:g> <xliff:g id="NUMBER">%d</xliff:g>)"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Laddar (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Batteriet har laddats"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Anslut din laddare."</string>
@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Försök igen om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Försök igen senare"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Dra nedåt om du vill avbryta fullskärmsläget"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Dra nedåt om du vill avbryta fullskärmsläget."</string>
     <string name="done_label" msgid="2093726099505892398">"Klart"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Cirkelreglage för minuter"</string>

@@ -440,7 +440,7 @@
     <string name="permlab_readContacts" msgid="8348481131899886131">"lectura dels contactes"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permet que l\'aplicació llegeixi dades sobre els contactes que tinguis emmagatzemats a la tauleta, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb persones concretes. Aquest permís permet que les aplicacions desin les dades dels teus contactes, i és possible que les aplicacions malicioses comparteixin dades dels contactes sense el teu coneixement."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permet que l\'aplicació llegeixi dades sobre els contactes que tinguis emmagatzemats al telèfon, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb persones concretes. Aquest permís permet que les aplicacions desin les dades dels teus contactes, i és possible que les aplicacions malicioses comparteixin dades dels contactes sense el teu coneixement."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"modificació dels contactes"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"modificar els teus contactes"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Permet que l\'aplicació modifiqui les dades sobre contactes emmagatzemades a la tauleta, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb contactes concrets. Aquest permís permet que les aplicacions suprimeixin dades de contactes."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permet que l\'aplicació modifiqui les dades sobre contactes emmagatzemades al telèfon, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb contactes concrets. Aquest permís permet que les aplicacions suprimeixin dades de contactes."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lectura del registre de trucades"</string>
@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Torna-ho a provar d\'aquí a <xliff:g id="COUNT">%d</xliff:g> segons"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
-    <string name="transient_navigation_confirmation" msgid="8554991488096662508">"Fes llis. dit avall per sortir de pant. comp."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Fes lliscar el dit cap avall per sortir de la pantalla completa."</string>
     <string name="done_label" msgid="2093726099505892398">"Fet"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Control circular de les hores"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Control circular dels minuts"</string>
