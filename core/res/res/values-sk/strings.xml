@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Skúste to zas o <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Režim celej obraz. ukončíte posunutím nadol"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Režim celej obrazovky ukončíte posunutím nadol."</string>
 </resources>
