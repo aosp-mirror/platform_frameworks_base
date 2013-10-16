@@ -268,6 +268,7 @@ package android {
     field public static final int addPrintersActivity = 16843750; // 0x10103e6
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
+    field public static final int advancedPrintOptionsActivity = 16843761; // 0x10103f1
     field public static final int alertDialogIcon = 16843605; // 0x1010355
     field public static final int alertDialogStyle = 16842845; // 0x101005d
     field public static final int alertDialogTheme = 16843529; // 0x1010309
@@ -19510,6 +19511,16 @@ package android.print {
     field public static final int STATE_STARTED = 3; // 0x3
   }
 
+  public static final class PrintJobInfo.Builder {
+    ctor public PrintJobInfo.Builder(android.print.PrintJobInfo);
+    method public android.print.PrintJobInfo build();
+    method public void putAdvancedOption(java.lang.String, java.lang.String);
+    method public void putAdvancedOption(java.lang.String, int);
+    method public void setAttributes(android.print.PrintAttributes);
+    method public void setCopies(int);
+    method public void setPages(android.print.PageRange[]);
+  }
+
   public final class PrintManager {
     method public java.util.List<android.print.PrintJob> getPrintJobs();
     method public android.print.PrintJob print(java.lang.String, android.print.PrintDocumentAdapter, android.print.PrintAttributes);
@@ -19592,10 +19603,13 @@ package android.printservice {
     method public boolean cancel();
     method public boolean complete();
     method public boolean fail(java.lang.String);
+    method public int getAdvancedIntOption(java.lang.String);
+    method public java.lang.String getAdvancedStringOption(java.lang.String);
     method public android.printservice.PrintDocument getDocument();
     method public android.print.PrintJobId getId();
     method public android.print.PrintJobInfo getInfo();
     method public java.lang.String getTag();
+    method public boolean hasAdvancedOption(java.lang.String);
     method public boolean isBlocked();
     method public boolean isCancelled();
     method public boolean isCompleted();
@@ -19617,6 +19631,7 @@ package android.printservice {
     method protected void onDisconnected();
     method protected abstract void onPrintJobQueued(android.printservice.PrintJob);
     method protected abstract void onRequestCancelPrintJob(android.printservice.PrintJob);
+    field public static final java.lang.String EXTRA_PRINT_JOB_INFO = "android.intent.extra.print.PRINT_JOB_INFO";
     field public static final java.lang.String SERVICE_INTERFACE = "android.printservice.PrintService";
     field public static final java.lang.String SERVICE_META_DATA = "android.printservice";
   }
