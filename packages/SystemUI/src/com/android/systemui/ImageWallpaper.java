@@ -326,6 +326,7 @@ public class ImageWallpaper extends WallpaperService {
                             ((mBackground == null) ? 0 : mBackground.getHeight()) + ", " +
                             dw + ", " + dh);
                 }
+                mWallpaperManager.forgetLoadedWallpaper();
                 updateWallpaperLocked();
                 if (mBackground == null) {
                     if (DEBUG) {
