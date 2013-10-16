@@ -226,7 +226,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_RESULTS = localLOGV || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
-    static final boolean DEBUG_STACK = localLOGV || true;
+    static final boolean DEBUG_STACK = localLOGV || false;
     static final boolean DEBUG_SWITCH = localLOGV || false;
     static final boolean DEBUG_TASKS = localLOGV || false;
     static final boolean DEBUG_THUMBNAILS = localLOGV || false;
@@ -236,7 +236,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PSS = localLOGV || false;
     static final boolean DEBUG_LOCKSCREEN = localLOGV || false;
-    static final boolean VALIDATE_TOKENS = true;
+    static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
     // Control over CPU and battery monitoring.
