@@ -1377,12 +1377,23 @@ public final class ActivityStackSupervisor {
         }
 
         final ActivityStack sourceStack;
-        TaskRecord sourceTask;
         if (sourceRecord != null) {
-            sourceTask = sourceRecord.task;
-            sourceStack = sourceTask.stack;
+            if (sourceRecord.finishing) {
+                // If the source is finishing, we can't further count it as our source.  This
+                // is because the task it is associated with may now be empty and on its way out,
+                // so we don't want to blindly throw it in to that task.  Instead we will take
+                // the NEW_TASK flow and try to find a task for it.
+                if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+                    Slog.w(TAG, "startActivity called from finishing " + sourceRecord
+                            + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+                }
+                sourceRecord = null;
+                sourceStack = null;
+            } else {
+                sourceStack = sourceRecord.task.stack;
+            }
         } else {
-            sourceTask = null;
             sourceStack = null;
         }
 
@@ -1424,6 +1435,8 @@ public final class ActivityStackSupervisor {
                     }
                     targetStack = intentActivity.task.stack;
                     targetStack.mLastPausedActivity = null;
+                    if (DEBUG_TASKS) Slog.d(TAG, "Bring to front target: " + targetStack
+                            + " from " + intentActivity);
                     moveHomeStack(targetStack.isHomeStack());
                     if (intentActivity.task.intent == null) {
                         // This task was started because of movement of
@@ -1663,7 +1676,7 @@ public final class ActivityStackSupervisor {
                 }
             }
         } else if (sourceRecord != null) {
-            sourceTask = sourceRecord.task;
+            TaskRecord sourceTask = sourceRecord.task;
             targetStack = sourceTask.stack;
             moveHomeStack(targetStack.isHomeStack());
             if (!addingToTask &&
@@ -1683,7 +1696,7 @@ public final class ActivityStackSupervisor {
                         targetStack.resumeTopActivityLocked(null);
                     }
                     ActivityOptions.abort(options);
-                    if (r.task == null)  Slog.v(TAG,
+                    if (r.task == null)  Slog.w(TAG,
                         "startActivityUncheckedLocked: task left null",
                         new RuntimeException("here").fillInStackTrace());
                     return ActivityManager.START_DELIVERED_TO_TOP;
@@ -1712,7 +1725,7 @@ public final class ActivityStackSupervisor {
             // it.
             r.setTask(sourceTask, sourceRecord.thumbHolder, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
-                    + " in existing task " + r.task);
+                    + " in existing task " + r.task + " from source " + sourceRecord);
 
         } else {
             // This not being started from an existing activity, and not part
@@ -2060,9 +2073,11 @@ public final class ActivityStackSupervisor {
     }
 
     ActivityRecord findTaskLocked(ActivityRecord r) {
+        if (DEBUG_TASKS) Slog.d(TAG, "Looking for task of " + r);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             if (!r.isApplicationActivity() && !stack.isHomeStack()) {
+                if (DEBUG_TASKS) Slog.d(TAG, "Skipping stack: " + stack);
                 continue;
             }
             final ActivityRecord ar = stack.findTaskLocked(r);
@@ -2070,6 +2085,7 @@ public final class ActivityStackSupervisor {
                 return ar;
             }
         }
+        if (DEBUG_TASKS) Slog.d(TAG, "No task found");
         return null;
     }
 
