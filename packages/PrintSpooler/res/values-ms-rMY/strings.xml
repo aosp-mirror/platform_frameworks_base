@@ -52,15 +52,15 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Ralat pencetak <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Pencetak disekat <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
   <plurals name="composite_notification_title_template">
-    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> kerja cetakan"</item>
-    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> kerja cetakan"</item>
+    <item quantity="one" msgid="5866624638054847057">"Kerja cetakan <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"Kerja cetakan <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"Batal"</string>
     <string name="restart" msgid="2472034227037808749">"Mulakan semula"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Tiada sambungan ke pencetak"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"tidak diketahui"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – tidak tersedia"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Tidak dapat menjaga kerja cetakan"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Tidak dapat menjana kerja cetakan"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Hitam &amp; Putih"</item>
     <item msgid="2762241247228983754">"Warna"</item>

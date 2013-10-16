@@ -60,7 +60,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Hakuna muunganisho kwa printa"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"haijulikani"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> - haipatikani"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Haikuweza kuzalisha kazi ya kuchapisha"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Haikuweza kuunda kazi ya kuchapisha"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Nyeusi na Nyeupe"</item>
     <item msgid="2762241247228983754">"Rangi"</item>
