@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Tente novamente em <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Tente novamente mais tarde"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Deslize para baixo para sair da tela inteira"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Deslize de cima para baixo para sair da tela inteira"</string>
 </resources>

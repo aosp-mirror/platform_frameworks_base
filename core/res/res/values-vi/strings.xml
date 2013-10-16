@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Hãy thử lại sau <xliff:g id="COUNT">%d</xliff:g> giây"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Hãy thử lại sau"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Vuốt từ trên xuống để thoát toàn màn hình"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Vuốt từ trên xuống để thoát toàn màn hình."</string>
 </resources>

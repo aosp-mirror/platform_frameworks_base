@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Coba <xliff:g id="COUNT">%d</xliff:g> detik lagi"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Coba lagi nanti"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Gesek ke bawah untuk keluar dari layar penuh"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Gesek dari atas ke bawah untuk keluar dari layar penuh."</string>
 </resources>
