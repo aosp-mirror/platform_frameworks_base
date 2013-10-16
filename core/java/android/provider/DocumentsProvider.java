@@ -24,6 +24,7 @@ import static android.provider.DocumentsContract.getRootId;
 import static android.provider.DocumentsContract.getSearchDocumentsQuery;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,7 @@ import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -46,25 +48,70 @@ import libcore.io.IoUtils;
 import java.io.FileNotFoundException;
 
 /**
- * Base class for a document provider. A document provider should extend this
- * class and implement the abstract methods.
+ * Base class for a document provider. A document provider offers read and write
+ * access to durable files, such as files stored on a local disk, or files in a
+ * cloud storage service. To create a document provider, extend this class,
+ * implement the abstract methods, and add it to your manifest like this:
+ *
+ * <pre class="prettyprint">&lt;manifest&gt;
+ *    ...
+ *    &lt;application&gt;
+ *        ...
+ *        &lt;provider
+ *            android:name="com.example.MyCloudProvider"
+ *            android:authorities="com.example.mycloudprovider"
+ *            android:exported="true"
+ *            android:grantUriPermissions="true"
+ *            android:permission="android.permission.MANAGE_DOCUMENTS"&gt;
+ *            &lt;intent-filter&gt;
+ *                &lt;action android:name="android.content.action.DOCUMENTS_PROVIDER" /&gt;
+ *            &lt;/intent-filter&gt;
+ *        &lt;/provider&gt;
+ *        ...
+ *    &lt;/application&gt;
+ *&lt;/manifest&gt;</pre>
  * <p>
- * Each document provider expresses one or more "roots" which each serve as the
- * top-level of a tree. For example, a root could represent an account, or a
- * physical storage device. Under each root, documents are referenced by
- * {@link Document#COLUMN_DOCUMENT_ID}, which must not change once returned.
+ * When defining your provider, you must protect it with
+ * {@link android.Manifest.permission#MANAGE_DOCUMENTS}, which is a permission
+ * only the system can obtain. Applications cannot use a documents provider
+ * directly; they must go through {@link Intent#ACTION_OPEN_DOCUMENT} or
+ * {@link Intent#ACTION_CREATE_DOCUMENT} which requires a user to actively
+ * navigate and select documents. When a user selects documents through that
+ * UI, the system issues narrow URI permission grants to the requesting
+ * application.
+ * </p>
+ * <h3>Documents</h3>
  * <p>
- * Documents can be either an openable file (with a specific MIME type), or a
+ * A document can be either an openable stream (with a specific MIME type), or a
  * directory containing additional documents (with the
- * {@link Document#MIME_TYPE_DIR} MIME type). Each document can have different
- * capabilities, as described by {@link Document#COLUMN_FLAGS}. The same
- * {@link Document#COLUMN_DOCUMENT_ID} can be included in multiple directories.
+ * {@link Document#MIME_TYPE_DIR} MIME type). Each directory represents the top
+ * of a subtree containing zero or more documents, which can recursively contain
+ * even more documents and directories.
+ * </p>
  * <p>
- * Document providers must be protected with the
- * {@link android.Manifest.permission#MANAGE_DOCUMENTS} permission, which can
- * only be requested by the system. The system-provided UI then issues narrow
- * Uri permission grants for individual documents when the user explicitly picks
- * documents.
+ * Each document can have different capabilities, as described by
+ * {@link Document#COLUMN_FLAGS}. For example, if a document can be represented
+ * as a thumbnail, a provider can set {@link Document#FLAG_SUPPORTS_THUMBNAIL}
+ * and implement
+ * {@link #openDocumentThumbnail(String, Point, CancellationSignal)} to return
+ * that thumbnail.
+ * </p>
+ * <p>
+ * Each document under a provider is uniquely referenced by its
+ * {@link Document#COLUMN_DOCUMENT_ID}, which must not change once returned. A
+ * single document can be included in multiple directories when responding to
+ * {@link #queryChildDocuments(String, String[], String)}. For example, a
+ * provider might surface a single photo in multiple locations: once in a
+ * directory of locations, and again in a directory of dates.
+ * </p>
+ * <h3>Roots</h3>
+ * <p>
+ * All documents are surfaced through one or more "roots." Each root represents
+ * the top of a document tree that a user can navigate. For example, a root
+ * could represent an account or a physical storage device. Similar to
+ * documents, each root can have capabilities expressed through
+ * {@link Root#COLUMN_FLAGS}.
+ * </p>
  *
  * @see Intent#ACTION_OPEN_DOCUMENT
  * @see Intent#ACTION_CREATE_DOCUMENT
@@ -114,25 +161,30 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Create a new document and return its {@link Document#COLUMN_DOCUMENT_ID}.
-     * A provider must allocate a new {@link Document#COLUMN_DOCUMENT_ID} to
-     * represent the document, which must not change once returned.
+     * Create a new document and return its newly generated
+     * {@link Document#COLUMN_DOCUMENT_ID}. A provider must allocate a new
+     * {@link Document#COLUMN_DOCUMENT_ID} to represent the document, which must
+     * not change once returned.
      *
-     * @param documentId the parent directory to create the new document under.
-     * @param mimeType the MIME type associated with the new document.
-     * @param displayName the display name of the new document.
+     * @param parentDocumentId the parent directory to create the new document
+     *            under.
+     * @param mimeType the concrete MIME type associated with the new document.
+     *            If the MIME type is not supported, the provider must throw.
+     * @param displayName the display name of the new document. The provider may
+     *            alter this name to meet any internal constraints, such as
+     *            conflicting names.
      */
     @SuppressWarnings("unused")
-    public String createDocument(String documentId, String mimeType, String displayName)
+    public String createDocument(String parentDocumentId, String mimeType, String displayName)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Create not supported");
     }
 
     /**
-     * Delete the given document. Upon returning, any Uri permission grants for
-     * the given document will be revoked. If additional documents were deleted
-     * as a side effect of this call, such as documents inside a directory, the
-     * implementor is responsible for revoking those permissions.
+     * Delete the requested document. Upon returning, any URI permission grants
+     * for the requested document will be revoked. If additional documents were
+     * deleted as a side effect of this call, such as documents inside a
+     * directory, the implementor is responsible for revoking those permissions.
      *
      * @param documentId the document to delete.
      */
@@ -141,8 +193,35 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Delete not supported");
     }
 
+    /**
+     * Return all roots currently provided. A provider must define at least one
+     * root to display to users, and it should avoid making network requests to
+     * keep this request fast.
+     * <p>
+     * Each root is defined by the metadata columns described in {@link Root},
+     * including {@link Root#COLUMN_DOCUMENT_ID} which points to a directory
+     * representing a tree of documents to display under that root.
+     * <p>
+     * If this set of roots changes, you must call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver)} to notify the system.
+     *
+     * @param projection list of {@link Root} columns to put into the cursor. If
+     *            {@code null} all supported columns should be included.
+     */
     public abstract Cursor queryRoots(String[] projection) throws FileNotFoundException;
 
+    /**
+     * Return recently modified documents under the requested root. This will
+     * only be called for roots that advertise
+     * {@link Root#FLAG_SUPPORTS_RECENTS}. The returned documents should be
+     * sorted by {@link Document#COLUMN_LAST_MODIFIED} in descending order, and
+     * limited to only return the 64 most recently modified documents.
+     *
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @see DocumentsContract#EXTRA_LOADING
+     */
     @SuppressWarnings("unused")
     public Cursor queryRecentDocuments(String rootId, String[] projection)
             throws FileNotFoundException {
@@ -150,18 +229,43 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return metadata for the given document. A provider should avoid making
-     * network requests to keep this request fast.
+     * Return metadata for the single requested document. A provider should
+     * avoid making network requests to keep this request fast.
      *
      * @param documentId the document to return.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
      */
     public abstract Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException;
 
     /**
-     * Return the children of the given document which is a directory.
+     * Return the children documents contained in the requested directory. This
+     * must only return immediate descendants, as additional queries will be
+     * issued to recursively explore the tree.
+     * <p>
+     * If your provider is cloud-based, and you have some data cached or pinned
+     * locally, you may return the local data immediately, setting
+     * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
+     * your provider is still fetching additional data. Then, when the network
+     * data is available, you can call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver)} to trigger a requery and return the
+     * complete contents.
      *
      * @param parentDocumentId the directory to return children for.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @param sortOrder how to order the rows, formatted as an SQL
+     *            {@code ORDER BY} clause (excluding the ORDER BY itself).
+     *            Passing {@code null} will use the default sort order, which
+     *            may be unordered. This ordering is a hint that can be used to
+     *            prioritize how data is fetched from the network, but UI may
+     *            always enforce a specific ordering.
+     * @see DocumentsContract#EXTRA_LOADING
+     * @see DocumentsContract#EXTRA_INFO
+     * @see DocumentsContract#EXTRA_ERROR
      */
     public abstract Cursor queryChildDocuments(
             String parentDocumentId, String[] projection, String sortOrder)
@@ -176,9 +280,24 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return documents that that match the given query.
+     * Return documents that that match the given query under the requested
+     * root. The returned documents should be sorted by relevance in descending
+     * order. How documents are matched against the query string is an
+     * implementation detail left to each provider, but it's suggested that at
+     * least {@link Document#COLUMN_DISPLAY_NAME} be matched in a
+     * case-insensitive fashion.
+     * <p>
+     * Only documents may be returned; directories are not supported in search
+     * results.
      *
      * @param rootId the root to search under.
+     * @param query string to match documents against.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @see DocumentsContract#EXTRA_LOADING
+     * @see DocumentsContract#EXTRA_INFO
+     * @see DocumentsContract#EXTRA_ERROR
      */
     @SuppressWarnings("unused")
     public Cursor querySearchDocuments(String rootId, String query, String[] projection)
@@ -187,8 +306,10 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return MIME type for the given document. Must match the value of
-     * {@link Document#COLUMN_MIME_TYPE} for this document.
+     * Return concrete MIME type of the requested document. Must match the value
+     * of {@link Document#COLUMN_MIME_TYPE} for this document. The default
+     * implementation queries {@link #queryDocument(String, String[])}, so
+     * providers may choose to override this as an optimization.
      */
     public String getDocumentType(String documentId) throws FileNotFoundException {
         final Cursor cursor = queryDocument(documentId, null);
@@ -204,18 +325,21 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Open and return the requested document. A provider should return a
-     * reliable {@link ParcelFileDescriptor} to detect when the remote caller
-     * has finished reading or writing the document. A provider may return a
-     * pipe or socket pair if the mode is exclusively
-     * {@link ParcelFileDescriptor#MODE_READ_ONLY} or
+     * Open and return the requested document.
+     * <p>
+     * A provider should return a reliable {@link ParcelFileDescriptor} to
+     * detect when the remote caller has finished reading or writing the
+     * document. A provider may return a pipe or socket pair if the mode is
+     * exclusively {@link ParcelFileDescriptor#MODE_READ_ONLY} or
      * {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, but complex modes like
      * {@link ParcelFileDescriptor#MODE_READ_WRITE} require a normal file on
-     * disk. If a provider blocks while downloading content, it should
-     * periodically check {@link CancellationSignal#isCanceled()} to abort
-     * abandoned open requests.
+     * disk.
+     * <p>
+     * If a provider blocks while downloading content, it should periodically
+     * check {@link CancellationSignal#isCanceled()} to abort abandoned open
+     * requests.
      *
-     * @param docId the document to return.
+     * @param documentId the document to return.
      * @param mode the mode to open with, such as 'r', 'w', or 'rw'.
      * @param signal used by the caller to signal if the request should be
      *            cancelled.
@@ -223,20 +347,24 @@ public abstract class DocumentsProvider extends ContentProvider {
      *      OnCloseListener)
      * @see ParcelFileDescriptor#createReliablePipe()
      * @see ParcelFileDescriptor#createReliableSocketPair()
+     * @see ParcelFileDescriptor#parseMode(String)
      */
     public abstract ParcelFileDescriptor openDocument(
-            String docId, String mode, CancellationSignal signal) throws FileNotFoundException;
+            String documentId, String mode, CancellationSignal signal) throws FileNotFoundException;
 
     /**
-     * Open and return a thumbnail of the requested document. A provider should
-     * return a thumbnail closely matching the hinted size, attempting to serve
-     * from a local cache if possible. A provider should never return images
-     * more than double the hinted size. If a provider performs expensive
-     * operations to download or generate a thumbnail, it should periodically
-     * check {@link CancellationSignal#isCanceled()} to abort abandoned
-     * thumbnail requests.
+     * Open and return a thumbnail of the requested document.
+     * <p>
+     * A provider should return a thumbnail closely matching the hinted size,
+     * attempting to serve from a local cache if possible. A provider should
+     * never return images more than double the hinted size.
+     * <p>
+     * If a provider performs expensive operations to download or generate a
+     * thumbnail, it should periodically check
+     * {@link CancellationSignal#isCanceled()} to abort abandoned thumbnail
+     * requests.
      *
-     * @param docId the document to return.
+     * @param documentId the document to return.
      * @param sizeHint hint of the optimal thumbnail dimensions.
      * @param signal used by the caller to signal if the request should be
      *            cancelled.
@@ -244,7 +372,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      */
     @SuppressWarnings("unused")
     public AssetFileDescriptor openDocumentThumbnail(
-            String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
+            String documentId, Point sizeHint, CancellationSignal signal)
+            throws FileNotFoundException {
         throw new UnsupportedOperationException("Thumbnails not supported");
     }
 
@@ -362,7 +491,7 @@ public abstract class DocumentsProvider extends ContentProvider {
         final String documentId = extras.getString(Document.COLUMN_DOCUMENT_ID);
         final Uri documentUri = DocumentsContract.buildDocumentUri(mAuthority, documentId);
 
-        // Require that caller can manage given document
+        // Require that caller can manage requested document
         final boolean callerHasManage =
                 context.checkCallingOrSelfPermission(android.Manifest.permission.MANAGE_DOCUMENTS)
                 == PackageManager.PERMISSION_GRANTED;
@@ -408,7 +537,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class.
+     * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #openDocument(String, String, CancellationSignal)
      */
@@ -418,7 +547,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class.
+     * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #openDocument(String, String, CancellationSignal)
      */
@@ -429,7 +558,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class.
+     * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
      */
@@ -445,7 +574,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class.
+     * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
      */
