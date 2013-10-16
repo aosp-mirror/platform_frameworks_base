@@ -34,8 +34,10 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
@@ -614,7 +616,7 @@ public abstract class Context {
     public abstract File getFilesDir();
 
     /**
-     * Returns the absolute path to the directory on the external filesystem
+     * Returns the absolute path to the directory on the primary external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()}) where the application can
      * place persistent files it owns.  These files are internal to the
@@ -628,9 +630,17 @@ public abstract class Context {
      * <li>External files are not always available: they will disappear if the
      * user mounts the external storage on a computer or removes it.  See the
      * APIs on {@link android.os.Environment} for information in the storage state.
-     * <li>There is no security enforced with these files.  All applications
-     * can read and write files placed here.
+     * <li>There is no security enforced with these files.  For example, any application
+     * holding {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} can write to
+     * these files.
      * </ul>
+     *
+     * <p>Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no permissions
+     * are required to read or write to the returned path; it's always
+     * accessible to the calling app.  This only applies to paths generated for
+     * package name of the calling application.  To access paths belonging
+     * to other packages, {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+     * and/or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      *
      * <p>On devices with multiple users (as described by {@link UserManager}),
      * each user has their own isolated external storage. Applications only
@@ -664,11 +674,6 @@ public abstract class Context {
      *
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_picture}
-     * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
-     * permissions are required for the owning application to read or write to
-     * this path. Otherwise, {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
-     * or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      *
      * @param type The type of files directory to return.  May be null for
      * the root of the files directory or one of
@@ -698,36 +703,61 @@ public abstract class Context {
      * it owns. These files are internal to the application, and not typically
      * visible to the user as media.
      * <p>
+     * This is like {@link #getFilesDir()} in that these files will be deleted when
+     * the application is uninstalled, however there are some important differences:
+     * <ul>
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.
+     * <li>There is no security enforced with these files.
+     * </ul>
+     * <p>
      * External storage devices returned here are considered a permanent part of
      * the device, including both emulated external storage and physical media
-     * slots. This does not include transient devices, such as USB flash drives.
+     * slots, such as SD cards in a battery compartment. The returned paths do
+     * not include transient devices, such as USB flash drives.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
-     * permissions are required for the owning application to read or write to
-     * these paths.
+     * An application may store data on any or all of the returned devices.  For
+     * example, an app may choose to store large files on the device with the
+     * most available space, as measured by {@link StatFs}.
      * <p>
-     * The returned paths include any path that would be returned by
-     * {@link #getExternalFilesDir(String)}.
+     * No permissions are required to read or write to the returned paths; they
+     * are always accessible to the calling app.  Write access outside of these
+     * paths on secondary external storage devices is not available.
+     * <p>
+     * The first path returned is the same as {@link #getExternalFilesDir(String)}.
+     * Returned paths may be {@code null} if a storage device is unavailable.
      *
      * @see #getExternalFilesDir(String)
+     * @see Environment#getStorageState(File)
      */
     public abstract File[] getExternalFilesDirs(String type);
 
     /**
-     * Return the directory where this application's OBB files (if there are
-     * any) can be found. Note if the application does not have any OBB files,
-     * this directory may not exist.
+     * Return the primary external storage directory where this application's OBB
+     * files (if there are any) can be found. Note if the application does not have
+     * any OBB files, this directory may not exist.
+     * <p>
+     * This is like {@link #getFilesDir()} in that these files will be deleted when
+     * the application is uninstalled, however there are some important differences:
+     * <ul>
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.
+     * <li>There is no security enforced with these files.  For example, any application
+     * holding {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} can write to
+     * these files.
+     * </ul>
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no permissions
+     * are required to read or write to the returned path; it's always
+     * accessible to the calling app.  This only applies to paths generated for
+     * package name of the calling application.  To access paths belonging
+     * to other packages, {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+     * and/or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      * <p>
      * On devices with multiple users (as described by {@link UserManager}),
      * multiple users may share the same OBB storage location. Applications
      * should ensure that multiple instances running under different users don't
      * interfere with each other.
-     * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
-     * permissions are required for the owning application to read or write to
-     * this path. Otherwise,
-     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or
-     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      */
     public abstract File getObbDir();
 
@@ -737,18 +767,32 @@ public abstract class Context {
      * any) can be found. Note if the application does not have any OBB files,
      * these directories may not exist.
      * <p>
+     * This is like {@link #getFilesDir()} in that these files will be deleted when
+     * the application is uninstalled, however there are some important differences:
+     * <ul>
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.
+     * <li>There is no security enforced with these files.
+     * </ul>
+     * <p>
      * External storage devices returned here are considered a permanent part of
      * the device, including both emulated external storage and physical media
-     * slots. This does not include transient devices, such as USB flash drives.
+     * slots, such as SD cards in a battery compartment. The returned paths do
+     * not include transient devices, such as USB flash drives.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
-     * permissions are required for the owning application to read or write to
-     * this path.
+     * An application may store data on any or all of the returned devices.  For
+     * example, an app may choose to store large files on the device with the
+     * most available space, as measured by {@link StatFs}.
      * <p>
-     * The returned paths include any path that would be returned by
-     * {@link #getObbDir()}
+     * No permissions are required to read or write to the returned paths; they
+     * are always accessible to the calling app.  Write access outside of these
+     * paths on secondary external storage devices is not available.
+     * <p>
+     * The first path returned is the same as {@link #getObbDir()}.
+     * Returned paths may be {@code null} if a storage device is unavailable.
      *
      * @see #getObbDir()
+     * @see Environment#getStorageState(File)
      */
     public abstract File[] getObbDirs();
 
@@ -772,7 +816,7 @@ public abstract class Context {
     public abstract File getCacheDir();
 
     /**
-     * Returns the absolute path to the directory on the external filesystem
+     * Returns the absolute path to the directory on the primary external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()} where the application can
      * place cache files it owns. These files are internal to the application, and
@@ -794,19 +838,21 @@ public abstract class Context {
      * <li>External files are not always available: they will disappear if the
      * user mounts the external storage on a computer or removes it.  See the
      * APIs on {@link android.os.Environment} for information in the storage state.
-     * <li>There is no security enforced with these files.  All applications
-     * can read and write files placed here.
+     * <li>There is no security enforced with these files.  For example, any application
+     * holding {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} can write to
+     * these files.
      * </ul>
+     *
+     * <p>Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no permissions
+     * are required to read or write to the returned path; it's always
+     * accessible to the calling app.  This only applies to paths generated for
+     * package name of the calling application.  To access paths belonging
+     * to other packages, {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+     * and/or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      *
      * <p>On devices with multiple users (as described by {@link UserManager}),
      * each user has their own isolated external storage. Applications only
      * have access to the external storage for the user they're running as.</p>
-     * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
-     * permissions are required for the owning application to read or write to
-     * this path. Otherwise,
-     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or
-     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      *
      * @return The path of the directory holding application cache files
      * on external storage.  Returns null if external storage is not currently
@@ -824,18 +870,32 @@ public abstract class Context {
      * owns. These files are internal to the application, and not typically
      * visible to the user as media.
      * <p>
+     * This is like {@link #getCacheDir()} in that these files will be deleted when
+     * the application is uninstalled, however there are some important differences:
+     * <ul>
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.
+     * <li>There is no security enforced with these files.
+     * </ul>
+     * <p>
      * External storage devices returned here are considered a permanent part of
      * the device, including both emulated external storage and physical media
-     * slots. This does not include transient devices, such as USB flash drives.
+     * slots, such as SD cards in a battery compartment. The returned paths do
+     * not include transient devices, such as USB flash drives.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
-     * permissions are required for the owning application to read or write to
-     * these paths.
+     * An application may store data on any or all of the returned devices.  For
+     * example, an app may choose to store large files on the device with the
+     * most available space, as measured by {@link StatFs}.
      * <p>
-     * The returned paths include any path that would be returned by
-     * {@link #getExternalCacheDir()}.
+     * No permissions are required to read or write to the returned paths; they
+     * are always accessible to the calling app.  Write access outside of these
+     * paths on secondary external storage devices is not available.
+     * <p>
+     * The first path returned is the same as {@link #getExternalCacheDir()}.
+     * Returned paths may be {@code null} if a storage device is unavailable.
      *
      * @see #getExternalCacheDir()
+     * @see Environment#getStorageState(File)
      */
     public abstract File[] getExternalCacheDirs();
 
