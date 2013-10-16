@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.R;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -188,6 +189,28 @@ public abstract class PrintService extends Service {
      * </p>
      */
     public static final String SERVICE_META_DATA = "android.printservice";
+
+    /**
+     * If you declared an optional activity with advanced print options via the
+     * {@link R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * attribute, this extra is used to pass in the currently constructed {@link
+     * PrintJobInfo} to your activity allowing you to modify it. After you are
+     * done, you must return the modified {@link PrintJobInfo} via the same extra.
+     * <p>
+     * You cannot modify the passed in {@link PrintJobInfo} directly, rather you
+     * should build another one using the {@link PrintJobInfo.Builder} class. You
+     * can specify any standard properties and add advanced, printer specific,
+     * ones via {@link PrintJobInfo.Builder#putAdvancedOption(String, String)
+     * PrintJobInfo.Builder#putAdvancedOption(String, String)} and {@link
+     * PrintJobInfo.Builder#putAdvancedOption(String, int)
+     * PrintJobInfo.Builder#putAdvancedOption(String, int)}. The advanced options
+     * are not interpreted by the system, they will not be visible to applications,
+     * and can only be accessed by your print service via {@link
+     * PrintJob#getAdvancedStringOption(String) PrintJob.getAdvancedStringOption(String)}
+     * and {@link PrintJob#getAdvancedIntOption(String) PrintJob.getAdvancedIntOption(String)}.
+     * </p>
+     */
+    public static final String EXTRA_PRINT_JOB_INFO = "android.intent.extra.print.PRINT_JOB_INFO";
 
     private Handler mHandler;
 
