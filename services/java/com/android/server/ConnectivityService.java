@@ -4247,27 +4247,35 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         log("isMobileOk: linkHasIpv4=" + linkHasIpv4
                                 + " linkHasIpv6=" + linkHasIpv6);
 
-                        // Loop through at most 3 valid addresses or all of the address or until
-                        // we run out of time
-                        int loops = Math.min(3, addresses.length);
-                        for(int validAddr=0, addrTried=0;
-                                    (validAddr < loops) && (addrTried < addresses.length)
-                                      && (SystemClock.elapsedRealtime() < endTime);
-                                addrTried ++) {
+                        final ArrayList<InetAddress> validAddresses =
+                                new ArrayList<InetAddress>(addresses.length);
 
-                            // Choose the address at random but make sure its type is supported
-                            // TODO: This doesn't work 100% of the time, because we may end up
-                            // trying the same invalid address more than once and ignoring one
-                            // of the valid addresses.
-                            InetAddress hostAddr = addresses[rand.nextInt(addresses.length)];
-                            if (((hostAddr instanceof Inet4Address) && linkHasIpv4)
-                                    || ((hostAddr instanceof Inet6Address) && linkHasIpv6)) {
-                                // Valid address, so use it
-                                validAddr += 1;
-                            } else {
-                                // Invalid address so try next address
-                                continue;
+                        for (InetAddress addr : addresses) {
+                            if (((addr instanceof Inet4Address) && linkHasIpv4) ||
+                                    ((addr instanceof Inet6Address) && linkHasIpv6)) {
+                                validAddresses.add(addr);
                             }
+                        }
+
+                        if (validAddresses.size() == 0) {
+                            return CMP_RESULT_CODE_NO_CONNECTION;
+                        }
+
+                        int addrTried = 0;
+                        while (true) {
+                            // Loop through at most 3 valid addresses or until
+                            // we run out of time
+                            if (addrTried++ >= 3) {
+                                log("too many loops tried - giving up");
+                                break;
+                            }
+                            if (SystemClock.elapsedRealtime() >= endTime) {
+                                log("spend too much time - giving up");
+                                break;
+                            }
+
+                            InetAddress hostAddr = validAddresses.get(rand.nextInt(
+                                    validAddresses.size()));
 
                             // Make a route to host so we check the specific interface.
                             if (mCs.requestRouteToHostAddress(ConnectivityManager.TYPE_MOBILE_HIPRI,
@@ -4283,8 +4291,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             }
 
                             // Rewrite the url to have numeric address to use the specific route.
+                            // Add a pointless random query param to fool proxies into not caching.
                             URL newUrl = new URL(orgUri.getScheme(),
-                                    hostAddr.getHostAddress(), orgUri.getPath());
+                                    hostAddr.getHostAddress(),
+                                    orgUri.getPath() + "?q=" + rand.nextInt(Integer.MAX_VALUE));
                             log("isMobileOk: newUrl=" + newUrl);
 
                             HttpURLConnection urlConn = null;
@@ -4321,6 +4331,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                     // occasions where a server returned 200 even though
                                     // the device didn't have a "warm" sim.
                                     log("isMobileOk: not expected responseCode=" + responseCode);
+                                    // TODO - it would be nice in the single-address case to do
+                                    // another DNS resolve here, but flushing the cache is a bit
+                                    // heavy-handed.
                                     result = CMP_RESULT_CODE_REDIRECTED;
                                 }
                             } catch (Exception e) {
