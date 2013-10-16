@@ -518,21 +518,31 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
             }
         }
 
-        Face[] faces = new Face[numFaces];
+        ArrayList<Face> faceList = new ArrayList<Face>();
         if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE) {
             for (int i = 0; i < numFaces; i++) {
-                faces[i] = new Face(faceRectangles[i], faceScores[i]);
+                if (faceScores[i] <= Face.SCORE_MAX &&
+                        faceScores[i] >= Face.SCORE_MIN) {
+                    faceList.add(new Face(faceRectangles[i], faceScores[i]));
+                }
             }
         } else {
             // CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL
             for (int i = 0; i < numFaces; i++) {
-                Point leftEye = new Point(faceLandmarks[i*6], faceLandmarks[i*6+1]);
-                Point rightEye = new Point(faceLandmarks[i*6+2], faceLandmarks[i*6+3]);
-                Point mouth = new Point(faceLandmarks[i*6+4], faceLandmarks[i*6+5]);
-                faces[i] = new Face(faceRectangles[i], faceScores[i], faceIds[i],
-                        leftEye, rightEye, mouth);
+                if (faceScores[i] <= Face.SCORE_MAX &&
+                        faceScores[i] >= Face.SCORE_MIN &&
+                        faceIds[i] >= 0) {
+                    Point leftEye = new Point(faceLandmarks[i*6], faceLandmarks[i*6+1]);
+                    Point rightEye = new Point(faceLandmarks[i*6+2], faceLandmarks[i*6+3]);
+                    Point mouth = new Point(faceLandmarks[i*6+4], faceLandmarks[i*6+5]);
+                    Face face = new Face(faceRectangles[i], faceScores[i], faceIds[i],
+                            leftEye, rightEye, mouth);
+                    faceList.add(face);
+                }
             }
         }
+        Face[] faces = new Face[faceList.size()];
+        faceList.toArray(faces);
         return faces;
     }
 
