@@ -42,6 +42,8 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_C_INCLUDES := \
     external/skia/include/core
 
+LOCAL_CFLAGS += -Wno-unused-parameter
+
 LOCAL_MODULE:= libinputservice
 
 LOCAL_MODULE_TAGS := optional
