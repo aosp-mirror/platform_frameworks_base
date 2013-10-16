@@ -1,0 +1,3 @@
+The res directory is needed for Eclipse to correctly build the project, but it
+is not possible to check in a directory into git. This file guarantees the res
+directory exists.
