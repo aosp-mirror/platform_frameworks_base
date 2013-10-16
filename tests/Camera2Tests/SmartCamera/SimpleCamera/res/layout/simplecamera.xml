@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout android:id="@+id/surfaceViewLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="1240px"
+        android:layout_alignParentTop="true" >
+        <SurfaceView android:id="@+id/cameraView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        />
+        <Button android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/startButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        />
+        <Button android:id="@+id/galleryOpenButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/galleryOpenButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        />
+        <Spinner android:id="@+id/spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/number_array"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        />
+        <TextView android:id="@+id/imagesSavedTextView"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:padding="16dip"
+        android:text="@string/imagesSavedTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:textColor="#FF0000"
+        android:textSize="20sp"
+        />
+    </RelativeLayout>
+    <HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/scrollViewLinearLayout"
+      android:orientation="horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="320px">
+    </LinearLayout>
+    </HorizontalScrollView>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:orientation="horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+        <TextView android:id="@+id/goodOrBadTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:padding="16dip"
+        android:text="@string/goodOrBadTextView"
+        />
+        <TextView android:id="@+id/fpsTextView"
+        android:layout_height="fill_parent"
+        android:layout_width="wrap_content"
+        android:padding="16dip"
+        android:text="@string/fpsTextView"
+        />
+        <TextView android:id="@+id/scoreTextView"
+        android:layout_height="fill_parent"
+        android:layout_width="wrap_content"
+        android:padding="16dip"
+        android:text="@string/scoreTextView"
+        />
+    </LinearLayout>
+</LinearLayout>
