@@ -192,6 +192,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @return a new ParcelFileDescriptor pointing to the given file.
      * @throws FileNotFoundException if the given file does not exist or can not
      *             be opened with the requested mode.
+     * @see #parseMode(String)
      */
     public static ParcelFileDescriptor open(File file, int mode) throws FileNotFoundException {
         final FileDescriptor fd = openInternal(file, mode);
@@ -216,6 +217,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @return a new ParcelFileDescriptor pointing to the given file.
      * @throws FileNotFoundException if the given file does not exist or can not
      *             be opened with the requested mode.
+     * @see #parseMode(String)
      */
     public static ParcelFileDescriptor open(
             File file, int mode, Handler handler, OnCloseListener listener) throws IOException {
