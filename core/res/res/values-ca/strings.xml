@@ -478,7 +478,7 @@
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"llegir la memòria intermèdia de marcs"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permet que l\'aplicació llegeixi el contingut de la memòria intermèdia de marcs."</string>
     <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"accedeix a InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permet que l\'aplicació utilitzi funcions InputFlinger de baix nivell."</string>
+    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permet que l\'aplicació utilitzi funcions de baix nivell d\'InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configuració de les pantalles Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet a l\'aplicació configurar-se i connectar-se a les pantalles Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control de les pantalles Wi-Fi"</string>

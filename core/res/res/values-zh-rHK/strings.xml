@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> 秒後再試一次"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下滑動即可結束全螢幕。"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下快速滑動即可退出全螢幕。"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"小時環形滑桿"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"分鐘環形滑桿"</string>

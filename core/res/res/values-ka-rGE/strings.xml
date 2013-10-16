@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"კიდევ ერთხელ სცადეთ <xliff:g id="COUNT">%d</xliff:g> წამში"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"სცადეთ მოგვიანებით"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"ჩამოასრიალეთ ზევიდან სრული ეკრანის დასახურად"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"ჩამოასრიალეთ ზევიდან სრული ეკრანის დასახურად."</string>
     <string name="done_label" msgid="2093726099505892398">"დასრულდა"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"საათების წრიული სლაიდერი"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"წუთების წრიული სლაიდერი"</string>
