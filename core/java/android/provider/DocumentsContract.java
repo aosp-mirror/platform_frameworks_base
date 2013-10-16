@@ -73,7 +73,8 @@ public final class DocumentsContract {
     }
 
     /**
-     * Intent action used to identify {@link DocumentsProvider} instances.
+     * Intent action used to identify {@link DocumentsProvider} instances. This
+     * is used in the {@code <intent-filter>} of a {@code <provider>}.
      */
     public static final String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";
 
@@ -100,12 +101,14 @@ public final class DocumentsContract {
     private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
 
     /**
-     * Constants related to a document, including {@link Cursor} columns names
+     * Constants related to a document, including {@link Cursor} column names
      * and flags.
      * <p>
-     * A document can be either an openable file (with a specific MIME type), or
-     * a directory containing additional documents (with the
-     * {@link #MIME_TYPE_DIR} MIME type).
+     * A document can be either an openable stream (with a specific MIME type),
+     * or a directory containing additional documents (with the
+     * {@link #MIME_TYPE_DIR} MIME type). A directory represents the top of a
+     * subtree containing zero or more documents, which can recursively contain
+     * even more documents and directories.
      * <p>
      * All columns are <em>read-only</em> to client applications.
      */
@@ -122,7 +125,7 @@ public final class DocumentsContract {
          * single document may be included as a child of multiple directories.
          * <p>
          * A provider must always return durable IDs, since they will be used to
-         * issue long-term Uri permission grants when an application interacts
+         * issue long-term URI permission grants when an application interacts
          * with {@link Intent#ACTION_OPEN_DOCUMENT} and
          * {@link Intent#ACTION_CREATE_DOCUMENT}.
          * <p>
@@ -290,8 +293,11 @@ public final class DocumentsContract {
     }
 
     /**
-     * Constants related to a root of documents, including {@link Cursor}
-     * columns names and flags.
+     * Constants related to a root of documents, including {@link Cursor} column
+     * names and flags. A root is the start of a tree of documents, such as a
+     * physical storage device, or an account. Each root starts at the directory
+     * referenced by {@link Root#COLUMN_DOCUMENT_ID}, which can recursively
+     * contain both documents and directories.
      * <p>
      * All columns are <em>read-only</em> to client applications.
      */
@@ -329,7 +335,8 @@ public final class DocumentsContract {
 
         /**
          * Title for a root, which will be shown to a user. This column is
-         * required.
+         * required. For a single storage service surfacing multiple accounts as
+         * different roots, this title should be the name of the service.
          * <p>
          * Type: STRING
          */
@@ -337,7 +344,9 @@ public final class DocumentsContract {
 
         /**
          * Summary for this root, which may be shown to a user. This column is
-         * optional, and may be {@code null}.
+         * optional, and may be {@code null}. For a single storage service
+         * surfacing multiple accounts as different roots, this summary should
+         * be the name of the account.
          * <p>
          * Type: STRING
          */
@@ -393,11 +402,12 @@ public final class DocumentsContract {
         public static final int FLAG_LOCAL_ONLY = 1 << 1;
 
         /**
-         * Flag indicating that this root can report recently modified
-         * documents.
+         * Flag indicating that this root can be queried to provide recently
+         * modified documents.
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsContract#buildRecentDocumentsUri(String, String)
+         * @see DocumentsProvider#queryRecentDocuments(String, String[])
          */
         public static final int FLAG_SUPPORTS_RECENTS = 1 << 2;
 
@@ -405,6 +415,8 @@ public final class DocumentsContract {
          * Flag indicating that this root supports search.
          *
          * @see #COLUMN_FLAGS
+         * @see DocumentsContract#buildSearchDocumentsUri(String, String,
+         *      String)
          * @see DocumentsProvider#querySearchDocuments(String, String,
          *      String[])
          */
@@ -481,7 +493,7 @@ public final class DocumentsContract {
     private static final String PARAM_MANAGE = "manage";
 
     /**
-     * Build Uri representing the roots of a document provider. When queried, a
+     * Build URI representing the roots of a document provider. When queried, a
      * provider will return one or more rows with columns defined by
      * {@link Root}.
      *
@@ -493,7 +505,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build Uri representing the given {@link Root#COLUMN_ROOT_ID} in a
+     * Build URI representing the given {@link Root#COLUMN_ROOT_ID} in a
      * document provider.
      *
      * @see #getRootId(Uri)
@@ -504,7 +516,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build Uri representing the recently modified documents of a specific root
+     * Build URI representing the recently modified documents of a specific root
      * in a document provider. When queried, a provider will return zero or more
      * rows with columns defined by {@link Document}.
      *
@@ -518,7 +530,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build Uri representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
+     * Build URI representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
      * document provider. When queried, a provider will return a single row with
      * columns defined by {@link Document}.
      *
@@ -531,7 +543,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build Uri representing the children of the given directory in a document
+     * Build URI representing the children of the given directory in a document
      * provider. When queried, a provider will return zero or more rows with
      * columns defined by {@link Document}.
      *
@@ -548,7 +560,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build Uri representing a search for matching documents under a specific
+     * Build URI representing a search for matching documents under a specific
      * root in a document provider. When queried, a provider will return zero or
      * more rows with columns defined by {@link Document}.
      *
@@ -564,7 +576,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Test if the given Uri represents a {@link Document} backed by a
+     * Test if the given URI represents a {@link Document} backed by a
      * {@link DocumentsProvider}.
      */
     public static boolean isDocumentUri(Context context, Uri uri) {
@@ -588,7 +600,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Extract the {@link Root#COLUMN_ROOT_ID} from the given Uri.
+     * Extract the {@link Root#COLUMN_ROOT_ID} from the given URI.
      */
     public static String getRootId(Uri rootUri) {
         final List<String> paths = rootUri.getPathSegments();
@@ -602,7 +614,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Extract the {@link Document#COLUMN_DOCUMENT_ID} from the given Uri.
+     * Extract the {@link Document#COLUMN_DOCUMENT_ID} from the given URI.
      */
     public static String getDocumentId(Uri documentUri) {
         final List<String> paths = documentUri.getPathSegments();
@@ -616,7 +628,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Extract the search query from a Uri built by
+     * Extract the search query from a URI built by
      * {@link #buildSearchDocumentsUri(String, String, String)}.
      */
     public static String getSearchDocumentsQuery(Uri searchDocumentsUri) {
@@ -634,7 +646,7 @@ public final class DocumentsContract {
     }
 
     /**
-     * Return thumbnail representing the document at the given Uri. Callers are
+     * Return thumbnail representing the document at the given URI. Callers are
      * responsible for their own in-memory caching.
      *
      * @param documentUri document to return thumbnail for, which must have
@@ -642,7 +654,7 @@ public final class DocumentsContract {
      * @param size optimal thumbnail size desired. A provider may return a
      *            thumbnail of a different size, but never more than double the
      *            requested size.
-     * @param signal signal used to indicate that caller is no longer interested
+     * @param signal signal used to indicate if caller is no longer interested
      *            in the thumbnail.
      * @return decoded thumbnail, or {@code null} if problem was encountered.
      * @see DocumentsProvider#openDocumentThumbnail(String, Point,
