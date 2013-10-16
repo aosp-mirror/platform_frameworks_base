@@ -322,6 +322,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         mAudioManager.unregisterRemoteController(mRemoteController);
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitor);
         mUserSeeking = false;
+        removeCallbacks(mUpdateSeekBars);
     }
 
     void setBadgeIcon(Drawable bmp) {
