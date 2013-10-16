@@ -40,7 +40,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextClock;
-
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.ArrayList;
