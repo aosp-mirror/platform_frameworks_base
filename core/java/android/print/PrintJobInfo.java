@@ -439,7 +439,7 @@ public final class PrintJobInfo implements Parcelable {
     /**
      * Sets the included pages.
      *
-     * @return The included pages.
+     * @param pageRanges The included pages.
      *
      * @hide
      */
@@ -598,6 +598,81 @@ public final class PrintJobInfo implements Parcelable {
             default: {
                 return "STATE_UNKNOWN";
             }
+        }
+    }
+
+    /**
+     * Builder for creating a {@link PrintJobInfo}.
+     */
+    public static final class Builder {
+        private final PrintJobInfo mPrototype;
+
+        /**
+         * Constructor.
+         *
+         * @param prototype Prototype to use as a starting point.
+         * Can be null.
+         */
+        public Builder(PrintJobInfo prototype) {
+            mPrototype = (prototype != null)
+                    ? new PrintJobInfo(prototype)
+                    : new PrintJobInfo();
+        }
+
+        /**
+         * Sets the number of copies.
+         *
+         * @param copies The number of copies.
+         */
+        public void setCopies(int copies) {
+            mPrototype.mCopies = copies;
+        }
+
+        /**
+         * Sets the print job attributes.
+         *
+         * @param attributes The attributes.
+         */
+        public void setAttributes(PrintAttributes attributes) {
+            mPrototype.mAttributes = attributes;
+        }
+
+        /**
+         * Sets the included pages.
+         *
+         * @param pages The included pages.
+         */
+        public void setPages(PageRange[] pages) {
+            mPrototype.mPageRanges = pages;
+        }
+
+        /**
+         * Puts an advanced (printer specific) option.
+         *
+         * @param key The option key.
+         * @param value The option value.
+         */
+        public void putAdvancedOption(String key, String value) {
+
+        }
+
+        /**
+         * Puts an advanced (printer specific) option.
+         *
+         * @param key The option key.
+         * @param value The option value.
+         */
+        public void putAdvancedOption(String key, int value) {
+
+        }
+
+        /**
+         * Creates a new {@link PrintJobInfo} instance.
+         *
+         * @return The new instance.
+         */
+        public PrintJobInfo build() {
+            return mPrototype;
         }
     }
 
