@@ -551,9 +551,6 @@ final class ActivityStack {
      * Move the activities around in the stack to bring a user to the foreground.
      */
     final void switchUserLocked(int userId) {
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
-        }
         if (mCurrentUser == userId) {
             return;
         }
@@ -564,10 +561,15 @@ final class ActivityStack {
         for (int i = 0; i < index; ++i) {
             TaskRecord task = mTaskHistory.get(i);
             if (task.userId == userId) {
+                if (DEBUG_TASKS) Slog.d(TAG, "switchUserLocked: stack=" + getStackId() +
+                        " moving " + task + " to top");
                 mTaskHistory.remove(i);
                 mTaskHistory.add(task);
                 --index;
             }
+        }
+        if (VALIDATE_TOKENS) {
+            validateAppTokensLocked();
         }
     }
 
@@ -2951,6 +2953,7 @@ final class ActivityStack {
         for (int taskNdx = top; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.isHomeTask()) {
+                if (DEBUG_TASKS || DEBUG_STACK) Slog.d(TAG, "moveHomeTaskToTop: moving " + task);
                 mTaskHistory.remove(taskNdx);
                 mTaskHistory.add(top, task);
                 mWindowManager.moveTaskToTop(task.taskId);
