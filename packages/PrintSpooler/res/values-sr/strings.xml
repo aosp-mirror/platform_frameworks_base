@@ -53,7 +53,7 @@
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Штампач је блокирао <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
   <plurals name="composite_notification_title_template">
     <item quantity="one" msgid="5866624638054847057">"Задатак штампања <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> задат(а)ка штампања"</item>
+    <item quantity="other" msgid="8746611264734222865">"Задаци штампања <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"Откажи"</string>
     <string name="restart" msgid="2472034227037808749">"Поново покрени"</string>

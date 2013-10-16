@@ -25,7 +25,7 @@
     <string name="label_color" msgid="1108690305218188969">"Cor"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientação"</string>
     <string name="label_pages" msgid="6300874667546617333">"Páginas (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <string name="pages_range_example" msgid="8558694453556945172">"p. ex. 1—5, 8, 11—13"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"p. ex. 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Pré-visualização de impressão"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Instalar o leitor de PDF para pré-visualização"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"A aplicação de impressão bloqueou"</string>
@@ -52,8 +52,8 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Erro da impressora <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"A impressora bloqueou <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
   <plurals name="composite_notification_title_template">
-    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> tarefa de impressão"</item>
-    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> tarefas de impressão"</item>
+    <item quantity="one" msgid="5866624638054847057">"Tarefa de impressão: <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"Tarefas de impressão: <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"Cancelar"</string>
     <string name="restart" msgid="2472034227037808749">"Reiniciar"</string>
