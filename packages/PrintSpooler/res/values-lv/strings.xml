@@ -52,8 +52,8 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Printera kļūda ar darbu <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printeris bloķēja darbu <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
   <plurals name="composite_notification_title_template">
-    <item quantity="one" msgid="5866624638054847057">"Drukas darbs: <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="8746611264734222865">"Drukas darbi: <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="one" msgid="5866624638054847057">"Drukas darbs <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="other" msgid="8746611264734222865">"Drukas darbi <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"Atcelt"</string>
     <string name="restart" msgid="2472034227037808749">"Restartēt"</string>

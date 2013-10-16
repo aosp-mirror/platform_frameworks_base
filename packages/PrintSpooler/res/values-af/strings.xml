@@ -52,8 +52,8 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Drukkerfout by <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Drukker het <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> geblokkeer"</string>
   <plurals name="composite_notification_title_template">
-    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>-druktaak"</item>
-    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>-druktake"</item>
+    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>-uitdruktaak"</item>
+    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>-uitdruktake"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"Kanselleer"</string>
     <string name="restart" msgid="2472034227037808749">"Herbegin"</string>
