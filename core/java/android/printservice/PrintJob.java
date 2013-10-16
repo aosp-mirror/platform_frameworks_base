@@ -304,13 +304,47 @@ public final class PrintJob {
     /**
      * Gets the print job tag.
      *
-     * @return tag The tag or null.
+     * @return The tag or null.
      *
      * @see #setTag(String)
      */
     public String getTag() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getTag();
+    }
+
+    /**
+     * Gets the value of an advanced (printer specific) print option.
+     *
+     * @param key The option key.
+     * @return The option value.
+     */
+    public String getAdvancedStringOption(String key) {
+        PrintService.throwIfNotCalledOnMainThread();
+        return null;
+    }
+
+    /**
+     * Gets whether this job has a given advanced (printer specific) print
+     * option.
+     *
+     * @param key The option key.
+     * @return Whether the option is present.
+     */
+    public boolean hasAdvancedOption(String key) {
+        PrintService.throwIfNotCalledOnMainThread();
+        return false;
+    }
+
+    /**
+     * Gets the value of an advanced (printer specific) print option.
+     *
+     * @param key The option key.
+     * @return The option value.
+     */
+    public int getAdvancedIntOption(String key) {
+        PrintService.throwIfNotCalledOnMainThread();
+        return 0;
     }
 
     @Override
