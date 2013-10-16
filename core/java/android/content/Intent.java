@@ -37,6 +37,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsProvider;
+import android.provider.OpenableColumns;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -48,7 +50,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -2624,49 +2625,76 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
 
     /**
-     * Activity Action: Allow the user to select and open one or more existing
-     * documents. Both read and write access to the documents will be granted
-     * until explicitly revoked by the user.
+     * Activity Action: Allow the user to select and return one or more existing
+     * documents. When invoked, the system will display the various
+     * {@link DocumentsProvider} instances installed on the device, letting the
+     * user interactively navigate through them. These documents include local
+     * media, such as photos and video, and documents provided by installed
+     * cloud storage providers.
      * <p>
-     * Callers can restrict selection to a specific kind of data, such as
-     * photos, by setting one or more MIME types in {@link #EXTRA_MIME_TYPES}.
+     * Each document is represented as a {@code content://} URI backed by a
+     * {@link DocumentsProvider}, which can be opened as a stream with
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}, or queried for
+     * {@link android.provider.DocumentsContract.Document} metadata.
+     * <p>
+     * All selected documents are returned to the calling application with
+     * persistable read and write permission grants. If you want to maintain
+     * access to the documents across device reboots, you need to explicitly
+     * take the persistable permissions using
+     * {@link ContentResolver#takePersistableUriPermission(Uri, int)}.
+     * <p>
+     * Callers can restrict document selection to a specific kind of data, such
+     * as photos, by setting one or more MIME types in
+     * {@link #EXTRA_MIME_TYPES}.
      * <p>
      * If the caller can handle multiple returned items (the user performing
-     * multiple selection), then it can specify {@link #EXTRA_ALLOW_MULTIPLE} to
-     * indicate this.
+     * multiple selection), then you can specify {@link #EXTRA_ALLOW_MULTIPLE}
+     * to indicate this.
      * <p>
      * Callers must include {@link #CATEGORY_OPENABLE} in the Intent so that
      * returned URIs can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
-     * Output: The URI of the item that was picked. This must be a content: URI
-     * so that any receiver can access it. If multiple documents were selected,
-     * they are returned in {@link #getClipData()}.
+     * Output: The URI of the item that was picked. This must be a
+     * {@code content://} URI so that any receiver can access it. If multiple
+     * documents were selected, they are returned in {@link #getClipData()}.
      *
      * @see DocumentsContract
-     * @see DocumentsContract#getOpenDocuments(Context)
+     * @see #ACTION_CREATE_DOCUMENT
+     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_OPEN_DOCUMENT = "android.intent.action.OPEN_DOCUMENT";
 
     /**
-     * Activity Action: Allow the user to create a new document. Both read and
-     * write access to the document will be granted until explicitly revoked by
-     * the user.
+     * Activity Action: Allow the user to create a new document. When invoked,
+     * the system will display the various {@link DocumentsProvider} instances
+     * installed on the device, letting the user navigate through them. The
+     * returned document may be a newly created document with no content, or it
+     * may be an existing document with the requested MIME type.
      * <p>
-     * Callers can provide a hint document name by setting {@link #EXTRA_TITLE},
-     * but the user may change this value before creating the file. Callers can
-     * optionally hint at the MIME type being created by setting
-     * {@link #setType(String)}.
+     * Each document is represented as a {@code content://} URI backed by a
+     * {@link DocumentsProvider}, which can be opened as a stream with
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}, or queried for
+     * {@link android.provider.DocumentsContract.Document} metadata.
+     * <p>
+     * Callers must indicate the concrete MIME type of the document being
+     * created by setting {@link #setType(String)}. This MIME type cannot be
+     * changed after the document is created.
+     * <p>
+     * Callers can provide an initial display name through {@link #EXTRA_TITLE},
+     * but the user may change this value before creating the file.
      * <p>
      * Callers must include {@link #CATEGORY_OPENABLE} in the Intent so that
      * returned URIs can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
-     * Output: The URI of the item that was created. This must be a content: URI
-     * so that any receiver can access it.
+     * Output: The URI of the item that was created. This must be a
+     * {@code content://} URI so that any receiver can access it.
      *
      * @see DocumentsContract
+     * @see #ACTION_OPEN_DOCUMENT
+     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
@@ -2790,11 +2818,16 @@ public class Intent implements Parcelable, Cloneable {
      * experience).
      */
     public static final String CATEGORY_SAMPLE_CODE = "android.intent.category.SAMPLE_CODE";
+
     /**
-     * Used to indicate that a GET_CONTENT intent only wants URIs that can be opened with
-     * ContentResolver.openInputStream. Openable URIs must support the columns in
-     * {@link android.provider.OpenableColumns}
-     * when queried, though it is allowable for those columns to be blank.
+     * Used to indicate that an intent only wants URIs that can be opened with
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}. Openable URIs
+     * must support at least the columns defined in {@link OpenableColumns} when
+     * queried.
+     *
+     * @see #ACTION_GET_CONTENT
+     * @see #ACTION_OPEN_DOCUMENT
+     * @see #ACTION_CREATE_DOCUMENT
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_OPENABLE = "android.intent.category.OPENABLE";
@@ -3221,27 +3254,32 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.client_intent";
 
     /**
-     * Used to indicate that a {@link #ACTION_GET_CONTENT} intent should only return
-     * data that is on the local device.  This is a boolean extra; the default
-     * is false.  If true, an implementation of ACTION_GET_CONTENT should only allow
-     * the user to select media that is already on the device, not requiring it
-     * be downloaded from a remote service when opened.  Another way to look
-     * at it is that such content should generally have a "_data" column to the
-     * path of the content on local external storage.
+     * Extra used to indicate that an intent should only return data that is on
+     * the local device. This is a boolean extra; the default is false. If true,
+     * an implementation should only allow the user to select data that is
+     * already on the device, not requiring it be downloaded from a remote
+     * service when opened.
+     *
+     * @see #ACTION_GET_CONTENT
+     * @see #ACTION_OPEN_DOCUMENT
+     * @see #ACTION_CREATE_DOCUMENT
      */
     public static final String EXTRA_LOCAL_ONLY =
-        "android.intent.extra.LOCAL_ONLY";
+            "android.intent.extra.LOCAL_ONLY";
 
     /**
-     * Used to indicate that a {@link #ACTION_GET_CONTENT} intent can allow the
-     * user to select and return multiple items.  This is a boolean extra; the default
-     * is false.  If true, an implementation of ACTION_GET_CONTENT is allowed to
-     * present the user with a UI where they can pick multiple items that are all
-     * returned to the caller.  When this happens, they should be returned as
-     * the {@link #getClipData()} part of the result Intent.
+     * Extra used to indicate that an intent can allow the user to select and
+     * return multiple items. This is a boolean extra; the default is false. If
+     * true, an implementation is allowed to present the user with a UI where
+     * they can pick multiple items that are all returned to the caller. When
+     * this happens, they should be returned as the {@link #getClipData()} part
+     * of the result Intent.
+     *
+     * @see #ACTION_GET_CONTENT
+     * @see #ACTION_OPEN_DOCUMENT
      */
     public static final String EXTRA_ALLOW_MULTIPLE =
-        "android.intent.extra.ALLOW_MULTIPLE";
+            "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
      * The userHandle carried with broadcast intents related to addition, removal and switching of
@@ -3275,9 +3313,13 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.restrictions_intent";
 
     /**
-     * Extra used to communicate set of acceptable MIME types for
-     * {@link #ACTION_GET_CONTENT} or {@link #ACTION_OPEN_DOCUMENT}. The type of the
-     * extra is <code>ArrayList&lt;String&gt;</code>.
+     * Extra used to communicate a set of acceptable MIME types. The type of the
+     * extra is {@code String[]}. Values may be a combination of concrete MIME
+     * types (such as "image/png") and/or partial MIME types (such as
+     * "audio/*").
+     *
+     * @see #ACTION_GET_CONTENT
+     * @see #ACTION_OPEN_DOCUMENT
      */
     public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
 
@@ -3304,7 +3346,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * If set, the recipient of this Intent will be granted permission to
-     * perform read operations on the Uri in the Intent's data and any URIs
+     * perform read operations on the URI in the Intent's data and any URIs
      * specified in its ClipData.  When applying to an Intent's ClipData,
      * all URIs as well as recursive traversals through data or other ClipData
      * in Intent items will be granted; only the grant flags of the top-level
@@ -3313,7 +3355,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_GRANT_READ_URI_PERMISSION = 0x00000001;
     /**
      * If set, the recipient of this Intent will be granted permission to
-     * perform write operations on the Uri in the Intent's data and any URIs
+     * perform write operations on the URI in the Intent's data and any URIs
      * specified in its ClipData.  When applying to an Intent's ClipData,
      * all URIs as well as recursive traversals through data or other ClipData
      * in Intent items will be granted; only the grant flags of the top-level
@@ -3348,7 +3390,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * When combined with {@link #FLAG_GRANT_READ_URI_PERMISSION} and/or
-     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, the Uri permission grant can be
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, the URI permission grant can be
      * persisted across device reboots until explicitly revoked with
      * {@link Context#revokeUriPermission(Uri, int)}. This flag only offers the
      * grant for possible persisting; the receiving application must call
@@ -3358,6 +3400,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see ContentResolver#takePersistableUriPermission(Uri, int)
      * @see ContentResolver#releasePersistableUriPermission(Uri, int)
      * @see ContentResolver#getPersistedUriPermissions()
+     * @see ContentResolver#getOutgoingPersistedUriPermissions()
      */
     public static final int FLAG_GRANT_PERSISTABLE_URI_PERMISSION = 0x00000040;
 

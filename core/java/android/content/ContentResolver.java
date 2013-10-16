@@ -1624,9 +1624,9 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Take a persistable Uri permission grant that has been offered. Once
+     * Take a persistable URI permission grant that has been offered. Once
      * taken, the permission grant will be remembered across device reboots.
-     * Only Uri permissions granted with
+     * Only URI permissions granted with
      * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION} can be persisted. If
      * the grant has already been persisted, taking it again will touch
      * {@link UriPermission#getPersistedTime()}.
@@ -1641,7 +1641,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Relinquish a persisted Uri permission grant. The Uri must have been
+     * Relinquish a persisted URI permission grant. The URI must have been
      * previously made persistent with
      * {@link #takePersistableUriPermission(Uri, int)}. Any non-persistent
      * grants to the calling package will remain intact.
@@ -1656,7 +1656,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Return list of all Uri permission grants that have been persisted by the
+     * Return list of all URI permission grants that have been persisted by the
      * calling app. That is, the returned permissions have been granted
      * <em>to</em> the calling app. Only persistable grants taken with
      * {@link #takePersistableUriPermission(Uri, int)} are returned.
@@ -1674,7 +1674,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Return list of all persisted Uri permission grants that are hosted by the
+     * Return list of all persisted URI permission grants that are hosted by the
      * calling app. That is, the returned permissions have been granted
      * <em>from</em> the calling app. Only grants taken with
      * {@link #takePersistableUriPermission(Uri, int)} are returned.
