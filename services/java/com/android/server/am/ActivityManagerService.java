@@ -13148,8 +13148,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(
                                     intent.getAction());
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
-                                forceStopPackageLocked(ssp,
-                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true,
+                                forceStopPackageLocked(ssp, UserHandle.getAppId(
+                                        intent.getIntExtra(Intent.EXTRA_UID, -1)), false, true, true,
                                         false, userId, removed ? "pkg removed" : "pkg changed");
                             }
                             if (removed) {
