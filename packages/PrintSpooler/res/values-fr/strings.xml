@@ -52,8 +52,8 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Erreur impression pour \"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>\""</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Impression de \"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>\" bloquée"</string>
   <plurals name="composite_notification_title_template">
-    <item quantity="one" msgid="5866624638054847057">"Tâche d\'impression <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
-    <item quantity="other" msgid="8746611264734222865">"Tâches d\'impression <xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g>"</item>
+    <item quantity="one" msgid="5866624638054847057">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> tâche d\'impression"</item>
+    <item quantity="other" msgid="8746611264734222865">"<xliff:g id="PRINT_JOB_NAME">%1$d</xliff:g> tâches d\'impression"</item>
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"Annuler"</string>
     <string name="restart" msgid="2472034227037808749">"Redémarrer"</string>
