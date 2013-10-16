@@ -478,37 +478,45 @@ final class ActivityStack {
         }
         final int userId = UserHandle.getUserId(info.applicationInfo.uid);
 
+        if (DEBUG_TASKS) Slog.d(TAG, "Looking for task of " + target + " in " + this);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.userId != userId) {
                 // Looking for a different task.
+                if (DEBUG_TASKS) Slog.d(TAG, "Skipping " + task + ": different user");
                 continue;
             }
             final ActivityRecord r = task.getTopActivity();
             if (r == null || r.finishing || r.userId != userId ||
                     r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+                if (DEBUG_TASKS) Slog.d(TAG, "Skipping " + task + ": mismatch root " + r);
                 continue;
             }
 
-            //Slog.i(TAG, "Comparing existing cls=" + r.task.intent.getComponent().flattenToShortString()
-            //        + "/aff=" + r.task.affinity + " to new cls="
-            //        + intent.getComponent().flattenToShortString() + "/aff=" + taskAffinity);
+            if (DEBUG_TASKS) Slog.d(TAG, "Comparing existing cls="
+                    + r.task.intent.getComponent().flattenToShortString()
+                    + "/aff=" + r.task.affinity + " to new cls="
+                    + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
             if (task.affinity != null) {
                 if (task.affinity.equals(info.taskAffinity)) {
-                    //Slog.i(TAG, "Found matching affinity!");
+                    if (DEBUG_TASKS) Slog.d(TAG, "Found matching affinity!");
                     return r;
                 }
             } else if (task.intent != null && task.intent.getComponent().equals(cls)) {
-                //Slog.i(TAG, "Found matching class!");
+                if (DEBUG_TASKS) Slog.d(TAG, "Found matching class!");
                 //dump();
-                //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                if (DEBUG_TASKS) Slog.d(TAG, "For Intent " + intent + " bringing to top: "
+                        + r.intent);
                 return r;
             } else if (task.affinityIntent != null
                     && task.affinityIntent.getComponent().equals(cls)) {
-                //Slog.i(TAG, "Found matching class!");
+                if (DEBUG_TASKS) Slog.d(TAG, "Found matching class!");
                 //dump();
-                //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                if (DEBUG_TASKS) Slog.d(TAG, "For Intent " + intent + " bringing to top: "
+                        + r.intent);
                 return r;
+            } else if (DEBUG_TASKS) {
+                Slog.d(TAG, "Not a match: " + task);
             }
         }
 
@@ -3575,6 +3583,7 @@ final class ActivityStack {
 
     @Override
     public String toString() {
-        return "stackId=" + mStackId + " tasks=" + mTaskHistory;
+        return "ActivityStack{" + Integer.toHexString(System.identityHashCode(this))
+                + " stackId=" + mStackId + ", " + mTaskHistory.size() + " tasks}";
     }
 }
