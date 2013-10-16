@@ -216,12 +216,12 @@ void SpriteController::doUpdateSprites() {
                 paint.setXfermodeMode(SkXfermode::kSrc_Mode);
                 surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
 
-                if (outBuffer.width > uint32_t(update.state.icon.bitmap.width())) {
+                if (outBuffer.width > update.state.icon.bitmap.width()) {
                     paint.setColor(0); // transparent fill color
                     surfaceCanvas.drawRectCoords(update.state.icon.bitmap.width(), 0,
                             outBuffer.width, update.state.icon.bitmap.height(), paint);
                 }
-                if (outBuffer.height > uint32_t(update.state.icon.bitmap.height())) {
+                if (outBuffer.height > update.state.icon.bitmap.height()) {
                     paint.setColor(0); // transparent fill color
                     surfaceCanvas.drawRectCoords(0, update.state.icon.bitmap.height(),
                             outBuffer.width, outBuffer.height, paint);
