@@ -4668,6 +4668,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void systemBooted() {
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.onBootCompleted();
+        }
         synchronized (mLock) {
             mSystemBooted = true;
         }
