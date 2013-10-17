@@ -4467,8 +4467,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mdst.enableMobileProvisioning(url);
         } else {
             if (DBG) log("handleMobileProvisioningAction: on default network");
-            Intent newIntent =
-                    new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            Intent newIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                    Intent.CATEGORY_APP_BROWSER);
+            newIntent.setData(Uri.parse(url));
             newIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
                     Intent.FLAG_ACTIVITY_NEW_TASK);
             try {
