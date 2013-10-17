@@ -54,9 +54,9 @@ public final class BroadcastQueue {
     static final boolean DEBUG_BROADCAST_LIGHT = ActivityManagerService.DEBUG_BROADCAST_LIGHT;
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
 
-    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 25;
+    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
     static final int MAX_BROADCAST_SUMMARY_HISTORY
-            = ActivityManager.isLowRamDeviceStatic() ? 25 : 100;
+            = ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
 
     final ActivityManagerService mService;
 
