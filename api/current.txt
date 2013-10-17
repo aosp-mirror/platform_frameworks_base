@@ -11632,6 +11632,7 @@ package android.inputmethodservice {
     method public android.view.inputmethod.InputConnection getCurrentInputConnection();
     method public android.view.inputmethod.EditorInfo getCurrentInputEditorInfo();
     method public boolean getCurrentInputStarted();
+    method public int getInputMethodWindowRecommendedHeight();
     method public android.view.LayoutInflater getLayoutInflater();
     method public int getMaxWidth();
     method public java.lang.CharSequence getTextForImeAction(int);

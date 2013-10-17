@@ -2237,6 +2237,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return;
     }
 
+    @Override
+    public int getInputMethodWindowVisibleHeight() {
+        return mWindowManagerService.getInputMethodWindowVisibleHeight();
+    }
+
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {

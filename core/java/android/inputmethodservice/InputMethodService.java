@@ -2322,6 +2322,21 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * @return The recommended height of the input method window.
+     * An IME author can get the last input method's height as the recommended height
+     * by calling this in
+     * {@link android.inputmethodservice.InputMethodService#onStartInputView(EditorInfo, boolean)}.
+     * If you don't need to use a predefined fixed height, you can avoid the window-resizing of IME
+     * switching by using this value as a visible inset height. It's efficient for the smooth
+     * transition between different IMEs. However, note that this may return 0 (or possibly
+     * unexpectedly low height). You should thus avoid relying on the return value of this method
+     * all the time. Please make sure to use a reasonable height for the IME.
+     */
+    public int getInputMethodWindowRecommendedHeight() {
+        return mImm.getInputMethodWindowVisibleHeight();
+    }
+
+    /**
      * Performs a dump of the InputMethodService's internal state.  Override
      * to add your own information to the dump.
      */

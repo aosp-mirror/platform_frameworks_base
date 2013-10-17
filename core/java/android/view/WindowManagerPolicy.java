@@ -1163,6 +1163,11 @@ public interface WindowManagerPolicy {
     public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
 
     /**
+     * @return The current height of the input method window.
+     */
+    public int getInputMethodWindowVisibleHeightLw();
+
+    /**
      * Called when the current user changes. Guaranteed to be called before the broadcast
      * of the new user id is made to all listeners.
      *
