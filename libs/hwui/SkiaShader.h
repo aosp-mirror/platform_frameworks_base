@@ -192,7 +192,7 @@ struct SkiaSweepGradientShader: public SkiaShader {
             GLuint* textureUnit);
 
 protected:
-    SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors, float* positions,
+    SkiaSweepGradientShader(Type type, uint32_t* colors, float* positions,
             int count, SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
     SkiaSweepGradientShader() {
     }

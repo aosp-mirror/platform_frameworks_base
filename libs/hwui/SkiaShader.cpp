@@ -142,7 +142,7 @@ void SkiaBitmapShader::describe(ProgramDescription& description, const Extension
 }
 
 void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
-        const Snapshot& snapshot, GLuint* textureUnit) {
+        const Snapshot&, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
     Caches::getInstance().activeTexture(textureSlot);
 
@@ -228,7 +228,7 @@ void SkiaLinearGradientShader::describe(ProgramDescription& description,
 }
 
 void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelView,
-        const Snapshot& snapshot, GLuint* textureUnit) {
+        const Snapshot&, GLuint* textureUnit) {
     if (CC_UNLIKELY(!mIsSimple)) {
         GLuint textureSlot = (*textureUnit)++;
         Caches::getInstance().activeTexture(textureSlot);
@@ -264,7 +264,7 @@ static void toCircularUnitMatrix(const float x, const float y, const float radiu
 SkiaCircularGradientShader::SkiaCircularGradientShader(float x, float y, float radius,
         uint32_t* colors, float* positions, int count, SkShader* key, SkShader::TileMode tileMode,
         SkMatrix* matrix, bool blend):
-        SkiaSweepGradientShader(kCircularGradient, x, y, colors, positions, count, key,
+        SkiaSweepGradientShader(kCircularGradient, colors, positions, count, key,
                 tileMode, matrix, blend) {
     SkMatrix unitMatrix;
     toCircularUnitMatrix(x, y, radius, &unitMatrix);
@@ -314,11 +314,12 @@ SkiaSweepGradientShader::SkiaSweepGradientShader(float x, float y, uint32_t* col
     mIsSimple = count == 2;
 }
 
-SkiaSweepGradientShader::SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors,
+SkiaSweepGradientShader::SkiaSweepGradientShader(Type type, uint32_t* colors,
         float* positions, int count, SkShader* key, SkShader::TileMode tileMode,
         SkMatrix* matrix, bool blend):
         SkiaShader(type, key, tileMode, tileMode, matrix, blend),
         mColors(colors), mPositions(positions), mCount(count) {
+    // protected method, that doesn't setup mUnitMatrix - should be handled by subclass
 
     mIsSimple = count == 2 && tileMode == SkShader::kClamp_TileMode;
 }
