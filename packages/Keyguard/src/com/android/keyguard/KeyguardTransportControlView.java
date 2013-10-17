@@ -101,9 +101,7 @@ public class KeyguardTransportControlView extends FrameLayout {
             new RemoteController.OnClientUpdateListener() {
         @Override
         public void onClientChange(boolean clearing) {
-            if (clearing) {
-                clearMetadata();
-            }
+            clearMetadata();
         }
 
         @Override
@@ -302,6 +300,7 @@ public class KeyguardTransportControlView extends FrameLayout {
             mPopulateMetadataWhenAttached = null;
         }
         if (DEBUG) Log.v(TAG, "Registering TCV " + this);
+        mMetadata.clear();
         mAudioManager.registerRemoteController(mRemoteController);
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitor);
     }
@@ -321,6 +320,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         if (DEBUG) Log.v(TAG, "Unregistering TCV " + this);
         mAudioManager.unregisterRemoteController(mRemoteController);
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitor);
+        mMetadata.clear();
         mUserSeeking = false;
         removeCallbacks(mUpdateSeekBars);
     }
@@ -395,10 +395,10 @@ public class KeyguardTransportControlView extends FrameLayout {
             Log.e(TAG, "Couldn't get remote control client package icon", e);
         }
         setBadgeIcon(badgeIcon);
-        if (!TextUtils.isEmpty(mMetadata.trackTitle)) {
-            mTrackTitle.setText(mMetadata.trackTitle);
-        }
-        StringBuilder sb = new StringBuilder();
+        mTrackTitle.setText(!TextUtils.isEmpty(mMetadata.trackTitle)
+                ? mMetadata.trackTitle : null);
+
+        final StringBuilder sb = new StringBuilder();
         if (!TextUtils.isEmpty(mMetadata.artist)) {
             if (sb.length() != 0) {
                 sb.append(" - ");
@@ -411,7 +411,10 @@ public class KeyguardTransportControlView extends FrameLayout {
             }
             sb.append(mMetadata.albumTitle);
         }
-        mTrackArtistAlbum.setText(sb.toString());
+
+        final String trackArtistAlbum = sb.toString();
+        mTrackArtistAlbum.setText(!TextUtils.isEmpty(trackArtistAlbum) ?
+                trackArtistAlbum : null);
 
         if (mMetadata.duration >= 0) {
             setSeekBarsEnabled(true);
