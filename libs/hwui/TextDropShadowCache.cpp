@@ -147,7 +147,7 @@ void TextDropShadowCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) {
+void TextDropShadowCache::operator()(ShadowText&, ShadowTexture*& texture) {
     if (texture) {
         mSize -= texture->bitmapSize;
 

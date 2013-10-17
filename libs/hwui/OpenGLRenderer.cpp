@@ -779,11 +779,10 @@ bool OpenGLRenderer::restoreSnapshot() {
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
-    const GLuint previousFbo = mSnapshot->fbo;
     const int count = saveSnapshot(flags);
 
     if (!mSnapshot->isIgnored()) {
-        createLayer(left, top, right, bottom, alpha, mode, flags, previousFbo);
+        createLayer(left, top, right, bottom, alpha, mode, flags);
     }
 
     return count;
@@ -835,7 +834,6 @@ void OpenGLRenderer::updateSnapshotIgnoreForLayer(const Rect& bounds, const Rect
 
 int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float bottom,
         int alpha, SkXfermode::Mode mode, int flags) {
-    const GLuint previousFbo = mSnapshot->fbo;
     const int count = saveSnapshot(flags);
 
     if (!mSnapshot->isIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
@@ -911,7 +909,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
  *     something actually gets drawn are the layers regions cleared.
  */
 bool OpenGLRenderer::createLayer(float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode, int flags, GLuint previousFbo) {
+        int alpha, SkXfermode::Mode mode, int flags) {
     LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
@@ -948,7 +946,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
 
     startMark("SaveLayer");
     if (fboLayer) {
-        return createFboLayer(layer, bounds, clip, previousFbo);
+        return createFboLayer(layer, bounds, clip);
     } else {
         // Copy the framebuffer into the layer
         layer->bindTexture();
@@ -974,7 +972,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     return true;
 }
 
-bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLuint previousFbo) {
+bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     layer->clipRect.set(clip);
     layer->setFbo(mCaches.fboCache.get());
 
@@ -1268,15 +1266,15 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         }
 
 #if DEBUG_LAYERS_AS_REGIONS
-        drawRegionRects(layer->region);
+        drawRegionRectsDebug(layer->region);
 #endif
 
         layer->region.clear();
     }
 }
 
-void OpenGLRenderer::drawRegionRects(const Region& region) {
 #if DEBUG_LAYERS_AS_REGIONS
+void OpenGLRenderer::drawRegionRectsDebug(const Region& region) {
     size_t count;
     const android::Rect* rects = region.getArray(&count);
 
@@ -1298,8 +1296,8 @@ void OpenGLRenderer::drawRegionRects(const Region& region) {
         drawColorRect(r.left, r.top, r.right, r.bottom, colors[offset + (i & 0x1)],
                 SkXfermode::kSrcOver_Mode);
     }
-#endif
 }
+#endif
 
 void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
         SkXfermode::Mode mode, bool dirty) {
@@ -1792,7 +1790,7 @@ void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorG = mColorA * ((color >>  8) & 0xFF) / 255.0f;
     mColorB = mColorA * ((color      ) & 0xFF) / 255.0f;
     mColorSet = true;
-    mSetShaderColor = mDescription.setColor(mColorR, mColorG, mColorB, mColorA);
+    mSetShaderColor = mDescription.setColorModulate(mColorA);
 }
 
 void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
@@ -1801,7 +1799,7 @@ void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
     mColorG = mColorA * ((color >>  8) & 0xFF) / 255.0f;
     mColorB = mColorA * ((color      ) & 0xFF) / 255.0f;
     mColorSet = true;
-    mSetShaderColor = mDescription.setAlpha8Color(mColorR, mColorG, mColorB, mColorA);
+    mSetShaderColor = mDescription.setAlpha8ColorModulate(mColorR, mColorG, mColorB, mColorA);
 }
 
 void OpenGLRenderer::setupDrawTextGamma(const SkPaint* paint) {
@@ -1814,7 +1812,7 @@ void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
     mColorG = g;
     mColorB = b;
     mColorSet = true;
-    mSetShaderColor = mDescription.setColor(r, g, b, a);
+    mSetShaderColor = mDescription.setColorModulate(a);
 }
 
 void OpenGLRenderer::setupDrawShader() {
@@ -2998,7 +2996,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
         dirtyLayerUnchecked(layerBounds, getRegion());
     }
 
-    drawTextDecorations(text, bytesCount, totalAdvance, oldX, oldY, paint);
+    drawTextDecorations(totalAdvance, oldX, oldY, paint);
 
     return DrawGlInfo::kStatusDrew;
 }
@@ -3132,7 +3130,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             }
 
 #if DEBUG_LAYERS_AS_REGIONS
-            drawRegionRects(layer->region);
+            drawRegionRectsDebug(layer->region);
 #endif
         }
 
@@ -3272,8 +3270,7 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
 #define kStdUnderline_Offset    (1.0f / 9.0f)
 #define kStdUnderline_Thickness (1.0f / 18.0f)
 
-void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float underlineWidth,
-        float x, float y, SkPaint* paint) {
+void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y, SkPaint* paint) {
     // Handle underline and strike-through
     uint32_t flags = paint->getFlags();
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {

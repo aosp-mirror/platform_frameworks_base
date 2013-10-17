@@ -654,12 +654,11 @@ private:
      * @param alpha The translucency of the layer
      * @param mode The blending mode of the layer
      * @param flags The layer save flags
-     * @param previousFbo The name of the current framebuffer
      *
      * @return True if the layer was successfully created, false otherwise
      */
     bool createLayer(float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags, GLuint previousFbo);
+            int alpha, SkXfermode::Mode mode, int flags);
 
     /**
      * Creates a new layer stored in the specified snapshot as an FBO.
@@ -667,9 +666,8 @@ private:
      * @param layer The layer to store as an FBO
      * @param snapshot The snapshot associated with the new layer
      * @param bounds The bounds of the layer
-     * @param previousFbo The name of the current framebuffer
      */
-    bool createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLuint previousFbo);
+    bool createFboLayer(Layer* layer, Rect& bounds, Rect& clip);
 
     /**
      * Compose the specified layer as a region.
@@ -868,8 +866,7 @@ private:
      * @param y The y coordinate where the text will be drawn
      * @param paint The paint to draw the text with
      */
-    void drawTextDecorations(const char* text, int bytesCount, float totalAdvance,
-            float x, float y, SkPaint* paint);
+    void drawTextDecorations(float totalAdvance, float x, float y, SkPaint* paint);
 
    /**
      * Draws shadow layer on text (with optional positions).
@@ -1004,11 +1001,13 @@ private:
     void updateLayers();
     void flushLayers();
 
+#if DEBUG_LAYERS_AS_REGIONS
     /**
      * Renders the specified region as a series of rectangles. This method
      * is used for debugging only.
      */
-    void drawRegionRects(const Region& region);
+    void drawRegionRectsDebug(const Region& region);
+#endif
 
     /**
      * Renders the specified region as a series of rectangles. The region

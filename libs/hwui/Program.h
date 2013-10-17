@@ -207,7 +207,7 @@ struct ProgramDescription {
      * the fragment shader. When this method returns true, the program should
      * be provided with a modulation color.
      */
-    bool setColor(const float r, const float g, const float b, const float a) {
+    bool setColorModulate(const float a) {
         modulate = a < COLOR_COMPONENT_THRESHOLD;
         return modulate;
     }
@@ -217,7 +217,7 @@ struct ProgramDescription {
      * the fragment shader. When this method returns true, the program should
      * be provided with a modulation color.
      */
-    bool setAlpha8Color(const float r, const float g, const float b, const float a) {
+    bool setAlpha8ColorModulate(const float r, const float g, const float b, const float a) {
         modulate = a < COLOR_COMPONENT_THRESHOLD || r > COLOR_COMPONENT_INV_THRESHOLD ||
                 g > COLOR_COMPONENT_INV_THRESHOLD || b > COLOR_COMPONENT_INV_THRESHOLD;
         return modulate;

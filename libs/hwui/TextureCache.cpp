@@ -103,7 +103,7 @@ void TextureCache::setFlushRate(float flushRate) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
+void TextureCache::operator()(SkBitmap*&, Texture*& texture) {
     // This will be called already locked
     if (texture) {
         mSize -= texture->bitmapSize;
