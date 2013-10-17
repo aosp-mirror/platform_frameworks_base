@@ -1540,14 +1540,16 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         NetworkInfo info = (NetworkInfo) message.obj;
                         mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
                         chooseUpstreamType(mTryCell);
-                        if (!info.isConnected()) {
-                            IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                            IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
-                            try {
-                                LinkProperties props = cm.getLinkProperties(info.getType());
-                                removeUpstreamV6Interface(props.getInterfaceName());
-                            } catch(Exception e) {
-                                Log.e(TAG, "Exception querying ConnectivityManager", e);
+                        if (info != null) {
+                            if (!info.isConnected()) {
+                                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+                                IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
+                                try {
+                                    LinkProperties props = cm.getLinkProperties(info.getType());
+                                    removeUpstreamV6Interface(props.getInterfaceName());
+                                } catch(Exception e) {
+                                    Log.e(TAG, "Exception querying ConnectivityManager", e);
+                                }
                             }
                         }
                         mTryCell = !mTryCell;
