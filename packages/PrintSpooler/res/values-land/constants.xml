@@ -16,17 +16,7 @@
 
 <resources>
 
-    <integer name="page_option_value_all">0</integer>
-    <integer name="page_option_value_page_range">1</integer>
-
-    <integer-array name="page_options_values" translatable="false">
-        <item>@integer/page_option_value_all</item>
-        <item>@integer/page_option_value_page_range</item>
-    </integer-array>
-
-    <dimen name="print_dialog_frame_max_width_dip">400dip</dimen>
-
-    <dimen name="printer_list_view_padding_start">16dip</dimen>
-    <dimen name="printer_list_view_padding_end">16dip</dimen>
+    <dimen name="printer_list_view_padding_start">48dip</dimen>
+    <dimen name="printer_list_view_padding_end">48dip</dimen>
 
 </resources>
