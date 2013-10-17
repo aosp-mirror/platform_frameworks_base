@@ -522,7 +522,7 @@ package android {
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
     field public static final int fragment = 16843491; // 0x10102e3
-    field public static final int fragmentBreadCrumbsStyle = 16843761; // 0x10103f1
+    field public static final int fragmentBreadCrumbsStyle = 16843762; // 0x10103f2
     field public static final int fragmentCloseEnterAnimation = 16843495; // 0x10102e7
     field public static final int fragmentCloseExitAnimation = 16843496; // 0x10102e8
     field public static final int fragmentFadeEnterAnimation = 16843497; // 0x10102e9
