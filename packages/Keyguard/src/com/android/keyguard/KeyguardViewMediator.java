@@ -530,9 +530,6 @@ public class KeyguardViewMediator {
             mSystemReady = true;
             mUpdateMonitor.registerCallback(mUpdateCallback);
 
-            // Send boot completed message if it hasn't already been sent.
-            mUpdateMonitor.dispatchBootCompleted();
-
             // Suppress biometric unlock right after boot until things have settled if it is the
             // selected security method, otherwise unsuppress it.  It must be unsuppressed if it is
             // not the selected security method for the following reason:  if the user starts
@@ -1365,5 +1362,9 @@ public class KeyguardViewMediator {
     public void launchCamera() {
         Message msg = mHandler.obtainMessage(LAUNCH_CAMERA);
         mHandler.sendMessage(msg);
+    }
+
+    public void onBootCompleted() {
+        mUpdateMonitor.dispatchBootCompleted();
     }
 }
