@@ -141,6 +141,10 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.launchCamera();
         }
+        public void onBootCompleted() {
+            checkPermission();
+            mKeyguardViewMediator.onBootCompleted();
+        }
     };
 
 }
