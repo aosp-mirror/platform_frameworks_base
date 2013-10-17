@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"सिस्‍टम UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ़ करें"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"एप्‍स जानकारी"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"कोई हाल ही के एप्स नहीं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के एप्स खारिज करें"</string>
   <plurals name="status_bar_accessibility_recent_apps">
@@ -75,7 +75,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"वापस जाएं"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"हाल ही के एप्‍स"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"हाल ही के ऐप्स"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"खोजें"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"कैमरा"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धति‍ बटन स्विच करें."</string>
@@ -146,7 +146,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना खारिज की गई."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"त्वरित सेटिंग."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"हाल ही के एप्‍स."</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"हाल ही के ऐप्स."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"उपयोगकर्ता <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"मोबाइल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -166,7 +166,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोध सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"एप्‍स जानकारी"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ऐप्स जानकारी"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्‍क्रीन लैंडस्केप अभिविन्यास में लॉक है."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"स्‍क्रीन पोर्ट्रेट अभिविन्‍यास में लॉक है."</string>
