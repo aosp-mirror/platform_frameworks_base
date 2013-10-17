@@ -29,6 +29,7 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.IntProperty;
 import android.util.MathUtils;
@@ -175,6 +176,9 @@ class FastScroller {
      * </ul>
      */
     private int mState;
+
+    /** Whether the preview image is visible. */
+    private boolean mShowingPreview;
 
     private BaseAdapter mListAdapter;
     private SectionIndexer mSectionIndexer;
@@ -769,6 +773,8 @@ class FastScroller {
         mDecorAnimation = new AnimatorSet();
         mDecorAnimation.playTogether(fadeOut, slideOut);
         mDecorAnimation.start();
+
+        mShowingPreview = false;
     }
 
     /**
@@ -790,6 +796,8 @@ class FastScroller {
         mDecorAnimation = new AnimatorSet();
         mDecorAnimation.playTogether(fadeIn, fadeOut, slideIn);
         mDecorAnimation.start();
+
+        mShowingPreview = false;
     }
 
     /**
@@ -809,6 +817,8 @@ class FastScroller {
         mDecorAnimation = new AnimatorSet();
         mDecorAnimation.playTogether(fadeIn, slideIn);
         mDecorAnimation.start();
+
+        mShowingPreview = true;
     }
 
     private void postAutoHide() {
@@ -982,9 +992,10 @@ class FastScroller {
         if (mCurrentSection != sectionIndex) {
             mCurrentSection = sectionIndex;
 
-            if (transitionPreviewLayout(sectionIndex)) {
+            final boolean hasPreview = transitionPreviewLayout(sectionIndex);
+            if (!mShowingPreview && hasPreview) {
                 transitionToDragging();
-            } else {
+            } else if (mShowingPreview && !hasPreview) {
                 transitionToVisible();
             }
         }
@@ -1072,7 +1083,7 @@ class FastScroller {
 
         mPreviewAnimation.start();
 
-        return (text != null && text.length() > 0);
+        return !TextUtils.isEmpty(text);
     }
 
     /**
@@ -1184,7 +1195,19 @@ class FastScroller {
                     / positionsInSection;
         }
 
-        return (section + posWithinSection) / sectionCount;
+        float result = (section + posWithinSection) / sectionCount;
+
+        // Fake out the scroll bar for the last item. Since the section indexer
+        // won't ever actually move the list in this end space, make scrolling
+        // across the last item account for whatever space is remaining.
+        if (firstVisibleItem > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
+            final View lastChild = mList.getChildAt(visibleItemCount - 1);
+            final float lastItemVisible = (float) (mList.getHeight() - mList.getPaddingBottom()
+                    - lastChild.getTop()) / lastChild.getHeight();
+            result += (1 - result) * lastItemVisible;
+        }
+
+        return result;
     }
 
     /**
