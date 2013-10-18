@@ -495,7 +495,7 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                                              gVMRuntime_newNonMovableArray,
                                                              gByte_class, size);
     if (arrayObj) {
-        jbyte* addr = (jbyte*)env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
+        jbyte* addr = (jbyte*) env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
         if (addr) {
             SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
             bitmap->setPixelRef(pr)->unref();
@@ -552,7 +552,7 @@ static jclass make_globalref(JNIEnv* env, const char classname[])
 {
     jclass c = env->FindClass(classname);
     SkASSERT(c);
-    return (jclass)env->NewGlobalRef(c);
+    return (jclass) env->NewGlobalRef(c);
 }
 
 static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
@@ -614,7 +614,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
         "(II)V");
 
     c = env->FindClass("java/lang/Byte");
-    gByte_class = (jclass)env->NewGlobalRef(
+    gByte_class = (jclass) env->NewGlobalRef(
         env->GetStaticObjectField(c, env->GetStaticFieldID(c, "TYPE", "Ljava/lang/Class;")));
 
     gVMRuntime_class = make_globalref(env, "dalvik/system/VMRuntime");
