@@ -558,7 +558,7 @@ public final class ActivityThread {
 
         public final void schedulePauseActivity(IBinder token, boolean finished,
                 boolean userLeaving, int configChanges) {
-            queueOrSendMessage(
+            sendMessage(
                     finished ? H.PAUSE_ACTIVITY_FINISHING : H.PAUSE_ACTIVITY,
                     token,
                     (userLeaving ? 1 : 0),
@@ -567,32 +567,32 @@ public final class ActivityThread {
 
         public final void scheduleStopActivity(IBinder token, boolean showWindow,
                 int configChanges) {
-           queueOrSendMessage(
+           sendMessage(
                 showWindow ? H.STOP_ACTIVITY_SHOW : H.STOP_ACTIVITY_HIDE,
                 token, 0, configChanges);
         }
 
         public final void scheduleWindowVisibility(IBinder token, boolean showWindow) {
-            queueOrSendMessage(
+            sendMessage(
                 showWindow ? H.SHOW_WINDOW : H.HIDE_WINDOW,
                 token);
         }
 
         public final void scheduleSleeping(IBinder token, boolean sleeping) {
-            queueOrSendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
+            sendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
         }
 
         public final void scheduleResumeActivity(IBinder token, int processState,
                 boolean isForward) {
             updateProcessState(processState, false);
-            queueOrSendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0);
+            sendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0);
         }
 
         public final void scheduleSendResult(IBinder token, List<ResultInfo> results) {
             ResultData res = new ResultData();
             res.token = token;
             res.results = results;
-            queueOrSendMessage(H.SEND_RESULT, res);
+            sendMessage(H.SEND_RESULT, res);
         }
 
         // we use token to identify this activity without having to send the
@@ -626,7 +626,7 @@ public final class ActivityThread {
 
             updatePendingConfiguration(curConfig);
 
-            queueOrSendMessage(H.LAUNCH_ACTIVITY, r);
+            sendMessage(H.LAUNCH_ACTIVITY, r);
         }
 
         public final void scheduleRelaunchActivity(IBinder token,
@@ -641,12 +641,12 @@ public final class ActivityThread {
             data.intents = intents;
             data.token = token;
 
-            queueOrSendMessage(H.NEW_INTENT, data);
+            sendMessage(H.NEW_INTENT, data);
         }
 
         public final void scheduleDestroyActivity(IBinder token, boolean finishing,
                 int configChanges) {
-            queueOrSendMessage(H.DESTROY_ACTIVITY, token, finishing ? 1 : 0,
+            sendMessage(H.DESTROY_ACTIVITY, token, finishing ? 1 : 0,
                     configChanges);
         }
 
@@ -658,7 +658,7 @@ public final class ActivityThread {
                     sync, false, mAppThread.asBinder(), sendingUser);
             r.info = info;
             r.compatInfo = compatInfo;
-            queueOrSendMessage(H.RECEIVER, r);
+            sendMessage(H.RECEIVER, r);
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
@@ -668,7 +668,7 @@ public final class ActivityThread {
             d.compatInfo = compatInfo;
             d.backupMode = backupMode;
 
-            queueOrSendMessage(H.CREATE_BACKUP_AGENT, d);
+            sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
 
         public final void scheduleDestroyBackupAgent(ApplicationInfo app,
@@ -677,7 +677,7 @@ public final class ActivityThread {
             d.appInfo = app;
             d.compatInfo = compatInfo;
 
-            queueOrSendMessage(H.DESTROY_BACKUP_AGENT, d);
+            sendMessage(H.DESTROY_BACKUP_AGENT, d);
         }
 
         public final void scheduleCreateService(IBinder token,
@@ -688,7 +688,7 @@ public final class ActivityThread {
             s.info = info;
             s.compatInfo = compatInfo;
 
-            queueOrSendMessage(H.CREATE_SERVICE, s);
+            sendMessage(H.CREATE_SERVICE, s);
         }
 
         public final void scheduleBindService(IBinder token, Intent intent,
@@ -702,7 +702,7 @@ public final class ActivityThread {
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
                         + Binder.getCallingUid() + " pid=" + Binder.getCallingPid());
-            queueOrSendMessage(H.BIND_SERVICE, s);
+            sendMessage(H.BIND_SERVICE, s);
         }
 
         public final void scheduleUnbindService(IBinder token, Intent intent) {
@@ -710,7 +710,7 @@ public final class ActivityThread {
             s.token = token;
             s.intent = intent;
 
-            queueOrSendMessage(H.UNBIND_SERVICE, s);
+            sendMessage(H.UNBIND_SERVICE, s);
         }
 
         public final void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
@@ -722,11 +722,11 @@ public final class ActivityThread {
             s.flags = flags;
             s.args = args;
 
-            queueOrSendMessage(H.SERVICE_ARGS, s);
+            sendMessage(H.SERVICE_ARGS, s);
         }
 
         public final void scheduleStopService(IBinder token) {
-            queueOrSendMessage(H.STOP_SERVICE, token);
+            sendMessage(H.STOP_SERVICE, token);
         }
 
         public final void bindApplication(String processName,
@@ -763,24 +763,24 @@ public final class ActivityThread {
             data.initProfileFile = profileFile;
             data.initProfileFd = profileFd;
             data.initAutoStopProfiler = false;
-            queueOrSendMessage(H.BIND_APPLICATION, data);
+            sendMessage(H.BIND_APPLICATION, data);
         }
 
         public final void scheduleExit() {
-            queueOrSendMessage(H.EXIT_APPLICATION, null);
+            sendMessage(H.EXIT_APPLICATION, null);
         }
 
         public final void scheduleSuicide() {
-            queueOrSendMessage(H.SUICIDE, null);
+            sendMessage(H.SUICIDE, null);
         }
 
         public void requestThumbnail(IBinder token) {
-            queueOrSendMessage(H.REQUEST_THUMBNAIL, token);
+            sendMessage(H.REQUEST_THUMBNAIL, token);
         }
 
         public void scheduleConfigurationChanged(Configuration config) {
             updatePendingConfiguration(config);
-            queueOrSendMessage(H.CONFIGURATION_CHANGED, config);
+            sendMessage(H.CONFIGURATION_CHANGED, config);
         }
 
         public void updateTimeZone() {
@@ -807,7 +807,7 @@ public final class ActivityThread {
                 data.fd = ParcelFileDescriptor.dup(fd);
                 data.token = servicetoken;
                 data.args = args;
-                queueOrSendMessage(H.DUMP_SERVICE, data);
+                sendMessage(H.DUMP_SERVICE, data, 0, 0, true /*async*/);
             } catch (IOException e) {
                 Slog.w(TAG, "dumpService failed", e);
             }
@@ -825,11 +825,11 @@ public final class ActivityThread {
         }
 
         public void scheduleLowMemory() {
-            queueOrSendMessage(H.LOW_MEMORY, null);
+            sendMessage(H.LOW_MEMORY, null);
         }
 
         public void scheduleActivityConfigurationChanged(IBinder token) {
-            queueOrSendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
+            sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
         }
 
         public void profilerControl(boolean start, String path, ParcelFileDescriptor fd,
@@ -837,14 +837,14 @@ public final class ActivityThread {
             ProfilerControlData pcd = new ProfilerControlData();
             pcd.path = path;
             pcd.fd = fd;
-            queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0, profileType);
+            sendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0, profileType);
         }
 
         public void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd) {
             DumpHeapData dhd = new DumpHeapData();
             dhd.path = path;
             dhd.fd = fd;
-            queueOrSendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0);
+            sendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0, 0, true /*async*/);
         }
 
         public void setSchedulingGroup(int group) {
@@ -860,11 +860,11 @@ public final class ActivityThread {
         }
 
         public void dispatchPackageBroadcast(int cmd, String[] packages) {
-            queueOrSendMessage(H.DISPATCH_PACKAGE_BROADCAST, packages, cmd);
+            sendMessage(H.DISPATCH_PACKAGE_BROADCAST, packages, cmd);
         }
 
         public void scheduleCrash(String msg) {
-            queueOrSendMessage(H.SCHEDULE_CRASH, msg);
+            sendMessage(H.SCHEDULE_CRASH, msg);
         }
 
         public void dumpActivity(FileDescriptor fd, IBinder activitytoken,
@@ -875,7 +875,7 @@ public final class ActivityThread {
                 data.token = activitytoken;
                 data.prefix = prefix;
                 data.args = args;
-                queueOrSendMessage(H.DUMP_ACTIVITY, data);
+                sendMessage(H.DUMP_ACTIVITY, data, 0, 0, true /*async*/);
             } catch (IOException e) {
                 Slog.w(TAG, "dumpActivity failed", e);
             }
@@ -888,7 +888,7 @@ public final class ActivityThread {
                 data.fd = ParcelFileDescriptor.dup(fd);
                 data.token = providertoken;
                 data.args = args;
-                queueOrSendMessage(H.DUMP_PROVIDER, data);
+                sendMessage(H.DUMP_PROVIDER, data, 0, 0, true /*async*/);
             } catch (IOException e) {
                 Slog.w(TAG, "dumpProvider failed", e);
             }
@@ -1225,7 +1225,7 @@ public final class ActivityThread {
 
         @Override
         public void unstableProviderDied(IBinder provider) {
-            queueOrSendMessage(H.UNSTABLE_PROVIDER_DIED, provider);
+            sendMessage(H.UNSTABLE_PROVIDER_DIED, provider);
         }
 
         @Override
@@ -1235,7 +1235,7 @@ public final class ActivityThread {
             cmd.activityToken = activityToken;
             cmd.requestToken = requestToken;
             cmd.requestType = requestType;
-            queueOrSendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
+            sendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
         }
 
         private void printRow(PrintWriter pw, String format, Object...objs) {
@@ -1243,22 +1243,22 @@ public final class ActivityThread {
         }
 
         public void setCoreSettings(Bundle coreSettings) {
-            queueOrSendMessage(H.SET_CORE_SETTINGS, coreSettings);
+            sendMessage(H.SET_CORE_SETTINGS, coreSettings);
         }
 
         public void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) {
             UpdateCompatibilityData ucd = new UpdateCompatibilityData();
             ucd.pkg = pkg;
             ucd.info = info;
-            queueOrSendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
+            sendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
         }
 
         public void scheduleTrimMemory(int level) {
-            queueOrSendMessage(H.TRIM_MEMORY, null, level);
+            sendMessage(H.TRIM_MEMORY, null, level);
         }
 
         public void scheduleTranslucentConversionComplete(IBinder token, boolean drawComplete) {
-            queueOrSendMessage(H.TRANSLUCENT_CONVERSION_COMPLETE, token, drawComplete ? 1 : 0);
+            sendMessage(H.TRANSLUCENT_CONVERSION_COMPLETE, token, drawComplete ? 1 : 0);
         }
 
         public void setProcessState(int state) {
@@ -1281,7 +1281,7 @@ public final class ActivityThread {
 
         @Override
         public void scheduleInstallProvider(ProviderInfo provider) {
-            queueOrSendMessage(H.INSTALL_PROVIDER, provider);
+            sendMessage(H.INSTALL_PROVIDER, provider);
         }
     }
 
@@ -2033,28 +2033,31 @@ public final class ActivityThread {
         mAppThread.scheduleSendResult(token, list);
     }
 
-    // if the thread hasn't started yet, we don't have the handler, so just
-    // save the messages until we're ready.
-    private void queueOrSendMessage(int what, Object obj) {
-        queueOrSendMessage(what, obj, 0, 0);
+    private void sendMessage(int what, Object obj) {
+        sendMessage(what, obj, 0, 0, false);
     }
 
-    private void queueOrSendMessage(int what, Object obj, int arg1) {
-        queueOrSendMessage(what, obj, arg1, 0);
+    private void sendMessage(int what, Object obj, int arg1) {
+        sendMessage(what, obj, arg1, 0, false);
     }
 
-    private void queueOrSendMessage(int what, Object obj, int arg1, int arg2) {
-        synchronized (this) {
-            if (DEBUG_MESSAGES) Slog.v(
-                TAG, "SCHEDULE " + what + " " + mH.codeToString(what)
-                + ": " + arg1 + " / " + obj);
-            Message msg = Message.obtain();
-            msg.what = what;
-            msg.obj = obj;
-            msg.arg1 = arg1;
-            msg.arg2 = arg2;
-            mH.sendMessage(msg);
+    private void sendMessage(int what, Object obj, int arg1, int arg2) {
+        sendMessage(what, obj, arg1, arg2, false);
+    }
+
+    private void sendMessage(int what, Object obj, int arg1, int arg2, boolean async) {
+        if (DEBUG_MESSAGES) Slog.v(
+            TAG, "SCHEDULE " + what + " " + mH.codeToString(what)
+            + ": " + arg1 + " / " + obj);
+        Message msg = Message.obtain();
+        msg.what = what;
+        msg.obj = obj;
+        msg.arg1 = arg1;
+        msg.arg2 = arg2;
+        if (async) {
+            msg.setAsynchronous(true);
         }
+        mH.sendMessage(msg);
     }
 
     final void scheduleContextCleanup(ContextImpl context, String who,
@@ -2063,7 +2066,7 @@ public final class ActivityThread {
         cci.context = context;
         cci.who = who;
         cci.what = what;
-        queueOrSendMessage(H.CLEAN_UP_CONTEXT, cci);
+        sendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
@@ -3592,7 +3595,7 @@ public final class ActivityThread {
                     target.onlyLocalRequest = true;
                 }
                 mRelaunchingActivities.add(target);
-                queueOrSendMessage(H.RELAUNCH_ACTIVITY, target);
+                sendMessage(H.RELAUNCH_ACTIVITY, target);
             }
 
             if (fromServer) {
@@ -4900,7 +4903,7 @@ public final class ActivityThread {
                                 mPendingConfiguration.isOtherSeqNewer(newConfig)) {
                             mPendingConfiguration = newConfig;
                             
-                            queueOrSendMessage(H.CONFIGURATION_CHANGED, newConfig);
+                            sendMessage(H.CONFIGURATION_CHANGED, newConfig);
                         }
                     }
                 }
