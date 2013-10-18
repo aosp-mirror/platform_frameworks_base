@@ -172,6 +172,12 @@ static jclass   gRegion_class;
 static jfieldID gRegion_nativeInstanceID;
 static jmethodID gRegion_constructorMethodID;
 
+static jclass    gByte_class;
+static jobject   gVMRuntime;
+static jclass    gVMRuntime_class;
+static jmethodID gVMRuntime_newNonMovableArray;
+static jmethodID gVMRuntime_addressOf;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void GraphicsJNI::get_jrect(JNIEnv* env, jobject obj, int* L, int* T, int* R, int* B)
@@ -476,8 +482,6 @@ void AndroidPixelRef::globalUnref() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" jbyte* jniGetNonMovableArrayElements(C_JNIEnv* env, jarray arrayObj);
-
 jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                              SkColorTable* ctable) {
     Sk64 size64 = bitmap->getSize64();
@@ -486,12 +490,12 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                           "bitmap size exceeds 32bits");
         return NULL;
     }
-
     size_t size = size64.get32();
-    jbyteArray arrayObj = env->NewByteArray(size);
+    jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
+                                                             gVMRuntime_newNonMovableArray,
+                                                             gByte_class, size);
     if (arrayObj) {
-        // TODO: make this work without jniGetNonMovableArrayElements
-        jbyte* addr = jniGetNonMovableArrayElements(&env->functions, arrayObj);
+        jbyte* addr = (jbyte*)env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
         if (addr) {
             SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
             bitmap->setPixelRef(pr)->unref();
@@ -608,6 +612,17 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gRegion_nativeInstanceID = getFieldIDCheck(env, gRegion_class, "mNativeRegion", "I");
     gRegion_constructorMethodID = env->GetMethodID(gRegion_class, "<init>",
         "(II)V");
+
+    c = env->FindClass("java/lang/Byte");
+    gByte_class = (jclass)env->NewGlobalRef(
+        env->GetStaticObjectField(c, env->GetStaticFieldID(c, "TYPE", "Ljava/lang/Class;")));
+
+    gVMRuntime_class = make_globalref(env, "dalvik/system/VMRuntime");
+    m = env->GetStaticMethodID(gVMRuntime_class, "getRuntime", "()Ldalvik/system/VMRuntime;");
+    gVMRuntime = env->NewGlobalRef(env->CallStaticObjectMethod(gVMRuntime_class, m));
+    gVMRuntime_newNonMovableArray = env->GetMethodID(gVMRuntime_class, "newNonMovableArray",
+                                                     "(Ljava/lang/Class;I)Ljava/lang/Object;");
+    gVMRuntime_addressOf = env->GetMethodID(gVMRuntime_class, "addressOf", "(Ljava/lang/Object;)J");
 
     return 0;
 }
