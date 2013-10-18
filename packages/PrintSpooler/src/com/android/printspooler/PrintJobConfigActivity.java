@@ -2303,8 +2303,6 @@ public class PrintJobConfigActivity extends Activity {
                             R.layout.printer_dropdown_item, parent, false);
                 }
 
-                convertView.getLayoutParams().width = mDestinationSpinner.getWidth();
-
                 CharSequence title = null;
                 CharSequence subtitle = null;
                 Drawable icon = null;
@@ -2353,7 +2351,7 @@ public class PrintJobConfigActivity extends Activity {
                     iconView.setImageDrawable(icon);
                     iconView.setVisibility(View.VISIBLE);
                 } else {
-                    iconView.setVisibility(View.GONE);
+                    iconView.setVisibility(View.INVISIBLE);
                 }
 
                 return convertView;
