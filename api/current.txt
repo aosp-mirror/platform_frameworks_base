@@ -25794,6 +25794,7 @@ package android.util {
     method public boolean equals(android.util.DisplayMetrics);
     method public void setTo(android.util.DisplayMetrics);
     method public void setToDefaults();
+    field public static final int DENSITY_400 = 400; // 0x190
     field public static final int DENSITY_DEFAULT = 160; // 0xa0
     field public static final int DENSITY_HIGH = 240; // 0xf0
     field public static final int DENSITY_LOW = 120; // 0x78
