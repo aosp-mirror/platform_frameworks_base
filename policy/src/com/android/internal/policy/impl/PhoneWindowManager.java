@@ -5186,7 +5186,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int flags = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
-                && (vis & flags) != 0;
+                && (vis & flags) != 0
+                && canHideNavigationBar();
     }
 
     /**
