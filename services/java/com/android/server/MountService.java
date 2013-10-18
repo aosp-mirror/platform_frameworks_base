@@ -56,7 +56,6 @@ import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -85,7 +84,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -666,6 +664,7 @@ class MountService extends IMountService.Stub
         final String oldState;
         synchronized (mVolumesLock) {
             oldState = mVolumeStates.put(path, state);
+            volume.setState(state);
         }
 
         if (state.equals(oldState)) {
@@ -1255,6 +1254,7 @@ class MountService extends IMountService.Stub
 
                             // Until we hear otherwise, treat as unmounted
                             mVolumeStates.put(volume.getPath(), Environment.MEDIA_UNMOUNTED);
+                            volume.setState(Environment.MEDIA_UNMOUNTED);
                         }
                     }
 
@@ -1298,6 +1298,7 @@ class MountService extends IMountService.Stub
         } else {
             // Place stub status for early callers to find
             mVolumeStates.put(volume.getPath(), Environment.MEDIA_MOUNTED);
+            volume.setState(Environment.MEDIA_MOUNTED);
         }
     }
 
