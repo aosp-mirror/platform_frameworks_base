@@ -930,8 +930,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
                     if (mDiscoveryBlocked) {
-                        replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
-                                WifiP2pManager.BUSY);
+                        /* do not send discovery failure to apps.
+                         since discovery is postponed and not failed */
+                        mDiscoveryPostponed = true;
+                        logi("P2P_FIND is deffered");
                         break;
                     }
                     // do not send service discovery request while normal find operation.
