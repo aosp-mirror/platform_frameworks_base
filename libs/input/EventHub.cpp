@@ -509,8 +509,9 @@ bool EventHub::hasScanCode(int32_t deviceId, int32_t scanCode) const {
 bool EventHub::hasLed(int32_t deviceId, int32_t led) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
-    if (device && led >= 0 && led <= LED_MAX) {
-        if (test_bit(led, device->ledBitmask)) {
+    int32_t sc;
+    if (device && mapLed(device, led, &sc) == NO_ERROR) {
+        if (test_bit(sc, device->ledBitmask)) {
             return true;
         }
     }
@@ -520,12 +521,17 @@ bool EventHub::hasLed(int32_t deviceId, int32_t led) const {
 void EventHub::setLedState(int32_t deviceId, int32_t led, bool on) {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
-    if (device && !device->isVirtual() && led >= 0 && led <= LED_MAX) {
+    setLedStateLocked(device, led, on);
+}
+
+void EventHub::setLedStateLocked(Device* device, int32_t led, bool on) {
+    int32_t sc;
+    if (device && !device->isVirtual() && mapLed(device, led, &sc) != NAME_NOT_FOUND) {
         struct input_event ev;
         ev.time.tv_sec = 0;
         ev.time.tv_usec = 0;
         ev.type = EV_LED;
-        ev.code = led;
+        ev.code = sc;
         ev.value = on ? 1 : 0;
 
         ssize_t nWrite;
@@ -1239,6 +1245,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     if (device->classes & (INPUT_DEVICE_CLASS_JOYSTICK | INPUT_DEVICE_CLASS_GAMEPAD)) {
         device->controllerNumber = getNextControllerNumberLocked(device);
+        setLedForController(device);
     }
 
     // Register with epoll.
@@ -1378,6 +1385,11 @@ void EventHub::releaseControllerNumberLocked(Device* device) {
     mControllerNumbers.clearBit(static_cast<uint32_t>(num - 1));
 }
 
+void EventHub::setLedForController(Device* device) {
+    for (int i = 0; i < MAX_CONTROLLER_LEDS; i++) {
+        setLedStateLocked(device, ALED_CONTROLLER_1 + i, device->controllerNumber == i + 1);
+    }
+}
 
 bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {
     if (!device->keyMap.haveKeyLayout() || !device->keyBitmask) {
@@ -1395,6 +1407,21 @@ bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {
     }
     
     return false;
+}
+
+status_t EventHub::mapLed(Device* device, int32_t led, int32_t* outScanCode) const {
+    if (!device->keyMap.haveKeyLayout() || !device->ledBitmask) {
+        return NAME_NOT_FOUND;
+    }
+
+    int32_t scanCode;
+    if(device->keyMap.keyLayoutMap->findScanCodeForLed(led, &scanCode) != NAME_NOT_FOUND) {
+        if(scanCode >= 0 && scanCode <= LED_MAX && test_bit(scanCode, device->ledBitmask)) {
+            *outScanCode = scanCode;
+            return NO_ERROR;
+        }
+    }
+    return NAME_NOT_FOUND;
 }
 
 status_t EventHub::closeDeviceByPathLocked(const char *devicePath) {
