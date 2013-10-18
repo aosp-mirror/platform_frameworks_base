@@ -77,8 +77,10 @@ import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -3458,6 +3460,12 @@ public final class ViewRootImpl implements ViewParent,
                 finishInputEvent(q);
             }
         }
+
+        void dump(String prefix, PrintWriter writer) {
+            if (mNext != null) {
+                mNext.dump(prefix, writer);
+            }
+        }
     }
 
     /**
@@ -3594,6 +3602,16 @@ public final class ViewRootImpl implements ViewParent,
 
             mQueueLength -= 1;
             Trace.traceCounter(Trace.TRACE_TAG_INPUT, mTraceCounter, mQueueLength);
+        }
+
+        @Override
+        void dump(String prefix, PrintWriter writer) {
+            writer.print(prefix);
+            writer.print(getClass().getName());
+            writer.print(": mQueueLength=");
+            writer.println(mQueueLength);
+
+            super.dump(prefix, writer);
         }
     }
 
@@ -5199,6 +5217,53 @@ public final class ViewRootImpl implements ViewParent,
 
     public void debug() {
         mView.debug();
+    }
+
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        String innerPrefix = prefix + "  ";
+        writer.print(prefix); writer.println("ViewRoot:");
+        writer.print(innerPrefix); writer.print("mAdded="); writer.print(mAdded);
+                writer.print(" mRemoved="); writer.println(mRemoved);
+        writer.print(innerPrefix); writer.print("mConsumeBatchedInputScheduled=");
+                writer.println(mConsumeBatchedInputScheduled);
+        writer.print(innerPrefix); writer.print("mPendingInputEventCount=");
+                writer.println(mPendingInputEventCount);
+        writer.print(innerPrefix); writer.print("mProcessInputEventsScheduled=");
+                writer.println(mProcessInputEventsScheduled);
+        writer.print(innerPrefix); writer.print("mTraversalScheduled=");
+                writer.print(mTraversalScheduled);
+        if (mTraversalScheduled) {
+            writer.print(" (barrier="); writer.print(mTraversalBarrier); writer.println(")");
+        } else {
+            writer.println();
+        }
+        mFirstInputStage.dump(innerPrefix, writer);
+
+        mChoreographer.dump(prefix, writer);
+
+        writer.print(prefix); writer.println("View Hierarchy:");
+        dumpViewHierarchy(innerPrefix, writer, mView);
+    }
+
+    private void dumpViewHierarchy(String prefix, PrintWriter writer, View view) {
+        writer.print(prefix);
+        if (view == null) {
+            writer.println("null");
+            return;
+        }
+        writer.println(view.toString());
+        if (!(view instanceof ViewGroup)) {
+            return;
+        }
+        ViewGroup grp = (ViewGroup)view;
+        final int N = grp.getChildCount();
+        if (N <= 0) {
+            return;
+        }
+        prefix = prefix + "  ";
+        for (int i=0; i<N; i++) {
+            dumpViewHierarchy(prefix, writer, grp.getChildAt(i));
+        }
     }
 
     public void dumpGfxInfo(int[] info) {
