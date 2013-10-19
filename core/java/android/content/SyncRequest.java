@@ -319,14 +319,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Developer can define timing constraints for this one-shot request.
-         * These values are elapsed real-time.
-         *
-         * @param whenSeconds The time in seconds at which you want this
-         *            sync to occur.
-         * @param beforeSeconds The amount of time in advance of whenSeconds that this
-         *               sync may be permitted to occur. This is rounded up to a minimum of 5
-         *               seconds, for any sync for which whenSeconds > 5.
+         * Request that a sync occur immediately.
          *
          * Example
          * <pre>
