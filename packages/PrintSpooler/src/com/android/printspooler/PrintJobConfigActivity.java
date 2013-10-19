@@ -40,6 +40,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.print.ILayoutResultCallback;
 import android.print.IPrintDocumentAdapter;
+import android.print.IPrintDocumentAdapterObserver;
 import android.print.IWriteResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
@@ -201,6 +202,14 @@ public class PrintJobConfigActivity extends Activity {
             throw new IllegalArgumentException("PrintDocumentAdapter cannot be null");
         }
 
+        try {
+            IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter)
+                    .setObserver(new PrintDocumentAdapterObserver(this));
+        } catch (RemoteException re) {
+            finish();
+            return;
+        }
+
         PrintAttributes attributes = printJob.getAttributes();
         if (attributes != null) {
             mCurrPrintAttributes.copyFrom(attributes);
@@ -249,27 +258,29 @@ public class PrintJobConfigActivity extends Activity {
         // We can safely do the work in here since at this point
         // the system is bound to our (spooler) process which
         // guarantees that this process will not be killed.
-        if (mController.hasStarted()) {
+        if (mController != null && mController.hasStarted()) {
             mController.finish();
         }
-        if (mEditor.isPrintConfirmed() && mController.isFinished()) {
-            mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
-                    PrintJobInfo.STATE_QUEUED, null);
+        if (mEditor != null && mEditor.isPrintConfirmed()
+                && mController != null && mController.isFinished()) {
+                mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
+                        PrintJobInfo.STATE_QUEUED, null);
         } else {
             mSpoolerProvider.getSpooler().setPrintJobState(mPrintJobId,
                     PrintJobInfo.STATE_CANCELED, null);
         }
-        mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
         if (mGeneratingPrintJobDialog != null) {
             mGeneratingPrintJobDialog.dismiss();
             mGeneratingPrintJobDialog = null;
         }
+        mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
         mSpoolerProvider.destroy();
         super.onDestroy();
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (!mEditor.isPrintConfirmed() && mEditor.shouldCloseOnTouch(event)) {
+        if (mController != null && mEditor != null &&
+                !mEditor.isPrintConfirmed() && mEditor.shouldCloseOnTouch(event)) {
             if (!mController.isWorking()) {
                 PrintJobConfigActivity.this.finish();
             }
@@ -287,17 +298,19 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mEditor.isShwoingGeneratingPrintJobUi()) {
+        if (mController != null && mEditor != null) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (mEditor.isShwoingGeneratingPrintJobUi()) {
+                    return true;
+                }
+                if (event.isTracking() && !event.isCanceled()) {
+                    if (!mController.isWorking()) {
+                        PrintJobConfigActivity.this.finish();
+                    }
+                }
+                mEditor.cancel();
                 return true;
             }
-            if (event.isTracking() && !event.isCanceled()) {
-                if (!mController.isWorking()) {
-                    PrintJobConfigActivity.this.finish();
-                }
-            }
-            mEditor.cancel();
-            return true;
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -2699,6 +2712,34 @@ public class PrintJobConfigActivity extends Activity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             /* do noting - we are in the same process */
+        }
+    }
+
+    private static final class PrintDocumentAdapterObserver
+            extends IPrintDocumentAdapterObserver.Stub {
+        private final WeakReference<PrintJobConfigActivity> mWeakActvity;
+
+        public PrintDocumentAdapterObserver(PrintJobConfigActivity activity) {
+            mWeakActvity = new WeakReference<PrintJobConfigActivity>(activity);
+        }
+
+        @Override
+        public void onDestroy() {
+            final PrintJobConfigActivity activity = mWeakActvity.get();
+            if (activity != null) {
+                activity.mController.mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (activity.mController != null) {
+                            activity.mController.cancel();
+                        }
+                        if (activity.mEditor != null) {
+                            activity.mEditor.cancel();
+                        }
+                        activity.finish();
+                    }
+                });
+            }
         }
     }
 }
