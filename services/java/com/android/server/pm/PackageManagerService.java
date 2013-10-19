@@ -5566,9 +5566,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // version of the one on the data partition, but which
                         // granted a new system permission that it didn't have
                         // before.  In this case we do want to allow the app to
-                        // now get the new permission if the new system-partition
-                        // apk is privileged to get it.
-                        if (sysPs.pkg != null && isPrivilegedApp(pkg)) {
+                        // now get the new permission if the ancestral apk is
+                        // privileged to get it.
+                        if (sysPs.pkg != null && sysPs.isPrivileged()) {
                             for (int j=0;
                                     j<sysPs.pkg.requestedPermissions.size(); j++) {
                                 if (perm.equals(
@@ -9370,7 +9370,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    boolean locationIsPrivileged(File path) {
+    static boolean locationIsPrivileged(File path) {
         try {
             final String privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app")
                     .getCanonicalPath();
