@@ -12,8 +12,9 @@ screen.">dp</acronym>) and <em>tablet</em> (larger than or equal 600dp).</li>
  <li>The density buckets are <acronym
 title="Low density (120 dpi)">LDPI</acronym>, <acronym title="Medium density (160
 dpi)">MDPI</acronym>, <acronym title="High density (240 dpi)">HDPI</acronym>, <acronym title
-="Extra-high density (320 dpi)">XHDPI</acronym>, and <acronym title
-="Extra-extra!-high density (480 dpi)">XXHDPI</acronym>.</li>
+="Extra-high density (320 dpi)">XHDPI</acronym>, <acronym title
+="Extra-extra!-high density (480 dpi)">XXHDPI</acronym>, and <acronym title
+="Extra-extra-extra!-high density (640 dpi)">XXXHDPI</acronym>.</li>
 </ul>
 
 <p>Optimize your application's UI by designing
