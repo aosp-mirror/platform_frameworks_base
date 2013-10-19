@@ -16,6 +16,10 @@
 
 package com.android.keyguard;
 
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.KeyguardUpdateMonitor.DisplayClientState;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -51,9 +55,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RemoteViews.OnClickHandler;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.keyguard.KeyguardUpdateMonitor.DisplayClientState;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -279,7 +280,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (newState != mTransportState) {
                 mTransportState = newState;
                 if (DEBUGXPORT) Log.v(TAG, "update widget: transport state changed");
-                KeyguardHostView.this.postShowAppropriateWidgetPage();
+                KeyguardHostView.this.post(mSwitchPageRunnable);
             }
         }
         @Override
@@ -291,7 +292,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 if (newState != mTransportState) {
                     mTransportState = newState;
                     if (DEBUGXPORT) Log.v(TAG, "update widget: play state changed");
-                    KeyguardHostView.this.postShowAppropriateWidgetPage();
+                    KeyguardHostView.this.post(mSwitchPageRunnable);
                 }
             }
         }
@@ -495,7 +496,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        removeCallbacks(mSwitchPageRunnable);
         mAppWidgetHost.stopListening();
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallbacks);
     }
@@ -1438,7 +1438,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetToShow = ss.appWidgetToShow;
         setInsets(ss.insets);
         if (DEBUG) Log.d(TAG, "onRestoreInstanceState, transport=" + mTransportState);
-        postShowAppropriateWidgetPage();
+        post(mSwitchPageRunnable);
     }
 
     @Override
@@ -1471,20 +1471,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    void showAppropriateWidgetPage() {
+    private void showAppropriateWidgetPage() {
         int state = mTransportState;
         ensureTransportPresentOrRemoved(state);
-        if (mAppWidgetContainer.isLayoutRequested()) {
-            postShowAppropriateWidgetPage();
-            return;
-        }
         int pageToShow = getAppropriateWidgetPage(state);
         mAppWidgetContainer.setCurrentPage(pageToShow);
-    }
-
-    void postShowAppropriateWidgetPage() {
-        removeCallbacks(mSwitchPageRunnable);
-        post(mSwitchPageRunnable);
     }
 
     /**
