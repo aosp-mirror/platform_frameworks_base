@@ -6929,7 +6929,7 @@ package android.content {
     method public android.content.SyncRequest.Builder setSyncAdapter(android.accounts.Account, java.lang.String);
     method public android.content.SyncRequest.Builder setSyncAdapter(android.content.ComponentName);
     method public android.content.SyncRequest.Builder setTransferSize(long, long);
-    method public android.content.SyncRequest.Builder syncOnce(long, long);
+    method public android.content.SyncRequest.Builder syncOnce();
     method public android.content.SyncRequest.Builder syncPeriodic(long, long);
   }
 

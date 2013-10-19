@@ -330,26 +330,15 @@ public class SyncRequest implements Parcelable {
          *
          * Example
          * <pre>
-         *     Perform an immediate sync.
-         *     SyncRequest.Builder builder = (new SyncRequest.Builder()).syncOnce(0, 0);
-         *     That is, a sync 0 seconds from now with 0 seconds of flex.
-         *
-         *     Perform a sync in exactly 5 minutes.
-         *     SyncRequest.Builder builder =
-         *       new SyncRequest.Builder().syncOnce(5 * MIN_IN_SECS, 0);
-         *
-         *     Perform a sync in 5 minutes, with one minute of leeway (between 4 and 5 minutes from
-         *     now).
-         *     SyncRequest.Builder builder =
-         *       new SyncRequest.Builder().syncOnce(5 * MIN_IN_SECS, 1 * MIN_IN_SECS);
+         *     SyncRequest.Builder builder = (new SyncRequest.Builder()).syncOnce();
          * </pre>
          */
-        public Builder syncOnce(long whenSeconds, long beforeSeconds) {
+        public Builder syncOnce() {
             if (mSyncType != SYNC_TYPE_UNKNOWN) {
                 throw new IllegalArgumentException("Sync type has already been defined.");
             }
             mSyncType = SYNC_TYPE_ONCE;
-            setupInterval(whenSeconds, beforeSeconds);
+            setupInterval(0, 0);
             return this;
         }
 

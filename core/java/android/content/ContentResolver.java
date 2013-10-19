@@ -1748,7 +1748,7 @@ public abstract class ContentResolver {
             new SyncRequest.Builder()
                 .setSyncAdapter(account, authority)
                 .setExtras(extras)
-                .syncOnce(0, 0)     // Immediate sync.
+                .syncOnce()     // Immediate sync.
                 .build();
         requestSync(request);
     }

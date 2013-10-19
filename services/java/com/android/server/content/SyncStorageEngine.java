@@ -2669,7 +2669,7 @@ public class SyncStorageEngine extends Handler {
         } else {
             SyncRequest.Builder req =
                     new SyncRequest.Builder()
-                            .syncOnce(0, 0)
+                            .syncOnce()
                             .setExtras(extras);
             if (authorityInfo.target.target_provider) {
                 req.setSyncAdapter(authorityInfo.target.account, authorityInfo.target.provider);
