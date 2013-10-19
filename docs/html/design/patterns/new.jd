@@ -1,7 +1,97 @@
 page.title=New in Android
+page.tags="KitKat", "Android 4.4"
 @jd:body
 
-<h2>Jelly Bean - Android 4.1</h2>
+
+<p>A quick look at the new patterns and styles you can use to build beautiful Android apps&hellip; 
+
+<h2 id="kitkat">Android 4.4 KitKat</h2>
+
+<img src="{@docRoot}design/media/branding_googlemusic.png" style="float:right;width:260px;padding-left:3em;margin-left: 28px;margin-right:15%;">
+
+<h3>
+  Your branding
+</h3>
+
+
+<p>
+  Consistency has its place in Android, but you also have the flexibility to
+  customize the look of your app to reinforce your brand.
+</p>
+
+<p>
+  Use your brand color for accent by overriding the Android framework's default
+  blue in UI elements like checkboxes, progress bars, radio buttons, sliders,
+  tabs, and scroll indicators.
+</p>
+
+<p>
+  Show your app's launcher icon and name in the action bar so that users can
+  see it in every screen of your app.
+</p>
+<p>
+  <a href="{@docRoot}design/style/branding.html">Your Branding</a> highlights 
+  these and other pointers on how to incorporate elements of your brand into your
+  app's visual language &mdash; highly encouraged!
+</p>
+
+<h3>
+  Touch feedback
+</h3>
+
+<p>
+  Before Android KitKat, Android's default touch feedback color was a vibrant
+  blue. Every touch resulted in a jolt of high-contrast color, in a shade that
+  might not have mixed well with your brand's color(s).
+</p>
+
+
+<p>
+  In Android KitKat and beyond, touch feedback is subtle: when something is
+  touched, by default its background color slightly darkens or lightens. This
+  provides two benefits: (1) <a href=
+  "/design/get-started/principles.html#sprinkle-encouragement">sprinkles
+  of encouragement</a> are more pleasant than jolts, and (2) incorporating your
+  branding is much easier because the default touch feedback works with
+  whatever hue you choose. Check the updated <a href=
+  "/design/style/touch-feedback.html">Touch Feedback</a> page for more
+  details.
+</p>
+<img src="{@docRoot}design/media/touch_feedback_reaction_response.png" style="padding-top:1em;">
+
+<h3>
+  Full screen 
+</h3>
+
+<p>
+  Android KitKat has improved support for letting your app use the entire
+  screen, with a few different approaches to meet the varying needs of apps and
+  content. The new <a href="{@docRoot}design/patterns/fullscreen.html">Full
+  Screen</a> page will guide you in setting the stage for deep user engagement.
+</p>
+
+<img src="{@docRoot}design/media/fullscreen_landing.png" style="margin:1em auto 2em auto;">
+
+<h3>
+  Gestures 
+</h3>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+<p>
+  The updated <a href="{@docRoot}design/patterns/gestures.html">Gestures</a>
+  page covers new and updated gestures introduced in Android KitKat:
+  <strong>double touch drag</strong> and <strong>double touch</strong>. These
+  gestures are used for changing the viewing size of content.
+</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <img src="{@docRoot}design/media/gesture_doubletouch.png">
+      <img src="{@docRoot}design/media/gesture_doubletouchdrag.png">
+  </div>
+</div>
+
+
+<h2>Android 4.1 Jelly Bean</h2>
 
 <h4>Notifications</h4>
 <div class="layout-content-row">
@@ -14,7 +104,10 @@ page.title=New in Android
       <li>Notifications can be collapsed and expanded</li>
     </ul>
 
-    <p>The base notification layout has not changed, so app notifications designed for versions earlier than Jelly Bean still look and work the same. Check the updated <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> page for more details.</p>
+    <p>The base notification layout has not changed, so app notifications designed for versions
+    earlier than Jelly Bean still look and work the same. Check the updated <a
+    href="{@docRoot}design/patterns/notifications.html">Notifications</a> page for
+    more details.</p>
   </div>
   <div class="layout-content-col span-6">
     <img src="{@docRoot}design/media/new_notifications.png">
@@ -26,14 +119,21 @@ page.title=New in Android
 <h4>Resizable Application Widgets</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-7">
-    <p>Widgets are an essential aspect of home screen customization, allowing "at-a-glance" views of an app's most important data and functionality right from the user's home screen. Android 4.1 introduces improved App Widgets that can <strong>automatically resize and load different content</strong> based upon a number of factors including:</p>
+    <p>Widgets are an essential aspect of home screen customization, allowing
+    "at-a-glance" views of an app's most important data and functionality right from
+    the user's home screen. Android 4.1 introduces improved App Widgets that can
+    <strong>automatically resize and load different content</strong> based upon a
+    number of factors including:</p>
     <ul>
       <li>Where the user drops them on the home screen</li>
       <li>The size to which the user expands them</li>
       <li>The amount of room available on the home screen</li>
     </ul>
 
-    <p>You can supply separate landscape and portrait layouts for your widgets, which the system inflates as appropriate when the screen orientation changes. The Application Widgets has useful details about widget types, limitations, and design considerations.</p>
+    <p>You can supply separate landscape and portrait layouts for your widgets, which
+    the system inflates as appropriate when the screen orientation changes. The <a
+    href="{@docRoot}design/patterns/widgets.html">Application Widgets</a> page has useful
+    details about widget types, limitations, and design considerations.</p>
   </div>
   <div class="layout-content-col span-6">
     <img src="{@docRoot}design/media/new_widgets.png">
@@ -45,8 +145,12 @@ page.title=New in Android
 <h4>Accessibility</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-11">
-    <p>One of Android's missions is to organize the world's information and make it universally accessible and useful. Our mission applies to all users-including people with disabilities such as visual impairment, color deficiency, hearing loss, and limited dexterity.</p>
-    <p>The new <a href="{@docRoot}design/patterns/accessibility.html">Accessibility</a> page provides details on how to design your app to be as accessible as possible by:</p>
+    <p>One of Android's missions is to organize the world's information and
+    make it universally accessible and useful. Our mission applies to all
+    users-including people with disabilities such as visual impairment, color
+    deficiency, hearing loss, and limited dexterity.</p>
+    <p>The new <a href="{@docRoot}design/patterns/accessibility.html">Accessibility</a>
+    page provides details on how to design your app to be as accessible as possible by:</p>
     <ul>
       <li>Making navigation intuitive</li>
       <li>Using recommended touch target sizes</li>
@@ -56,20 +160,28 @@ page.title=New in Android
       <li>Trying it out yourself</li>
     </ul>
 
-    <p>You can supply separate landscape and portrait layouts for your widgets, which the system inflates as appropriate when the screen orientation changes. The <a href="{@docRoot}design/patterns/widgets.html">Widgets</a> page has useful details about widget types, limitations, and design considerations.</p>
+    <p>You can supply separate landscape and portrait layouts for your
+    widgets, which the system inflates as appropriate when the screen
+    orientation changes. The
+    <a href="{@docRoot}design/patterns/widgets.html">Widgets</a> page has
+    useful details about widget types, limitations, and design considerations.</p>
   </div>
   <div class="layout-content-col span-2">
     <img src="{@docRoot}design/media/new_accessibility.png">
   </div>
 </div>
 
-<h2>Ice Cream Sandwich - Android 4.0</h2>
+<h2>Android 4.0 Ice Cream Sandwich</h2>
 
 <h4>Navigation bar</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-7">
-    <p>Android 4.0 removes the need for traditional hardware keys on phones by replacing them with a
-    virtual navigation bar that houses the Back, Home and Recents buttons. Read the <a href="{@docRoot}design/patterns/compatibility.html">Compatibility</a> pattern to learn how the OS adapts to phones with hardware buttons and how pre-Android 3.0 apps that rely on menu keys are supported.</p>
+    <p>Android 4.0 removes the need for traditional hardware keys on
+    phones by replacing them with a virtual navigation bar that houses
+    the Back, Home and Recents buttons. Read the
+    <a href="{@docRoot}design/patterns/compatibility.html">Compatibility</a>
+    pattern to learn how the OS adapts to phones with hardware buttons and
+    how pre-Android 3.0 apps that rely on menu keys are supported.</p>
   </div>
   <div class="layout-content-col span-6">
     <img src="{@docRoot}design/media/whats_new_nav_bar.png">
@@ -81,7 +193,9 @@ page.title=New in Android
 <h4>Action bar</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-7">
-    <p>The action bar is the most important structural element of an Android app. It provides consistent navigation across the platform and allows your app to surface actions.</p>
+    <p>The action bar is the most important structural element of an Android
+    app. It provides consistent navigation across the platform and allows your
+    app to surface actions.</p>
   </div>
   <div class="layout-content-col span-6">
     <img src="{@docRoot}design/media/whats_new_action_bar.png">
@@ -93,7 +207,10 @@ page.title=New in Android
 <h4>Multi-pane layouts</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-7">
-    <p>Creating apps that scale well across different form factors and screen sizes is important in the Android world. Multi-pane layouts allow you to combine different activities that show separately on smaller devices into richer compound views for tablets.</p>
+    <p>Creating apps that scale well across different form factors and screen
+    sizes is important in the Android world. Multi-pane layouts allow you to
+    combine different activities that show separately on smaller devices into
+    richer compound views for tablets.</p>
   </div>
   <div class="layout-content-col span-6">
     <img src="{@docRoot}design/media/whats_new_multipanel.png">
@@ -106,7 +223,9 @@ page.title=New in Android
 
 <div class="layout-content-row">
   <div class="layout-content-col span-7">
-    <p>The long press gesture which was traditionally used to show contextual actions for objects is now used for data selection. When selecting data, contextual action bars allow you to surface actions.</p>
+    <p>The long press gesture which was traditionally used to show contextual
+    actions for objects is now used for data selection. When selecting data,
+    contextual action bars allow you to surface actions.</p>
   </div>
   <div class="layout-content-col span-6">
     <img src="{@docRoot}design/media/whats_new_multiselect.png">

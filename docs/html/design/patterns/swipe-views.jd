@@ -32,12 +32,12 @@ using the swipe gesture to navigate to the next/previous detail view.</p>
 
 <img src="{@docRoot}design/media/swipe_views2.png">
 <div class="figure-caption">
-  Navigating between consecutive Email messages using the swipe gesture. If a view contains content that exceeds the width of the screen such as a wide Email message, make sure the user's initial swipes will scroll horizontally within the view. Once the end of the content is reached, an additional swipe should navigate to the next view. In addition, support the use of edge swipes to immediately navigate between views when content scrolls horizontally.
+  Navigating between consecutive email messages using the swipe gesture. If a view contains content that exceeds the width of the screen such as a wide email message, make sure the user's initial swipes will scroll horizontally within the view. Once the end of the content is reached, an additional swipe should navigate to the next view. In addition, support the use of edge swipes to immediately navigate between views when content scrolls horizontally.
 </div>
 
 <img src="{@docRoot}design/media/swipe_views3.png">
 <div class="figure-caption">
-  Scrolling within a wide Email message using the swipe gesture before navigating to the next message.
+  Scrolling within a wide email message using the swipe gesture before navigating to the next message.
 </div>
 
 <h2 id="between-tabs">Swiping Between Tabs</h2>
@@ -45,7 +45,7 @@ using the swipe gesture to navigate to the next/previous detail view.</p>
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
 
-    <div class="framed-galaxynexus-port-span-5">
+    <div class="framed-nexus5-port-span-5">
       <video class="play-on-hover" autoplay>
         <source src="{@docRoot}design/media/swipe_tabs.mp4" type="video/mp4">
         <source src="{@docRoot}design/media/swipe_tabs.webm" type="video/webm">
