@@ -38,9 +38,22 @@ import java.util.Locale;
  * the specified subtype of the designated IME directly.
  *
  * <p>It should be defined in an XML resource file of the input method with the
- * <code>&lt;subtype&gt;</code> element. For more information, see the guide to
- * <a href="{@docRoot}resources/articles/creating-input-method.html">
+ * <code>&lt;subtype&gt;</code> element, which resides within an {@code &lt;input-method>} element.
+ * For more information, see the guide to
+ * <a href="{@docRoot}guide/topics/text/creating-input-method.html">
  * Creating an Input Method</a>.</p>
+ *
+ * @see InputMethodInfo
+ *
+ * @attr ref android.R.styleable#InputMethod_Subtype_label
+ * @attr ref android.R.styleable#InputMethod_Subtype_icon
+ * @attr ref android.R.styleable#InputMethod_Subtype_imeSubtypeLocale
+ * @attr ref android.R.styleable#InputMethod_Subtype_imeSubtypeMode
+ * @attr ref android.R.styleable#InputMethod_Subtype_imeSubtypeExtraValue
+ * @attr ref android.R.styleable#InputMethod_Subtype_isAuxiliary
+ * @attr ref android.R.styleable#InputMethod_Subtype_overridesImplicitlyEnabledSubtype
+ * @attr ref android.R.styleable#InputMethod_Subtype_subtypeId
+ * @attr ref android.R.styleable#InputMethod_Subtype_isAsciiCapable
  */
 public final class InputMethodSubtype implements Parcelable {
     private static final String TAG = InputMethodSubtype.class.getSimpleName();
