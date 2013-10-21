@@ -35,6 +35,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.BatchedScanResult;
 import android.net.wifi.BatchedScanSettings;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiStateMachine;
@@ -175,8 +176,19 @@ public final class WifiService extends IWifiManager.Stub {
                     WifiConfiguration config = (WifiConfiguration) msg.obj;
                     int networkId = msg.arg1;
                     if (config != null && config.isValid()) {
-                        if (DBG) Slog.d(TAG, "Connect with config" + config);
-                        mWifiStateMachine.sendMessage(Message.obtain(msg));
+                        // This is restricted because there is no UI for the user to
+                        // monitor/control PAC.
+                        if (config.proxySettings != ProxySettings.PAC) {
+                            if (DBG) Slog.d(TAG, "Connect with config" + config);
+                            mWifiStateMachine.sendMessage(Message.obtain(msg));
+                        } else {
+                            Slog.e(TAG,  "ClientHandler.handleMessage cannot process msg with PAC");
+                            if (msg.what == WifiManager.CONNECT_NETWORK) {
+                                replyFailed(msg, WifiManager.CONNECT_NETWORK_FAILED);
+                            } else {
+                                replyFailed(msg, WifiManager.SAVE_NETWORK_FAILED);
+                            }
+                        }
                     } else if (config == null
                             && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
                         if (DBG) Slog.d(TAG, "Connect with networkId" + networkId);
@@ -685,6 +697,9 @@ public final class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
+        if (config.proxySettings == ProxySettings.PAC) {
+            enforceConnectivityInternalPermission();
+        }
         if (config.isValid()) {
             if (mWifiStateMachineChannel != null) {
                 return mWifiStateMachine.syncAddOrUpdateNetwork(mWifiStateMachineChannel, config);
