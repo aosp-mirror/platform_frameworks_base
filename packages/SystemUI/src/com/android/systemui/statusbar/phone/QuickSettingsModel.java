@@ -280,7 +280,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mUserTracker = new CurrentUserTracker(mContext) {
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
-                onRotationLockChanged();
+                refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onNextAlarmChanged();
                 onBugreportChanged();
