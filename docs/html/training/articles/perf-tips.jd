@@ -16,7 +16,6 @@ page.article=true
   <li><a href="#AvoidFloat">Avoid Using Floating-Point</a></li>
   <li><a href="#UseLibraries">Know and Use the Libraries</a></li>
   <li><a href="#NativeMethods">Use Native Methods Carefully</a></li>
-  <li><a href="#library">Know And Use The Libraries</a></li>
   <li><a href="#native_methods">Use Native Methods Judiciously</a></li>
   <li><a href="#closing_notes">Closing Notes</a></li>
 </ol>
