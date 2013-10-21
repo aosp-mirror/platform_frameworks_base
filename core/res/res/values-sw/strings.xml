@@ -1651,7 +1651,7 @@
     <item quantity="other" msgid="4730868920742952817">"Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Jaribu tena baadaye"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Telezesha kidole kwa kasi chini kuanzia juu ili uondoke kwenye skrini kamili."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Telezesha kidole kwa kasi chini kuanzia juu ili uondoke kwenye skrini zima."</string>
     <string name="done_label" msgid="2093726099505892398">"Imekamilika"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kitelezi cha mviringo wa saa"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Kitelezi cha mviringo wa dakika"</string>
