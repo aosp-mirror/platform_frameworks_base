@@ -60,7 +60,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nav savienojuma ar printeri"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"nezināms"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> — nav pieejams"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Nevar ģenerēt drukas darbu"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Nevarēja ģenerēt drukas darbu"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Melnbalts"</item>
     <item msgid="2762241247228983754">"Krāsa"</item>
