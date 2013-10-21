@@ -17,7 +17,6 @@
 package android.transition;
 
 import android.animation.Animator;
-import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -75,8 +74,8 @@ public class Recolor extends Transition {
             if (startColor.getColor() != endColor.getColor()) {
                 endColor.setColor(startColor.getColor());
                 changed = true;
-                return ObjectAnimator.ofObject(endBackground, "color",
-                        new ArgbEvaluator(), startColor.getColor(), endColor.getColor());
+                return ObjectAnimator.ofArgb(endBackground, "color", startColor.getColor(),
+                        endColor.getColor());
             }
         }
         if (view instanceof TextView) {
@@ -86,8 +85,7 @@ public class Recolor extends Transition {
             if (start != end) {
                 textView.setTextColor(end);
                 changed = true;
-                return ObjectAnimator.ofObject(textView, "textColor",
-                        new ArgbEvaluator(), start, end);
+                return ObjectAnimator.ofArgb(textView, "textColor", start, end);
             }
         }
         return null;

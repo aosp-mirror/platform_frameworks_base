@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager;
@@ -142,7 +141,7 @@ public class BarTransitions {
 
     private void startColorAnimation(int from, int to) {
         if (DEBUG) Log.d(mTag, String.format("startColorAnimation %08x -> %08x", from, to));
-        mColorDrawableAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
+        mColorDrawableAnimator = ValueAnimator.ofArgb(from, to);
         mColorDrawableAnimator.addUpdateListener(mAnimatorListener);
         mColorDrawableAnimator.start();
     }

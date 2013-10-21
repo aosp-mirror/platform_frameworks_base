@@ -215,7 +215,7 @@ public class AnimatorInflater {
                 (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
             // special case for colors: ignore valueType and get ints
             getFloats = false;
-            evaluator = new ArgbEvaluator();
+            evaluator = ArgbEvaluator.getInstance();
         }
 
         if (getFloats) {
