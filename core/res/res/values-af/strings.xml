@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Probeer weer oor <xliff:g id="COUNT">%d</xliff:g> sekondes"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Probeer later weer"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Sleep van bo af na onder om volskerm te verlaat."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Swiep van bo af na onder om volskerm te verlaat."</string>
 </resources>
