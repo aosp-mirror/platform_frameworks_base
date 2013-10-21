@@ -2210,7 +2210,11 @@ final class Settings {
 
         int pkgFlags = 0;
         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
-        PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
+        final File codePathFile = new File(codePathStr);
+        if (PackageManagerService.locationIsPrivileged(codePathFile)) {
+            pkgFlags |= ApplicationInfo.FLAG_PRIVILEGED;
+        }
+        PackageSetting ps = new PackageSetting(name, realName, codePathFile,
                 new File(resourcePathStr), nativeLibraryPathStr, versionCode, pkgFlags);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
@@ -2266,6 +2270,7 @@ final class Settings {
                 XmlUtils.skipCurrentTag(parser);
             }
         }
+
         mDisabledSysPackages.put(name, ps);
     }
 
