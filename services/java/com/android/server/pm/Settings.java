@@ -426,12 +426,12 @@ final class Settings {
                         + "; replacing with new");
                 p = null;
             } else {
-                if ((pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                    // If what we are scanning is a system package, then
-                    // make it so, regardless of whether it was previously
-                    // installed only in the data partition.
-                    p.pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
-                }
+                // If what we are scanning is a system (and possibly privileged) package,
+                // then make it so, regardless of whether it was previously installed only
+                // in the data partition.
+                final int sysPrivFlags = pkgFlags
+                        & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_PRIVILEGED);
+                p.pkgFlags |= sysPrivFlags;
             }
         }
         if (p == null) {
