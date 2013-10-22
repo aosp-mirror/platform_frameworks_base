@@ -845,9 +845,9 @@ class WindowStateAnimator {
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
-        if (mIsWallpaper && mService.mLowerWallpaperTarget == null
-                && mService.mWallpaperTarget != null) {
-            final WindowStateAnimator wallpaperAnimator = mService.mWallpaperTarget.mWinAnimator;
+        final WindowState wallpaperTarget = mService.mWallpaperTarget;
+        if (mIsWallpaper && wallpaperTarget != null && mService.mAnimateWallpaperWithTarget) {
+            final WindowStateAnimator wallpaperAnimator = wallpaperTarget.mWinAnimator;
             if (wallpaperAnimator.mHasLocalTransformation &&
                     wallpaperAnimator.mAnimation != null &&
                     !wallpaperAnimator.mAnimation.getDetachWallpaper()) {
@@ -856,8 +856,9 @@ class WindowStateAnimator {
                     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
                 }
             }
-            final AppWindowAnimator wpAppAnimator = mAnimator.getWallpaperAppAnimator();
-            if (wpAppAnimator != null && wpAppAnimator.hasTransformation
+            final AppWindowAnimator wpAppAnimator = wallpaperTarget.mAppToken == null ?
+                    null : wallpaperTarget.mAppToken.mAppAnimator;
+                if (wpAppAnimator != null && wpAppAnimator.hasTransformation
                     && wpAppAnimator.animation != null
                     && !wpAppAnimator.animation.getDetachWallpaper()) {
                 appTransformation = wpAppAnimator.transformation;
