@@ -150,7 +150,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
-    static final long TIME_TO_RECONNECT = 10*1000;
+    static final long TIME_TO_RECONNECT = 3 * 1000;
 
     static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
 
