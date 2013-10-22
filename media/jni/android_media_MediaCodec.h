@@ -21,8 +21,8 @@
 
 #include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/AHandler.h>
 #include <utils/Errors.h>
-#include <utils/RefBase.h>
 
 namespace android {
 
@@ -34,12 +34,14 @@ struct IGraphicBufferProducer;
 struct MediaCodec;
 class Surface;
 
-struct JMediaCodec : public RefBase {
+struct JMediaCodec : public AHandler {
     JMediaCodec(
             JNIEnv *env, jobject thiz,
             const char *name, bool nameIsType, bool encoder);
 
     status_t initCheck() const;
+
+    void registerSelf();
 
     status_t configure(
             const sp<AMessage> &format,
@@ -94,13 +96,27 @@ struct JMediaCodec : public RefBase {
 protected:
     virtual ~JMediaCodec();
 
+    virtual void onMessageReceived(const sp<AMessage> &msg);
+
 private:
+    enum {
+        kWhatActivityNotify,
+        kWhatRequestActivityNotifications,
+        kWhatStopActivityNotifications,
+    };
+
     jclass mClass;
     jweak mObject;
     sp<Surface> mSurfaceTextureClient;
 
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
+
+    sp<AMessage> mActivityNotification;
+    int32_t mGeneration;
+    bool mRequestedActivityNotification;
+
+    void requestActivityNotification();
 
     DISALLOW_EVIL_CONSTRUCTORS(JMediaCodec);
 };
