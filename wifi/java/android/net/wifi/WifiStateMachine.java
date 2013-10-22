@@ -85,6 +85,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Iterator;
@@ -493,6 +494,10 @@ public class WifiStateMachine extends StateMachine {
     // sometimes telephony gives us this data before boot is complete and we can't store it
     // until after, so the write is deferred
     private volatile String mPersistedCountryCode;
+
+    // Supplicant doesn't like setting the same country code multiple times (it may drop
+    // currently connected network), so we save the country code here to avoid redundency
+    private String mLastSetCountryCode;
 
     private static final int MIN_RSSI = -200;
     private static final int MAX_RSSI = 256;
@@ -3008,8 +3013,16 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
                     if (DBG) log("set country code " + country);
-                    if (!mWifiNative.setCountryCode(country)) {
-                        loge("Failed to set country code " + country);
+                    if (country != null) {
+                        country = country.toUpperCase(Locale.ROOT);
+                        if (mLastSetCountryCode == null
+                                || country.equals(mLastSetCountryCode) == false) {
+                            if (mWifiNative.setCountryCode(country)) {
+                                mLastSetCountryCode = country;
+                            } else {
+                                loge("Failed to set country code " + country);
+                            }
+                        }
                     }
                     break;
                 case CMD_SET_FREQUENCY_BAND:
@@ -3142,6 +3155,8 @@ public class WifiStateMachine extends StateMachine {
             intent.putExtra(WifiManager.EXTRA_SCAN_AVAILABLE, WIFI_STATE_DISABLED);
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
             noteScanEnd(); // wrap up any pending request.
+
+            mLastSetCountryCode = null;
         }
     }
 
