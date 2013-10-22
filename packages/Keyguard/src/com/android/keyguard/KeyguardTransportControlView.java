@@ -134,6 +134,7 @@ public class KeyguardTransportControlView extends FrameLayout {
     private final Runnable mUpdateSeekBars = new Runnable() {
         public void run() {
             if (updateSeekBars()) {
+                removeCallbacks(this);
                 postDelayed(this, 1000);
             }
         }
@@ -249,7 +250,6 @@ public class KeyguardTransportControlView extends FrameLayout {
         }
         if (enabled) {
             mUpdateSeekBars.run();
-            postDelayed(mUpdateSeekBars, 1000);
         } else {
             removeCallbacks(mUpdateSeekBars);
         }
@@ -437,8 +437,7 @@ public class KeyguardTransportControlView extends FrameLayout {
             setSeekBarsEnabled(false);
         }
 
-        KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(
-                mMetadata.bitmap);
+        KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(mMetadata.bitmap);
         final int flags = mTransportControlFlags;
         setVisibilityBasedOnFlag(mBtnPrev, flags, RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS);
         setVisibilityBasedOnFlag(mBtnNext, flags, RemoteControlClient.FLAG_KEY_MEDIA_NEXT);
@@ -539,7 +538,7 @@ public class KeyguardTransportControlView extends FrameLayout {
                 imageResId = R.drawable.ic_media_pause;
                 imageDescId = R.string.keyguard_transport_pause_description;
                 if (mSeekEnabled) {
-                    postDelayed(mUpdateSeekBars, 1000);
+                    mUpdateSeekBars.run();
                 }
                 break;
 
@@ -567,6 +566,7 @@ public class KeyguardTransportControlView extends FrameLayout {
     boolean updateSeekBars() {
         final int position = (int) mRemoteController.getEstimatedMediaPosition();
         if (position >= 0) {
+            if (DEBUG) Log.v(TAG, "Seek to " + position);
             if (!mUserSeeking) {
                 mTransientSeekBar.setProgress(position);
             }
