@@ -1254,15 +1254,16 @@ public final class ActivityStackSupervisor {
         final TaskRecord task = r.task;
         if (r.isApplicationActivity() || (task != null && task.isApplicationTask())) {
             if (task != null) {
-                if (mFocusedStack != task.stack) {
+                final ActivityStack taskStack = task.stack;
+                if (mFocusedStack != taskStack) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                             "adjustStackFocus: Setting focused stack to r=" + r + " task=" + task);
-                    mFocusedStack = task.stack;
+                    mFocusedStack = taskStack.isHomeStack() ? null : taskStack;
                 } else {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                         "adjustStackFocus: Focused stack already=" + mFocusedStack);
                 }
-                return mFocusedStack;
+                return taskStack;
             }
 
             if (mFocusedStack != null) {
@@ -1282,8 +1283,8 @@ public final class ActivityStackSupervisor {
             }
 
             // Time to create the first app stack for this user.
-            int stackId = mService.createStack(-1, HOME_STACK_ID,
-                StackBox.TASK_STACK_GOES_OVER, 1.0f);
+            int stackId =
+                    mService.createStack(-1, HOME_STACK_ID, StackBox.TASK_STACK_GOES_OVER, 1.0f);
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "adjustStackFocus: New stack r=" + r +
                     " stackId=" + stackId);
             mFocusedStack = getStack(stackId);
@@ -1308,7 +1309,8 @@ public final class ActivityStackSupervisor {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
                     "setFocusedStack: Setting focused stack to r=" + r + " task=" + r.task +
                     " Callers=" + Debug.getCallers(3));
-            mFocusedStack = r.task.stack;
+            final ActivityStack taskStack = r.task.stack;
+            mFocusedStack = taskStack.isHomeStack() ? null : taskStack;
             if (mStackState != STACK_STATE_HOME_IN_BACK) {
                 if (DEBUG_STACK) Slog.d(TAG, "setFocusedStack: mStackState old=" +
                         stackStateToString(mStackState) + " new=" +
@@ -2367,12 +2369,13 @@ public final class ActivityStackSupervisor {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity:");
+        pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity=");
                 pw.println(mDismissKeyguardOnNextActivity);
-        pw.print(prefix); pw.print("mStackState="); pw.println(stackStateToString(mStackState));
-        pw.print(prefix); pw.println("mSleepTimeout: " + mSleepTimeout);
-        pw.print(prefix); pw.println("mCurTaskId: " + mCurTaskId);
-        pw.print(prefix); pw.println("mUserStackInFront: " + mUserStackInFront);
+        pw.print(prefix); pw.print("mFocusedStack=" + mFocusedStack);
+                pw.print(" mStackState="); pw.println(stackStateToString(mStackState));
+        pw.print(prefix); pw.println("mSleepTimeout=" + mSleepTimeout);
+        pw.print(prefix); pw.println("mCurTaskId=" + mCurTaskId);
+        pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
