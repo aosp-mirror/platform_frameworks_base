@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Próbálja újra <xliff:g id="COUNT">%d</xliff:g> másodperc múlva"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Próbálkozzon később"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"A teljes képernyős nézetből való kilépéshez húzza ujját a tetejétől lefelé."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"A teljes képernyős nézetből való kilépéshez húzza ujját a képernyő tetejétől lefelé."</string>
 </resources>

@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> 秒後再試一次"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下快速滑動即可退出全螢幕。"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"由頂端往下快速滑動即可離開全螢幕。"</string>
 </resources>

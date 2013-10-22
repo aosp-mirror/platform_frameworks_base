@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Jaribu tena baadaye"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Telezesha kidole kwa kasi chini kuanzia juu ili uondoke kwenye skrini kamili."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Telezesha kidole kwa kasi chini kuanzia juu ili uondoke kwenye skrini zima."</string>
 </resources>
