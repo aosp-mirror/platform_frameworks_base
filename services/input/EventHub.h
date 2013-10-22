@@ -231,6 +231,8 @@ public:
             uint8_t* outFlags) const = 0;
 
     virtual bool hasScanCode(int32_t deviceId, int32_t scanCode) const = 0;
+
+    /* LED related functions expect Android LED constants, not scan codes or HID usages */
     virtual bool hasLed(int32_t deviceId, int32_t led) const = 0;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on) = 0;
 
@@ -393,6 +395,10 @@ private:
 
     int32_t getNextControllerNumberLocked(Device* device);
     void releaseControllerNumberLocked(Device* device);
+    void setLedForController(Device* device);
+
+    status_t mapLed(Device* device, int32_t led, int32_t* outScanCode) const;
+    void setLedStateLocked(Device* device, int32_t led, bool on);
 
     // Protect all internal state.
     mutable Mutex mLock;
