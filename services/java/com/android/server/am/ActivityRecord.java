@@ -480,7 +480,12 @@ final class ActivityRecord {
 
     void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
         if (task != null && task.removeActivity(this)) {
-            mStackSupervisor.removeTask(task);
+            if (task != newTask) {
+                mStackSupervisor.removeTask(task);
+            } else {
+                Slog.d(TAG, "!!! REMOVE THIS LOG !!! setTask: nearly removed stack=" +
+                        (newTask == null ? null : newTask.stack));
+            }
         }
         if (inHistory && !finishing) {
             if (task != null) {
