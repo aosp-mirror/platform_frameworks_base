@@ -2174,6 +2174,19 @@ final class ActivityStack {
         r.addResultLocked(null, resultWho, requestCode, resultCode, data);
     }
 
+    private void adjustFocusedActivityLocked(ActivityRecord r) {
+        if (mStackSupervisor.isFrontStack(this) && mService.mFocusedActivity == r) {
+            ActivityRecord next = topRunningActivityLocked(null);
+            if (next != r) {
+                final TaskRecord task = r.task;
+                if (r.frontOfTask && task == topTask() && task.mOnTopOfHome) {
+                    mStackSupervisor.moveHomeToTop();
+                }
+            }
+            mService.setFocusedActivityLocked(mStackSupervisor.topRunningActivityLocked());
+        }
+    }
+
     final void stopActivityLocked(ActivityRecord r) {
         if (DEBUG_SWITCH) Slog.d(TAG, "Stopping: " + r);
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
@@ -2193,11 +2206,7 @@ final class ActivityStack {
         }
 
         if (r.app != null && r.app.thread != null) {
-            if (mStackSupervisor.isFrontStack(this)) {
-                if (mService.mFocusedActivity == r) {
-                    mService.setFocusedActivityLocked(topRunningActivityLocked(null));
-                }
-            }
+            adjustFocusedActivityLocked(r);
             r.resumeKeyDispatchingLocked();
             try {
                 r.stopped = false;
@@ -2376,11 +2385,8 @@ final class ActivityStack {
         }
 
         r.pauseKeyDispatchingLocked();
-        if (mStackSupervisor.isFrontStack(this)) {
-            if (mService.mFocusedActivity == r) {
-                mService.setFocusedActivityLocked(mStackSupervisor.topRunningActivityLocked());
-            }
-        }
+
+        adjustFocusedActivityLocked(r);
 
         finishActivityResultsLocked(r, resultCode, resultData);
 
