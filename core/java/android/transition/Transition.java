@@ -994,15 +994,7 @@ public abstract class Transition implements Cloneable {
      * false otherwise
      */
     void captureValues(ViewGroup sceneRoot, boolean start) {
-        if (start) {
-            mStartValues.viewValues.clear();
-            mStartValues.idValues.clear();
-            mStartValues.itemIdValues.clear();
-        } else {
-            mEndValues.viewValues.clear();
-            mEndValues.idValues.clear();
-            mEndValues.itemIdValues.clear();
-        }
+        clearValues(start);
         if (mTargetIds.size() > 0 || mTargets.size() > 0) {
             if (mTargetIds.size() > 0) {
                 for (int i = 0; i < mTargetIds.size(); ++i) {
@@ -1051,6 +1043,23 @@ public abstract class Transition implements Cloneable {
             }
         } else {
             captureHierarchy(sceneRoot, start);
+        }
+    }
+
+    /**
+     * Clear valuesMaps for specified start/end state
+     *
+     * @param start true if the start values should be cleared, false otherwise
+     */
+    void clearValues(boolean start) {
+        if (start) {
+            mStartValues.viewValues.clear();
+            mStartValues.idValues.clear();
+            mStartValues.itemIdValues.clear();
+        } else {
+            mEndValues.viewValues.clear();
+            mEndValues.idValues.clear();
+            mEndValues.itemIdValues.clear();
         }
     }
 
