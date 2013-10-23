@@ -977,6 +977,40 @@ final class ActivityStack {
     }
 
     /**
+     * Determine if home should be visible below the passed record.
+     * @param record activity we are querying for.
+     * @return true if home is visible below the passed activity, false otherwise.
+     */
+    boolean isActivityOverHome(ActivityRecord record) {
+        // Start at record and go down, look for either home or a visible fullscreen activity.
+        final TaskRecord recordTask = record.task;
+        for (int taskNdx = mTaskHistory.indexOf(recordTask); taskNdx >= 0; --taskNdx) {
+            TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            final int startNdx =
+                    task == recordTask ? activities.indexOf(record) : activities.size() - 1;
+            for (int activityNdx = startNdx; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.isHomeActivity()) {
+                    return true;
+                }
+                if (!r.finishing && r.visible && r.fullscreen) {
+                    // Passed activity is over a visible fullscreen activity.
+                    return false;
+                }
+            }
+            if (task.mOnTopOfHome) {
+                // Got to the bottom of a task on top of home without finding a visible fullscreen
+                // activity. Home is visible.
+                return true;
+            }
+        }
+        // Got to the bottom of this stack and still don't know. If this is over the home stack
+        // then record is over home. May not work if we ever get more than two layers.
+        return mStackSupervisor.isFrontStack(this);
+    }
+
+    /**
      * Version of ensureActivitiesVisible that can easily be called anywhere.
      */
     final boolean ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
@@ -1101,24 +1135,10 @@ final class ActivityStack {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
-                    } else if (task.mOnTopOfHome) {
-                        // Work our way down from r to bottom of task and see if there are any
-                        // visible activities below r.
-                        int rIndex = task.mActivities.indexOf(r);
-                        for ( --rIndex; rIndex >= 0; --rIndex) {
-                            final ActivityRecord blocker = task.mActivities.get(rIndex);
-                            if (!blocker.finishing) {
-                                if (DEBUG_VISBILITY) Slog.v(TAG, "Home visibility for " +
-                                        r + " blocked by " + blocker);
-                                break;
-                            }
-                        }
-                        if (rIndex < 0) {
-                            // Got to task bottom without finding a visible activity, show home.
-                            if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
-                            showHomeBehindStack = true;
-                            behindFullscreen = true;
-                        }
+                    } else if (isActivityOverHome(r)) {
+                        if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
+                        showHomeBehindStack = true;
+                        behindFullscreen = true;
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
