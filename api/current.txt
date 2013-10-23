@@ -13227,6 +13227,7 @@ package android.media.audiofx {
     field public static final java.util.UUID EFFECT_TYPE_BASS_BOOST;
     field public static final java.util.UUID EFFECT_TYPE_ENV_REVERB;
     field public static final java.util.UUID EFFECT_TYPE_EQUALIZER;
+    field public static final java.util.UUID EFFECT_TYPE_LOUDNESS_ENHANCER;
     field public static final java.util.UUID EFFECT_TYPE_NS;
     field public static final java.util.UUID EFFECT_TYPE_PRESET_REVERB;
     field public static final java.util.UUID EFFECT_TYPE_VIRTUALIZER;
@@ -13384,6 +13385,7 @@ package android.media.audiofx {
   }
 
   public class LoudnessEnhancer extends android.media.audiofx.AudioEffect {
+    ctor public LoudnessEnhancer(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.RuntimeException, java.lang.UnsupportedOperationException;
     method public float getTargetGain() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public void setTargetGain(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     field public static final int PARAM_TARGET_GAIN_MB = 0; // 0x0
