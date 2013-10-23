@@ -76,6 +76,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -528,7 +529,7 @@ public class DirectoryFragment extends Fragment {
             if (iconThumb != null) {
                 final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
                 if (oldTask != null) {
-                    oldTask.reallyCancel();
+                    oldTask.preempt();
                     iconThumb.setTag(null);
                 }
             }
@@ -794,7 +795,7 @@ public class DirectoryFragment extends Fragment {
 
             final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
             if (oldTask != null) {
-                oldTask.reallyCancel();
+                oldTask.preempt();
                 iconThumb.setTag(null);
             }
 
@@ -818,7 +819,7 @@ public class DirectoryFragment extends Fragment {
                     final ThumbnailAsyncTask task = new ThumbnailAsyncTask(
                             uri, iconMime, iconThumb, mThumbSize);
                     iconThumb.setTag(task);
-                    task.executeOnExecutor(ProviderExecutor.forAuthority(docAuthority));
+                    ProviderExecutor.forAuthority(docAuthority).execute(task);
                 }
             }
 
@@ -988,7 +989,8 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap> {
+    private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap>
+            implements Preemptable {
         private final Uri mUri;
         private final ImageView mIconMime;
         private final ImageView mIconThumb;
@@ -1004,7 +1006,8 @@ public class DirectoryFragment extends Fragment {
             mSignal = new CancellationSignal();
         }
 
-        public void reallyCancel() {
+        @Override
+        public void preempt() {
             cancel(false);
             mSignal.cancel();
         }
