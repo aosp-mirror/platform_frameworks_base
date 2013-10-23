@@ -55,6 +55,7 @@
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
   <java-symbol type="id" name="current_scene" />
+  <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
   <java-symbol type="id" name="datePicker" />
   <java-symbol type="id" name="day" />
