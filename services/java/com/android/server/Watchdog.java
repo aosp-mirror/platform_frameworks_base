@@ -60,7 +60,8 @@ public class Watchdog extends Thread {
 
     static final int TIME_TO_WAIT = DB ? 5*1000 : 30*1000;
 
-    static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
+    // Which native processes to dump into dropbox's stack traces
+    public static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
         "/system/bin/mediaserver",
         "/system/bin/sdcard",
         "/system/bin/surfaceflinger"

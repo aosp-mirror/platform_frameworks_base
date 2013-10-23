@@ -21,6 +21,7 @@ import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
+import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -321,6 +322,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int MY_PID = Process.myPid();
 
     static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    // How many bytes to write into the dropbox log before truncating
+    static final int DROPBOX_MAX_SIZE = 256 * 1024;
 
     /** Run all ActivityStacks through this */
     ActivityStackSupervisor mStackSupervisor;
@@ -3687,7 +3691,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            // Next measure CPU usage.
+            // Next collect the stacks of the native pids
+            if (nativeProcs != null) {
+                int[] pids = Process.getPidsForCommands(nativeProcs);
+                if (pids != null) {
+                    for (int pid : pids) {
+                        Debug.dumpNativeBacktraceToFile(pid, tracesPath);
+                    }
+                }
+            }
+
+            // Lastly, measure CPU usage.
             if (processCpuTracker != null) {
                 processCpuTracker.init();
                 System.gc();
@@ -3719,18 +3733,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
-
         } finally {
             observer.stopWatching();
-        }
-
-        if (nativeProcs != null) {
-            int[] pids = Process.getPidsForCommands(nativeProcs);
-            if (pids != null) {
-                for (int pid : pids) {
-                    Debug.dumpNativeBacktraceToFile(pid, tracesPath);
-                }
-            }
         }
     }
 
@@ -3895,7 +3899,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
-        File tracesFile = dumpStackTraces(true, firstPids, processCpuTracker, lastPids, null);
+        File tracesFile = dumpStackTraces(true, firstPids, processCpuTracker, lastPids,
+                NATIVE_STACKS_OF_INTEREST);
 
         String cpuInfo = null;
         if (MONITOR_CPU_USAGE) {
@@ -9820,7 +9825,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (logFile != null) {
                     try {
-                        sb.append(FileUtils.readTextFile(logFile, 128 * 1024, "\n\n[[TRUNCATED]]"));
+                        sb.append(FileUtils.readTextFile(logFile, DROPBOX_MAX_SIZE,
+                                    "\n\n[[TRUNCATED]]"));
                     } catch (IOException e) {
                         Slog.e(TAG, "Error reading " + logFile, e);
                     }
