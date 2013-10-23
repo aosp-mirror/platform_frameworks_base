@@ -601,7 +601,11 @@ public class BaseInputConnection implements InputConnection {
         }
         
         beginBatchEdit();
-        
+        if (!composing && !TextUtils.isEmpty(text)) {
+            // Notify the text is committed by the user to InputMethodManagerService
+            mIMM.notifyTextCommitted();
+        }
+
         // delete composing text set previously.
         int a = getComposingSpanStart(content);
         int b = getComposingSpanEnd(content);
