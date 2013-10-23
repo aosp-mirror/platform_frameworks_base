@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.CancellationSignal.OnCancelListener;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
@@ -54,8 +55,9 @@ import java.lang.ref.WeakReference;
 public class TestDocumentsProvider extends DocumentsProvider {
     private static final String TAG = "TestDocuments";
 
+    private static final boolean LAG = false;
+
     private static final boolean ROOTS_WEDGE = false;
-    private static final boolean ROOTS_LAG = false;
     private static final boolean ROOTS_CRASH = false;
     private static final boolean ROOTS_REFRESH = false;
 
@@ -105,8 +107,8 @@ public class TestDocumentsProvider extends DocumentsProvider {
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
         Log.d(TAG, "Someone asked for our roots!");
 
-        if (ROOTS_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
-        if (ROOTS_LAG) SystemClock.sleep(3000);
+        if (LAG) lagUntilCanceled(null);
+        if (ROOTS_WEDGE) wedgeUntilCanceled(null);
         if (ROOTS_CRASH) System.exit(12);
 
         if (ROOTS_REFRESH) {
@@ -137,6 +139,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
+        if (LAG) lagUntilCanceled(null);
         if (DOCUMENT_CRASH) System.exit(12);
 
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
@@ -209,6 +212,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
 
+        if (LAG) lagUntilCanceled(null);
         if (CHILD_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
         if (CHILD_CRASH) System.exit(12);
 
@@ -228,7 +232,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
 
         if (THUMB_HUNDREDS) {
             for (int i = 0; i < 256; i++) {
-                includeFile(result, "i maded u an picshure", Document.FLAG_SUPPORTS_THUMBNAIL);
+                includeFile(result, "i maded u an picshure" + i, Document.FLAG_SUPPORTS_THUMBNAIL);
             }
         }
 
@@ -278,7 +282,8 @@ public class TestDocumentsProvider extends DocumentsProvider {
     public Cursor queryRecentDocuments(String rootId, String[] projection)
             throws FileNotFoundException {
 
-        if (RECENT_WEDGE) SystemClock.sleep(Integer.MAX_VALUE);
+        if (LAG) lagUntilCanceled(null);
+        if (RECENT_WEDGE) wedgeUntilCanceled(null);
 
         // Pretend to take a super long time to respond
         SystemClock.sleep(3000);
@@ -292,6 +297,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     @Override
     public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
+        if (LAG) lagUntilCanceled(null);
         throw new FileNotFoundException();
     }
 
@@ -299,6 +305,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
     public AssetFileDescriptor openDocumentThumbnail(
             String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
 
+        if (LAG) lagUntilCanceled(signal);
         if (THUMB_WEDGE) wedgeUntilCanceled(signal);
         if (THUMB_CRASH) System.exit(12);
 
@@ -339,15 +346,34 @@ public class TestDocumentsProvider extends DocumentsProvider {
         return true;
     }
 
+    private static void lagUntilCanceled(CancellationSignal signal) {
+        waitForCancelOrTimeout(signal, 1500);
+    }
+
     private static void wedgeUntilCanceled(CancellationSignal signal) {
+        waitForCancelOrTimeout(signal, Integer.MAX_VALUE);
+    }
+
+    private static void waitForCancelOrTimeout(
+            final CancellationSignal signal, long timeoutMillis) {
         if (signal != null) {
-            while (true) {
-                signal.throwIfCanceled();
-                SystemClock.sleep(500);
-            }
-        } else {
-            Log.w(TAG, "WEDGING WITHOUT A CANCELLATIONSIGNAL");
-            SystemClock.sleep(Integer.MAX_VALUE);
+            final Thread blocked = Thread.currentThread();
+            signal.setOnCancelListener(new OnCancelListener() {
+                @Override
+                public void onCancel() {
+                    blocked.interrupt();
+                }
+            });
+            signal.throwIfCanceled();
+        }
+
+        try {
+            Thread.sleep(timeoutMillis);
+        } catch (InterruptedException e) {
+        }
+
+        if (signal != null) {
+            signal.throwIfCanceled();
         }
     }
 
