@@ -160,7 +160,7 @@ public final class BatteryService extends Binder {
 
         mBatteryPropertiesListener = new BatteryListener();
 
-        IBinder b = ServiceManager.getService("batterypropreg");
+        IBinder b = ServiceManager.getService("batteryproperties");
         mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(b);
 
         try {
