@@ -135,10 +135,10 @@ public final class ProcessStats implements Parcelable {
     };
 
     static final String[] STATE_NAMES = new String[] {
-            "Persistent", "Top       ", "Imp Fg    ", "Imp Bg    ",
-            "Backup    ", "Heavy Wght", "Service   ", "Service Rs",
-            "Receiver  ", "Home      ",
-            "Last Act  ", "Cch Act   ", "Cch CliAct", "Cch Empty "
+            "Persist", "Top    ", "ImpFg  ", "ImpBg  ",
+            "Backup ", "HeavyWt", "Service", "ServRst",
+            "Receivr", "Home   ",
+            "LastAct", "CchAct ", "CchCAct", "CchEmty"
     };
 
     public static final String[] ADJ_SCREEN_NAMES_CSV = new String[] {
@@ -314,16 +314,16 @@ public final class ProcessStats implements Parcelable {
     private static void printScreenLabel(PrintWriter pw, int offset) {
         switch (offset) {
             case ADJ_NOTHING:
-                pw.print("             ");
+                pw.print("     ");
                 break;
             case ADJ_SCREEN_OFF:
-                pw.print("Screen Off / ");
+                pw.print("SOff/");
                 break;
             case ADJ_SCREEN_ON:
-                pw.print("Screen On  / ");
+                pw.print("SOn /");
                 break;
             default:
-                pw.print("?????????? / ");
+                pw.print("????/");
                 break;
         }
     }
@@ -344,25 +344,31 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
-    private static void printMemLabel(PrintWriter pw, int offset) {
+    private static void printMemLabel(PrintWriter pw, int offset, char sep) {
         switch (offset) {
             case ADJ_NOTHING:
-                pw.print("       ");
+                pw.print("    ");
+                if (sep != 0) pw.print(' ');
                 break;
             case ADJ_MEM_FACTOR_NORMAL:
-                pw.print("Norm / ");
+                pw.print("Norm");
+                if (sep != 0) pw.print(sep);
                 break;
             case ADJ_MEM_FACTOR_MODERATE:
-                pw.print("Mod  / ");
+                pw.print("Mod ");
+                if (sep != 0) pw.print(sep);
                 break;
             case ADJ_MEM_FACTOR_LOW:
-                pw.print("Low  / ");
+                pw.print("Low ");
+                if (sep != 0) pw.print(sep);
                 break;
             case ADJ_MEM_FACTOR_CRITICAL:
-                pw.print("Crit / ");
+                pw.print("Crit");
+                if (sep != 0) pw.print(sep);
                 break;
             default:
-                pw.print("???? / ");
+                pw.print("????");
+                if (sep != 0) pw.print(sep);
                 break;
         }
     }
@@ -399,8 +405,9 @@ public final class ProcessStats implements Parcelable {
                         printScreenLabel(pw, printedScreen != iscreen
                                 ? iscreen : STATE_NOTHING);
                         printedScreen = iscreen;
-                        printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING);
+                        printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING, (char)0);
                         printedMem = imem;
+                        pw.print(": ");
                         TimeUtils.formatDuration(time, pw); pw.println(running);
                     }
                     totalTime += time;
@@ -409,8 +416,7 @@ public final class ProcessStats implements Parcelable {
         }
         if (totalTime != 0 && pw != null) {
             pw.print(prefix);
-            printScreenLabel(pw, STATE_NOTHING);
-            pw.print("TOTAL: ");
+            pw.print("    TOTAL: ");
             TimeUtils.formatDuration(totalTime, pw);
             pw.println();
         }
@@ -569,7 +575,7 @@ public final class ProcessStats implements Parcelable {
                             printedScreen = iscreen;
                         }
                         if (memStates.length > 1) {
-                            printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING);
+                            printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING, '/');
                             printedMem = imem;
                         }
                         pw.print(STATE_NAMES[procStates[ip]]); pw.print(": ");
@@ -585,9 +591,9 @@ public final class ProcessStats implements Parcelable {
                 printScreenLabel(pw, STATE_NOTHING);
             }
             if (memStates.length > 1) {
-                printMemLabel(pw, STATE_NOTHING);
+                printMemLabel(pw, STATE_NOTHING, '/');
             }
-            pw.print("TOTAL     : ");
+            pw.print("TOTAL  : ");
             TimeUtils.formatDuration(totalTime, pw);
             pw.println();
         }
@@ -621,7 +627,7 @@ public final class ProcessStats implements Parcelable {
                             printedScreen = iscreen;
                         }
                         if (memStates.length > 1) {
-                            printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING);
+                            printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING, '/');
                             printedMem = imem;
                         }
                         pw.print(STATE_NAMES[procStates[ip]]); pw.print(": ");
@@ -798,7 +804,7 @@ public final class ProcessStats implements Parcelable {
                     new int[] {STATE_SERVICE_RESTARTING}, now, totalTime, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "      Receiver: ", screenStates, memStates,
                     new int[] {STATE_RECEIVER}, now, totalTime, true);
-            dumpProcessSummaryDetails(pw, proc, prefix, "          Home: ", screenStates, memStates,
+            dumpProcessSummaryDetails(pw, proc, prefix, "        (Home): ", screenStates, memStates,
                     new int[] {STATE_HOME}, now, totalTime, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "    (Last Act): ", screenStates, memStates,
                     new int[] {STATE_LAST_ACTIVITY}, now, totalTime, true);
@@ -1733,13 +1739,17 @@ public final class ProcessStats implements Parcelable {
                         pw.print(" pkg="); pw.println(proc.mCommonProcess.mPackage);
             }
         }
-        pw.print(prefix); pw.print("mActive="); pw.println(proc.mActive);
+        if (proc.mActive) {
+            pw.print(prefix); pw.print("mActive="); pw.println(proc.mActive);
+        }
         if (proc.mDead) {
             pw.print(prefix); pw.print("mDead="); pw.println(proc.mDead);
         }
-        pw.print(prefix); pw.print("mNumActiveServices="); pw.print(proc.mNumActiveServices);
-                pw.print(" mNumStartedServices=");
-                pw.println(proc.mNumStartedServices);
+        if (proc.mNumActiveServices != 0 || proc.mNumStartedServices != 0) {
+            pw.print(prefix); pw.print("mNumActiveServices="); pw.print(proc.mNumActiveServices);
+                    pw.print(" mNumStartedServices=");
+                    pw.println(proc.mNumStartedServices);
+        }
     }
 
     public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
@@ -1920,8 +1930,9 @@ public final class ProcessStats implements Parcelable {
                         printScreenLabel(pw, printedScreen != iscreen
                                 ? iscreen : STATE_NOTHING);
                         printedScreen = iscreen;
-                        printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING);
+                        printMemLabel(pw, printedMem != imem ? imem : STATE_NOTHING, (char)0);
                         printedMem = imem;
+                        pw.print(": ");
                         TimeUtils.formatDuration(time, pw); pw.println(running);
                     }
                     totalTime += time;
@@ -1930,8 +1941,7 @@ public final class ProcessStats implements Parcelable {
         }
         if (totalTime != 0 && pw != null) {
             pw.print(prefix);
-            printScreenLabel(pw, STATE_NOTHING);
-            pw.print("TOTAL: ");
+            pw.print("    TOTAL: ");
             TimeUtils.formatDuration(totalTime, pw);
             pw.println();
         }

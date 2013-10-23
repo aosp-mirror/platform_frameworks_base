@@ -1051,7 +1051,14 @@ public final class ActivityStackSupervisor {
 
         if (app != null && app.thread != null) {
             try {
-                app.addPackage(r.info.packageName, mService.mProcessStats);
+                if ((r.info.flags&ActivityInfo.FLAG_MULTIPROCESS) == 0
+                        || !"android".equals(r.info.packageName)) {
+                    // Don't add this if it is a platform component that is marked
+                    // to run in multiple processes, because this is actually
+                    // part of the framework so doesn't make sense to track as a
+                    // separate apk in the process.
+                    app.addPackage(r.info.packageName, mService.mProcessStats);
+                }
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
