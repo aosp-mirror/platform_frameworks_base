@@ -630,8 +630,19 @@ class QuickSettings {
                     return true; // Consume click
                 }} );
         }
-        mModel.addLocationTile(locationTile,
-                new QuickSettingsModel.BasicRefreshCallback(locationTile));
+        mModel.addLocationTile(locationTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                locationTile.setImageResource(state.iconId);
+                String locationState = mContext.getString(
+                        (state.enabled) ? R.string.accessibility_desc_on
+                                : R.string.accessibility_desc_off);
+                locationTile.setContentDescription(mContext.getString(
+                        R.string.accessibility_quick_settings_location,
+                        locationState));
+                locationTile.setText(state.label);
+            }
+        });
         parent.addView(locationTile);
     }
 
