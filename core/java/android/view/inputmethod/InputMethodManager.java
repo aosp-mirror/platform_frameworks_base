@@ -1805,6 +1805,20 @@ public final class InputMethodManager {
     }
 
     /**
+     * Notify the current IME commits text
+     * @hide
+     */
+    public void notifyTextCommitted() {
+        synchronized (mH) {
+            try {
+                mService.notifyTextCommitted();
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+            }
+        }
+    }
+
+    /**
      * Returns a map of all shortcut input method info and their subtypes.
      */
     public Map<InputMethodInfo, List<InputMethodSubtype>> getShortcutInputMethodsAndSubtypes() {

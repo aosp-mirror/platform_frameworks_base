@@ -75,4 +75,5 @@ interface IInputMethodManager {
     boolean setInputMethodEnabled(String id, boolean enabled);
     oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
+    oneway void notifyTextCommitted();
 }
