@@ -7228,7 +7228,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_MU)
                     Slog.v(TAG_MU, "generateApplicationProvidersLocked, cpi.uid = " + cpr.uid);
                 app.pubProviders.put(cpi.name, cpr);
-                app.addPackage(cpi.applicationInfo.packageName, mProcessStats);
+                if (!cpi.multiprocess || !"android".equals(cpi.packageName)) {
+                    // Don't add this if it is a platform component that is marked
+                    // to run in multiple processes, because this is actually
+                    // part of the framework so doesn't make sense to track as a
+                    // separate apk in the process.
+                    app.addPackage(cpi.applicationInfo.packageName, mProcessStats);
+                }
                 ensurePackageDexOpt(cpi.applicationInfo.packageName);
             }
         }
@@ -12782,7 +12788,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + ") when registering receiver " + receiver);
                 }
                 if (callerApp.info.uid != Process.SYSTEM_UID &&
-                        !callerApp.pkgList.containsKey(callerPackage)) {
+                        !callerApp.pkgList.containsKey(callerPackage) &&
+                        !"android".equals(callerPackage)) {
                     throw new SecurityException("Given caller package " + callerPackage
                             + " is not running in process " + callerApp);
                 }

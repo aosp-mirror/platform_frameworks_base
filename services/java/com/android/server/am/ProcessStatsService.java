@@ -529,6 +529,33 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    private void dumpAggregatedStats(PrintWriter pw, long aggregateHours, long now,
+            String reqPackage, boolean isCompact, boolean dumpDetails, boolean dumpFullDetails,
+            boolean dumpAll, boolean activeOnly) {
+        ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
+                - (ProcessStats.COMMIT_PERIOD/2));
+        if (pfd == null) {
+            pw.println("Unable to build stats!");
+            return;
+        }
+        ProcessStats stats = new ProcessStats(false);
+        InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        stats.read(stream);
+        if (stats.mReadError != null) {
+            pw.print("Failure reading: "); pw.println(stats.mReadError);
+            return;
+        }
+        if (isCompact) {
+            stats.dumpCheckinLocked(pw, reqPackage);
+        } else {
+            if (dumpDetails || dumpFullDetails) {
+                stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll, activeOnly);
+            } else {
+                stats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
+            }
+        }
+    }
+
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
@@ -789,28 +816,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
             return;
         } else if (aggregateHours != 0) {
-            ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
-                    - (ProcessStats.COMMIT_PERIOD/2));
-            if (pfd == null) {
-                pw.println("Unable to build stats!");
-                return;
-            }
-            ProcessStats stats = new ProcessStats(false);
-            InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-            stats.read(stream);
-            if (stats.mReadError != null) {
-                pw.print("Failure reading: "); pw.println(stats.mReadError);
-                return;
-            }
-            if (isCompact) {
-                stats.dumpCheckinLocked(pw, reqPackage);
-            } else {
-                if (dumpDetails || dumpFullDetails) {
-                    stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll, activeOnly);
-                } else {
-                    stats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
-                }
-            }
+            dumpAggregatedStats(pw, aggregateHours, now, reqPackage, isCompact,
+                    dumpDetails, dumpFullDetails, dumpAll, activeOnly);
             return;
         }
 
@@ -875,6 +882,19 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
         }
         if (!isCheckin) {
+            if (dumpAll) {
+                if (sepNeeded) {
+                    pw.println();
+                    pw.println("AGGREGATED OVER LAST 24 HOURS:");
+                }
+                dumpAggregatedStats(pw, 24, now, reqPackage, isCompact,
+                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
+                pw.println();
+                pw.println("AGGREGATED OVER LAST 3 HOURS:");
+                dumpAggregatedStats(pw, 3, now, reqPackage, isCompact,
+                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
+                sepNeeded = true;
+            }
             synchronized (mAm) {
                 if (isCompact) {
                     mProcessStats.dumpCheckinLocked(pw, reqPackage);
