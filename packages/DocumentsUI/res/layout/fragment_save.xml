@@ -51,15 +51,31 @@
             android:singleLine="true"
             android:selectAllOnFocus="true" />
 
-        <Button
-            android:id="@android:id/button1"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="?android:attr/selectableItemBackground"
-            android:text="@string/menu_save"
-            android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:padding="8dp" />
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@android:id/button1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground"
+                android:text="@string/menu_save"
+                android:textAllCaps="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:padding="8dp" />
+
+            <ProgressBar
+                android:id="@android:id/progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true"
+                android:padding="8dp"
+                style="?android:attr/progressBarStyle" />
+
+        </FrameLayout>
 
     </LinearLayout>
 
