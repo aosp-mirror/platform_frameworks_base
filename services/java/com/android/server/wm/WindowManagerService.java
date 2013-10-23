@@ -7637,22 +7637,27 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            // Set some sort of reasonable bounds on the size of the display that we
-            // will try to emulate.
-            final int MIN_WIDTH = 200;
-            final int MIN_HEIGHT = 200;
-            final int MAX_SCALE = 2;
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                width = Math.min(Math.max(width, MIN_WIDTH),
-                        displayContent.mInitialDisplayWidth * MAX_SCALE);
-                height = Math.min(Math.max(height, MIN_HEIGHT),
-                        displayContent.mInitialDisplayHeight * MAX_SCALE);
-                setForcedDisplaySizeLocked(displayContent, width, height);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                // Set some sort of reasonable bounds on the size of the display that we
+                // will try to emulate.
+                final int MIN_WIDTH = 200;
+                final int MIN_HEIGHT = 200;
+                final int MAX_SCALE = 2;
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    width = Math.min(Math.max(width, MIN_WIDTH),
+                            displayContent.mInitialDisplayWidth * MAX_SCALE);
+                    height = Math.min(Math.max(height, MIN_HEIGHT),
+                            displayContent.mInitialDisplayHeight * MAX_SCALE);
+                    setForcedDisplaySizeLocked(displayContent, width, height);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7723,14 +7728,19 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
-                        displayContent.mInitialDisplayHeight);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_SIZE_FORCED, "");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
+                            displayContent.mInitialDisplayHeight);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_SIZE_FORCED, "");
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7771,13 +7781,18 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setForcedDisplayDensityLocked(displayContent, density);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setForcedDisplayDensityLocked(displayContent, density);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7802,13 +7817,19 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setForcedDisplayDensityLocked(displayContent, displayContent.mInitialDisplayDensity);
-                Settings.Global.putString(mContext.getContentResolver(),
-                        Settings.Global.DISPLAY_DENSITY_FORCED, "");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setForcedDisplayDensityLocked(displayContent,
+                            displayContent.mInitialDisplayDensity);
+                    Settings.Global.putString(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_DENSITY_FORCED, "");
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -7856,11 +7877,16 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        synchronized(mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                setOverscanLocked(displayContent, left, top, right, bottom);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    setOverscanLocked(displayContent, left, top, right, bottom);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
