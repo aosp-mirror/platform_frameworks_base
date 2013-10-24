@@ -1642,7 +1642,7 @@ public class LocationManager {
         }
         if (!intent.isTargetedToPackage()) {
             IllegalArgumentException e = new IllegalArgumentException(
-                    "pending intent msut be targeted to package");
+                    "pending intent must be targeted to package");
             if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN) {
                 throw e;
             } else {
