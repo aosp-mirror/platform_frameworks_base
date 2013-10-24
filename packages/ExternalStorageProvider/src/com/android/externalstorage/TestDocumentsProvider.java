@@ -127,7 +127,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
         final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
         final RowBuilder row = result.newRow();
         row.add(Root.COLUMN_ROOT_ID, MY_ROOT_ID);
-        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_RECENTS);
+        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_RECENTS | Root.FLAG_SUPPORTS_CREATE);
         row.add(Root.COLUMN_TITLE, "_Test title which is really long");
         row.add(Root.COLUMN_SUMMARY,
                 SystemClock.elapsedRealtime() + " summary which is also super long text");
@@ -145,6 +145,14 @@ public class TestDocumentsProvider extends DocumentsProvider {
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         includeFile(result, documentId, 0);
         return result;
+    }
+
+    @Override
+    public String createDocument(String parentDocumentId, String mimeType, String displayName)
+            throws FileNotFoundException {
+        if (LAG) lagUntilCanceled(null);
+
+        return super.createDocument(parentDocumentId, mimeType, displayName);
     }
 
     /**
@@ -386,6 +394,7 @@ public class TestDocumentsProvider extends DocumentsProvider {
 
         if (MY_DOC_ID.equals(docId)) {
             row.add(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
+            row.add(Document.COLUMN_FLAGS, Document.FLAG_DIR_SUPPORTS_CREATE);
         } else if (MY_DOC_NULL.equals(docId)) {
             // No MIME type
         } else {
