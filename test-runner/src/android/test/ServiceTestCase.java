@@ -263,6 +263,7 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
         }
         if (mServiceCreated) {
             mService.onDestroy();
+            mServiceCreated = false;
         }
     }
 
