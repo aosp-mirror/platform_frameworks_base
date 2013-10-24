@@ -20,6 +20,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.speech.tts.ITextToSpeechCallback;
+import android.speech.tts.VoiceInfo;
+import android.speech.tts.SynthesisRequestV2;
 
 /**
  * Interface for TextToSpeech to talk to TextToSpeechService.
@@ -70,9 +72,10 @@ interface ITextToSpeechService {
      *        TextToSpeech object.
      * @param duration Number of milliseconds of silence to play.
      * @param queueMode Determines what to do to requests already in the queue.
-     * @param param Request parameters.
+     * @param utteranceId Unique id used to identify this request in callbacks.
      */
-    int playSilence(in IBinder callingInstance, in long duration, in int queueMode, in Bundle params);
+    int playSilence(in IBinder callingInstance, in long duration, in int queueMode,
+        in String utteranceId);
 
     /**
      * Checks whether the service is currently playing some audio.
@@ -90,7 +93,6 @@ interface ITextToSpeechService {
 
     /**
      * Returns the language, country and variant currently being used by the TTS engine.
-     *
      * Can be called from multiple threads.
      *
      * @return A 3-element array, containing language (ISO 3-letter code),
@@ -99,7 +101,7 @@ interface ITextToSpeechService {
      *         be empty too.
      */
     String[] getLanguage();
-    
+
     /**
      * Returns a default TTS language, country and variant as set by the user.
      *
@@ -111,7 +113,7 @@ interface ITextToSpeechService {
      *         be empty too.
      */
     String[] getClientDefaultLanguage();
-    
+
     /**
      * Checks whether the engine supports a given language.
      *
@@ -137,7 +139,7 @@ interface ITextToSpeechService {
      * @param country ISO-3 country code. May be empty or null.
      * @param variant Language variant. May be empty or null.
      * @return An array of strings containing the set of features supported for
-     *         the supplied locale. The array of strings must not contain 
+     *         the supplied locale. The array of strings must not contain
      *         duplicates.
      */
     String[] getFeaturesForLanguage(in String lang, in String country, in String variant);
@@ -169,4 +171,44 @@ interface ITextToSpeechService {
      */
     void setCallback(in IBinder caller, ITextToSpeechCallback cb);
 
+    /**
+     * Tells the engine to synthesize some speech and play it back.
+     *
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
+     * @param text The text to synthesize.
+     * @param queueMode Determines what to do to requests already in the queue.
+     * @param request Request parameters.
+     */
+    int speakV2(in IBinder callingInstance, in SynthesisRequestV2 request);
+
+    /**
+     * Tells the engine to synthesize some speech and write it to a file.
+     *
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
+     * @param text The text to synthesize.
+     * @param fileDescriptor The file descriptor to write the synthesized audio to. Has to be
+              writable.
+     * @param request Request parameters.
+     */
+    int synthesizeToFileDescriptorV2(in IBinder callingInstance,
+        in ParcelFileDescriptor fileDescriptor, in SynthesisRequestV2 request);
+
+    /**
+     * Plays an existing audio resource. V2 version
+     *
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
+     * @param audioUri URI for the audio resource (a file or android.resource URI)
+     * @param utteranceId Unique identifier.
+     * @param audioParameters Parameters for audio playback (from {@link SynthesisRequestV2}).
+     */
+    int playAudioV2(in IBinder callingInstance, in Uri audioUri, in String utteranceId,
+        in Bundle audioParameters);
+
+    /**
+     * Request the list of available voices from the service.
+     */
+    List<VoiceInfo> getVoicesInfo();
 }

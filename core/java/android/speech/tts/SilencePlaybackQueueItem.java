@@ -17,7 +17,6 @@ package android.speech.tts;
 
 import android.os.ConditionVariable;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
-import android.util.Log;
 
 class SilencePlaybackQueueItem extends PlaybackQueueItem {
     private final ConditionVariable mCondVar = new ConditionVariable();
@@ -32,14 +31,20 @@ class SilencePlaybackQueueItem extends PlaybackQueueItem {
     @Override
     public void run() {
         getDispatcher().dispatchOnStart();
+        boolean wasStopped = false;
         if (mSilenceDurationMs > 0) {
-            mCondVar.block(mSilenceDurationMs);
+          wasStopped = mCondVar.block(mSilenceDurationMs);
         }
-        getDispatcher().dispatchOnDone();
+        if (wasStopped) {
+            getDispatcher().dispatchOnStop();
+        } else {
+            getDispatcher().dispatchOnSuccess();
+        }
+
     }
 
     @Override
-    void stop(boolean isError) {
+    void stop(int errorCode) {
         mCondVar.open();
     }
 }
