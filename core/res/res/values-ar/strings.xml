@@ -43,7 +43,7 @@
     <string name="serviceErased" msgid="1288584695297200972">"لم يتم المسح بنجاح."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"كلمة مرور غير صحيحة."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"اكتمل MMI."</string>
-    <string name="badPin" msgid="9015277645546710014">"رقم التعريف الشخصي القديم الذي كتبته غير صحيح."</string>
+    <string name="badPin" msgid="9015277645546710014">"رمز PIN القديم الذي كتبته غير صحيح."</string>
     <string name="badPuk" msgid="5487257647081132201">"رمز PUK الذي كتبته غير صحيح."</string>
     <string name="mismatchPin" msgid="609379054496863419">"أرقام التعريف الشخصية التي كتبتها غير مطابقة."</string>
     <string name="invalidPin" msgid="3850018445187475377">"اكتب رقم تعريف شخصيًا مكونًا من 4 إلى ثمانية أعداد."</string>
@@ -54,11 +54,11 @@
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"معرف المتصل الوارد"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"معرف المتصل الصادر"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"إعادة توجيه الاتصال"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"اعادة توجيه المكالمة"</string>
     <string name="CwMmi" msgid="9129678056795016867">"انتظار المكالمة"</string>
     <string name="BaMmi" msgid="455193067926770581">"حظر الاتصال"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"تغيير كلمة المرور"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"تغيير رقم التعريف الشخصي"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"تغيير رمز PIN"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"رقم الاتصال موجود"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"رقم الاتصال مقيّد"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"اتصال ثلاثي"</string>
@@ -259,7 +259,7 @@
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"تلقي بث الطوارئ"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"للسماح للتطبيق بتلقي رسائل بث الطوارئ ومعالجتها. لا يتوفر هذا الإذن سوى لتطبيقات النظام."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"قراءة رسائل بث الخلية"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم تنبيهات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم اشعارات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. وقد يؤدي هذا إلى تحمل رسوم غير متوقعة. وقد تكلفك التطبيقات الضارة أموالاً من خلال إرسال رسائل بدون موافقة منك."</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"إرسال أحداث يتم الرد عليها عبر رسالة"</string>
@@ -809,14 +809,14 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"المنزل"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"العمل"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"غير ذلك"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"اكتب رمز رقم التعريف الشخصي"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"اكتب رمز PUK ورمز رقم التعريف الشخصي الجديد"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"اكتب رمز رمز PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"اكتب رمز PUK ورمز رمز PIN الجديد"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"رمز PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"رمز رقم التعريف الشخصي الجديد"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"رمز رمز PIN الجديد"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"المس لكتابة كلمة المرور"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"اكتب كلمة المرور لإلغاء التأمين"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"اكتب رقم التعريف الشخصي لإلغاء التأمين"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"رقم التعريف الشخصي غير صحيح."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"اكتب رمز PIN لإلغاء التأمين"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"رمز PIN غير صحيح."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"لإلغاء التأمين، اضغط على \"القائمة\" ثم على 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"رقم الطوارئ"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"لا تتوفر خدمة"</string>
@@ -854,7 +854,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"جارٍ إلغاء تأمين بطاقة SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة.\n\nالرجاء إعادة المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"لقد كتبت كلمة المرور <xliff:g id="NUMBER_0">%d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"لقد كتبت رقم التعريف الشخصي <xliff:g id="NUMBER_0">%d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"لقد كتبت رمز PIN <xliff:g id="NUMBER_0">%d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
@@ -896,7 +896,7 @@
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"إلغاء القفل باستخدام التمرير."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"إلغاء القفل باستخدام النقش."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"تأمين الجهاز بالوجه."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"إلغاء القفل باستخدام رقم التعريف الشخصي."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"إلغاء القفل باستخدام رمز PIN."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"إلغاء القفل باستخدام كلمة المرور."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"منطقة النقش."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"منطقة التمرير."</string>
@@ -1198,8 +1198,8 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"دعوة للاتصال"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"من:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"إلى:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"اكتب رقم التعريف الشخصي المطلوب:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"رقم التعريف الشخصي:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"اكتب رمز PIN المطلوب:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"رمز PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"سيتم قطع اتصال الجهاز اللوحي مؤقتًا بشبكة Wi-Fi في الوقت الذي يكون فيه متصلاً بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"سيتم قطع اتصال الهاتف مؤقتًا بشبكة Wi-Fi في الوقت الذي يكون فيه متصلاً بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
@@ -1505,18 +1505,18 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"رقم تعريف شخصي خاطئ"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%1$d</xliff:g> ثانية."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ارسم نقشك"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"أدخل رقم التعريف الشخصي لبطاقة SIM"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"أدخل رقم التعريف الشخصي"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"أدخل رمز PIN لبطاقة SIM"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"أدخل رمز PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"أدخل كلمة المرور"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"بطاقة SIM معطلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوال للاطلاع على التفاصيل."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"إدخال رمز رقم التعريف الشخصي المراد"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"تأكيد رمز رقم التعريف الشخصي المراد"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"إدخال رمز رمز PIN المراد"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"تأكيد رمز رمز PIN المراد"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"جارٍ إلغاء تأمين بطاقة SIM…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"رقم التعريف الشخصي غير صحيح."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"اكتب رقم التعريف الشخصي المكون من 4 إلى 8 أرقام."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"رمز PIN غير صحيح."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"اكتب رمز PIN المكون من 4 إلى 8 أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"يجب أن يتضمن رمز PUK‏ 8 أرقام أو أكثر."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى تعطيل بطاقة SIM نهائيًا."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"لا يتطابق رمزا رقم التعريف الشخصي"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"لا يتطابق رمزا رمز PIN"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"محاولات النقش كثيرة جدًا"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"لإلغاء التأمين، سجّل الدخول بحسابك في Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"اسم المستخدم (البريد إلكتروني)"</string>
@@ -1525,7 +1525,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"اسم مستخدم غير صحيح أو كلمة مرور غير صالحة."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"هل نسيت اسم المستخدم أو كلمة المرور؟\nانتقل إلى "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"جارٍ فحص الحساب…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"لقد كتبت رقم التعريف الشخصي بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
@@ -1635,15 +1635,15 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"خدمة الطباعة ليست ممكّنة"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"تم تثبيت خدمة <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"انقر للتمكين."</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"أدخل رقم التعريف الشخصي للمشرف"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"إدخال رقم التعريف الشخصي"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"أدخل رمز PIN للمشرف"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"إدخال رمز PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"غير صحيح"</string>
-    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"رقم التعريف الشخصي الحالي"</string>
-    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"رقم التعريف الشخصي الجديد"</string>
-    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"تأكيد رقم التعريف الشخصي الجديد"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"رمز PIN الحالي"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"رمز PIN الجديد"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"تأكيد رمز PIN الجديد"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"إنشاء رقم تعريف شخصي لتعديل القيود"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"أرقام التعريف الشخصية لا تتطابق، أعد المحاولة."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"رقم التعريف الشخصي أقصر مما يلزم، يجب ألا يقل عن 4 أرقام. "</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"رمز PIN أقصر مما يلزم، يجب ألا يقل عن 4 أرقام. "</string>
   <plurals name="restr_pin_countdown">
     <item quantity="one" msgid="311050995198548675">"أعد المحاولة خلال ثانية واحدة."</item>
     <item quantity="other" msgid="4730868920742952817">"أعد المحاولة خلال <xliff:g id="COUNT">%d</xliff:g> ثانية"</item>

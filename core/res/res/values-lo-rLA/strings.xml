@@ -1114,7 +1114,7 @@
     <string name="loading" msgid="7933681260296021180">"ກຳລັງໂຫລດ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ເປີດ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ປິດ"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"ເຮັດວຽກໃຫ້ສຳເລັດໂດຍໃຊ້"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"ດຳເນີນການໂດຍໃຊ້"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"ເລືອກແອັບຯ Home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ລຶບລ້າງຄ່າເລີ່ມຕົ້ນ ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ."</string>
