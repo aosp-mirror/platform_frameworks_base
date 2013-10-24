@@ -2070,8 +2070,10 @@ final class Settings {
                 if (intent.getAction() != null) {
                     filter.addAction(intent.getAction());
                 }
-                for (String cat : intent.getCategories()) {
-                    filter.addCategory(cat);
+                if (intent.getCategories() != null) {
+                    for (String cat : intent.getCategories()) {
+                        filter.addCategory(cat);
+                    }
                 }
                 if ((flags&PackageManager.MATCH_DEFAULT_ONLY) != 0) {
                     filter.addCategory(Intent.CATEGORY_DEFAULT);
@@ -2087,6 +2089,13 @@ final class Settings {
                 }
                 if (path != null) {
                     filter.addDataPath(path);
+                }
+                if (intent.getType() != null) {
+                    try {
+                        filter.addDataType(intent.getType());
+                    } catch (IntentFilter.MalformedMimeTypeException ex) {
+                        Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
+                    }
                 }
                 PreferredActivity pa = new PreferredActivity(filter, match, set, cn, true);
                 editPreferredActivitiesLPw(userId).addFilter(pa);
