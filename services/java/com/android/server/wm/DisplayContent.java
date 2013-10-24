@@ -107,7 +107,7 @@ class DisplayContent {
     Region mTouchExcludeRegion = new Region();
 
     /** Save allocating when retrieving tasks */
-    ArrayList<Task> mTmpTasks = new ArrayList<Task>();
+    ArrayList<Task> mTaskHistory = new ArrayList<Task>();
 
     /** Save allocating when calculating rects */
     Rect mTmpRect = new Rect();
@@ -163,7 +163,7 @@ class DisplayContent {
     void moveStack(TaskStack stack, boolean toTop) {
         mStackHistory.remove(stack);
         mStackHistory.add(toTop ? mStackHistory.size() : 0, stack);
-        mService.moveStackWindowsLocked(stack);
+        mService.moveStackWindowsLocked(this);
     }
 
     public boolean isPrivate() {
@@ -175,14 +175,35 @@ class DisplayContent {
      * @return All the Tasks, in order, on this display.
      */
     ArrayList<Task> getTasks() {
-        mTmpTasks.clear();
-        final int numStacks = mStackHistory.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            mTmpTasks.addAll(mStackHistory.get(stackNdx).getTasks());
+        return mTaskHistory;
+    }
+
+    void addTask(Task task, boolean toTop) {
+        mTaskHistory.remove(task);
+
+        final int userId = task.mUserId;
+        int taskNdx;
+        final int numTasks = mTaskHistory.size();
+        if (toTop) {
+            for (taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+                if (mTaskHistory.get(taskNdx).mUserId == userId) {
+                    break;
+                }
+            }
+            ++taskNdx;
+        } else {
+            for (taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+                if (mTaskHistory.get(taskNdx).mUserId == userId) {
+                    break;
+                }
+            }
         }
-        if (WindowManagerService.DEBUG_LAYERS) Slog.i(TAG, "getTasks: mStackHistory=" +
-                mStackHistory);
-        return mTmpTasks;
+
+        mTaskHistory.add(taskNdx, task);
+    }
+
+    void removeTask(Task task) {
+        mTaskHistory.remove(task);
     }
 
     TaskStack getHomeStack() {
@@ -205,10 +226,9 @@ class DisplayContent {
 
     /** @return The number of tokens in all of the Tasks on this display. */
     int numTokens() {
-        getTasks();
         int count = 0;
-        for (int taskNdx = mTmpTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            count += mTmpTasks.get(taskNdx).mAppTokens.size();
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            count += mTaskHistory.get(taskNdx).mAppTokens.size();
         }
         return count;
     }
@@ -469,8 +489,8 @@ class DisplayContent {
             pw.println();
             pw.println("  Application tokens in Z order:");
             getTasks();
-            for (int taskNdx = mTmpTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                AppTokenList tokens = mTmpTasks.get(taskNdx).mAppTokens;
+            for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+                AppTokenList tokens = mTaskHistory.get(taskNdx).mAppTokens;
                 for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
                     pw.print("  App #"); pw.print(ndx--);

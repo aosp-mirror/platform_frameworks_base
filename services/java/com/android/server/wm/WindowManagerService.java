@@ -4733,11 +4733,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return index;
     }
 
-    void moveStackWindowsLocked(TaskStack stack) {
-        DisplayContent displayContent = stack.getDisplayContent();
-
+    void moveStackWindowsLocked(DisplayContent displayContent) {
         // First remove all of the windows from the list.
-        final ArrayList<Task> tasks = stack.getTasks();
+        final ArrayList<Task> tasks = displayContent.getTasks();
         final int numTasks = tasks.size();
         for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
             AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
@@ -4813,7 +4811,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final TaskStack stack = task.mStack;
                 stack.moveTaskToBottom(task);
-                moveStackWindowsLocked(stack);
+                moveStackWindowsLocked(stack.getDisplayContent());
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
