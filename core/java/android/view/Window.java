@@ -91,12 +91,21 @@ public abstract class Window {
      * If overlay is enabled, the action mode UI will be allowed to cover existing window content.
      */
     public static final int FEATURE_ACTION_MODE_OVERLAY = 10;
+    /**
+     * Flag for requesting that window content changes should be represented
+     * with scenes and transitions.
+     *
+     * TODO Add docs
+     *
+     * @see #setContentView
+     */
+    public static final int FEATURE_CONTENT_TRANSITIONS = 11;
 
     /**
      * Max value used as a feature ID
      * @hide
      */
-    public static final int FEATURE_MAX = FEATURE_ACTION_MODE_OVERLAY;
+    public static final int FEATURE_MAX = FEATURE_CONTENT_TRANSITIONS;
 
     /** Flag for setting the progress bar's visibility to VISIBLE */
     public static final int PROGRESS_VISIBILITY_ON = -1;

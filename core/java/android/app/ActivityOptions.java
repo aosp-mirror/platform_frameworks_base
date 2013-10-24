@@ -90,6 +90,35 @@ public class ActivityOptions {
      */
     public static final String KEY_ANIM_START_LISTENER = "android:animStartListener";
 
+    /**
+     * A string array of names for the destination scene. This defines an API in the same
+     * way that intent action or extra names do and should follow a similar convention:
+     * "com.example.scene.FOO"
+     *
+     * @hide
+     */
+    public static final String KEY_DEST_SCENE_NAMES = "android:destSceneNames";
+
+    /**
+     * A string indicating the destination scene name that was chosen by the target.
+     * Used by {@link OnSceneTransitionStartedListener}.
+     * @hide
+     */
+    public static final String KEY_DEST_SCENE_NAME_CHOSEN = "android:destSceneNameChosen";
+
+    /**
+     * Callback for when scene transition is started.
+     * @hide
+     */
+    public static final String KEY_SCENE_TRANSITION_START_LISTENER =
+            "android:sceneTransitionStartListener";
+
+    /**
+     * Arguments for the scene transition about to begin.
+     * @hide
+     */
+    public static final String KEY_SCENE_TRANSITION_ARGS = "android:sceneTransitionArgs";
+
     /** @hide */
     public static final int ANIM_NONE = 0;
     /** @hide */
@@ -100,6 +129,8 @@ public class ActivityOptions {
     public static final int ANIM_THUMBNAIL_SCALE_UP = 3;
     /** @hide */
     public static final int ANIM_THUMBNAIL_SCALE_DOWN = 4;
+    /** @hide */
+    public static final int ANIM_SCENE_TRANSITION = 5;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -110,7 +141,10 @@ public class ActivityOptions {
     private int mStartY;
     private int mStartWidth;
     private int mStartHeight;
+    private String[] mDestSceneNames;
+    private Bundle mTransitionArgs;
     private IRemoteCallback mAnimationStartedListener;
+    private IRemoteCallback mSceneTransitionStartedListener;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -156,11 +190,12 @@ public class ActivityOptions {
         opts.mAnimationType = ANIM_CUSTOM;
         opts.mCustomEnterResId = enterResId;
         opts.mCustomExitResId = exitResId;
-        opts.setListener(handler, listener);
+        opts.setOnAnimationStartedListener(handler, listener);
         return opts;
     }
 
-    private void setListener(Handler handler, OnAnimationStartedListener listener) {
+    private void setOnAnimationStartedListener(Handler handler,
+            OnAnimationStartedListener listener) {
         if (listener != null) {
             final Handler h = handler;
             final OnAnimationStartedListener finalListener = listener;
@@ -176,6 +211,24 @@ public class ActivityOptions {
         }
     }
 
+    private void setOnSceneTransitionStartedListener(Handler handler,
+            OnSceneTransitionStartedListener listener) {
+        if (listener != null) {
+            final Handler h = handler;
+            final OnSceneTransitionStartedListener l = listener;
+            mSceneTransitionStartedListener = new IRemoteCallback.Stub() {
+                @Override public void sendResult(final Bundle data) throws RemoteException {
+                    h.post(new Runnable() {
+                        public void run() {
+                            l.onSceneTransitionStarted(data != null ?
+                                    data.getString(KEY_DEST_SCENE_NAME_CHOSEN) : null);
+                        }
+                    });
+                }
+            };
+        }
+    }
+
     /**
      * Callback for use with {@link ActivityOptions#makeThumbnailScaleUpAnimation}
      * to find out when the given animation has started running.
@@ -183,6 +236,15 @@ public class ActivityOptions {
      */
     public interface OnAnimationStartedListener {
         void onAnimationStarted();
+    }
+
+    /**
+     * Callback for use with {@link ActivityOptions#makeSceneTransitionAnimation}
+     * to find out when a transition is about to begin.
+     * @hide
+     */
+    public interface OnSceneTransitionStartedListener {
+        void onSceneTransitionStarted(String destSceneName);
     }
 
     /**
@@ -298,7 +360,23 @@ public class ActivityOptions {
         source.getLocationOnScreen(pts);
         opts.mStartX = pts[0] + startX;
         opts.mStartY = pts[1] + startY;
-        opts.setListener(source.getHandler(), listener);
+        opts.setOnAnimationStartedListener(source.getHandler(), listener);
+        return opts;
+    }
+
+    /**
+     * Create an ActivityOptions specifying an animation where an activity window is asked
+     * to perform animations within the window content.
+     *
+     * @hide
+     */
+    public static ActivityOptions makeSceneTransitionAnimation(String[] destSceneNames,
+            Bundle args, OnSceneTransitionStartedListener listener, Handler handler) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mAnimationType = ANIM_SCENE_TRANSITION;
+        opts.mDestSceneNames = destSceneNames;
+        opts.mTransitionArgs = args;
+        opts.setOnSceneTransitionStartedListener(handler, listener);
         return opts;
     }
 
@@ -309,23 +387,36 @@ public class ActivityOptions {
     public ActivityOptions(Bundle opts) {
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         mAnimationType = opts.getInt(KEY_ANIM_TYPE);
-        if (mAnimationType == ANIM_CUSTOM) {
-            mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
-            mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
-            mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
-                    opts.getIBinder(KEY_ANIM_START_LISTENER));
-        } else if (mAnimationType == ANIM_SCALE_UP) {
-            mStartX = opts.getInt(KEY_ANIM_START_X, 0);
-            mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
-            mStartWidth = opts.getInt(KEY_ANIM_START_WIDTH, 0);
-            mStartHeight = opts.getInt(KEY_ANIM_START_HEIGHT, 0);
-        } else if (mAnimationType == ANIM_THUMBNAIL_SCALE_UP ||
-                mAnimationType == ANIM_THUMBNAIL_SCALE_DOWN) {
-            mThumbnail = (Bitmap)opts.getParcelable(KEY_ANIM_THUMBNAIL);
-            mStartX = opts.getInt(KEY_ANIM_START_X, 0);
-            mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
-            mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
-                    opts.getIBinder(KEY_ANIM_START_LISTENER));
+        switch (mAnimationType) {
+            case ANIM_CUSTOM:
+                mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
+                mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
+                mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
+                        opts.getBinder(KEY_ANIM_START_LISTENER));
+                break;
+
+            case ANIM_SCALE_UP:
+                mStartX = opts.getInt(KEY_ANIM_START_X, 0);
+                mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
+                mStartWidth = opts.getInt(KEY_ANIM_START_WIDTH, 0);
+                mStartHeight = opts.getInt(KEY_ANIM_START_HEIGHT, 0);
+                break;
+
+            case ANIM_THUMBNAIL_SCALE_UP:
+            case ANIM_THUMBNAIL_SCALE_DOWN:
+                mThumbnail = (Bitmap)opts.getParcelable(KEY_ANIM_THUMBNAIL);
+                mStartX = opts.getInt(KEY_ANIM_START_X, 0);
+                mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
+                mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
+                        opts.getBinder(KEY_ANIM_START_LISTENER));
+                break;
+
+            case ANIM_SCENE_TRANSITION:
+                mDestSceneNames = opts.getStringArray(KEY_DEST_SCENE_NAMES);
+                mTransitionArgs = opts.getBundle(KEY_SCENE_TRANSITION_ARGS);
+                mSceneTransitionStartedListener = IRemoteCallback.Stub.asInterface(
+                        opts.getBinder(KEY_SCENE_TRANSITION_START_LISTENER));
+                break;
         }
     }
 
@@ -375,8 +466,23 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public String[] getDestSceneNames() {
+        return mDestSceneNames;
+    }
+
+    /** @hide */
+    public Bundle getSceneTransitionArgs() {
+        return mTransitionArgs;
+    }
+
+    /** @hide */
     public IRemoteCallback getOnAnimationStartListener() {
         return mAnimationStartedListener;
+    }
+
+    /** @hide */
+    public IRemoteCallback getOnSceneTransitionStartedListener() {
+        return mSceneTransitionStartedListener;
     }
 
     /** @hide */
@@ -411,13 +517,16 @@ public class ActivityOptions {
                 mCustomEnterResId = otherOptions.mCustomEnterResId;
                 mCustomExitResId = otherOptions.mCustomExitResId;
                 mThumbnail = null;
-                if (otherOptions.mAnimationStartedListener != null) {
+                if (mAnimationStartedListener != null) {
                     try {
-                        otherOptions.mAnimationStartedListener.sendResult(null);
+                        mAnimationStartedListener.sendResult(null);
                     } catch (RemoteException e) {
                     }
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
+                mSceneTransitionStartedListener = null;
+                mTransitionArgs = null;
+                mDestSceneNames = null;
                 break;
             case ANIM_SCALE_UP:
                 mAnimationType = otherOptions.mAnimationType;
@@ -425,13 +534,16 @@ public class ActivityOptions {
                 mStartY = otherOptions.mStartY;
                 mStartWidth = otherOptions.mStartWidth;
                 mStartHeight = otherOptions.mStartHeight;
-                if (otherOptions.mAnimationStartedListener != null) {
+                if (mAnimationStartedListener != null) {
                     try {
-                        otherOptions.mAnimationStartedListener.sendResult(null);
+                        mAnimationStartedListener.sendResult(null);
                     } catch (RemoteException e) {
                     }
                 }
                 mAnimationStartedListener = null;
+                mSceneTransitionStartedListener = null;
+                mTransitionArgs = null;
+                mDestSceneNames = null;
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
@@ -439,13 +551,28 @@ public class ActivityOptions {
                 mThumbnail = otherOptions.mThumbnail;
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
-                if (otherOptions.mAnimationStartedListener != null) {
+                if (mAnimationStartedListener != null) {
                     try {
-                        otherOptions.mAnimationStartedListener.sendResult(null);
+                        mAnimationStartedListener.sendResult(null);
                     } catch (RemoteException e) {
                     }
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
+                mSceneTransitionStartedListener = null;
+                mTransitionArgs = null;
+                mDestSceneNames = null;
+                break;
+            case ANIM_SCENE_TRANSITION:
+                mAnimationType = otherOptions.mAnimationType;
+                if (mSceneTransitionStartedListener != null) {
+                    try {
+                        mSceneTransitionStartedListener.sendResult(null);
+                    } catch (RemoteException e) {
+                    }
+                }
+                mSceneTransitionStartedListener = otherOptions.mSceneTransitionStartedListener;
+                mDestSceneNames = otherOptions.mDestSceneNames;
+                mAnimationStartedListener = null;
                 break;
         }
     }

@@ -2408,6 +2408,16 @@ please see styles_device_defaults.xml.
     <style name="Animation.Holo.Dialog" parent="Animation.Dialog">
     </style>
 
+    <style name="Animation.Quantum" parent="Animation.Holo">
+    </style>
+
+    <style name="Animation.Quantum.Activity" parent="Animation.Holo.Activity">
+        <item name="activityOpenEnterAnimation">@null</item>
+        <item name="activityOpenExitAnimation">@null</item>
+        <item name="activityCloseEnterAnimation">@null</item>
+        <item name="activityCloseExitAnimation">@anim/fade_out</item>
+    </style>
+
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Holo" parent="AlertDialog">

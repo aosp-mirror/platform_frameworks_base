@@ -22,6 +22,10 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
 import android.view.ViewConfiguration;
 
 import com.android.internal.R;
@@ -145,6 +149,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ActionBarView mActionBar;
     private ActionMenuPresenterCallback mActionMenuPresenterCallback;
     private PanelMenuPresenterCallback mPanelMenuPresenterCallback;
+
+    private TransitionManager mTransitionManager;
 
     // The icon resource has been explicitly set elsewhere
     // and should not be overwritten with a default.
@@ -282,12 +288,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setContentView(int layoutResID) {
+        // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+        // decor, when theme attributes and the like are crystalized. Do not check the feature
+        // before this happens.
         if (mContentParent == null) {
             installDecor();
-        } else {
+        } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
             mContentParent.removeAllViews();
         }
-        mLayoutInflater.inflate(layoutResID, mContentParent);
+
+        if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+            final Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,
+                    getContext());
+            mTransitionManager.transitionTo(newScene);
+        } else {
+            mLayoutInflater.inflate(layoutResID, mContentParent);
+        }
         final Callback cb = getCallback();
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
@@ -301,12 +317,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
+        // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+        // decor, when theme attributes and the like are crystalized. Do not check the feature
+        // before this happens.
         if (mContentParent == null) {
             installDecor();
-        } else {
+        } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
             mContentParent.removeAllViews();
         }
-        mContentParent.addView(view, params);
+
+        if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+            view.setLayoutParams(params);
+            final Scene newScene = new Scene(mContentParent, view);
+            mTransitionManager.transitionTo(newScene);
+        } else {
+            mContentParent.addView(view, params);
+        }
         final Callback cb = getCallback();
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
@@ -317,6 +343,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         if (mContentParent == null) {
             installDecor();
+        }
+        if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+            // TODO Augment the scenes/transitions API to support this.
+            throw new UnsupportedOperationException(
+                    "addContentView does not support content transitions");
         }
         mContentParent.addView(view, params);
         final Callback cb = getCallback();
@@ -2890,6 +2921,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             a.getValue(com.android.internal.R.styleable.Window_windowFixedHeightMinor,
                     mFixedHeightMinor);
         }
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowContentTransitions, false)) {
+            requestFeature(FEATURE_CONTENT_TRANSITIONS);
+        }
 
         final Context context = getContext();
         final int targetSdk = context.getApplicationInfo().targetSdkVersion;
@@ -3177,6 +3211,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             }
                         }
                     });
+                }
+            }
+
+            // Only inflate or create a new TransitionManager if the caller hasn't
+            // already set a custom one.
+            if (hasFeature(FEATURE_CONTENT_TRANSITIONS) && mTransitionManager == null) {
+                final int transitionRes = getWindowStyle().getResourceId(
+                        com.android.internal.R.styleable.Window_windowContentTransitionManager, 0);
+                if (transitionRes != 0) {
+                    final TransitionInflater inflater = TransitionInflater.from(getContext());
+                    mTransitionManager = inflater.inflateTransitionManager(transitionRes,
+                            mContentParent);
+                } else {
+                    mTransitionManager = new TransitionManager();
                 }
             }
         }
