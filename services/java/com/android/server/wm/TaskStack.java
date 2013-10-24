@@ -120,6 +120,7 @@ public class TaskStack {
         mTasks.add(stackNdx, task);
 
         task.mStack = this;
+        mDisplayContent.addTask(task, toTop);
         return mDisplayContent.moveHomeStackBox(mStackId == HOME_STACK_ID);
     }
 
@@ -145,6 +146,7 @@ public class TaskStack {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
         mStackBox.makeDirty();
         mTasks.remove(task);
+        mDisplayContent.removeTask(task);
     }
 
     int remove() {
