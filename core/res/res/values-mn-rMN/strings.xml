@@ -1649,5 +1649,5 @@
     <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> секундын дараа дахин оролдоно уу"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Дараа дахин оролдоно уу"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Бүтэн дэлгэцээс гарахын тулд дээрээс нь эхлэн доош шудрана уу."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Бүтэн дэлгэцээс гарахын тулд дээрээс нь доош шудрана уу."</string>
 </resources>
