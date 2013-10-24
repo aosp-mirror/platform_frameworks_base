@@ -617,7 +617,7 @@ public final class TextToSpeechClient {
     }
 
     /**
-     * Retrieve TTS engine status @{link VoicesStatus}. Requires connected client.
+     * Retrieve TTS engine status {@link EngineStatus}. Requires connected client.
      */
     public EngineStatus getEngineStatus() {
         synchronized (mLock) {

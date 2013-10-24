@@ -54,7 +54,7 @@ import java.util.Set;
  * When you are done using the TextToSpeech instance, call the {@link #shutdown()} method
  * to release the native resources used by the TextToSpeech engine.
  *
- * @deprecated Use @{link android.speech.tts.v2.TextToSpeechClient} instead
+ * @deprecated Use {@link TextToSpeechClient} instead
  */
 @Deprecated
 public class TextToSpeech {

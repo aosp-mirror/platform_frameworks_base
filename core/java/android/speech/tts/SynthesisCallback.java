@@ -107,7 +107,7 @@ public interface SynthesisCallback {
      * {@link TextToSpeechService#onSynthesizeTextV2}.
      *
      * @param errorCode Error code to pass to the client. One of the ERROR_ values from
-     *      @{link android.sppech.tts.v2.TextToSpeechClient.Status}
+     *      {@link TextToSpeechClient.Status}
      */
     public void error(int errorCode);
 
@@ -132,7 +132,7 @@ public interface SynthesisCallback {
     public int fallback();
 
     /**
-     * Check if @{link #start} was called or not.
+     * Check if {@link #start} was called or not.
      *
      * This method should only be called on the synthesis thread,
      * while in {@link TextToSpeechService#onSynthesizeText} or
@@ -143,7 +143,7 @@ public interface SynthesisCallback {
     public boolean hasStarted();
 
     /**
-     * Check if @{link #done} was called or not.
+     * Check if {@link #done} was called or not.
      *
      * This method should only be called on the synthesis thread,
      * while in {@link TextToSpeechService#onSynthesizeText} or
