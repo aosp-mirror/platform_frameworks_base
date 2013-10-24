@@ -661,6 +661,13 @@ public class DocumentsActivity extends Activity {
         DirectoryFragment.get(getFragmentManager()).onUserModeChanged();
     }
 
+    public void setPending(boolean pending) {
+        final SaveFragment save = SaveFragment.get(getFragmentManager());
+        if (save != null) {
+            save.setPending(pending);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (!mState.stackTouched) {
@@ -1051,6 +1058,11 @@ public class DocumentsActivity extends Activity {
         }
 
         @Override
+        protected void onPreExecute() {
+            setPending(true);
+        }
+
+        @Override
         protected Uri doInBackground(Void... params) {
             final ContentResolver resolver = getContentResolver();
             final DocumentInfo cwd = getCurrentDirectory();
@@ -1083,6 +1095,8 @@ public class DocumentsActivity extends Activity {
                 Toast.makeText(DocumentsActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
                         .show();
             }
+
+            setPending(false);
         }
     }
 
