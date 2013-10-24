@@ -7,7 +7,7 @@ import android.os.Bundle;
  * Synthesis request configuration.
  *
  * This class is immutable, and can only be constructed using
- * @link{RequestConfig.Builder}.
+ * {@link RequestConfig.Builder}.
  */
 public final class RequestConfig {
 
@@ -54,12 +54,12 @@ public final class RequestConfig {
          *
          * @param paramName
          *            The name of the parameter. It has to be one of the keys
-         *            from @{link VoiceInfo.getParamsWithDefaults()}
+         *            from {@link VoiceInfo#getParamsWithDefaults()}
          * @param value
          *            Value of the parameter. Its type can be one of: Integer, Float,
          *            Boolean, String, VoiceInfo (will be set as an Integer, result of a call to
          *            the {@link VoiceInfo#getId()}) or byte[]. It has to be of the same type
-         *            as the default value from @{link VoiceInfo.getParamsWithDefaults()}
+         *            as the default value from {@link VoiceInfo#getParamsWithDefaults()}
          *            for that parameter.
          * @throws IllegalArgumentException
          *            If paramName is not a valid parameter name or its value is of a wrong
