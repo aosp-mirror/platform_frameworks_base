@@ -8434,20 +8434,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         && !mWallpaperTarget.mWinAnimator.isDummyAnimation()
                     ? null : mWallpaperTarget;
 
-            // If there is a wallpaper target and the target is neither opening nor closing, then
-            // there exists an app on top of the wallpaper target that has a translucent
-            // background.
-            // If the pending transition is an exit, we should add the wallpaper target to the list
-            // of opening apps so that the translucent app on top of it will animate correctly.
-            final AppWindowToken wallpaperTargetAppToken =
-                    mWallpaperTarget != null ? mWallpaperTarget.mAppToken : null;
-            if (wallpaperTargetAppToken != null
-                    && !mClosingApps.contains(wallpaperTargetAppToken)
-                    && !mOpeningApps.contains(wallpaperTargetAppToken)
-                    && (transit & AppTransition.TRANSIT_EXIT_MASK) != 0) {
-                mOpeningApps.add(wallpaperTargetAppToken);
-                NN++;
-            }
             mInnerFields.mWallpaperMayChange = false;
 
             // The top-most window will supply the layout params,
@@ -8533,7 +8519,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         break;
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit: " + transit);
-            } else if ((oldWallpaper != null) && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
+            } else if ((oldWallpaper != null) && !mOpeningApps.isEmpty()
+                    && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
                 transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
@@ -8602,8 +8589,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.mAppAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 wtoken.mAppAnimator.animation = null;
-                setTokenVisibilityLocked(wtoken, animLp, false,
-                        transit, false);
+                setTokenVisibilityLocked(wtoken, animLp, false, transit, false);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToHide = false;
                 // Force the allDrawn flag, because we want to start
