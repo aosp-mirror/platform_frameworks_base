@@ -57,7 +57,7 @@ public final class Scene {
                 com.android.internal.R.id.scene_layoutid_cache);
         if (scenes == null) {
             scenes = new SparseArray<Scene>();
-            sceneRoot.setTag(com.android.internal.R.id.scene_layoutid_cache, scenes);
+            sceneRoot.setTagInternal(com.android.internal.R.id.scene_layoutid_cache, scenes);
         }
         Scene scene = scenes.get(layoutId);
         if (scene != null) {
