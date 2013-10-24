@@ -5723,7 +5723,7 @@ public class WindowManagerService extends IWindowManager.Stub
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
 
-        if (true || DEBUG_SCREENSHOT) {
+        if (DEBUG_SCREENSHOT) {
             // TEST IF IT's ALL BLACK
             int[] buffer = new int[bm.getWidth() * bm.getHeight()];
             bm.getPixels(buffer, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
