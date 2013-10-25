@@ -25635,10 +25635,8 @@ package android.transition {
     ctor public TransitionManager();
     method public static void beginDelayedTransition(android.view.ViewGroup);
     method public static void beginDelayedTransition(android.view.ViewGroup, android.transition.Transition);
-    method public static android.transition.Transition getDefaultTransition();
     method public static void go(android.transition.Scene);
     method public static void go(android.transition.Scene, android.transition.Transition);
-    method public void setDefaultTransition(android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Scene, android.transition.Transition);
     method public void transitionTo(android.transition.Scene);
