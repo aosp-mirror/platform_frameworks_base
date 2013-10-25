@@ -12367,7 +12367,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
-            checkValidCaller(callingUid, userId);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(caller, service,
                     resolvedType, callingPid, callingUid, userId);
@@ -12396,8 +12395,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-
-        checkValidCaller(Binder.getCallingUid(), userId);
 
         synchronized(this) {
             return mServices.stopServiceLocked(caller, service, resolvedType, userId);
@@ -16387,13 +16384,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             mUserManager = (UserManagerService)IUserManager.Stub.asInterface(b);
         }
         return mUserManager;
-    }
-
-    private void checkValidCaller(int uid, int userId) {
-        if (UserHandle.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0) return;
-
-        throw new SecurityException("Caller uid=" + uid
-                + " is not privileged to communicate with user=" + userId);
     }
 
     private int applyUserId(int uid, int userId) {
