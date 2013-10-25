@@ -612,6 +612,7 @@
   <java-symbol type="string" name="more_item_label" />
   <java-symbol type="string" name="needPuk" />
   <java-symbol type="string" name="needPuk2" />
+  <java-symbol type="string" name="enablePin" />
   <java-symbol type="string" name="new_app_action" />
   <java-symbol type="string" name="new_app_description" />
   <java-symbol type="string" name="noApplications" />
@@ -965,6 +966,7 @@
   <java-symbol type="plurals" name="num_minutes_ago" />
   <java-symbol type="plurals" name="num_seconds_ago" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
+  <java-symbol type="plurals" name="pinpuk_attempts" />
 
   <java-symbol type="array" name="carrier_properties" />
   <java-symbol type="array" name="config_data_usage_network_types" />
