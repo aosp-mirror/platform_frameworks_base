@@ -17,8 +17,13 @@
 package android.print;
 
 /**
- * This class represents a print job from the perspective of
- * an application.
+ * This class represents a print job from the perspective of an
+ * application. It contains behavior methods for performing operations
+ * on it as well as methods for querying its state. A snapshot of the
+ * print job state is represented by the {@link PrintJobInfo} class.
+ * The state of a print job may change over time. An application receives
+ * instances of this class when creating a print job or querying for
+ * its print jobs.
  */
 public final class PrintJob {
 
@@ -145,11 +150,12 @@ public final class PrintJob {
     /**
      * Gets whether this print job is failed. Such a print job is
      * not successfully printed due to an error. You can request
-     * a restart via {@link #restart()}.
+     * a restart via {@link #restart()} or cancel via {@link #cancel()}.
      *
      * @return Whether the print job is failed.
      *
      * @see #restart()
+     * @see #cancel()
      */
     public boolean isFailed() {
         return getInfo().getState() == PrintJobInfo.STATE_FAILED;

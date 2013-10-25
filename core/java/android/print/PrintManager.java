@@ -55,6 +55,49 @@ import java.util.Map;
  * PrintManager printManager =
  *         (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
  * </pre>
+ * 
+ * <h3>Print mechanics</h3>
+ * <p>
+ * The key idea behind printing on the platform is that the content to be printed
+ * should be laid out for the currently selected print options resulting in an
+ * optimized output and higher user satisfaction. To achieve this goal the platform
+ * declares a contract that the printing application has to follow which is defined
+ * by the {@link PrintDocumentAdapter} class. At a higher level the contract is that
+ * when the user selects some options from the print UI that may affect the way
+ * content is laid out, for example page size, the application receives a callback
+ * allowing it to layout the content to better fit these new constraints. After a
+ * layout pass the system may ask the application to render one or more pages one
+ * or more times. For example, an application may produce a single column list for
+ * smaller page sizes and a multi-column table for larger page sizes.
+ * </p>
+ * <h3>Print jobs</h3>
+ * <p>
+ * Print jobs are started by calling the {@link #print(String, PrintDocumentAdapter,
+ * PrintAttributes)} from an activity which results in bringing up the system print
+ * UI. Once the print UI is up, when the user changes a selected print option that
+ * affects the way content is laid out the system starts to interact with the
+ * application following the mechanics described the section above.
+ * </p>
+ * <p>
+ * Print jobs can be in {@link PrintJobInfo#STATE_CREATED created}, {@link
+ * PrintJobInfo#STATE_QUEUED queued}, {@link PrintJobInfo#STATE_STARTED started},
+ * {@link PrintJobInfo#STATE_BLOCKED blocked}, {@link PrintJobInfo#STATE_COMPLETED
+ * completed}, {@link PrintJobInfo#STATE_FAILED failed}, and {@link
+ * PrintJobInfo#STATE_CANCELED canceled} state. Print jobs are stored in dedicated
+ * system spooler until they are handled which is they are cancelled or completed.
+ * Active print jobs, ones that are not cancelled or completed, are considered failed
+ * if the device reboots as the new boot may be after a very long time. The user may
+ * choose to restart such print jobs. Once a print job is queued all relevant content
+ * is stored in the system spooler and its lifecycle becomes detached from this of
+ * the application that created it.
+ * </p>
+ * <p>
+ * An applications can query the print spooler for current print jobs it created
+ * but not print jobs created by other applications.
+ * </p>
+ *
+ * @see PrintJob
+ * @see PrintJobInfo
  */
 public final class PrintManager {
 
@@ -292,20 +335,54 @@ public final class PrintManager {
     /**
      * Creates a print job for printing a {@link PrintDocumentAdapter} with
      * default print attributes.
-     * 
-     * @param printJobName A name for the new print job.
+     * <p>
+     * Calling this method brings the print UI allowing the user to customize
+     * the print job and returns a {@link PrintJob} object without waiting for the
+     * user to customize or confirm the print job. The returned print job instance
+     * is in a {@link PrintJobInfo#STATE_CREATED created} state.
+     * <p>
+     * This method can be called only from an {@link Activity}. The rationale is that
+     * printing from a service will create an inconsistent user experience as the print
+     * UI would appear without any context.
+     * </p>
+     * <p>
+     * Also the passed in {@link PrintDocumentAdapter} will be considered invalid if
+     * your activity is finished. The rationale is that once the activity that
+     * initiated printing is finished, the provided adapter may be in an inconsistent
+     * state as it may depend on the UI presented by the activity.
+     * </p>
+     * <p>
+     * The default print attributes are a hint to the system how the data is to
+     * be printed. For example, a photo editor may look at the photo aspect ratio
+     * to determine the default orientation and provide a hint whether the printing
+     * should be in portrait or landscape. The system will do a best effort to
+     * selected the hinted options in the print dialog, given the current printer
+     * supports them.
+     * </p>
+     *
+     * @param printJobName A name for the new print job which is shown to the user.
      * @param documentAdapter An adapter that emits the document to print.
-     * @param attributes The default print job attributes.
+     * @param attributes The default print job attributes or <code>null</code>.
      * @return The created print job on success or null on failure.
+     * @throws IllegalStateException If not called from an {@link Activity}.
+     * @throws IllegalArgumentException If the print job name is empty or the
+     * document adapter is null.
+     *
      * @see PrintJob
      */
     public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
             PrintAttributes attributes) {
+        if (!(mContext instanceof Activity)) {
+            throw new IllegalStateException("Can print only from an activity");
+        }
         if (TextUtils.isEmpty(printJobName)) {
-            throw new IllegalArgumentException("priintJobName cannot be empty");
+            throw new IllegalArgumentException("printJobName cannot be empty");
+        }
+        if (documentAdapter == null) {
+            throw new IllegalArgumentException("documentAdapter cannot be null");
         }
         PrintDocumentAdapterDelegate delegate = new PrintDocumentAdapterDelegate(
-                mContext, documentAdapter);
+                (Activity) mContext, documentAdapter);
         try {
             Bundle result = mService.print(printJobName, delegate,
                     attributes, mContext.getPackageName(), mAppId, mUserId);
@@ -398,12 +475,9 @@ public final class PrintManager {
 
         private boolean mDestroyed;
 
-        public PrintDocumentAdapterDelegate(Context context,
+        public PrintDocumentAdapterDelegate(Activity activity,
                 PrintDocumentAdapter documentAdapter) {
-            if (!(context instanceof Activity)) {
-                throw new IllegalStateException("Can print only from an activity");
-            }
-            mActivity = (Activity) context;
+            mActivity = activity;
             mDocumentAdapter = documentAdapter;
             mHandler = new MyHandler(mActivity.getMainLooper());
             mActivity.getApplication().registerActivityLifecycleCallbacks(this);
