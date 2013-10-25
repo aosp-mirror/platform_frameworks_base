@@ -346,6 +346,7 @@ class RetainFragment extends Fragment {
         RetainFragment fragment = (RetainFragment) fm.findFragmentByTag(TAG);
         if (fragment == null) {
             fragment = new RetainFragment();
+            fm.beginTransaction().add(fragment, TAG).commit();
         }
         return fragment;
     }
