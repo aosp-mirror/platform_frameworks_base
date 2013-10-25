@@ -97,6 +97,13 @@
          the SIM card. -->
     <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
     <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
+    <!-- Displayed when user attempts to change SIM PIN1 without enabling PIN1. -->
+    <string name="enablePin">Unsuccessful, enable SIM/RUIM Lock.</string>
+    <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
+    <plurals name="pinpuk_attempts">
+        <item quantity="one">You have <xliff:g id="number">%d</xliff:g> remaining attempt before SIM is locked.</item>
+        <item quantity="other">You have <xliff:g id="number">%d</xliff:g> remaining attempts before SIM is locked.</item>
+    </plurals>
     <!-- Title for the dialog used to display the user's IMEI number [CHAR LIMIT=10] -->
     <string name="imei">IMEI</string>
 
