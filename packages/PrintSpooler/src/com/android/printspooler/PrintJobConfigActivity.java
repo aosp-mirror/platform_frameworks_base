@@ -621,7 +621,7 @@ public class PrintJobConfigActivity extends Activity {
                         .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.setType("application/pdf");
-                intent.putExtra(Intent.EXTRA_TITLE, printJob.getLabel());
+                intent.putExtra(Intent.EXTRA_TITLE, mDocument.info.getName());
                 intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, mCallingPackageName);
                 startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
             } else {
