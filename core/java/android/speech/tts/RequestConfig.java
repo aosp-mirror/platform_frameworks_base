@@ -57,8 +57,8 @@ public final class RequestConfig {
          *            from {@link VoiceInfo#getParamsWithDefaults()}
          * @param value
          *            Value of the parameter. Its type can be one of: Integer, Float,
-         *            Boolean, String, VoiceInfo (will be set as an Integer, result of a call to
-         *            the {@link VoiceInfo#getId()}) or byte[]. It has to be of the same type
+         *            Boolean, String, VoiceInfo (will be set as a String, result of a call to
+         *            the {@link VoiceInfo#getName()}) or byte[]. It has to be of the same type
          *            as the default value from {@link VoiceInfo#getParamsWithDefaults()}
          *            for that parameter.
          * @throws IllegalArgumentException
@@ -75,13 +75,13 @@ public final class RequestConfig {
             Object defaultValue = mCurrentVoiceInfo.getParamsWithDefaults().get(paramName);
             if (defaultValue == null) {
                 throw new IllegalArgumentException(
-                        "Parameter \"" + paramName + "\" is not available in set voice with id: " +
-                                mCurrentVoiceInfo.getId());
+                        "Parameter \"" + paramName + "\" is not available in set voice with " +
+                                "name: " + mCurrentVoiceInfo.getName());
             }
 
-            // If it's VoiceInfo, get its id
+            // If it's VoiceInfo, get its name
             if (value instanceof VoiceInfo) {
-                value = ((VoiceInfo)value).getId();
+                value = ((VoiceInfo)value).getName();
             }
 
             // Check type information

@@ -93,7 +93,7 @@ public final class TextToSpeechClient {
         /**
          * Maximum allowed time for a single request attempt, in milliseconds, before synthesis
          * fails (or fallback request starts, if requested using
-         * {@link #FALLBACK_VOICE_ID}).
+         * {@link #FALLBACK_VOICE_NAME}).
          */
         public static final String NETWORK_TIMEOUT_MS = "networkTimeoutMs";
 
@@ -111,13 +111,13 @@ public final class TextToSpeechClient {
         /**
          * If a voice exposes this parameter then it supports the fallback request feature.
          *
-         * If it is set to a valid id of some other voice ({@link VoiceInfo#getId()}) then
+         * If it is set to a valid name of some other voice ({@link VoiceInfo#getName()}) then
          * in case of request failure (due to network problems or missing data), fallback request
          * will be attempted. Request will be done using the voice referenced by this parameter.
          * If it is the case, the client will be informed by a callback to the {@link
          * RequestCallbacks#onSynthesisFallback(UtteranceId)}.
          */
-        public static final String FALLBACK_VOICE_ID = "fallbackVoiceId";
+        public static final String FALLBACK_VOICE_NAME = "fallbackVoiceName";
 
         /**
          * Audio parameter for specifying a linear multiplier to the speaking speed of the voice.
@@ -252,7 +252,7 @@ public final class TextToSpeechClient {
         /**
          * Called when requested synthesis failed and fallback synthesis is about to be attempted.
          *
-         * Requires voice with available {@link TextToSpeechClient.Params#FALLBACK_VOICE_ID}
+         * Requires voice with available {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME}
          * parameter, and request with this parameter enabled.
          *
          * This callback will be followed by callback to the {@link #onSynthesisStart},
@@ -260,7 +260,7 @@ public final class TextToSpeechClient {
          * fallback outcome.
          *
          * For more fallback feature reference, look at the
-         * {@link TextToSpeechClient.Params#FALLBACK_VOICE_ID}.
+         * {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME}.
          *
          * @param utteranceId
          *            Unique identifier of synthesized utterance.

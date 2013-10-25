@@ -115,7 +115,7 @@ public abstract class TextToSpeechService extends Service {
     private final Object mVoicesInfoLock = new Object();
 
     private List<VoiceInfo> mVoicesInfoList;
-    private Map<Integer, VoiceInfo> mVoicesInfoLookup;
+    private Map<String, VoiceInfo> mVoicesInfoLookup;
 
     @Override
     public void onCreate() {
@@ -236,8 +236,8 @@ public abstract class TextToSpeechService extends Service {
             SynthesisCallback callback);
 
     /**
-     * Check the available voices data and return immutable list of available voices.
-     * Output of this method will be passed to clients to allow them to configure synthesis
+     * Check the available voices data and return an immutable list of the available voices.
+     * The output of this method will be passed to clients to allow them to configure synthesis
      * requests.
      *
      * Can be called on multiple threads.
@@ -291,14 +291,14 @@ public abstract class TextToSpeechService extends Service {
 
             if (features == null || features.contains(
                     TextToSpeech.Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS)) {
-                builder.setId(id++);
+                builder.setName(locale.toString() + "-embedded");
                 builder.setRequiresNetworkConnection(false);
                 voicesInfo.add(builder.build());
             }
 
             if (features != null && features.contains(
                     TextToSpeech.Engine.KEY_FEATURE_NETWORK_SYNTHESIS)) {
-                builder.setId(id++);
+                builder.setName(locale.toString() + "-network");
                 builder.setRequiresNetworkConnection(true);
                 voicesInfo.add(builder.build());
             }
@@ -391,11 +391,12 @@ public abstract class TextToSpeechService extends Service {
                 // Get voices. Defensive copy to make sure TTS engine won't alter the list.
                 mVoicesInfoList = new ArrayList<VoiceInfo>(checkVoicesInfo());
                 // Build lookup map
-                mVoicesInfoLookup = new HashMap<Integer, VoiceInfo>((int) (mVoicesInfoList.size()*1.5f));
+                mVoicesInfoLookup = new HashMap<String, VoiceInfo>((int) (
+                        mVoicesInfoList.size()*1.5f));
                 for (VoiceInfo voiceInfo : mVoicesInfoList) {
-                    VoiceInfo prev = mVoicesInfoLookup.put(voiceInfo.getId(), voiceInfo);
+                    VoiceInfo prev = mVoicesInfoLookup.put(voiceInfo.getName(), voiceInfo);
                     if (prev != null) {
-                        Log.e(TAG, "Duplicate ID (" + voiceInfo.getId() + ") of the voice ");
+                        Log.e(TAG, "Duplicate name (" + voiceInfo.getName() + ") of the voice ");
                     }
                 }
             }
@@ -403,10 +404,10 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    public VoiceInfo getVoicesInfoWithId(int id) {
+    public VoiceInfo getVoicesInfoWithName(String name) {
         synchronized (mVoicesInfoLock) {
             if (mVoicesInfoLookup != null) {
-                return mVoicesInfoLookup.get(id);
+                return mVoicesInfoLookup.get(name);
             }
         }
         return null;
@@ -885,13 +886,13 @@ public abstract class TextToSpeechService extends Service {
             }
 
             // Get voice info
-            VoiceInfo voiceInfo = getVoicesInfoWithId(mSynthesisRequest.getVoiceId());
+            VoiceInfo voiceInfo = getVoicesInfoWithName(mSynthesisRequest.getVoiceName());
             if (voiceInfo != null) {
                 // Primary voice
                 TextToSpeechService.this.onSynthesizeTextV2(mSynthesisRequest, voiceInfo,
                         synthesisCallback);
             } else {
-                Log.e(TAG, "Unknown voice id:" + mSynthesisRequest.getVoiceId());
+                Log.e(TAG, "Unknown voice name:" + mSynthesisRequest.getVoiceName());
                 synthesisCallback.error(TextToSpeechClient.Status.ERROR_INVALID_REQUEST);
             }
 
