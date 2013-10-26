@@ -255,7 +255,9 @@ public class DocumentsActivity extends Activity {
         }
 
         mState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-        mState.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(this);
+        mState.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+        mState.showAdvanced = mState.forceAdvanced
+                | SettingsActivity.getDisplayAdvancedDevices(this);
     }
 
     private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
@@ -1136,6 +1138,7 @@ public class DocumentsActivity extends Activity {
         public boolean allowMultiple = false;
         public boolean showSize = false;
         public boolean localOnly = false;
+        public boolean forceAdvanced = false;
         public boolean showAdvanced = false;
         public boolean stackTouched = false;
         public boolean restored = false;
@@ -1176,6 +1179,7 @@ public class DocumentsActivity extends Activity {
             out.writeInt(allowMultiple ? 1 : 0);
             out.writeInt(showSize ? 1 : 0);
             out.writeInt(localOnly ? 1 : 0);
+            out.writeInt(forceAdvanced ? 1 : 0);
             out.writeInt(showAdvanced ? 1 : 0);
             out.writeInt(stackTouched ? 1 : 0);
             out.writeInt(restored ? 1 : 0);
@@ -1195,6 +1199,7 @@ public class DocumentsActivity extends Activity {
                 state.allowMultiple = in.readInt() != 0;
                 state.showSize = in.readInt() != 0;
                 state.localOnly = in.readInt() != 0;
+                state.forceAdvanced = in.readInt() != 0;
                 state.showAdvanced = in.readInt() != 0;
                 state.stackTouched = in.readInt() != 0;
                 state.restored = in.readInt() != 0;
