@@ -265,6 +265,12 @@ public:
     ANDROID_API void getMatrix(SkMatrix* matrix);
     virtual void setMatrix(SkMatrix* matrix);
     virtual void concatMatrix(SkMatrix* matrix);
+    virtual void concatMatrix(Matrix4& matrix) {
+        currentTransform().multiply(matrix);
+    }
+    void translateZ(float z) {
+        currentTransform().translate(0,0,z);
+    }
 
     ANDROID_API const Rect& getClipBounds();
 
@@ -314,6 +320,9 @@ public:
             const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
     virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
+
+    status_t drawShadow(const mat4& casterTransform, float casterAlpha,
+            float width, float height);
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
@@ -1070,8 +1079,8 @@ private:
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
-    // Matrix used for ortho projection in shaders
-    mat4 mOrthoMatrix;
+    // Matrix used for view/projection in shaders
+    mat4 mViewProjMatrix;
 
     /**
      * Model-view matrix used to position/size objects

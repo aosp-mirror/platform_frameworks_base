@@ -26,6 +26,7 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
+#include <utils/KeyedVector.h>
 #include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
@@ -37,6 +38,8 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "Debug.h"
+#include "Matrix.h"
+#include "DeferredDisplayList.h"
 
 #define TRANSLATION 0x0001
 #define ROTATION    0x0002
@@ -65,36 +68,70 @@ class ClipRectOp;
 class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
+class DrawDisplayListOp;
 
-struct DeferStateStruct {
-    DeferStateStruct(DeferredDisplayList& deferredList, OpenGLRenderer& renderer, int replayFlags)
-            : mDeferredList(deferredList), mRenderer(renderer), mReplayFlags(replayFlags) {}
-    DeferredDisplayList& mDeferredList;
+/**
+ * Holds data used in the playback a tree of DisplayLists.
+ */
+class PlaybackStateStruct {
+protected:
+    PlaybackStateStruct(OpenGLRenderer& renderer, int replayFlags, LinearAllocator* allocator)
+            : mRenderer(renderer), mReplayFlags(replayFlags), mAllocator(allocator){}
+
+public:
     OpenGLRenderer& mRenderer;
     const int mReplayFlags;
+
+    // Allocator with the lifetime of a single frame.
+    // replay uses an Allocator owned by the struct, while defer shares the DeferredDisplayList's Allocator
+    LinearAllocator * const mAllocator;
 };
 
-struct ReplayStateStruct {
+class DeferStateStruct : public PlaybackStateStruct {
+public:
+    DeferStateStruct(DeferredDisplayList& deferredList, OpenGLRenderer& renderer, int replayFlags)
+            : PlaybackStateStruct(renderer, replayFlags, &(deferredList.mAllocator)), mDeferredList(deferredList) {}
+
+    DeferredDisplayList& mDeferredList;
+};
+
+class ReplayStateStruct : public PlaybackStateStruct {
+public:
     ReplayStateStruct(OpenGLRenderer& renderer, Rect& dirty, int replayFlags)
-            : mRenderer(renderer), mDirty(dirty), mReplayFlags(replayFlags),
-            mDrawGlStatus(DrawGlInfo::kStatusDone) {}
-    OpenGLRenderer& mRenderer;
+            : PlaybackStateStruct(renderer, replayFlags, &mReplayAllocator),
+            mDirty(dirty), mDrawGlStatus(DrawGlInfo::kStatusDone) {}
+
     Rect& mDirty;
-    const int mReplayFlags;
     status_t mDrawGlStatus;
+    LinearAllocator mReplayAllocator;
 };
 
 /**
- * Refcounted structure that holds data used in display list stream
+ * Refcounted structure that holds the list of commands used in display list stream.
  */
 class DisplayListData : public LightRefBase<DisplayListData> {
 public:
+    // allocator into which all ops were allocated
     LinearAllocator allocator;
+
+    // pointers to all ops within display list, pointing into allocator data
     Vector<DisplayListOp*> displayListOps;
+
+    // list of children display lists for quick, non-drawing traversal
+    Vector<DrawDisplayListOp*> children;
 };
 
 /**
- * Replays recorded drawing commands.
+ * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
+ *
+ * Recording of canvas commands is somewhat similar to SkPicture, except the canvas-recording
+ * functionality is split between DisplayListRenderer (which manages the recording), DisplayListData
+ * (which holds the actual data), and DisplayList (which holds properties and performs playback onto
+ * a renderer).
+ *
+ * Note that DisplayListData is swapped out from beneath an individual DisplayList when a view's
+ * recorded stream of canvas operations is refreshed. The DisplayList (and its properties) stay
+ * attached.
  */
 class DisplayList {
 public:
@@ -113,6 +150,7 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
+    void computeOrdering();
     void defer(DeferStateStruct& deferStruct, const int level);
     void replay(ReplayStateStruct& replayStruct, const int level);
 
@@ -188,12 +226,7 @@ public:
     void setTranslationX(float translationX) {
         if (translationX != mTranslationX) {
             mTranslationX = translationX;
-            mMatrixDirty = true;
-            if (mTranslationX == 0.0f && mTranslationY == 0.0f) {
-                mMatrixFlags &= ~TRANSLATION;
-            } else {
-                mMatrixFlags |= TRANSLATION;
-            }
+            onTranslationUpdate();
         }
     }
 
@@ -204,17 +237,23 @@ public:
     void setTranslationY(float translationY) {
         if (translationY != mTranslationY) {
             mTranslationY = translationY;
-            mMatrixDirty = true;
-            if (mTranslationX == 0.0f && mTranslationY == 0.0f) {
-                mMatrixFlags &= ~TRANSLATION;
-            } else {
-                mMatrixFlags |= TRANSLATION;
-            }
+            onTranslationUpdate();
         }
     }
 
     float getTranslationY() const {
         return mTranslationY;
+    }
+
+    void setTranslationZ(float translationZ) {
+        if (translationZ != mTranslationZ) {
+            mTranslationZ = translationZ;
+            onTranslationUpdate();
+        }
+    }
+
+    float getTranslationZ() const {
+        return mTranslationZ;
     }
 
     void setRotation(float rotation) {
@@ -454,10 +493,34 @@ public:
     }
 
 private:
+    enum ChildrenSelectMode {
+        kNegativeZChildren,
+        kPositiveZChildren
+    };
+
+    void onTranslationUpdate() {
+        mMatrixDirty = true;
+        if (mTranslationX == 0.0f && mTranslationY == 0.0f && mTranslationZ == 0.0f) {
+            mMatrixFlags &= ~TRANSLATION;
+        } else {
+            mMatrixFlags |= TRANSLATION;
+        }
+    }
+
     void outputViewProperties(const int level);
+
+    void applyViewPropertyTransforms(mat4& matrix);
+
+    void computeOrderingImpl(DrawDisplayListOp* opState,
+            KeyedVector<float, Vector<DrawDisplayListOp*> >* compositedChildrenOf3dRoot,
+            const mat4* transformFromRoot);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler, const int level);
+
+    template <class T>
+    inline void iterate3dChildren(ChildrenSelectMode mode, OpenGLRenderer& renderer,
+        T& handler, const int level);
 
     template <class T>
     inline void iterate(OpenGLRenderer& renderer, T& handler, const int level);
@@ -509,7 +572,7 @@ private:
     bool mClipToBounds;
     float mAlpha;
     bool mHasOverlappingRendering;
-    float mTranslationX, mTranslationY;
+    float mTranslationX, mTranslationY, mTranslationZ;
     float mRotation, mRotationX, mRotationY;
     float mScaleX, mScaleY;
     float mPivotX, mPivotY;
@@ -526,23 +589,17 @@ private:
     SkMatrix* mTransformMatrix3D;
     SkMatrix* mStaticMatrix;
     SkMatrix* mAnimationMatrix;
+    Matrix4 mTransform;
     bool mCaching;
+    bool mIs3dRoot;
+
 
     /**
-     * State operations - needed to defer displayList property operations (for example, when setting
-     * an alpha causes a SaveLayerAlpha to occur). These operations point into mDisplayListData's
-     * allocation, or null if uninitialized.
-     *
-     * These are initialized (via friend re-constructors) when a displayList is issued in either
-     * replay or deferred mode. If replaying, the ops are not used until the next frame. If
-     * deferring, the ops may be stored in the DeferredDisplayList to be played back a second time.
-     *
-     * They should be used at most once per frame (one call to 'iterate') to avoid overwriting data
+     * Draw time state - these properties are only set and used during rendering
      */
-    ClipRectOp* mClipRectOp;
-    SaveLayerOp* mSaveLayerOp;
-    SaveOp* mSaveOp;
-    RestoreToCountOp* mRestoreToCountOp;
+
+    // for 3d roots, contains a z sorted list of all children items
+    KeyedVector<float, Vector<DrawDisplayListOp*> > m3dNodes; // TODO: good data structure
 }; // class DisplayList
 
 }; // namespace uirenderer

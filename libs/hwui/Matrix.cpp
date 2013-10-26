@@ -89,8 +89,9 @@ uint8_t Matrix4::getType() const {
         float m01 = data[kSkewX];
         float m10 = data[kSkewY];
         float m11 = data[kScaleY];
+        float m32 = data[kTranslateZ];
 
-        if (m01 != 0.0f || m10 != 0.0f) {
+        if (m01 != 0.0f || m10 != 0.0f || m32 != 0.0f) {
             mType |= kTypeAffine;
         }
 
@@ -131,11 +132,13 @@ bool Matrix4::changesBounds() const {
 }
 
 bool Matrix4::isPureTranslate() const {
-    return getGeometryType() <= kTypeTranslate;
+    // NOTE: temporary hack to workaround ignoreTransform behavior with Z values
+    // TODO: separate this into isPure2dTranslate vs isPure3dTranslate
+    return getGeometryType() <= kTypeTranslate && (data[kTranslateZ] == 0.0f);
 }
 
 bool Matrix4::isSimple() const {
-    return getGeometryType() <= (kTypeScale | kTypeTranslate);
+    return getGeometryType() <= (kTypeScale | kTypeTranslate) && (data[kTranslateZ] == 0.0f);
 }
 
 bool Matrix4::isIdentity() const {
@@ -369,6 +372,84 @@ void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
     mType = kTypeUnknown;
 }
 
+// translated from android.opengl.Matrix#frustumM()
+void Matrix4::loadFrustum(float left, float top, float right, float bottom, float near, float far) {
+    float r_width  = 1.0f / (right - left);
+    float r_height = 1.0f / (top - bottom);
+    float r_depth  = 1.0f / (near - far);
+    float x = 2.0f * (near * r_width);
+    float y = 2.0f * (near * r_height);
+    float A = (right + left) * r_width;
+    float B = (top + bottom) * r_height;
+    float C = (far + near) * r_depth;
+    float D = 2.0f * (far * near * r_depth);
+
+    memset(&data, 0, sizeof(data));
+    mType = kTypeUnknown;
+
+    data[kScaleX] = x;
+    data[kScaleY] = y;
+    data[8] = A;
+    data[9] = B;
+    data[kScaleZ] = C;
+    data[kTranslateZ] = D;
+    data[11] = -1.0f;
+}
+
+// translated from android.opengl.Matrix#setLookAtM()
+void Matrix4::loadLookAt(float eyeX, float eyeY, float eyeZ,
+        float centerX, float centerY, float centerZ,
+        float upX, float upY, float upZ) {
+    float fx = centerX - eyeX;
+    float fy = centerY - eyeY;
+    float fz = centerZ - eyeZ;
+
+    // Normalize f
+    float rlf = 1.0f / sqrt(fx*fx + fy*fy + fz*fz);
+    fx *= rlf;
+    fy *= rlf;
+    fz *= rlf;
+
+    // compute s = f x up (x means "cross product")
+    float sx = fy * upZ - fz * upY;
+    float sy = fz * upX - fx * upZ;
+    float sz = fx * upY - fy * upX;
+
+    // and normalize s
+    float rls = 1.0f / sqrt(sx*sx + sy*sy + sz*sz);
+    sx *= rls;
+    sy *= rls;
+    sz *= rls;
+
+    // compute u = s x f
+    float ux = sy * fz - sz * fy;
+    float uy = sz * fx - sx * fz;
+    float uz = sx * fy - sy * fx;
+
+    mType = kTypeUnknown;
+    data[0] = sx;
+    data[1] = ux;
+    data[2] = -fx;
+    data[3] = 0.0f;
+
+    data[4] = sy;
+    data[5] = uy;
+    data[6] = -fy;
+    data[7] = 0.0f;
+
+    data[8] = sz;
+    data[9] = uz;
+    data[10] = -fz;
+    data[11] = 0.0f;
+
+    data[12] = 0.0f;
+    data[13] = 0.0f;
+    data[14] = 0.0f;
+    data[15] = 1.0f;
+
+    translate(-eyeX, -eyeY, -eyeZ);
+}
+
 void Matrix4::loadOrtho(float left, float right, float bottom, float top, float near, float far) {
     loadIdentity();
 
@@ -380,6 +461,14 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
     data[kTranslateZ] = -(far + near) / (far - near);
 
     mType = kTypeTranslate | kTypeScale | kTypeRectToRect;
+}
+
+void Matrix4::mapPoint3d(Vector3& vec) const {
+    //TODO: optimize simple case
+    Vector3 orig(vec);
+    vec.x = orig.x * data[kScaleX] + orig.y * data[kSkewX] + orig.z * data[8] + data[kTranslateX];
+    vec.y = orig.x * data[kSkewY] + orig.y * data[kScaleY] + orig.z * data[9] + data[kTranslateY];
+    vec.z = orig.x * data[2] + orig.y * data[6] + orig.z * data[kScaleZ] + data[kTranslateZ];
 }
 
 #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)

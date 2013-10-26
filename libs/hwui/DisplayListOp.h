@@ -262,7 +262,6 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 
 class SaveOp : public StateOp {
-    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     SaveOp(int flags)
             : mFlags(flags) {}
@@ -295,7 +294,6 @@ private:
 };
 
 class RestoreToCountOp : public StateOp {
-    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     RestoreToCountOp(int count)
             : mCount(count) {}
@@ -328,7 +326,6 @@ private:
 };
 
 class SaveLayerOp : public StateOp {
-    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     SaveLayerOp(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags)
@@ -524,7 +521,6 @@ protected:
 };
 
 class ClipRectOp : public ClipOp {
-    friend class DisplayList; // give DisplayList private constructor/reinit access
 public:
     ClipRectOp(float left, float top, float right, float bottom, SkRegion::Op op)
             : ClipOp(op), mArea(left, top, right, bottom) {}
@@ -1100,7 +1096,7 @@ private:
 class DrawColorOp : public DrawOp {
 public:
     DrawColorOp(int color, SkXfermode::Mode mode)
-            : DrawOp(0), mColor(color), mMode(mode) {};
+            : DrawOp(NULL), mColor(color), mMode(mode) {};
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawColor(mColor, mMode);
@@ -1505,7 +1501,7 @@ private:
 class DrawFunctorOp : public DrawOp {
 public:
     DrawFunctorOp(Functor* functor)
-            : DrawOp(0), mFunctor(functor) {}
+            : DrawOp(NULL), mFunctor(functor) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         renderer.startMark("GL functor");
@@ -1525,20 +1521,21 @@ private:
 };
 
 class DrawDisplayListOp : public DrawBoundedOp {
+    friend class DisplayList; // grant DisplayList access to info of child
 public:
-    DrawDisplayListOp(DisplayList* displayList, int flags)
+    DrawDisplayListOp(DisplayList* displayList, int flags, const mat4& transformFromParent)
             : DrawBoundedOp(0, 0, displayList->getWidth(), displayList->getHeight(), 0),
-            mDisplayList(displayList), mFlags(flags) {}
+            mDisplayList(displayList), mFlags(flags), mTransformFromParent(transformFromParent) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
-        if (mDisplayList && mDisplayList->isRenderable()) {
+        if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
             mDisplayList->defer(deferStruct, level + 1);
         }
     }
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) {
-        if (mDisplayList && mDisplayList->isRenderable()) {
+        if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
             mDisplayList->replay(replayStruct, level + 1);
         }
     }
@@ -1559,13 +1556,58 @@ public:
 
 private:
     DisplayList* mDisplayList;
-    int mFlags;
+    const int mFlags;
+
+    ///////////////////////////
+    // Properties below are used by DisplayList::computeOrderingImpl() and iterate()
+    ///////////////////////////
+    /**
+     * Records transform vs parent, used for computing total transform without rerunning DL contents
+     */
+    const mat4 mTransformFromParent;
+
+    /**
+     * Holds the transformation between the 3d root ViewGroup and this DisplayList drawing
+     * instance. Represents any translations / transformations done within the drawing of the 3d
+     * root ViewGroup's draw, before the draw of the View represented by this DisplayList draw
+     * instance.
+     *
+     * Note: doesn't include any transformation recorded within the DisplayList and its properties.
+     */
+    mat4 mTransformFrom3dRoot;
+    bool mSkipInOrderDraw;
+};
+
+/**
+ * Not a canvas operation, used only by 3d / z ordering logic in DisplayList::iterate()
+ */
+class DrawShadowOp : public DrawOp {
+public:
+    DrawShadowOp(const mat4& casterTransform, float casterAlpha, float width, float height)
+            : DrawOp(NULL), mCasterTransform(casterTransform), mCasterAlpha(casterAlpha),
+            mWidth(width), mHeight(height) {}
+
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
+        return renderer.drawShadow(mCasterTransform, mCasterAlpha, mWidth, mHeight);
+    }
+
+    virtual void output(int level, uint32_t logFlags) const {
+        OP_LOG("DrawShadow of width %.2f, height %.2f", mWidth, mHeight);
+    }
+
+    virtual const char* name() { return "DrawShadow"; }
+
+private:
+    const mat4 mCasterTransform;
+    const float mCasterAlpha;
+    const float mWidth;
+    const float mHeight;
 };
 
 class DrawLayerOp : public DrawOp {
 public:
     DrawLayerOp(Layer* layer, float x, float y)
-            : DrawOp(0), mLayer(layer), mX(x), mY(y) {}
+            : DrawOp(NULL), mLayer(layer), mX(x), mY(y) {}
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         return renderer.drawLayer(mLayer, mX, mY);

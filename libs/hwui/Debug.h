@@ -85,6 +85,9 @@
 // Turn on to highlight drawing batches and merged batches with different colors
 #define DEBUG_MERGE_BEHAVIOR 0
 
+// Turn on to enable 3D support in the renderer (off by default until API for control exists)
+#define DEBUG_ENABLE_3D 0
+
 #if DEBUG_INIT
     #define INIT_LOGD(...) ALOGD(__VA_ARGS__)
 #else
