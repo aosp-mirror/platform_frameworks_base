@@ -111,6 +111,7 @@ import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.DctConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -4434,15 +4435,27 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mdst.enableMobileProvisioning(url);
         } else {
             if (DBG) log("handleMobileProvisioningAction: on default network");
-            Intent newIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
-                    Intent.CATEGORY_APP_BROWSER);
-            newIntent.setData(Uri.parse(url));
-            newIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                    Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                mContext.startActivity(newIntent);
-            } catch (ActivityNotFoundException e) {
-                loge("handleMobileProvisioningAction: startActivity failed" + e);
+            // Check for  apps that can handle provisioning first
+            Intent provisioningIntent = new Intent(TelephonyIntents.ACTION_CARRIER_SETUP);
+            provisioningIntent.addCategory(TelephonyIntents.CATEGORY_MCCMNC_PREFIX
+                    + mTelephonyManager.getSimOperator());
+            if (mContext.getPackageManager().resolveActivity(provisioningIntent, 0 /* flags */)
+                    != null) {
+                provisioningIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(provisioningIntent);
+            } else {
+                // If no apps exist, use standard URL ACTION_VIEW method
+                Intent newIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                        Intent.CATEGORY_APP_BROWSER);
+                newIntent.setData(Uri.parse(url));
+                newIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    mContext.startActivity(newIntent);
+                } catch (ActivityNotFoundException e) {
+                    loge("handleMobileProvisioningAction: startActivity failed" + e);
+                }
             }
         }
     }
