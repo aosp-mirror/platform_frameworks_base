@@ -84,7 +84,6 @@ import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Display the documents inside a single directory.
@@ -127,9 +126,7 @@ public class DirectoryFragment extends Fragment {
     private static final String EXTRA_QUERY = "query";
     private static final String EXTRA_IGNORE_STATE = "ignoreState";
 
-    private static AtomicInteger sLoaderId = new AtomicInteger(4000);
-
-    private final int mLoaderId = sLoaderId.incrementAndGet();
+    private final int mLoaderId = 42;
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
