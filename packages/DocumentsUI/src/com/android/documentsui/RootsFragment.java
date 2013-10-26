@@ -136,7 +136,8 @@ public class RootsFragment extends Fragment {
 
         final Context context = getActivity();
         final State state = ((DocumentsActivity) context).getDisplayState();
-        state.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(context);
+        state.showAdvanced = state.forceAdvanced
+                | SettingsActivity.getDisplayAdvancedDevices(context);
 
         if (state.action == ACTION_GET_CONTENT) {
             mList.setOnItemLongClickListener(mItemLongClickListener);
