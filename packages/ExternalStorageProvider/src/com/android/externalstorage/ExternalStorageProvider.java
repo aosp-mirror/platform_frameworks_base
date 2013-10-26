@@ -394,7 +394,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private static String getTypeForName(String name) {
         final int lastDot = name.lastIndexOf('.');
         if (lastDot >= 0) {
-            final String extension = name.substring(lastDot + 1);
+            final String extension = name.substring(lastDot + 1).toLowerCase();
             final String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (mime != null) {
                 return mime;
@@ -411,7 +411,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private static String removeExtension(String mimeType, String name) {
         final int lastDot = name.lastIndexOf('.');
         if (lastDot >= 0) {
-            final String extension = name.substring(lastDot + 1);
+            final String extension = name.substring(lastDot + 1).toLowerCase();
             final String nameMime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (mimeType.equals(nameMime)) {
                 return name.substring(0, lastDot);

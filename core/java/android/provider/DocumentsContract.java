@@ -81,6 +81,9 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
 
+    /** {@hide} */
+    public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
+
     /**
      * Included in {@link AssetFileDescriptor#getExtras()} when returned
      * thumbnail should be rotated.
