@@ -3084,18 +3084,18 @@ package android.app {
     method public void cancel(android.app.PendingIntent);
     method public void set(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
-    method public deprecated void setInexactRepeating(int, long, long, android.app.PendingIntent);
+    method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method public void setTime(long);
     method public void setTimeZone(java.lang.String);
     method public void setWindow(int, long, long, android.app.PendingIntent);
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
-    field public static final deprecated long INTERVAL_DAY = 86400000L; // 0x5265c00L
-    field public static final deprecated long INTERVAL_FIFTEEN_MINUTES = 900000L; // 0xdbba0L
-    field public static final deprecated long INTERVAL_HALF_DAY = 43200000L; // 0x2932e00L
-    field public static final deprecated long INTERVAL_HALF_HOUR = 1800000L; // 0x1b7740L
-    field public static final deprecated long INTERVAL_HOUR = 3600000L; // 0x36ee80L
+    field public static final long INTERVAL_DAY = 86400000L; // 0x5265c00L
+    field public static final long INTERVAL_FIFTEEN_MINUTES = 900000L; // 0xdbba0L
+    field public static final long INTERVAL_HALF_DAY = 43200000L; // 0x2932e00L
+    field public static final long INTERVAL_HALF_HOUR = 1800000L; // 0x1b7740L
+    field public static final long INTERVAL_HOUR = 3600000L; // 0x36ee80L
     field public static final int RTC = 1; // 0x1
     field public static final int RTC_WAKEUP = 0; // 0x0
   }
