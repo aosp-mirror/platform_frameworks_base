@@ -16,6 +16,7 @@
 
 package android.print;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -160,6 +161,9 @@ public final class PrintJobInfo implements Parcelable {
     /** Information about the printed document. */
     private PrintDocumentInfo mDocumentInfo;
 
+    /** Advanced printer specific options. */
+    private Bundle mAdvancedOptions;
+
     /** Whether we are trying to cancel this print job. */
     private boolean mCanceling;
 
@@ -184,6 +188,7 @@ public final class PrintJobInfo implements Parcelable {
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
         mCanceling = other.mCanceling;
+        mAdvancedOptions = other.mAdvancedOptions;
     }
 
     private PrintJobInfo(Parcel parcel) {
@@ -197,20 +202,17 @@ public final class PrintJobInfo implements Parcelable {
         mCreationTime = parcel.readLong();
         mCopies = parcel.readInt();
         mStateReason = parcel.readString();
-        if (parcel.readInt() == 1) {
-            Parcelable[] parcelables = parcel.readParcelableArray(null);
+        Parcelable[] parcelables = parcel.readParcelableArray(null);
+        if (parcelables != null) {
             mPageRanges = new PageRange[parcelables.length];
             for (int i = 0; i < parcelables.length; i++) {
                 mPageRanges[i] = (PageRange) parcelables[i];
             }
         }
-        if (parcel.readInt() == 1) {
-            mAttributes = PrintAttributes.CREATOR.createFromParcel(parcel);
-        }
-        if (parcel.readInt() == 1) {
-            mDocumentInfo = PrintDocumentInfo.CREATOR.createFromParcel(parcel);
-        }
+        mAttributes = (PrintAttributes) parcel.readParcelable(null);
+        mDocumentInfo = (PrintDocumentInfo) parcel.readParcelable(null);
         mCanceling = (parcel.readInt() == 1);
+        mAdvancedOptions = parcel.readBundle();
     }
 
     /**
@@ -521,6 +523,71 @@ public final class PrintJobInfo implements Parcelable {
         mCanceling = cancelling;
     }
 
+    /**
+     * Gets whether this job has a given advanced (printer specific) print
+     * option.
+     *
+     * @param key The option key.
+     * @return Whether the option is present.
+     *
+     * @hide
+     */
+    public boolean hasAdvancedOption(String key) {
+        return mAdvancedOptions != null && mAdvancedOptions.containsKey(key);
+    }
+
+    /**
+     * Gets the value of an advanced (printer specific) print option.
+     *
+     * @param key The option key.
+     * @return The option value.
+     *
+     * @hide
+     */
+    public String getAdvancedStringOption(String key) {
+        if (mAdvancedOptions != null) {
+            return mAdvancedOptions.getString(key);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the value of an advanced (printer specific) print option.
+     *
+     * @param key The option key.
+     * @return The option value.
+     *
+     * @hide
+     */
+    public int getAdvancedIntOption(String key) {
+        if (mAdvancedOptions != null) {
+            return mAdvancedOptions.getInt(key);
+        }
+        return 0;
+    }
+
+    /**
+     * Gets the advanced options.
+     *
+     * @return The advanced options.
+     *
+     * @hide
+     */
+    public Bundle getAdvancedOptions() {
+        return mAdvancedOptions;
+    }
+
+    /**
+     * Sets the advanced options.
+     *
+     * @param options The advanced options.
+     *
+     * @hide
+     */
+    public void setAdvancedOptions(Bundle options) {
+        mAdvancedOptions = options;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -538,25 +605,11 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeLong(mCreationTime);
         parcel.writeInt(mCopies);
         parcel.writeString(mStateReason);
-        if (mPageRanges != null) {
-            parcel.writeInt(1);
-            parcel.writeParcelableArray(mPageRanges, flags);
-        } else {
-            parcel.writeInt(0);
-        }
-        if (mAttributes != null) {
-            parcel.writeInt(1);
-            mAttributes.writeToParcel(parcel, flags);
-        } else {
-            parcel.writeInt(0);
-        }
-        if (mDocumentInfo != null) {
-            parcel.writeInt(1);
-            mDocumentInfo.writeToParcel(parcel, flags);
-        } else {
-            parcel.writeInt(0);
-        }
+        parcel.writeParcelableArray(mPageRanges, flags);
+        parcel.writeParcelable(mAttributes, flags);
+        parcel.writeParcelable(mDocumentInfo, 0);
         parcel.writeInt(mCanceling ? 1 : 0);
+        parcel.writeBundle(mAdvancedOptions);
     }
 
     @Override
@@ -577,6 +630,7 @@ public final class PrintJobInfo implements Parcelable {
         builder.append(", cancelling: " + mCanceling);
         builder.append(", pages: " + (mPageRanges != null
                 ? Arrays.toString(mPageRanges) : null));
+        builder.append(", hasAdvancedOptions: " + (mAdvancedOptions != null));
         builder.append("}");
         return builder.toString();
     }
@@ -663,7 +717,10 @@ public final class PrintJobInfo implements Parcelable {
          * @param value The option value.
          */
         public void putAdvancedOption(String key, String value) {
-
+            if (mPrototype.mAdvancedOptions == null) {
+                mPrototype.mAdvancedOptions = new Bundle();
+            }
+            mPrototype.mAdvancedOptions.putString(key, value);
         }
 
         /**
@@ -673,7 +730,10 @@ public final class PrintJobInfo implements Parcelable {
          * @param value The option value.
          */
         public void putAdvancedOption(String key, int value) {
-
+            if (mPrototype.mAdvancedOptions == null) {
+                mPrototype.mAdvancedOptions = new Bundle();
+            }
+            mPrototype.mAdvancedOptions.putInt(key, value);
         }
 
         /**
