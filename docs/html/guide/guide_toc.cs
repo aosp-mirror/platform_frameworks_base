@@ -63,6 +63,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/providers/contacts-provider.html">
               <span class="en">Contacts Provider</span>
             </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/providers/document-provider.html">
+              <span class="en">Storage Access Framework</span>
+            </a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
