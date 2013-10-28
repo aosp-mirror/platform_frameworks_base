@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Въведете PUK код с поне осем цифри."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM картата ви е заключена с PUK. Въведете PUK кода, за да я отключите."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Въведете PUK2, за да отблокирате SIM картата."</string>
+    <string name="enablePin" msgid="209412020907207950">"Неуспешно – активирайте заключването на SIM/RUIM картата."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди SIM картата да бъде заключена."</item>
+    <item quantity="other" msgid="7530597808358774740">"Остават ви <xliff:g id="NUMBER">%d</xliff:g> опита, преди SIM картата да бъде заключена."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Идентификация на вх. обаждания"</string>

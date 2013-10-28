@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Введіть PUK-код із 8 або більше цифр."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM-карта заблок. PUK-кодом. Введіть PUK-код, щоб її розблок."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Введ. PUK2, щоб розбл. SIM-карту."</string>
+    <string name="enablePin" msgid="209412020907207950">"Помилка. Увімкніть блокування SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"У вас залишилась <xliff:g id="NUMBER">%d</xliff:g> спроба. Після цього SIM-карту буде заблоковано."</item>
+    <item quantity="other" msgid="7530597808358774740">"У вас залишилося стільки спроб: <xliff:g id="NUMBER">%d</xliff:g>. Після цього SIM-карту буде заблоковано."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Вхідн. ід. абонента"</string>

@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Πληκτρολογήστε έναν κωδικό PUK με 8 αριθμούς ή περισσότερους."</string>
     <string name="needPuk" msgid="919668385956251611">"Η κάρτα SIM έχει κλειδωθεί με κωδικό PUK. Πληκτρολογήστε τον κωδικό PUK για να την ξεκλειδώσετε."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Πληκτρολογήστε τον κωδικό PUK2 για την κατάργηση αποκλεισμού της κάρτας SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Ανεπιτυχής προσπάθεια. Ενεργοποιήστε το Κλείδωμα SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια προτού η κάρτα SIM κλειδωθεί."</item>
+    <item quantity="other" msgid="7530597808358774740">"Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες προτού η κάρτα SIM κλειδωθεί."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Εισερχόμενη αναγνώριση κλήσης"</string>

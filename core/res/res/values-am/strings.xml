@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"8 ወይም ከዛ በላይ የሆኑ ቁጥሮችንPUK ተይብ።"</string>
     <string name="needPuk" msgid="919668385956251611">"SIM ካርድዎ PUK-የተቆለፈ ነው።የPUK ኮዱን በመተየብ ይክፈቱት።"</string>
     <string name="needPuk2" msgid="4526033371987193070">" SIM ለመክፈት PUK2 ተይብ።"</string>
+    <string name="enablePin" msgid="209412020907207950">"አልተሳካም፣ የሲም/RUIM ቁልፍን አንቃ።"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"ሲምዎ ከመቆለፉ በፊት <xliff:g id="NUMBER">%d</xliff:g> ሙከራ ይቀርዎታል።"</item>
+    <item quantity="other" msgid="7530597808358774740">"ሲምዎ ከመቆለፉ በፊት <xliff:g id="NUMBER">%d</xliff:g> ሙከራዎች ይቀሩዎታል።"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"የገቢ ደዋይID"</string>

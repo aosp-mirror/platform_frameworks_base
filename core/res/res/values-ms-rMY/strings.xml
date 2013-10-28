@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Taipkan PUK yang mempunyai 8 nombor atau lebih panjang."</string>
     <string name="needPuk" msgid="919668385956251611">"Kad SIM anda dikunci PUK. Taipkan kod PUK untuk membuka kuncinya."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Taipkan PUK2 untuk menyahsekat kad SIM."</string>
+    <!-- no translation found for enablePin (209412020907207950) -->
+    <skip />
+    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
+    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID Pemanggil Masuk"</string>

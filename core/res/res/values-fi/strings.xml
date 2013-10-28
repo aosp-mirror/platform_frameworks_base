@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Kirjoita vähintään 8 numeron pituinen PUK-koodi."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM-korttisi on PUK-lukittu. Poista lukitus antamalla PUK-koodi."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Pura SIM-kortin esto antamalla PUK2-koodi."</string>
+    <string name="enablePin" msgid="209412020907207950">"Epäonnistui, ota SIM-/RUIM-lukitus käyttöön."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Sinulla on <xliff:g id="NUMBER">%d</xliff:g> yritys jäljellä, ennen kuin SIM-kortti lukitaan."</item>
+    <item quantity="other" msgid="7530597808358774740">"Sinulla on <xliff:g id="NUMBER">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortti lukitaan."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI-koodi"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Soittajan tunnus"</string>
