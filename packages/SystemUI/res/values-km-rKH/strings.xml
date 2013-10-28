@@ -153,8 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ថ្ម <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"របៀបពេល​ជិះ​យន្ត​ហោះ <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ប៊្លូធូស <xliff:g id="STATE">%s</xliff:g> ។"</string>
-    <!-- no translation found for accessibility_quick_settings_location (4577282329866813100) -->
-    <skip />
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"ទីតាំង <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"កំណត់​សំឡេង​រោទ៍​សម្រាប់ <xliff:g id="TIME">%s</xliff:g> ។"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"បាន​បិទ​ទិន្នន័យ 2G-3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"បាន​បិទ​ទិន្នន័យ 4G"</string>
