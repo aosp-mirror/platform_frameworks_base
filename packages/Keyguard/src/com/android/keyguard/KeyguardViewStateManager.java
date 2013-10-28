@@ -15,6 +15,9 @@
  */
 package com.android.keyguard;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -45,6 +48,20 @@ public class KeyguardViewStateManager implements
     private int mPageIndexOnPageBeginMoving = -1;
 
     int mChallengeTop = 0;
+
+    private final AnimatorListener mPauseListener = new AnimatorListenerAdapter() {
+        public void onAnimationEnd(Animator animation) {
+            mKeyguardSecurityContainer.onPause();
+        }
+    };
+
+    private final AnimatorListener mResumeListener = new AnimatorListenerAdapter() {
+        public void onAnimationEnd(Animator animation) {
+            if (((View)mKeyguardSecurityContainer).isShown()) {
+                mKeyguardSecurityContainer.onResume(0);
+            }
+        }
+    };
 
     public KeyguardViewStateManager(KeyguardHostView hostView) {
         mKeyguardHostView = hostView;
@@ -102,11 +119,13 @@ public class KeyguardViewStateManager implements
     }
 
     public void fadeOutSecurity(int duration) {
-        ((View) mKeyguardSecurityContainer).animate().alpha(0f).setDuration(duration).start();
+        ((View) mKeyguardSecurityContainer).animate().alpha(0f).setDuration(duration)
+                .setListener(mPauseListener).start();
     }
 
     public void fadeInSecurity(int duration) {
-        ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration).start();
+        ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration)
+                .setListener(mResumeListener).start();
     }
 
     public void onPageBeginMoving() {
