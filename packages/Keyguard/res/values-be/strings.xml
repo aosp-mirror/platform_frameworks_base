@@ -21,9 +21,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Увядзіце PIN-код"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Увядзіце PUK-код і новы PIN-код"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Новы PIN-код"</string>
+    <!-- no translation found for keyguard_password_enter_puk_code (3035856550289724338) -->
+    <skip />
+    <!-- no translation found for keyguard_password_enter_puk_prompt (1801941051094974609) -->
+    <skip />
+    <!-- no translation found for keyguard_password_enter_pin_prompt (3201151840570492538) -->
+    <skip />
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Дакраніцеся, каб увесці пароль"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Увядзіце пароль для разблакавання"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Каб разблакаваць, увядзіце PIN-код"</string>
@@ -119,7 +122,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Увядзіце жаданы PIN-код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Пацвердзіце жадан PIN-код"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Разблакiроўка SIM-карты..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Няправільны PIN-код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Увядзіце PIN-код, які змяшчае ад 4 да 8 лічбаў."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-код павінен утрымлiваць 8 лiчбаў і больш."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Паўторна увядзіце правільны PUK-код. Неаднаразовыя спробы назаўжды адключаць SIM-карту."</string>
@@ -143,6 +145,20 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Выдалiць"</string>
+    <!-- no translation found for kg_password_wrong_pin_code_pukked (30531039455764924) -->
+    <skip />
+    <!-- no translation found for kg_password_wrong_pin_code:one (8134313997799638254) -->
+    <!-- no translation found for kg_password_wrong_pin_code:other (2215723361575359486) -->
+    <!-- no translation found for kg_password_wrong_puk_code_dead (7077536808291316208) -->
+    <skip />
+    <!-- no translation found for kg_password_wrong_puk_code:one (3256893607561060649) -->
+    <!-- no translation found for kg_password_wrong_puk_code:other (5477305226026342036) -->
+    <!-- no translation found for kg_password_pin_failed (6268288093558031564) -->
+    <skip />
+    <!-- no translation found for kg_password_puk_failed (2838824369502455984) -->
+    <skip />
+    <!-- no translation found for kg_pin_accepted (1448241673570020097) -->
+    <skip />
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Кнопка папярэдняй кампазiцыі"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Кнопка наступнай кампазiцыі"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Кнопка паўзы"</string>

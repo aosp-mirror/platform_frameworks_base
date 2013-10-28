@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Въведете ПИН кода"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Въведете PUK и новия ПИН код"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK код"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Нов ПИН код"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Въведете PUK за SIM картата и новия ПИН код"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK код за SIM картата"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Нов ПИН код за SIM картата"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Докоснете и въведете парола"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Въведете парола, за да отключите"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Въведете ПИН, за да отключите"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Въведете желания ПИН код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Потвърдете желания ПИН код"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM картата се отключва…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неправилен ПИН код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Въведете ПИН код с четири до осем цифри."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK кодът трябва да е с 8 или повече цифри."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Въведете отново правилния PUK код. Многократните опити ще деактивират за постоянно SIM картата."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Премахване"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неправилен ПИН код за SIM картата – сега трябва да се свържете с оператора си, за да отключите устройството."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Неправилен ПИН код за SIM картата – остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди да трябва да се свържете с оператора си, за да отключите устройството."</item>
+    <item quantity="other" msgid="2215723361575359486">"Неправилен ПИН код за SIM картата – остават ви <xliff:g id="NUMBER">%d</xliff:g> опита."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM картата е неизползваема. Свържете се с оператора си."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Неправилен PUK код за SIM картата – остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди SIM картата да стане неизползваема завинаги."</item>
+    <item quantity="other" msgid="5477305226026342036">"Неправилен PUK код за SIM картата – остават ви <xliff:g id="NUMBER">%d</xliff:g> опита, преди SIM картата да стане неизползваема завинаги."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Операцията с ПИН кода за SIM картата не бе успешна!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Операцията с PUK кода за SIM картата не бе успешна!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Кодът е приет!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Бутон за предишния запис"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Бутон за следващия запис"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Бутон за пауза"</string>
