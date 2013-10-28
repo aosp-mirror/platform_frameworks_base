@@ -281,6 +281,31 @@ public class ColorStateList implements Parcelable {
     }
 
     /**
+     * @return the number of state spec to color mappings in the list
+     * @see #getColorAt(int)
+     * @see #getStateSpecAt(int)
+     */
+    public int getCount() {
+        return mColors.length;
+    }
+
+    /**
+     * @return the state spec at the specified index in the list
+     * @see #getCount()
+     */
+    public int[] getStateSpecAt(int index) {
+        return mStateSpecs[index];
+    }
+
+    /**
+     * @return the color at the specified index in the list
+     * @see #getCount()
+     */
+    public int getColorAt(int index) {
+        return mColors[index];
+    }
+
+    /**
      * Return the default color in this {@link ColorStateList}.
      *
      * @return the default color in this {@link ColorStateList}.
