@@ -16,7 +16,7 @@
 
 <com.android.printspooler.PrintDialogFrame xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="wrap_content">
     <FrameLayout
         android:id="@+id/content_container"
         android:layout_width="fill_parent"

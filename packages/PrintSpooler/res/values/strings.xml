@@ -19,6 +19,9 @@
     <!-- Title of the PrintSpooler application. [CHAR LIMIT=50] -->
     <string name="app_label">Print Spooler</string>
 
+    <!-- Label of the print dialog's button for advanced printer settings. [CHAR LIMIT=25] -->
+    <string name="advanced_settings_button">Printer settings</string>
+
     <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
     <string name="print_button">Print</string>
 

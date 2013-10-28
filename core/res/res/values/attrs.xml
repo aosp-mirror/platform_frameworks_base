@@ -2622,7 +2622,11 @@
              add printers to this print service. -->
         <attr name="addPrintersActivity" format="string"/>
         <!-- Fully qualified class name of an activity with advanced print options
-             specific to this print service. -->
+             specific to this print service. If this activity is specified the system
+             will allow the user a choice to open it given the currently selected printer
+             has advanced options which is specified by the print service via
+             {@link android.print.PrinterInfo.Builder#setHasAdvancedOptions(boolean)}.
+             -->
         <attr name="advancedPrintOptionsActivity" format="string"/>
         <!-- The vendor name if this print service is vendor specific. -->
         <attr name="vendor" format="string"/>
