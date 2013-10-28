@@ -16,14 +16,17 @@
 
 package com.android.externalstorage;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -48,6 +51,8 @@ import java.util.Map;
 
 public class ExternalStorageProvider extends DocumentsProvider {
     private static final String TAG = "ExternalStorage";
+
+    private static final boolean LOG_INOTIFY = false;
 
     public static final String AUTHORITY = "com.android.externalstorage.documents";
 
@@ -82,6 +87,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private HashMap<String, RootInfo> mIdToRoot;
     @GuardedBy("mRootsLock")
     private HashMap<String, File> mIdToPath;
+
+    @GuardedBy("mObservers")
+    private Map<File, DirectoryObserver> mObservers = Maps.newHashMap();
 
     @Override
     public boolean onCreate() {
@@ -327,8 +335,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public Cursor queryChildDocuments(
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         final File parent = getFileForDocId(parentDocumentId);
+        final MatrixCursor result = new DirectoryCursor(
+                resolveDocumentProjection(projection), parentDocumentId, parent);
         for (File file : parent.listFiles()) {
             includeFile(result, null, file);
         }
@@ -430,5 +439,87 @@ public class ExternalStorageProvider extends DocumentsProvider {
             return name + "." + extension;
         }
         return name;
+    }
+
+    private void startObserving(File file, Uri notifyUri) {
+        synchronized (mObservers) {
+            DirectoryObserver observer = mObservers.get(file);
+            if (observer == null) {
+                observer = new DirectoryObserver(
+                        file, getContext().getContentResolver(), notifyUri);
+                observer.startWatching();
+                mObservers.put(file, observer);
+            }
+            observer.mRefCount++;
+
+            if (LOG_INOTIFY) Log.d(TAG, "after start: " + observer);
+        }
+    }
+
+    private void stopObserving(File file) {
+        synchronized (mObservers) {
+            DirectoryObserver observer = mObservers.get(file);
+            if (observer == null) return;
+
+            observer.mRefCount--;
+            if (observer.mRefCount == 0) {
+                mObservers.remove(file);
+                observer.stopWatching();
+            }
+
+            if (LOG_INOTIFY) Log.d(TAG, "after stop: " + observer);
+        }
+    }
+
+    private static class DirectoryObserver extends FileObserver {
+        private static final int NOTIFY_EVENTS = ATTRIB | CLOSE_WRITE | MOVED_FROM | MOVED_TO
+                | CREATE | DELETE | DELETE_SELF | MOVE_SELF;
+
+        private final File mFile;
+        private final ContentResolver mResolver;
+        private final Uri mNotifyUri;
+
+        private int mRefCount = 0;
+
+        public DirectoryObserver(File file, ContentResolver resolver, Uri notifyUri) {
+            super(file.getAbsolutePath(), NOTIFY_EVENTS);
+            mFile = file;
+            mResolver = resolver;
+            mNotifyUri = notifyUri;
+        }
+
+        @Override
+        public void onEvent(int event, String path) {
+            if ((event & NOTIFY_EVENTS) != 0) {
+                if (LOG_INOTIFY) Log.d(TAG, "onEvent() " + event + " at " + path);
+                mResolver.notifyChange(mNotifyUri, null, false);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "DirectoryObserver{file=" + mFile.getAbsolutePath() + ", ref=" + mRefCount + "}";
+        }
+    }
+
+    private class DirectoryCursor extends MatrixCursor {
+        private final File mFile;
+
+        public DirectoryCursor(String[] columnNames, String docId, File file) {
+            super(columnNames);
+
+            final Uri notifyUri = DocumentsContract.buildChildDocumentsUri(
+                    AUTHORITY, docId);
+            setNotificationUri(getContext().getContentResolver(), notifyUri);
+
+            mFile = file;
+            startObserving(mFile, notifyUri);
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            stopObserving(mFile);
+        }
     }
 }
