@@ -16,10 +16,10 @@
 
 <resources>
 
-    <color name="container_background">#FFFFFF</color>
+    <color name="container_background">#F2F2F2</color>
     <color name="important_text">#333333</color>
     <color name="print_option_title">#888888</color>
     <color name="separator">#CCCCCC</color>
-    <color name="editable_background">#F2F2F2</color>
+    <color name="action_button_background">#FFFFFF</color>
 
 </resources>
