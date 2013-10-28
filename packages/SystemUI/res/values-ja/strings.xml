@@ -155,8 +155,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"電池<xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"機内モード<xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_location (4577282329866813100) -->
-    <skip />
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"現在地: <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"アラームは<xliff:g id="TIME">%s</xliff:g>に設定されています。"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G～3Gデータが無効になりました"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4Gデータが無効になりました"</string>
