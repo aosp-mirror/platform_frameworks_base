@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"បញ្ចូល​កូដ PUK ដែល​មាន​ពី​ ៨ លេខ​ ឬ​វែង​ជាង​នេះ។"</string>
     <string name="needPuk" msgid="919668385956251611">"ស៊ីមកាត​​របស់​អ្នក​ជាប់​កូដ PUK ។ បញ្ចូល​កូដ PUK ដើម្បី​ដោះ​សោ។"</string>
     <string name="needPuk2" msgid="4526033371987193070">"បញ្ចូល​កូដ PUK2 ដើម្បី​ដោះ​សោ​ស៊ីម​កាត។"</string>
+    <string name="enablePin" msgid="209412020907207950">"បរាជ័យ, បើក​ការ​ចាក់សោ​ស៊ី​ម / RUIM ។"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​ស៊ី​ម​ត្រូវ​បាន​ចាក់សោ​។"</item>
+    <item quantity="other" msgid="7530597808358774740">"អ្នក​មាន <xliff:g id="NUMBER">%d</xliff:g> ការ​ព្យាយាម​ដែល​នៅសល់​មុន​ពេល​ស៊ី​ម​ត្រូវ​បាន​ចាក់សោ​។"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល"</string>

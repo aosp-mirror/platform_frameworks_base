@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"PUKは8桁以上で入力してください。"</string>
     <string name="needPuk" msgid="919668385956251611">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIMカードのロック解除のためPUK2を入力します。"</string>
+    <string name="enablePin" msgid="209412020907207950">"SIM/RUIMロックを有効にしてください。"</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"失敗できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMがロックされます。"</item>
+    <item quantity="other" msgid="7530597808358774740">"失敗できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMがロックされます。"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"着信時の発信者番号"</string>

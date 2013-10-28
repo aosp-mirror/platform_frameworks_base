@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Typ een PUK-code die 8 cijfers of langer is."</string>
     <string name="needPuk" msgid="919668385956251611">"Uw SIM-kaart is vergrendeld met de PUK-code. Typ de PUK-code om te ontgrendelen."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Voer de PUK2-code in om de SIM-kaart te ontgrendelen."</string>
+    <string name="enablePin" msgid="209412020907207950">"Mislukt. Schakel SIM/RUIM-vergrendeling in."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"U heeft nog <xliff:g id="NUMBER">%d</xliff:g> poging over voordat de simkaart wordt vergrendeld."</item>
+    <item quantity="other" msgid="7530597808358774740">"U heeft nog <xliff:g id="NUMBER">%d</xliff:g> pogingen over voordat de simkaart wordt vergrendeld."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Inkomende beller-id"</string>

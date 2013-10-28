@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Увядзіце PUK з 8 лічбаў ці больш."</string>
     <string name="needPuk" msgid="919668385956251611">"Ваша SIM-карта заблакавана PUK-кодам. Увядзіце PUK, каб разблакаваць карту."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Увядзіце PUK2 для разблакавання SIM-карты."</string>
+    <!-- no translation found for enablePin (209412020907207950) -->
+    <skip />
+    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
+    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Ідэнтыфікатар АВН"</string>
