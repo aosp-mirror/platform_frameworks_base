@@ -153,8 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"배터리 <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"비행기 모드가 <xliff:g id="STATE">%s</xliff:g> 상태입니다."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"블루투스 <xliff:g id="STATE">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_location (4577282329866813100) -->
-    <skip />
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"위치 <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"알람이 <xliff:g id="TIME">%s</xliff:g>(으)로 설정되었습니다."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 데이터 사용중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 데이터 사용중지됨"</string>

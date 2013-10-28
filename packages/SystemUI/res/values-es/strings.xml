@@ -153,8 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo avión <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_location (4577282329866813100) -->
-    <skip />
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Ubicación <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"La alarma sonará a la(s) <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos 2G-3G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos 4G inhabilitados"</string>
