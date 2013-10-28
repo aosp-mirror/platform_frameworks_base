@@ -1471,13 +1471,13 @@ public final class ActivityStackSupervisor {
                             // We really do want to push this one into the
                             // user's face, right now.
                             movedHome = true;
+                            targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
                             if ((launchFlags &
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                                 // Caller wants to appear on home activity.
                                 intentActivity.task.mOnTopOfHome = true;
                             }
-                            targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
                             options = null;
                         }
                     }
