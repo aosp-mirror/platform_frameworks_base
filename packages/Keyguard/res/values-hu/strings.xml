@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Írja be a PIN kódot"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Írja be a PUK kódot, majd az új PIN kódot"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kód"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Új PIN kód"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Írja be a SIM kártya PUK kódját, majd az új PIN kódot"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM kártya PUK kódja"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Új PIN kód a SIM kártyához"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Érintsen jelszó megadásához"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"A feloldáshoz írja be a jelszót"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Feloldáshoz írja be a PIN kódot"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Kívánt PIN kód megadása"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Kívánt PIN kód megerősítése"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM kártya feloldása..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Helytelen PIN kód."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4–8 számjegyű PIN kódot írjon be."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"A PUK kód legalább  8 számjegyből kell, hogy álljon."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Adja meg újra a helyes PUK kódot. Az ismételt próbálkozással véglegesen letiltja a SIM kártyát."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eltávolítás"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Helytelen PIN kód a SIM kártyához; vegye fel a kapcsolatot szolgáltatójával az eszköz feloldásához."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt fel kellene vennie a kapcsolatot szolgáltatójával az eszköz feloldásához."</item>
+    <item quantity="other" msgid="2215723361575359486">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"A SIM kártya használhatatlan. Vegye fel a kapcsolatot szolgáltatójával."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Helytelen PUK kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlan lesz."</item>
+    <item quantity="other" msgid="5477305226026342036">"Helytelen PUK kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt a SIM kártya végleg használhatatlan lesz."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"A SIM kártya PIN-művelete sikertelen!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"A SIM kártya PUK-művelete sikertelen!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód elfogadva."</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Előző szám gomb"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Következő szám gomb"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Szünet gomb"</string>

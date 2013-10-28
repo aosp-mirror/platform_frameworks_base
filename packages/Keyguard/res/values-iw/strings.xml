@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"הקלד קוד PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"הקלד את קוד ה-PUK וקוד  ה-PIN החדש"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"קוד PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"קוד PIN חדש"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"הקלד קוד PUK של כרטיס SIM וקוד PIN חדש"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"קוד PUK של כרטיס SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"מספר PIN חדש של כרטיס SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"גע כדי להקליד את הסיסמה"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"הקלד סיסמה לביטול הנעילה"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"הקלד קוד PIN לביטול הנעילה"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"הזן את קוד ה-PIN הרצוי"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"אשר את קוד ה-PIN הרצוי"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"מבטל נעילה של כרטיס SIM…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"קוד PIN שגוי."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"הקלד מספר PIN שאורכו 4 עד 8 ספרות."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"קוד PUK צריך להיות בן 8 ספרות או יותר."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"הזן מחדש את קוד PUK הנכון. ניסיונות חוזרים ישביתו לצמיתות את כרטיס ה-SIM."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"מספר PIN שגוי של כרטיס ה-SIM. עליך ליצור כעת קשר עם הספק על מנת לבטל את נעילת המכשיר."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"מספר PIN שגוי של כרטיס ה-SIM. נותר לך ניסיון <xliff:g id="NUMBER">%d</xliff:g> נוסף לפני שיהיה עליך ליצור קשר עם הספק על מנת לבטל את נעילת המכשיר."</item>
+    <item quantity="other" msgid="2215723361575359486">"מספר PIN שגוי של כרטיס ה-SIM. נותרו לך <xliff:g id="NUMBER">%d</xliff:g> ניסיונות נוספים."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"לא ניתן להשתמש בכרטיס ה-SIM. צור קשר עם הספק."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"קוד PUK שגוי של כרטיס ה-SIM. נותר לך ניסיון <xliff:g id="NUMBER">%d</xliff:g> נוסף לפני שכרטיס ה-SIM ינעל לצמיתות."</item>
+    <item quantity="other" msgid="5477305226026342036">"קוד PUK שגוי של כרטיס ה-SIM. נותרו לך <xliff:g id="NUMBER">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM ינעל לצמיתות."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"פעולת מספר ה-PIN של כרטיס ה-SIM נכשלה!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"פעולת קוד ה-PUK של כרטיס ה-SIM נכשלה!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"הקוד התקבל!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"לחצן \'הרצועה הקודמת\'"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"לחצן \'הרצועה הבאה\'"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"לחצן \'השהה\'"</string>
