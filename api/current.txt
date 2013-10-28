@@ -127,6 +127,7 @@ package android {
     field public static final java.lang.String SET_WALLPAPER = "android.permission.SET_WALLPAPER";
     field public static final java.lang.String SET_WALLPAPER_HINTS = "android.permission.SET_WALLPAPER_HINTS";
     field public static final java.lang.String SIGNAL_PERSISTENT_PROCESSES = "android.permission.SIGNAL_PERSISTENT_PROCESSES";
+    field public static final java.lang.String SIM_COMMUNICATION = "android.permission.SIM_COMMUNICATION";
     field public static final java.lang.String STATUS_BAR = "android.permission.STATUS_BAR";
     field public static final java.lang.String SUBSCRIBED_FEEDS_READ = "android.permission.SUBSCRIBED_FEEDS_READ";
     field public static final java.lang.String SUBSCRIBED_FEEDS_WRITE = "android.permission.SUBSCRIBED_FEEDS_WRITE";
@@ -24118,6 +24119,9 @@ package android.telephony {
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
     method public boolean hasIccCard();
+    method public boolean iccCloseLogicalChannel(int);
+    method public int iccOpenLogicalChannel(java.lang.String);
+    method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
