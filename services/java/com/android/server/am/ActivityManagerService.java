@@ -11507,7 +11507,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     pid = Integer.parseInt(args[start]);
                 } catch (NumberFormatException e) {
-
                 }
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
                     ProcessRecord proc = mLruProcesses.get(i);
@@ -11518,7 +11517,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 if (procs.size() <= 0) {
-                    pw.println("No process found for: " + args[start]);
                     return null;
                 }
             } else {
@@ -11532,6 +11530,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             PrintWriter pw, String[] args) {
         ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, args);
         if (procs == null) {
+            pw.println("No process found for: " + args[0]);
             return;
         }
 
@@ -11567,6 +11566,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void dumpDbInfo(FileDescriptor fd, PrintWriter pw, String[] args) {
         ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, args);
         if (procs == null) {
+            pw.println("No process found for: " + args[0]);
             return;
         }
 
@@ -11713,6 +11713,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             "prev", "serviceb", "cached"
     };
 
+    private final void dumpApplicationMemoryUsageHeader(PrintWriter pw, long uptime,
+            long realtime, boolean isCheckinRequest, boolean isCompact) {
+        if (isCheckinRequest || isCompact) {
+            // short checkin version
+            pw.print("time,"); pw.print(uptime); pw.print(","); pw.println(realtime);
+        } else {
+            pw.println("Applications Memory Usage (kB):");
+            pw.println("Uptime: " + uptime + " Realtime: " + realtime);
+        }
+    }
+
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief, PrintWriter categoryPw) {
         boolean dumpDetails = false;
@@ -11752,26 +11763,71 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, args);
-        if (procs == null) {
-            return;
-        }
-
         final boolean isCheckinRequest = scanArgs(args, "--checkin");
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
+        final long[] tmpLong = new long[1];
+
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, args);
+        if (procs == null) {
+            // No Java processes.  Maybe they want to print a native process.
+            if (args != null && args.length > opti
+                    && args[opti].charAt(0) != '-') {
+                ArrayList<ProcessCpuTracker.Stats> nativeProcs
+                        = new ArrayList<ProcessCpuTracker.Stats>();
+                updateCpuStatsNow();
+                int findPid = -1;
+                try {
+                    findPid = Integer.parseInt(args[opti]);
+                } catch (NumberFormatException e) {
+                }
+                synchronized (mProcessCpuThread) {
+                    final int N = mProcessCpuTracker.countStats();
+                    for (int i=0; i<N; i++) {
+                        ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                        if (st.pid == findPid || (st.baseName != null
+                                && st.baseName.equals(args[opti]))) {
+                            nativeProcs.add(st);
+                        }
+                    }
+                }
+                if (nativeProcs.size() > 0) {
+                    dumpApplicationMemoryUsageHeader(pw, uptime, realtime, isCheckinRequest,
+                            isCompact);
+                    Debug.MemoryInfo mi = null;
+                    for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
+                        final ProcessCpuTracker.Stats r = nativeProcs.get(i);
+                        final int pid = r.pid;
+                        if (!isCheckinRequest && dumpDetails) {
+                            pw.println("\n** MEMINFO in pid " + pid + " [" + r.baseName + "] **");
+                        }
+                        if (mi == null) {
+                            mi = new Debug.MemoryInfo();
+                        }
+                        if (dumpDetails || (!brief && !oomOnly)) {
+                            Debug.getMemoryInfo(pid, mi);
+                        } else {
+                            mi.dalvikPss = (int)Debug.getPss(pid, tmpLong);
+                            mi.dalvikPrivateDirty = (int)tmpLong[0];
+                        }
+                        ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
+                                dumpDalvik, pid, r.baseName, 0, 0, 0, 0, 0, 0);
+                        if (isCheckinRequest) {
+                            pw.println();
+                        }
+                    }
+                    return;
+                }
+            }
+            pw.println("No process found for: " + args[opti]);
+            return;
+        }
 
         if (!brief && !oomOnly && (procs.size() == 1 || isCheckinRequest)) {
             dumpDetails = true;
         }
 
-        if (isCheckinRequest || isCompact) {
-            // short checkin version
-            pw.print("time,"); pw.print(uptime); pw.print(","); pw.println(realtime);
-        } else {
-            pw.println("Applications Memory Usage (kB):");
-            pw.println("Uptime: " + uptime + " Realtime: " + realtime);
-        }
+        dumpApplicationMemoryUsageHeader(pw, uptime, realtime, isCheckinRequest, isCompact);
 
         String[] innerArgs = new String[args.length-opti];
         System.arraycopy(args, opti, innerArgs, 0, args.length-opti);
@@ -11784,7 +11840,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         long oomPss[] = new long[DUMP_MEM_OOM_LABEL.length];
         ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])
                 new ArrayList[DUMP_MEM_OOM_LABEL.length];
-        final long[] tmpLong = new long[1];
 
         long totalPss = 0;
         long cachedPss = 0;

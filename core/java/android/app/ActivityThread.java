@@ -534,16 +534,9 @@ public final class ActivityThread {
     private native void dumpGraphicsInfo(FileDescriptor fd);
 
     private class ApplicationThread extends ApplicationThreadNative {
-        private static final String HEAP_FULL_COLUMN
-                = "%13s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s";
-        private static final String HEAP_COLUMN
-                = "%13s %8s %8s %8s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%21s %8d";
         private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
-
-        // Formatting for checkin service - update version if row format changes
-        private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 3;
 
         private int mLastProcessState = -1;
 
@@ -929,82 +922,14 @@ public final class ActivityThread {
             long openSslSocketCount = Debug.countInstancesOfClass(OpenSSLSocketImpl.class);
             SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
-            // For checkin, we print one long comma-separated list of values
+            dumpMemInfoTable(pw, memInfo, checkin, dumpFullInfo, dumpDalvik, Process.myPid(),
+                    (mBoundApplication != null) ? mBoundApplication.processName : "unknown",
+                    nativeMax, nativeAllocated, nativeFree,
+                    dalvikMax, dalvikAllocated, dalvikFree);
+
             if (checkin) {
                 // NOTE: if you change anything significant below, also consider changing
                 // ACTIVITY_THREAD_CHECKIN_VERSION.
-                String processName = (mBoundApplication != null)
-                        ? mBoundApplication.processName : "unknown";
-
-                // Header
-                pw.print(ACTIVITY_THREAD_CHECKIN_VERSION); pw.print(',');
-                pw.print(Process.myPid()); pw.print(',');
-                pw.print(processName); pw.print(',');
-
-                // Heap info - max
-                pw.print(nativeMax); pw.print(',');
-                pw.print(dalvikMax); pw.print(',');
-                pw.print("N/A,");
-                pw.print(nativeMax + dalvikMax); pw.print(',');
-
-                // Heap info - allocated
-                pw.print(nativeAllocated); pw.print(',');
-                pw.print(dalvikAllocated); pw.print(',');
-                pw.print("N/A,");
-                pw.print(nativeAllocated + dalvikAllocated); pw.print(',');
-
-                // Heap info - free
-                pw.print(nativeFree); pw.print(',');
-                pw.print(dalvikFree); pw.print(',');
-                pw.print("N/A,");
-                pw.print(nativeFree + dalvikFree); pw.print(',');
-
-                // Heap info - proportional set size
-                pw.print(memInfo.nativePss); pw.print(',');
-                pw.print(memInfo.dalvikPss); pw.print(',');
-                pw.print(memInfo.otherPss); pw.print(',');
-                pw.print(memInfo.getTotalPss()); pw.print(',');
-
-                // Heap info - swappable set size
-                pw.print(memInfo.nativeSwappablePss); pw.print(',');
-                pw.print(memInfo.dalvikSwappablePss); pw.print(',');
-                pw.print(memInfo.otherSwappablePss); pw.print(',');
-                pw.print(memInfo.getTotalSwappablePss()); pw.print(',');
-
-                // Heap info - shared dirty
-                pw.print(memInfo.nativeSharedDirty); pw.print(',');
-                pw.print(memInfo.dalvikSharedDirty); pw.print(',');
-                pw.print(memInfo.otherSharedDirty); pw.print(',');
-                pw.print(memInfo.getTotalSharedDirty()); pw.print(',');
-
-                // Heap info - shared clean
-                pw.print(memInfo.nativeSharedClean); pw.print(',');
-                pw.print(memInfo.dalvikSharedClean); pw.print(',');
-                pw.print(memInfo.otherSharedClean); pw.print(',');
-                pw.print(memInfo.getTotalSharedClean()); pw.print(',');
-
-                // Heap info - private Dirty
-                pw.print(memInfo.nativePrivateDirty); pw.print(',');
-                pw.print(memInfo.dalvikPrivateDirty); pw.print(',');
-                pw.print(memInfo.otherPrivateDirty); pw.print(',');
-                pw.print(memInfo.getTotalPrivateDirty()); pw.print(',');
-
-                // Heap info - private Clean
-                pw.print(memInfo.nativePrivateClean); pw.print(',');
-                pw.print(memInfo.dalvikPrivateClean); pw.print(',');
-                pw.print(memInfo.otherPrivateClean); pw.print(',');
-                pw.print(memInfo.getTotalPrivateClean()); pw.print(',');
-
-                // Heap info - other areas
-                for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
-                    pw.print(Debug.MemoryInfo.getOtherLabel(i)); pw.print(',');
-                    pw.print(memInfo.getOtherPss(i)); pw.print(',');
-                    pw.print(memInfo.getOtherSwappablePss(i)); pw.print(',');
-                    pw.print(memInfo.getOtherSharedDirty(i)); pw.print(',');
-                    pw.print(memInfo.getOtherSharedClean(i)); pw.print(',');
-                    pw.print(memInfo.getOtherPrivateDirty(i)); pw.print(',');
-                    pw.print(memInfo.getOtherPrivateClean(i)); pw.print(',');
-                }
 
                 // Object counts
                 pw.print(viewInstanceCount); pw.print(',');
@@ -1037,128 +962,6 @@ public final class ActivityThread {
                 pw.println();
 
                 return;
-            }
-
-            // otherwise, show human-readable format
-            if (dumpFullInfo) {
-                printRow(pw, HEAP_FULL_COLUMN, "", "Pss", "Pss", "Shared", "Private",
-                        "Shared", "Private", "Swapped", "Heap", "Heap", "Heap");
-                printRow(pw, HEAP_FULL_COLUMN, "", "Total", "Clean", "Dirty", "Dirty",
-                        "Clean", "Clean", "Dirty", "Size", "Alloc", "Free");
-                printRow(pw, HEAP_FULL_COLUMN, "", "------", "------", "------", "------",
-                        "------", "------", "------", "------", "------", "------");
-                printRow(pw, HEAP_FULL_COLUMN, "Native Heap", memInfo.nativePss,
-                        memInfo.nativeSwappablePss, memInfo.nativeSharedDirty,
-                        memInfo.nativePrivateDirty, memInfo.nativeSharedClean,
-                        memInfo.nativePrivateClean, memInfo.nativeSwappedOut,
-                        nativeMax, nativeAllocated, nativeFree);
-                printRow(pw, HEAP_FULL_COLUMN, "Dalvik Heap", memInfo.dalvikPss,
-                        memInfo.dalvikSwappablePss, memInfo.dalvikSharedDirty,
-                        memInfo.dalvikPrivateDirty, memInfo.dalvikSharedClean,
-                        memInfo.dalvikPrivateClean, memInfo.dalvikSwappedOut,
-                        dalvikMax, dalvikAllocated, dalvikFree);
-            } else {
-                printRow(pw, HEAP_COLUMN, "", "Pss", "Private",
-                        "Private", "Swapped", "Heap", "Heap", "Heap");
-                printRow(pw, HEAP_COLUMN, "", "Total", "Dirty",
-                        "Clean", "Dirty", "Size", "Alloc", "Free");
-                printRow(pw, HEAP_COLUMN, "", "------", "------", "------",
-                        "------", "------", "------", "------", "------");
-                printRow(pw, HEAP_COLUMN, "Native Heap", memInfo.nativePss,
-                        memInfo.nativePrivateDirty,
-                        memInfo.nativePrivateClean, memInfo.nativeSwappedOut,
-                        nativeMax, nativeAllocated, nativeFree);
-                printRow(pw, HEAP_COLUMN, "Dalvik Heap", memInfo.dalvikPss,
-                        memInfo.dalvikPrivateDirty,
-                        memInfo.dalvikPrivateClean, memInfo.dalvikSwappedOut,
-                        dalvikMax, dalvikAllocated, dalvikFree);
-            }
-
-            int otherPss = memInfo.otherPss;
-            int otherSwappablePss = memInfo.otherSwappablePss;
-            int otherSharedDirty = memInfo.otherSharedDirty;
-            int otherPrivateDirty = memInfo.otherPrivateDirty;
-            int otherSharedClean = memInfo.otherSharedClean;
-            int otherPrivateClean = memInfo.otherPrivateClean;
-            int otherSwappedOut = memInfo.otherSwappedOut;
-
-            for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
-                final int myPss = memInfo.getOtherPss(i);
-                final int mySwappablePss = memInfo.getOtherSwappablePss(i);
-                final int mySharedDirty = memInfo.getOtherSharedDirty(i);
-                final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
-                final int mySharedClean = memInfo.getOtherSharedClean(i);
-                final int myPrivateClean = memInfo.getOtherPrivateClean(i);
-                final int mySwappedOut = memInfo.getOtherSwappedOut(i);
-                if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
-                        || mySharedClean != 0 || myPrivateClean != 0 || mySwappedOut != 0) {
-                    if (dumpFullInfo) {
-                        printRow(pw, HEAP_FULL_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
-                                myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
-                                mySharedClean, myPrivateClean, mySwappedOut, "", "", "");
-                    } else {
-                        printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
-                                myPss, myPrivateDirty,
-                                myPrivateClean, mySwappedOut, "", "", "");
-                    }
-                    otherPss -= myPss;
-                    otherSwappablePss -= mySwappablePss;
-                    otherSharedDirty -= mySharedDirty;
-                    otherPrivateDirty -= myPrivateDirty;
-                    otherSharedClean -= mySharedClean;
-                    otherPrivateClean -= myPrivateClean;
-                    otherSwappedOut -= mySwappedOut;
-                }
-            }
-
-            if (dumpFullInfo) {
-                printRow(pw, HEAP_FULL_COLUMN, "Unknown", otherPss, otherSwappablePss,
-                        otherSharedDirty, otherPrivateDirty, otherSharedClean, otherPrivateClean,
-                        otherSwappedOut, "", "", "");
-                printRow(pw, HEAP_FULL_COLUMN, "TOTAL", memInfo.getTotalPss(),
-                        memInfo.getTotalSwappablePss(),
-                        memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
-                        memInfo.getTotalSharedClean(), memInfo.getTotalPrivateClean(),
-                        memInfo.getTotalSwappedOut(), nativeMax+dalvikMax,
-                        nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
-            } else {
-                printRow(pw, HEAP_COLUMN, "Unknown", otherPss,
-                        otherPrivateDirty, otherPrivateClean, otherSwappedOut,
-                        "", "", "");
-                printRow(pw, HEAP_COLUMN, "TOTAL", memInfo.getTotalPss(),
-                        memInfo.getTotalPrivateDirty(),
-                        memInfo.getTotalPrivateClean(),
-                        memInfo.getTotalSwappedOut(),
-                        nativeMax+dalvikMax,
-                        nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
-            }
-
-            if (dumpDalvik) {
-                pw.println(" ");
-                pw.println(" Dalvik Details");
-
-                for (int i=Debug.MemoryInfo.NUM_OTHER_STATS;
-                     i<Debug.MemoryInfo.NUM_OTHER_STATS + Debug.MemoryInfo.NUM_DVK_STATS; i++) {
-                    final int myPss = memInfo.getOtherPss(i);
-                    final int mySwappablePss = memInfo.getOtherSwappablePss(i);
-                    final int mySharedDirty = memInfo.getOtherSharedDirty(i);
-                    final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
-                    final int mySharedClean = memInfo.getOtherSharedClean(i);
-                    final int myPrivateClean = memInfo.getOtherPrivateClean(i);
-                    final int mySwappedOut = memInfo.getOtherSwappedOut(i);
-                    if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
-                            || mySharedClean != 0 || myPrivateClean != 0) {
-                        if (dumpFullInfo) {
-                            printRow(pw, HEAP_FULL_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
-                                    myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
-                                    mySharedClean, myPrivateClean, mySwappedOut, "", "", "");
-                        } else {
-                            printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
-                                    myPss, myPrivateDirty,
-                                    myPrivateClean, mySwappedOut, "", "", "");
-                        }
-                    }
-                }
             }
 
             pw.println(" ");
@@ -1236,10 +1039,6 @@ public final class ActivityThread {
             cmd.requestToken = requestToken;
             cmd.requestType = requestType;
             sendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
-        }
-
-        private void printRow(PrintWriter pw, String format, Object...objs) {
-            pw.println(String.format(format, objs));
         }
 
         public void setCoreSettings(Bundle coreSettings) {
@@ -1956,6 +1755,223 @@ public final class ActivityThread {
         if ((BinderInternal.getLastGcTime()+MIN_TIME_BETWEEN_GCS) < now) {
             //Slog.i(TAG, "**** WE DO, WE DO WANT TO GC!");
             BinderInternal.forceGc("bg");
+        }
+    }
+
+    private static final String HEAP_FULL_COLUMN
+            = "%13s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s";
+    private static final String HEAP_COLUMN
+            = "%13s %8s %8s %8s %8s %8s %8s %8s";
+
+    // Formatting for checkin service - update version if row format changes
+    private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 3;
+
+    static void printRow(PrintWriter pw, String format, Object...objs) {
+        pw.println(String.format(format, objs));
+    }
+
+    public static void dumpMemInfoTable(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
+            boolean dumpFullInfo, boolean dumpDalvik, int pid, String processName,
+            long nativeMax, long nativeAllocated, long nativeFree,
+            long dalvikMax, long dalvikAllocated, long dalvikFree) {
+
+        // For checkin, we print one long comma-separated list of values
+        if (checkin) {
+            // NOTE: if you change anything significant below, also consider changing
+            // ACTIVITY_THREAD_CHECKIN_VERSION.
+
+            // Header
+            pw.print(ACTIVITY_THREAD_CHECKIN_VERSION); pw.print(',');
+            pw.print(pid); pw.print(',');
+            pw.print(processName); pw.print(',');
+
+            // Heap info - max
+            pw.print(nativeMax); pw.print(',');
+            pw.print(dalvikMax); pw.print(',');
+            pw.print("N/A,");
+            pw.print(nativeMax + dalvikMax); pw.print(',');
+
+            // Heap info - allocated
+            pw.print(nativeAllocated); pw.print(',');
+            pw.print(dalvikAllocated); pw.print(',');
+            pw.print("N/A,");
+            pw.print(nativeAllocated + dalvikAllocated); pw.print(',');
+
+            // Heap info - free
+            pw.print(nativeFree); pw.print(',');
+            pw.print(dalvikFree); pw.print(',');
+            pw.print("N/A,");
+            pw.print(nativeFree + dalvikFree); pw.print(',');
+
+            // Heap info - proportional set size
+            pw.print(memInfo.nativePss); pw.print(',');
+            pw.print(memInfo.dalvikPss); pw.print(',');
+            pw.print(memInfo.otherPss); pw.print(',');
+            pw.print(memInfo.getTotalPss()); pw.print(',');
+
+            // Heap info - swappable set size
+            pw.print(memInfo.nativeSwappablePss); pw.print(',');
+            pw.print(memInfo.dalvikSwappablePss); pw.print(',');
+            pw.print(memInfo.otherSwappablePss); pw.print(',');
+            pw.print(memInfo.getTotalSwappablePss()); pw.print(',');
+
+            // Heap info - shared dirty
+            pw.print(memInfo.nativeSharedDirty); pw.print(',');
+            pw.print(memInfo.dalvikSharedDirty); pw.print(',');
+            pw.print(memInfo.otherSharedDirty); pw.print(',');
+            pw.print(memInfo.getTotalSharedDirty()); pw.print(',');
+
+            // Heap info - shared clean
+            pw.print(memInfo.nativeSharedClean); pw.print(',');
+            pw.print(memInfo.dalvikSharedClean); pw.print(',');
+            pw.print(memInfo.otherSharedClean); pw.print(',');
+            pw.print(memInfo.getTotalSharedClean()); pw.print(',');
+
+            // Heap info - private Dirty
+            pw.print(memInfo.nativePrivateDirty); pw.print(',');
+            pw.print(memInfo.dalvikPrivateDirty); pw.print(',');
+            pw.print(memInfo.otherPrivateDirty); pw.print(',');
+            pw.print(memInfo.getTotalPrivateDirty()); pw.print(',');
+
+            // Heap info - private Clean
+            pw.print(memInfo.nativePrivateClean); pw.print(',');
+            pw.print(memInfo.dalvikPrivateClean); pw.print(',');
+            pw.print(memInfo.otherPrivateClean); pw.print(',');
+            pw.print(memInfo.getTotalPrivateClean()); pw.print(',');
+
+            // Heap info - other areas
+            for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
+                pw.print(Debug.MemoryInfo.getOtherLabel(i)); pw.print(',');
+                pw.print(memInfo.getOtherPss(i)); pw.print(',');
+                pw.print(memInfo.getOtherSwappablePss(i)); pw.print(',');
+                pw.print(memInfo.getOtherSharedDirty(i)); pw.print(',');
+                pw.print(memInfo.getOtherSharedClean(i)); pw.print(',');
+                pw.print(memInfo.getOtherPrivateDirty(i)); pw.print(',');
+                pw.print(memInfo.getOtherPrivateClean(i)); pw.print(',');
+            }
+            return;
+        }
+
+        // otherwise, show human-readable format
+        if (dumpFullInfo) {
+            printRow(pw, HEAP_FULL_COLUMN, "", "Pss", "Pss", "Shared", "Private",
+                    "Shared", "Private", "Swapped", "Heap", "Heap", "Heap");
+            printRow(pw, HEAP_FULL_COLUMN, "", "Total", "Clean", "Dirty", "Dirty",
+                    "Clean", "Clean", "Dirty", "Size", "Alloc", "Free");
+            printRow(pw, HEAP_FULL_COLUMN, "", "------", "------", "------", "------",
+                    "------", "------", "------", "------", "------", "------");
+            printRow(pw, HEAP_FULL_COLUMN, "Native Heap", memInfo.nativePss,
+                    memInfo.nativeSwappablePss, memInfo.nativeSharedDirty,
+                    memInfo.nativePrivateDirty, memInfo.nativeSharedClean,
+                    memInfo.nativePrivateClean, memInfo.nativeSwappedOut,
+                    nativeMax, nativeAllocated, nativeFree);
+            printRow(pw, HEAP_FULL_COLUMN, "Dalvik Heap", memInfo.dalvikPss,
+                    memInfo.dalvikSwappablePss, memInfo.dalvikSharedDirty,
+                    memInfo.dalvikPrivateDirty, memInfo.dalvikSharedClean,
+                    memInfo.dalvikPrivateClean, memInfo.dalvikSwappedOut,
+                    dalvikMax, dalvikAllocated, dalvikFree);
+        } else {
+            printRow(pw, HEAP_COLUMN, "", "Pss", "Private",
+                    "Private", "Swapped", "Heap", "Heap", "Heap");
+            printRow(pw, HEAP_COLUMN, "", "Total", "Dirty",
+                    "Clean", "Dirty", "Size", "Alloc", "Free");
+            printRow(pw, HEAP_COLUMN, "", "------", "------", "------",
+                    "------", "------", "------", "------", "------");
+            printRow(pw, HEAP_COLUMN, "Native Heap", memInfo.nativePss,
+                    memInfo.nativePrivateDirty,
+                    memInfo.nativePrivateClean, memInfo.nativeSwappedOut,
+                    nativeMax, nativeAllocated, nativeFree);
+            printRow(pw, HEAP_COLUMN, "Dalvik Heap", memInfo.dalvikPss,
+                    memInfo.dalvikPrivateDirty,
+                    memInfo.dalvikPrivateClean, memInfo.dalvikSwappedOut,
+                    dalvikMax, dalvikAllocated, dalvikFree);
+        }
+
+        int otherPss = memInfo.otherPss;
+        int otherSwappablePss = memInfo.otherSwappablePss;
+        int otherSharedDirty = memInfo.otherSharedDirty;
+        int otherPrivateDirty = memInfo.otherPrivateDirty;
+        int otherSharedClean = memInfo.otherSharedClean;
+        int otherPrivateClean = memInfo.otherPrivateClean;
+        int otherSwappedOut = memInfo.otherSwappedOut;
+
+        for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
+            final int myPss = memInfo.getOtherPss(i);
+            final int mySwappablePss = memInfo.getOtherSwappablePss(i);
+            final int mySharedDirty = memInfo.getOtherSharedDirty(i);
+            final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
+            final int mySharedClean = memInfo.getOtherSharedClean(i);
+            final int myPrivateClean = memInfo.getOtherPrivateClean(i);
+            final int mySwappedOut = memInfo.getOtherSwappedOut(i);
+            if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
+                    || mySharedClean != 0 || myPrivateClean != 0 || mySwappedOut != 0) {
+                if (dumpFullInfo) {
+                    printRow(pw, HEAP_FULL_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
+                            myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
+                            mySharedClean, myPrivateClean, mySwappedOut, "", "", "");
+                } else {
+                    printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
+                            myPss, myPrivateDirty,
+                            myPrivateClean, mySwappedOut, "", "", "");
+                }
+                otherPss -= myPss;
+                otherSwappablePss -= mySwappablePss;
+                otherSharedDirty -= mySharedDirty;
+                otherPrivateDirty -= myPrivateDirty;
+                otherSharedClean -= mySharedClean;
+                otherPrivateClean -= myPrivateClean;
+                otherSwappedOut -= mySwappedOut;
+            }
+        }
+
+        if (dumpFullInfo) {
+            printRow(pw, HEAP_FULL_COLUMN, "Unknown", otherPss, otherSwappablePss,
+                    otherSharedDirty, otherPrivateDirty, otherSharedClean, otherPrivateClean,
+                    otherSwappedOut, "", "", "");
+            printRow(pw, HEAP_FULL_COLUMN, "TOTAL", memInfo.getTotalPss(),
+                    memInfo.getTotalSwappablePss(),
+                    memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
+                    memInfo.getTotalSharedClean(), memInfo.getTotalPrivateClean(),
+                    memInfo.getTotalSwappedOut(), nativeMax+dalvikMax,
+                    nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
+        } else {
+            printRow(pw, HEAP_COLUMN, "Unknown", otherPss,
+                    otherPrivateDirty, otherPrivateClean, otherSwappedOut,
+                    "", "", "");
+            printRow(pw, HEAP_COLUMN, "TOTAL", memInfo.getTotalPss(),
+                    memInfo.getTotalPrivateDirty(),
+                    memInfo.getTotalPrivateClean(),
+                    memInfo.getTotalSwappedOut(),
+                    nativeMax+dalvikMax,
+                    nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
+        }
+
+        if (dumpDalvik) {
+            pw.println(" ");
+            pw.println(" Dalvik Details");
+
+            for (int i=Debug.MemoryInfo.NUM_OTHER_STATS;
+                 i<Debug.MemoryInfo.NUM_OTHER_STATS + Debug.MemoryInfo.NUM_DVK_STATS; i++) {
+                final int myPss = memInfo.getOtherPss(i);
+                final int mySwappablePss = memInfo.getOtherSwappablePss(i);
+                final int mySharedDirty = memInfo.getOtherSharedDirty(i);
+                final int myPrivateDirty = memInfo.getOtherPrivateDirty(i);
+                final int mySharedClean = memInfo.getOtherSharedClean(i);
+                final int myPrivateClean = memInfo.getOtherPrivateClean(i);
+                final int mySwappedOut = memInfo.getOtherSwappedOut(i);
+                if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
+                        || mySharedClean != 0 || myPrivateClean != 0) {
+                    if (dumpFullInfo) {
+                        printRow(pw, HEAP_FULL_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
+                                myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
+                                mySharedClean, myPrivateClean, mySwappedOut, "", "", "");
+                    } else {
+                        printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
+                                myPss, myPrivateDirty,
+                                myPrivateClean, mySwappedOut, "", "", "");
+                    }
+                }
+            }
         }
     }
 
