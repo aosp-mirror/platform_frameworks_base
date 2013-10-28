@@ -577,16 +577,14 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 operation, workSource);
         removeLocked(operation);
 
-        boolean reschedule;
         int whichBatch = (isStandalone) ? -1 : attemptCoalesceLocked(whenElapsed, maxWhen);
         if (whichBatch < 0) {
             Batch batch = new Batch(a);
             batch.standalone = isStandalone;
-            reschedule = addBatchLocked(mAlarmBatches, batch);
+            addBatchLocked(mAlarmBatches, batch);
         } else {
             Batch batch = mAlarmBatches.get(whichBatch);
-            reschedule = batch.add(a);
-            if (reschedule) {
+            if (batch.add(a)) {
                 // The start time of this batch advanced, so batch ordering may
                 // have just been broken.  Move it to where it now belongs.
                 mAlarmBatches.remove(whichBatch);
@@ -602,13 +600,10 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         + " interval=" + interval + " op=" + operation
                         + " standalone=" + isStandalone);
                 rebatchAllAlarmsLocked(false);
-                reschedule = true;
             }
         }
 
-        if (reschedule) {
-            rescheduleKernelAlarmsLocked();
-        }
+        rescheduleKernelAlarmsLocked();
     }
 
     private void logBatchesLocked() {
