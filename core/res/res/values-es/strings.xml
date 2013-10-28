@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Escribe un código PUK de ocho caracteres o más."</string>
     <string name="needPuk" msgid="919668385956251611">"La tarjeta SIM está bloqueada con el código PUK. Introduce el código PUK para desbloquearla."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Introduce el código PUK2 para desbloquear la tarjeta SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"Error, habilitar bloqueo de SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Te queda <xliff:g id="NUMBER">%d</xliff:g> intento para bloquear la tarjeta SIM."</item>
+    <item quantity="other" msgid="7530597808358774740">"Quedan <xliff:g id="NUMBER">%d</xliff:g> intentos para bloquear la tarjeta SIM."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID de emisor de llamada entrante"</string>
