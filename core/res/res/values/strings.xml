@@ -3901,6 +3901,9 @@
     <!-- Description of the shwoing of a popup window with activities to choose from. [CHAR LIMIT=NONE] -->
     <string name="activitychooserview_choose_application">Choose an app</string>
 
+    <!-- Error message if the share target app cannto be launched. [CHAR LIMIT=NONE] -->
+    <string name="activitychooserview_choose_application_error">Couldn\'t launch <xliff:g id="application_name" example="Acme">%s</xliff:g></string>
+
     <!-- ShareActionProvider - accessibility support -->
     <!-- Description of the choose target button in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] -->
     <string name="shareactionprovider_share_with">Share with</string>

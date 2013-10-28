@@ -16,9 +16,12 @@
 
 package android.widget;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.DataSetObservable;
 import android.os.AsyncTask;
@@ -708,7 +711,12 @@ public class ActivityChooserModel extends DataSetObservable {
             final int resolveInfoCount = resolveInfos.size();
             for (int i = 0; i < resolveInfoCount; i++) {
                 ResolveInfo resolveInfo = resolveInfos.get(i);
-                mActivities.add(new ActivityResolveInfo(resolveInfo));
+                ActivityInfo activityInfo = resolveInfo.activityInfo;
+                if (ActivityManager.checkComponentPermission(activityInfo.permission,
+                        android.os.Process.myUid(), activityInfo.applicationInfo.uid,
+                        activityInfo.exported) == PackageManager.PERMISSION_GRANTED) {
+                    mActivities.add(new ActivityResolveInfo(resolveInfo));
+                }
             }
             return true;
         }
