@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"8-с цөөнгүй тооноос бүтэх PUK-г бичнэ үү."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM картны PUK-түгжигдсэн. Тайлах бол PUK кодыг бичнэ үү."</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM картын хаалтыг болиулах бол PUK2-г бичнэ үү."</string>
+    <string name="enablePin" msgid="209412020907207950">"Амжилтгүй боллоо, СИМ/РҮИМ түгжээг идэвхжүүлнэ үү."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Таны СИМ түгжигдэхээс өмнө танд <xliff:g id="NUMBER">%d</xliff:g> оролдлого хийх боломж үлдлээ."</item>
+    <item quantity="other" msgid="7530597808358774740">"СИМ түгжигдэхээс өмнө танд <xliff:g id="NUMBER">%d</xliff:g> оролдлого хийх боломж үлдлээ."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Дуудлага хийгчийн ID"</string>

@@ -50,6 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"הקלד PUK באורך 8 מספרים או יותר."</string>
     <string name="needPuk" msgid="919668385956251611">"כרטיס ה-SIM נעול באמצעות PUK. הקלד את קוד PUK כדי לבטל את נעילתו."</string>
     <string name="needPuk2" msgid="4526033371987193070">"הקלד PUK2 כדי לבטל את חסימת כרטיס ה-SIM."</string>
+    <string name="enablePin" msgid="209412020907207950">"לא הצלחת. הפעל נעילת SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"נותר לך ניסיון <xliff:g id="NUMBER">%d</xliff:g> לפני נעילת כרטיס ה-SIM."</item>
+    <item quantity="other" msgid="7530597808358774740">"נותרו לך <xliff:g id="NUMBER">%d</xliff:g> ניסיונות לפני נעילת כרטיס ה-SIM."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"זיהוי מתקשר של שיחה נכנסת"</string>
