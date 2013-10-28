@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -24,12 +25,12 @@ import android.graphics.ColorFilter;
 import android.graphics.DashPathEffect;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.graphics.Path;
-import android.graphics.RadialGradient;
 import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -479,7 +480,8 @@ public class GradientDrawable extends Drawable {
             mFillPaint.setAlpha(currFillAlpha);
             mFillPaint.setDither(mDither);
             mFillPaint.setColorFilter(mColorFilter);
-            if (mColorFilter != null && !mGradientState.mHasSolidColor) {
+            if (mColorFilter != null && !mGradientState.mHasSolidColor
+                    && mGradientState.mColorStateList == null) {
                 mFillPaint.setColor(mAlpha << 24);
             }
             if (haveStroke) {
@@ -610,7 +612,7 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * <p>Changes this drawbale to use a single color instead of a gradient.</p>
+     * <p>Changes this drawable to use a single color instead of a gradient.</p>
      * <p><strong>Note</strong>: changing color will affect all instances
      * of a drawable loaded from a resource. It is recommended to invoke
      * {@link #mutate()} before changing the color.</p>
@@ -624,6 +626,45 @@ public class GradientDrawable extends Drawable {
         mGradientState.setSolidColor(argb);
         mFillPaint.setColor(argb);
         invalidateSelf();
+    }
+
+    /**
+     * Changes this drawable to use a single color state list instead of a
+     * gradient.
+     * <p>
+     * <strong>Note</strong>: changing color will affect all instances of a
+     * drawable loaded from a resource. It is recommended to invoke
+     * {@link #mutate()} before changing the color.</p>
+     *
+     * @param colorStateList The color state list used to fill the shape
+     * @see #mutate()
+     */
+    public void setColor(ColorStateList colorStateList) {
+        final int color = colorStateList.getColorForState(getState(), 0);
+        mGradientState.setColorStateList(colorStateList);
+        mFillPaint.setColor(color);
+        invalidateSelf();
+    }
+
+    @Override
+    public boolean setState(int[] stateSet) {
+        final ColorStateList stateList = mGradientState.mColorStateList;
+        if (stateList != null) {
+            final int newColor = stateList.getColorForState(stateSet, 0);
+            final int oldColor = mFillPaint.getColor();
+            if (oldColor != newColor) {
+                mFillPaint.setColor(newColor);
+                invalidateSelf();
+                return true;
+            }
+        }
+
+        return super.setState(stateSet);
+    }
+
+    @Override
+    public boolean isStateful() {
+        return super.isStateful() || mGradientState.mColorStateList != null;
     }
 
     @Override
@@ -791,7 +832,7 @@ public class GradientDrawable extends Drawable {
 
                 // If we don't have a solid color, the alpha channel must be
                 // maxed out so that alpha modulation works correctly.
-                if (!st.mHasSolidColor) {
+                if (!st.mHasSolidColor && st.mColorStateList == null) {
                     mFillPaint.setColor(Color.BLACK);
                 }
             }
@@ -967,10 +1008,10 @@ public class GradientDrawable extends Drawable {
             } else if (name.equals("solid")) {
                 a = r.obtainAttributes(attrs,
                         com.android.internal.R.styleable.GradientDrawableSolid);
-                int argb = a.getColor(
-                        com.android.internal.R.styleable.GradientDrawableSolid_color, 0);
+                final ColorStateList colorStateList = a.getColorStateList(
+                        com.android.internal.R.styleable.GradientDrawableSolid_color);
                 a.recycle();
-                setColor(argb);
+                setColor(colorStateList);
             } else if (name.equals("stroke")) {
                 a = r.obtainAttributes(attrs,
                         com.android.internal.R.styleable.GradientDrawableStroke);
@@ -1077,6 +1118,7 @@ public class GradientDrawable extends Drawable {
         public int mShape = RECTANGLE;
         public int mGradient = LINEAR_GRADIENT;
         public Orientation mOrientation;
+        public ColorStateList mColorStateList;
         public int[] mColors;
         public int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
@@ -1113,6 +1155,7 @@ public class GradientDrawable extends Drawable {
             mShape = state.mShape;
             mGradient = state.mGradient;
             mOrientation = state.mOrientation;
+            mColorStateList = state.mColorStateList;
             if (state.mColors != null) {
                 mColors = state.mColors.clone();
             }
@@ -1178,6 +1221,7 @@ public class GradientDrawable extends Drawable {
         public void setColors(int[] colors) {
             mHasSolidColor = false;
             mColors = colors;
+            mColorStateList = null;
             computeOpacity();
         }
         
@@ -1185,6 +1229,14 @@ public class GradientDrawable extends Drawable {
             mHasSolidColor = true;
             mSolidColor = argb;
             mColors = null;
+            mColorStateList = null;
+            computeOpacity();
+        }
+
+        public void setColorStateList(ColorStateList colorStateList) {
+            mHasSolidColor = false;
+            mColors = null;
+            mColorStateList = colorStateList;
             computeOpacity();
         }
 
@@ -1203,7 +1255,12 @@ public class GradientDrawable extends Drawable {
                 mOpaque = false;
                 return;
             }
-            
+
+            if (mColorStateList != null && !isOpaque(mColorStateList)) {
+                mOpaque = false;
+                return;
+            }
+
             if (mHasSolidColor) {
                 mOpaque = isOpaque(mSolidColor);
                 return;
@@ -1223,6 +1280,16 @@ public class GradientDrawable extends Drawable {
 
         private static boolean isOpaque(int color) {
             return ((color >> 24) & 0xff) == 0xff;
+        }
+
+        private static boolean isOpaque(ColorStateList colors) {
+            final int n = colors.getCount();
+            for (int i = 0; i < n; i++) {
+                if (!isOpaque(colors.getColorAt(i))) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void setStroke(int width, int color) {
@@ -1274,6 +1341,10 @@ public class GradientDrawable extends Drawable {
     private void initializeWithState(GradientState state) {
         if (state.mHasSolidColor) {
             mFillPaint.setColor(state.mSolidColor);
+        } else if (state.mColorStateList != null) {
+            final int[] currentState = getState();
+            final int stateColor = state.mColorStateList.getColorForState(currentState, 0);
+            mFillPaint.setColor(stateColor);
         } else if (state.mColors == null) {
             // If we don't have a solid color and we don't have a gradient,
             // the app is stroking the shape, set the color to the default
