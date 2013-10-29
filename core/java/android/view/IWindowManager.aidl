@@ -211,7 +211,7 @@ interface IWindowManager
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
-    void statusBarVisibilityChanged(int visibility);
+    oneway void statusBarVisibilityChanged(int visibility);
 
     /**
      * Block until the given window has been drawn to the screen.
