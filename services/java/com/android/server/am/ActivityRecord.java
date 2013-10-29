@@ -143,6 +143,7 @@ final class ActivityRecord {
 
     private boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
+    boolean mStartingWindowShown = false;
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();

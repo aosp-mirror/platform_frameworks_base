@@ -256,9 +256,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
-    /** Amount of time (in milliseconds) to delay before declaring a starting window leaked. */
-    static final int STARTING_WINDOW_TIMEOUT_DURATION = 10000;
-
     /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
@@ -2268,8 +2265,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.appWindowToken.startingWindow = win;
                 if (DEBUG_STARTING_WINDOW) Slog.v (TAG, "addWindow: " + token.appWindowToken
                         + " startingWindow=" + win);
-                Message m = mH.obtainMessage(H.REMOVE_STARTING_TIMEOUT, token.appWindowToken);
-                mH.sendMessageDelayed(m, STARTING_WINDOW_TIMEOUT_DURATION);
             }
 
             boolean imMayMove = true;
@@ -2372,7 +2367,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public void removeWindowLocked(Session session, WindowState win) {
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "Starting window removed " + win);
-            removeStartingWindowTimeout(win.mAppToken);
         }
 
         if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && win==mCurrentFocus) Slog.v(
@@ -2516,7 +2510,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (atoken != null) {
             if (atoken.startingWindow == win) {
                 if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Nulling startingWindow " + win);
-                removeStartingWindowTimeout(atoken);
                 atoken.startingWindow = null;
             } else if (atoken.allAppWindows.size() == 0 && atoken.startingData != null) {
                 // If this is the last window and we had requested a starting
@@ -3983,7 +3976,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) {
                             Slog.v(TAG, "Removing starting window: " + startingWindow);
                         }
-                        removeStartingWindowTimeout(ttoken);
                         startingWindow.getWindowList().remove(startingWindow);
                         mWindowsChanged = true;
                         if (DEBUG_ADD_REMOVE) Slog.v(TAG,
@@ -4127,6 +4119,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // messages.
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Enqueueing ADD_STARTING");
             mH.sendMessageAtFrontOfQueue(m);
+        }
+    }
+
+    public void removeAppStartingWindow(IBinder token) {
+        synchronized (mWindowMap) {
+            AppWindowToken wtoken = mTokenMap.get(token).appWindowToken;
+            if (wtoken.startingWindow != null) {
+                scheduleRemoveStartingWindow(wtoken);
+            }
         }
     }
 
@@ -4551,21 +4552,11 @@ public class WindowManagerService extends IWindowManager.Stub
         scheduleRemoveStartingWindow(startingToken);
     }
 
-    void removeStartingWindowTimeout(AppWindowToken wtoken) {
-        if (wtoken != null) {
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, Debug.getCallers(1) +
-                    ": Remove starting window timeout " + wtoken + (wtoken != null ?
-                    " startingWindow=" + wtoken.startingWindow : ""));
-            mH.removeMessages(H.REMOVE_STARTING_TIMEOUT, wtoken);
-        }
-    }
-
     void scheduleRemoveStartingWindow(AppWindowToken wtoken) {
         if (wtoken != null && wtoken.startingWindow != null) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG, Debug.getCallers(1) +
                     ": Schedule remove starting " + wtoken + (wtoken != null ?
                     " startingWindow=" + wtoken.startingWindow : ""));
-            removeStartingWindowTimeout(wtoken);
             Message m = mH.obtainMessage(H.REMOVE_STARTING, wtoken);
             mH.sendMessage(m);
         }
@@ -7072,8 +7063,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int TAP_OUTSIDE_STACK = 31;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
-        public static final int REMOVE_STARTING_TIMEOUT = 33;
-
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7172,7 +7161,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                             "Aborted starting " + wtoken
                                             + ": removed=" + wtoken.removed
                                             + " startingData=" + wtoken.startingData);
-                                    removeStartingWindowTimeout(wtoken);
                                     wtoken.startingWindow = null;
                                     wtoken.startingData = null;
                                     abort = true;
@@ -7197,11 +7185,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 } break;
 
-                case REMOVE_STARTING_TIMEOUT: {
-                    final AppWindowToken wtoken = (AppWindowToken)msg.obj;
-                    Slog.e(TAG, "Starting window " + wtoken + " timed out");
-                    // Fall through.
-                }
                 case REMOVE_STARTING: {
                     final AppWindowToken wtoken = (AppWindowToken)msg.obj;
                     IBinder token = null;
