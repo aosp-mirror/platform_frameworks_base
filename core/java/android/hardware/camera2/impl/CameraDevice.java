@@ -19,27 +19,24 @@ package android.hardware.camera2.impl;
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
@@ -48,6 +45,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     private final String TAG;
     private final boolean DEBUG;
+
+    private static final int REQUEST_ID_NONE = -1;
 
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUser mRemoteDevice;
@@ -63,7 +62,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     private final SparseArray<CaptureListenerHolder> mCaptureListenerMap =
             new SparseArray<CaptureListenerHolder>();
 
-    private final Stack<Integer> mRepeatingRequestIdStack = new Stack<Integer>();
+    private int mRepeatingRequestId = REQUEST_ID_NONE;
+    private final ArrayList<Integer> mRepeatingRequestIdDeletedList = new ArrayList<Integer>();
     // Map stream IDs to Surfaces
     private final SparseArray<Surface> mConfiguredOutputs = new SparseArray<Surface>();
 
@@ -186,7 +186,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             stopRepeating();
 
             try {
-                mRemoteDevice.waitUntilIdle();
+                waitUntilIdle();
 
                 // TODO: mRemoteDevice.beginConfigure
                 // Delete all streams first (to free up HW resources)
@@ -293,7 +293,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             }
 
             if (repeating) {
-                mRepeatingRequestIdStack.add(requestId);
+                // Queue for deletion after in-flight requests finish
+                if (mRepeatingRequestId != REQUEST_ID_NONE) {
+                    mRepeatingRequestIdDeletedList.add(mRepeatingRequestId);
+                }
+                mRepeatingRequestId = requestId;
             }
 
             if (mIdle) {
@@ -327,8 +331,13 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
         synchronized (mLock) {
             checkIfCameraClosed();
-            while (!mRepeatingRequestIdStack.isEmpty()) {
-                int requestId = mRepeatingRequestIdStack.pop();
+            if (mRepeatingRequestId != REQUEST_ID_NONE) {
+
+                int requestId = mRepeatingRequestId;
+                mRepeatingRequestId = REQUEST_ID_NONE;
+
+                // Queue for deletion after in-flight requests finish
+                mRepeatingRequestIdDeletedList.add(requestId);
 
                 try {
                     mRemoteDevice.cancelRequest(requestId);
@@ -347,7 +356,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
         synchronized (mLock) {
             checkIfCameraClosed();
-            if (!mRepeatingRequestIdStack.isEmpty()) {
+            if (mRepeatingRequestId != REQUEST_ID_NONE) {
                 throw new IllegalStateException("Active repeating request ongoing");
             }
 
@@ -359,6 +368,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // impossible
                 return;
             }
+
+            mRepeatingRequestId = REQUEST_ID_NONE;
+            mRepeatingRequestIdDeletedList.clear();
+            mCaptureListenerMap.clear();
         }
     }
 
@@ -572,13 +585,28 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
 
                 // Clean up listener once we no longer expect to see it.
-
-                // TODO: how to handle repeating listeners?
-                // we probably want cancelRequest to return # of times it already enqueued and
-                // keep a counter.
                 if (holder != null && !holder.isRepeating()) {
                     CameraDevice.this.mCaptureListenerMap.remove(requestId);
                 }
+
+                // TODO: add 'capture sequence completed' callback to the
+                // service, and clean up repeating requests there instead.
+
+                // If we received a result for a repeating request and have
+                // prior repeating requests queued for deletion, remove those
+                // requests from mCaptureListenerMap.
+                if (holder != null && holder.isRepeating()
+                        && mRepeatingRequestIdDeletedList.size() > 0) {
+                    Iterator<Integer> iter = mRepeatingRequestIdDeletedList.iterator();
+                    while (iter.hasNext()) {
+                        int deletedRequestId = iter.next();
+                        if (deletedRequestId < requestId) {
+                            CameraDevice.this.mCaptureListenerMap.remove(deletedRequestId);
+                            iter.remove();
+                        }
+                    }
+                }
+
             }
 
             // Check if we have a listener for this
