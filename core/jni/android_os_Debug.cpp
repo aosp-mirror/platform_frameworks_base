@@ -335,6 +335,7 @@ static jint read_binder_stat(const char* stat)
     // loop until we have the block that represents this process
     do {
         if (fgets(line, 1024, fp) == 0) {
+            fclose(fp);
             return -1;
         }
     } while (strncmp(compare, line, len));
@@ -344,13 +345,16 @@ static jint read_binder_stat(const char* stat)
 
     do {
         if (fgets(line, 1024, fp) == 0) {
+            fclose(fp);
             return -1;
         }
     } while (strncmp(compare, line, len));
 
     // we have the line, now increment the line ptr to the value
     char* ptr = line + len;
-    return atoi(ptr);
+    jint result = atoi(ptr);
+    fclose(fp);
+    return result;
 }
 
 static jint android_os_Debug_getBinderSentTransactions(JNIEnv *env, jobject clazz)
