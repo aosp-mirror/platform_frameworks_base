@@ -159,8 +159,8 @@ status_t BootAnimation::initTexture(void* buffer, size_t len)
     SkBitmap bitmap;
     SkMemoryStream  stream(buffer, len);
     SkImageDecoder* codec = SkImageDecoder::Factory(&stream);
-    codec->setDitherImage(false);
     if (codec) {
+        codec->setDitherImage(false);
         codec->decode(&stream, &bitmap,
                 SkBitmap::kARGB_8888_Config,
                 SkImageDecoder::kDecodePixels_Mode);
@@ -270,7 +270,7 @@ status_t BootAnimation::readyToRun() {
 
     mAndroidAnimation = true;
 
-    // If the device has encryption turned on or is in process 
+    // If the device has encryption turned on or is in process
     // of being encrypted we show the encrypted boot animation.
     char decrypt[PROPERTY_VALUE_MAX];
     property_get("vold.decrypt", decrypt, "");
