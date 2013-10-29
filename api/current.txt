@@ -23475,7 +23475,7 @@ package android.speech.tts {
     method public android.os.Bundle getAudioParams();
     method public java.lang.String getText();
     method public java.lang.String getUtteranceId();
-    method public int getVoiceId();
+    method public java.lang.String getVoiceName();
     method public android.os.Bundle getVoiceParams();
     method public void writeToParcel(android.os.Parcel, int);
   }
@@ -23595,7 +23595,7 @@ package android.speech.tts {
     field public static final java.lang.String AUDIO_PARAM_PAN = "pan";
     field public static final java.lang.String AUDIO_PARAM_STREAM = "streamType";
     field public static final java.lang.String AUDIO_PARAM_VOLUME = "volume";
-    field public static final java.lang.String FALLBACK_VOICE_ID = "fallbackVoiceId";
+    field public static final java.lang.String FALLBACK_VOICE_NAME = "fallbackVoiceName";
     field public static final java.lang.String NETWORK_RETRIES_COUNT = "networkRetriesCount";
     field public static final java.lang.String NETWORK_TIMEOUT_MS = "networkTimeoutMs";
     field public static final java.lang.String SPEECH_PITCH = "speechPitch";
@@ -23637,7 +23637,7 @@ package android.speech.tts {
     ctor public TextToSpeechService();
     method protected java.util.List<android.speech.tts.VoiceInfo> checkVoicesInfo();
     method public void forceVoicesInfoCheck();
-    method public android.speech.tts.VoiceInfo getVoicesInfoWithId(int);
+    method public android.speech.tts.VoiceInfo getVoicesInfoWithName(java.lang.String);
     method protected boolean implementsV2API();
     method public android.os.IBinder onBind(android.content.Intent);
     method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
@@ -23660,9 +23660,9 @@ package android.speech.tts {
   public final class VoiceInfo implements android.os.Parcelable {
     method public int describeContents();
     method public android.os.Bundle getAdditionalFeatures();
-    method public int getId();
     method public int getLatency();
     method public java.util.Locale getLocale();
+    method public java.lang.String getName();
     method public android.os.Bundle getParamsWithDefaults();
     method public int getQuality();
     method public boolean getRequiresNetworkConnection();
@@ -23687,9 +23687,9 @@ package android.speech.tts {
     ctor public VoiceInfo.Builder(android.speech.tts.VoiceInfo);
     method public android.speech.tts.VoiceInfo build();
     method public android.speech.tts.VoiceInfo.Builder setAdditionalFeatures(android.os.Bundle);
-    method public android.speech.tts.VoiceInfo.Builder setId(int);
     method public android.speech.tts.VoiceInfo.Builder setLatency(int);
     method public android.speech.tts.VoiceInfo.Builder setLocale(java.util.Locale);
+    method public android.speech.tts.VoiceInfo.Builder setName(java.lang.String);
     method public android.speech.tts.VoiceInfo.Builder setParamsWithDefaults(android.os.Bundle);
     method public android.speech.tts.VoiceInfo.Builder setQuality(int);
     method public android.speech.tts.VoiceInfo.Builder setRequiresNetworkConnection(boolean);

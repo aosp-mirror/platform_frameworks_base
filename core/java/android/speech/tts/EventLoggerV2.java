@@ -65,7 +65,7 @@ class EventLoggerV2 extends AbstractEventLogger {
         mRequest.getVoiceParams().size();
         mRequest.getAudioParams().size();
 
-        return new StringBuilder(64).append("VoiceId: ").append(mRequest.getVoiceId())
+        return new StringBuilder(64).append("VoiceName: ").append(mRequest.getVoiceName())
             .append(" ,VoiceParams: ").append(mRequest.getVoiceParams())
             .append(" ,SystemParams: ").append(mRequest.getAudioParams())
             .append("]").toString();

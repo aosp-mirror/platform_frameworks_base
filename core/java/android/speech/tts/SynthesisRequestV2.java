@@ -10,7 +10,7 @@ import android.speech.tts.TextToSpeechClient.UtteranceId;
  * <ul>
  *   <li>The utterance to synthesize</li>
  *   <li>The id of the utterance (String, result of {@link UtteranceId#toUniqueString()}</li>
- *   <li>The synthesis voice ID (Integer, result of {@link VoiceInfo#getId()})</li>
+ *   <li>The synthesis voice name (String, result of {@link VoiceInfo#getName()})</li>
  *   <li>Voice parameters (Bundle of parameters)</li>
  *   <li>Audio parameters (Bundle of parameters)</li>
  * </ul>
@@ -23,7 +23,7 @@ public final class SynthesisRequestV2 implements Parcelable {
     private final String mUtteranceId;
 
     /** Voice ID. */
-    private final int mVoiceId;
+    private final String mVoiceName;
 
     /** Voice Parameters. */
     private final Bundle mVoiceParams;
@@ -39,7 +39,7 @@ public final class SynthesisRequestV2 implements Parcelable {
     public SynthesisRequestV2(Parcel in) {
         this.mText = in.readString();
         this.mUtteranceId = in.readString();
-        this.mVoiceId = in.readInt();
+        this.mVoiceName = in.readString();
         this.mVoiceParams = in.readBundle();
         this.mAudioParams = in.readBundle();
     }
@@ -47,7 +47,7 @@ public final class SynthesisRequestV2 implements Parcelable {
     SynthesisRequestV2(String text, String utteranceId, RequestConfig rconfig) {
         this.mText = text;
         this.mUtteranceId = utteranceId;
-        this.mVoiceId = rconfig.getVoice().getId();
+        this.mVoiceName = rconfig.getVoice().getName();
         this.mVoiceParams = rconfig.getVoiceParams();
         this.mAudioParams = rconfig.getAudioParams();
     }
@@ -61,7 +61,7 @@ public final class SynthesisRequestV2 implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mText);
         dest.writeString(mUtteranceId);
-        dest.writeInt(mVoiceId);
+        dest.writeString(mVoiceName);
         dest.writeBundle(mVoiceParams);
         dest.writeBundle(mAudioParams);
     }
@@ -83,11 +83,11 @@ public final class SynthesisRequestV2 implements Parcelable {
     }
 
     /**
-     * @return the id of the voice to use for this synthesis request. Result of a call to
-     * the {@link VoiceInfo#getId()} method.
+     * @return the name of the voice to use for this synthesis request. Result of a call to
+     * the {@link VoiceInfo#getName()} method.
      */
-    public int getVoiceId() {
-        return mVoiceId;
+    public String getVoiceName() {
+        return mVoiceName;
     }
 
     /**

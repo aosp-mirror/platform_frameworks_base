@@ -10,11 +10,12 @@ import java.util.Locale;
  * Characteristics and features of a Text-To-Speech Voice. Each TTS Engine can expose
  * multiple voices for multiple locales, with different set of features.
  *
- * Each VoiceInfo has an unique ID. This ID can be obtained using the {@link #getId()} method and
- * will persist until the client is asked to re-evaluate the list of available voices in the
+ * Each VoiceInfo has an unique name. This name can be obtained using the {@link #getName()} method
+ * and will persist until the client is asked to re-evaluate the list of available voices in the
  * {@link TextToSpeechClient.ConnectionCallbacks#onEngineStatusChange(android.speech.tts.TextToSpeechClient.EngineStatus)}
- * callback. The id can be used to reference a VoiceInfo in an instance of {@link RequestConfig};
- * the {@link TextToSpeechClient.Params#FALLBACK_VOICE_ID} voice parameter is an example of this.
+ * callback. The name can be used to reference a VoiceInfo in an instance of {@link RequestConfig};
+ * the {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME} voice parameter is an example of this.
+ * It is recommended that the voice name never change during the TTS service lifetime.
  */
 public final class VoiceInfo implements Parcelable {
     /** Very low, but still intelligible quality of speech synthesis */
@@ -60,16 +61,16 @@ public final class VoiceInfo implements Parcelable {
      *
      * Making a request with a voice that has this feature may result in a
      * {@link TextToSpeechClient.Status#ERROR_DOWNLOADING_ADDITIONAL_DATA} error. It's recommended
-     * to set the {@link TextToSpeechClient.Params#FALLBACK_VOICE_ID} voice parameter to reference
+     * to set the {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME} voice parameter to reference
      * a fully installed voice (or network voice) that can serve as replacement.
      *
      * Note: It's a good practice for a TTS engine to provide a sensible fallback voice as the
-     * default value for {@link TextToSpeechClient.Params#FALLBACK_VOICE_ID} parameter if this
+     * default value for {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME} parameter if this
      * feature is present.
      */
     public static final String FEATURE_MAY_AUTOINSTALL = "mayAutoInstall";
 
-    private final int id;
+    private final String mName;
     private final Locale mLocale;
     private final int mQuality;
     private final int mLatency;
@@ -78,7 +79,7 @@ public final class VoiceInfo implements Parcelable {
     private final Bundle mAdditionalFeatures;
 
     private VoiceInfo(Parcel in) {
-        this.id = in.readInt();
+        this.mName = in.readString();
         String[] localesData = new String[3];
         in.readStringArray(localesData);
         this.mLocale = new Locale(localesData[0], localesData[1], localesData[2]);
@@ -91,14 +92,14 @@ public final class VoiceInfo implements Parcelable {
         this.mAdditionalFeatures = in.readBundle();
     }
 
-    private VoiceInfo(int id,
+    private VoiceInfo(String name,
             Locale locale,
             int quality,
             int latency,
             boolean requiresNetworkConnection,
             Bundle params,
             Bundle additionalFeatures) {
-        this.id = id;
+        this.mName = name;
         this.mLocale = locale;
         this.mQuality = quality;
         this.mLatency = latency;
@@ -109,7 +110,7 @@ public final class VoiceInfo implements Parcelable {
 
     /** Builder, allows TTS engines to create VoiceInfo instances. */
     public static final class Builder {
-        private int id;
+        private String name;
         private Locale locale;
         private int quality = VoiceInfo.QUALITY_NORMAL;
         private int latency = VoiceInfo.LATENCY_NORMAL;
@@ -125,7 +126,7 @@ public final class VoiceInfo implements Parcelable {
          * Copy fields from given VoiceInfo instance.
          */
         public Builder(VoiceInfo voiceInfo) {
-            this.id = voiceInfo.id;
+            this.name = voiceInfo.mName;
             this.locale = voiceInfo.mLocale;
             this.quality = voiceInfo.mQuality;
             this.latency = voiceInfo.mLatency;
@@ -135,11 +136,14 @@ public final class VoiceInfo implements Parcelable {
         }
 
         /**
-         * Sets the voice's unique ID. It will be used by clients to name the voice used by a
+         * Sets the voice's unique name. It will be used by clients to reference the voice used by a
          * request.
+         *
+         * It's recommended that each voice use the same consistent name during the TTS service
+         * lifetime.
          */
-        public Builder setId(int id) {
-            this.id = id;
+        public Builder setName(String name) {
+            this.name = name;
             return this;
         }
 
@@ -196,14 +200,17 @@ public final class VoiceInfo implements Parcelable {
         }
 
         /**
-         * @return The built VoiceInfo instance
+         * @return The built VoiceInfo instance.
          */
         public VoiceInfo build() {
+            if (name == null || name.isEmpty()) {
+                throw new IllegalStateException("Name can't be null or empty");
+            }
             if (locale == null) {
                 throw new IllegalStateException("Locale can't be null");
             }
 
-            return new VoiceInfo(id, locale, quality, latency,
+            return new VoiceInfo(name, locale, quality, latency,
                         requiresNetworkConnection,
                         ((params == null) ? new Bundle() :
                             (Bundle)params.clone()),
@@ -225,7 +232,7 @@ public final class VoiceInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeString(mName);
         String[] localesData = new String[]{mLocale.getLanguage(), mLocale.getCountry(), mLocale.getVariant()};
         dest.writeStringArray(localesData);
         dest.writeInt(mQuality);
@@ -286,14 +293,14 @@ public final class VoiceInfo implements Parcelable {
     }
 
     /**
-     * @return Unique voice identifier.
+     * @return Unique voice name.
      *
-     * Each VoiceInfo has an unique ID, that persists until client is asked to re-evaluate the
+     * Each VoiceInfo has an unique name, that persists until client is asked to re-evaluate the
      * set of the available languages in the {@link TextToSpeechClient.ConnectionCallbacks#onEngineStatusChange(android.speech.tts.TextToSpeechClient.EngineStatus)}
-     * callback.
+     * callback (Voice may disappear from the set if voice was removed by the user).
      */
-    public int getId() {
-        return id;
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -306,7 +313,7 @@ public final class VoiceInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(64);
-        return builder.append("VoiceInfo[Id: ").append(id)
+        return builder.append("VoiceInfo[Name: ").append(mName)
                 .append(" ,locale: ").append(mLocale)
                 .append(" ,quality: ").append(mQuality)
                 .append(" ,latency: ").append(mLatency)
