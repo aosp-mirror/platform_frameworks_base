@@ -19,7 +19,6 @@ package android.widget;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
@@ -291,11 +290,8 @@ public class VideoView extends SurfaceView
             // not ready for playback just yet, will try again later
             return;
         }
-        // Tell the music playback service to pause
-        // TODO: these constants need to be published somewhere in the framework.
-        Intent i = new Intent("com.android.music.musicservicecommand");
-        i.putExtra("command", "pause");
-        mContext.sendBroadcast(i);
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
         // we shouldn't clear the target state, because somebody might have
         // called start() previously
