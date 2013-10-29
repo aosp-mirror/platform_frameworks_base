@@ -116,7 +116,7 @@ public interface SynthesisCallback {
      * fallback is happening.
      *
      * Fallback can be requested by the client by setting
-     * {@link TextToSpeechClient.Params#FALLBACK_VOICE_ID} voice parameter with a id of
+     * {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME} voice parameter with a id of
      * the voice that is expected to be used for the fallback.
      *
      * This method will fail if user called {@link #start(int, int, int)} and/or
