@@ -57,6 +57,9 @@ public class TestDocumentsProvider extends DocumentsProvider {
 
     private static final boolean LAG = false;
 
+    private static final boolean ROOT_LAME_PROJECTION = false;
+    private static final boolean DOCUMENT_LAME_PROJECTION = false;
+
     private static final boolean ROOTS_WEDGE = false;
     private static final boolean ROOTS_CRASH = false;
     private static final boolean ROOTS_REFRESH = false;
@@ -88,10 +91,12 @@ public class TestDocumentsProvider extends DocumentsProvider {
     };
 
     private static String[] resolveRootProjection(String[] projection) {
+        if (ROOT_LAME_PROJECTION) return new String[0];
         return projection != null ? projection : DEFAULT_ROOT_PROJECTION;
     }
 
     private static String[] resolveDocumentProjection(String[] projection) {
+        if (DOCUMENT_LAME_PROJECTION) return new String[0];
         return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
     }
 
