@@ -68,6 +68,8 @@ public class KeyguardService extends Service {
     }
 
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
+        private boolean mSetHiddenCalled;
+        private boolean mIsHidden;
         public boolean isShowing() {
             return mKeyguardViewMediator.isShowing();
         }
@@ -89,7 +91,10 @@ public class KeyguardService extends Service {
         }
         public void setHidden(boolean isHidden) {
             checkPermission();
+            if (mSetHiddenCalled && mIsHidden == isHidden) return;
             mKeyguardViewMediator.setHidden(isHidden);
+            mSetHiddenCalled = true;
+            mIsHidden = isHidden;
         }
         public void dismiss() {
             mKeyguardViewMediator.dismiss();
