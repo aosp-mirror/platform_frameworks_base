@@ -392,6 +392,7 @@
   <java-symbol type="string" name="accessibility_enabled" />
   <java-symbol type="string" name="activity_chooser_view_see_all" />
   <java-symbol type="string" name="activitychooserview_choose_application" />
+  <java-symbol type="string" name="activitychooserview_choose_application_error" />
   <java-symbol type="string" name="alternate_eri_file" />
   <java-symbol type="string" name="alwaysUse" />
   <java-symbol type="string" name="autofill_address_line_1_label_re" />
