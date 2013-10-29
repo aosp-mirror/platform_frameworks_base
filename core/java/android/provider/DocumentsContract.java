@@ -34,6 +34,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.RemoteException;
@@ -670,7 +671,9 @@ public final class DocumentsContract {
         try {
             return getDocumentThumbnail(client, documentUri, size, signal);
         } catch (Exception e) {
-            Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
+            if (!(e instanceof OperationCanceledException)) {
+                Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
+            }
             return null;
         } finally {
             ContentProviderClient.releaseQuietly(client);
