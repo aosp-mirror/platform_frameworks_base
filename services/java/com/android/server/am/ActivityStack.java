@@ -61,7 +61,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -121,8 +120,7 @@ final class ActivityStack {
     // convertToTranslucent().
     static final long TRANSLUCENT_CONVERSION_TIMEOUT = 2000;
 
-    static final boolean SCREENSHOT_FORCE_565 = ActivityManager
-            .isLowRamDeviceStatic() ? true : false;
+    static final boolean SCREENSHOT_FORCE_565 = ActivityManager.isLowRamDeviceStatic();
 
     enum ActivityState {
         INITIALIZING,
@@ -398,8 +396,9 @@ final class ActivityStack {
         // be simplified once we stop storing tasks with empty mActivities lists.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                return activities.get(activityNdx);
+            final int topActivityNdx = activities.size() - 1;
+            if (topActivityNdx >= 0) {
+                return activities.get(topActivityNdx);
             }
         }
         return null;
@@ -434,25 +433,6 @@ final class ActivityStack {
             }
         }
         return null;
-    }
-
-    boolean containsApp(ProcessRecord app) {
-        if (app == null) {
-            return false;
-        }
-        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                if (r.finishing) {
-                    continue;
-                }
-                if (r.app == app) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     final boolean updateLRUListLocked(ActivityRecord r) {
@@ -1231,6 +1211,32 @@ final class ActivityStack {
         }
     }
 
+    /** If any activities below the top running one are in the INITIALIZING state and they have a
+     * starting window displayed then remove that starting window. It is possible that the activity
+     * in this state will never resumed in which case that starting window will be orphaned. */
+    void cancelInitializingActivities() {
+        final ActivityRecord topActivity = topRunningActivityLocked(null);
+        boolean aboveTop = true;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (aboveTop) {
+                    if (r == topActivity) {
+                        aboveTop = false;
+                    }
+                    continue;
+                }
+
+                if (r.state == ActivityState.INITIALIZING && r.mStartingWindowShown) {
+                    if (DEBUG_VISBILITY) Slog.w(TAG, "Found orphaned starting window " + r);
+                    r.mStartingWindowShown = false;
+                    mWindowManager.removeAppStartingWindow(r.appToken);
+                }
+            }
+        }
+    }
+
     /**
      * Ensure that the top activity in the stack is resumed.
      *
@@ -1246,6 +1252,8 @@ final class ActivityStack {
 
     final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
+
+        cancelInitializingActivities();
 
         // Find the first activity that is not finishing.
         ActivityRecord next = topRunningActivityLocked(null);
@@ -1811,6 +1819,7 @@ final class ActivityStack {
                                 r.info.applicationInfo), r.nonLocalizedLabel,
                         r.labelRes, r.icon, r.logo, r.windowFlags,
                         prev != null ? prev.appToken : null, showStartingIcon);
+                r.mStartingWindowShown = true;
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
