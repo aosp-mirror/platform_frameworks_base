@@ -5635,7 +5635,13 @@ public final class ViewRootImpl implements ViewParent,
         if (mConsumeBatchedInputScheduled) {
             mConsumeBatchedInputScheduled = false;
             if (mInputEventReceiver != null) {
-                mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos);
+                if (mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos)) {
+                    // If we consumed a batch here, we want to go ahead and schedule the
+                    // consumption of batched input events on the next frame. Otherwise, we would
+                    // wait until we have more input events pending and might get starved by other
+                    // things occurring in the process.
+                    scheduleConsumeBatchedInput();
+                }
             }
             doProcessInputEvents();
         }
