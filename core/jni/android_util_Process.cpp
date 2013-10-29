@@ -422,7 +422,7 @@ static int pid_compare(const void* v1, const void* v2)
     return *((const jint*)v1) - *((const jint*)v2);
 }
 
-static jlong getFreeMemoryImpl(const char* const sums[], const int sumsLen[], int num)
+static jlong getFreeMemoryImpl(const char* const sums[], const size_t sumsLen[], size_t num)
 {
     int fd = open("/proc/meminfo", O_RDONLY);
 
@@ -441,7 +441,7 @@ static jlong getFreeMemoryImpl(const char* const sums[], const int sumsLen[], in
     }
     buffer[len] = 0;
 
-    int numFound = 0;
+    size_t numFound = 0;
     jlong mem = 0;
 
     char* p = buffer;
@@ -473,14 +473,14 @@ static jlong getFreeMemoryImpl(const char* const sums[], const int sumsLen[], in
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
     static const char* const sums[] = { "MemFree:", "Cached:", NULL };
-    static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
+    static const size_t sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
     return getFreeMemoryImpl(sums, sumsLen, 2);
 }
 
 static jlong android_os_Process_getTotalMemory(JNIEnv* env, jobject clazz)
 {
     static const char* const sums[] = { "MemTotal:", NULL };
-    static const int sumsLen[] = { strlen("MemTotal:"), 0 };
+    static const size_t sumsLen[] = { strlen("MemTotal:"), 0 };
     return getFreeMemoryImpl(sums, sumsLen, 1);
 }
 
@@ -745,7 +745,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
 
         jsize end = -1;
         if ((mode&PROC_PARENS) != 0) {
-            while (buffer[i] != ')' && i < endIndex) {
+            while (i < endIndex && buffer[i] != ')') {
                 i++;
             }
             end = i;
@@ -757,7 +757,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
             end = i;
             i++;
         }
-        while (buffer[i] != term && i < endIndex) {
+        while (i < endIndex && buffer[i] != term) {
             i++;
         }
         if (end < 0) {
@@ -767,7 +767,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         if (i < endIndex) {
             i++;
             if ((mode&PROC_COMBINE) != 0) {
-                while (buffer[i] == term && i < endIndex) {
+                while (i < endIndex && buffer[i] == term) {
                     i++;
                 }
             }
