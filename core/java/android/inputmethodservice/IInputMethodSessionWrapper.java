@@ -75,7 +75,15 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     @Override
     public void executeMessage(Message msg) {
         if (mInputMethodSession == null) {
-            // The session has been finished.
+            // The session has been finished. Args needs to be recycled
+            // for cases below.
+            switch (msg.what) {
+                case DO_UPDATE_SELECTION:
+                case DO_APP_PRIVATE_COMMAND: {
+                    SomeArgs args = (SomeArgs)msg.obj;
+                    args.recycle();
+                }
+            }
             return;
         }
 
