@@ -335,6 +335,30 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/printing/index.html"
+             description=
+             "How to print photos, HTML documents, and custom documents from your app."
+            >Printing Content</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/printing/photos.html">
+            Photos
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/printing/html-docs.html">
+            HTML Documents
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/printing/custom-docs.html">
+            Custom Documents
+          </a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li>
   <!-- End multimedia -->
