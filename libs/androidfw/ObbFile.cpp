@@ -133,7 +133,7 @@ bool ObbFile::parseObbFile(int fd)
     {
         lseek64(fd, fileLength - kFooterTagSize, SEEK_SET);
 
-        char *footer = new char[kFooterTagSize];
+        char footer[kFooterTagSize];
         actual = TEMP_FAILURE_RETRY(read(fd, footer, kFooterTagSize));
         if (actual != kFooterTagSize) {
             ALOGW("couldn't read footer signature: %s\n", strerror(errno));
