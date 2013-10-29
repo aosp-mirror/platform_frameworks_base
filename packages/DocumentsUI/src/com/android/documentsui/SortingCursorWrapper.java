@@ -19,6 +19,8 @@ package com.android.documentsui;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
+import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.AbstractCursor;
 import android.database.Cursor;
@@ -62,10 +64,9 @@ public class SortingCursorWrapper extends AbstractCursor {
 
             switch (sortOrder) {
                 case SORT_ORDER_DISPLAY_NAME:
-                    final String mimeType = cursor.getString(
-                            cursor.getColumnIndex(Document.COLUMN_MIME_TYPE));
-                    final String displayName = cursor.getString(
-                            cursor.getColumnIndex(Document.COLUMN_DISPLAY_NAME));
+                    final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+                    final String displayName = getCursorString(
+                            cursor, Document.COLUMN_DISPLAY_NAME);
                     if (Document.MIME_TYPE_DIR.equals(mimeType)) {
                         mValueString[i] = '\001' + displayName;
                     } else {
@@ -73,11 +74,10 @@ public class SortingCursorWrapper extends AbstractCursor {
                     }
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
-                    mValueLong[i] = cursor.getLong(
-                            cursor.getColumnIndex(Document.COLUMN_LAST_MODIFIED));
+                    mValueLong[i] = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
                     break;
                 case SORT_ORDER_SIZE:
-                    mValueLong[i] = cursor.getLong(cursor.getColumnIndex(Document.COLUMN_SIZE));
+                    mValueLong[i] = getCursorLong(cursor, Document.COLUMN_SIZE);
                     break;
             }
         }
