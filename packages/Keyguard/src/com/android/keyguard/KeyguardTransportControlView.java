@@ -75,7 +75,7 @@ public class KeyguardTransportControlView extends FrameLayout {
     private View mTransientSeek;
     private SeekBar mTransientSeekBar;
     private TextView mTransientSeekTimeElapsed;
-    private TextView mTransientSeekTimeRemaining;
+    private TextView mTransientSeekTimeTotal;
 
     private ImageView mBtnPrev;
     private ImageView mBtnPlay;
@@ -93,7 +93,7 @@ public class KeyguardTransportControlView extends FrameLayout {
     private java.text.DateFormat mFormat;
 
     private Date mTimeElapsed;
-    private Date mTimeRemaining;
+    private Date mTrackDuration;
 
     /**
      * The metadata which should be populated into the view once we've been attached
@@ -281,7 +281,7 @@ public class KeyguardTransportControlView extends FrameLayout {
         mTransientSeekBar = (SeekBar) findViewById(R.id.transient_seek_bar);
         mTransientSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
         mTransientSeekTimeElapsed = (TextView) findViewById(R.id.transient_seek_time_elapsed);
-        mTransientSeekTimeRemaining = (TextView) findViewById(R.id.transient_seek_time_remaining);
+        mTransientSeekTimeTotal = (TextView) findViewById(R.id.transient_seek_time_remaining);
         mBtnPrev = (ImageView) findViewById(R.id.btn_prev);
         mBtnPlay = (ImageView) findViewById(R.id.btn_play);
         mBtnNext = (ImageView) findViewById(R.id.btn_next);
@@ -458,16 +458,16 @@ public class KeyguardTransportControlView extends FrameLayout {
             if (mTimeElapsed == null) {
                 mTimeElapsed = new Date();
             }
-            if (mTimeRemaining == null) {
-                mTimeRemaining = new Date();
+            if (mTrackDuration == null) {
+                mTrackDuration = new Date();
             }
             mTimeElapsed.setTime(mRemoteController.getEstimatedMediaPosition());
-            mTimeRemaining.setTime(mMetadata.duration - mTimeElapsed.getTime());
+            mTrackDuration.setTime(mMetadata.duration);
             mTransientSeekTimeElapsed.setText(mFormat.format(mTimeElapsed));
-            mTransientSeekTimeRemaining.setText(mFormat.format(mTimeRemaining));
+            mTransientSeekTimeTotal.setText(mFormat.format(mTrackDuration));
 
             if (DEBUG) Log.d(TAG, "updateSeekDisplay timeElapsed=" + mTimeElapsed +
-                    " duration=" + mMetadata.duration + " remaining=" + mTimeRemaining);
+                    " duration=" + mMetadata.duration);
         }
     }
 
