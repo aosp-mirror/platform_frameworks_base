@@ -67,7 +67,8 @@ public class Watchdog extends Thread {
     static final int WAITED_HALF = 2;
     static final int OVERDUE = 3;
 
-    static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
+    // Which native processes to dump into dropbox's stack traces
+    public static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
         "/system/bin/mediaserver",
         "/system/bin/sdcard",
         "/system/bin/surfaceflinger"
