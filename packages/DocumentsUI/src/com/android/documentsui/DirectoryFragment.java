@@ -47,6 +47,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -1028,7 +1029,9 @@ public class DirectoryFragment extends Fragment {
                     thumbs.put(mUri, result);
                 }
             } catch (Exception e) {
-                Log.w(TAG, "Failed to load thumbnail for " + mUri + ": " + e);
+                if (!(e instanceof OperationCanceledException)) {
+                    Log.w(TAG, "Failed to load thumbnail for " + mUri + ": " + e);
+                }
             } finally {
                 ContentProviderClient.releaseQuietly(client);
             }
