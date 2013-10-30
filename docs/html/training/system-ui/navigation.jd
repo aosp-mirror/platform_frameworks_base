@@ -1,0 +1,101 @@
+page.title=Hiding the Navigation Bar
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#40">Hiding the Navigation Bar on 4.0 and Higher</a></li>
+  <li><a href="#behind">Make Content Appear Behind the Navigation Bar</a></li>
+</ol>
+
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}design/index.html">
+        Android Design Guide
+        </a>
+    </li>
+</ul>
+
+
+</div>
+</div>
+
+<p>This lesson describes how to hide the navigation bar, which was introduced in
+Android 4.0 (API level 14).</p>
+
+<p>Even though this lesson focuses on hiding the
+navigation bar, you should design your app to hide the status bar
+at the same time, as described in <a href="status.html">Hiding the Status Bar</a>.
+Hiding the navigation and status bars (while still keeping them readily accessible)
+lets the content use the entire display space, thereby providing a more immersive
+user experience. </p>
+
+<img src="{@docRoot}images/training/navigation-bar.png"
+  alt="system bars">
+<p class="img-caption"><strong>Figure 1.</strong> Navigation bar.</p>
+
+
+
+<h2 id="40">Hide the Navigation Bar on 4.0 and Higher</h2>
+
+<p>You can hide the navigation bar on Android 4.0 and higher using the
+{@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} flag. This snippet hides both
+the navigation bar and the status bar:</p>
+<pre>View decorView = getWindow().getDecorView();
+// Hide both the navigation bar and the status bar.
+int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+              | View.SYSTEM_UI_FLAG_FULLSCREEN;
+decorView.setSystemUiVisibility(uiOptions);</pre>
+
+<p>Note the following:</p>
+
+<ul>
+  <li>With this approach, touching anywhere on the screen causes the navigation bar (and
+  status bar) to reappear and remain visible. The user interaction causes the flags to be
+  be cleared.</li>
+<li>Once the flags have been cleared, your app needs to reset them if you
+want to hide the bars again. See <a href="visibility.html">Responding to UI Visibility Changes</a> for a
+discussion of how to listen for UI visibility changes so that your app can
+respond accordingly.</li>
+
+<li>Where you set the UI flags makes a difference. If you hide the system bars in your activity's
+ {@link android.app.Activity#onCreate onCreate()} method and the user presses Home, the system bars will
+ reappear. When the user reopens the activity, {@link android.app.Activity#onCreate onCreate()}
+won't get called, so the system bars will remain visible. If you want system UI changes to
+persist as the user navigates in and out of your activity, set UI flags in
+{@link android.app.Activity#onResume onResume()}
+or {@link android.view.Window.Callback#onWindowFocusChanged onWindowFocusChanged()}.</li>
+
+  <li>The method {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()} only
+  has an effect if the view you call it from is visible.</li>
+  <li>Navigating away from the view causes flags
+  set with {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()}
+  to be cleared.</li>
+</ul>
+
+<h2 id="behind">Make Content Appear Behind the Navigation Bar</h2>
+<p>On Android 4.1 and higher, you can set your application's content to appear behind
+the navigation bar, so that the content doesn't resize as the navigation bar hides and
+shows. To do this, use
+{@link android.view.View#setSystemUiVisibility setSystemuiVisibility(SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)}.
+You may also need to use
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} to help your app maintain a
+stable layout.</p>
+
+<p>When you use this approach, it becomes your responsibility to ensure that critical parts
+of your app's UI don't end up getting covered by system bars. For more
+discussion of this topic, see the <a href="status.html#behind">
+Hiding the Status Bar</a> lesson.</p>
