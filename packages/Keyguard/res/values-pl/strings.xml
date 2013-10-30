@@ -137,7 +137,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Usuń"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Nieprawidłowy kod PIN karty SIM. Musisz teraz skontaktować się z operatorem, by odblokował Twoje urządzenie."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Nieprawidłowy kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> próbę, zanim trzeba będzie skontaktować się z operatorem, by odblokował Twoje urządzenie."</item>
+    <item quantity="one" msgid="8134313997799638254">"Nieprawidłowy kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> próbę, zanim będziesz musiał skontaktować się z operatorem, by odblokował Twoje urządzenie."</item>
     <item quantity="other" msgid="2215723361575359486">"Nieprawidłowy kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> prób(y)."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Karta SIM została trwale zablokowana. Skontaktuj się z operatorem."</string>
