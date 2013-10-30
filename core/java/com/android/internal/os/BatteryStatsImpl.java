@@ -84,7 +84,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 66 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 67 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -4721,7 +4721,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.batteryStatus = (byte)status;
                 mHistoryCur.batteryHealth = (byte)health;
                 mHistoryCur.batteryPlugType = (byte)plugType;
-                mHistoryCur.batteryTemperature = (char)temp;
+                mHistoryCur.batteryTemperature = (short)temp;
                 mHistoryCur.batteryVoltage = (char)volt;
                 setOnBatteryLocked(onBattery, oldStatus, level);
             } else {
@@ -4744,7 +4744,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
                 if (temp >= (mHistoryCur.batteryTemperature+10)
                         || temp <= (mHistoryCur.batteryTemperature-10)) {
-                    mHistoryCur.batteryTemperature = (char)temp;
+                    mHistoryCur.batteryTemperature = (short)temp;
                     changed = true;
                 }
                 if (volt > (mHistoryCur.batteryVoltage+20)
