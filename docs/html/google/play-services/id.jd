@@ -9,10 +9,12 @@ header.hide=1
 <div class="col-8">
 
   <h1 itemprop="name" style="margin-bottom:0;">Advertising ID</h1>
-  <p itemprop="description">The advertising ID is a user-specific, unique, resettable ID for advertising, provided by
-    Google Play services. Developers can use the advertising ID to deliver targeted ads to users in a consistent way.
-    At the same time, the advertising ID gives users control over their privacy and the ability to
-    op-out of interest-based ads at any time.</p>
+  <p itemprop="description">The advertising ID is a user-specific, unique,
+  resettable ID for advertising, provided by Google Play services. It gives
+  users better controls and provides developers with a simple, standard system
+  to continue to monetize your apps. It is an anonymous identifier for advertising
+  purposes and enables users to reset their identifier or opt out of interest-based
+  ads within Google Play apps. </p>
 
 <p>The advertising ID is accessible through a straightforward API that you can implement in your apps. For details, 
 take a look at the
@@ -73,8 +75,9 @@ href="{@docRoot}reference/com/google/android/gms/ads/identifier/package-summary.
 <p>
   Apps making use of the advertising ID <strong>must check for and respect</strong> the
   user's ad tracking preference. Also please note that any use of the advertising ID
-  must abide by the terms of Google Play Store <a class="external-link"
-  href="http://play.google.com/about/developer-content-policy.html">policies</a>.
+  must abide by the terms of the <a class="external-link"
+  href="http://play.google.com/about/developer-content-policy.html#ADID">Google Play
+  Developer Content Policies</a>. 
 </p>
 
 <h3 id="format">Format of the Advertising ID</h3>

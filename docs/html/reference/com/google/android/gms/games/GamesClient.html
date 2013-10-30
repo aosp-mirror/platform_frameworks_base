@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -925,20 +937,27 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_APP_MISCONFIGURED">STATUS_APP_MISCONFIGURED</a></td>
+        <td class="jd-descrcol" width="100%">The developer has misconfigured their application in some way.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">The GamesClient is in an inconsistent state and must reconnect to the service to resolve the
  issue.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></td>
         <td class="jd-descrcol" width="100%">An unspecified error occurred; no more specific information is available.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INVALID_REAL_TIME_ROOM_ID">STATUS_INVALID_REAL_TIME_ROOM_ID</a></td>
         <td class="jd-descrcol" width="100%">Constant indicating that the real-time room ID provided to the operation was not valid, or
@@ -946,28 +965,28 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_LICENSE_CHECK_FAILED">STATUS_LICENSE_CHECK_FAILED</a></td>
         <td class="jd-descrcol" width="100%">The game is not licensed to the user.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_ERROR_CREATION_NOT_ALLOWED">STATUS_MULTIPLAYER_ERROR_CREATION_NOT_ALLOWED</a></td>
         <td class="jd-descrcol" width="100%">The user is not allowed to create a new multiplayer game at this time.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER">STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER</a></td>
         <td class="jd-descrcol" width="100%">The user attempted to invite another user who was not authorized to see the game.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to retrieve fresh data, and no data was available
@@ -975,7 +994,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_OPERATION_DEFERRED">STATUS_NETWORK_ERROR_OPERATION_DEFERRED</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to modify data, but the data was successfully
@@ -984,7 +1003,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_OPERATION_FAILED">STATUS_NETWORK_ERROR_OPERATION_FAILED</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to perform an operation that requires network
@@ -992,7 +1011,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></td>
         <td class="jd-descrcol" width="100%">A network error occurred while attempting to retrieve fresh data, but some locally cached
@@ -1000,14 +1019,14 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></td>
         <td class="jd-descrcol" width="100%">The operation was successful.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_PARTICIPANT_NOT_CONNECTED">STATUS_PARTICIPANT_NOT_CONNECTED</a></td>
         <td class="jd-descrcol" width="100%">Constant indicating that the ID of the participant provided by the user is not currently
@@ -1015,21 +1034,21 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_CONNECTION_FAILED">STATUS_REAL_TIME_CONNECTION_FAILED</a></td>
         <td class="jd-descrcol" width="100%">Failed to initialize the network connection for a real-time room.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_INACTIVE_ROOM">STATUS_REAL_TIME_INACTIVE_ROOM</a></td>
         <td class="jd-descrcol" width="100%">The room is not currently active.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_MESSAGE_FAILED">STATUS_REAL_TIME_MESSAGE_FAILED</a></td>
         <td class="jd-descrcol" width="100%">Status code returned from the <code><a href="/reference/com/google/android/gms/games/GamesClient.html#sendUnreliableRealTimeMessage(byte[], java.lang.String, java.lang.String)">sendUnreliableRealTimeMessage(byte[], String, String)</a></code> and
@@ -1038,14 +1057,14 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_MESSAGE_SEND_FAILED">STATUS_REAL_TIME_MESSAGE_SEND_FAILED</a></td>
         <td class="jd-descrcol" width="100%">Failed to send message to the peer participant for a real-time room.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_REAL_TIME_ROOM_NOT_JOINED">STATUS_REAL_TIME_ROOM_NOT_JOINED</a></td>
         <td class="jd-descrcol" width="100%">Failed to send message to the peer participant for a real-time room, since the user has not
@@ -1366,12 +1385,12 @@ Summary:
             
             
             
-            <a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a></nobr>
+            <a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html">RealTimeSocket</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#getRealTimeSocketForParticipant(java.lang.String, java.lang.String)">getRealTimeSocketForParticipant</a></span>(String roomId, String participantId)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a></code> for carrying network traffic to the given peer.</div>
+        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html">RealTimeSocket</a></code> for carrying network traffic to the given peer.</div>
   
   </td></tr>
 
@@ -1683,12 +1702,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</nobr>
         
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    This form of the API is deprecated and will be removed in a future release. 
- Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
- instead.
-</em></div>
+        <div class="jd-descrdiv">Asynchronously load a specific leaderboard's metadata for this game.</div>
   
   </td></tr>
 
@@ -1706,11 +1720,7 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    This form of the API is deprecated and will be removed in a future release. 
- Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.
-</em></div>
+        <div class="jd-descrdiv">Asynchronously load the list of leaderboard metadata for this game.</div>
   
   </td></tr>
 
@@ -2051,6 +2061,42 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementSteps(java.lang.String, int)">setAchievementSteps</a></span>(String id, int numSteps)</nobr>
+        
+        <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementStepsImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)">setAchievementStepsImmediate</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id, int numSteps)</nobr>
+        
+        <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#setGravityForPopups(int)">setGravityForPopups</a></span>(int gravity)</nobr>
         
         <div class="jd-descrdiv">Specifies the part of the screen at which games service popups (for example, "welcome back"
@@ -2143,7 +2189,43 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScore(java.lang.String, long, java.lang.String)">submitScore</a></span>(String leaderboardId, long score, String scoreTag)</nobr>
+        
+        <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScore(java.lang.String, long)">submitScore</a></span>(String leaderboardId, long score)</nobr>
+        
+        <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#submitScoreImmediate(com.google.android.gms.games.leaderboard.OnScoreSubmittedListener, java.lang.String, long, java.lang.String)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, String leaderboardId, long score, String scoreTag)</nobr>
         
         <div class="jd-descrdiv">Submit a score to a leaderboard for the currently signed in player.</div>
   
@@ -3301,6 +3383,46 @@ From interface
             
                 3000
                 (0x00000bb8)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_APP_MISCONFIGURED"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        STATUS_APP_MISCONFIGURED
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The developer has misconfigured their application in some way. The logs will contain more
+ data about the error and the appropriate resolution.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                8
+                (0x00000008)
             
         </span>
         </div>
@@ -4652,7 +4774,7 @@ From interface
          
          
          
-        <a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a>
+        <a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html">RealTimeSocket</a>
       </span>
       <span class="sympad">getRealTimeSocketForParticipant</span>
       <span class="normal">(String roomId, String participantId)</span>
@@ -4665,7 +4787,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html">RealTimeSocket</a></code> for carrying network traffic to the given peer.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeSocket.html">RealTimeSocket</a></code> for carrying network traffic to the given peer.
  Creates a new socket if one does not exist (or if an existing socket gets disconnected).
  Requires an active real-time room and players being available. Throws an
  <code><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> if participantId is not a valid participant or
@@ -5512,18 +5634,15 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    This form of the API is deprecated and will be removed in a future release. 
- Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
- instead.
-
-  </p>
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
  <p>
  The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
- called before the result is ready it will not be delivered.</p></div>
+ called before the result is ready it will not be delivered.
+ <p>
+ This form of the API is deprecated and will be removed in a future release. Please use
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
+ instead.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -5534,7 +5653,8 @@ From interface
         </tr>
         <tr>
           <th>leaderboardId</td>
-          <td>ID of the leaderboard to load metadata for.</td>
+          <td>ID of the leaderboard to load metadata for.
+</td>
         </tr>
       </table>
   </div>
@@ -5565,24 +5685,22 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    This form of the API is deprecated and will be removed in a future release. 
- Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.
-
-  </p>
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
  <p>
  The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
- called before the result is ready it will not be delivered.</p></div>
+ called before the result is ready it will not be delivered.
+ <p>
+ This form of the API is deprecated and will be removed in a future release. Please use
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
           <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.</td>
+            on the main thread.
+</td>
         </tr>
       </table>
   </div>
@@ -5732,7 +5850,8 @@ From interface
         </tr>
         <tr>
           <th>buffer</td>
-          <td>The existing buffer that will be expanded.</td>
+          <td>The existing buffer that will be expanded. The buffer is allowed to be closed
+            prior to being passed in to this method.</td>
         </tr>
         <tr>
           <th>maxResults</td>
@@ -6595,6 +6714,117 @@ From interface
 </div>
 
 
+<A NAME="setAchievementSteps(java.lang.String, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setAchievementSteps</span>
+      <span class="normal">(String id, int numSteps)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Set an achievement to have at least the given number of steps completed. Calling this method
+ while the achievement already has more steps than the provided value is a no-op. Once the
+ achievement reaches the maximum number of steps, the achievement will automatically be
+ unlocked, and any further mutation operations will be ignored.
+ <p>
+ This is the fire-and-forget form of the API. Use this form if you don't need to know the
+ status of the operation immediately. For most applications, this will be the preferred API to
+ use, though note that the update may not be sent to the server until the next sync. See
+ <code><a href="/reference/com/google/android/gms/games/GamesClient.html#setAchievementStepsImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)">setAchievementStepsImmediate(OnAchievementUpdatedListener, String, int)</a></code> if you need
+ the operation to attempt to communicate to the server immediately or need to have the status
+ code delivered to your application.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>id</td>
+          <td>The ID of the achievement to modify.</td>
+        </tr>
+        <tr>
+          <th>numSteps</td>
+          <td>The number of steps to set the achievement to. Must be greater than 0.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setAchievementStepsImmediate(com.google.android.gms.games.achievement.OnAchievementUpdatedListener, java.lang.String, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setAchievementStepsImmediate</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementUpdatedListener.html">OnAchievementUpdatedListener</a> listener, String id, int numSteps)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Set an achievement to have at least the given number of steps completed. Calling this method
+ while the achievement already has more steps than the provided value is a no-op. Once the
+ achievement reaches the maximum number of steps, the achievement will automatically be
+ unlocked, and any further mutation operations will be ignored.
+ <p>
+ This form of the API will attempt to update the user's achievement on the server immediately,
+ and will use the provided listener to inform the caller of the result of the operation.
+ <p>
+ The status code to indicate the success or failure of the operation is delivered to the given
+ listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is called before the operation is
+ completed, the status code will not be delivered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the set operation is complete. The listener
+            is called on the main thread.</td>
+        </tr>
+        <tr>
+          <th>id</td>
+          <td>The ID of the achievement to modify.</td>
+        </tr>
+        <tr>
+          <th>numSteps</td>
+          <td>The number of steps to set the achievement to. Must be greater than 0.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="setGravityForPopups(int)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -6740,7 +6970,11 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously signs the current user out.
- <p>
+ </p>
+ This call doesn't disconnect the GamesClient. As no user is signed in after this call is
+ completed, subsequent calls to this client will very likely fail. You should either
+ call disconnect() or finish your Activity after this call.
+ </p>
  The listener is called when sign-out is complete. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is called before
  sign-out is complete, the listener will not be called.</p></div>
   <div class="jd-tagdata">
@@ -6783,7 +7017,81 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously signs the current user out.
+ </p>
+ This call doesn't disconnect the GamesClient. As no user is signed in after this call is
+ completed, subsequent calls to this client will very likely fail. You should either
+ call disconnect() or finish your Activity after this call.
 </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="submitScore(java.lang.String, long, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">submitScore</span>
+      <span class="normal">(String leaderboardId, long score, String scoreTag)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Submit a score to a leaderboard for the currently signed in player. The score is ignored if
+ it is worse (as defined by the leaderboard configuration) than a previously submitted score
+ for the same player.
+ <p>
+ This form of the API is a fire-and-forget form. Use this if you do not need to be notified of
+ the results of submitting the score, though note that the update may not be sent to the
+ server until the next sync.
+ <p>
+ The meaning of the score value depends on the formatting of the leaderboard established in
+ the developer console. Leaderboards support the following score formats:
+ <ul>
+ <li>Fixed-point: <code>score</code> represents a raw value, and will be formatted based on the
+ number of decimal places configured. A score of 1000 would be formatted as 1000, 100.0, or
+ 10.00 for 0, 1, or 2 decimal places.</li>
+ <li>Time: <code>score</code> represents an elapsed time in milliseconds. The value will be
+ formatted as an appropriate time value.</li>
+ <li>Currency: <code>score</code> represents a value in micro units. For example, in USD, a score
+ of 100 would display as $0.0001, while a score of 1000000 would display as $1.00</li>
+ </ul>
+ <p>
+ For more details, please see <a
+ href="https://developers.google.com/games/services/common/concepts/leaderboards">Leaderboard
+ Concepts</a>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>leaderboardId</td>
+          <td>The leaderboard to submit the score to.</td>
+        </tr>
+        <tr>
+          <th>score</td>
+          <td>The raw score value.</td>
+        </tr>
+        <tr>
+          <th>scoreTag</td>
+          <td>Optional metadata about this score. The value may contain no more than 64
+            URI-safe characters as defined by section 2.3 of RFC 3986.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -6848,6 +7156,87 @@ From interface
 </td>
         </tr>
       </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="submitScoreImmediate(com.google.android.gms.games.leaderboard.OnScoreSubmittedListener, java.lang.String, long, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">submitScoreImmediate</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a> listener, String leaderboardId, long score, String scoreTag)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Submit a score to a leaderboard for the currently signed in player. The score is ignored if
+ it is worse (as defined by the leaderboard configuration) than a previously submitted score
+ for the same player.
+ <p>
+ This form of the API will attempt to submit the score to the server immediately, and will use
+ the provided listener to inform the caller of the result of the operation.
+ <p>
+ The status code to indicate the success or failure of the operation is delivered to the given
+ listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is called before the operation is
+ completed, the status code will not be delivered.
+ <p>
+ The meaning of the score value depends on the formatting of the leaderboard established in
+ the developer console. Leaderboards support the following score formats:
+ <ul>
+ <li>Fixed-point: <code>score</code> represents a raw value, and will be formatted based on the
+ number of decimal places configured. A score of 1000 would be formatted as 1000, 100.0, or
+ 10.00 for 0, 1, or 2 decimal places.</li>
+ <li>Time: <code>score</code> represents an elapsed time in milliseconds. The value will be
+ formatted as an appropriate time value.</li>
+ <li>Currency: <code>score</code> represents a value in micro units. For example, in USD, a score
+ of 100 would display as $0.0001, while a score of 1000000 would display as $1.00</li>
+ </ul>
+ <p>
+ For more details, please see <a
+ href="https://developers.google.com/games/services/common/concepts/leaderboards">this
+ page</a>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td><code><a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a></code> to call when the score has been submitted.</td>
+        </tr>
+        <tr>
+          <th>leaderboardId</td>
+          <td>The leaderboard to submit the score to.</td>
+        </tr>
+        <tr>
+          <th>score</td>
+          <td>The raw score value.</td>
+        </tr>
+        <tr>
+          <th>scoreTag</td>
+          <td>Optional metadata about this score. The value may contain no more than 64
+            URI-safe characters as defined by section 2.3 of RFC 3986.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/leaderboard/OnScoreSubmittedListener.html">OnScoreSubmittedListener</a></code></li>
+      </ul>
   </div>
 
     </div>
