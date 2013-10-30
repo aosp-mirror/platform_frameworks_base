@@ -1,16 +1,11 @@
 page.title=Google Wallet Instant Buy for Android
-page.tags="Wallet","payments","Google Play Services"
+page.tags="Wallet","payments","Instant Buy"
 header.hide=1
 
 @jd:body
 
 <div class="landing-banner">
 <div class="col-8">
-<!--<div class="col-6">
-  <img src="{@docRoot}images/google/gps-wallet.png" alt="" style="">
-</div>
-<div class="col-6"> -->
-
   <h1 itemprop="name" style="margin-bottom:0;">Google Wallet Instant Buy</h1>
   <p itemprop="description">Add fast, secure checkout for users buying physical goods and
   services from your app.  Transactions are monitored for fraud 24/7. Keep your existing
@@ -22,10 +17,14 @@ header.hide=1
       US-based merchants. </p>
 
   <p>Check out the <a 
-  href="{@docRoot}reference/gms-packages.html">Instant Buy API reference</a> and visit
-  <a href="developers.google.com/mobile-ads-sdk">developers.google.com/mobile-ads-sdk</a>
+  href="{@docRoot}reference/com/google/android/gms/wallet/package-summary.html">Instant
+  Buy API reference</a> and visit
+  <a href="https://developers.google.com/wallet/instant-buy/">developers.google.com/wallet/instant-buy/</a>
   for complete information about integrating Google Wallet Instant Buy into your app.</p>
+</div>
 
+<div class="col-4"> 
+  <img src="{@docRoot}images/google/gps-wallet-instant.png" alt="" style="padding-bottom:14px;width:210px">
 </div>
 </div>
 
