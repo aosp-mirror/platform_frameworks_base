@@ -360,6 +360,10 @@ class WindowStateAnimator {
                     + mWin.mToken + ": first real window done animating");
             mService.mFinishedStarting.add(mWin.mAppToken);
             mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
+        } else if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
+            // Upon completion of a not-visible to visible status bar animation a relayout is
+            // required.
+            mWin.mDisplayContent.layoutNeeded = true;
         }
 
         finishExit();
