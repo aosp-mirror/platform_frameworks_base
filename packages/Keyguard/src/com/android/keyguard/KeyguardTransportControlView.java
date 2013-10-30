@@ -104,7 +104,9 @@ public class KeyguardTransportControlView extends FrameLayout {
             new RemoteController.OnClientUpdateListener() {
         @Override
         public void onClientChange(boolean clearing) {
-            clearMetadata();
+            if (clearing) {
+                clearMetadata();
+            }
         }
 
         @Override
@@ -206,10 +208,10 @@ public class KeyguardTransportControlView extends FrameLayout {
             = new KeyguardUpdateMonitorCallback() {
         public void onScreenTurnedOff(int why) {
             setEnableMarquee(false);
-        };
+        }
         public void onScreenTurnedOn() {
             setEnableMarquee(true);
-        };
+        }
     };
 
     public KeyguardTransportControlView(Context context, AttributeSet attrs) {
@@ -326,6 +328,33 @@ public class KeyguardTransportControlView extends FrameLayout {
         mMetadata.clear();
         mUserSeeking = false;
         removeCallbacks(mUpdateSeekBars);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        SavedState ss = new SavedState(super.onSaveInstanceState());
+        ss.artist = mMetadata.artist;
+        ss.trackTitle = mMetadata.trackTitle;
+        ss.albumTitle = mMetadata.albumTitle;
+        ss.duration = mMetadata.duration;
+        ss.bitmap = mMetadata.bitmap;
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mMetadata.artist = ss.artist;
+        mMetadata.trackTitle = ss.trackTitle;
+        mMetadata.albumTitle = ss.albumTitle;
+        mMetadata.duration = ss.duration;
+        mMetadata.bitmap = ss.bitmap;
+        populateMetadata();
     }
 
     void setBadgeIcon(Drawable bmp) {
@@ -587,6 +616,11 @@ public class KeyguardTransportControlView extends FrameLayout {
 
     static class SavedState extends BaseSavedState {
         boolean clientPresent;
+        String artist;
+        String trackTitle;
+        String albumTitle;
+        long duration;
+        Bitmap bitmap;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -594,13 +628,23 @@ public class KeyguardTransportControlView extends FrameLayout {
 
         private SavedState(Parcel in) {
             super(in);
-            this.clientPresent = in.readInt() != 0;
+            clientPresent = in.readInt() != 0;
+            artist = in.readString();
+            trackTitle = in.readString();
+            albumTitle = in.readString();
+            duration = in.readLong();
+            bitmap = Bitmap.CREATOR.createFromParcel(in);
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
-            out.writeInt(this.clientPresent ? 1 : 0);
+            out.writeInt(clientPresent ? 1 : 0);
+            out.writeString(artist);
+            out.writeString(trackTitle);
+            out.writeString(albumTitle);
+            out.writeLong(duration);
+            bitmap.writeToParcel(out, flags);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
