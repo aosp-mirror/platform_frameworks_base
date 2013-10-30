@@ -3471,6 +3471,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mStatusBarController.setBarShowingLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT;
                 }
+                // Maintain fullscreen layout until incoming animation is complete.
+                topIsFullscreen = mTopIsFullscreen && mStatusBar.isAnimatingLw();
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 if (localLOGV) {
                     Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
@@ -3504,7 +3506,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        mTopIsFullscreen = topIsFullscreen;
+        if (mTopIsFullscreen != topIsFullscreen) {
+            if (!topIsFullscreen) {
+                // Force another layout when status bar becomes fully shown.
+                changes |= FINISH_LAYOUT_REDO_LAYOUT;
+            }
+            mTopIsFullscreen = topIsFullscreen;
+        }
 
         // Hide the key guard if a visible window explicitly specifies that it wants to be
         // displayed when the screen is locked.
