@@ -41,6 +41,9 @@ import java.util.TreeMap;
 public class InputMethodSubtypeSwitchingController {
     private static final String TAG = InputMethodSubtypeSwitchingController.class.getSimpleName();
     private static final boolean DEBUG = false;
+    // TODO: Turn on this flag and add CTS when the platform starts expecting that all IMEs return
+    // true for supportsSwitchingToNextInputMethod().
+    private static final boolean REQUIRE_SWITCHING_SUPPORT = false;
     private static final int MAX_HISTORY_SIZE = 4;
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
 
@@ -260,9 +263,11 @@ public class InputMethodSubtypeSwitchingController {
             if (DEBUG) {
                 Slog.d(TAG, "onCommitText: " + imi.getId() + ", " + subtype);
             }
-            if (!imi.supportsSwitchingToNextInputMethod()) {
-                Slog.w(TAG, imi.getId() + " doesn't support switching to next input method.");
-                return;
+            if (REQUIRE_SWITCHING_SUPPORT) {
+                if (!imi.supportsSwitchingToNextInputMethod()) {
+                    Slog.w(TAG, imi.getId() + " doesn't support switching to next input method.");
+                    return;
+                }
             }
             if (mTypedSubtypeHistory.size() >= MAX_HISTORY_SIZE) {
                 mTypedSubtypeHistory.poll();
