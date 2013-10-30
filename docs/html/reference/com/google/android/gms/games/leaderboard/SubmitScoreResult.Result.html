@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -820,6 +832,17 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          
+          final
+          String</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.Result.html#scoreTag">scoreTag</a></td>
+          <td class="jd-descrcol" width="100%">The score tag associated with this result, if any.</td>
+      </tr>
+      
+    
 
 </table>
 
@@ -845,7 +868,7 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.Result.html#SubmitScoreResult.Result(long, java.lang.String, boolean)">SubmitScoreResult.Result</a></span>(long rawScore, String formattedScore, boolean newBest)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/SubmitScoreResult.Result.html#SubmitScoreResult.Result(long, java.lang.String, java.lang.String, boolean)">SubmitScoreResult.Result</a></span>(long rawScore, String formattedScore, String scoreTag, boolean newBest)</nobr>
         
   </td></tr>
 
@@ -1215,6 +1238,35 @@ From class
 
 
 
+<A NAME="scoreTag"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+        final 
+        String
+      </span>
+        scoreTag
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The score tag associated with this result, if any.
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
 
 <!-- Public ctors -->
 
@@ -1224,7 +1276,7 @@ From class
 
 
 
-<A NAME="SubmitScoreResult.Result(long, java.lang.String, boolean)"></A>
+<A NAME="SubmitScoreResult.Result(long, java.lang.String, java.lang.String, boolean)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1237,7 +1289,7 @@ From class
         
       </span>
       <span class="sympad">SubmitScoreResult.Result</span>
-      <span class="normal">(long rawScore, String formattedScore, boolean newBest)</span>
+      <span class="normal">(long rawScore, String formattedScore, String scoreTag, boolean newBest)</span>
     </h4>
       <div class="api-level">
         <div></div>
