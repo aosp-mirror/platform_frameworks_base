@@ -17,6 +17,7 @@ package com.android.server;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
+import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.internal.os.HandlerCaller;
@@ -115,12 +116,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.TreeMap;
 
 /**
  * This class provides a system service that manages input methods.
@@ -168,7 +166,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final HandlerCaller mCaller;
     final boolean mHasFeature;
     private InputMethodFileManager mFileManager;
-    private InputMethodAndSubtypeListManager mImListManager;
     private final HardKeyboardListener mHardKeyboardListener;
     private final WindowManagerService mWindowManagerService;
 
@@ -180,8 +177,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<String, InputMethodInfo>();
     private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
             new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
-    private final InputMethodSubtypeSwitchingController mSwitchingController =
-            new InputMethodSubtypeSwitchingController();
+    private final InputMethodSubtypeSwitchingController mSwitchingController;
 
     // Used to bring IME service up to visible adjustment while it is being shown.
     final ServiceConnection mVisibleConnection = new ServiceConnection() {
@@ -678,7 +674,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
-        mImListManager = new InputMethodAndSubtypeListManager(context, this);
+        mSwitchingController = new InputMethodSubtypeSwitchingController(mSettings);
+        mSwitchingController.resetCircularListLocked(context);
 
         // Just checking if defaultImiId is empty or not
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -758,8 +755,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
             }
-            // InputMethodAndSubtypeListManager should be reset when the locale is changed.
-            mImListManager = new InputMethodAndSubtypeListManager(mContext, this);
+            // CircularList should be reset when the locale is changed.
+            mSwitchingController.resetCircularListLocked(mContext);
             buildInputMethodListLocked(mMethodList, mMethodMap, resetDefaultEnabledIme);
             if (!updateOnlyWhenLocaleChanged) {
                 final String selectedImiId = mSettings.getSelectedInputMethod();
@@ -962,17 +959,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             return mSettings.getEnabledInputMethodListLocked();
         }
-    }
-
-    private HashMap<InputMethodInfo, List<InputMethodSubtype>>
-            getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked() {
-        HashMap<InputMethodInfo, List<InputMethodSubtype>> enabledInputMethodAndSubtypes =
-                new HashMap<InputMethodInfo, List<InputMethodSubtype>>();
-        for (InputMethodInfo imi: mSettings.getEnabledInputMethodListLocked()) {
-            enabledInputMethodAndSubtypes.put(
-                    imi, mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true));
-        }
-        return enabledInputMethodAndSubtypes;
     }
 
     /**
@@ -2155,7 +2141,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            final ImeSubtypeListItem nextSubtype = mImListManager.getNextInputMethod(
+            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethod(
                     onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
                 return false;
@@ -2171,7 +2157,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         synchronized (mMethodMap) {
-            final ImeSubtypeListItem nextSubtype = mImListManager.getNextInputMethod(
+            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethod(
                     false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
                 return false;
@@ -2638,7 +2624,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         synchronized (mMethodMap) {
             final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
-                    getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked();
+                    mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
+                            mContext);
             if (immis == null || immis.size() == 0) {
                 return;
             }
@@ -2646,7 +2633,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             hideInputMethodMenuLocked();
 
             final List<ImeSubtypeListItem> imList =
-                    mImListManager.getSortedInputMethodAndSubtypeList(
+                    mSwitchingController.getSortedInputMethodAndSubtypeList(
                             showSubtypes, mInputShown, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
@@ -2762,66 +2749,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             mSwitchingDialog.getWindow().getAttributes().setTitle("Select input method");
             mSwitchingDialog.show();
-        }
-    }
-
-    private static class ImeSubtypeListItem implements Comparable<ImeSubtypeListItem> {
-        public final CharSequence mImeName;
-        public final CharSequence mSubtypeName;
-        public final InputMethodInfo mImi;
-        public final int mSubtypeId;
-        private final boolean mIsSystemLocale;
-        private final boolean mIsSystemLanguage;
-
-        public ImeSubtypeListItem(CharSequence imeName, CharSequence subtypeName,
-                InputMethodInfo imi, int subtypeId, String subtypeLocale, String systemLocale) {
-            mImeName = imeName;
-            mSubtypeName = subtypeName;
-            mImi = imi;
-            mSubtypeId = subtypeId;
-            if (TextUtils.isEmpty(subtypeLocale)) {
-                mIsSystemLocale = false;
-                mIsSystemLanguage = false;
-            } else {
-                mIsSystemLocale = subtypeLocale.equals(systemLocale);
-                mIsSystemLanguage = mIsSystemLocale
-                        || subtypeLocale.startsWith(systemLocale.substring(0, 2));
-            }
-        }
-
-        @Override
-        public int compareTo(ImeSubtypeListItem other) {
-            if (TextUtils.isEmpty(mImeName)) {
-                return 1;
-            }
-            if (TextUtils.isEmpty(other.mImeName)) {
-                return -1;
-            }
-            if (!TextUtils.equals(mImeName, other.mImeName)) {
-                return mImeName.toString().compareTo(other.mImeName.toString());
-            }
-            if (TextUtils.equals(mSubtypeName, other.mSubtypeName)) {
-                return 0;
-            }
-            if (mIsSystemLocale) {
-                return -1;
-            }
-            if (other.mIsSystemLocale) {
-                return 1;
-            }
-            if (mIsSystemLanguage) {
-                return -1;
-            }
-            if (other.mIsSystemLanguage) {
-                return 1;
-            }
-            if (TextUtils.isEmpty(mSubtypeName)) {
-                return 1;
-            }
-            if (TextUtils.isEmpty(other.mSubtypeName)) {
-                return -1;
-            }
-            return mSubtypeName.toString().compareTo(other.mSubtypeName.toString());
         }
     }
 
@@ -3193,123 +3120,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             return false;
-        }
-    }
-
-    private static class InputMethodAndSubtypeListManager {
-        private final Context mContext;
-        // Used to load label
-        private final PackageManager mPm;
-        private final InputMethodManagerService mImms;
-        private final String mSystemLocaleStr;
-        public InputMethodAndSubtypeListManager(Context context, InputMethodManagerService imms) {
-            mContext = context;
-            mPm = context.getPackageManager();
-            mImms = imms;
-            final Locale locale = context.getResources().getConfiguration().locale;
-            mSystemLocaleStr = locale != null ? locale.toString() : "";
-        }
-
-        private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
-                new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
-                        new Comparator<InputMethodInfo>() {
-                            @Override
-                            public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
-                                if (imi2 == null) return 0;
-                                if (imi1 == null) return 1;
-                                if (mPm == null) {
-                                    return imi1.getId().compareTo(imi2.getId());
-                                }
-                                CharSequence imiId1 = imi1.loadLabel(mPm) + "/" + imi1.getId();
-                                CharSequence imiId2 = imi2.loadLabel(mPm) + "/" + imi2.getId();
-                                return imiId1.toString().compareTo(imiId2.toString());
-                            }
-                        });
-
-        public ImeSubtypeListItem getNextInputMethod(
-                boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
-            if (imi == null) {
-                return null;
-            }
-            final List<ImeSubtypeListItem> imList = getSortedInputMethodAndSubtypeList();
-            if (imList.size() <= 1) {
-                return null;
-            }
-            final int N = imList.size();
-            final int currentSubtypeId = subtype != null
-                    ? InputMethodUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode())
-                    : NOT_A_SUBTYPE_ID;
-            for (int i = 0; i < N; ++i) {
-                final ImeSubtypeListItem isli = imList.get(i);
-                if (isli.mImi.equals(imi) && isli.mSubtypeId == currentSubtypeId) {
-                    if (!onlyCurrentIme) {
-                        return imList.get((i + 1) % N);
-                    }
-                    for (int j = 0; j < N - 1; ++j) {
-                        final ImeSubtypeListItem candidate = imList.get((i + j + 1) % N);
-                        if (candidate.mImi.equals(imi)) {
-                            return candidate;
-                        }
-                    }
-                    return null;
-                }
-            }
-            return null;
-        }
-
-        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList() {
-            return getSortedInputMethodAndSubtypeList(true, false, false);
-        }
-
-        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(boolean showSubtypes,
-                boolean inputShown, boolean isScreenLocked) {
-            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<ImeSubtypeListItem>();
-            final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
-                    mImms.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked();
-            if (immis == null || immis.size() == 0) {
-                return Collections.emptyList();
-            }
-            mSortedImmis.clear();
-            mSortedImmis.putAll(immis);
-            for (InputMethodInfo imi : mSortedImmis.keySet()) {
-                if (imi == null) continue;
-                List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
-                HashSet<String> enabledSubtypeSet = new HashSet<String>();
-                for (InputMethodSubtype subtype: explicitlyOrImplicitlyEnabledSubtypeList) {
-                    enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
-                }
-                final CharSequence imeLabel = imi.loadLabel(mPm);
-                if (showSubtypes && enabledSubtypeSet.size() > 0) {
-                    final int subtypeCount = imi.getSubtypeCount();
-                    if (DEBUG) {
-                        Slog.v(TAG, "Add subtypes: " + subtypeCount + ", " + imi.getId());
-                    }
-                    for (int j = 0; j < subtypeCount; ++j) {
-                        final InputMethodSubtype subtype = imi.getSubtypeAt(j);
-                        final String subtypeHashCode = String.valueOf(subtype.hashCode());
-                        // We show all enabled IMEs and subtypes when an IME is shown.
-                        if (enabledSubtypeSet.contains(subtypeHashCode)
-                                && ((inputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
-                            final CharSequence subtypeLabel =
-                                    subtype.overridesImplicitlyEnabledSubtype() ? null
-                                            : subtype.getDisplayName(mContext, imi.getPackageName(),
-                                                    imi.getServiceInfo().applicationInfo);
-                            imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j,
-                                    subtype.getLocale(), mSystemLocaleStr));
-
-                            // Removing this subtype from enabledSubtypeSet because we no longer
-                            // need to add an entry of this subtype to imList to avoid duplicated
-                            // entries.
-                            enabledSubtypeSet.remove(subtypeHashCode);
-                        }
-                    }
-                } else {
-                    imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID,
-                            null, mSystemLocaleStr));
-                }
-            }
-            Collections.sort(imList);
-            return imList;
         }
     }
 
