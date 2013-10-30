@@ -236,7 +236,11 @@ public class MiniThumbFile {
         RandomAccessFile r = miniThumbDataFile();
         if (r == null) return null;
 
-        long pos = id * BYTES_PER_MINTHUMB;
+        long pos = getIndex(id, false);
+        if(pos < 0) return null;
+
+        pos *= BYTES_PER_MINTHUMB;
+
         FileLock lock = null;
         try {
             mBuffer.clear();
