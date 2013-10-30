@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"列印多工緩衝處理器"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"印表機設定"</string>
     <string name="print_button" msgid="645164566271246268">"列印"</string>
     <string name="save_button" msgid="1921310454071758999">"儲存"</string>
     <string name="label_destination" msgid="9132510997381599275">"目的地"</string>
