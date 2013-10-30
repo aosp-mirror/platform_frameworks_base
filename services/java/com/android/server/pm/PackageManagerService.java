@@ -9965,6 +9965,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true, "add preferred activity");
+        if (filter.countActions() == 0) {
+            Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
+            return;
+        }
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
@@ -10024,7 +10028,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 String category = filter.getCategory(0);
                 while (it.hasNext()) {
                     PreferredActivity pa = it.next();
-                    if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
+                    if ((pa.countActions() == 0) || (pa.countCategories() == 0)
+                            || (pa.getAction(0).equals(action)
+                                    && pa.getCategory(0).equals(category))) {
                         if (removed == null) {
                             removed = new ArrayList<PreferredActivity>();
                         }
