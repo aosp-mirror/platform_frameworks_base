@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Saisissez le NIP."</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Entrez le code PUK et le nouveau NIP"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Entrez le code PUK et le nouveau NIP de la carte SIM"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Code PUK de la carte SIM"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Nouveau NIP de la carte SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Appuyer pour saisir mot passe"</font></string>
@@ -137,16 +137,16 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Supprimer"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"NIP de carte SIM incorrect. Vous devez maintenant communiquer avec votre fournisseur de services pour déverrouiller votre appareil."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"NIP de carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives. Après cela, vous devrez communiquer avec votre fournisseur de services pour déverrouiller votre appareil."</item>
-    <item quantity="other" msgid="2215723361575359486">"NIP de carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives."</item>
+    <item quantity="one" msgid="8134313997799638254">"NIP de carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative. Après cela, vous devrez communiquer avec votre fournisseur de services pour déverrouiller votre appareil."</item>
+    <item quantity="other" msgid="2215723361575359486">"NIP de carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative(s)."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La carte SIM est inutilisable. Communiquez avec votre fournisseur de services."</string>
   <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Code PUK incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM devienne définitivement inutilisable."</item>
-    <item quantity="other" msgid="5477305226026342036">"Code PUK incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives avant que votre carte SIM devienne définitivement inutilisable."</item>
+    <item quantity="one" msgid="3256893607561060649">"Code PUK de la carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM devienne définitivement inutilisable."</item>
+    <item quantity="other" msgid="5477305226026342036">"Code PUK de la carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative(s) avant que votre carte SIM devienne définitivement inutilisable."</item>
   </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Le déverrouillage par NIP de carte SIM a échoué."</string>
-    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Le déverrouillage de carte SIM par code PUK a échoué."</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Le déverrouillage par NIP de la carte SIM a échoué."</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Le déverrouillage de la carte SIM par code PUK a échoué."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Code accepté"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Bouton pour revenir au titre précédent"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Bouton pour atteindre le titre suivant"</string>
