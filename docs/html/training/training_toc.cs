@@ -945,6 +945,34 @@ include the action bar on devices running Android 2.1 or higher."
         </ul>
       </li>
 
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/system-ui/index.html"
+             description=
+             "How to hide and show status and navigation bars across different versions of Android,
+              while managing the display of other screen components."
+            >Managing the System UI</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/system-ui/dim.html">
+            Dimming the System Bars
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/system-ui/status.html">
+            Hiding the Status Bar
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/system-ui/navigation.html">
+            Hiding the Navigation Bar
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/system-ui/visibility.html">
+            Responding to UI Visibility Changes
+          </a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li>
   <!-- End best UX and UI -->
