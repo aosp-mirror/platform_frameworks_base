@@ -899,13 +899,13 @@ protected class myDragEventListener implements View.OnDragListener {
                     v.invalidate();
 
                     // returns true to indicate that the View can accept the dragged data.
-                    return(true);
+                    return true;
 
                 }
 
                 // Returns false. During the current drag and drop operation, this View will
                 // not receive events again until ACTION_DRAG_ENDED is sent.
-                return(false);
+                return false;
 
             case DragEvent.ACTION_DRAG_ENTERED:
 
@@ -916,12 +916,12 @@ protected class myDragEventListener implements View.OnDragListener {
                 // Invalidate the view to force a redraw in the new tint
                 v.invalidate();
 
-                return(true);
+                return true;
 
             case DragEvent.ACTION_DRAG_LOCATION:
 
                 // Ignore the event
-                return(true);
+                return true;
 
             case DragEvent.ACTION_DRAG_EXITED:
 
@@ -931,7 +931,7 @@ protected class myDragEventListener implements View.OnDragListener {
                 // Invalidate the view to force a redraw in the new tint
                 v.invalidate();
 
-                return(true);
+                return true;
 
             case DragEvent.ACTION_DROP:
 
@@ -951,7 +951,7 @@ protected class myDragEventListener implements View.OnDragListener {
                 v.invalidate();
 
                 // Returns true. DragEvent.getResult() will return true.
-                return(true);
+                return true;
 
             case DragEvent.ACTION_DRAG_ENDED:
 
@@ -971,7 +971,7 @@ protected class myDragEventListener implements View.OnDragListener {
                 }
 
                 // returns true; the value is ignored.
-                return(true);
+                return true;
 
             // An unknown action type was received.
             default:
@@ -979,7 +979,7 @@ protected class myDragEventListener implements View.OnDragListener {
                 break;
         }
         
-        return(false);
+        return false;
     }
 };
 </pre>
