@@ -959,5 +959,16 @@ public class InputMethodUtils {
                 addSubtypeToHistory(curMethodId, subtypeId);
             }
         }
+
+        public HashMap<InputMethodInfo, List<InputMethodSubtype>>
+                getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(Context context) {
+            HashMap<InputMethodInfo, List<InputMethodSubtype>> enabledInputMethodAndSubtypes =
+                    new HashMap<InputMethodInfo, List<InputMethodSubtype>>();
+            for (InputMethodInfo imi: getEnabledInputMethodListLocked()) {
+                enabledInputMethodAndSubtypes.put(
+                        imi, getEnabledInputMethodSubtypeListLocked(context, imi, true));
+            }
+            return enabledInputMethodAndSubtypes;
+        }
     }
 }
