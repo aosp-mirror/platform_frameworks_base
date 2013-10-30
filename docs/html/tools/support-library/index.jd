@@ -62,6 +62,58 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 19</a> <em>(October 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added support for external Storage APIs with the
+            {@link android.support.v4.content.ContextCompat#getObbDirs getObbDirs()},
+            {@link android.support.v4.content.ContextCompat#getExternalFilesDirs getExternalFilesDirs()},
+            {@link android.support.v4.content.ContextCompat#getExternalCacheDirs getExternalCacheDirs()},
+            and {@link android.support.v4.os.EnvironmentCompat#getStorageState getStorageState()}.
+            These helper methods always return a single file object on devices running Android
+            4.3 (API level 18) and earlier. When running on Android 4.4 (API level 19) and higher,
+            these methods may return more than one file object.</li>
+          <li>Added {@link android.support.v4.print.PrintHelper} class that works with the
+            Print APIs to print images with a minimum of code.</li>
+          <li>Added drag-to-open user interface support for pop-up menus. For more information, see
+            {@link android.support.v4.widget.PopupMenuCompat} and
+            {@link android.support.v4.widget.ListPopupWindowCompat}.</li>
+          <li>Improved accessibility support with the addition of a
+            {@link android.support.v4.view.accessibility.AccessibilityNodeProviderCompat#findFocus
+            findFocus()} method in
+            {@link android.support.v4.view.accessibility.AccessibilityNodeProviderCompat} and the
+            {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat#getLiveRegion
+            getLiveRegion()} method in
+            {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}.</li>
+          <li>Added helper class {@link android.support.v4.view.ScaleGestureDetectorCompat} for
+            accessing new scaling gesture methods.</li>
+          <li>Fixed problem with {@link android.support.v4.app.ActionBarDrawerToggle} in
+            right-to-left language displays.</li>
+          <li>Modified {@link android.support.v4.widget.AutoScrollHelper} option to consume
+            touch events or allow them to be passed through to other views.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v7 mediarouter library:</dt>
+      <dd>
+        <ul>
+          <li>Added support for media playback queuing, setting HTTP header values and media
+            playback duration.</li>
+          <li>Added explicit start, get, and end session actions for explicitly managing media
+            playback sessions with media router.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 18</a> <em>(July 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
