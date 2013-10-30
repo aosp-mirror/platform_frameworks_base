@@ -3417,6 +3417,9 @@ final class ActivityStack {
             int numActivities = 0;
             int numRunning = 0;
             final ArrayList<ActivityRecord> activities = task.mActivities;
+            if (activities.isEmpty()) {
+                continue;
+            }
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 r = activities.get(activityNdx);
 
