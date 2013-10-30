@@ -83,7 +83,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>RealTimeSocket | Android Developers</title>
+<title>AdRequest.Builder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -421,7 +421,22 @@ onkeyup="return search_changed(event, false, '/')" />
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="/google/play-services/maps.html">
-          <span class="en">Google Maps</span>
+          <span class="en">Maps</span>
+      </a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play-services/ads.html">
+      <span class="en">Ads</span></a>
+    </div>
+    <ul>
+      <li><a href="/google/play-services/id.html">
+          <span class="en">Advertising ID</span></a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="/google/play-services/wallet.html">
+          <span class="en">Wallet</span>
       </a></div>
   </li>
   <li class="nav-section">
@@ -507,26 +522,23 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Overview</span></a>
-        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">Implementing GCM Client</span></a>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
         </li>
-        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
-              <span class="en">Implementing GCM Server</span></a></div>
-              <ul>
-              <li><a href="/google/gcm/ccs.html">
-              <span class="en">CCS (XMPP)</span></a></li>
-              <li><a href="/google/gcm/http.html">
-              <span class="en">HTTP</span></a></li>
-              </ul>
+         <li><a href="/google/gcm/ccs.html">
+              <span class="en">Cloud Connection Server</span></a>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
+        </li>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">GCM Client</span></a>
+        </li>
+        <li><a href="/google/gcm/server.html">
+            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -631,8 +643,39 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
+  
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -648,13 +691,19 @@ onkeyup="return search_changed(event, false, '/')" />
 
 <div id="jd-header">
     public
-     
-     
+    static 
+    final 
     
-    interface
-<h1 itemprop="name">RealTimeSocket</h1>
+    class
+<h1 itemprop="name">AdRequest.Builder</h1>
 
 
+
+  
+    extends Object<br/>
+  
+  
+  
 
   
   
@@ -671,7 +720,15 @@ onkeyup="return search_changed(event, false, '/')" />
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.games.RealTimeSocket</td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.ads.AdRequest.Builder</td>
     </tr>
     
 
@@ -687,20 +744,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Provides a Socket-like interface for a real-time data connection to a participant in a real-time
- room. Use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#getRealTimeSocketForParticipant(java.lang.String, java.lang.String)">getRealTimeSocketForParticipant(String, String)</a></code> to get an instance.
- <p>
- Use <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code> to get a file descriptor for read/write, or
- use <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getInputStream()">getInputStream()</a></code> / <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getOutputStream()">getOutputStream()</a></code> to get
- access to an instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>
- respectively.
- <p>
- Calling close() on any of (i) the returned <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or, (ii) the
- <code><a href="/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> instances will close the socket. Note: The maximum
- (unfragmented) packet size supported through this API is
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes (excluding internal protocol headers). Thus,
- the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the packet will
- be dropped and an error message will be sent to the log.
+<p itemprop="articleBody">Builds an <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
 </p>
 
 
@@ -751,6 +795,31 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#AdRequest.Builder()">AdRequest.Builder</a></span>()</nobr>
+        
+  </td></tr>
+
+
+
+</table>
+
+
 
 
 
@@ -763,17 +832,17 @@ onkeyup="return search_changed(event, false, '/')" />
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            void</nobr>
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#close()">close</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addKeyword(java.lang.String)">addKeyword</a></span>(String keyword)</nobr>
         
-        <div class="jd-descrdiv">Closes this real-time socket connection with the participant.</div>
+        <div class="jd-descrdiv">Add a keyword for targeting purposes.</div>
   
   </td></tr>
 
@@ -781,17 +850,17 @@ onkeyup="return search_changed(event, false, '/')" />
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            InputStream</nobr>
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getInputStream()">getInputStream</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addNetworkExtras(com.google.android.gms.ads.mediation.NetworkExtras)">addNetworkExtras</a></span>(<a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a> networkExtras)</nobr>
         
-        <div class="jd-descrdiv">Use this to read data from this socket.</div>
+        <div class="jd-descrdiv">Add extra parameters to pass to a specific ad network adapter.</div>
   
   </td></tr>
 
@@ -799,17 +868,17 @@ onkeyup="return search_changed(event, false, '/')" />
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            OutputStream</nobr>
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getOutputStream()">getOutputStream</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice</a></span>(String deviceId)</nobr>
         
-        <div class="jd-descrdiv">Instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.</div>
+        <div class="jd-descrdiv">Causes a device to receive test ads.</div>
   
   </td></tr>
 
@@ -817,17 +886,17 @@ onkeyup="return search_changed(event, false, '/')" />
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            ParcelFileDescriptor</nobr>
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#build()">build</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the underlying file descriptor for direct read/write access.</div>
+        <div class="jd-descrdiv">Constructs an <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code> with the specified attributes.</div>
   
   </td></tr>
 
@@ -835,17 +904,56 @@ onkeyup="return search_changed(event, false, '/')" />
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            boolean</nobr>
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#isClosed()">isClosed</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#setBirthday(java.util.Date)">setBirthday</a></span>(Date birthday)</nobr>
         
-        <div class="jd-descrdiv">Use this to check if the socket is closed.</div>
+        <div class="jd-descrdiv">Set the user's birthday for targeting purposes.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#setGender(int)">setGender</a></span>(int gender)</nobr>
+        
+        <div class="jd-descrdiv">Set the user's gender for targeting purposes.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#tagForChildDirectedTreatment(boolean)">tagForChildDirectedTreatment</a></span>(boolean tagForChildDirectedTreatment)</nobr>
+        
+        <div class="jd-descrdiv">This method allows you to specify whether you would like your app to be treated as
+ child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA) -
+ <a href="http://business.ftc.gov/privacy-and-security/childrens-privacy">
+ http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.</div>
   
   </td></tr>
 
@@ -857,6 +965,216 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -885,6 +1203,42 @@ onkeyup="return search_changed(event, false, '/')" />
 <!-- Public ctors -->
 
 
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<A NAME="AdRequest.Builder()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">AdRequest.Builder</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -898,7 +1252,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 
-<A NAME="close()"></A>
+<A NAME="addKeyword(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -906,12 +1260,12 @@ onkeyup="return search_changed(event, false, '/')" />
         public 
          
          
-        abstract 
          
-        void
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a>
       </span>
-      <span class="sympad">close</span>
-      <span class="normal">()</span>
+      <span class="sympad">addKeyword</span>
+      <span class="normal">(String keyword)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -921,23 +1275,14 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Closes this real-time socket connection with the participant.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>IOException</td>
-            <td>on error.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Add a keyword for targeting purposes.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="getInputStream()"></A>
+<A NAME="addNetworkExtras(com.google.android.gms.ads.mediation.NetworkExtras)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -945,12 +1290,12 @@ onkeyup="return search_changed(event, false, '/')" />
         public 
          
          
-        abstract 
          
-        InputStream
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a>
       </span>
-      <span class="sympad">getInputStream</span>
-      <span class="normal">()</span>
+      <span class="sympad">addNetworkExtras</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a> networkExtras)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -960,28 +1305,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Use this to read data from this socket.
- Calling close() on the InputStream will close the socket.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code>.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>IOException</td>
-            <td>on error.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Add extra parameters to pass to a specific ad network adapter. <code>networkExtras</code>
+ should be an instance of <code>com.google.ads.mediation.NetworkExtras</code>, which is
+ provided by ad network adapters.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="getOutputStream()"></A>
+<A NAME="addTestDevice(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -989,12 +1322,12 @@ onkeyup="return search_changed(event, false, '/')" />
         public 
          
          
-        abstract 
          
-        OutputStream
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a>
       </span>
-      <span class="sympad">getOutputStream</span>
-      <span class="normal">()</span>
+      <span class="sympad">addTestDevice</span>
+      <span class="normal">(String deviceId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1004,33 +1337,16 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.
- Calling close() on the OutputStream will close the socket.
-
- Note: The maximum (unfragmented) packet size supported through this API is
- <code><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes (excluding internal protocol headers).
- Thus, the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the
- packet will be dropped and an error message will be sent to the log.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>IOException</td>
-            <td>on error.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Causes a device to receive test ads. The <code>deviceId</code> can be obtained by viewing the
+ logcat output after creating a new ad. For emulators, use
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.html#DEVICE_ID_EMULATOR">DEVICE_ID_EMULATOR</a></code>.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="getParcelFileDescriptor()"></A>
+<A NAME="build()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1038,11 +1354,11 @@ onkeyup="return search_changed(event, false, '/')" />
         public 
          
          
-        abstract 
          
-        ParcelFileDescriptor
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a>
       </span>
-      <span class="sympad">getParcelFileDescriptor</span>
+      <span class="sympad">build</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1053,29 +1369,14 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the underlying file descriptor for direct read/write access.
- Calling close() on the returned ParcelFileDescriptor will close the socket.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>An instance of <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or null if the underlying
-         socket is closed.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>IOException</td>
-            <td>in case of error.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Constructs an <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code> with the specified attributes.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="isClosed()"></A>
+<A NAME="setBirthday(java.util.Date)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1083,12 +1384,12 @@ onkeyup="return search_changed(event, false, '/')" />
         public 
          
          
-        abstract 
          
-        boolean
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a>
       </span>
-      <span class="sympad">isClosed</span>
-      <span class="normal">()</span>
+      <span class="sympad">setBirthday</span>
+      <span class="normal">(Date birthday)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1098,11 +1399,101 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Use this to check if the socket is closed.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Set the user's birthday for targeting purposes.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setGender(int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a>
+      </span>
+      <span class="sympad">setGender</span>
+      <span class="normal">(int gender)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Set the user's gender for targeting purposes. This should be
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.html#GENDER_MALE">GENDER_MALE</a></code>, <code><a href="/reference/com/google/android/gms/ads/AdRequest.html#GENDER_FEMALE">GENDER_FEMALE</a></code>, or <code><a href="/reference/com/google/android/gms/ads/AdRequest.html#GENDER_UNKNOWN">GENDER_UNKNOWN</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="tagForChildDirectedTreatment(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a>
+      </span>
+      <span class="sympad">tagForChildDirectedTreatment</span>
+      <span class="normal">(boolean tagForChildDirectedTreatment)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This method allows you to specify whether you would like your app to be treated as
+ child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA) -
+ <a href="http://business.ftc.gov/privacy-and-security/childrens-privacy">
+ http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.
+ <p>
+ If you set this method to <code>true</code>, you will indicate that your app should be treated
+ as child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA).
+ <p>
+ If you set this method to <code>false</code>, you will indicate that your app should not be
+ treated as child-directed for purposes of the Children’s Online Privacy Protection Act
+ (COPPA).
+ <p>
+ If you do not set this method, ad requests will include no indication of how you would
+ like your app treated with respect to COPPA.
+ <p>
+ By setting this method, you certify that this notification is accurate and you are
+ authorized to act on behalf of the owner of the app. You understand that abuse of this
+ setting may result in termination of your Google account.
+ <p>
+ Note: it may take some time for this designation to be fully implemented in applicable
+ Google services.
+ <p>
+ This designation will only apply to ad requests for which you have set this method.</p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>True if the socket is closed.
-</li></ul>
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>tagForChildDirectedTreatment</td>
+          <td>Set to <code>true</code> to indicate that your app should
+         be treated as child-directed. Set to <code>false</code> to indicate that your app
+         should not be treated as child-directed.
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
