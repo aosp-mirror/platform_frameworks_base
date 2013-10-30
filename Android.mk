@@ -538,31 +538,87 @@ framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
 framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
     frameworks/base/docs/knowntags.txt
 
-sample_dir := development/samples
+sample_dir := development/samples/browseable
 new_sample_dir := developers/samples/android
 
 # Whitelist of valid groups, used for default TOC grouping. Each sample must
 # belong to one (and only one) group. Assign samples to groups by setting
 # a sample.group var to one of these groups in the sample's _index.jd.
-sample_groups := -samplegroup Input \
-                 -samplegroup Sensors \
-                 -samplegroup Connectivity
+sample_groups := -samplegroup Background \
+                 -samplegroup Connectivity \
+                 -samplegroup Content \
+                 -samplegroup Input \
+                 -samplegroup Media \
+                 -samplegroup Security \
+                 -samplegroup Testing \
+                 -samplegroup UI \
+                 -samplegroup Views
 
 # the list here should match the list of samples included in the sdk samples package
 # (see development/build/sdk.atree)
 # remove htmlified samples for now -- samples are still available through the SDK
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
-		-samplecode $(new_sample_dir)/input/gestures/BasicGestureDetect/BasicGestureDetect \
- 		            samples/BasicGestureDetect/ "Basic Gestures" \
-		-samplecode $(sample_dir)/AccelerometerPlay \
- 		            samples/AccelerometerPlay "Accelerometer Play" \
-		-samplecode $(sample_dir)/ActionBarCompat \
- 		            samples/ActionBarCompat "Action Bar Compatibility" \
- 		-samplecode $(sample_dir)/BluetoothHDP \
- 		            samples/BluetoothHDP "Bluetooth HDP Demo" \
- 		-samplecode $(sample_dir)/BluetoothLeGatt \
- 		            samples/BluetoothLeGatt "Bluetooth HDP Demo"
+		-samplecode $(sample_dir)/BasicAccessibility \
+ 		            samples/BasicAccessibility "dd" \
+		-samplecode $(sample_dir)/HorizontalPaging \
+ 		            samples/HorizontalPaging "" \
+		-samplecode $(sample_dir)/ShareActionProvider \
+ 		            samples/ShareActionProvider "" \
+		-samplecode $(sample_dir)/Styled \
+ 		            samples/Styled "" \
+		-samplecode $(sample_dir)/BasicAndroidKeyStore \
+ 		            samples/BasicAndroidKeyStore "" \
+		-samplecode $(sample_dir)/Basic \
+ 		            samples/Basic "" \
+		-samplecode $(sample_dir)/ImmersiveMode \
+ 		            samples/ImmersiveMode "" \
+		-samplecode $(sample_dir)/repeatingAlarm \
+ 		            samples/repeatingAlarm "" \
+		-samplecode $(sample_dir)/TextLinkify \
+ 		            samples/TextLinkify "" \
+		-samplecode $(sample_dir)/BasicMediaRouter \
+ 		            samples/BasicMediaRouter "" \
+		-samplecode $(sample_dir)/BasicMultitouch \
+ 		            samples/BasicMultitouch "" \
+		-samplecode $(sample_dir)/TextSwitcher \
+ 		            samples/TextSwitcher "" \
+		-samplecode $(sample_dir)/ActivityInstrumentation \
+ 		            samples/ActivityInstrumentation "" \
+		-samplecode $(sample_dir)/BorderlessButtons \
+ 		            samples/BorderlessButtons "" \
+		-samplecode $(sample_dir)/BasicNotifications \
+ 		            samples/BasicNotifications "" \
+		-samplecode $(sample_dir)/AdvancedImmersiveMode \
+ 		            samples/AdvancedImmersiveMode "" \
+		-samplecode $(sample_dir)/BluetoothLeGatt \
+ 		            samples/BluetoothLeGatt "" \
+		-samplecode $(sample_dir)/NetworkConnect \
+ 		            samples/NetworkConnect "" \
+		-samplecode $(sample_dir)/BasicNetworking \
+ 		            samples/BasicNetworking "" \
+		-samplecode $(sample_dir)/BasicMediaDecoder \
+ 		            samples/BasicMediaDecoder "" \
+		-samplecode $(sample_dir)/BasicImmersiveMode \
+ 		            samples/BasicImmersiveMode "" \
+		-samplecode $(sample_dir)/CustomChoiceList \
+ 		            samples/CustomChoiceList "" \
+		-samplecode $(sample_dir)/BasicContactables \
+ 		            samples/BasicContactables "" \
+		-samplecode $(sample_dir)/BasicGestureDetect \
+ 		            samples/BasicGestureDetect "" \
+		-samplecode $(sample_dir)/DoneBar \
+ 		            samples/DoneBar "" \
+		-samplecode $(sample_dir)/ListPopupMenu \
+ 		            samples/ListPopupMenu "" \
+		-samplecode $(sample_dir)/AppRestrictions \
+ 		            samples/AppRestrictions "" \
+		-samplecode $(sample_dir)/CustomNotifications \
+ 		            samples/CustomNotifications "" \
+		-samplecode $(sample_dir)/BasicSyncAdapter \
+ 		            samples/BasicSyncAdapter "" \
+		-samplecode $(sample_dir)/StorageClient \
+ 		            samples/StorageClient "" 
 #       -samplecode $(sample_dir)/AndroidBeamDemo \
 # 		            samples/AndroidBeamDemo "Android Beam Demo" \
 # 		-samplecode $(sample_dir)/ApiDemos \
@@ -781,7 +837,7 @@ LOCAL_MODULE := online-sdk
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
-		-hdf android.whichdoc online
+		-hdf android.whichdoc online 
 #		$(sample_groups) \
 #		$(web_docs_sample_code_flags)
 
