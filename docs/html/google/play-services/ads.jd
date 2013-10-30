@@ -1,0 +1,85 @@
+page.title=Google Mobile Ads
+page.tags="Ads","monetization", "AdMob", "Google Play services"
+header.hide=1
+
+@jd:body
+
+
+<div class="landing-banner">
+        
+<div class="col-6">
+  <img src="{@docRoot}images/google/gps-ads.png" alt="">
+</div>
+<div class="col-6">
+
+<h1 itemprop="name" style="margin-bottom:0;">Google Mobile Ads</h1>
+<p itemprop="description">
+  Monetize your app with banner or interstitial ads from
+  Google's vast pool of advertisers. Integrate with top ad networks through
+  mediation to maximize your revenue from impressions. Take advantage of new
+  ad features and capabilities through Google Play services, without having to
+  add or update a library in your APK.
+</p>
+
+<p>
+  Check out the  <a href=
+  "{@docRoot}reference/gms-packages.html">Google Mobile Ads API reference</a> and visit <a class=
+  "external-link" href=
+  "http://developers.google.com/mobile-ads-sdk">developers.google.com/mobile-ads-sdk</a>
+  for more information about integrating Google Mobile Ads into your app.
+</p>
+</div>
+</div>
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Key Developer Features</h3>
+
+      <h4>Seamless auto-updates</h4>
+      <p>The Google Mobile Ads SDK is part of Google Play services, so you can take advantage of features
+      and capabilities in each new release of Google Play services, without needing to update your
+      APK. </p>
+
+      <h4>Monetize your apps</h4>
+      <p>Connect with over a million Google advertisers and show relevant ads in your
+      app. Users engage with the ads, you make money.
+      <br>
+      <a href="http://www.google.com/ads/admob/monetize.html" class="external-link">Learn more
+      and sign up</a>.</p>
+
+      <h4>Innovative ads</h4>
+      <p>Choose from a range of ads across mobile devices and tablets, including interactive
+      ad units.</p>
+
+      <h4>Flexible and powerful tools </h4>
+      <p>Filters and controls help you manage your ads. If you want to use multiple ad
+      networks, you can do that too, with free ad network mediation.</p>
+  </div>
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>1. Get the Google Play services SDK</h4>
+    <p>The Google Mobile Ads APIs are part of the Google Play services platform.</p>
+    <p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+    the Google Play services SDK.</p>
+
+    <h4>2. Run the sample</h4>
+    <p>Once you've installed the Google Play services package, the Google Mobile Ads sample is located
+    in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/ads</code> and shows you how to
+    serve banner and interstitial ads using the Google Mobile Ads APIs.</p>
+
+    <h4>3. Read the documentation</h4>
+    <p>Read the <a class="external-link" href="https://www.google.com/adsense/localized-terms">AdSense
+    Terms of Service</a> and the <a class="external-link"
+    href="https://support.google.com/admob/topic/1307235?hl=en&ref_topic=1307209">AdMob
+    publisher guidelines and policies</a>.</p>
+    <p>For quick access while developing your Android apps, the <a
+    href="{@docRoot}reference/gms-packages.html">Google Mobile Ads API reference</a> is available here on
+    developer.android.com.</p>
+    <p>Detailed documentation for Google Mobile Ads for Android is available with the rest of the Google
+    Mobile Ads developer documents at <a href="https://developers.google.com/mobile-ads-sdk"
+    class="external-link">developers.google.com/mobile-ads-sdk</a>. </p>
+    <p class="note"><strong>Note</strong>: The SDK doesn’t currently support DFP, Ad Exchange or Search
+    Ads for Mobile Apps but support is coming soon.</p>
+  </div>
+</div>
