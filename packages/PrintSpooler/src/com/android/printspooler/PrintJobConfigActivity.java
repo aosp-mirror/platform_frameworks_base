@@ -357,6 +357,9 @@ public class PrintJobConfigActivity extends Activity {
         }
 
         public void cancel() {
+            if (isWorking()) {
+                mRemotePrintAdapter.cancel();
+            }
             mControllerState = CONTROLLER_STATE_CANCELLED;
         }
 
