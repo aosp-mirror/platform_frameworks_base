@@ -5,25 +5,25 @@ header.hide=1
 page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 
 
-sdk.linux32_bundle_download=adt-bundle-linux-x86-20131028.zip
-sdk.linux32_bundle_bytes=496856894
-sdk.linux32_bundle_checksum=dfc1b314a07b5260941360d3e7542493
+sdk.linux32_bundle_download=adt-bundle-linux-x86-20131030.zip
+sdk.linux32_bundle_bytes=496876498
+sdk.linux32_bundle_checksum=d389139ad9f59a43bdd34c94bc850509
 
-sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20131028.zip
-sdk.linux64_bundle_bytes=497152039
-sdk.linux64_bundle_checksum=c5db52afa4d7d3b6b78793ccc98b036f
+sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20131030.zip
+sdk.linux64_bundle_bytes=497171697
+sdk.linux64_bundle_checksum=99b51a4f0526434b083701a896550b72
 
-sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20131028.zip
-sdk.mac64_bundle_bytes=470367339
-sdk.mac64_bundle_checksum=446f013ab88ff873985369e5405fda70
+sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20131030.zip
+sdk.mac64_bundle_bytes=470386961
+sdk.mac64_bundle_checksum=3e80e7a92b549029d91bdcf2ae82657f
 
-sdk.win32_bundle_download=adt-bundle-windows-x86-20131028.zip
-sdk.win32_bundle_bytes=503579820
-sdk.win32_bundle_checksum=8cfb299b548c1017dbe66259e136d1e7
+sdk.win32_bundle_download=adt-bundle-windows-x86-20131030.zip
+sdk.win32_bundle_bytes=503599460
+sdk.win32_bundle_checksum=cd490a531ec24667354f6473e999b988
 
-sdk.win64_bundle_download=adt-bundle-windows-x86_64-20131028.zip
-sdk.win64_bundle_bytes=503715722
-sdk.win64_bundle_checksum=fc2c638d32293df8874dbcff3ab06e63
+sdk.win64_bundle_download=adt-bundle-windows-x86_64-20131030.zip
+sdk.win64_bundle_bytes=503735416
+sdk.win64_bundle_checksum=ddddbb1b9028015779d68dde01f96b14
 
 
 
