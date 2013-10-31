@@ -512,10 +512,7 @@ public abstract class DocumentsProvider extends ContentProvider {
         final boolean callerHasManage =
                 context.checkCallingOrSelfPermission(android.Manifest.permission.MANAGE_DOCUMENTS)
                 == PackageManager.PERMISSION_GRANTED;
-        if (!callerHasManage) {
-            getContext().enforceCallingOrSelfUriPermission(
-                    documentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION, method);
-        }
+        enforceWritePermissionInner(documentUri);
 
         final Bundle out = new Bundle();
         try {
