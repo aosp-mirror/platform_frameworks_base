@@ -2739,6 +2739,8 @@
         <!-- Enables the fast scroll thumb that can be dragged to quickly scroll through
              the list. -->
         <attr name="fastScrollEnabled" format="boolean" />
+        <!-- Specifies the style of the fast scroll decorations. -->
+        <attr name="fastScrollStyle" format="reference" />
         <!-- When set to true, the list will use a more refined calculation
              method based on the pixels height of the items visible on screen. This
              property is set to true by default but should be set to false if your adapter
@@ -2806,6 +2808,36 @@
         <attr name="checkMark" format="reference"/>
     </declare-styleable>
     <declare-styleable name="EditText">
+    </declare-styleable>
+    <declare-styleable name="FastScroll">
+        <!-- Drawable used for the scroll bar thumb. -->
+        <attr name="thumbDrawable" format="reference" />
+        <!-- Minimum width of the thumb. -->
+        <attr name="thumbMinWidth" format="dimension" />
+        <!-- Minimum height of the thumb. -->
+        <attr name="thumbMinHeight" format="dimension" />
+        <!-- Drawable used for the scroll bar track. -->
+        <attr name="trackDrawable" format="reference" />
+        <!-- Drawable used for the section header preview when right-aligned. -->
+        <attr name="backgroundRight" format="reference" />
+        <!-- Drawable used for the section header preview when left-aligned. -->
+        <attr name="backgroundLeft" format="reference" />
+        <!-- Position of section header preview. -->
+        <attr name="position">
+            <!-- Floating at the top of the content. -->
+            <enum name="floating" value="0" />
+            <!-- Pinned alongside the thumb. -->
+            <enum name="atThumb" value="1" />
+        </attr>
+        <attr name="textAppearance" />
+        <attr name="textColor" />
+        <attr name="textSize" />
+        <!-- Minimum width of the section header preview. -->
+        <attr name="minWidth" />
+        <!-- Minimum height of the section header preview. -->
+        <attr name="minHeight" />
+        <!-- Padding for the section header preview. -->
+        <attr name="padding" />
     </declare-styleable>
     <declare-styleable name="FrameLayout">
         <!-- Defines the drawable to draw over the content. This can be used as an overlay.
