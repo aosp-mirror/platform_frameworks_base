@@ -1255,7 +1255,8 @@ public abstract class Transition implements Cloneable {
             Animator anim = runningAnimators.keyAt(i);
             if (anim != null) {
                 AnimationInfo oldInfo = runningAnimators.get(anim);
-                if (oldInfo != null) {
+                if (oldInfo != null && oldInfo.view != null &&
+                        oldInfo.view.getContext() == sceneRoot.getContext()) {
                     boolean cancel = false;
                     TransitionValues oldValues = oldInfo.values;
                     View oldView = oldInfo.view;
