@@ -1,0 +1,11 @@
+page.title=Views
+@jd:body
+
+
+<div id="samples" class="views">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>
