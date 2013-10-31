@@ -391,6 +391,31 @@ public class PdfDocument {
         /**
          * Gets the {@link Canvas} of the page.
          *
+         * <p>
+         * <strong>Note: </strong> There are some draw operations that are
+         * not yet supported by the canvas returned by this method. More
+         * specifically:
+         * <ul>
+         * <li>{@link Canvas#clipPath(android.graphics.Path)
+         *     Canvas.clipPath(android.graphics.Path)}</li>
+         * <li>All flavors of {@link Canvas#drawText(String, float, float,
+         *     android.graphics.Paint) Canvas.drawText(String, float, float,
+         *     android.graphics.Paint)}</li>
+         * <li>All flavors of {@link Canvas#drawPosText(String, float[],
+         *     android.graphics.Paint) Canvas.drawPosText(String, float[],
+         *     android.graphics.Paint)}</li>
+         * <li>{@link Canvas#drawVertices(android.graphics.Canvas.VertexMode, int,
+         *     float[], int, float[], int, int[], int, short[], int, int,
+         *     android.graphics.Paint) Canvas.drawVertices(
+         *     android.graphics.Canvas.VertexMode, int, float[], int, float[],
+         *     int, int[], int, short[], int, int, android.graphics.Paint)}</li>
+         * <li>{@link android.graphics.PorterDuff.Mode#SRC_ATOP PorterDuff.Mode SRC},
+         *     {@link android.graphics.PorterDuff.Mode#DST_ATOP PorterDuff.DST_ATOP},
+         *     {@link android.graphics.PorterDuff.Mode#XOR PorterDuff.XOR},
+         *     {@link android.graphics.PorterDuff.Mode#ADD PorterDuff.ADD}</li>
+         * <li>Perspective transforms</li>
+         * </ul>
+         *
          * @return The canvas if the page is not finished, null otherwise.
          *
          * @see PdfDocument#finishPage(Page)
