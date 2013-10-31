@@ -1733,34 +1733,6 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * @return the direct child that contains accessibility focus, or null if no
-     *         child contains accessibility focus
-     */
-    private View getAccessibilityFocusedChild() {
-        final ViewRootImpl viewRootImpl = getViewRootImpl();
-        if (viewRootImpl == null) {
-            return null;
-        }
-
-        View focusedView = viewRootImpl.getAccessibilityFocusedHost();
-        if (focusedView == null) {
-            return null;
-        }
-
-        ViewParent viewParent = focusedView.getParent();
-        while ((viewParent instanceof View) && (viewParent != this)) {
-            focusedView = (View) viewParent;
-            viewParent = viewParent.getParent();
-        }
-
-        if (!(viewParent instanceof View)) {
-            return null;
-        }
-
-        return focusedView;
-    }
-
-    /**
      * Obtain the view and add it to our list of children. The view can be made
      * fresh, converted from an unused view, or used as is if it was in the
      * recycle bin.

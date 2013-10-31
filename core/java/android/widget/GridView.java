@@ -23,6 +23,7 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.SoundEffectConstants;
@@ -1215,6 +1216,24 @@ public class GridView extends AbsListView {
 
             setSelectedPositionInt(mNextSelectedPosition);
 
+            // Remember which child, if any, had accessibility focus.
+            final int accessibilityFocusPosition;
+            final View accessFocusedChild = getAccessibilityFocusedChild();
+            if (accessFocusedChild != null) {
+                accessibilityFocusPosition = getPositionForView(accessFocusedChild);
+                accessFocusedChild.setHasTransientState(true);
+            } else {
+                accessibilityFocusPosition = INVALID_POSITION;
+            }
+
+            // Ensure the child containing focus, if any, has transient state.
+            // If the list data hasn't changed, or if the adapter has stable
+            // IDs, this will maintain focus.
+            final View focusedChild = getFocusedChild();
+            if (focusedChild != null) {
+                focusedChild.setHasTransientState(true);
+            }
+
             // Pull all children into the RecycleBin.
             // These views will be reused if possible
             final int firstPosition = mFirstPosition;
@@ -1229,7 +1248,6 @@ public class GridView extends AbsListView {
             }
 
             // Clear out old views
-            //removeAllViewsInLayout();
             detachAllViewsFromParent();
             recycleBin.removeSkippedScrap();
 
@@ -1298,6 +1316,27 @@ public class GridView extends AbsListView {
             } else {
                 mSelectedTop = 0;
                 mSelectorRect.setEmpty();
+            }
+
+            if (accessFocusedChild != null) {
+                accessFocusedChild.setHasTransientState(false);
+
+                // If we failed to maintain accessibility focus on the previous
+                // view, attempt to restore it to the previous position.
+                if (!accessFocusedChild.isAccessibilityFocused()
+                    && accessibilityFocusPosition != INVALID_POSITION) {
+                    // Bound the position within the visible children.
+                    final int position = MathUtils.constrain(
+                            accessibilityFocusPosition - mFirstPosition, 0, getChildCount() - 1);
+                    final View restoreView = getChildAt(position);
+                    if (restoreView != null) {
+                        restoreView.requestAccessibilityFocus();
+                    }
+                }
+            }
+
+            if (focusedChild != null) {
+                focusedChild.setHasTransientState(false);
             }
 
             mLayoutMode = LAYOUT_NORMAL;
