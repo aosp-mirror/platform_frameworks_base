@@ -1,0 +1,11 @@
+page.title=UI
+@jd:body
+
+
+<div id="samples" class="ui">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>
