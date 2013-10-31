@@ -44,8 +44,9 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 
                 <li class="item carousel-home">
-                    <div class="content-left col-10">
+                    <div class="content-left col-10"><a href="/design/patterns/new.html">
                         <img src="/design/media/design_elements_landing.png" style="margin-top:30px">
+                        </a>
                     </div>
                     <div class="content-right col-5">
                     <h1>Design for Android KitKat</h1>
