@@ -55,6 +55,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -2122,6 +2123,34 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Subclasses must override this method to layout their children.
      */
     protected void layoutChildren() {
+    }
+
+    /**
+     * @return the direct child that contains accessibility focus, or null if no
+     *         child contains accessibility focus
+     */
+    View getAccessibilityFocusedChild() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl == null) {
+            return null;
+        }
+
+        View focusedView = viewRootImpl.getAccessibilityFocusedHost();
+        if (focusedView == null) {
+            return null;
+        }
+
+        ViewParent viewParent = focusedView.getParent();
+        while ((viewParent instanceof View) && (viewParent != this)) {
+            focusedView = (View) viewParent;
+            viewParent = viewParent.getParent();
+        }
+
+        if (!(viewParent instanceof View)) {
+            return null;
+        }
+
+        return focusedView;
     }
 
     void updateScrollIndicators() {
