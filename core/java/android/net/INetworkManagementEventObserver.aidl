@@ -90,4 +90,13 @@ interface INetworkManagementEventObserver {
      * @param active  True if the interface is actively transmitting data, false if it is idle.
      */
     void interfaceClassDataActivityChanged(String label, boolean active);
+
+    /**
+     * Information about available DNS servers has been received.
+     *
+     * @param iface The interface on which the information was received.
+     * @param lifetime The time in seconds for which the DNS servers may be used.
+     * @param servers The IP addresses of the DNS servers.
+     */
+    void interfaceDnsServerInfo(String iface, long lifetime, in String[] servers);
 }
