@@ -15,25 +15,31 @@ page.tags="samples","examples","code"
 <p>If you want to download a complete project, just click on any source file in the project and
   click the link in the upper right of the source page.</p>
 
+<p>To import a downloaded project:<p>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Android Studio</a></p>
+
+  <div class="toggle-content-toggleme">
+
+  <ol>
+    <li>Unpack the downloaded project package.</li>
+    <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, chose
+    <strong>File > Import Project</strong> and select the root folder of the unpacked project.
+      <p>Android Studio may ask you to choose the type of project you are importing.
+        If this is the case, make sure to choose <strong>Import project from
+        external model</strong> and select the <strong>Gradle</strong> option.
+      </p>
+    </li>
+  </ol>
+
+  </div>
+</div>
+
 <p class="note">
   <strong>Note:</strong> At this time, the downloadable projects are designed for use with Gradle
     and Android Studio. Project downloads for Eclipse will be available soon!
 </p>
 
-<p>To import a downloaded project into <a href="{@docRoot}sdk/installing/studio.html">Android
-  Studio</a>:</p>
-
-<ul>
-  <li>Unpack the downloaded project package.</li>
-  <li>In Android Studio, chose <strong>File > Import Project</strong> and select the root folder of
-  the unpacked project.
-    <p>Android Studio may ask you to choose the type of project you are importing.
-      If this is the case, make sure to choose <strong>Import project from
-      external model</strong> and select the <strong>Gradle</strong> option.
-    </p>
-  </li>
-</ul>
-
-
-<div id="samples">
-</div>
