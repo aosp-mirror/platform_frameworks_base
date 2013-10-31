@@ -564,7 +564,7 @@ public final class ActiveServices {
                     if (r.isForeground) {
                         r.isForeground = false;
                         if (r.app != null) {
-                            mAm.updateLruProcessLocked(r.app, false, false);
+                            mAm.updateLruProcessLocked(r.app, false, null);
                             updateServiceForegroundLocked(r.app, true);
                         }
                     }
@@ -595,6 +595,42 @@ public final class ActiveServices {
                 mAm.updateOomAdjLocked();
             }
         }
+    }
+
+    private boolean updateServiceClientActivitiesLocked(ProcessRecord proc,
+            ConnectionRecord modCr) {
+        if (modCr != null && modCr.binding.client != null) {
+            if (modCr.binding.client.activities.size() <= 0) {
+                // This connection is from a client without activities, so adding
+                // and removing is not interesting.
+                return false;
+            }
+        }
+
+        boolean anyClientActivities = false;
+        for (int i=proc.services.size()-1; i>=0 && !anyClientActivities; i--) {
+            ServiceRecord sr = proc.services.valueAt(i);
+            for (int conni=sr.connections.size()-1; conni>=0 && !anyClientActivities; conni--) {
+                ArrayList<ConnectionRecord> clist = sr.connections.valueAt(conni);
+                for (int cri=clist.size()-1; cri>=0; cri--) {
+                    ConnectionRecord cr = clist.get(cri);
+                    if (cr.binding.client == null || cr.binding.client == proc) {
+                        // Binding to ourself is not interesting.
+                        continue;
+                    }
+                    if (cr.binding.client.activities.size() > 0) {
+                        anyClientActivities = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (anyClientActivities != proc.hasClientActivities) {
+            proc.hasClientActivities = anyClientActivities;
+            mAm.updateLruProcessLocked(proc, anyClientActivities, null);
+            return true;
+        }
+        return false;
     }
 
     int bindServiceLocked(IApplicationThread caller, IBinder token,
@@ -698,6 +734,9 @@ public final class ActiveServices {
             if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
                 b.client.hasAboveClient = true;
             }
+            if (s.app != null) {
+                updateServiceClientActivitiesLocked(s.app, c);
+            }
             clist = mServiceConnections.get(binder);
             if (clist == null) {
                 clist = new ArrayList<ConnectionRecord>();
@@ -714,6 +753,7 @@ public final class ActiveServices {
 
             if (s.app != null) {
                 // This could have made the service more important.
+                mAm.updateLruProcessLocked(s.app, s.app.hasClientActivities, b.client);
                 mAm.updateOomAdjLocked(s.app);
             }
 
@@ -1316,7 +1356,8 @@ public final class ActiveServices {
 
         app.services.add(r);
         bumpServiceExecutingLocked(r, execInFg, "create");
-        mAm.updateLruProcessLocked(app, true, false);
+        mAm.updateLruProcessLocked(app, false, null);
+        mAm.updateOomAdjLocked();
 
         boolean created = false;
         try {
@@ -1601,6 +1642,9 @@ public final class ActiveServices {
             if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
                 b.client.updateHasAboveClientLocked();
             }
+            if (s.app != null) {
+                updateServiceClientActivitiesLocked(s.app, c);
+            }
         }
         clist = mServiceConnections.get(binder);
         if (clist != null) {
@@ -1621,6 +1665,13 @@ public final class ActiveServices {
                     && b.intent.hasBound) {
                 try {
                     bumpServiceExecutingLocked(s, false, "unbind");
+                    if (b.client != s.app && (c.flags&Context.BIND_WAIVE_PRIORITY) == 0
+                            && s.app.setProcState <= ActivityManager.PROCESS_STATE_RECEIVER) {
+                        // If this service's process is not already in the cached list,
+                        // then update it in the LRU list here because this may be causing
+                        // it to go down there and we want it to start out near the top.
+                        mAm.updateLruProcessLocked(s.app, false, null);
+                    }
                     mAm.updateOomAdjLocked(s.app);
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;
