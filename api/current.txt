@@ -498,6 +498,7 @@ package android {
     field public static final int fastScrollOverlayPosition = 16843578; // 0x101033a
     field public static final int fastScrollPreviewBackgroundLeft = 16843575; // 0x1010337
     field public static final int fastScrollPreviewBackgroundRight = 16843576; // 0x1010338
+    field public static final int fastScrollStyle = 16843763; // 0x10103f3
     field public static final int fastScrollTextColor = 16843609; // 0x1010359
     field public static final int fastScrollThumbDrawable = 16843574; // 0x1010336
     field public static final int fastScrollTrackDrawable = 16843577; // 0x1010339
@@ -1865,6 +1866,7 @@ package android {
     field public static final int Widget_DeviceDefault_DropDownItem_Spinner = 16974178; // 0x1030162
     field public static final int Widget_DeviceDefault_EditText = 16974154; // 0x103014a
     field public static final int Widget_DeviceDefault_ExpandableListView = 16974155; // 0x103014b
+    field public static final int Widget_DeviceDefault_FastScroll = 16974316; // 0x10301ec
     field public static final int Widget_DeviceDefault_FragmentBreadCrumbs = 16974311; // 0x10301e7
     field public static final int Widget_DeviceDefault_GridView = 16974156; // 0x103014c
     field public static final int Widget_DeviceDefault_HorizontalScrollView = 16974171; // 0x103015b
@@ -1899,6 +1901,7 @@ package android {
     field public static final int Widget_DeviceDefault_Light_DropDownItem_Spinner = 16974233; // 0x1030199
     field public static final int Widget_DeviceDefault_Light_EditText = 16974206; // 0x103017e
     field public static final int Widget_DeviceDefault_Light_ExpandableListView = 16974207; // 0x103017f
+    field public static final int Widget_DeviceDefault_Light_FastScroll = 16974317; // 0x10301ed
     field public static final int Widget_DeviceDefault_Light_FragmentBreadCrumbs = 16974312; // 0x10301e8
     field public static final int Widget_DeviceDefault_Light_GridView = 16974208; // 0x1030180
     field public static final int Widget_DeviceDefault_Light_HorizontalScrollView = 16974226; // 0x1030192
@@ -1956,6 +1959,7 @@ package android {
     field public static final int Widget_DropDownItem_Spinner = 16973868; // 0x103002c
     field public static final int Widget_EditText = 16973859; // 0x1030023
     field public static final int Widget_ExpandableListView = 16973860; // 0x1030024
+    field public static final int Widget_FastScroll = 16974313; // 0x10301e9
     field public static final int Widget_FragmentBreadCrumbs = 16973961; // 0x1030089
     field public static final int Widget_Gallery = 16973877; // 0x1030035
     field public static final int Widget_GridView = 16973874; // 0x1030032
@@ -1987,6 +1991,7 @@ package android {
     field public static final int Widget_Holo_DropDownItem_Spinner = 16973995; // 0x10300ab
     field public static final int Widget_Holo_EditText = 16973971; // 0x1030093
     field public static final int Widget_Holo_ExpandableListView = 16973972; // 0x1030094
+    field public static final int Widget_Holo_FastScroll = 16974314; // 0x10301ea
     field public static final int Widget_Holo_FragmentBreadCrumbs = 16974309; // 0x10301e5
     field public static final int Widget_Holo_GridView = 16973973; // 0x1030095
     field public static final int Widget_Holo_HorizontalScrollView = 16973988; // 0x10300a4
@@ -2021,6 +2026,7 @@ package android {
     field public static final int Widget_Holo_Light_DropDownItem_Spinner = 16974041; // 0x10300d9
     field public static final int Widget_Holo_Light_EditText = 16974014; // 0x10300be
     field public static final int Widget_Holo_Light_ExpandableListView = 16974015; // 0x10300bf
+    field public static final int Widget_Holo_Light_FastScroll = 16974315; // 0x10301eb
     field public static final int Widget_Holo_Light_FragmentBreadCrumbs = 16974310; // 0x10301e6
     field public static final int Widget_Holo_Light_GridView = 16974016; // 0x10300c0
     field public static final int Widget_Holo_Light_HorizontalScrollView = 16974034; // 0x10300d2
@@ -31138,6 +31144,7 @@ package android.widget {
     method public void setDrawSelectorOnTop(boolean);
     method public void setFastScrollAlwaysVisible(boolean);
     method public void setFastScrollEnabled(boolean);
+    method public void setFastScrollStyle(int);
     method public void setFilterText(java.lang.String);
     method public void setFriction(float);
     method public void setItemChecked(int, boolean);

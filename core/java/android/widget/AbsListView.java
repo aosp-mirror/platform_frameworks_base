@@ -582,7 +582,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Helper object that renders and controls the fast scroll thumb.
      */
-    private FastScroller mFastScroller;
+    private FastScroller mFastScroll;
+
+    /**
+     * Temporary holder for fast scroller style until a FastScroller object
+     * is created.
+     */
+    private int mFastScrollStyle;
 
     private boolean mGlobalLayoutListenerAddedFilter;
 
@@ -813,6 +819,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         boolean enableFastScroll = a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false);
         setFastScrollEnabled(enableFastScroll);
+
+        int fastScrollStyle = a.getResourceId(R.styleable.AbsListView_fastScrollStyle, 0);
+        setFastScrollStyle(fastScrollStyle);
 
         boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
@@ -1243,17 +1252,31 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void setFastScrollerEnabledUiThread(boolean enabled) {
-        if (mFastScroller != null) {
-            mFastScroller.setEnabled(enabled);
+        if (mFastScroll != null) {
+            mFastScroll.setEnabled(enabled);
         } else if (enabled) {
-            mFastScroller = new FastScroller(this);
-            mFastScroller.setEnabled(true);
+            mFastScroll = new FastScroller(this, mFastScrollStyle);
+            mFastScroll.setEnabled(true);
         }
 
         resolvePadding();
 
-        if (mFastScroller != null) {
-            mFastScroller.updateLayout();
+        if (mFastScroll != null) {
+            mFastScroll.updateLayout();
+        }
+    }
+
+    /**
+     * Specifies the style of the fast scroller decorations.
+     *
+     * @param styleResId style resource containing fast scroller properties
+     * @see android.R.styleable#FastScroll
+     */
+    public void setFastScrollStyle(int styleResId) {
+        if (mFastScroll == null) {
+            mFastScrollStyle = styleResId;
+        } else {
+            mFastScroll.setStyle(styleResId);
         }
     }
 
@@ -1293,8 +1316,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void setFastScrollerAlwaysVisibleUiThread(boolean alwaysShow) {
-        if (mFastScroller != null) {
-            mFastScroller.setAlwaysShow(alwaysShow);
+        if (mFastScroll != null) {
+            mFastScroll.setAlwaysShow(alwaysShow);
         }
     }
 
@@ -1312,17 +1335,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setFastScrollAlwaysVisible(boolean)
      */
     public boolean isFastScrollAlwaysVisible() {
-        if (mFastScroller == null) {
+        if (mFastScroll == null) {
             return mFastScrollEnabled && mFastScrollAlwaysVisible;
         } else {
-            return mFastScroller.isEnabled() && mFastScroller.isAlwaysShowEnabled();
+            return mFastScroll.isEnabled() && mFastScroll.isAlwaysShowEnabled();
         }
     }
 
     @Override
     public int getVerticalScrollbarWidth() {
-        if (mFastScroller != null && mFastScroller.isEnabled()) {
-            return Math.max(super.getVerticalScrollbarWidth(), mFastScroller.getWidth());
+        if (mFastScroll != null && mFastScroll.isEnabled()) {
+            return Math.max(super.getVerticalScrollbarWidth(), mFastScroll.getWidth());
         }
         return super.getVerticalScrollbarWidth();
     }
@@ -1335,26 +1358,26 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     @ViewDebug.ExportedProperty
     public boolean isFastScrollEnabled() {
-        if (mFastScroller == null) {
+        if (mFastScroll == null) {
             return mFastScrollEnabled;
         } else {
-            return mFastScroller.isEnabled();
+            return mFastScroll.isEnabled();
         }
     }
 
     @Override
     public void setVerticalScrollbarPosition(int position) {
         super.setVerticalScrollbarPosition(position);
-        if (mFastScroller != null) {
-            mFastScroller.setScrollbarPosition(position);
+        if (mFastScroll != null) {
+            mFastScroll.setScrollbarPosition(position);
         }
     }
 
     @Override
     public void setScrollBarStyle(int style) {
         super.setScrollBarStyle(style);
-        if (mFastScroller != null) {
-            mFastScroller.setScrollBarStyle(style);
+        if (mFastScroll != null) {
+            mFastScroll.setScrollBarStyle(style);
         }
     }
 
@@ -1415,8 +1438,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Notify our scroll listener (if there is one) of a change in scroll state
      */
     void invokeOnItemScrollListener() {
-        if (mFastScroller != null) {
-            mFastScroller.onScroll(mFirstPosition, getChildCount(), mItemCount);
+        if (mFastScroll != null) {
+            mFastScroll.onScroll(mFirstPosition, getChildCount(), mItemCount);
         }
         if (mOnScrollListener != null) {
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
@@ -2089,8 +2112,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mRecycler.markChildrenDirty();
         }
 
-        if (mFastScroller != null && (mItemCount != mOldItemCount || mDataChanged)) {
-            mFastScroller.onItemCountChanged(mItemCount);
+        if (mFastScroll != null && (mItemCount != mOldItemCount || mDataChanged)) {
+            mFastScroll.onItemCountChanged(mItemCount);
         }
 
         layoutChildren();
@@ -2532,8 +2555,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             rememberSyncState();
         }
 
-        if (mFastScroller != null) {
-            mFastScroller.onSizeChanged(w, h, oldw, oldh);
+        if (mFastScroll != null) {
+            mFastScroll.onSizeChanged(w, h, oldw, oldh);
         }
     }
 
@@ -2862,8 +2885,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
-        if (mFastScroller != null) {
-           mFastScroller.setScrollbarPosition(getVerticalScrollbarPosition());
+        if (mFastScroll != null) {
+           mFastScroll.setScrollbarPosition(getVerticalScrollbarPosition());
         }
     }
 
@@ -3436,8 +3459,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return false;
         }
 
-        if (mFastScroller != null) {
-            boolean intercepted = mFastScroller.onTouchEvent(ev);
+        if (mFastScroll != null) {
+            boolean intercepted = mFastScroll.onTouchEvent(ev);
             if (intercepted) {
                 return true;
             }
@@ -3926,7 +3949,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onInterceptHoverEvent(MotionEvent event) {
-        if (mFastScroller != null && mFastScroller.onInterceptHoverEvent(event)) {
+        if (mFastScroll != null && mFastScroll.onInterceptHoverEvent(event)) {
             return true;
         }
 
@@ -3950,7 +3973,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return false;
         }
 
-        if (mFastScroller != null && mFastScroller.onInterceptTouchEvent(ev)) {
+        if (mFastScroll != null && mFastScroll.onInterceptTouchEvent(ev)) {
             return true;
         }
 
@@ -6311,16 +6334,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public void onChanged() {
             super.onChanged();
-            if (mFastScroller != null) {
-                mFastScroller.onSectionsChanged();
+            if (mFastScroll != null) {
+                mFastScroll.onSectionsChanged();
             }
         }
 
         @Override
         public void onInvalidated() {
             super.onInvalidated();
-            if (mFastScroller != null) {
-                mFastScroller.onSectionsChanged();
+            if (mFastScroll != null) {
+                mFastScroll.onSectionsChanged();
             }
         }
     }
