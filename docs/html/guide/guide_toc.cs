@@ -405,6 +405,7 @@
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/connectivity/nfc/nfc.html">NFC Basics</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/connectivity/nfc/advanced-nfc.html">Advanced NFC</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/connectivity/nfc/hce.html">Host-based Card Emulation</a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/connectivity/wifip2p.html">
