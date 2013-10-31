@@ -560,7 +560,7 @@ sample_groups := -samplegroup Background \
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/BasicAccessibility \
- 		            samples/BasicAccessibility "dd" \
+ 		            samples/BasicAccessibility "" \
 		-samplecode $(sample_dir)/HorizontalPaging \
  		            samples/HorizontalPaging "" \
 		-samplecode $(sample_dir)/ShareActionProvider \
@@ -619,6 +619,8 @@ web_docs_sample_code_flags := \
  		            samples/BasicSyncAdapter "" \
 		-samplecode $(sample_dir)/StorageClient \
  		            samples/StorageClient "" 
+#		-samplecode $(sample_dir)/StorageProvider \
+# 		            samples/StorageProvider "" 
 #       -samplecode $(sample_dir)/AndroidBeamDemo \
 # 		            samples/AndroidBeamDemo "Android Beam Demo" \
 # 		-samplecode $(sample_dir)/ApiDemos \
@@ -837,9 +839,9 @@ LOCAL_MODULE := online-sdk
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
-		-hdf android.whichdoc online 
-#		$(sample_groups) \
-#		$(web_docs_sample_code_flags)
+		-hdf android.whichdoc online \
+		$(sample_groups) \
+		$(web_docs_sample_code_flags)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
