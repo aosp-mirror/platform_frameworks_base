@@ -1,0 +1,579 @@
+page.title=Android 4.4 APIs
+excludeFromSuggestions=true
+sdk.platform.version=4.4
+sdk.platform.apiLevel=19
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document
+    <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">show more</span>
+        <span class="less" style="display:none">show less</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#ApiLevel">Update your target API level</a></li>
+  <li><a href="#Behaviors">Important Behavior Changes</a>
+    <ol>
+      <li><a href="#BehaviorStorage">If your app reads from external storage...</a></li>
+      <li><a href="#BehaviorWebView">If your app uses WebView...</a></li>
+      <li><a href="#BehaviorAlarms">If your app uses AlarmManager...</a></li>
+      <li><a href="#BehaviorSync">If your app syncs data using ContentResolver...</a></li>
+    </ol>
+  </li>
+  <li><a href="#Printing">Printing Framework</a>
+    <ol>
+      <li><a href="#PrintingGeneric">Printing generic content</a></li>
+      <li><a href="#PrintingImages">Printing images</a></li>
+      <li><a href="#PrintService">Building print services</a></li>
+    </ol>
+  </li>
+  <li><a href="#SMS">SMS Provider</a></li>
+  <li><a href="#Wireless">Wireless and Connectivity</a>
+    <ol>
+      <li><a href="#HCE">Host card emulation</a></li>
+      <li><a href="#ReaderMode">NFC reader mode</a></li>
+      <li><a href="#IR">Infrared transmitters</a></li>
+    </ol>
+  </li>
+  <li><a href="#Multimedia">Multimedia</a>
+    <ol>
+      <li><a href="#AdaptivePlayback">Adaptive playback</a></li>
+      <li><a href="#AudioTimestamp">On-demand audio timestamps</a></li>
+      <li><a href="#ImageReader">Surface image reader</a></li>
+      <li><a href="#PeakRms">Peak and RMS measurement</a></li>
+      <li><a href="#LoudnessEnhancer">Loudness enhancer</a></li>
+      <li><a href="#RemoteController">Remote controllers</a></li>
+      <li><a href="#Ratings">Ratings from remote controllers</a></li>
+      <li><a href="#ClosedCaptions">Closed captions</a></li>
+    </ol>
+  </li>
+  <li><a href="#Animations">Animation &amp; Graphics</a>
+    <ol>
+      <li><a href="#Transitions">Scenes and transitions</a></li>
+      <li><a href="#AnimatorPause">Animator pausing</a></li>
+      <li><a href="#ReusableBitmaps">Reusable bitmaps</a></li>
+    </ol>
+  </li>
+  <li><a href="#UserContent">User Content</a>
+    <ol>
+      <li><a href="#StorageAccess">Storage access framework</a></li>
+      <li><a href="#ExternalStorage">External storage access</a></li>
+      <li><a href="#SyncAdapter">Sync adapters</a></li>
+    </ol>
+  </li>
+  <li><a href="#UserInput">User Input</a>
+    <ol>
+      <li><a href="#NewSensors">New sensor types</a></li>
+      <li><a href="#BatchSensors">Batched sensor events</a></li>
+      <li><a href="#Controllers">Controller identities</a></li>
+    </ol>
+  </li>
+  <li><a href="#UI">User Interface</a>
+    <ol>
+      <li><a href="#ImmersiveMode">Immersive full-screen mode</a></li>
+      <li><a href="#TranslucentBars">Translucent system bars</a></li>
+      <li><a href="#NotificationListener">Enhanced notification listener</a></li>
+      <li><a href="#DrawableMirroring">Drawable mirroring for RTL layouts</a></li>
+      <li><a href="#A11y">Accessibility</a></li>
+    </ol>
+  </li>
+  <li><a href="#Permissions">App Permissions</a></li>
+  <li><a href="#DeviceFeatures">Device Features</a></li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/19/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>API Level: {@sdkPlatformApiLevel}</p>
+
+<p>Android 4.4 ({@link android.os.Build.VERSION_CODES#KITKAT}) is a new release for the Android platform that offers new features for users and app developers. This document provides an introduction to the most notable new APIs.</p>
+
+<p>As an app developer, you should download the Android {@sdkPlatformVersion} system image
+and SDK platform from the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> as
+soon as possible. If you don't have a device running Android {@sdkPlatformVersion} on which to
+test your app, use the Android {@sdkPlatformVersion} system
+image to test your app on the <a href="{@docRoot}tools/devices/emulator.html">Android emulator</a>.
+Then build your apps against the Android {@sdkPlatformVersion} platform to begin using the
+latest APIs.</p>
+
+
+<h3 id="ApiLevel">Update your target API level</h3>
+
+<p>To better optimize your app for devices running Android {@sdkPlatformVersion},
+  you should set your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+<code>"{@sdkPlatformApiLevel}"</code>, install it on an Android {@sdkPlatformVersion} system image,
+test it, then publish an update with this change.</p>
+
+<p>You can use APIs in Android {@sdkPlatformVersion} while also supporting older versions by adding
+conditions to your code that check for the system API level before executing
+APIs not supported by your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>.
+To learn more about maintaining backward compatibility, read <a
+href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
+Platform Versions</a>.</p>
+
+<p>For more information about how API levels work, read <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
+Level?</a></p>
+
+
+
+
+
+<h2 id="Behaviors">Important Behavior Changes</h2>
+
+<p>If you have previously published an app for Android, be aware that your app might
+be affected by changes in Android {@sdkPlatformVersion}.</p>
+
+
+<h3 id="BehaviorStorage">If your app reads from external storage...</h3>
+
+<p>Your app can not read shared files on the external storage when running on Android 4.4, unless your app has the {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission. That is, files within the directory returned by {@link android.os.Environment#getExternalStoragePublicDirectory getExternalStoragePublicDirectory()} are no longer accessible without the permission. However, if you need to access only your app-specific directories, provided by {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}, then you do not need the {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</p>
+
+
+<h3 id="BehaviorWebView">If your app uses WebView...</h3>
+
+<p>Your app might behave differently when running on Android 4.4, especially when you update your app's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "19" or higher.</p>
+
+<p>The code underlying the {@link android.webkit.WebView} class and related APIs has been upgraded to be based on a modern snapshot of the Chromium source code. This brings a variety of improvements for performance, support for new HTML5 features, and support for remote debugging of your {@link android.webkit.WebView} content. The scope of this upgrade means that if your app uses {@link android.webkit.WebView}, it's behavior may be impacted in some cases. Although known behavior changes are documented and mostly affect your app only when you update your app's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "19" or higher&mdash;the new {@link android.webkit.WebView} operates in "quirks mode" to provide some legacy functionality in apps that target API level 18 and lower&mdash;it's possible that your app depends on unknown behaviors from the previous version of {@link android.webkit.WebView}.</p>
+
+<p>So if your existing app uses {@link android.webkit.WebView}, it's important that you test on Android 4.4 as soon as possible and consult <a href="{@docRoot}guide/webapps/migrating.html">Migrating to WebView in Android 4.4</a> for information about how your app might be affected when you update your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "19" or higher.</p>
+
+
+<h3 id="BehaviorAlarms">If your app uses AlarmManager...</h3>
+
+<p>When you set your app's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "19" or higher, alarms that you create using either {@link android.app.AlarmManager#set set()} or {@link android.app.AlarmManager#setRepeating setRepeating()} will be inexact.</p>
+
+<p>To improve power efficiency, Android now batches together alarms from all apps that occur at reasonably similar times so the system wakes the device once instead of several times to handle each alarm.</p>
+
+<p>If your alarm is not associated with an exact clock time, but it's still important that your alarm be invoked during a specific time range (such as between 2pm and 4pm), then you can use the new {@link android.app.AlarmManager#setWindow setWindow()} method, which accepts an "earliest" time for the alarm and a "window" of time following the earliest time within which the system should invoke the alarm.</p>
+
+<p>If your alarm must be pinned to an exact clock time (such as for a calendar event reminder), then you can use the new {@link android.app.AlarmManager#setExact setExact()} method.</p>
+
+<p>This inexact batching behavior applies only to updated apps. If you've set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "18" or lower, your alarms will continue behave as they have on previous versions when running on Android 4.4.</p>
+
+
+<h3 id="BehaviorSync">If your app syncs data using ContentResolver...</h3>
+
+<p>When you set your app's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "19" or higher, creating a sync with {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()} will perform your sync operations within a default flex interval of approximately 4% of the period you specify. For example, if your poll frequency is 24 hours, then your sync operation may occur within roughly a one-hour window of time each day, instead of at exactly the same time each day.</p>
+
+<p>To specify your own flex interval for sync operations, you should begin using the new {@link android.content.ContentResolver#requestSync requestSync()} method. For more details, see the section below about <a href="#SyncAdapter">Sync Adapters</a>.</p>
+
+<p>This flex interval behavior applies only to updated apps. If you've set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to "18" or lower, your existing sync requests will continue to behave as they have on previous versions when running on Android 4.4.</p>
+
+
+
+
+
+
+
+
+
+
+<h2 id="Printing">Printing Framework</h2>
+
+<p>Android now includes a complete framework that allows users to print any document using a printer connected over Wi-Fi, Bluetooth, or other services. The system handles the transaction between an app that wants to print a document and the services that deliver print jobs to a printer. The {@link android.print} framework provides all the APIs necessary to specify a print document and deliver it to the system for printing. Which APIs you actually need for a given print job depends on your content.</p>
+
+<h3 id="PrintingGeneric">Printing generic content</h3>
+
+<p>If you want to print content from your UI as a document, you need to first create a subclass of {@link android.print.PrintDocumentAdapter}. Within this class, you must implement a few callback methods, including {@link android.print.PrintDocumentAdapter#onLayout onLayout()} to establish your layout based on the provided printing properties, and {@link android.print.PrintDocumentAdapter#onWrite onWrite()} to serialize your printable content into a {@link android.os.ParcelFileDescriptor}. </p>
+
+<p>In order to write your content to the {@link android.os.ParcelFileDescriptor} you must pass it a PDF. The new {@link android.graphics.pdf.PdfDocument} APIs offer a convenient way to do this by providing a {@link android.graphics.Canvas} from {@link android.graphics.pdf.PdfDocument.Page#getCanvas getCanvas()}, on which you can draw your printable content. Then write the {@link android.graphics.pdf.PdfDocument} to the {@link android.os.ParcelFileDescriptor} using the {@link android.graphics.pdf.PdfDocument#writeTo writeTo()} method.</p>
+
+<p>Once you've defined your implementation for {@link android.print.PrintDocumentAdapter}, you can execute print jobs upon the user's request using the {@link android.print.PrintManager} method, {@link android.print.PrintManager#print print()}, which takes the {@link android.print.PrintDocumentAdapter} as one of its  arguments.</p>
+
+<h3 id="PrintingImages">Printing images</h3>
+
+<p>If you want to print just a photo or other bitmap, then the helper APIs in the support library do all the work for you. Simply create a new instance of {@link android.support.v4.print.PrintHelper}, set the scale mode with {@link android.support.v4.print.PrintHelper#setScaleMode setScaleMode()}, then pass your {@link android.graphics.Bitmap} to {@link android.support.v4.print.PrintHelper#printBitmap printBitmap()}. That's it. The library handles all the remaining interaction with the system to deliver the bitmap to the printer.</p>
+
+<h3 id="PrintService">Building print services</h3>
+
+<p>As a printer OEM, you can use the {@link android.printservice} framework to provide interoperability with your printers from Android devices. You can build and distribute print services as APKs, which users can install on their devices . A print service app operates primarily as a headless service by subclassing the {@link android.printservice.PrintService} class, which receives print jobs from the system and communicates the jobs to its printers using the appropriate protocols.</p>
+
+<p>For more information about how to print your app content, read <a href="{@docRoot}training/printing/index.html">Printing Content</a>.</p>
+
+
+
+
+
+
+
+<h2 id="SMS">SMS Provider</h2>
+
+<p>The {@link android.provider.Telephony} content provider (the "SMS Provider") allows apps to read and write SMS and MMS messages on the device. It includes tables for SMS and MMS messages received, drafted, sent, pending, and more.</p>
+
+<p>Beginning with Android 4.4, the system settings allow users to select a "default SMS app." Once selected, only the default SMS app is able to write to the SMS Provider and only the default SMS app receives the {@link android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION} broadcast when the user receives an SMS or the {@link android.provider.Telephony.Sms.Intents#WAP_PUSH_DELIVER_ACTION} broadcast when the user receives an MMS. The default SMS app is responsible for writing details to the SMS Provider when it receives or sends a new message.</p>
+
+<p>Other apps that are not selected as the default SMS app can only read the SMS Provider, but may also be notified when a new SMS arrives by listening for the {@link android.provider.Telephony.Sms.Intents#SMS_RECEIVED_ACTION} broadcast, which is a non-abortable broadcast that may be delivered to multiple apps. This broadcast is intended for apps that---while not selected as the default SMS app---need to read special incoming messages such as to perform phone number verification.</p>
+
+<p>For more information, read the blog post, <a href="http://android-developers.blogspot.com/2013/10/getting-your-sms-apps-ready-for-kitkat.html">Getting Your SMS Apps Ready for KitKat</a>.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Wireless">Wireless and Connectivity</h2>
+
+<h3 id="HCE">Host card emulation</h3>
+
+<p>Android apps can now emulate ISO14443-4 (ISO-DEP) NFC cards that use APDUs for data exchange (as specified in ISO7816-4). This allows an NFC-enabled device running Android 4.4 to emulate multiple NFC cards at the same time, and allows an NFC payment terminal or other NFC reader to initiate a transaction with the appropriate NFC card based on the application identifier (AID).</p>
+
+<p>If you want to emulate an NFC card that is using these protocols in your app, create a service component based on the {@link android.nfc.cardemulation.HostApduService} class. Whereas if your app instead uses a secure element for card emulation, you need to create a service based on the {@link android.nfc.cardemulation.OffHostApduService} class, which will not directly be involved in the transactions but is necessary to register the AIDs that should be handled by the secure element.</p>
+
+<p>For more information, read the <a href="">NFC Card Emulation</a> guide.</p>
+
+
+<h3 id="ReaderMode">NFC reader mode</h3>
+
+<p>A new NFC reader mode allows an activity to restrict all NFC activity to only reading the types of tags the activity is interested in while in the foreground. You can enable reader mode for your activity with {@link android.nfc.NfcAdapter#enableReaderMode enableReaderMode()}, providing an implementation of {@link android.nfc.NfcAdapter.ReaderCallback} that receives a callback when new tags are detected.</p>
+
+<p>This new capability, in conjunction with host card emulation, allows Android to operate on both ends of a mobile payment interface: One devices operates as the payment terminal (a device running a reader mode activity) and another device operates as the payment client (a device emulating an NFC card).</p>
+
+<h3 id="IR">Infrared transmitters</h3>
+
+<p>When running on a device that includes an infrared (IR) transmitter, you can now transmit IR signals using the {@link android.hardware.ConsumerIrManager} APIs. To get an instance of {@link android.hardware.ConsumerIrManager}, call {@link android.content.Context#getSystemService getSystemService()} with {@link android.content.Context#CONSUMER_IR_SERVICE} as the argument. You can then query the device's supported IR frequencies with {@link android.hardware.ConsumerIrManager#getCarrierFrequencies()} and transmit signals by passing your desired frequency and signal pattern with {@link android.hardware.ConsumerIrManager#transmit transmit()}.</p>
+
+<p>You should always first check whether a device includes an IR transmitter by calling {@link android.hardware.ConsumerIrManager#hasIrEmitter()}, but if your app is compatible only with devices that do have one, you should include a <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a> element in your manifest for {@code "android.hardware.consumerir"} ({@link android.content.pm.PackageManager#FEATURE_CONSUMER_IR}).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="Multimedia">Multimedia</h2>
+
+<h3 id="AdaptivePlayback">Adaptive playback</h3>
+
+<p>Support for adaptive video playback is now available with the {@link android.media.MediaCodec} APIs, enabling seamless change in resolution during playback onto a {@link android.view.Surface}&mdash;you can feed the decoder input frames of a new resolution and the resolution of the output buffers change without a significant gap.</p>
+
+<p>You can enable adaptive playback by adding two keys to {@link android.media.MediaFormat} that specify the maximum resolution that your app requires from the codec: {@link android.media.MediaFormat#KEY_MAX_WIDTH} and {@link android.media.MediaFormat#KEY_MAX_HEIGHT}. With these added to your {@link android.media.MediaFormat}, pass the {@link android.media.MediaFormat} to your {@link android.media.MediaCodec} instance with {@link android.media.MediaCodec#configure configure()}.</p>
+
+<p>The codec will transition between resolutions that are the same as or smaller than these values in a seamless fashion. The codec may also support resolutions larger than the specified maximums (as long as it is within the limits of supported profiles), but transitions to larger resolutions may not be seamless.</p>
+
+<p>To change the resolution while decoding H.264 video, continue to queue frames using MediaCodec.queueInputBuffer(), but be certain that you provide the new Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) values together with the Instantaneous Decoder Refresh (IDR) frame in a single buffer.</p>
+
+<p>However, before you attempt to configure your codec for adaptive playback, you must verify that the device supports adaptive playback by calling {@link android.media.MediaCodecInfo.CodecCapabilities#isFeatureSupported} with {@link android.media.MediaCodecInfo.CodecCapabilities#FEATURE_AdaptivePlayback}.</p>
+
+<p class="note"><strong>Note:</strong> Support for adaptive playback is vendor specific.  Some codecs may require more memory for larger resolution hints.  Therefore, you should set the resolution maximums based on the source material you are decoding.</p>
+
+<h3 id="AudioTimestamp">On-demand audio timestamps</h3>
+
+<p>To facilitate audio-video synchronization, the new {@link android.media.AudioTimestamp} class provides timeline details about a specific "frame" in an audio stream handled by {@link android.media.AudioTrack}. To get the most recent timestamp available, instantiate an {@link android.media.AudioTimestamp} object and pass it to {@link android.media.AudioTrack#getTimestamp getTimestamp()}. If the request for the timestamp succeeds, the {@link android.media.AudioTrack} instance is filled in with a position in frame units, together with the estimated time when that frame either was presented or is committed to be presented.</p>
+
+<p>You can use the value of {@code nanoTime} in the {@link android.media.AudioTimestamp} (which is monotonic) to find the closest associated video frame compared to {@code framePosition} so you can drop, duplicate, or interpolate video frames to match the audio. Alternatively, you can determine the delta time between the value of {@code nanoTime} and a future video frame’s expected time (with consideration for the sample rate) to predict which audio frame is expected at the same moment as a video frame.</p>
+
+<h3 id="ImageReader">Surface image reader</h3>
+
+<p>The new {@link android.media.ImageReader} API provides you direct access to image buffers as they are rendered into a {@link android.view.Surface}. You can acquire an {@link android.media.ImageReader} with the static method {@link android.media.ImageReader#newInstance newInstance()}. Then call {@link android.media.ImageReader#getSurface()} to create a new {@link android.view.Surface} and deliver your image data with a producer such as {@link android.media.MediaPlayer} or {@link android.media.MediaCodec}. To be notified when new images are available from the surface, implement the {@link android.media.ImageReader.OnImageAvailableListener} interface and register it with {@link android.media.ImageReader#setOnImageAvailableListener setOnImageAvailableListener()}.</p>
+
+<p>Now as you draw content to your {@link android.view.Surface}, your {@link android.media.ImageReader.OnImageAvailableListener} receives a call to {@link android.media.ImageReader.OnImageAvailableListener#onImageAvailable onImageAvailable()} as each new image frame becomes available, providing you with the corresponding {@link android.media.ImageReader}. You can use the {@link android.media.ImageReader} to acquire the frame's image data as an {@link android.media.Image} object by calling {@link android.media.ImageReader#acquireLatestImage()} or {@link android.media.ImageReader#acquireNextImage()}.</p>
+
+<p>The {@link android.media.Image} object provides direct access to the image's timestamp, format, dimensions, and pixel data in a {@link java.nio.ByteBuffer}. However, in order for the {@link android.media.Image} class to interpret your images, they must be formatted according to one of the types defined by constants in either {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}. </p>
+
+<h3 id="PeakRms">Peak and RMS measurement</h3>
+
+<p>You can now query the peak and RMS of the current audio stream from {@link android.media.audiofx.Visualizer} by creating a new instance of {@link android.media.audiofx.Visualizer.MeasurementPeakRms} and passing it to {@link android.media.audiofx.Visualizer#getMeasurementPeakRms getMeasurementPeakRms()}. When you call this method, the peak and RMS values of the given {@link android.media.audiofx.Visualizer.MeasurementPeakRms} are set to the latest measured values.</p>
+
+<h3 id="LoudnessEnhancer">Loudness enhancer</h3>
+
+<p>The {@link android.media.audiofx.LoudnessEnhancer} is a new subclass of {@link android.media.audiofx.AudioEffect} that allows you to increase the audible volume of your {@link android.media.MediaPlayer} or {@link android.media.AudioTrack}. This can be especially useful in conjunction with the new {@link android.media.audiofx.Visualizer#getMeasurementPeakRms getMeasurementPeakRms()} method mentioned above, in order to increase the volume of spoken audio tracks while other media is currently playing.</p>
+
+<h3 id="RemoteController">Remote controllers</h3>
+
+<p>Android 4.0 (API level 14) introduced the {@link android.media.RemoteControlClient} APIs that allow media apps to consume media controller events from remote clients such as media controls on the lock screen. Now the new {@link android.media.RemoteController} APIs allow you to build your own remote controller, enabling the creation of innovative new apps and peripherals that can control the playback of any media app that integrates with {@link android.media.RemoteControlClient}.</p>
+
+<p>To build a remote controller, you can implement your user interface any way you want to, but to deliver the media button events to the user's media app you must create a service that extends the {@link android.service.notification.NotificationListenerService} class and implements the {@link android.media.RemoteController.OnClientUpdateListener} interface. Using the {@link android.service.notification.NotificationListenerService} as the basis is important because it provides the appropriate privacy restrictions, which require users to enable your app as a notification listener within the system security settings.</p>
+
+<p>The {@link android.service.notification.NotificationListenerService} class includes a couple abstract methods you must implement, but if you are only concerned with the media controller events for handling media playback, you can leave your implementation for those empty and instead focus on the {@link android.media.RemoteController.OnClientUpdateListener} methods.</p>
+
+<h3 id="Ratings">Ratings from remote controllers</h3>
+
+<p>Android 4.4 builds upon the existing capabilities for remote control clients (apps that receive media control events with the {@link android.media.RemoteControlClient}) by adding the ability for users to rate the current track from the remote controller.</p> 
+
+<p>The new {@link android.media.Rating} class encapsulates information about a user rating. A rating is defined by its rating style (either {@link android.media.Rating#RATING_HEART}, {@link android.media.Rating#RATING_THUMB_UP_DOWN}, {@link android.media.Rating#RATING_3_STARS}, {@link android.media.Rating#RATING_4_STARS}, {@link android.media.Rating#RATING_5_STARS} or {@link android.media.Rating#RATING_PERCENTAGE}) and the rating value that's appropriate for that style.</p>
+
+<p>To allow users to rate your tracks from a remote controller:</p>
+<ul>
+<li> Signal that you'd like to expose the rating UI to the user (if applicable) by adding the {@link android.media.RemoteControlClient#FLAG_KEY_MEDIA_RATING} flag in {@link android.media.RemoteControlClient#setTransportControlFlags setTransportControlFlags()}. </li>
+<li>Call {@link android.media.RemoteControlClient#editMetadata editMetadata()} to retrieve a {@link android.media.RemoteControlClient.MetadataEditor} and pass it {@link android.media.MediaMetadataEditor#RATING_KEY_BY_USER} with {@link android.media.MediaMetadataEditor#addEditableKey addEditableKey()}. </li>
+<li>Then specify the rating style by calling {@link android.media.MediaMetadataEditor#putObject putObject()} and passing it {@link android.media.MediaMetadataEditor#RATING_KEY_BY_USER} as the key and one of the above rating styles as the value.</li>
+</ul>
+
+<p>To receive a callback when the user changes the rating from the remote controller, implement the new {@link android.media.RemoteControlClient.OnMetadataUpdateListener} interface and pass an instance to {@link android.media.RemoteControlClient#setMetadataUpdateListener setMetadataUpdateListener()}. When the user changes the rating, your {@link android.media.RemoteControlClient.OnMetadataUpdateListener} receives a call to {@link android.media.RemoteControlClient.OnMetadataUpdateListener#onMetadataUpdate onMetadataUpdate()}, passing {@link android.media.MediaMetadataEditor#RATING_KEY_BY_USER} as the key and a {@link android.media.Rating} object as the value.</p>
+
+<h3 id="ClosedCaptions">Closed captions</h3>
+
+<p>{@link android.widget.VideoView} now supports <a href="http://dev.w3.org/html5/webvtt/" class="external-link">WebVTT</a> subtitle tracks when playing HTTP Live Stream (HLS) videos, displaying the subtitle track according to the closed caption preferences the user has defined in system settings. </p>
+
+<p>You can also provide {@link android.widget.VideoView} with your WebVTT subtitle tracks using the {@link android.widget.VideoView#addSubtitleSource addSubtitleSource()} method. This method accepts an {@link java.io.InputStream} that carries the subtitle data and a {@link android.media.MediaFormat} object that specifies the format for the subtitle data, which you can specify using {@link android.media.MediaFormat#createSubtitleFormat createSubtitleFormat()}. These subtitles also appear over the video according to the user's preferences. </p>
+
+<p>If you do not use {@link android.widget.VideoView} to display your video content, you should make your subtitle overlay match the user's closed captioning preference as closely as possible. A new {@link android.view.accessibility.CaptioningManager} API allows you to query the user’s closed captioning preferences, including styles defined by {@link android.view.accessibility.CaptioningManager.CaptionStyle}, such as typeface and color. In case the user adjusts some preferences once your video has already started, you should listen for changes to the preferences by registering an instance of {@link android.view.accessibility.CaptioningManager.CaptioningChangeListener} to receive a callback when any of the preferences change, then update your subtitles as necessary.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="Animations">Animation &amp; Graphics</h2>
+
+
+<h3 id="Transitions">Scenes and transitions</h3>
+
+<p>The new {@link android.transition} framework provides APIs that facilitate animations between different states of your user interface. A key feature is the ability for you to define distinct states of your UI, known as "scenes," by creating a separate layout for each one. When you want to animate from one scene to another, execute a "transition," which calculates the necessary animation to change the layout from the current scene to the next scene.</p>
+
+<p>To transition between two scenes, you generally need to perform the following:</p>
+<ol>
+<li>Specify the {@link android.view.ViewGroup} containing the UI components you want to change.</li>
+<li>Specify the layout representing the end-result of the change (the next scene).</li>
+<li>Specify the type of transition that should animate the layout change.</li>
+<li>Execute the transition.</li>
+</ol>
+
+<p>You can use a {@link android.transition.Scene} object to accomplish steps 1 and 2. A {@link android.transition.Scene} contains metadata describing the properties of a layout that are necessary to perform a transition, including the scene's parent view and the scene's layout. You can create a {@link android.transition.Scene} using a class constructor or the static method {@link android.transition.Scene#getSceneForLayout getSceneForLayout()}.</p>
+
+<p>You must then use the {@link android.transition.TransitionManager} to accomplish steps 3 and 4. One way is to pass your {@link android.transition.Scene} to the static method {@link android.transition.TransitionManager#go go()}. This finds the scene's parent view in the current layout and performs a transition on the child views in order to reach the layout defined by the {@link android.transition.Scene}.</p>
+
+<p>Alternatively, you don't need to create a {@link android.transition.Scene} object at all, but can instead call {@link android.transition.TransitionManager#beginDelayedTransition beginDelayedTransition()}, specifying a {@link android.view.ViewGroup} that contains the views you want to change. Then add, remove, or reconfigure the target views. After the system lays out the changes as necessary, a transition starts to animate all the affected views.</p>
+
+<p>For additional control, you can define sets of transitions that should occur between pre-defined scenes, using an XML file in your project {@code res/transition/} directory. Inside a {@code &lt;transitionManager>} element, specify one or more {@code &lt;transition>} tags that each specify a scene (a reference to a layout file) and the transition to apply when entering and/or exiting that scene. Then inflate this set of transitions using {@link android.transition.TransitionInflater#inflateTransitionManager inflateTransitionManager()}. Use the returned {@link android.transition.TransitionManager} to execute each transition with {@link android.transition.TransitionManager#transitionTo transitionTo()}, passing a {@link android.transition.Scene} that is represented by one of the {@code &lt;transition>} tags. You can also define sets of transitions programmatically with the {@link android.transition.TransitionManager} APIs.</p>
+
+<p>When specifying a transition, you can use several predefined types defined by subclasses of {@link android.transition.Transition}, such as {@link android.transition.Fade} and {@link android.transition.ChangeBounds}. If you don't specify a transition type, the system uses {@link android.transition.AutoTransition} by default, which automatically fades, moves, and resizes views as necessary. Additionally, you can create custom transitions by extending any of these classes to perform the animations however you'd like. A custom transition can track any property changes you'd like, and create any animation you want to based on those changes. For example, you could provide a subclass of {@link android.transition.Transition} that listens for changes to the "rotation" property of a view then animate any changes.</p>
+
+<p>For more information, see the {@link android.transition.TransitionManager} documentation.</p>
+
+<h3 id="AnimatorPause">Animator pausing</h3>
+
+<p>The {@link android.animation.Animator} APIs now allow you to pause and resume an ongoing animation with methods {@link android.animation.Animator#pause()} and {@link android.animation.Animator#resume()}.</p>
+
+<p>To track the state of an animation, you can implement the {@link android.animation.Animator.AnimatorPauseListener} interface, which provides callbacks when an animation is paused and resumed: {@link android.animation.Animator#pause()} and {@link android.animation.Animator#resume()}. Then add the listener to an {@link android.animation.Animator} object with {@link android.animation.Animator#addPauseListener addPauseListener()}. </p>
+
+<p>Alternatively, you can subclass the {@link android.animation.AnimatorListenerAdapter} abstract class, which now includes empty implementations for the pause and resume callbacks defined by {@link android.animation.Animator.AnimatorPauseListener}.</p>
+
+
+<h3 id="ReusableBitmaps">Reusable bitmaps</h3>
+
+<p>You can now reuse any mutable bitmap in {@link android.graphics.BitmapFactory} to decode any other bitmap&mdash;even when the new bitmap is a different size---as long as the resulting byte count of the decoded bitmap (available from {@link android.graphics.Bitmap#getByteCount()}) is less than or equal to the allocated byte count of the reused bitmap (available from {@link android.graphics.Bitmap#getAllocationByteCount()}. For more information, see {@link android.graphics.BitmapFactory.Options#inBitmap}.</p>
+
+<p>New APIs for {@link android.graphics.Bitmap} allow similar reconfiguration for reuse outside of {@link android.graphics.BitmapFactory} (for manual bitmap generation or custom decoding logic). You can now set a bitmap’s dimensions with methods {@link android.graphics.Bitmap#setHeight setHeight()} and {@link android.graphics.Bitmap#setWidth setWidth()}, and specify specify a new {@link android.graphics.Bitmap.Config} with {@link android.graphics.Bitmap#setConfig setConfig()} without affecting the underlying bitmap allocation. The {@link android.graphics.Bitmap#reconfigure reconfigure()} method also provides a convenient way to combine these changes with one call.</p>
+
+<p>However, you should not reconfigure a bitmap that's currently used by the view system, because the underlying pixel buffer will not be remapped in a predictable way.</p>
+
+
+
+
+
+
+
+
+<h2 id="UserContent">User Content</h2>
+
+<h3 id="StorageAccess">Storage access framework</h3>
+
+<p>On previous versions of Android, if you want your app to retrieve a specific type of file from another app, it must invoke an intent with the {@link android.content.Intent#ACTION_GET_CONTENT} action. This action is still the appropriate way to request a file that you want to <em>import</em> into your app. However,  Android 4.4 introduces the {@link android.content.Intent#ACTION_OPEN_DOCUMENT} action, which allows the user to select a file of a specific type and grant your app long-term read access to that file (possibly with write access) without importing the file to your app.</p>
+
+<p>If you're developing an app that provides storage services for files (such as a cloud save service), you can participate in this unified UI for picking files by implementing a content provider as a subclass of the new {@link android.provider.DocumentsProvider} class. Your subclass of {@link android.provider.DocumentsProvider} must include an intent filter that accepts the {@link android.provider.DocumentsContract#PROVIDER_INTERFACE} action (<code>"android.content.action.DOCUMENTS_PROVIDER"</code>). You must then implement the four abstract methods in the {@link android.provider.DocumentsProvider}:</p>
+
+<dl>
+<dt>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</dt>
+<dd>This must return a {@link android.database.Cursor} that describes all the root directories of your document storage, using columns defined in {@link android.provider.DocumentsContract.Root}.</dd>
+<dt>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</dt>
+<dd>This must return a {@link android.database.Cursor} that describes all the files in the specified directory, using columns defined in {@link android.provider.DocumentsContract.Document}.</dd>
+<dt>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</dt>
+<dd>This must return a {@link android.database.Cursor} that describes the specified file, using columns defined in {@link android.provider.DocumentsContract.Document}.</dd>
+<dt>{@link android.provider.DocumentsProvider#openDocument openDocument()}</dt>
+<dd>This must return a {@link android.os.ParcelFileDescriptor} representing the specified file. The system calls this method once the user selects a file and the client app requests access to it by calling {@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()}.</dd>
+</dl>
+
+<p>For more information, see the <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage Access Framework</a> guide.</p>
+
+
+<h3 id="ExternalStorage">External storage access</h3>
+
+<p>You can now read and write app-specific files on secondary external storage media, such as when a device provides both emulated storage and an SD card. The new method {@link android.content.Context#getExternalFilesDirs getExternalFilesDirs()} works the same as the existing {@link android.content.Context#getExternalFilesDir getExternalFilesDir()} method except it returns an array of {@link java.io.File} objects. Before reading or writing to any of the paths returned by this method, pass the  {@link java.io.File} object to the new {@link android.os.Environment#getStorageState getStorageState()} method to verify the storage is currently available.</p>
+
+<p>Other methods for accessing your app-specific cache directory and OBB directory also now have corresponding versions that provide access to secondary storage devices: {@link android.content.Context#getExternalCacheDirs getExternalCacheDirs()} and {@link android.content.Context#getObbDirs getObbDirs()}, respectively.</p>
+
+<p>The first entry in the returned {@link java.io.File} array is considered the device's primary external storage, which is the same as the {@link java.io.File} returned by existing methods such as {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}.</p>
+
+<p class="note"><strong>Note:</strong> Beginning with Android 4.4, the platform no longer requires that your app acquire the {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} when you need to access only your app-specific regions of the external storage using the methods above. However, the permissions are required if you want to access the shareable regions of the external storage, provided by {@link android.os.Environment#getExternalStoragePublicDirectory getExternalStoragePublicDirectory()}. </p>
+
+<h3 id="SyncAdapter">Sync adapters</h3>
+
+<p>The new {@link android.content.ContentResolver#requestSync requestSync()} method in {@link android.content.ContentResolver} simplifies some of the procedure for defining a sync request for your {@link android.content.ContentProvider} by encapsulating requests in the new {@link android.content.SyncRequest} object, which you can create with {@link android.content.SyncRequest.Builder}. The properties in {@link android.content.SyncRequest} provide the same functionality as the existing {@link android.content.ContentProvider} sync calls, but adds the ability to specify that a sync should be dropped if the network is metered, by enabling {@link android.content.SyncRequest.Builder#setDisallowMetered setDisallowMetered()}.</p>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="UserInput">User Input</h2>
+
+<h3 id="NewSensors">New sensor types</h3>
+
+<p>The new {@link android.hardware.Sensor#TYPE_GEOMAGNETIC_ROTATION_VECTOR}
+sensor provides rotation vector data based on a magnetometer, which is a useful alternative to the {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR} sensor when a gyroscope is not available or when used with <a href="#BatchSensors">batched sensor events</a> to record the device's orientation while the phone is sleeping. This sensor requires less power than {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR}, but may be prone to noisy event data and is most effective while the user is outdoors.</p>
+
+<p>Android also now supports built-in step sensors in hardware:</p>
+
+<dl>
+<dt>{@link android.hardware.Sensor#TYPE_STEP_DETECTOR}</dt>
+<dd>This sensor triggers an event each time the user takes a step. Upon each user step, this sensor delivers an event with a value of 1.0 and a timestamp indicating when the step occurred.</dd>
+<dt>{@link android.hardware.Sensor#TYPE_STEP_COUNTER}</dt>
+<dd>This sensor also triggers an event upon each detected step, but instead delivers the total accumulated number of steps since this sensor was first registered by an app.</dd>
+</dl>
+
+<p>Be aware that these two step sensors don't always deliver the same results. The {@link android.hardware.Sensor#TYPE_STEP_COUNTER} events occur with a higher latency than those from {@link android.hardware.Sensor#TYPE_STEP_DETECTOR}, but that's because the {@link android.hardware.Sensor#TYPE_STEP_COUNTER} algorithm does more processing to eliminate false positives. So the {@link android.hardware.Sensor#TYPE_STEP_COUNTER} may be slower to deliver events, but its results should be more accurate.</p>
+
+<p>Both step sensors are hardware dependent (Nexus 5 is the first device to support them), so you should check for availability with {@link android.content.pm.PackageManager#hasSystemFeature hasSystemFeature()}, using the {@link android.content.pm.PackageManager#FEATURE_SENSOR_STEP_DETECTOR} and {@link android.content.pm.PackageManager#FEATURE_SENSOR_STEP_COUNTER} constants.</p>
+
+<h3 id="BatchSensors">Batched sensor events</h3>
+
+<p>To better manage device power, the {@link android.hardware.SensorManager} APIs now allow you to specify the frequency at which you'd like the system to deliver batches of sensor events to your app. This doesn't reduce the number of actual sensor events available to your app for a given period of time, but instead reduces the frequency at which the system calls your {@link android.hardware.SensorEventListener} with sensor updates. That is, instead of delivering each event to your app the moment it occurs, the system saves up all the events that occur over a period of time, then delivers them to your app all at once.</p>
+
+<p>To provide batching, the {@link android.hardware.SensorManager} class adds two new versions of the {@link android.hardware.SensorManager#registerListener(SensorEventListener, Sensor, int, int) registerListener()} method that allow you to specify the "maximum report latency." This new parameter specifies the maximum delay that your {@link android.hardware.SensorEventListener} will tolerate for delivery of new sensor events. For example, if you specify a batch latency of one minute, the system will deliver the recent set of batched events at an interval no longer than one minute by making consecutive calls to your {@link android.hardware.SensorEventListener#onSensorChanged onSensorChanged()} method&mdash;once for each event that was batched. The sensor events will never be delayed longer than your maximum report latency value, but may arrive sooner if other apps have requested a shorter latency for the same sensor.</p>
+
+<p>However, be aware that the sensor will deliver your app the batched events based on your report latency <strong>only while the CPU is awake</strong>. Although a hardware sensor that supports batching will continue to collect sensor events while the CPU is asleep, it will not wake the CPU to deliver your app the batched events. When the sensor eventually runs out of its memory for events, it will begin dropping the oldest events in order to save the newest events. You can avoid losing events by waking the device before the sensor fills its memory then call {@link android.hardware.SensorManager#flush flush()} to capture the latest batch of events. To estimate when the memory will be full and should be flushed, call {@link android.hardware.Sensor#getFifoReservedEventCount()} to get the maximum number of sensor events it can save, and divide that number by the rate at which your app desires each event. Use that calculation to set wake alarms with {@link android.app.AlarmManager} that invoke your {@link android.app.Service} (which implements the {@link android.hardware.SensorEventListener}) to flush the sensor. It's okay that the alarm may execute even while the device is awake, because the alarm interval should be large enough that it occurs only a few times in a day.</p>
+
+
+<p class="note"><strong>Note:</strong> Not all devices support batching sensor events because it requires support by the hardware sensor. However, beginning with Android 4.4, you should always use the new {@link android.hardware.SensorManager#registerListener(SensorEventListener, Sensor, int, int) registerListener()} methods, because if the device does not support batching, then the system gracefully ignores the batch latency argument and delivers sensor events in real time.</p>
+
+<h3 id="Controllers">Controller identities</h3>
+
+<p>Android now identifies each connected controller with a unique integer that you can query with {@link android.view.InputDevice#getControllerNumber()}, making it easier for you to associate each controller to a different player in a game. The number for each controller may change due to controllers being disconnected, connected, or re-configured by the user, so you should track which controller number corresponds to each input device by registering an instance of {@link android.hardware.input.InputManager.InputDeviceListener}. Then call {@link android.view.InputDevice#getControllerNumber()} for each {@link android.view.InputDevice} when a change occurs.</p>
+
+<p>Connected devices also now provide product and vendor IDs that are available from {@link android.view.InputDevice#getProductId()} and {@link android.view.InputDevice#getVendorId()}. If you need to modify your key mappings based on the available set of keys on a device, you can query the device to check whether certain keys are available with {@link android.view.InputDevice#hasKeys}.</p>
+
+
+
+
+
+
+
+
+<h2 id="UI">User Interface</h2>
+
+<h3 id="ImmersiveMode">Immersive full-screen mode</h3>
+
+<p>To provide your app with a layout that fills the entire screen, the new {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE} flag for {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()} (when combined with {@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION}) enables a new <em>immersive</em> full-screen mode. While immersive full-screen mode is enabled, your activity continues to receive all touch events. The user can reveal the system bars with an inward swipe along the region where the system bars normally appear. This clears the {@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} flag  (and the {@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN} flag, if applied) so the system bars remain visible. However, if you'd like the system bars to hide again after a few moments, you can instead use the {@link android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY} flag.</p>
+
+<h3 id="TranslucentBars">Translucent system bars</h3>
+
+<p>You can now make the system bars partially translucent with new themes, {@link android.R.style#Theme_Holo_NoActionBar_TranslucentDecor Theme.Holo.NoActionBar.TranslucentDecor} and {@link android.R.style#Theme_Holo_Light_NoActionBar_TranslucentDecor Theme.Holo.Light.NoActionBar.TranslucentDecor}. By enabling translucent system bars, your layout will fill the area behind the system bars, so you must also enable {@link android.R.attr#fitsSystemWindows} for the portion of your layout that should not be covered by the system bars.</p>
+
+<p>If you're creating a custom theme, set one of these themes as the parent theme or include the {@link android.R.attr#windowTranslucentNavigation} and {@link android.R.attr#windowTranslucentStatus} style properties in your theme.</p>
+
+<h3 id="NotificationListener">Enhanced notification listener</h3>
+
+<p>Android 4.3 added the {@link android.service.notification.NotificationListenerService} APIs, allowing apps to receive information about new notifications as they are posted by the system. In Android 4.4, notification listeners can retrieve additional metadata for the notification and complete details about the notification's actions:</p>
+
+<p>The new {@link android.app.Notification#extras Notification.extras} field includes a {@link android.os.Bundle} to deliver your notification builder additional metadata such as {@link android.app.Notification#EXTRA_TITLE} and {@link android.app.Notification#EXTRA_PICTURE}.
+The new {@link android.app.Notification.Action} class defines the characteristics of an action attached to the notification, which you can  retrieve from the new {@link android.app.Notification#actions} field.</p>
+
+<h3 id="DrawableMirroring">Drawable mirroring for RTL layouts</h3>
+
+<p>On previous versions of Android, if your app includes images that should reverse their horizontal orientation for right-to-left layouts, you must include the mirrored image in a <code>drawables-ldrtl/</code> resource directory. Now, the system can automatically mirror images for you by enabling the {@link android.R.attr#autoMirrored} attribute on a drawable resource or by calling {@link android.graphics.drawable.Drawable#setAutoMirrored setAutoMirrored()}. When enabled, the {@link android.graphics.drawable.Drawable} is automatically mirrored when the layout direction is right-to-left.</p>
+
+<h3 id="A11y">Accessibility</h3>
+
+<p>The {@link android.view.View} class now allows you to declare "live regions" for portions of your UI that dynamically update with new text content, by adding the new {@link android.R.attr#accessibilityLiveRegion} attribute to your XML layout or calling {@link android.view.View#setAccessibilityLiveRegion setAccessibilityLiveRegion()}. For example, a login screen with a text field that displays an "incorrect password" notification should be marked as a live region, so the screen reader will recite the message when it changes.</p>
+
+<p>Apps that provide an <a href="{@docRoot}guide/topics/ui/accessibility/services.html">accessibility service</a> can now also enhance their capabilities with new APIs that provide information about view collections such as list or grid views using {@link android.view.accessibility.AccessibilityNodeInfo.CollectionInfo} and {@link android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo}.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Permissions">App Permissions</h2>
+
+<p>The following are new permissions that your app must request with the <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code &lt;uses-permission>}</a> tag to use certain new APIs:</p>
+
+<dl>
+<dt>{@link android.Manifest.permission#INSTALL_SHORTCUT}</dt>
+<dd>Allows an application to install a shortcut in Launcher</dd>
+<dt>{@link android.Manifest.permission#UNINSTALL_SHORTCUT}    </dt>
+<dd>Allows an application to uninstall a shortcut in Launcher</dd>
+<dt>{@link android.Manifest.permission#TRANSMIT_IR}</dt>
+<dd>Allows an applicaiton to use the device's IR transmitter, if available</dd>
+</dl>
+
+<p class="note"><strong>Note:</strong> Beginning with Android 4.4, the platform no longer requires that your app acquire the {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} when you want to access your app-specific regions of the external storage using methods such as {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}. However, the permissions are still required if you want to access the shareable regions of the external storage, provided by {@link android.os.Environment#getExternalStoragePublicDirectory getExternalStoragePublicDirectory()}. </p>
+
+
+
+
+
+<h2 id="DeviceFeatures">Device Features</h2>
+
+<p>The following are new device features that you can declare with the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a> tag to declare your app requirements and enable filtering on Google Play or check for at runtime:</p>
+
+<dl>
+<dt>{@link android.content.pm.PackageManager#FEATURE_CONSUMER_IR}</dt>
+<dd>The device is capable of communicating with consumer IR devices.</dd>
+<dt>{@link android.content.pm.PackageManager#FEATURE_DEVICE_ADMIN}</dt>
+<dd>The device supports device policy enforcement via device admins.</dd>
+<dt>{@link android.content.pm.PackageManager#FEATURE_NFC_HOST_CARD_EMULATION}</dt>
+<dd>The device supports host- based NFC card emulation.</dd>
+<dt>{@link android.content.pm.PackageManager#FEATURE_SENSOR_STEP_COUNTER}</dt>
+<dd>The device includes a hardware step counter.</dd>
+<dt>{@link android.content.pm.PackageManager#FEATURE_SENSOR_STEP_DETECTOR}</dt>
+<dd>The device includes a hardware step detector.</dd>
+</dl>
+
+
+
+
+
+
+
+
+<p style="margin-top:50px" class="note">For a detailed view of all API changes in Android 4.3, see the
+<a href="{@docRoot}sdk/api_diff/18/changes.html">API Differences Report</a>.</p>
+
+
+
