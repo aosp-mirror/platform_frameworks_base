@@ -366,7 +366,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 pw.println("PRINT MANAGER STATE (dumpsys print)");
                 final int userStateCount = mUserStates.size();
                 for (int i = 0; i < userStateCount; i++) {
-                    UserState userState = mUserStates.get(i);
+                    UserState userState = mUserStates.valueAt(i);
                     userState.dump(fd, pw, "");
                     pw.println();
                 }
