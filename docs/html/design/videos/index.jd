@@ -46,7 +46,7 @@ page.title=Videos
 <div class="layout-content-row">
   <div class="layout-content-col span-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326483138">Agile UX Research Practice in Android</a></h3>
-    <p>In the Android UX team, it is critical to get user feedback frequently and consistently so that we are able to iterate and develop the best-in-class designs for our users. We will discuss how the team applied ""Pulse Studies"" (iterative research sessions) in order to put new ideas, designs, and concepts in front of users on a regular basis; it requires minimal advance planning, it can have an immediate product impact, and it can meet urgent needs. </p>
+    <p>In the Android UX team, it is critical to get user feedback frequently and consistently so that we are able to iterate and develop the best-in-class designs for our users. We will discuss how the team applied "Pulse Studies" (iterative research sessions) in order to put new ideas, designs, and concepts in front of users on a regular basis; it requires minimal advance planning, it can have an immediate product impact, and it can meet urgent needs. </p>
   </div>
   <div class="layout-content-col span-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/6MOeVNbh9cY" frameborder="0" allowfullscreen=""></iframe>
