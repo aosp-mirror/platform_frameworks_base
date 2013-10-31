@@ -93,9 +93,9 @@ rotation on different screen sizes.</p>
 content across multiple bars located below the main action bar or at the bottom of the screen.</p>
 
 <img src="{@docRoot}design/media/action_bar_pattern_rotation.png">
-<div class="figure-caption">
+<!-- <div class="figure-caption">
   Split action bar showing action buttons at the bottom of the screen in vertical orientation.
-</div>
+</div> -->
 
 <h2 id="considerations-split-action-bars">Layout Considerations for Split Action Bars</h2>
 
