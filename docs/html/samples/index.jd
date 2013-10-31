@@ -25,11 +25,11 @@ page.tags="samples","examples","code"
 
 <ul>
   <li>Unpack the downloaded project package.</li>
-  <li>In Android Studio, chose <strong>File > Import Project</strong> and select root folder of
+  <li>In Android Studio, chose <strong>File > Import Project</strong> and select the root folder of
   the unpacked project.
     <p>Android Studio may ask you to choose the type of project you are importing.
       If this is the case, make sure to choose <strong>Import project from
-      external model</strong> and the <strong>Gradle</strong> option.
+      external model</strong> and select the <strong>Gradle</strong> option.
     </p>
   </li>
 </ul>
