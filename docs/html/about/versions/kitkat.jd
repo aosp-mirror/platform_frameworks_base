@@ -377,7 +377,7 @@ window.onhashchange = function () {
   chipset partners to bring it to more devices as soon as possible.
 </p>
 
-<div style="float:right;margin:1em 0em 0em 3em;width:484px;clear:both">
+<div style="float:right;margin:1em 0em 0em 3em;width:490px;clear:both">
   <img src="{@docRoot}images/kk-sensors-moves-n5.jpg" alt="" width="240" style=
   "margin-bottom:0;"> <img src="{@docRoot}images/kk-sensors-runtastic-n5.jpg" alt=""
   width="240" style="margin-bottom:0;padding-left:4px;">
