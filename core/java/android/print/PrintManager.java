@@ -616,6 +616,18 @@ public final class PrintManager {
         }
 
         @Override
+        public void cancel() {
+            // Start not called or finish called or destroyed - nothing to do.
+            if (!mStartReqeusted || mFinishRequested || mDestroyed) {
+                return;
+            }
+            // Request cancellation of pending work if needed.
+            synchronized (mLock) {
+                cancelPreviousCancellableOperationLocked();
+            }
+        }
+
+        @Override
         public void onActivityPaused(Activity activity) {
             /* do nothing */
         }
