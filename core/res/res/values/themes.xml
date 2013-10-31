@@ -249,6 +249,7 @@ please see themes_device_defaults.xml.
         <item name="editTextStyle">@android:style/Widget.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView</item>
         <item name="expandableListViewWhiteStyle">@android:style/Widget.ExpandableListView.White</item>
+        <item name="fastScrollStyle">@android:style/Widget.FastScroll</item>
         <item name="galleryStyle">@android:style/Widget.Gallery</item>
         <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView</item>
         <item name="gridViewStyle">@android:style/Widget.GridView</item>
@@ -403,7 +404,6 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@android:drawable/menu_submenu_background</item>
         <item name="fastScrollOverlayPosition">floating</item>
         <item name="fastScrollTextColor">@android:color/primary_text_dark</item>
-
         <!-- Pointer style -->
         <item name="pointerStyle">@android:style/Pointer</item>
 
@@ -1108,6 +1108,7 @@ please see themes_device_defaults.xml.
         <item name="editTextStyle">@android:style/Widget.Holo.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.Holo.ExpandableListView</item>
         <item name="expandableListViewWhiteStyle">@android:style/Widget.Holo.ExpandableListView.White</item>
+        <item name="fastScrollStyle">@android:style/Widget.Holo.FastScroll</item>
         <item name="galleryStyle">@android:style/Widget.Holo.Gallery</item>
         <item name="gestureOverlayViewStyle">@android:style/Widget.Holo.GestureOverlayView</item>
         <item name="gridViewStyle">@android:style/Widget.Holo.GridView</item>
@@ -1436,6 +1437,7 @@ please see themes_device_defaults.xml.
         <item name="editTextStyle">@android:style/Widget.Holo.Light.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.Holo.Light.ExpandableListView</item>
         <item name="expandableListViewWhiteStyle">@android:style/Widget.Holo.Light.ExpandableListView.White</item>
+        <item name="fastScrollStyle">@android:style/Widget.Holo.Light.FastScroll</item>
         <item name="galleryStyle">@android:style/Widget.Holo.Light.Gallery</item>
         <item name="gestureOverlayViewStyle">@android:style/Widget.Holo.Light.GestureOverlayView</item>
         <item name="gridViewStyle">@android:style/Widget.Holo.Light.GridView</item>

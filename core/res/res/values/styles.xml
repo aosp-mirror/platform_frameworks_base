@@ -292,6 +292,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.AbsListView">
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">vertical</item>
+        <item name="android:fastScrollStyle">?android:attr/fastScrollStyle</item>
     </style>
 
     <style name="Widget.GestureOverlayView">
@@ -2587,6 +2588,29 @@ please see styles_device_defaults.xml.
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/timepicker_default_text_color_holo_light</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.FastScroll">
+        <item name="android:thumbDrawable">?android:attr/fastScrollThumbDrawable</item>
+        <item name="android:trackDrawable">?android:attr/fastScrollTrackDrawable</item>
+        <item name="android:backgroundLeft">?android:attr/fastScrollPreviewBackgroundLeft</item>
+        <item name="android:backgroundRight">?android:attr/fastScrollPreviewBackgroundRight</item>
+        <item name="android:position">?android:attr/fastScrollOverlayPosition</item>
+        <item name="android:textColor">?android:attr/fastScrollTextColor</item>
+        <item name="android:thumbMinWidth">64dp</item>
+        <item name="android:thumbMinHeight">52dp</item>
+        <item name="android:textSize">52sp</item>
+        <item name="android:minWidth">72dp</item>
+        <item name="android:minHeight">72dp</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="Widget.Holo.FastScroll" parent="Widget.FastScroll">
+        <item name="android:thumbMinWidth">0dp</item>
+        <item name="android:thumbMinHeight">0dp</item>
+    </style>
+
+    <style name="Widget.Holo.Light.FastScroll" parent="Widget.Holo.FastScroll">
     </style>
 
 </resources>
