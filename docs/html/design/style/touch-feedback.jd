@@ -2,15 +2,43 @@ page.title=Touch Feedback
 page.tags="input","button"
 @jd:body
 
-<div class="layout-content-row" style="margin-bottom: -100px">
+    <div class="layout-content-row" style="margin-bottom: -100px">
   <div class="layout-content-col span-7">
 
-<p>Use color and illumination to respond to touches, reinforce the resulting behaviors of gestures, and
-indicate what actions are enabled and disabled.</p>
-<p>Whenever a user touches an actionable area in your app, provide a visual response. This lets the
-user know which object was touched and that your app is "listening".</p>
+<p>Use illumination and dimming to respond to touches, reinforce the resulting behaviors
+of gestures, and indicate what actions are enabled and disabled.</p>
+<p>Whenever a user touches an actionable area in your app, provide a subtle visual response.
+This lets the user know which object was touched and that your app is "listening".</p>
+
+<p><strong>Be responsive to touches in a gentle way</strong>. Whenever a user touches an
+actionable area in your app, let them know the app is "listening" by providing a visual
+response. Make it subtle &mdash;just slightly lighter or darker than the untouched color. This
+provides two benefits:</p>
+
+<ul>
+<li><a href="{@docRoot}design/get-started/principles.html#sprinkle-encouragement">Sprinkles
+of encouragement</a> are more pleasant than jolts.</li>
+<li>Incorporating <a href="{@docRoot}design/style/branding.html">your branding</a> is much
+easier because the default touch feedback works with whatever hue you choose.</li>
+</ul>
 
   </div>
+
+  <div class="layout-content-col span-6" style="float:right;">
+
+   <!-- <div class="framed-nexus5-port-span-5">
+      <video class="play-on-hover" autoplay>
+        <source src="{@docRoot}design/media/calendar.mp4" type="video/mp4">
+        <source src="{@docRoot}design/media/calendar.webm" type="video/webm">
+        <source src="{@docRoot}design/media/calendar.ogv" type="video/ogg">
+      </video>
+    </div>
+    <div class="figure-caption" style="margin-top:0">
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+  </div> -->
+
+
   <div class="layout-content-col span-6">
 
     <img src="{@docRoot}design/media/touch_feedback_reaction_response.png">
@@ -18,51 +46,54 @@ user know which object was touched and that your app is "listening".</p>
   </div>
 </div>
 
-<h4>States</h4>
+<h4 style="clear:both;">States</h4>
+
 
 <div class="vspace size-1">&nbsp;</div>
 
 <img src="{@docRoot}design/media/touch_feedback_states.png">
 <div class="figure-caption">
-  Most of Android's UI elements have touch-feedback built in, including states that indicate
-  whether touching the element will have any effect.
+  Most of Android's UI elements have touch feedback built in, including
+  states that indicate whether touching the element will have any effect.
 </div>
 
-<div class="vspace size-4">&nbsp;</div>
+<div class="vspace size-3">&nbsp;</div>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-4">
+  <div class="layout-content-col span-6">
 
-<h4>Communication</h4>
-<p>When your objects react to more complex gestures, help users understand what the outcome of the
-operation will be. For example, in Recents, when you start swiping a thumbnail left or right, it
-starts to dim. This helps the user understand that swiping will cause the item to be removed.</p>
+    <h4>Communication</h4>
+<p>When your objects react to more complex gestures, help users
+understand what the outcome will be.</p>
 
+<p>In Recents, when a user starts swiping a thumbnail left or right, it
+begins to dim. This helps the user understand that swiping will cause the
+item to be removed.</p>
   </div>
-  <div class="layout-content-col span-9">
+  <div class="layout-content-col span-7">
 
     <img src="{@docRoot}design/media/touch_feedback_manipulation.png">
 
   </div>
 </div>
+<div class="vspace size-3">&nbsp;</div>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
 
     <img src="{@docRoot}design/media/touch_feedback_communication.png">
+    <p><em>If a user attempts to scroll past the last home screen panel, the screen
+    content tilts to the right to indicate that further navigation in this direction
+    isn’t possible.</em></p>
 
   </div>
   <div class="layout-content-col span-6">
 
-<div class="vspace size-3">&nbsp;</div>
-
 <h4>Boundaries</h4>
-<p>When users try to scroll past the upper or lower limit of a scrollable area, communicate the
-boundary with a visual cue. For example, if a user attempts to scroll past the first home screen
-panel, the screen content tilts to the right to indicate that further navigation in this direction
-is not possible. Many of Android's scrollable UI widgets (e.g. lists or grid lists) already have
-support for boundary feedback built in. If you are building custom, keep boundary feedback in mind
-and provide it from within your app.</p>
-
-  </div>
-</div>
+<p>
+  When users try to scroll past the beginning or end of a scrollable area,
+  communicate the boundary with a visual cue. Many of Android's scrollable UI
+  widgets, like lists and grid lists, have support for boundary feedback built
+  in. If you’re building custom widgets, keep boundary feedback in mind and
+  provide it from within your app.
+</p>
