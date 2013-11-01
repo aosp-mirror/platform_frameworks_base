@@ -2260,11 +2260,11 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mTempVisiblePagesRange[0] = 0;
         mTempVisiblePagesRange[1] = getPageCount() - 1;
         boundByReorderablePages(true, mTempVisiblePagesRange);
-        mReorderingStarted = true;
 
         // Check if we are within the reordering range
         if (mTempVisiblePagesRange[0] <= dragViewIndex &&
                 dragViewIndex <= mTempVisiblePagesRange[1]) {
+            mReorderingStarted = true;
             if (zoomOut()) {
                 // Find the drag view under the pointer
                 mDragView = getChildAt(dragViewIndex);
