@@ -589,7 +589,7 @@ window.onhashchange = function () {
 <p stydle="clear:both;">
   In addition, the new Chromium WebView supports remote debugging using
   <a class="external-link" href=
-  "https://devsite.googleplex.com/chrome-developer-tools/docs/remote-debugging#debugging-webviews">
+  "https://developers.google.com/chrome-developer-tools/docs/remote-debugging#debugging-webviews">
   Chrome DevTools</a>. For example, you can use Chrome DevTools on your
   development machine to inspect, debug, and analyze your WebView content live
   on a mobile device.
