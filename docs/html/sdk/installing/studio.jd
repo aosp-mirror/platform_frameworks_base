@@ -294,7 +294,8 @@ download (or continue to use) the
 
 <p>If you already have Android Studio installed, in most cases, you can upgrade to the latest
 version by installing a patch. From within Android Studio, select
-<strong>Help &gt; Check for updates</strong> to see whether an update is available.</p>
+<strong>Help &gt; Check for updates</strong> (on Mac, <strong>Android Studio &gt;
+Check for updates</strong>) to see whether an update is available.</p>
 
 <p>If an update is not available,
 follow the <a href="#Installing">installation instructions</a> below and replace your existing
