@@ -52,8 +52,8 @@
     <string name="needPuk2" msgid="4526033371987193070">"請輸入 PUK2 以解鎖 SIM 卡。"</string>
     <string name="enablePin" msgid="209412020907207950">"操作失敗，請啟用 SIM/RUIM 鎖定。"</string>
   <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"您還剩 <xliff:g id="NUMBER">%d</xliff:g> 次嘗試機會。如果仍然失敗，SIM 卡將遭到鎖定。"</item>
-    <item quantity="other" msgid="7530597808358774740">"您還剩 <xliff:g id="NUMBER">%d</xliff:g> 次嘗試機會。如果仍然失敗，SIM 卡將遭到鎖定。"</item>
+    <item quantity="one" msgid="6596245285809790142">"您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖住。"</item>
+    <item quantity="other" msgid="7530597808358774740">"您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖住。"</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -490,8 +490,8 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"擷取音訊輸出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音訊輸出。"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"熱門字詞偵測"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取音訊用於熱門字詞偵測。擷取作業可在背景執行，但並未禁止使用其他音訊擷取工具 (例如攝錄影機)。"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"啟動字詞偵測"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取音訊用於啟動字詞偵測。擷取作業可在背景執行，但並未禁止使用其他音訊擷取工具 (例如攝錄影機)。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"擷取視訊輸出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允許應用程式擷取及重新導向視訊輸出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"擷取安全視訊輸出"</string>
@@ -1421,6 +1421,8 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift 鍵"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 鍵"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"選擇應用程式"</string>
+    <!-- no translation found for activitychooserview_choose_application_error (8624618365481126668) -->
+    <skip />
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"分享對象："</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"與「<xliff:g id="APPLICATION_NAME">%s</xliff:g>」分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑動控制。持續輕觸。"</string>
