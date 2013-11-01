@@ -905,7 +905,8 @@ public final class ActivityStackSupervisor {
         if (idx < 0) {
             app.activities.add(r);
         }
-        mService.updateLruProcessLocked(app, true, true);
+        mService.updateLruProcessLocked(app, true, null);
+        mService.updateOomAdjLocked();
 
         final ActivityStack stack = r.task.stack;
         try {
