@@ -99,6 +99,10 @@ public class BarTransitions {
         mBarBackground.finishAnimation();
     }
 
+    public void setContentVisible(boolean visible) {
+        // for subclasses
+    }
+
     private static class BarBackgroundDrawable extends Drawable {
         private final int mOpaque;
         private final int mSemiTransparent;
