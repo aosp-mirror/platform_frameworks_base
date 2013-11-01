@@ -135,9 +135,9 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Verkeerde SIM PIN-kode, jy moet nou jou diensverskaffer kontak om jou toestel te ontsluit."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Verkeerde SIM PIN-kode, jy sal nou jou diensverskaffer moet kontak om jou toestel te ontsluit."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit."</item>
+    <item quantity="one" msgid="8134313997799638254">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat jy jou diensverskaffer sal moet kontak om jou toestel te ontsluit."</item>
     <item quantity="other" msgid="2215723361575359486">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM is onbruikbaar. Kontak jou diensverskaffer."</string>
@@ -145,8 +145,8 @@
     <item quantity="one" msgid="3256893607561060649">"Verkeerde SIM PUK-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat SIM permanent onbruikbaar word."</item>
     <item quantity="other" msgid="5477305226026342036">"Verkeerde SIM PUK-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings voordat SIM permanent onbruikbaar word."</item>
   </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN-operasie het misluk!"</string>
-    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK-operasie het misluk!"</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN-bewerking het misluk!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK-bewerking het misluk!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kode is aanvaar!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Vorigesnit-knoppie"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Volgendesnit-knoppie"</string>

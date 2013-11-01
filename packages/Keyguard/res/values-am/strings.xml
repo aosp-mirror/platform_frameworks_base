@@ -140,7 +140,7 @@
     <item quantity="one" msgid="8134313997799638254">"ልክ ያልሆነ የሲም ፒን ኮድ፣ መሳሪያዎን ለማስከፈት ድምጸ ተያያዥ ሞደምዎን ማግኘት ግዴታዎ ሊሆን <xliff:g id="NUMBER">%d</xliff:g> ሙከራ ይቀርዎታል።"</item>
     <item quantity="other" msgid="2215723361575359486">"ልክ ያልሆነ የሲም ፒን ኮድ፣ <xliff:g id="NUMBER">%d</xliff:g> ሙከራዎች ይቀሩዎታል።"</item>
   </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ሲሙ ጥቅም ላይ መዋል እይችልም። የእርስዎን ድምጸ ተያያዥ ሞደምዎን ያግኙ።"</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ሲሙ ጥቅም ላይ መዋል እይችልም። የእርስዎን ድምጸ ተያያዥ ሞደም ያግኙ።"</string>
   <plurals name="kg_password_wrong_puk_code">
     <item quantity="one" msgid="3256893607561060649">"ልክ ያልሆነ የሲም PUK ኮድ፣ ሲም ካርድዎ በቋሚነት ጥቅም ላይ መዋል የማይችል ሊሆን <xliff:g id="NUMBER">%d</xliff:g> ሙከራ ይቀርዎታል።"</item>
     <item quantity="other" msgid="5477305226026342036">"ልክ ያልሆነ የሲም PUK ኮድ፣ ሲም ካርድዎ በቋሚነት ጥቅም ላይ መዋል የማይችል ሊሆን <xliff:g id="NUMBER">%d</xliff:g> ሙከራዎች ይቀሩዎታል።"</item>
