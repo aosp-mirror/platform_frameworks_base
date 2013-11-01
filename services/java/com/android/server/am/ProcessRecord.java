@@ -86,7 +86,6 @@ final class ProcessRecord {
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
-    boolean hasActivities;      // Are there any activities running in this process?
     boolean hasClientActivities;  // Are there any client services with activities?
     boolean hasStartedServices; // Are there any started services running in this process?
     boolean foregroundServices; // Running any services that are foreground?
@@ -265,9 +264,8 @@ final class ProcessRecord {
             pw.print(prefix); pw.print("persistent="); pw.print(persistent);
                     pw.print(" removed="); pw.println(removed);
         }
-        if (hasActivities || hasClientActivities || foregroundActivities) {
-            pw.print(prefix); pw.print("hasActivities="); pw.print(hasActivities);
-                    pw.print(" hasClientActivities="); pw.print(hasClientActivities);
+        if (hasClientActivities || foregroundActivities) {
+            pw.print(prefix); pw.print("hasClientActivities="); pw.print(hasClientActivities);
                     pw.print(" foregroundActivities="); pw.println(foregroundActivities);
         }
         if (hasStartedServices) {
