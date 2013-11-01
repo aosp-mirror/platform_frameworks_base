@@ -135,9 +135,9 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ລຶບອອກ"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງທ່ານຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງທ່ານຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການ ເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</item>
+    <item quantity="one" msgid="8134313997799638254">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານ ເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</item>
     <item quantity="other" msgid="2215723361575359486">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອ."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM ໃຊ້ບໍ່ໄດ້ແລ້ວ. ກະລຸນາຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານ."</string>

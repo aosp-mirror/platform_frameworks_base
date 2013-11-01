@@ -137,13 +137,13 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM PINコードが無効です。失敗できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えると、お使いの端末をロック解除するのに携帯通信会社にお問い合わせいただく必要があります。"</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM PINコードが無効です。失敗できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。"</item>
+    <item quantity="one" msgid="8134313997799638254">"SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えると、お使いの端末をロック解除するのに携帯通信会社にお問い合わせいただく必要があります。"</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。"</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIMは使用できません。携帯通信会社にお問い合わせください。"</string>
   <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM PUKコードが無効です。失敗できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。"</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM PUKコードが無効です。失敗できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。"</item>
+    <item quantity="one" msgid="3256893607561060649">"SIM PUKコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。"</item>
+    <item quantity="other" msgid="5477305226026342036">"SIM PUKコードが無効です。入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。"</item>
   </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN操作に失敗しました。"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK操作に失敗しました。"</string>
