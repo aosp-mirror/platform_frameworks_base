@@ -18,19 +18,29 @@ messages</li>
 
 <h2>See also</h2>
 <ol>
+  <li><a class="external-link"
+href="https://developers.google.com/chrome-developer-tools/docs/remote-debugging">Remote
+Debugging on Android</a></li>
   <li><a href="{@docRoot}tools/debugging/index.html">Debugging</a></li>
 </ol>
 
 </div>
 </div>
 
-<p>If you're developing a web application for Android, you can debug your JavaScript
-using the {@code console} JavaScript APIs, which output messages to logcat. If you're familiar with
+<p>If you are testing your web app with a device running Android 4.4 or higher,
+you can remotely debug your web pages in {@link android.webkit.WebView} with
+Chrome Developer Tools, while continuing to support older versions of Android.
+For more information, see <a class="external-link"
+href="https://developers.google.com/chrome-developer-tools/docs/remote-debugging">Remote
+Debugging on Android</a>.</p>
+
+<p>If you don't have a device running Android 4.4 or higher, you can debug your JavaScript using the
+{@code console} JavaScript APIs and view the output messages to logcat. If you're familiar with
 debugging web pages with Firebug or Web Inspector, then you're probably familiar
 with using {@code console} (such as {@code console.log()}). Android's WebKit framework supports most
 of the same APIs, so you can receive logs from your web page when debugging in Android's Browser
-or in your own {@link android.webkit.WebView}.</p>
-
+or in your own {@link android.webkit.WebView}. This document describes how to use the
+console APIs for debugging.</p>
 
 
 <h2 id="Browser">Using Console APIs in the Android Browser</h2>
@@ -83,28 +93,17 @@ expect from other web browsers.</p>
 
 <h2 id="WebView">Using Console APIs in WebView</h2>
 
-<p>If you've implemented a custom {@link android.webkit.WebView} in your application, all the
-same console APIs are supported when debugging your web page in WebView. On Android
-1.6 and lower, console messages are automatically sent to logcat with the
-"WebCore" logging tag. If you're targeting Android 2.1 (API Level 7) or higher, then you must
+<p>All the console APIs shown above are also
+supported when debugging in {@link android.webkit.WebView}. 
+If you're targeting Android 2.1 (API level 7) and higher, you must
 provide a {@link android.webkit.WebChromeClient}
 that implements the {@link android.webkit.WebChromeClient#onConsoleMessage(String,int,String)
-onConsoleMessage()} callback method, in order for console messages to appear in logcat.</p>
-
-<p>Additionally, the {@link
-android.webkit.WebChromeClient#onConsoleMessage(String,int,String)} method introduced in API
-Level 7 has been deprecated in favor of {@link
-android.webkit.WebChromeClient#onConsoleMessage(ConsoleMessage)} in API Level 8.</p>
-
-<p>Whether you're developing for Android 2.1 (API Level 7) or Android 2.2 (API Level 8 or
-greater), you must implement {@link android.webkit.WebChromeClient} and override the appropriate
-{@link
-android.webkit.WebChromeClient#onConsoleMessage(String,int,String) onConsoleMessage()} callback
-method. Then, apply the {@link android.webkit.WebChromeClient} to your {@link
+onConsoleMessage()} method in order for console messages to appear in logcat.
+Then, apply the {@link android.webkit.WebChromeClient} to your {@link
 android.webkit.WebView} with {@link android.webkit.WebView#setWebChromeClient(WebChromeClient)
 setWebChromeClient()}.
 
-<p>Using API Level 7, this is how your code for {@link
+<p>For example, to support API level 7, this is how your code for {@link
 android.webkit.WebChromeClient#onConsoleMessage(String,int,String)} might look:</p>
 
 <pre>
@@ -118,8 +117,8 @@ myWebView.setWebChromeClient(new WebChromeClient() {
 });
 </pre>
 
-<p>With API Level 8 or greater, your code for {@link
-android.webkit.WebChromeClient#onConsoleMessage(ConsoleMessage)} might look like this:</p>
+<p>However, if your lowest supported version is API level 8 or higher, you should instead
+implement {@link android.webkit.WebChromeClient#onConsoleMessage(ConsoleMessage)}. For example:</p>
 
 <pre>
 WebView myWebView = (WebView) findViewById(R.id.webview);
@@ -134,8 +133,8 @@ myWebView.setWebChromeClient(new WebChromeClient() {
 </pre>
 
 <p>The {@link android.webkit.ConsoleMessage} also includes a {@link
-android.webkit.ConsoleMessage.MessageLevel MessageLevel} to indicate the type of console message
-being delivered. You can query the message level with {@link
+android.webkit.ConsoleMessage.MessageLevel MessageLevel} object to indicate the type of console
+message being delivered. You can query the message level with {@link
 android.webkit.ConsoleMessage#messageLevel()} to determine the severity of the message, then
 use the appropriate {@link android.util.Log} method or take other appropriate actions.</p>
 

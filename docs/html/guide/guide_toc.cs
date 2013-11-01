@@ -490,11 +490,8 @@
     <span class="en">Web Apps</span>
     </a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/webapps/overview.html">
-            <span class="en">Overview</span>
-          </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/targeting.html">
-            <span class="en">Targeting Screens from Web Apps</span>
+            <span class="en">Supporting Different Screens in Web Apps</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/webview.html">
             <span class="en">Building Web Apps in WebView</span>
