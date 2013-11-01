@@ -4889,7 +4889,11 @@ public class Activity extends ContextThemeWrapper
 
         mFragments.dump(prefix, fd, writer, args);
 
-        getWindow().getDecorView().getViewRootImpl().dump(prefix, fd, writer, args);
+        if (getWindow() != null &&
+                getWindow().peekDecorView() != null &&
+                getWindow().peekDecorView().getViewRootImpl() != null) {
+            getWindow().peekDecorView().getViewRootImpl().dump(prefix, fd, writer, args);
+        }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
     }
