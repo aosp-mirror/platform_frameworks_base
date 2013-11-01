@@ -3398,16 +3398,7 @@ public final class ViewRootImpl implements ViewParent,
         public final void deliver(QueuedInputEvent q) {
             if ((q.mFlags & QueuedInputEvent.FLAG_FINISHED) != 0) {
                 forward(q);
-            } else if (mView == null || !mAdded) {
-                Slog.w(TAG, "Dropping event due to root view being removed: " + q.mEvent);
-                finish(q, false);
-            } else if (!mAttachInfo.mHasWindowFocus &&
-                  !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER) &&
-                  !isTerminalInputEvent(q.mEvent)) {
-                // If this is a focused event and the window doesn't currently have input focus,
-                // then drop this event.  This could be an event that came back from the previous
-                // stage but the window has lost focus in the meantime.
-                Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
+            } else if (shouldDropInputEvent(q)) {
                 finish(q, false);
             } else {
                 apply(q, onProcess(q));
@@ -3464,6 +3455,22 @@ public final class ViewRootImpl implements ViewParent,
             } else {
                 finishInputEvent(q);
             }
+        }
+
+        protected boolean shouldDropInputEvent(QueuedInputEvent q) {
+            if (mView == null || !mAdded) {
+                Slog.w(TAG, "Dropping event due to root view being removed: " + q.mEvent);
+                return true;
+            } else if (!mAttachInfo.mHasWindowFocus &&
+                  !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER) &&
+                  !isTerminalInputEvent(q.mEvent)) {
+                // If this is a focused event and the window doesn't currently have input focus,
+                // then drop this event.  This could be an event that came back from the previous
+                // stage but the window has lost focus in the meantime.
+                Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
+                return true;
+            }
+            return false;
         }
 
         void dump(String prefix, PrintWriter writer) {
@@ -3851,6 +3858,10 @@ public final class ViewRootImpl implements ViewParent,
                 return FINISH_HANDLED;
             }
 
+            if (shouldDropInputEvent(q)) {
+                return FINISH_NOT_HANDLED;
+            }
+
             // If the Control modifier is held, try to interpret the key as a shortcut.
             if (event.getAction() == KeyEvent.ACTION_DOWN
                     && event.isCtrlPressed()
@@ -3859,11 +3870,17 @@ public final class ViewRootImpl implements ViewParent,
                 if (mView.dispatchKeyShortcutEvent(event)) {
                     return FINISH_HANDLED;
                 }
+                if (shouldDropInputEvent(q)) {
+                    return FINISH_NOT_HANDLED;
+                }
             }
 
             // Apply the fallback event policy.
             if (mFallbackEventHandler.dispatchKeyEvent(event)) {
                 return FINISH_HANDLED;
+            }
+            if (shouldDropInputEvent(q)) {
+                return FINISH_NOT_HANDLED;
             }
 
             // Handle automatic focus changes.
