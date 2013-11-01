@@ -61,7 +61,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1398,7 +1397,7 @@ final class ActivityStack {
             if (next.app != null && next.app.thread != null) {
                 // No reason to do full oom adj update here; we'll let that
                 // happen whenever it needs to later.
-                mService.updateLruProcessLocked(next.app, false, true);
+                mService.updateLruProcessLocked(next.app, true, null);
             }
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return true;
@@ -1526,8 +1525,9 @@ final class ActivityStack {
             mResumedActivity = next;
             next.task.touchActiveTime();
             mService.addRecentTaskLocked(next.task);
-            mService.updateLruProcessLocked(next.app, true, true);
+            mService.updateLruProcessLocked(next.app, true, null);
             updateLRUListLocked(next);
+            mService.updateOomAdjLocked();
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
@@ -2781,7 +2781,7 @@ final class ActivityStack {
                 }
                 if (r.app.activities.isEmpty()) {
                     // No longer have activities, so update LRU list and oom adj.
-                    mService.updateLruProcessLocked(r.app, false, false);
+                    mService.updateLruProcessLocked(r.app, false, null);
                     mService.updateOomAdjLocked();
                 }
             }
