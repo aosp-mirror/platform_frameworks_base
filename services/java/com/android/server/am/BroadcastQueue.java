@@ -220,7 +220,8 @@ public final class BroadcastQueue {
         r.curApp = app;
         app.curReceiver = r;
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
-        mService.updateLruProcessLocked(app, true, false);
+        mService.updateLruProcessLocked(app, false, null);
+        mService.updateOomAdjLocked();
 
         // Tell the application to launch this receiver.
         r.intent.setComponent(r.curComponent);
