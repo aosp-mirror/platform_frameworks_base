@@ -566,7 +566,11 @@ public class ActionBarView extends AbsActionBarView {
         mUpGoerFive.setEnabled(enable);
         mUpGoerFive.setFocusable(enable);
         // Make sure the home button has an accurate content description for accessibility.
-        if (!enable) {
+        updateHomeAccessibility(enable);
+    }
+
+    private void updateHomeAccessibility(boolean homeEnabled) {
+        if (!homeEnabled) {
             mUpGoerFive.setContentDescription(null);
             mUpGoerFive.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         } else {
@@ -677,19 +681,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         // Make sure the home button has an accurate content description for accessibility.
-        if (!mHomeLayout.isEnabled()) {
-            mHomeLayout.setContentDescription(null);
-            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        } else {
-            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-            if ((options & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                mHomeLayout.setContentDescription(mContext.getResources().getText(
-                        R.string.action_bar_up_description));
-            } else {
-                mHomeLayout.setContentDescription(mContext.getResources().getText(
-                        R.string.action_bar_home_description));
-            }
-        }
+        updateHomeAccessibility(!mUpGoerFive.isEnabled());
     }
 
     public void setIcon(Drawable icon) {
