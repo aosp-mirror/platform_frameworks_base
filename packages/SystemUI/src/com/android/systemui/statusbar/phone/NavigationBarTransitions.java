@@ -30,6 +30,9 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 
 public final class NavigationBarTransitions extends BarTransitions {
 
+    private static final float KEYGUARD_QUIESCENT_ALPHA = 0.5f;
+    private static final int CONTENT_FADE_DURATION = 200;
+
     private final NavigationBarView mView;
     private final IStatusBarService mBarService;
 
@@ -73,16 +76,55 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     private void applyMode(int mode, boolean animate, boolean force) {
         // apply to key buttons
-        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
-        final float alpha = isOpaque ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
-        setKeyButtonViewQuiescentAlpha(mView.getBackButton(), alpha, animate);
+        final float alpha = alphaForMode(mode);
         setKeyButtonViewQuiescentAlpha(mView.getHomeButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getRecentsButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getMenuButton(), alpha, animate);
-        setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), alpha, animate);
+
+        setKeyButtonViewQuiescentAlpha(mView.getSearchLight(), KEYGUARD_QUIESCENT_ALPHA, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), KEYGUARD_QUIESCENT_ALPHA, animate);
+
+        applyBackButtonQuiescentAlpha(mode, animate);
 
         // apply to lights out
         applyLightsOut(mode == MODE_LIGHTS_OUT, animate, force);
+    }
+
+    private float alphaForMode(int mode) {
+        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
+        return isOpaque ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
+    }
+
+    public void applyBackButtonQuiescentAlpha(int mode, boolean animate) {
+        float backAlpha = 0;
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getSearchLight());
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getCameraButton());
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getHomeButton());
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getRecentsButton());
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getMenuButton());
+        if (backAlpha > 0) {
+            setKeyButtonViewQuiescentAlpha(mView.getBackButton(), backAlpha, animate);
+        }
+    }
+
+    private static float maxVisibleQuiescentAlpha(float max, View v) {
+        if ((v instanceof KeyButtonView) && v.isShown()) {
+            return Math.max(max, ((KeyButtonView)v).getQuiescentAlpha());
+        }
+        return max;
+    }
+
+    @Override
+    public void setContentVisible(boolean visible) {
+        final float alpha = visible ? 1 : 0;
+        fadeContent(mView.getCameraButton(), alpha);
+        fadeContent(mView.getSearchLight(), alpha);
+    }
+
+    private void fadeContent(View v, float alpha) {
+        if (v != null) {
+            v.animate().alpha(alpha).setDuration(CONTENT_FADE_DURATION);
+        }
     }
 
     private void setKeyButtonViewQuiescentAlpha(View button, float alpha, boolean animate) {
