@@ -267,6 +267,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     private boolean mIsCameraEvent;
     private float mWarpPeekAmount;
+    private boolean mOnPageEndWarpCalled;
+    private boolean mOnPageBeginWarpCalled;
 
     public interface PageSwitchListener {
         void onPageSwitching(View newPage, int newPageIndex);
@@ -491,13 +493,29 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         if (!mIsPageMoving) {
             mIsPageMoving = true;
             if (isWarping()) {
-                onPageBeginWarp();
+                dispatchOnPageBeginWarp();
                 if (mPageSwapIndex != -1) {
                     swapPages(mPageSwapIndex, mPageWarpIndex);
                 }
             }
             onPageBeginMoving();
         }
+    }
+
+    private void dispatchOnPageBeginWarp() {
+        if (!mOnPageBeginWarpCalled) {
+            onPageBeginWarp();
+            mOnPageBeginWarpCalled = true;
+        }
+        mOnPageEndWarpCalled = false;
+    }
+
+    private void dispatchOnPageEndWarp() {
+        if (!mOnPageEndWarpCalled) {
+            onPageEndWarp();
+            mOnPageEndWarpCalled = true;
+        }
+        mOnPageBeginWarpCalled = false;
     }
 
     protected void pageEndMoving() {
@@ -508,7 +526,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 if (mPageSwapIndex != -1) {
                     swapPages(mPageSwapIndex, mPageWarpIndex);
                 }
-                onPageEndWarp();
+                dispatchOnPageEndWarp();
                 resetPageWarp();
             }
             onPageEndMoving();
@@ -1919,7 +1937,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
 
         if (isWarping()) {
-            onPageEndWarp();
+            dispatchOnPageEndWarp();
             resetPageWarp();
         }
 
@@ -2702,7 +2720,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         @Override
         public void onAnimationEnd(Animator animation) {
             mWarpAnimation = null;
-            mWarpPageExposed = true;
+            mWarpPageExposed = false;
         }
     };
 
@@ -2727,9 +2745,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     private void animateWarpPageOnScreen(String reason) {
         if (DEBUG_WARP) Log.v(TAG, "animateWarpPageOnScreen(" + reason + ")");
-        if (isWarping()) {
+        if (isWarping() && !mWarpPageExposed) {
             mWarpPageExposed = true;
-            onPageBeginWarp();
+            dispatchOnPageBeginWarp();
             KeyguardWidgetFrame v = (KeyguardWidgetFrame) getPageAt(mPageWarpIndex);
             if (DEBUG_WARP) Log.v(TAG, "moving page on screen: Tx=" + v.getTranslationX());
             DecelerateInterpolator interp = new DecelerateInterpolator(1.5f);
@@ -2744,7 +2762,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private void animateWarpPageOffScreen(String reason, boolean animate) {
         if (DEBUG_WARP) Log.v(TAG, "animateWarpPageOffScreen(" + reason + " anim:" + animate + ")");
         if (isWarping()) {
-            onPageEndWarp();
+            dispatchOnPageEndWarp();
             KeyguardWidgetFrame v = (KeyguardWidgetFrame) getPageAt(mPageWarpIndex);
             if (DEBUG_WARP) Log.v(TAG, "moving page off screen: Tx=" + v.getTranslationX());
             AccelerateInterpolator interp = new AccelerateInterpolator(1.5f);
