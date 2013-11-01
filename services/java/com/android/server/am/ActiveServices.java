@@ -76,7 +76,7 @@ public final class ActiveServices {
 
     // How long a service needs to be running until restarting its process
     // is no longer considered to be a relaunch of the service.
-    static final int SERVICE_RESTART_DURATION = 5*1000;
+    static final int SERVICE_RESTART_DURATION = 1*1000;
 
     // How long a service needs to be running until it will start back at
     // SERVICE_RESTART_DURATION after being killed.
@@ -301,7 +301,7 @@ public final class ActiveServices {
         ServiceRecord r = res.record;
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
                 callingUid, r.packageName, service, service.getFlags(), null);
-        if (unscheduleServiceRestartLocked(r)) {
+        if (unscheduleServiceRestartLocked(r, callingUid)) {
             if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: " + r);
         }
         r.lastActivity = SystemClock.uptimeMillis();
@@ -695,7 +695,7 @@ public final class ActiveServices {
         final long origId = Binder.clearCallingIdentity();
 
         try {
-            if (unscheduleServiceRestartLocked(s)) {
+            if (unscheduleServiceRestartLocked(s, callerApp.info.uid)) {
                 if (DEBUG_SERVICE) Slog.v(TAG, "BIND SERVICE WHILE RESTART PENDING: "
                         + s);
             }
@@ -1141,16 +1141,9 @@ public final class ActiveServices {
                     r.restartCount = 1;
                     r.restartDelay = minDuration;
                 } else {
-                    if ((r.serviceInfo.applicationInfo.flags
-                            &ApplicationInfo.FLAG_PERSISTENT) != 0) {
-                        // Services in peristent processes will restart much more
-                        // quickly, since they are pretty important.  (Think SystemUI).
-                        r.restartDelay += minDuration/2;
-                    } else {
-                        r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
-                        if (r.restartDelay < minDuration) {
-                            r.restartDelay = minDuration;
-                        }
+                    r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
+                    if (r.restartDelay < minDuration) {
+                        r.restartDelay = minDuration;
                     }
                 }
             }
@@ -1177,7 +1170,7 @@ public final class ActiveServices {
             } while (repeat);
 
         } else {
-            // Persistent processes are immediately restrted, so there is no
+            // Persistent processes are immediately restarted, so there is no
             // reason to hold of on restarting their services.
             r.totalRestartCount++;
             r.restartCount = 0;
@@ -1210,12 +1203,17 @@ public final class ActiveServices {
         bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
     }
 
-    private final boolean unscheduleServiceRestartLocked(ServiceRecord r) {
+    private final boolean unscheduleServiceRestartLocked(ServiceRecord r, int callingUid) {
         if (r.restartDelay == 0) {
             return false;
         }
-        r.resetRestartCounter();
-        mRestartingServices.remove(r);
+        // Remove from the restarting list; if the service is currently on the
+        // restarting list, or the call is coming from another app, then this
+        // service has become of much more interest so we reset the restart interval.
+        boolean removed = mRestartingServices.remove(r);
+        if (removed || callingUid != r.appInfo.uid) {
+            r.resetRestartCounter();
+        }
         mAm.mHandler.removeCallbacks(r.restarter);
         return true;
     }
@@ -1549,7 +1547,7 @@ public final class ActiveServices {
         smap.mServicesByName.remove(r.name);
         smap.mServicesByIntent.remove(r.intent);
         r.totalRestartCount = 0;
-        unscheduleServiceRestartLocked(r);
+        unscheduleServiceRestartLocked(r, 0);
 
         // Also make sure it is not on the pending list.
         int N = mPendingServices.size();
