@@ -748,8 +748,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     //      CONNECTIVITY_ACTION. Only to accomodate interface
     //      switch during HO.
     //      @see bug/4455071
-    public void handleTetherIfaceChange() {
-        mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
+    public void handleTetherIfaceChange(NetworkInfo info) {
+        mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED, info);
     }
 
     class TetherInterfaceSM extends StateMachine {
