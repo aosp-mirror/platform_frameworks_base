@@ -144,6 +144,10 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
         mCallback = cb;
     }
 
+    public Callback getCallback() {
+        return mCallback;
+    }
+
     /**
      * Create a new item view that can be re-bound to other item data later.
      *
