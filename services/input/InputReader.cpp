@@ -6283,7 +6283,7 @@ void JoystickInputMapper::configure(nsecs_t when,
 
                 // To eliminate noise while the joystick is at rest, filter out small variations
                 // in axis values up front.
-                axis.filter = axis.flat * 0.25f;
+                axis.filter = axis.fuzz ? axis.fuzz : axis.flat * 0.25f;
 
                 mAxes.add(abs, axis);
             }
