@@ -2725,7 +2725,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     };
 
     private void cancelWarpAnimation(String msg, boolean abortAnimation) {
-        if (DEBUG_WARP) Log.v(TAG, "cancelWarpAnimation(" + msg + ")");
+        if (DEBUG_WARP) Log.v(TAG, "cancelWarpAnimation(" + msg + ",abort=" + abortAnimation + ")");
         if (abortAnimation) {
             // We're done with the animation and moving to a new page.  Let the scroller
             // take over the animation.
