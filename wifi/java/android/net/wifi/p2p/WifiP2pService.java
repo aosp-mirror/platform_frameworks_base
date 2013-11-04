@@ -313,7 +313,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mContext = context;
 
         //STOPSHIP: get this from native side
-        mInterface = "p2p0";
+        mInterface = SystemProperties.get("wifi.p2pinterface", "p2p0");
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
 
         mP2pSupported = mContext.getPackageManager().hasSystemFeature(
