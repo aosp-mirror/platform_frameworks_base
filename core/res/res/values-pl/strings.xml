@@ -1211,7 +1211,7 @@
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Na czas połączenia z <xliff:g id="DEVICE_NAME">%1$s</xliff:g> telefon zostanie tymczasowo odłączony od Wi-Fi"</string>
     <string name="select_character" msgid="3365550120617701745">"Wstaw znak"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Wysyłanie wiadomości SMS"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wysyła wiele SMS-ów. Chcesz pozwolić tej aplikacji dalej wysyłać SMS-y?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"Aplikacja &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wysyła wiele SMS-ów. Chcesz pozwolić tej aplikacji dalej wysyłać SMS-y?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Pozwól"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odmów"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce wysłać wiadomość do &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1421,8 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Wybierz aplikację"</string>
-    <!-- no translation found for activitychooserview_choose_application_error (8624618365481126668) -->
-    <skip />
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>

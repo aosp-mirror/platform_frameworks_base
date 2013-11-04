@@ -52,8 +52,8 @@
     <string name="needPuk2" msgid="4526033371987193070">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
   <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Hai <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata."</item>
-    <item quantity="other" msgid="7530597808358774740">"Hai <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata."</item>
+    <item quantity="one" msgid="6596245285809790142">"Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata."</item>
+    <item quantity="other" msgid="7530597808358774740">"Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata."</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -1421,8 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maiuscolo"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Invio"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Scegli un\'applicazione"</string>
-    <!-- no translation found for activitychooserview_choose_application_error (8624618365481126668) -->
-    <skip />
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Impossibile avviare l\'applicazione <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Condividi con"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Condividi con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Maniglia scorrevole. Tocca e tieni premuto."</string>
