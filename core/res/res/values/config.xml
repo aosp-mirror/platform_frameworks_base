@@ -959,6 +959,14 @@
     <!-- The VoiceMail default value is displayed to my own number if it is true -->
     <bool name="config_telephony_use_own_number_for_voicemail">false</bool>
 
+    <!-- Set additional audio parameters for incall audio
+         Usage: parameter=onstring=offstring
+         Examples: <item>realcall=on=off</item>
+                   <item>dualmic_enabled=true=false</item>
+                   <item>mic_boost=yes=no</item> -->
+    <string-array name="config_telephony_set_audioparameters" translatable="false">
+    </string-array>
+
     <!-- If this value is true, Sms encoded as octet is decoded by utf8 decoder.
          If false, decoded by Latin decoder. -->
     <bool name="config_sms_utf8_support">false</bool>
