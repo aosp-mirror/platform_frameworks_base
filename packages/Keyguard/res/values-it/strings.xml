@@ -135,15 +135,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Rimuovi"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codice PIN della SIM sbagliato. Devi contattare l\'operatore per sbloccare il dispositivo."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codice PIN della SIM errato. Devi contattare l\'operatore per sbloccare il dispositivo."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Codice PIN della SIM sbagliato. Hai <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione, dopodiché dovrai contattare l\'operatore per sbloccare il dispositivo."</item>
-    <item quantity="other" msgid="2215723361575359486">"Codice PIN della SIM sbagliato. Hai <xliff:g id="NUMBER">%d</xliff:g> tentativi ancora a disposizione."</item>
+    <item quantity="one" msgid="8134313997799638254">"Codice PIN della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione, dopodiché dovrai contattare l\'operatore per sbloccare il dispositivo."</item>
+    <item quantity="other" msgid="2215723361575359486">"Codice PIN della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM inutilizzabile. Contatta il tuo operatore."</string>
   <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Codice PUK della SIM sbagliato. Hai <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile."</item>
-    <item quantity="other" msgid="5477305226026342036">"Codice PUK della SIM sbagliato. Hai <xliff:g id="NUMBER">%d</xliff:g> tentativi ancora a disposizione prima che la SIM diventi definitivamente inutilizzabile."</item>
+    <item quantity="one" msgid="3256893607561060649">"Codice PUK della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile."</item>
+    <item quantity="other" msgid="5477305226026342036">"Codice PUK della SIM errato. Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile."</item>
   </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operazione con PIN della SIM non riuscita."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operazione con PUK della SIM non riuscita."</string>

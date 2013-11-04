@@ -145,8 +145,8 @@
     <item quantity="one" msgid="3256893607561060649">"Msimbo wa PUK ya SIM usio sahihi, umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kuacha kutumika kabisa."</item>
     <item quantity="other" msgid="5477305226026342036">"Msimbo wa PUK ya SIM usio sahihi, umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kuacha kutumika kabisa."</item>
   </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operesheni ya PIN ya SIM imeshindwa!"</string>
-    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operesheni ya PUK ya SIM imeshindwa!"</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Utendakazi wa PIN ya SIM umeshindwa!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Utendakazi wa PUK ya SIM umeshindwa!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Msimbo Umekubaliwa!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Kitufe cha wimbo wa awali"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Kitufe cha wimbo unaofuata"</string>
