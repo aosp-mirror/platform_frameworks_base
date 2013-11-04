@@ -606,6 +606,24 @@ public final class PowerManager {
     }
 
     /**
+     * Boost the CPU. Boosts the cpu for the given duration in microseconds.
+     * Requires the {@link android.Manifest.permission#CPU_BOOST} permission.
+     *
+     * @param duration in microseconds to boost the CPU
+     *
+     * @hide
+     */
+    public void cpuBoost(int duration)
+    {
+        try {
+            if (mService != null) {
+                mService.cpuBoost(duration);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * A wake lock is a mechanism to indicate that your application needs
      * to have the device stay on.
      * <p>
