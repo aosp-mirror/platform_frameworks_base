@@ -4880,6 +4880,12 @@ public final class Settings {
          public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
 
         /**
+         * Whether to include options in power menu for rebooting into recovery or bootloader
+         * @hide
+         */
+        public static final String ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -4929,7 +4935,8 @@ public final class Settings {
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
             UI_NIGHT_MODE,
-            SLEEP_TIMEOUT
+            SLEEP_TIMEOUT,
+            ADVANCED_REBOOT
         };
 
         /**

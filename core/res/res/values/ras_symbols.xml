@@ -6,9 +6,12 @@
     <java-symbol name="config_backKillTimeout" type="integer" />
 
     <!-- Power menu reboot -->
-    <java-symbol name="reboot_confirm" type="string" />
-    <java-symbol name="reboot_title" type="string" />
-    <java-symbol name="ic_lock_power_reboot" type="drawable" />
-    <java-symbol name="global_action_reboot" type="string" />
+    <java-symbol type="array" name="shutdown_reboot_options" />
+    <java-symbol type="array" name="shutdown_reboot_actions" />
+    <java-symbol type="drawable" name="ic_lock_power_reboot" />
+    <java-symbol type="string" name="reboot_confirm" />
+    <java-symbol type="string" name="reboot_title"/>
+    <java-symbol type="string" name="reboot_progress" />
+    <java-symbol type="string" name="global_action_reboot" />
 
 </resources>
