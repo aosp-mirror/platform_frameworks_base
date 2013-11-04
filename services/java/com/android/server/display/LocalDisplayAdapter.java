@@ -166,6 +166,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
                         mInfo.rotation = Surface.ROTATION_270;
                     }
+
+                    // For demonstration purposes, allow rotation of the external display
+                    // to follow the built-in display.
+                    if (SystemProperties.getBoolean("persist.demo.hdmirotates", false)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                    }
                 }
             }
             return mInfo;
