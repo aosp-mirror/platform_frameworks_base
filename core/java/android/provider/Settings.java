@@ -5004,6 +5004,23 @@ public final class Settings {
         public static final Validator VOLUME_LINK_NOTIFICATION_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Control the type of rotation which can be performed using the accelerometer
+         * if ACCELEROMETER_ROTATION is enabled.
+         * Value is a bitwise combination of
+         * 1 = 0 degrees (portrait)
+         * 2 = 90 degrees (left)
+         * 4 = 180 degrees (inverted portrait)
+         * 8 = 270 degrees (right)
+         * Setting to 0 is effectively orientation lock
+         * @hide
+         */
+        public static final String ACCELEROMETER_ROTATION_ANGLES = "accelerometer_rotation_angles";
+
+        /** @hide */
+        public static final Validator ACCELEROMETER_ROTATION_ANGLES_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5241,6 +5258,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(WAKE_WHEN_PLUGGED_OR_UNPLUGGED);
             PRIVATE_SETTINGS.add(TETHERING_ALLOW_VPN_UPSTREAMS);
             PRIVATE_SETTINGS.add(VOLUME_LINK_NOTIFICATION);
+            PRIVATE_SETTINGS.add(ACCELEROMETER_ROTATION_ANGLES);
         }
 
         /**
@@ -5381,6 +5399,7 @@ public final class Settings {
             VALIDATORS.put(WAKE_WHEN_PLUGGED_OR_UNPLUGGED, WAKE_WHEN_PLUGGED_OR_UNPLUGGED_VALIDATOR);
             VALIDATORS.put(TETHERING_ALLOW_VPN_UPSTREAMS, TETHERING_ALLOW_VPN_UPSTREAMS_VALIDATOR);
             VALIDATORS.put(VOLUME_LINK_NOTIFICATION, VOLUME_LINK_NOTIFICATION_VALIDATOR);
+            VALIDATORS.put(ACCELEROMETER_ROTATION_ANGLES, ACCELEROMETER_ROTATION_ANGLES_VALIDATOR);
         }
 
         /**
