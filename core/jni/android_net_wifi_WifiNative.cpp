@@ -82,6 +82,11 @@ static jstring doStringCommand(JNIEnv* env, jstring javaCommand) {
     return env->NewStringUTF(reply);
 }
 
+static jboolean android_net_wifi_setMode(JNIEnv* env, jobject, jint type)
+{
+    return (jboolean)(::wifi_set_mode(type) == 0);
+}
+
 static jboolean android_net_wifi_isDriverLoaded(JNIEnv* env, jobject)
 {
     return (::is_wifi_driver_loaded() == 1);
@@ -163,6 +168,7 @@ static JNINativeMethod gWifiMethods[] = {
     { "doIntCommandNative", "(Ljava/lang/String;)I", (void*)android_net_wifi_doIntCommand },
     { "doStringCommandNative", "(Ljava/lang/String;)Ljava/lang/String;",
             (void*) android_net_wifi_doStringCommand },
+    { "setMode", "(I)Z", (void*) android_net_wifi_setMode},
 };
 
 int register_android_net_wifi_WifiNative(JNIEnv* env) {
