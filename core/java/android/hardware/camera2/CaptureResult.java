@@ -758,6 +758,8 @@ public final class CaptureResult extends CameraMetadata {
      * <p>
      * Only available if faceDetectMode == FULL
      * </p>
+     *
+     * @hide
      */
     public static final Key<int[]> STATISTICS_FACE_IDS =
             new Key<int[]>("android.statistics.faceIds", int[].class);
@@ -770,6 +772,8 @@ public final class CaptureResult extends CameraMetadata {
      * <p>
      * Only available if faceDetectMode == FULL
      * </p>
+     *
+     * @hide
      */
     public static final Key<int[]> STATISTICS_FACE_LANDMARKS =
             new Key<int[]>("android.statistics.faceLandmarks", int[].class);
@@ -782,6 +786,8 @@ public final class CaptureResult extends CameraMetadata {
      * <p>
      * Only available if faceDetectMode != OFF
      * </p>
+     *
+     * @hide
      */
     public static final Key<android.graphics.Rect[]> STATISTICS_FACE_RECTANGLES =
             new Key<android.graphics.Rect[]>("android.statistics.faceRectangles", android.graphics.Rect[].class);
@@ -795,6 +801,8 @@ public final class CaptureResult extends CameraMetadata {
      * Only available if faceDetectMode != OFF. The value should be
      * meaningful (for example, setting 100 at all times is illegal).
      * </p>
+     *
+     * @hide
      */
     public static final Key<byte[]> STATISTICS_FACE_SCORES =
             new Key<byte[]>("android.statistics.faceScores", byte[].class);
