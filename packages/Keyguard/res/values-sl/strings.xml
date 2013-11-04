@@ -137,12 +137,12 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Odstrani"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Napačna koda PIN kartice SIM. Zdaj se boste morali za odklenitev naprave obrniti na operaterja."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Napačna koda PIN kartice SIM. Imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem se boste morali za odklenitev naprave obrniti na operaterja."</item>
+    <item quantity="one" msgid="8134313997799638254">"Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem se boste morali za odklenitev naprave obrniti na operaterja."</item>
     <item quantity="other" msgid="2215723361575359486">"Napačna koda PIN kartice SIM. Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Kartica SIM ni več uporabna. Obrnite se na operaterja."</string>
   <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Napačna koda PUK kartice SIM. Imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna."</item>
+    <item quantity="one" msgid="3256893607561060649">"Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna."</item>
     <item quantity="other" msgid="5477305226026342036">"Napačna koda PUK kartice SIM. Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat. Potem bo kartica SIM postala trajno neuporabna."</item>
   </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Postopek za odklepanje s kodo PIN kartice SIM ni uspel."</string>
