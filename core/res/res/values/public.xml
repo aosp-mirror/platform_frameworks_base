@@ -2087,4 +2087,5 @@
   <public type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" id="0x010301e3" />
   <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" id="0x010301e4" />
 
+  <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
 </resources>
