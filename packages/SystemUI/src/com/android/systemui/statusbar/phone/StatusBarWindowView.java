@@ -113,7 +113,7 @@ public class StatusBarWindowView extends FrameLayout
             handled = super.onTouchEvent(ev);
         }
         final int action = ev.getAction();
-        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+        if (!handled && (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL)) {
             mService.setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         }
         return handled;
