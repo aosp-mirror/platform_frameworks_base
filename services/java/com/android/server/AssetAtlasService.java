@@ -436,6 +436,9 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
             Log.d(LOG_TAG, String.format("Found best atlas configuration in %.2fs", delay));
         }
 
+        // PRELOAD_RESOURCES may have been disabled!
+        if (results.size() == 0) return null;
+
         WorkerResult result = results.get(0);
         return new Configuration(result.type, result.width, result.height, result.count);
     }
