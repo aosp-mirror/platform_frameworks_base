@@ -166,6 +166,9 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         sendMessage("614 Address removed 2001:db8::1/64 wlan0 1 0");
         expectSoon(observer).addressRemoved("2001:db8::1/64", "wlan0", 1, 0);
 
+        sendMessage("614 Address removed 2001:db8::1/64 wlan0 1");
+        // Not enough arguments.
+
         sendMessage("666 Address added 2001:db8::1/64 wlan0 1 0");
         // Invalid code.
 
