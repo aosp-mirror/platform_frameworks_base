@@ -11314,10 +11314,6 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TIMESTAMP;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_IDS;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_LANDMARKS;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_RECTANGLES;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_SCORES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_PREDICTED_COLOR_GAINS;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_PREDICTED_COLOR_TRANSFORM;
