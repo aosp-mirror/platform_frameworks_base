@@ -46,6 +46,8 @@ import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,6 +56,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
@@ -80,6 +83,8 @@ public final class SelectPrinterFragment extends Fragment {
 
     private static final String FRAGMRNT_ARGUMENT_PRINT_SERVICE_INFOS =
             "FRAGMRNT_ARGUMENT_PRINT_SERVICE_INFOS";
+
+    private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
     private final ArrayList<PrintServiceInfo> mAddPrinterServices =
             new ArrayList<PrintServiceInfo>();
@@ -127,6 +132,9 @@ public final class SelectPrinterFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (!((DestinationAdapter) mListView.getAdapter()).isActionable(position)) {
+                    return;
+                }
                 PrinterInfo printer = (PrinterInfo) mListView.getAdapter().getItem(position);
                 Activity activity = getActivity();
                 if (activity instanceof OnPrinterSelectedListener) {
@@ -137,6 +145,8 @@ public final class SelectPrinterFragment extends Fragment {
                 }
             }
         });
+
+        registerForContextMenu(mListView);
 
         return content;
     }
@@ -182,6 +192,62 @@ public final class SelectPrinterFragment extends Fragment {
         if (mAddPrinterServices.isEmpty()) {
             menu.removeItem(R.id.action_add_printer);
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
+        if (view == mListView) {
+            final int position = ((AdapterContextMenuInfo) menuInfo).position;
+            PrinterInfo printer = (PrinterInfo) mListView.getAdapter().getItem(position);
+
+            menu.setHeaderTitle(printer.getName());
+
+            // Add the select menu item if applicable.
+            if (printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE) {
+                MenuItem selectItem = menu.add(Menu.NONE, R.string.print_select_printer,
+                        Menu.NONE, R.string.print_select_printer);
+                Intent intent = new Intent();
+                intent.putExtra(EXTRA_PRINTER_ID, printer.getId());
+                selectItem.setIntent(intent);
+            }
+
+            // Add the forget menu item if applicable.
+            FusedPrintersProvider provider = (FusedPrintersProvider) (Loader<?>)
+                    getLoaderManager().getLoader(LOADER_ID_PRINTERS_LOADER);
+            if (provider.isFavoritePrinter(printer.getId())) {
+                MenuItem forgetItem = menu.add(Menu.NONE, R.string.print_forget_printer,
+                        Menu.NONE, R.string.print_forget_printer);
+                Intent intent = new Intent();
+                intent.putExtra(EXTRA_PRINTER_ID, printer.getId());
+                forgetItem.setIntent(intent);
+            }
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.string.print_select_printer: {
+                PrinterId printerId = (PrinterId) item.getIntent().getParcelableExtra(
+                        EXTRA_PRINTER_ID);
+                Activity activity = getActivity();
+                if (activity instanceof OnPrinterSelectedListener) {
+                    ((OnPrinterSelectedListener) activity).onPrinterSelected(printerId);
+                } else {
+                    throw new IllegalStateException("the host activity must implement"
+                            + " OnPrinterSelectedListener");
+                }
+            } return true;
+
+            case R.string.print_forget_printer: {
+                PrinterId printerId = (PrinterId) item.getIntent().getParcelableExtra(
+                        EXTRA_PRINTER_ID);
+                FusedPrintersProvider provider = (FusedPrintersProvider) (Loader<?>)
+                        getLoaderManager().getLoader(LOADER_ID_PRINTERS_LOADER);
+                provider.forgetFavoritePrinter(printerId);
+            } return true;
+        }
+        return false;
     }
 
     @Override
@@ -464,7 +530,7 @@ public final class SelectPrinterFragment extends Fragment {
                         R.layout.printer_list_item, parent, false);
             }
 
-            convertView.setEnabled(isEnabled(position));
+            convertView.setEnabled(isActionable(position));
 
             CharSequence title = null;
             CharSequence subtitle = null;
@@ -506,8 +572,7 @@ public final class SelectPrinterFragment extends Fragment {
             return convertView;
         }
 
-        @Override
-        public boolean isEnabled(int position) {
+        public boolean isActionable(int position) {
             PrinterInfo printer =  (PrinterInfo) getItem(position);
             return printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE;
         }
