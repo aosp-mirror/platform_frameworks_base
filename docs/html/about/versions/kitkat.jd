@@ -55,7 +55,7 @@ window.onhashchange = function () {
 <div id="44-android-44" class="version-section">
 
   <div style="padding:0px 0px 0px 60px;margin-top:-3px;float:right;">
-    <img src="{@docRoot}images/kk-android-44.png" alt="Android 4.4 on phone and tablet" width="380"> 
+    <img src="{@docRoot}design/media/index_landing_page.png" alt="Android 4.4 on phone and tablet" width="380">
   </div>
 
   <div class="landing-docs" style="float:right;clear:both;margin:22px 0 2em 3em;">
@@ -143,7 +143,8 @@ window.onhashchange = function () {
   lets you tune your app's behavior to match the device's memory configuration.
   You can modify or disable large-memory features as needed, depending on the
   use-cases you want to support on entry-level devices. Learn more about
-  optimizing your apps for low-memory devices <a href="">here</a>.
+  optimizing your apps for low-memory devices <a
+  href="{@docRoot}training/articles/memory.html">here</a>.
 </p>
 
 <p>
@@ -612,18 +613,20 @@ window.onhashchange = function () {
   Now it's easy to create high-quality video of your app, directly from your
   Android device. <span style="white-space:nowrap;">Android 4.4</span> adds
   support for screen recording and provides a <strong>screen recording
-  utility</strong> that lets you capture video as you use the device and store
-  it as an MP4 file. It's a great new way to create walkthroughs and tutorials
-  for your app, testing materials, marketing videos, and much more.
+  utility</strong> that lets you start and stop recording on a device that's
+  connected to your Android SDK environment over USB. It's a great new way to
+  create walkthroughs and tutorials for your app, testing materials, marketing
+  videos, and more.
 </p>
 
 <p>
-  You can record at any device-supported resolution and bitrate you want, and
-  the output retains the aspect ratio of the display. By default, the utility
-  selects a resolution equal or close to the device's display resolution in the
-  current orientation. When you are done recording, you can share the video
-  directly from your device or pull the MP4 file to your host computer for
-  post-production.
+  With the screen recording utility, you can capture video of your device screen
+  contents and store the video as an MP4 file on the device. You can record at any
+  device-supported resolution and bitrate you want, and the output retains the
+  aspect ratio of the display. By default, the utility selects a resolution
+  equal or close to the device's display resolution in the current orientation.
+  When you are done recording, you can share the video directly from your
+  device or pull the MP4 file to your host computer for post-production.
 </p>
 
 <p>
