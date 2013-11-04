@@ -44,6 +44,10 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_MODULE:= libinputservice
 
+ifeq ($(BOARD_USE_LEGACY_TRACKPAD),true)
+LOCAL_CFLAGS += -DLEGACY_TRACKPAD
+endif
+
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
