@@ -88,6 +88,11 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_LTE_ON_CDMA_DEVICE = "telephony.lteOnCdmaDevice";
 
+    /**
+     * {@see BaseCommands#getLteOnGsmMode()}
+     */
+    static final String PROPERTY_LTE_ON_GSM_DEVICE = "telephony.lteOnGsmDevice";
+
     static final String CURRENT_ACTIVE_PHONE = "gsm.current.phone-type";
 
     //****** SIM Card
