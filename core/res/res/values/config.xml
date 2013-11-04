@@ -841,6 +841,9 @@
          application is desired. -->
     <string name="default_sms_application" translatable="false">com.android.mms</string>
 
+    <!-- If this value is true, we handle Samsung CDMA's message ID method -->
+    <bool name="config_smsSamsungCdmaAlternateMessageIDEncoding">false</bool>
+
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
     <bool name="config_bluetooth_default_profiles">true</bool>

@@ -1751,7 +1751,7 @@
   <!—- Start of SuperNexus additions —->
   <!—- ***************************** —->
 
-  <!—- Broken hardware keyboard support —->
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
+  <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
 
 </resources>
