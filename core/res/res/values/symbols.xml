@@ -1753,5 +1753,6 @@
 
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+  <java-symbol type="bool" name="config_samsung_stk" />
 
 </resources>
