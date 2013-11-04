@@ -258,8 +258,7 @@ final class LogicalDisplay {
         // The orientation specifies how the physical coordinate system of the display
         // is rotated when the contents of the logical display are rendered.
         int orientation = Surface.ROTATION_0;
-        if (device == mPrimaryDisplayDevice
-                && (displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
+        if ((displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
             orientation = displayInfo.rotation;
         }
 
