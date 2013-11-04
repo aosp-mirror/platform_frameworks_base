@@ -50,10 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Andika PUK ambayo ina urefu wa nambari 8 au zaidi."</string>
     <string name="needPuk" msgid="919668385956251611">"Kadi yako ya SIM imefungwa na PUK. Anika msimbo wa PUK ili kuifungua."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Chapisha PUK2 ili kufungua SIM kadi."</string>
-    <!-- no translation found for enablePin (209412020907207950) -->
-    <skip />
-    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
-    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
+    <string name="enablePin" msgid="209412020907207950">"Imeshindwa, washa ufungaji wa SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kufungwa."</item>
+    <item quantity="other" msgid="7530597808358774740">"Umesalia na majaribio <xliff:g id="NUMBER">%d</xliff:g> kabla ya SIM kufungwa."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Kitambulisho cha Mpigaji wa Simu Inayoingia"</string>
@@ -555,7 +556,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"kusoma hali na kitambulisho cha simu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Inaruhusu programu kufikia vipengele vya simu vya kifaa. Idhini hii inaruhusu programu kutambua nambari ya simu na kifaa, kama simu ni amilifu, na nambari ya mbali iliyounganishwa kwa simu."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zuia kompyuta ndogo dhidi ya kulala"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zuia simu dhidi ya kulala"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"kuzuia simu isilale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Inaruhusu programu kuzuia kompyuta kibao  kwenda kulala."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Inaruhusu programu kuzuia simu isiende kulala."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"sambaza infrared"</string>
@@ -1418,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Songa"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Chagua programu"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Haikuweza kuzindua <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Shiriki na"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Shiriki na <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Utambo unaosonga. Gusa &amp; shika"</string>

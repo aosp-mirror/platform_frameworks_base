@@ -647,7 +647,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ανάγνωση του περιεχομένου της κάρτας SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου του αποθηκευτικού σας χώρου USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου της κάρτας SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροπ. ή διαγρ. του USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροποποίηση ή διαγραφή του USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"τροποποίηση ή διαγραφή των περιεχομένων της κάρτας SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Επιτρέπει στην εφαρμογή την εγγραφή στον αποθηκευτικό χώρο USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
@@ -1419,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Επιλέξτε κάποια εφαρμογή"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Δεν ήταν δυνατή η εκκίνηση του <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Κοινή χρήση με"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Κοινή χρήση με <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Στοιχείο χειρισμού με δυνατότητα ολίσθησης. Αγγίξτε και πατήστε παρατεταμένα."</string>

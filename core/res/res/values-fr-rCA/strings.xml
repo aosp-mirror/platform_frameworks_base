@@ -53,7 +53,7 @@
     <string name="enablePin" msgid="209412020907207950">"Opération infructueuse. Activez le verrouillage SIM/RUIM."</string>
   <plurals name="pinpuk_attempts">
     <item quantity="one" msgid="6596245285809790142">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée."</item>
-    <item quantity="other" msgid="7530597808358774740">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée."</item>
+    <item quantity="other" msgid="7530597808358774740">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative(s) avant que votre carte SIM soit verrouillée."</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"Code IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -1419,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Entrée"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Sélectionnez une application"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Impossible de lancer l\'application <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Partagez avec"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Partager avec <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Poignée coulissante. Appuyez de manière prolongée."</string>

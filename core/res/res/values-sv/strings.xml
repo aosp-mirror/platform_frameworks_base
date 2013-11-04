@@ -50,10 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Ange en PUK-kod med minst 8 siffror."</string>
     <string name="needPuk" msgid="919668385956251611">"Ditt SIM-kort är PUK-låst. Ange PUK-koden om du vill låsa upp det."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Ange PUK2-koden för att häva spärren av SIM-kortet."</string>
-    <!-- no translation found for enablePin (209412020907207950) -->
-    <skip />
-    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
-    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
+    <string name="enablePin" msgid="209412020907207950">"Försöket misslyckades. Aktivera SIM-/RUIM-lås."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Du har <xliff:g id="NUMBER">%d</xliff:g> försök kvar innan SIM-kortet låses."</item>
+    <item quantity="other" msgid="7530597808358774740">"Du har <xliff:g id="NUMBER">%d</xliff:g> försök kvar innan SIM-kortet låses."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI-kod"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Nummerpresentatör för inkommande samtal"</string>
@@ -1418,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Skift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retur"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Välj en app"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Det gick inte att starta <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dela med"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skärmlåsfunktion. Tryck och dra."</string>

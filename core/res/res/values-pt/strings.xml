@@ -50,10 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Digite um PUK com oito números ou mais."</string>
     <string name="needPuk" msgid="919668385956251611">"O seu cartão SIM está bloqueado por um PUK. Digite o código PUK para desbloqueá-lo."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Digite o PUK2 para desbloquear o cartão SIM."</string>
-    <!-- no translation found for enablePin (209412020907207950) -->
-    <skip />
-    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
-    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
+    <string name="enablePin" msgid="209412020907207950">"Falha. Ative o bloqueio do SIM/R-UIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Tentativas restantes: <xliff:g id="NUMBER">%d</xliff:g>. Caso o código correto não seja digitado, o SIM será bloqueado."</item>
+    <item quantity="other" msgid="7530597808358774740">"Tentativas restantes: <xliff:g id="NUMBER">%d</xliff:g>. Caso o código correto não seja digitado, o SIM será bloqueado."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID do chamador de entrada"</string>
@@ -1418,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Selecione um aplicativo"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Não foi possível iniciar o <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Compartilhar com"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Compartilhar com <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Recurso deslizante. Toque e segure."</string>
