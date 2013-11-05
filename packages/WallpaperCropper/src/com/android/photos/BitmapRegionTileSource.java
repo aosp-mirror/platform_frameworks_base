@@ -24,6 +24,9 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -53,7 +56,8 @@ class SimpleBitmapRegionDecoderWrapper implements SimpleBitmapRegionDecoder {
     private SimpleBitmapRegionDecoderWrapper(BitmapRegionDecoder decoder) {
         mDecoder = decoder;
     }
-    public static SimpleBitmapRegionDecoderWrapper newInstance(String pathName, boolean isShareable) {
+    public static SimpleBitmapRegionDecoderWrapper newInstance(
+            String pathName, boolean isShareable) {
         try {
             BitmapRegionDecoder d = BitmapRegionDecoder.newInstance(pathName, isShareable);
             if (d != null) {
@@ -65,7 +69,8 @@ class SimpleBitmapRegionDecoderWrapper implements SimpleBitmapRegionDecoder {
         }
         return null;
     }
-    public static SimpleBitmapRegionDecoderWrapper newInstance(InputStream is, boolean isShareable) {
+    public static SimpleBitmapRegionDecoderWrapper newInstance(
+            InputStream is, boolean isShareable) {
         try {
             BitmapRegionDecoder d = BitmapRegionDecoder.newInstance(is, isShareable);
             if (d != null) {
@@ -89,8 +94,9 @@ class SimpleBitmapRegionDecoderWrapper implements SimpleBitmapRegionDecoder {
 }
 
 class DumbBitmapRegionDecoder implements SimpleBitmapRegionDecoder {
-    //byte[] streamCopy;
     Bitmap mBuffer;
+    Canvas mTempCanvas;
+    Paint mTempPaint;
     private DumbBitmapRegionDecoder(Bitmap b) {
         mBuffer = b;
     }
@@ -115,9 +121,23 @@ class DumbBitmapRegionDecoder implements SimpleBitmapRegionDecoder {
         return mBuffer.getHeight();
     }
     public Bitmap decodeRegion(Rect wantRegion, BitmapFactory.Options options) {
-        System.out.println("DECODING WITH SAMPLE LEVEL OF " + options.inSampleSize);
-        return Bitmap.createBitmap(
-                mBuffer, wantRegion.left, wantRegion.top, wantRegion.width(), wantRegion.height());
+        if (mTempCanvas == null) {
+            mTempCanvas = new Canvas();
+            mTempPaint = new Paint();
+            mTempPaint.setFilterBitmap(true);
+        }
+        int sampleSize = Math.max(options.inSampleSize, 1);
+        Bitmap newBitmap = Bitmap.createBitmap(
+                wantRegion.width() / sampleSize,
+                wantRegion.height() / sampleSize,
+                Bitmap.Config.ARGB_8888);
+        mTempCanvas.setBitmap(newBitmap);
+        mTempCanvas.save();
+        mTempCanvas.scale(1f / sampleSize, 1f / sampleSize);
+        mTempCanvas.drawBitmap(mBuffer, -wantRegion.left, -wantRegion.top, mTempPaint);
+        mTempCanvas.restore();
+        mTempCanvas.setBitmap(null);
+        return newBitmap;
     }
 }
 
@@ -256,6 +276,7 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
                 if (regionDecoder == null) {
                     is = regenerateInputStream();
                     regionDecoder = DumbBitmapRegionDecoder.newInstance(is);
+                    Utils.closeSilently(is);
                 }
                 return regionDecoder;
             } catch (FileNotFoundException e) {
@@ -280,8 +301,9 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
         }
         @Override
         public boolean readExif(ExifInterface ei) {
+            InputStream is = null;
             try {
-                InputStream is = regenerateInputStream();
+                is = regenerateInputStream();
                 ei.readExif(is);
                 Utils.closeSilently(is);
                 return true;
@@ -291,6 +313,8 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
             } catch (IOException e) {
                 Log.e("BitmapRegionTileSource", "Failed to load URI " + mUri, e);
                 return false;
+            } finally {
+                Utils.closeSilently(is);
             }
         }
     }
@@ -316,6 +340,7 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
             if (regionDecoder == null) {
                 is = regenerateInputStream();
                 regionDecoder = DumbBitmapRegionDecoder.newInstance(is);
+                Utils.closeSilently(is);
             }
             return regionDecoder;
         }
