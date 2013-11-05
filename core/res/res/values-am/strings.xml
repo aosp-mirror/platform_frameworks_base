@@ -210,7 +210,7 @@
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"ለካሜራ ምስል ወይም ቪዲዮ ለመቅረጽ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_screenlock" msgid="8275500173330718168">"ማያ ገጽ ቆልፍ"</string>
     <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"በመሣሪያዎ ላይ ያለውን የመቆለፊያ ማያ ገጽ ባህሪያት ላይ ተጽዕኖ የመፍጠር ችሎታ።"</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"የመተግበሪያዎችህ መረጃ"</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"የመተግበሪያዎችዎ መረጃ"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"በመሣሪያህ ላይ ያሉ የሌሎች መተግበሪያዎች ባህሪዎች ላይ ተፅዕኖ የማሳረፍ ችሎታ።"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"ልጣፍ"</string>
     <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"የመሣሪያውን ልጣፍ ቅንብሮች ቀይር።"</string>
@@ -277,7 +277,7 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"በስልክህ ወይም ሲም ካርድህ ላይ ኤስ ኤም ኤስ መልዕክቶችን ለመፃፍ ለመተግበሪያው ይፈቅዳሉ፡፡መልዕክቶችህን ተንኮል አዘል መተግበሪያዎች ሊሰርዙ ይችላሉ፡፡"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"የፅሁፍ መልዕክቶችን ተቀበል (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"መተግበሪያው የWAP መልእክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ፈቃድ የተላኩልህን መልእክቶች ላንተ ሳያሳይህ የመቆጣጠር ወይም የመሰረዝ ብቃትን ያጠቃልላል።"</string>
-    <string name="permlab_getTasks" msgid="6466095396623933906">"አሂድ መተግበሪያዎችን ሰርስረህ አውጣ"</string>
+    <string name="permlab_getTasks" msgid="6466095396623933906">"አሂድ መተግበሪያዎችን ሰርስረው ያውጡ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"መተግበሪያው በአሁኑ ጊዜና በቅርቡ እየተካሄዱ ስላሉ ተግባሮችን መረጃ ሰርስሮ እንዲያወጣ ይፈቅድለታል። ይህ መተግበሪያው በመሳሪያው ላይ የትኛዎቹ መተግበሪያዎች ጥቅም ላይ ስለመዋላቸው መረጃ እንዲያገኝ ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"በተለያዩ ተጠቃሚዎች መካከል መስተጋብር መፍጠር"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"መተግበሪያው በመሣሪያው ላይ በተለያዩ ተጠቃሚዎች ላይ እርምጃዎችን እንዲፈጽም ይፈቅድለታል። ተንኮል-አዘል መተግበሪያዎች ይህንን ተጠቅመው በተጠቃሚዎች መካከል ያለውን ጥበቃ ሊጥሱ ይችላሉ።"</string>
@@ -592,9 +592,9 @@
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"የመለያ አረጋጋጭ መለያ መናጅ ችሎታን ለመጠቀም፣ መለያ መፍጠር እና የይለፍ ቃሎችን ለማግኘት እና ለማቀናጀት አክሎ ለመተግበሪያው ይፈቅዳሉ ።"</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"መለያዎችን አክል ወይም አስወግድ"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"መለያዎችን እንደ ማከል እና ማስወገድ ክወናዎችን እና የይለፍ ቃልን መሰረዝ ለማከናወን ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"በመሣሪያው ላይ ያሉ መለያዎችን ተጠቀም"</string>
+    <string name="permlab_useCredentials" msgid="235481396163877642">"በመሣሪያው ላይ ያሉ መለያዎችን ይጠቀሙ"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"የማረጋገጫ የምስጋና የምስክር ወረቀትን ለመጠየቅ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"የአውታረ መረብ ግኑኝነቶችን እይ"</string>
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"የአውታረ መረብ ግንኙነቶችን ይመልከቱ"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"መተግበሪያው እንደ የትኛዎቹ አውታረ መረቦች እንዳሉ እና እንደተገናኙ ያሉ የአውታረ መረብ ግንኙነቶች መረጃዎችን እንዲያይ ይፈቅድለታል።"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ሙሉ የአውታረ መረብ መዳረሻ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"መተግበሪያው የአውታረ መረብ መሰኪያዎችን እንዲፈጥር እና ብጁ የአውታረ መረብ ፕሮቶኮሎችን እንዲጠቀም ይፈቅድለታል። አሳሹ እና ሌሎች መተግበሪያዎች ውሂብ ወደ በይነመረብ የመላኪያ መንገዶችን ስለሚያቀርቡውሂብ ወደ በይነመረብ ለመላክ ይህ ፍቃድ አያስፈልግም።"</string>
@@ -1421,8 +1421,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"ቀይር"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"አስገባ"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"መተግበሪያ ምረጥ"</string>
-    <!-- no translation found for activitychooserview_choose_application_error (8624618365481126668) -->
-    <skip />
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>ን ማስጀመር አልተቻለም"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"ተጋራ ከ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"ከ <xliff:g id="APPLICATION_NAME">%s</xliff:g> ጋር ተጋራ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"ባለስላይድ መያዣ፡፡ ዳስ&amp;ያዝ፡፡"</string>
