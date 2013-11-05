@@ -120,21 +120,19 @@ public class KeyguardViewStateManager implements
 
     public void fadeOutSecurity(int duration) {
         ((View) mKeyguardSecurityContainer).animate().alpha(0f).setDuration(duration)
-                .setListener(mPauseListener).start();
+                .setListener(mPauseListener);
     }
 
     public void fadeInSecurity(int duration) {
         ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration)
-                .setListener(mResumeListener).start();
+                .setListener(mResumeListener);
     }
 
     public void onPageBeginMoving() {
         if (mChallengeLayout.isChallengeOverlapping() &&
                 mChallengeLayout instanceof SlidingChallengeLayout) {
             SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
-            if (!mKeyguardWidgetPager.isWarping()) {
-                scl.fadeOutChallenge();
-            }
+            scl.fadeOutChallenge();
             mPageIndexOnPageBeginMoving = mKeyguardWidgetPager.getCurrentPage();
         }
         // We use mAppWidgetToShow to show a particular widget after you add it--
@@ -158,9 +156,6 @@ public class KeyguardViewStateManager implements
             boolean isCameraPage = newPage instanceof CameraWidgetFrame;
             SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
             scl.setChallengeInteractive(!isCameraPage);
-            if (isCameraPage) {
-                scl.fadeOutChallenge();
-            }
             final int currentFlags = mKeyguardWidgetPager.getSystemUiVisibility();
             final int newFlags = isCameraPage ? (currentFlags | View.STATUS_BAR_DISABLE_SEARCH)
                     : (currentFlags & ~View.STATUS_BAR_DISABLE_SEARCH);
@@ -197,7 +192,7 @@ public class KeyguardViewStateManager implements
             boolean challengeOverlapping = mChallengeLayout.isChallengeOverlapping();
             if (challengeOverlapping && !newCurPage.isSmall()
                     && mPageListeningToSlider != newPageIndex) {
-                newCurPage.shrinkWidget();
+                newCurPage.shrinkWidget(true);
             }
         }
 
