@@ -375,10 +375,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
         return mSmallFrameHeight;
     }
 
-    public void shrinkWidget() {
-        shrinkWidget(true);
-    }
-
     public void setWidgetLockedSmall(boolean locked) {
         if (locked) {
             setWidgetHeight(mSmallWidgetHeight);
