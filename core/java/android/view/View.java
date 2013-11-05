@@ -11209,6 +11209,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
+     */
+    public HardwareRenderer getHardwareRenderer() {
+        return mAttachInfo != null ? mAttachInfo.mHardwareRenderer : null;
+    }
+
+    /**
      * <p>Causes the Runnable to be added to the message queue.
      * The runnable will be run on the user interface thread.</p>
      *
@@ -18842,8 +18849,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Display mDisplay;
 
         final Callbacks mRootCallbacks;
-
-        HardwareCanvas mHardwareCanvas;
 
         IWindowId mIWindowId;
         WindowId mWindowId;

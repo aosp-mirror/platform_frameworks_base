@@ -188,6 +188,9 @@ public abstract class HardwareRenderer {
      */
     public static boolean sSystemRendererDisabled = false;
 
+    /** @hide */
+    public static boolean sUseRenderThread = false;
+
     private boolean mEnabled;
     private boolean mRequested = true;
 
@@ -306,13 +309,6 @@ public abstract class HardwareRenderer {
     abstract int getHeight();
 
     /**
-     * Gets the current canvas associated with this HardwareRenderer.
-     *
-     * @return the current HardwareCanvas
-     */
-    abstract HardwareCanvas getCanvas();
-
-    /**
      * Outputs extra debugging information in the specified file descriptor.
      * @param pw
      */
@@ -335,7 +331,7 @@ public abstract class HardwareRenderer {
      *
      * @return True if a property has changed.
      */
-    abstract boolean loadSystemProperties(Surface surface);
+    abstract boolean loadSystemProperties();
 
     /**
      * Sets the directory to use as a persistent storage for hardware rendering
@@ -410,6 +406,18 @@ public abstract class HardwareRenderer {
      */
     abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
             Rect dirty);
+
+    /**
+     * Temporary hook to draw a display list directly, only used if sUseRenderThread
+     * is true.
+     *
+     * @param displayList The display list to draw
+     * @param attachInfo AttachInfo tied to the specified view.
+     * @param callbacks Callbacks invoked when drawing happens.
+     * @param dirty The dirty rectangle to update, can be null.
+     */
+    abstract void drawDisplayList(DisplayList displayList, View.AttachInfo attachInfo,
+            HardwareDrawCallbacks callbacks, Rect dirty);
 
     /**
      * Creates a new hardware layer. A hardware layer built by calling this
@@ -517,10 +525,14 @@ public abstract class HardwareRenderer {
      * @return A hardware renderer backed by OpenGL.
      */
     static HardwareRenderer create(boolean translucent) {
+        HardwareRenderer renderer = null;
         if (GLES20Canvas.isAvailable()) {
-            return new GLRenderer(translucent);
+            renderer = new GLRenderer(translucent);
         }
-        return null;
+        if (renderer != null && sUseRenderThread) {
+            renderer = new ThreadedRenderer((GLRenderer)renderer);
+        }
+        return renderer;
     }
 
     /**
