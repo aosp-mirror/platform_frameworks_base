@@ -457,6 +457,23 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ProcessMap<Long> mProcessCrashTimes = new ProcessMap<Long>();
 
     /**
+     * Information about a process that is currently marked as bad.
+     */
+    static final class BadProcessInfo {
+        BadProcessInfo(long time, String shortMsg, String longMsg, String stack) {
+            this.time = time;
+            this.shortMsg = shortMsg;
+            this.longMsg = longMsg;
+            this.stack = stack;
+        }
+
+        final long time;
+        final String shortMsg;
+        final String longMsg;
+        final String stack;
+    }
+
+    /**
      * Set of applications that we consider to be bad, and will reject
      * incoming broadcasts from (which the user has no control over).
      * Processes are added to this set when they have crashed twice within
@@ -464,7 +481,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * later restarted (hopefully due to some user action).  The value is the
      * time it was added to the list.
      */
-    final ProcessMap<Long> mBadProcesses = new ProcessMap<Long>();
+    final ProcessMap<BadProcessInfo> mBadProcesses = new ProcessMap<BadProcessInfo>();
 
     /**
      * All of the processes we currently have running organized by pid.
@@ -9422,7 +9439,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ActivityManager.ProcessErrorStateInfo.CRASHED, null, shortMsg, longMsg, stackTrace);
         startAppProblemLocked(app);
         app.stopFreezingAllLocked();
-        return handleAppCrashLocked(app);
+        return handleAppCrashLocked(app, shortMsg, longMsg, stackTrace);
     }
 
     private void makeAppNotRespondingLocked(ProcessRecord app,
@@ -9477,13 +9494,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.waitDialog = null;
             }
             if (app.pid > 0 && app.pid != MY_PID) {
-                handleAppCrashLocked(app);
+                handleAppCrashLocked(app, null, null, null);
                 killUnneededProcessLocked(app, "user request after error");
             }
         }
     }
 
-    private boolean handleAppCrashLocked(ProcessRecord app) {
+    private boolean handleAppCrashLocked(ProcessRecord app, String shortMsg, String longMsg,
+            String stackTrace) {
         if (mHeadless) {
             Log.e(TAG, "handleAppCrashLocked: " + app.processName);
             return false;
@@ -9513,7 +9531,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!app.isolated) {
                     // XXX We don't have a way to mark isolated processes
                     // as bad, since they don't have a peristent identity.
-                    mBadProcesses.put(app.info.processName, app.uid, now);
+                    mBadProcesses.put(app.info.processName, app.uid,
+                            new BadProcessInfo(now, shortMsg, longMsg, stackTrace));
                     mProcessCrashTimes.remove(app.info.processName, app.uid);
                 }
                 app.bad = true;
@@ -10775,11 +10794,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (mBadProcesses.getMap().size() > 0) {
             boolean printed = false;
-            final ArrayMap<String, SparseArray<Long>> pmap = mBadProcesses.getMap();
+            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = mBadProcesses.getMap();
             final int NP = pmap.size();
             for (int ip=0; ip<NP; ip++) {
                 String pname = pmap.keyAt(ip);
-                SparseArray<Long> uids = pmap.valueAt(ip);
+                SparseArray<BadProcessInfo> uids = pmap.valueAt(ip);
                 final int N = uids.size();
                 for (int i=0; i<N; i++) {
                     int puid = uids.keyAt(i);
@@ -10794,10 +10813,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                         pw.println("  Bad processes:");
                         printedAnything = true;
                     }
+                    BadProcessInfo info = uids.valueAt(i);
                     pw.print("    Bad process "); pw.print(pname);
                             pw.print(" uid "); pw.print(puid);
-                            pw.print(": crashed at time ");
-                            pw.println(uids.valueAt(i));
+                            pw.print(": crashed at time "); pw.println(info.time);
+                    if (info.shortMsg != null) {
+                        pw.print("      Short msg: "); pw.println(info.shortMsg);
+                    }
+                    if (info.longMsg != null) {
+                        pw.print("      Long msg: "); pw.println(info.longMsg);
+                    }
+                    if (info.stack != null) {
+                        pw.println("      Stack:");
+                        int lastPos = 0;
+                        for (int pos=0; pos<info.stack.length(); pos++) {
+                            if (info.stack.charAt(pos) == '\n') {
+                                pw.print("        ");
+                                pw.write(info.stack, lastPos, pos-lastPos);
+                                pw.println();
+                                lastPos = pos+1;
+                            }
+                        }
+                        if (lastPos < info.stack.length()) {
+                            pw.print("        ");
+                            pw.write(info.stack, lastPos, info.stack.length()-lastPos);
+                            pw.println();
+                        }
+                    }
                 }
             }
         }
