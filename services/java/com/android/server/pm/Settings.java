@@ -1959,10 +1959,14 @@ final class Settings {
         }
 
         boolean doNonData = true;
+        boolean hasSchemes = false;
 
         for (int ischeme=0; ischeme<tmpPa.countDataSchemes(); ischeme++) {
             boolean doScheme = true;
             String scheme = tmpPa.getDataScheme(ischeme);
+            if (scheme != null && !scheme.isEmpty()) {
+                hasSchemes = true;
+            }
             for (int issp=0; issp<tmpPa.countDataSchemeSpecificParts(); issp++) {
                 Uri.Builder builder = new Uri.Builder();
                 builder.scheme(scheme);
@@ -2016,11 +2020,25 @@ final class Settings {
         }
 
         for (int idata=0; idata<tmpPa.countDataTypes(); idata++) {
-            Intent finalIntent = new Intent(intent);
             String mimeType = tmpPa.getDataType(idata);
-            finalIntent.setType(mimeType);
-            applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
-                    null, null, null, null, mimeType, userId);
+            if (hasSchemes) {
+                Uri.Builder builder = new Uri.Builder();
+                for (int ischeme=0; ischeme<tmpPa.countDataSchemes(); ischeme++) {
+                    String scheme = tmpPa.getDataScheme(ischeme);
+                    if (scheme != null && !scheme.isEmpty()) {
+                        Intent finalIntent = new Intent(intent);
+                        builder.scheme(scheme);
+                        finalIntent.setDataAndType(builder.build(), mimeType);
+                        applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                                scheme, null, null, null, mimeType, userId);
+                    }
+                }
+            } else {
+                Intent finalIntent = new Intent(intent);
+                finalIntent.setType(mimeType);
+                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                        null, null, null, null, mimeType, userId);
+            }
             doNonData = false;
         }
 
