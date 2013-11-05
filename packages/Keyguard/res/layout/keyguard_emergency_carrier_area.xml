@@ -32,12 +32,10 @@
         android:id="@+id/carrier_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textAllCaps="@bool/kg_use_all_caps" />
+        android:textColor="?android:attr/textColorSecondary" />
 
     <LinearLayout
         android:layout_width="match_parent"
