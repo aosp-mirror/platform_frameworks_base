@@ -23,7 +23,7 @@
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Taip kod PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Taip PUK SIM dan kod PIN baharu"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Kod PUK SIM"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Kod PIN SIM baru"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Kod PIN SIM baharu"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Sentuh untuk menaip kata laluan"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Taip kata laluan untuk membuka kunci"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Taip PIN untuk membuka kunci"</string>
@@ -135,15 +135,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alih keluar"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Kod PIN SIM tidak betul, anda kini harus menghubungi pembawa anda untuk membuka kunci peranti anda."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Kod PIN SIM tidak betul, jadi anda harus menghubungi pembawa anda untuk membuka kunci peranti."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Kod PIN SIM tidak betul. anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan yang tinggal sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti anda."</item>
-    <item quantity="other" msgid="2215723361575359486">"Kod PIN SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan yang tinggal."</item>
+    <item quantity="one" msgid="8134313997799638254">"Kod PIN SIM tidak betul. Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti."</item>
+    <item quantity="other" msgid="2215723361575359486">"Kod PIN SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM tidak boleh digunakan. Hubungi pembawa anda."</string>
   <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan yang tinggal sebelum SIM tidak boleh digunakan secara kekal."</item>
-    <item quantity="other" msgid="5477305226026342036">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan yang tinggal sebelum SIM tidak boleh digunakan secara kekal."</item>
+    <item quantity="one" msgid="3256893607561060649">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM tidak boleh digunakan secara kekal."</item>
+    <item quantity="other" msgid="5477305226026342036">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM tidak boleh digunakan secara kekal."</item>
   </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operasi PIN SIM gagal!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operasi PUK SIM gagal!"</string>
