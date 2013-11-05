@@ -591,8 +591,8 @@
     <!-- Disable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
-    <!-- Disable lockscreen translucent decor by default -->
-    <bool name="config_enableLockScreenTranslucentDecor">false</bool>
+    <!-- Enable lockscreen translucent decor by default -->
+    <bool name="config_enableLockScreenTranslucentDecor">true</bool>
 
     <!-- Enable translucent decor by default -->
     <bool name="config_enableTranslucentDecor">true</bool>
