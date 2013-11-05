@@ -28,6 +28,7 @@ import android.os.Debug;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import com.android.server.CircularLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -113,6 +114,8 @@ class DisplayContent {
     Rect mTmpRect = new Rect();
 
     final WindowManagerService mService;
+
+    CircularLog mVisibilityLog = new CircularLog(30);
 
     /**
      * @param display May not be null.
@@ -456,7 +459,7 @@ class DisplayContent {
         }
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
         pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
@@ -521,6 +524,7 @@ class DisplayContent {
                   token.dump(pw, "    ");
             }
         }
+        pw.print(prefix); pw.println("mVisibilityLog:"); mVisibilityLog.dump(pw, prefix + "  ");
         pw.println();
     }
 }
