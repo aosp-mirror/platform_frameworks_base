@@ -216,6 +216,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * {@link Root#FLAG_SUPPORTS_RECENTS}. The returned documents should be
      * sorted by {@link Document#COLUMN_LAST_MODIFIED} in descending order, and
      * limited to only return the 64 most recently modified documents.
+     * <p>
+     * Recent documents do not support change notifications.
      *
      * @param projection list of {@link Document} columns to put into the
      *            cursor. If {@code null} all supported columns should be
