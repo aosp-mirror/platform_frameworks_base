@@ -648,6 +648,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             if (width <= 0 || height <= 0) {
                 throw new IllegalArgumentException("width and height must be > 0");
             }
+            // Make sure it is at least as large as the display's maximum size.
+            int maxSizeDimension = getMaximumSizeDimension();
+            width = Math.max(width, maxSizeDimension);
+            height = Math.max(height, maxSizeDimension);
 
             if (width != wallpaper.width || height != wallpaper.height) {
                 wallpaper.width = width;
@@ -1146,15 +1150,19 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         // We always want to have some reasonable width hint.
-        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display d = wm.getDefaultDisplay();
-        int baseSize = d.getMaximumSizeDimension();
+        int baseSize = getMaximumSizeDimension();
         if (wallpaper.width < baseSize) {
             wallpaper.width = baseSize;
         }
         if (wallpaper.height < baseSize) {
             wallpaper.height = baseSize;
         }
+    }
+
+    private int getMaximumSizeDimension() {
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display d = wm.getDefaultDisplay();
+        return d.getMaximumSizeDimension();
     }
 
     // Called by SystemBackupAgent after files are restored to disk.
