@@ -18875,7 +18875,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         View mRootView;
 
         IBinder mPanelParentWindowToken;
-        Surface mSurface;
 
         boolean mHardwareAccelerated;
         boolean mHardwareAccelerationRequested;

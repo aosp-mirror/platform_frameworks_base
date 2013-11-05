@@ -108,7 +108,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_FPS = false;
-    private static final boolean DEBUG_INPUT_PROCESSING = false || LOCAL_LOGV;
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -1195,11 +1194,6 @@ public final class ViewRootImpl implements ViewParent,
                 desiredWindowHeight = packageMetrics.heightPixels;
             }
 
-            // For the very first time, tell the view hierarchy that it
-            // is attached to the window.  Note that at this point the surface
-            // object is not initialized to its backing store, but soon it
-            // will be (assuming the window is visible).
-            attachInfo.mSurface = mSurface;
             // We used to use the following condition to choose 32 bits drawing caches:
             // PixelFormat.hasAlpha(lp.format) || lp.format == PixelFormat.RGBX_8888
             // However, windows are now always 32 bits by default, so choose 32 bits
@@ -1548,7 +1542,7 @@ public final class ViewRootImpl implements ViewParent,
                         if (mAttachInfo.mHardwareRenderer != null) {
                             try {
                                 hwInitialized = mAttachInfo.mHardwareRenderer.initialize(
-                                        mHolder.getSurface());
+                                        mSurface);
                             } catch (OutOfResourcesException e) {
                                 handleOutOfResourcesException(e);
                                 return;
@@ -1575,7 +1569,7 @@ public final class ViewRootImpl implements ViewParent,
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
                     mFullRedrawNeeded = true;
                     try {
-                        mAttachInfo.mHardwareRenderer.updateSurface(mHolder.getSurface());
+                        mAttachInfo.mHardwareRenderer.updateSurface(mSurface);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -1658,7 +1652,7 @@ public final class ViewRootImpl implements ViewParent,
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
                     mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
                     if (!hwInitialized) {
-                        mAttachInfo.mHardwareRenderer.invalidate(mHolder.getSurface());
+                        mAttachInfo.mHardwareRenderer.invalidate(mSurface);
                         mFullRedrawNeeded = true;
                     }
                 }
@@ -2395,7 +2389,7 @@ public final class ViewRootImpl implements ViewParent,
 
                     try {
                         attachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                mHolder.getSurface());
+                                mSurface);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -2857,7 +2851,6 @@ public final class ViewRootImpl implements ViewParent,
         mView.assignParent(null);
         mView = null;
         mAttachInfo.mRootView = null;
-        mAttachInfo.mSurface = null;
 
         mSurface.release();
 
@@ -3117,7 +3110,7 @@ public final class ViewRootImpl implements ViewParent,
                             mFullRedrawNeeded = true;
                             try {
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mHolder.getSurface());
+                                        mWidth, mHeight, mSurface);
                             } catch (OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {
@@ -4511,8 +4504,7 @@ public final class ViewRootImpl implements ViewParent,
         // The active pointer id, or -1 if none.
         private int mActivePointerId = -1;
 
-        // Time and location where tracking started.
-        private long mStartTime;
+        // Location where tracking started.
         private float mStartX;
         private float mStartY;
 
@@ -4539,9 +4531,6 @@ public final class ViewRootImpl implements ViewParent,
         // The current fling velocity while a fling is in progress.
         private boolean mFlinging;
         private float mFlingVelocity;
-
-        // The last time a confirm key was pressed on the touch nav device
-        private long mLastConfirmKeyTime = Long.MAX_VALUE;
 
         public SyntheticTouchNavigationHandler() {
             super(true);
@@ -4609,7 +4598,6 @@ public final class ViewRootImpl implements ViewParent,
                     mActivePointerId = event.getPointerId(0);
                     mVelocityTracker = VelocityTracker.obtain();
                     mVelocityTracker.addMovement(event);
-                    mStartTime = time;
                     mStartX = event.getX();
                     mStartY = event.getY();
                     mLastX = mStartX;
@@ -5393,7 +5381,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Hardware rendering
                 if (mAttachInfo.mHardwareRenderer != null) {
-                    if (mAttachInfo.mHardwareRenderer.loadSystemProperties(mHolder.getSurface())) {
+                    if (mAttachInfo.mHardwareRenderer.loadSystemProperties(mSurface)) {
                         invalidate();
                     }
                 }
@@ -6339,68 +6327,6 @@ public final class ViewRootImpl implements ViewParent,
             super(msg);
         }
     }
-
-    private final SurfaceHolder mHolder = new SurfaceHolder() {
-        // we only need a SurfaceHolder for opengl. it would be nice
-        // to implement everything else though, especially the callback
-        // support (opengl doesn't make use of it right now, but eventually
-        // will).
-        @Override
-        public Surface getSurface() {
-            return mSurface;
-        }
-
-        @Override
-        public boolean isCreating() {
-            return false;
-        }
-
-        @Override
-        public void addCallback(Callback callback) {
-        }
-
-        @Override
-        public void removeCallback(Callback callback) {
-        }
-
-        @Override
-        public void setFixedSize(int width, int height) {
-        }
-
-        @Override
-        public void setSizeFromLayout() {
-        }
-
-        @Override
-        public void setFormat(int format) {
-        }
-
-        @Override
-        public void setType(int type) {
-        }
-
-        @Override
-        public void setKeepScreenOn(boolean screenOn) {
-        }
-
-        @Override
-        public Canvas lockCanvas() {
-            return null;
-        }
-
-        @Override
-        public Canvas lockCanvas(Rect dirty) {
-            return null;
-        }
-
-        @Override
-        public void unlockCanvasAndPost(Canvas canvas) {
-        }
-        @Override
-        public Rect getSurfaceFrame() {
-            return null;
-        }
-    };
 
     static RunQueue getRunQueue() {
         RunQueue rq = sRunQueues.get();
