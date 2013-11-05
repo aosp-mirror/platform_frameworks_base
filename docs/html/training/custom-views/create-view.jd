@@ -22,7 +22,7 @@ next.link=custom-drawing.html
 
         <h2>You should also read</h2>
         <ul>
-            <li><a href="{@docRoot}/guide/topics/ui/custom-components.html">Custom Components</a>
+            <li><a href="{@docRoot}guide/topics/ui/custom-components.html">Custom Components</a>
             </li>
         </ul>
 <h2>Try it out</h2>

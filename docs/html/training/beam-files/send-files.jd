@@ -139,7 +139,7 @@ trainingnavtop=true
 &lt;uses-feature android:name="android.hardware.nfc" android:required="false" /&gt;</pre>
 <p>
     If you set the attribute
-    <code><a href="guide/topics/manifest/uses-feature-element.html#required"
+    <code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required"
     >android:required</a>="false"</code>, you must test for NFC support and Android Beam file
     transfer support in code.
 </p>

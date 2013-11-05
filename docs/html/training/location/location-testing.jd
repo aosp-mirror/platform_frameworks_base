@@ -11,7 +11,7 @@ trainingnavtop=true
 <ol>
     <li><a href="#TurnOnMockMode">Turn On Mock Mode</a></li>
     <li><a href="#SendMockLocations">Send Mock Locations</a></li>
-    <li><a href="RunProvider">Run the Mock Location Provider App</a></li>
+    <li><a href="#RunProvider">Run the Mock Location Provider App</a></li>
     <li><a href="#TestingTips">Testing Tips</a>
 </ol>
 
@@ -62,7 +62,7 @@ trainingnavtop=true
     The best way to use mock locations is to send them from a separate mock location provider app.
     This lesson includes a provider app that you can download and use to test your own software.
     Modify the provider app as necessary to suit your own needs. Some ideas for providing test data
-    to the app are listed in the section <a href="TestData">Managing test data</a>.
+    to the app are listed in the section <a href="#TestData">Managing test data</a>.
 </p>
 <p>
     The remainder of this lesson shows you how to turn on mock mode and use a location client to

@@ -293,7 +293,7 @@ usage.</p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}topics/resources/string-resource.html">String Resources</a></strong> &mdash; Developer guide explaining how to use string resources in your UI.</li>
+<li><strong><a href="{@docRoot}guide/topics/resources/string-resource.html">String Resources</a></strong> &mdash; Developer guide explaining how to use string resources in your UI.</li>
 <li><strong><a href="{@docRoot}design/style/writing.html">Writing Style</a></strong> &mdash; Android Design guidelines for voice and style in your UI.</li>
 <li><strong><a class="external-link" href="http://en.wikipedia.org/wiki/XLIFF">XML Localisation Interchange File Format (XLIFF)</a></strong> &mdash; Background information on XLIFF.</li>
 </ul>
