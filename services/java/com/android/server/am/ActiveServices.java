@@ -26,6 +26,7 @@ import java.util.List;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
@@ -239,7 +240,12 @@ public final class ActiveServices {
 
     public ActiveServices(ActivityManagerService service) {
         mAm = service;
-        mMaxStartingBackground = ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
+        int maxBg = 0;
+        try {
+            maxBg = Integer.parseInt(SystemProperties.get("ro.config.max_starting_bg", "0"));
+        } catch(RuntimeException e) {
+        }
+        mMaxStartingBackground = maxBg > 0 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
     }
 
     ServiceRecord getServiceByName(ComponentName name, int callingUser) {
