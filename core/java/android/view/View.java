@@ -5900,6 +5900,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 sThreadLocal.set(localInsets);
             }
             boolean res = computeFitSystemWindows(insets, localInsets);
+            mUserPaddingLeftInitial = localInsets.left;
+            mUserPaddingRightInitial = localInsets.right;
             internalSetPadding(localInsets.left, localInsets.top,
                     localInsets.right, localInsets.bottom);
             return res;
