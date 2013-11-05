@@ -50,10 +50,11 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Taipkan PUK yang mempunyai 8 nombor atau lebih panjang."</string>
     <string name="needPuk" msgid="919668385956251611">"Kad SIM anda dikunci PUK. Taipkan kod PUK untuk membuka kuncinya."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Taipkan PUK2 untuk menyahsekat kad SIM."</string>
-    <!-- no translation found for enablePin (209412020907207950) -->
-    <skip />
-    <!-- no translation found for pinpuk_attempts:one (6596245285809790142) -->
-    <!-- no translation found for pinpuk_attempts:other (7530597808358774740) -->
+    <string name="enablePin" msgid="209412020907207950">"Tidak berjaya, dayakan Kunci SIM/RUIM."</string>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM dikunci."</item>
+    <item quantity="other" msgid="7530597808358774740">"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM dikunci."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID Pemanggil Masuk"</string>
@@ -1418,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Masuk"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Pilih apl"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Tidak dapat melancarkan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Kongsi dengan"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Kongsi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Pemegang gelongsor. Sentuh &amp; tahan."</string>

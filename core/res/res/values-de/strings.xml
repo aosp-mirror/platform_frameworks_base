@@ -1419,6 +1419,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"App auswählen"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Teilen mit"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Mit <xliff:g id="APPLICATION_NAME">%s</xliff:g> teilen"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Schieberegler: Berühren und halten"</string>
