@@ -937,6 +937,7 @@ public class PrintJobConfigActivity extends Activity {
                             mPrintJobId, mCurrentPrinter);
 
                     if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE) {
+                        mCapabilitiesTimeout.post();
                         updateUi();
                         return;
                     }
