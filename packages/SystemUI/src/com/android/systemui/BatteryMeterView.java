@@ -66,7 +66,7 @@ public class BatteryMeterView extends View implements DemoMode {
     private final RectF mFrame = new RectF();
     private final RectF mButtonFrame = new RectF();
     private final RectF mClipFrame = new RectF();
-    private final Rect mBoltFrame = new Rect();
+    private final RectF mBoltFrame = new RectF();
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -319,10 +319,10 @@ public class BatteryMeterView extends View implements DemoMode {
 
         if (tracker.plugged) {
             // draw the bolt
-            final int bl = (int)(mFrame.left + mFrame.width() / 4.5f);
-            final int bt = (int)(mFrame.top + mFrame.height() / 6f);
-            final int br = (int)(mFrame.right - mFrame.width() / 7f);
-            final int bb = (int)(mFrame.bottom - mFrame.height() / 10f);
+            final float bl = mFrame.left + mFrame.width() / 4.5f;
+            final float bt = mFrame.top + mFrame.height() / 6f;
+            final float br = mFrame.right - mFrame.width() / 7f;
+            final float bb = mFrame.bottom - mFrame.height() / 10f;
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
                 mBoltFrame.set(bl, bt, br, bb);
