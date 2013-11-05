@@ -544,7 +544,7 @@ public final class PrintSpoolerService extends Service {
         final int printJobCount = mPrintJobs.size();
         for (int i = 0; i < printJobCount; i++) {
             PrintJobInfo printJob = mPrintJobs.get(i);
-            if (isActiveState(printJob.getState())
+            if (isActiveState(printJob.getState()) && printJob.getPrinterId() != null
                     && printJob.getPrinterId().getServiceName().equals(service)) {
                 return true;
             }
