@@ -135,10 +135,10 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ, დაგჭირდებათ თქვენი ტელეფონის განბლოკვა ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ამოშლა"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-ის არასწორი PIN კოდი. თქვენი ახლა მოგიწევთ მოწყობილობის განსაბლოკად მიმართოთ ოპერატორს."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-ის არასწორი PIN კოდი. თქვენ ახლა მოგიწევთ მოწყობილობის განსაბლოკად მიმართოთ ოპერატორს."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM-ის არასწორი PIN კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა, სანამ თქვენი მოწყობილობის განსაბლოკად ოპერატორთა მოგიწევდეთ მიმართვა."</item>
-    <item quantity="other" msgid="2215723361575359486">"არასწორი SIM-ის PIN კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა."</item>
+    <item quantity="one" msgid="8134313997799638254">"SIM-ის არასწორი PIN კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა, სანამ მოგიწევთ თქვენი მოწყობილობის განსაბლოკად ოპერატორთან დაკავშირება."</item>
+    <item quantity="other" msgid="2215723361575359486">"SIM-ის არასწორი PIN კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER">%d</xliff:g> მცდელობა."</item>
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM გამოუსადეგარია. დაუკავშირდით ოპერატორს."</string>
   <plurals name="kg_password_wrong_puk_code">

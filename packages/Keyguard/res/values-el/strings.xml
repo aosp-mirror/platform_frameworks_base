@@ -135,12 +135,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Κατάργηση"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Εσφαλμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με την εταιρεία κινητής τηλεφωνίας που χρησιμοποιείτε για να ξεκλειδώσετε τη συσκευή σας."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Εσφαλμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με την εταιρεία κινητής τηλεφωνίας που χρησιμοποιείτε για να ξεκλειδώσετε τη συσκευή σας."</item>
+    <item quantity="one" msgid="8134313997799638254">"Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</item>
     <item quantity="other" msgid="2215723361575359486">"Εσφαλμένος κωδικός PIN κάρτας SIM. Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες."</item>
   </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας που χρησιμοποιείτε."</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί. Επικοινωνήστε με τον πάροχο κινητής τηλεφωνίας σας."</string>
   <plurals name="kg_password_wrong_puk_code">
     <item quantity="one" msgid="3256893607561060649">"Εσφαλμένος κωδικός PUK κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια προτού δεν είναι πλέον δυνατή η χρήση της κάρτας SIM."</item>
     <item quantity="other" msgid="5477305226026342036">"Εσφαλμένος κωδικός PUK κάρτας SIM. Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες προτού δεν είναι πλέον δυνατή η χρήση της κάρτας SIM."</item>

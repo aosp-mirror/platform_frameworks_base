@@ -145,8 +145,8 @@
     <item quantity="one" msgid="3256893607561060649">"รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร"</item>
     <item quantity="other" msgid="5477305226026342036">"รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร"</item>
   </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"การดำเนินการ PIN ของซิมล้มเหลว!"</string>
-    <string name="kg_password_puk_failed" msgid="2838824369502455984">"การดำเนินการ PUK ของซิมล้มเหลว!"</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"การปลดล็อกด้วย PIN ของซิมล้มเหลว!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"การปลดล็อกด้วย PUK ของซิมล้มเหลว!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"รหัสได้รับการยอมรับ!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"ปุ่มแทร็กก่อนหน้า"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"ปุ่มแทร็กถัดไป"</string>

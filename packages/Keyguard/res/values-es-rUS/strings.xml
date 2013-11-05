@@ -23,7 +23,7 @@
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ingresa el código PIN"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Escribe el código PUK de la tarjeta SIM y un nuevo código PIN."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Código PUK de la tarjeta SIM"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Nuevo código de PIN de la tarjeta SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Nuevo código PIN de la tarjeta SIM"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Toca para ingresar la contraseña"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Ingresar contraseña para desbloquear"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Ingresa el PIN para desbloquear"</string>
@@ -142,11 +142,11 @@
   </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La tarjeta SIM no se puede utilizar. Comunícate con el proveedor."</string>
   <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"El código PUK de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que la tarjeta SIM no se pueda utilizar de forma permanente."</item>
-    <item quantity="other" msgid="5477305226026342036">"El código PUK de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos antes de que la tarjeta SIM no se pueda utilizar de forma permanente."</item>
+    <item quantity="one" msgid="3256893607561060649">"El código PUK de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER">%d</xliff:g> intento antes de que la tarjeta SIM quede inutilizable permanentemente."</item>
+    <item quantity="other" msgid="5477305226026342036">"El código PUK de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER">%d</xliff:g> intentos antes de que la tarjeta SIM quede inutilizable permanentemente."</item>
   </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Ocurrió un error al intentar desbloquear la tarjeta SIM con el código PIN."</string>
-    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Ocurrió un error al intentar desbloquear la tarjeta SIM con el código PUK."</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Error al desbloquear la tarjeta SIM con el PIN"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Error al desbloquear la tarjeta SIM con el PUK"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceptado"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Botón de pista anterior"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Botón de pista siguiente"</string>
