@@ -830,9 +830,7 @@ window.onhashchange = function () {
 
 <p>
   <span style="white-space:nowrap;">Android 4.4</span> upgrades its
-  SurfaceFlinger from OpenGL ES 1.0 to OpenGL ES 2.0. This boosts performance
-  by using multi-texturing, and it improves color calibration and supports more
-  advanced special effects.
+  SurfaceFlinger from OpenGL ES 1.0 to OpenGL ES 2.0.
 </p>
 
 <h4 id="44-composer">New Hardware Composer support for virtual displays</h4>
