@@ -234,6 +234,23 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
+     * <p>Set the stroke width and color state list for the drawable. If width
+     * is zero, then no stroke is drawn.</p>
+     * <p><strong>Note</strong>: changing this property will affect all instances
+     * of a drawable loaded from a resource. It is recommended to invoke
+     * {@link #mutate()} before changing this property.</p>
+     *
+     * @param width The width in pixels of the stroke
+     * @param colorStateList The color state list of the stroke
+     *
+     * @see #mutate()
+     * @see #setStroke(int, ColorStateList, float, float)
+     */
+    public void setStroke(int width, ColorStateList colorStateList) {
+        setStroke(width, colorStateList, 0, 0);
+    }
+
+    /**
      * <p>Set the stroke width and color for the drawable. If width is zero,
      * then no stroke is drawn. This method can also be used to dash the stroke.</p>
      * <p><strong>Note</strong>: changing this property will affect all instances
@@ -250,7 +267,35 @@ public class GradientDrawable extends Drawable {
      */
     public void setStroke(int width, int color, float dashWidth, float dashGap) {
         mGradientState.setStroke(width, color, dashWidth, dashGap);
+        setStrokeInternal(width, color, dashWidth, dashGap);
+    }
 
+    /**
+     * <p>Set the stroke width and color state list for the drawable. If width
+     * is zero, then no stroke is drawn. This method can also be used to dash
+     * the stroke.</p>
+     * <p><strong>Note</strong>: changing this property will affect all instances
+     * of a drawable loaded from a resource. It is recommended to invoke
+     * {@link #mutate()} before changing this property.</p>
+     *
+     * @param width The width in pixels of the stroke
+     * @param colorStateList The color state list of the stroke
+     * @param dashWidth The length in pixels of the dashes, set to 0 to disable dashes
+     * @param dashGap The gap in pixels between dashes
+     *
+     * @see #mutate()
+     * @see #setStroke(int, ColorStateList)
+     */
+    public void setStroke(
+            int width, ColorStateList colorStateList, float dashWidth, float dashGap) {
+        mGradientState.setStroke(width, colorStateList, dashWidth, dashGap);
+
+        final int[] stateSet = getState();
+        final int color = colorStateList.getColorForState(stateSet, 0);
+        setStrokeInternal(width, color, dashWidth, dashGap);
+    }
+
+    private void setStrokeInternal(int width, int color, float dashWidth, float dashGap) {
         if (mStrokePaint == null)  {
             mStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mStrokePaint.setStyle(Paint.Style.STROKE);
@@ -647,24 +692,44 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public boolean setState(int[] stateSet) {
-        final ColorStateList stateList = mGradientState.mColorStateList;
+    public boolean onStateChange(int[] stateSet) {
+        boolean invalidateSelf = false;
+
+        final GradientState s = mGradientState;
+        final ColorStateList stateList = s.mColorStateList;
         if (stateList != null) {
             final int newColor = stateList.getColorForState(stateSet, 0);
             final int oldColor = mFillPaint.getColor();
             if (oldColor != newColor) {
                 mFillPaint.setColor(newColor);
-                invalidateSelf();
-                return true;
+                invalidateSelf |= true;
             }
         }
 
-        return super.setState(stateSet);
+        final ColorStateList strokeStateList = s.mStrokeColorStateList;
+        if (strokeStateList != null) {
+            final int newColor = stateList.getColorForState(stateSet, 0);
+            final int oldColor = mStrokePaint.getColor();
+            if (oldColor != newColor) {
+                mStrokePaint.setColor(newColor);
+                invalidateSelf |= true;
+            }
+        }
+
+        if (invalidateSelf) {
+            invalidateSelf();
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public boolean isStateful() {
-        return super.isStateful() || mGradientState.mColorStateList != null;
+        final GradientState s = mGradientState;
+        return super.isStateful()
+                || (s.mColorStateList != null && s.mColorStateList.isStateful())
+                || (s.mStrokeColorStateList != null && s.mStrokeColorStateList.isStateful());
     }
 
     @Override
@@ -1015,18 +1080,18 @@ public class GradientDrawable extends Drawable {
             } else if (name.equals("stroke")) {
                 a = r.obtainAttributes(attrs,
                         com.android.internal.R.styleable.GradientDrawableStroke);
-                int width = a.getDimensionPixelSize(
+                final int width = a.getDimensionPixelSize(
                         com.android.internal.R.styleable.GradientDrawableStroke_width, 0);
-                int color = a.getColor(
-                        com.android.internal.R.styleable.GradientDrawableStroke_color, 0);
-                float dashWidth = a.getDimension(
+                final ColorStateList colorStateList = a.getColorStateList(
+                        com.android.internal.R.styleable.GradientDrawableStroke_color);
+                final float dashWidth = a.getDimension(
                         com.android.internal.R.styleable.GradientDrawableStroke_dashWidth, 0);
                 if (dashWidth != 0.0f) {
-                    float dashGap = a.getDimension(
+                    final float dashGap = a.getDimension(
                             com.android.internal.R.styleable.GradientDrawableStroke_dashGap, 0);
-                    setStroke(width, color, dashWidth, dashGap);
+                    setStroke(width, colorStateList, dashWidth, dashGap);
                 } else {
-                    setStroke(width, color);
+                    setStroke(width, colorStateList);
                 }
                 a.recycle();
             } else if (name.equals("corners")) {
@@ -1119,6 +1184,7 @@ public class GradientDrawable extends Drawable {
         public int mGradient = LINEAR_GRADIENT;
         public Orientation mOrientation;
         public ColorStateList mColorStateList;
+        public ColorStateList mStrokeColorStateList;
         public int[] mColors;
         public int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
@@ -1251,12 +1317,19 @@ public class GradientDrawable extends Drawable {
                 return;
             }
 
-            if (mStrokeWidth > 0 && !isOpaque(mStrokeColor)) {
-                mOpaque = false;
-                return;
+            if (mStrokeWidth > 0) {
+                if (mStrokeColorStateList != null) {
+                    if (!mStrokeColorStateList.isOpaque()) {
+                        mOpaque = false;
+                        return;
+                    }
+                } else if (!isOpaque(mStrokeColor)) {
+                    mOpaque = false;
+                    return;
+                }
             }
 
-            if (mColorStateList != null && !isOpaque(mColorStateList)) {
+            if (mColorStateList != null && !mColorStateList.isOpaque()) {
                 mOpaque = false;
                 return;
             }
@@ -1282,25 +1355,26 @@ public class GradientDrawable extends Drawable {
             return ((color >> 24) & 0xff) == 0xff;
         }
 
-        private static boolean isOpaque(ColorStateList colors) {
-            final int n = colors.getCount();
-            for (int i = 0; i < n; i++) {
-                if (!isOpaque(colors.getColorAt(i))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         public void setStroke(int width, int color) {
             mStrokeWidth = width;
             mStrokeColor = color;
+            mStrokeColorStateList = null;
             computeOpacity();
         }
 
         public void setStroke(int width, int color, float dashWidth, float dashGap) {
             mStrokeWidth = width;
             mStrokeColor = color;
+            mStrokeColorStateList = null;
+            mStrokeDashWidth = dashWidth;
+            mStrokeDashGap = dashGap;
+            computeOpacity();
+        }
+
+        public void setStroke(
+                int width, ColorStateList colorStateList, float dashWidth, float dashGap) {
+            mStrokeWidth = width;
+            mStrokeColorStateList = colorStateList;
             mStrokeDashWidth = dashWidth;
             mStrokeDashGap = dashGap;
             computeOpacity();

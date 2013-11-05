@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.graphics.Color;
 import com.android.internal.util.ArrayUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -259,7 +260,17 @@ public class ColorStateList implements Parcelable {
     public boolean isStateful() {
         return mStateSpecs.length > 1;
     }
-    
+
+    public boolean isOpaque() {
+        final int n = mColors.length;
+        for (int i = 0; i < n; i++) {
+            if (Color.alpha(mColors[i]) != 0xFF) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Return the color associated with the given set of {@link android.view.View} states.
      *
@@ -278,31 +289,6 @@ public class ColorStateList implements Parcelable {
             }
         }
         return defaultColor;
-    }
-
-    /**
-     * @return the number of state spec to color mappings in the list
-     * @see #getColorAt(int)
-     * @see #getStateSpecAt(int)
-     */
-    public int getCount() {
-        return mColors.length;
-    }
-
-    /**
-     * @return the state spec at the specified index in the list
-     * @see #getCount()
-     */
-    public int[] getStateSpecAt(int index) {
-        return mStateSpecs[index];
-    }
-
-    /**
-     * @return the color at the specified index in the list
-     * @see #getCount()
-     */
-    public int getColorAt(int index) {
-        return mColors[index];
     }
 
     /**

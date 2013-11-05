@@ -7634,11 +7634,9 @@ package android.content.res {
     ctor public ColorStateList(int[][], int[]);
     method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public int describeContents();
-    method public int getColorAt(int);
     method public int getColorForState(int[], int);
-    method public int getCount();
     method public int getDefaultColor();
-    method public int[] getStateSpecAt(int);
+    method public boolean isOpaque();
     method public boolean isStateful();
     method public static android.content.res.ColorStateList valueOf(int);
     method public android.content.res.ColorStateList withAlpha(int);
@@ -10284,6 +10282,7 @@ package android.graphics.drawable {
     method public void draw(android.graphics.Canvas);
     method public int getOpacity();
     method public android.graphics.drawable.GradientDrawable.Orientation getOrientation();
+    method public boolean onStateChange(int[]);
     method public void setAlpha(int);
     method public void setColor(int);
     method public void setColor(android.content.res.ColorStateList);
@@ -10298,7 +10297,9 @@ package android.graphics.drawable {
     method public void setShape(int);
     method public void setSize(int, int);
     method public void setStroke(int, int);
+    method public void setStroke(int, android.content.res.ColorStateList);
     method public void setStroke(int, int, float, float);
+    method public void setStroke(int, android.content.res.ColorStateList, float, float);
     method public void setUseLevel(boolean);
     field public static final int LINE = 2; // 0x2
     field public static final int LINEAR_GRADIENT = 0; // 0x0
