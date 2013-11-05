@@ -996,8 +996,8 @@ final class ActivityStack {
                 if (r.isHomeActivity()) {
                     return true;
                 }
-                if (!r.finishing && r.visible && r.fullscreen) {
-                    // Passed activity is over a visible fullscreen activity.
+                if (!r.finishing && r.fullscreen) {
+                    // Passed activity is over a fullscreen activity.
                     return false;
                 }
             }
