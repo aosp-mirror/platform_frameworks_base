@@ -97,10 +97,10 @@ abstract class MapCollections<K, V> {
             if (!mEntryValid) {
                 throw new IllegalStateException();
             }
+            colRemoveAt(mIndex);
             mIndex--;
             mEnd--;
             mEntryValid = false;
-            colRemoveAt(mIndex);
         }
 
         @Override
