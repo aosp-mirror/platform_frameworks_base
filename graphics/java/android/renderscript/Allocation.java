@@ -801,7 +801,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
         int dataSize = mType.mElement.getBytesSize() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
+        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize, Element.DataType.SIGNED_32);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -817,7 +817,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
         int dataSize = mType.mElement.getBytesSize() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
-        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
+        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize, Element.DataType.SIGNED_16);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -833,7 +833,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
         int dataSize = mType.mElement.getBytesSize() * count;
         data1DChecks(off, count, d.length, dataSize);
-        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
+        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize, Element.DataType.SIGNED_8);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -849,7 +849,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
         int dataSize = mType.mElement.getBytesSize() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
+        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize, Element.DataType.FLOAT_32);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -955,7 +955,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
-                              w, h, data, data.length);
+                              w, h, data, data.length, Element.DataType.SIGNED_8);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -964,7 +964,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
-                              w, h, data, data.length * 2);
+                              w, h, data, data.length * 2, Element.DataType.SIGNED_16);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -973,7 +973,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
-                              w, h, data, data.length * 4);
+                              w, h, data, data.length * 4, Element.DataType.SIGNED_32);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -982,7 +982,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
-                              w, h, data, data.length * 4);
+                              w, h, data, data.length * 4, Element.DataType.FLOAT_32);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1128,7 +1128,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate3DRange(xoff, yoff, zoff, w, h, d);
         mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
-                              w, h, d, data, data.length);
+                              w, h, d, data, data.length, Element.DataType.SIGNED_8);
     }
 
     /**
@@ -1139,7 +1139,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate3DRange(xoff, yoff, zoff, w, h, d);
         mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
-                              w, h, d, data, data.length * 2);
+                              w, h, d, data, data.length * 2, Element.DataType.SIGNED_16);
     }
 
     /**
@@ -1150,7 +1150,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate3DRange(xoff, yoff, zoff, w, h, d);
         mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
-                              w, h, d, data, data.length * 4);
+                              w, h, d, data, data.length * 4, Element.DataType.SIGNED_32);
     }
 
     /**
@@ -1161,7 +1161,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate3DRange(xoff, yoff, zoff, w, h, d);
         mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD,
-                              w, h, d, data, data.length * 4);
+                              w, h, d, data, data.length * 4, Element.DataType.FLOAT_32);
     }
 
 
