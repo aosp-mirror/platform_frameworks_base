@@ -88,9 +88,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public boolean getPadding(Rect padding) {
         final Rect r = mDrawableContainerState.getConstantPadding();
-        boolean result = true;
+        boolean result;
         if (r != null) {
             padding.set(r);
+            result = (r.left | r.top | r.bottom | r.right) != 0;
         } else {
             if (mCurrDrawable != null) {
                 result = mCurrDrawable.getPadding(padding);
