@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.framework.multidexlegacytestservices"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="19" />
+
+    <application
+        android:label="MultiDexLegacyTestServices">
+
+        <service android:name=".Service1" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices1">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service1" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service2" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices2">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service2" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service3" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices3">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service3" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service4" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices4">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service4" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service5" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices5">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service5" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service6" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices6">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service6" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service7" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices7">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service7" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service8" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices8">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service8" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service9" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices9">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service9" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service10" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices10">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service10" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service11" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices11">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service11" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service12" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices12">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service12" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service13" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices13">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service13" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service14" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices14">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service14" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service15" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices15">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service15" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service16" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices16">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service16" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service17" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices17">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service17" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service18" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices18">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service18" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".Service19" android:exported="true" android:process=":com.android.framework.multidexlegacytestservices19">
+            <intent-filter>
+                <action android:name="com.android.framework.multidexlegacytestservices.action.Service19" />
+            </intent-filter>
+        </service>
+        </application>
+
+</manifest>
