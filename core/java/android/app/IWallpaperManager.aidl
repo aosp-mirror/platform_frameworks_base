@@ -71,4 +71,14 @@ interface IWallpaperManager {
      * Returns the desired minimum height for the wallpaper.
      */
     int getHeightHint();
+
+    /**
+     * Returns the name of the wallpaper. Private API.
+     */
+    String getName();
+
+    /**
+     * Informs the service that wallpaper settings have been restored. Private API.
+     */
+    void settingsRestored();
 }

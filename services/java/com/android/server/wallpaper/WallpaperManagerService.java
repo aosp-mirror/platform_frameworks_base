@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.wallpaper;
 
 import static android.os.ParcelFileDescriptor.*;
 
@@ -85,8 +85,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 
-class WallpaperManagerService extends IWallpaperManager.Stub {
-    static final String TAG = "WallpaperService";
+public class WallpaperManagerService extends IWallpaperManager.Stub {
+    static final String TAG = "WallpaperManagerService";
     static final boolean DEBUG = false;
 
     final Object mLock = new Object[0];
@@ -98,7 +98,6 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     static final long MIN_WALLPAPER_CRASH_TIME = 10000;
     static final String WALLPAPER = "wallpaper";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
-
     /**
      * Name of the component used to display bitmap wallpapers from either the gallery or
      * built-in wallpapers.
@@ -505,7 +504,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    String getName() {
+    /** Called by SystemBackupAgent */
+    public String getName() {
+        // Verify caller is the system
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new RuntimeException("getName() can only be called from the system process");
+        }
         synchronized (mLock) {
             return mWallpaperMap.get(0).name;
         }
@@ -1175,7 +1179,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     // Called by SystemBackupAgent after files are restored to disk.
-    void settingsRestored() {
+    public void settingsRestored() {
+        // Verify caller is the system
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new RuntimeException("settingsRestored() can only be called from the system process");
+        }
         // TODO: If necessary, make it work for secondary users as well. This currently assumes
         // restores only to the primary user
         if (DEBUG) Slog.v(TAG, "settingsRestored");

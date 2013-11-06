@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.appwidget;
 
 import android.app.ActivityManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -48,7 +48,7 @@ import java.util.Locale;
 /**
  * Redirects calls to this service to the instance of the service for the appropriate user.
  */
-class AppWidgetService extends IAppWidgetService.Stub
+public class AppWidgetService extends IAppWidgetService.Stub
 {
     private static final String TAG = "AppWidgetService";
 
@@ -60,7 +60,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     private final SparseArray<AppWidgetServiceImpl> mAppWidgetServices;
 
-    AppWidgetService(Context context) {
+    public AppWidgetService(Context context) {
         mContext = context;
 
         mSaveStateHandler = BackgroundThread.getHandler();
