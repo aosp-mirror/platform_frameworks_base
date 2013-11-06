@@ -129,8 +129,8 @@ public class BarController {
         final boolean wasAnim = mWin.isAnimatingLw();
         final boolean change = show ? mWin.showLw(true) : mWin.hideLw(true);
         final int state = computeStateLw(wasVis, wasAnim, mWin, change);
-        updateStateLw(state);
-        return change;
+        final boolean stateChanged = updateStateLw(state);
+        return change || stateChanged;
     }
 
     private int computeStateLw(boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
@@ -139,6 +139,8 @@ public class BarController {
             final boolean anim = win.isAnimatingLw();
             if (mState == StatusBarManager.WINDOW_STATE_HIDING && !change && !vis) {
                 return StatusBarManager.WINDOW_STATE_HIDDEN;
+            } else if (mState == StatusBarManager.WINDOW_STATE_HIDDEN && vis) {
+                return StatusBarManager.WINDOW_STATE_SHOWING;
             } else if (change) {
                 if (wasVis && vis && !wasAnim && anim) {
                     return StatusBarManager.WINDOW_STATE_HIDING;
@@ -150,7 +152,7 @@ public class BarController {
         return mState;
     }
 
-    private void updateStateLw(final int state) {
+    private boolean updateStateLw(final int state) {
         if (state != mState) {
             mState = state;
             if (DEBUG) Slog.d(mTag, "mState: " + StatusBarManager.windowStateToString(state));
@@ -169,7 +171,9 @@ public class BarController {
                     }
                 }
             });
+            return true;
         }
+        return false;
     }
 
     public boolean checkHiddenLw() {
