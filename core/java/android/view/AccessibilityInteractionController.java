@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.LongArray;
 import android.util.SparseLongArray;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -881,13 +882,12 @@ final class AccessibilityInteractionController {
                 AccessibilityNodeInfo parent =
                     provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
                 if (parent != null) {
-                    SparseLongArray childNodeIds = parent.getChildNodeIds();
-                    final int childCount = childNodeIds.size();
+                    final int childCount = parent.getChildCount();
                     for (int i = 0; i < childCount; i++) {
                         if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
                             return;
                         }
-                        final long childNodeId = childNodeIds.get(i);
+                        final long childNodeId = parent.getChildId(i);
                         if (childNodeId != current.getSourceNodeId()) {
                             final int childVirtualDescendantId =
                                 AccessibilityNodeInfo.getVirtualDescendantId(childNodeId);
@@ -906,14 +906,13 @@ final class AccessibilityInteractionController {
 
         private void prefetchDescendantsOfVirtualNode(AccessibilityNodeInfo root,
                 AccessibilityNodeProvider provider, List<AccessibilityNodeInfo> outInfos) {
-            SparseLongArray childNodeIds = root.getChildNodeIds();
             final int initialOutInfosSize = outInfos.size();
-            final int childCount = childNodeIds.size();
+            final int childCount = root.getChildCount();
             for (int i = 0; i < childCount; i++) {
                 if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
                     return;
                 }
-                final long childNodeId = childNodeIds.get(i);
+                final long childNodeId = root.getChildId(i);
                 AccessibilityNodeInfo child = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(childNodeId));
                 if (child != null) {

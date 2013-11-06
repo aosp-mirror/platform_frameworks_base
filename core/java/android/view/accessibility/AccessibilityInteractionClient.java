@@ -718,10 +718,9 @@ public final class AccessibilityInteractionClient
                 Log.e(LOG_TAG, "Duplicate node.");
                 return;
             }
-            SparseLongArray childIds = current.getChildNodeIds();
-            final int childCount = childIds.size();
+            final int childCount = current.getChildCount();
             for (int i = 0; i < childCount; i++) {
-                final long childId = childIds.valueAt(i);
+                final long childId = current.getChildId(i);
                 for (int j = 0; j < infoCount; j++) {
                     AccessibilityNodeInfo child = infos.get(j);
                     if (child.getSourceNodeId() == childId) {
