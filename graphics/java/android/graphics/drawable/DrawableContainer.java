@@ -60,7 +60,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private long mExitAnimationEnd;
     private Drawable mLastDrawable;
 
-    private Insets mInsets;
+    private Insets mInsets = Insets.NONE;
 
     // overrides from Drawable
 
