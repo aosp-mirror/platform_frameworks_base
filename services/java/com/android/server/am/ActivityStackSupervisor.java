@@ -379,7 +379,7 @@ public final class ActivityStackSupervisor {
                 if (hr.app == null && app.uid == hr.info.applicationInfo.uid
                         && processName.equals(hr.processName)) {
                     try {
-                        if (realStartActivityLocked(hr, app, true, true)) {
+                        if (realStartActivityLocked(hr, app, true, true, null)) {
                             didSomething = true;
                         }
                     } catch (Exception e) {
@@ -868,7 +868,7 @@ public final class ActivityStackSupervisor {
     }
 
     final boolean realStartActivityLocked(ActivityRecord r,
-            ProcessRecord app, boolean andResume, boolean checkConfig)
+            ProcessRecord app, boolean andResume, boolean checkConfig, Bundle resumeArgs)
             throws RemoteException {
 
         r.startFreezingScreenLocked(app, 0);
@@ -960,13 +960,14 @@ public final class ActivityStackSupervisor {
                     }
                 }
             }
+
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
                     new Configuration(mService.mConfiguration), r.compat,
                     app.repProcState, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profileFile, profileFd,
-                    profileAutoStop);
+                    profileAutoStop, resumeArgs);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -1040,7 +1041,7 @@ public final class ActivityStackSupervisor {
     }
 
     void startSpecificActivityLocked(ActivityRecord r,
-            boolean andResume, boolean checkConfig) {
+            boolean andResume, boolean checkConfig, Bundle resumeArgs) {
         // Is this activity's application already running?
         ProcessRecord app = mService.getProcessRecordLocked(r.processName,
                 r.info.applicationInfo.uid, true);
@@ -1057,7 +1058,7 @@ public final class ActivityStackSupervisor {
                     // separate apk in the process.
                     app.addPackage(r.info.packageName, mService.mProcessStats);
                 }
-                realStartActivityLocked(r, app, andResume, checkConfig);
+                realStartActivityLocked(r, app, andResume, checkConfig, resumeArgs);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when starting activity "

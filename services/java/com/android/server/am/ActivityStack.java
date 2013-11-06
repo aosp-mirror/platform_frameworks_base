@@ -36,6 +36,8 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
+import android.os.Trace;
+import android.util.Log;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.Objects;
 import com.android.server.Watchdog;
@@ -1078,7 +1080,7 @@ final class ActivityStack {
                                 mWindowManager.setAppVisibility(r.appToken, true);
                             }
                             if (r != starting) {
-                                mStackSupervisor.startSpecificActivityLocked(r, false, false);
+                                mStackSupervisor.startSpecificActivityLocked(r, false, false, null);
                             }
                         }
 
@@ -1511,7 +1513,13 @@ final class ActivityStack {
                 mWindowManager.prepareAppTransition(AppTransition.TRANSIT_ACTIVITY_OPEN, false);
             }
         }
+
+        Bundle resumeAnimOptions = null;
         if (anim) {
+            ActivityOptions opts = next.getOptionsForTargetActivityLocked();
+            if (opts != null) {
+                resumeAnimOptions = opts.toBundle();
+            }
             next.applyOptionsLocked();
         } else {
             next.clearOptionsLocked();
@@ -1604,7 +1612,7 @@ final class ActivityStack {
                 next.app.pendingUiClean = true;
                 next.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
                 next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
-                        mService.isNextTransitionForward());
+                        mService.isNextTransitionForward(), resumeAnimOptions);
 
                 mStackSupervisor.checkReadyForSleepLocked();
 
@@ -1628,7 +1636,7 @@ final class ActivityStack {
                             next.nonLocalizedLabel, next.labelRes, next.icon, next.logo,
                             next.windowFlags, null, true);
                 }
-                mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                mStackSupervisor.startSpecificActivityLocked(next, true, false, resumeAnimOptions);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return true;
             }
@@ -1666,7 +1674,7 @@ final class ActivityStack {
                 if (DEBUG_SWITCH) Slog.v(TAG, "Restarting: " + next);
             }
             if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Restarting " + next);
-            mStackSupervisor.startSpecificActivityLocked(next, true, true);
+            mStackSupervisor.startSpecificActivityLocked(next, true, true, resumeAnimOptions);
         }
 
         if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();

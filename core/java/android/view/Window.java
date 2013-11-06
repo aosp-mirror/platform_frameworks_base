@@ -27,6 +27,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemProperties;
+import android.transition.Scene;
+import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -1333,4 +1335,47 @@ public abstract class Window {
      * @param event A key or touch event to inject to this window.
      */
     public void injectInputEvent(InputEvent event) { }
+
+    /**
+     * Retrieve the {@link TransitionManager} responsible for  for default transitions
+     * in this window. Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * <p>This method will return non-null after content has been initialized (e.g. by using
+     * {@link #setContentView}) if {@link #FEATURE_CONTENT_TRANSITIONS} has been granted.</p>
+     *
+     * @return This window's content TransitionManager or null if none is set.
+     */
+    public TransitionManager getTransitionManager() {
+        return null;
+    }
+
+    /**
+     * Set the {@link TransitionManager} to use for default transitions in this window.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * @param tm The TransitionManager to use for scene changes.
+     */
+    public void setTransitionManager(TransitionManager tm) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Retrieve the {@link Scene} representing this window's current content.
+     * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
+     *
+     * <p>This method will return null if the current content is not represented by a Scene.</p>
+     *
+     * @return Current Scene being shown or null
+     */
+    public Scene getContentScene() {
+        return null;
+    }
+
+    /**
+     * Set options that can affect the transition behavior within this window.
+     * @param options Options to set or null for none
+     */
+    public void setTransitionOptions(Bundle options) {
+        throw new UnsupportedOperationException();
+    }
 }

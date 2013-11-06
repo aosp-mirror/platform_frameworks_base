@@ -723,6 +723,10 @@ final class ActivityRecord {
         }
     }
 
+    ActivityOptions getOptionsForTargetActivityLocked() {
+        return pendingOptions != null ? pendingOptions.forTargetActivity() : null;
+    }
+
     void clearOptionsLocked() {
         if (pendingOptions != null) {
             pendingOptions.abort();

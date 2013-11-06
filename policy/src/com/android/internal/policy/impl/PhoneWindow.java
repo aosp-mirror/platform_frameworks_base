@@ -22,7 +22,9 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.app.ActivityOptions;
 import android.transition.Scene;
+import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
 import android.view.ViewConfiguration;
@@ -148,6 +150,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private PanelMenuPresenterCallback mPanelMenuPresenterCallback;
 
     private TransitionManager mTransitionManager;
+    private Scene mContentScene;
+    private Bundle mTransitionOptions;
 
     // The icon resource has been explicitly set elsewhere
     // and should not be overwritten with a default.
@@ -284,6 +288,26 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public TransitionManager getTransitionManager() {
+        return mTransitionManager;
+    }
+
+    @Override
+    public void setTransitionManager(TransitionManager tm) {
+        mTransitionManager = tm;
+    }
+
+    @Override
+    public Scene getContentScene() {
+        return mContentScene;
+    }
+
+    @Override
+    public void setTransitionOptions(Bundle options) {
+        mTransitionOptions = options;
+    }
+
+    @Override
     public void setContentView(int layoutResID) {
         // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
         // decor, when theme attributes and the like are crystalized. Do not check the feature
@@ -297,7 +321,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
             final Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,
                     getContext());
-            mTransitionManager.transitionTo(newScene);
+            transitionTo(newScene);
         } else {
             mLayoutInflater.inflate(layoutResID, mContentParent);
         }
@@ -326,7 +350,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
             view.setLayoutParams(params);
             final Scene newScene = new Scene(mContentParent, view);
-            mTransitionManager.transitionTo(newScene);
+            transitionTo(newScene);
         } else {
             mContentParent.addView(view, params);
         }
@@ -351,6 +375,33 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
         }
+    }
+
+    private void transitionTo(Scene scene) {
+        Transition selected = null;
+        if (mTransitionOptions != null) {
+            final ActivityOptions opts = new ActivityOptions(mTransitionOptions);
+            mTransitionOptions = null;
+
+            String selectedName = null;
+            for (String sceneName : opts.getDestSceneNames()) {
+                final Transition t = mTransitionManager.getNamedTransition(sceneName, scene);
+                if (t != null) {
+                    // TODO handle args/state; inject into t/clone with params
+                    selected = t;
+                    selectedName = sceneName;
+                    break;
+                }
+            }
+            opts.dispatchSceneTransitionStarted(selectedName);
+        }
+
+        if (selected != null) {
+            TransitionManager.go(scene, selected);
+        } else {
+            mTransitionManager.transitionTo(scene);
+        }
+        mContentScene = scene;
     }
 
     @Override

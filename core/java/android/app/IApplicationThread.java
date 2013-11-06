@@ -50,15 +50,16 @@ public interface IApplicationThread extends IInterface {
             int configChanges) throws RemoteException;
     void scheduleWindowVisibility(IBinder token, boolean showWindow) throws RemoteException;
     void scheduleSleeping(IBinder token, boolean sleeping) throws RemoteException;
-    void scheduleResumeActivity(IBinder token, int procState, boolean isForward)
+    void scheduleResumeActivity(IBinder token, int procState, boolean isForward, Bundle resumeArgs)
             throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
             int procState, Bundle state, List<ResultInfo> pendingResults,
-    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-    		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
-    		throws RemoteException;
+            List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler,
+            Bundle resumeArgs)
+            throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,
             boolean notResumed, Configuration config) throws RemoteException;

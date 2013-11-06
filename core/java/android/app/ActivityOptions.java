@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -30,6 +32,8 @@ import android.view.View;
  * Context.startActivity(Intent, Bundle)} and related methods.
  */
 public class ActivityOptions {
+    private static final String TAG = "ActivityOptions";
+
     /**
      * The package name that created the options.
      * @hide
@@ -481,8 +485,19 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public IRemoteCallback getOnSceneTransitionStartedListener() {
-        return mSceneTransitionStartedListener;
+    public void dispatchSceneTransitionStarted(String destScene) {
+        if (mSceneTransitionStartedListener != null) {
+            Bundle data = null;
+            if (!TextUtils.isEmpty(destScene)) {
+                data = new Bundle();
+                data.putString(KEY_DEST_SCENE_NAME_CHOSEN, destScene);
+            }
+            try {
+                mSceneTransitionStartedListener.sendResult(data);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Caught exception dispatching scene transition start", e);
+            }
+        }
     }
 
     /** @hide */
@@ -490,6 +505,12 @@ public class ActivityOptions {
         if (mAnimationStartedListener != null) {
             try {
                 mAnimationStartedListener.sendResult(null);
+            } catch (RemoteException e) {
+            }
+        }
+        if (mSceneTransitionStartedListener != null) {
+            try {
+                mSceneTransitionStartedListener.sendResult(null);
             } catch (RemoteException e) {
             }
         }
@@ -572,6 +593,8 @@ public class ActivityOptions {
                 }
                 mSceneTransitionStartedListener = otherOptions.mSceneTransitionStartedListener;
                 mDestSceneNames = otherOptions.mDestSceneNames;
+                mTransitionArgs = otherOptions.mTransitionArgs;
+                mThumbnail = null;
                 mAnimationStartedListener = null;
                 break;
         }
@@ -595,7 +618,7 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
-                b.putIBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
+                b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;
             case ANIM_SCALE_UP:
@@ -611,10 +634,31 @@ public class ActivityOptions {
                 b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
-                b.putIBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
+                b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
+                break;
+            case ANIM_SCENE_TRANSITION:
+                b.putInt(KEY_ANIM_TYPE, mAnimationType);
+                b.putStringArray(KEY_DEST_SCENE_NAMES, mDestSceneNames);
+                b.putBundle(KEY_SCENE_TRANSITION_ARGS, mTransitionArgs);
+                b.putBinder(KEY_SCENE_TRANSITION_START_LISTENER, mSceneTransitionStartedListener
+                        != null ? mSceneTransitionStartedListener.asBinder() : null);
                 break;
         }
         return b;
+    }
+
+    /**
+     * Return the filtered options only meant to be seen by the target activity itself
+     * @hide
+     */
+    public ActivityOptions forTargetActivity() {
+        if (mAnimationType == ANIM_SCENE_TRANSITION) {
+            final ActivityOptions result = new ActivityOptions();
+            result.update(this);
+            return result;
+        }
+
+        return null;
     }
 }
