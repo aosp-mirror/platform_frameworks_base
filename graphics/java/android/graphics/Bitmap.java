@@ -1167,6 +1167,11 @@ public final class Bitmap implements Parcelable {
      * @see #reconfigure(int, int, Config)
      */
     public final int getAllocationByteCount() {
+        if (mBuffer == null) {
+            // native backed bitmaps don't support reconfiguration,
+            // so alloc size is always content size
+            return getByteCount();
+        }
         return mBuffer.length;
     }
 
