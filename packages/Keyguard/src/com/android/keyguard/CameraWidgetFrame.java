@@ -243,11 +243,12 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         final float pvTransX = pvWidth < thisWidth ? (thisWidth - pvWidth) / 2 : 0;
         final float pvTransY = pvHeight < thisHeight ? (thisHeight - pvHeight) / 2 : 0;
 
-        mPreview.setPivotX(0);
+        final boolean isRtl = mPreview.getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        mPreview.setPivotX(isRtl ? mPreview.width : 0);
         mPreview.setPivotY(0);
         mPreview.setScaleX(pvScale);
         mPreview.setScaleY(pvScale);
-        mPreview.setTranslationX(pvTransX);
+        mPreview.setTranslationX((isRtl ? -1 : 1) * pvTransX);
         mPreview.setTranslationY(pvTransY);
 
         mRenderedSize.set(width, height);
