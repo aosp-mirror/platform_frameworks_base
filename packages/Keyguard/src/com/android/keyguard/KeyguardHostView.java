@@ -218,7 +218,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mTransportState = (dcs.clearing ? TRANSPORT_GONE :
             (isMusicPlaying(dcs.playbackState) ? TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE));
 
-        if (DEBUG) Log.v(TAG, "Initial transport state: "
+        if (DEBUGXPORT) Log.v(TAG, "Initial transport state: "
                 + mTransportState + ", pbstate=" + dcs.playbackState);
     }
 
@@ -1369,7 +1369,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    Runnable mSwitchPageRunnable = new Runnable() {
+    private final Runnable mSwitchPageRunnable = new Runnable() {
         @Override
         public void run() {
            showAppropriateWidgetPage();
@@ -1438,7 +1438,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetToShow = ss.appWidgetToShow;
         setInsets(ss.insets);
         if (DEBUG) Log.d(TAG, "onRestoreInstanceState, transport=" + mTransportState);
-        post(mSwitchPageRunnable);
+        mSwitchPageRunnable.run();
     }
 
     @Override
@@ -1472,10 +1472,21 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void showAppropriateWidgetPage() {
-        int state = mTransportState;
-        ensureTransportPresentOrRemoved(state);
-        int pageToShow = getAppropriateWidgetPage(state);
-        mAppWidgetContainer.setCurrentPage(pageToShow);
+        final int state = mTransportState;
+        final boolean transportAdded = ensureTransportPresentOrRemoved(state);
+        final int pageToShow = getAppropriateWidgetPage(state);
+        if (!transportAdded) {
+            mAppWidgetContainer.setCurrentPage(pageToShow);
+        } else if (state == TRANSPORT_VISIBLE) {
+            // If the transport was just added, we need to wait for layout to happen before
+            // we can set the current page.
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    mAppWidgetContainer.setCurrentPage(pageToShow);
+                }
+            });
+        }
     }
 
     /**
@@ -1499,12 +1510,11 @@ public class KeyguardHostView extends KeyguardViewBase {
      *
      * @param state
      */
-    private void ensureTransportPresentOrRemoved(int state) {
+    private boolean ensureTransportPresentOrRemoved(int state) {
         final boolean showing = getWidgetPosition(R.id.keyguard_transport_control) != -1;
         final boolean visible = state == TRANSPORT_VISIBLE;
         final boolean shouldBeVisible = state == TRANSPORT_INVISIBLE && isMusicPlaying(state);
         if (!showing && (visible || shouldBeVisible)) {
-            if (DEBUGXPORT) Log.v(TAG, "add transport");
             // insert to left of camera if it exists, otherwise after right-most widget
             int lastWidget = mAppWidgetContainer.getChildCount() - 1;
             int position = 0; // handle no widget case
@@ -1512,13 +1522,16 @@ public class KeyguardHostView extends KeyguardViewBase {
                 position = mAppWidgetContainer.isCameraPage(lastWidget) ?
                         lastWidget : lastWidget + 1;
             }
+            if (DEBUGXPORT) Log.v(TAG, "add transport at " + position);
             mAppWidgetContainer.addWidget(getOrCreateTransportControl(), position);
+            return true;
         } else if (showing && state == TRANSPORT_GONE) {
             if (DEBUGXPORT) Log.v(TAG, "remove transport");
             mAppWidgetContainer.removeWidget(getOrCreateTransportControl());
             mTransportControl = null;
             KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(null);
         }
+        return false;
     }
 
     private CameraWidgetFrame findCameraPage() {
