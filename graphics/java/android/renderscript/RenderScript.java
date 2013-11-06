@@ -425,6 +425,7 @@ public class RenderScript {
         validate();
         rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
     }
+
     native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, Bitmap b);
     synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, Bitmap b) {
         validate();
@@ -457,26 +458,28 @@ public class RenderScript {
         rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID);
     }
 
-    native void rsnAllocationRead(int con, int id, byte[] d);
-    synchronized void nAllocationRead(int id, byte[] d) {
+    native void rsnAllocationRead(int con, int id, Object d, int dt);
+    synchronized void nAllocationRead(int id, Object d, Element.DataType dt) {
         validate();
-        rsnAllocationRead(mContext, id, d);
+        rsnAllocationRead(mContext, id, d, dt.mID);
     }
-    native void rsnAllocationRead(int con, int id, short[] d);
-    synchronized void nAllocationRead(int id, short[] d) {
+
+    native void rsnAllocationRead1D(int con, int id, int off, int mip, int count, Object d,
+                                    int sizeBytes, int dt);
+    synchronized void nAllocationRead1D(int id, int off, int mip, int count, Object d,
+                                        int sizeBytes, Element.DataType dt) {
         validate();
-        rsnAllocationRead(mContext, id, d);
+        rsnAllocationRead1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
     }
-    native void rsnAllocationRead(int con, int id, int[] d);
-    synchronized void nAllocationRead(int id, int[] d) {
+
+    native void rsnAllocationRead2D(int con, int id, int xoff, int yoff, int mip, int face,
+                                    int w, int h, Object d, int sizeBytes, int dt);
+    synchronized void nAllocationRead2D(int id, int xoff, int yoff, int mip, int face,
+                                        int w, int h, Object d, int sizeBytes, Element.DataType dt) {
         validate();
-        rsnAllocationRead(mContext, id, d);
+        rsnAllocationRead2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
     }
-    native void rsnAllocationRead(int con, int id, float[] d);
-    synchronized void nAllocationRead(int id, float[] d) {
-        validate();
-        rsnAllocationRead(mContext, id, d);
-    }
+
     native int  rsnAllocationGetType(int con, int id);
     synchronized int nAllocationGetType(int id) {
         validate();
