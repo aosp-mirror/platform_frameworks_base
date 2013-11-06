@@ -386,25 +386,10 @@ public class RenderScript {
     }
 
 
-    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, int[] d, int sizeBytes);
-    synchronized void nAllocationData1D(int id, int off, int mip, int count, int[] d, int sizeBytes) {
+    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, Object d, int sizeBytes, int dt);
+    synchronized void nAllocationData1D(int id, int off, int mip, int count, Object d, int sizeBytes, Element.DataType dt) {
         validate();
-        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
-    }
-    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, short[] d, int sizeBytes);
-    synchronized void nAllocationData1D(int id, int off, int mip, int count, short[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
-    }
-    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, byte[] d, int sizeBytes);
-    synchronized void nAllocationData1D(int id, int off, int mip, int count, byte[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
-    }
-    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, float[] d, int sizeBytes);
-    synchronized void nAllocationData1D(int id, int off, int mip, int count, float[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
     }
 
     native void rsnAllocationElementData1D(int con, int id, int xoff, int mip, int compIdx, byte[] d, int sizeBytes);
@@ -433,25 +418,12 @@ public class RenderScript {
                             srcMip, srcFace);
     }
 
-    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, byte[] d, int sizeBytes);
-    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, byte[] d, int sizeBytes) {
+    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face,
+                                    int w, int h, Object d, int sizeBytes, int dt);
+    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face,
+                                        int w, int h, Object d, int sizeBytes, Element.DataType dt) {
         validate();
-        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
-    }
-    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, short[] d, int sizeBytes);
-    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, short[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
-    }
-    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, int[] d, int sizeBytes);
-    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, int[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
-    }
-    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, float[] d, int sizeBytes);
-    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, float[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
     }
     native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, Bitmap b);
     synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, Bitmap b) {
@@ -477,27 +449,13 @@ public class RenderScript {
                             srcAlloc, srcXoff, srcYoff, srcZoff, srcMip);
     }
 
-    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, byte[] d, int sizeBytes);
-    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, byte[] d, int sizeBytes) {
+    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip,
+                                    int w, int h, int depth, Object d, int sizeBytes, int dt);
+    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip,
+                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt) {
         validate();
-        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID);
     }
-    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, short[] d, int sizeBytes);
-    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, short[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
-    }
-    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, int[] d, int sizeBytes);
-    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, int[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
-    }
-    native void rsnAllocationData3D(int con, int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, float[] d, int sizeBytes);
-    synchronized void nAllocationData3D(int id, int xoff, int yoff, int zoff, int mip, int w, int h, int depth, float[] d, int sizeBytes) {
-        validate();
-        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes);
-    }
-
 
     native void rsnAllocationRead(int con, int id, byte[] d);
     synchronized void nAllocationRead(int id, byte[] d) {
