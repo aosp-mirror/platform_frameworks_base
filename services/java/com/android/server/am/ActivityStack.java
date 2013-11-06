@@ -565,7 +565,7 @@ final class ActivityStack {
 
         // Move userId's tasks to the top.
         int index = mTaskHistory.size();
-        for (int i = 0; i < index; ++i) {
+        for (int i = 0; i < index; ) {
             TaskRecord task = mTaskHistory.get(i);
             if (task.userId == userId) {
                 if (DEBUG_TASKS) Slog.d(TAG, "switchUserLocked: stack=" + getStackId() +
@@ -573,6 +573,9 @@ final class ActivityStack {
                 mTaskHistory.remove(i);
                 mTaskHistory.add(task);
                 --index;
+                // Use same value for i.
+            } else {
+                ++i;
             }
         }
         if (VALIDATE_TOKENS) {
