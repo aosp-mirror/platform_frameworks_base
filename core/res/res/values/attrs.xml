@@ -447,6 +447,15 @@
              to {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION}. -->
         <attr name="windowTranslucentNavigation" format="boolean" />
 
+        <!-- Flag indicating whether this window requests that content changes be performed
+             as scene changes with transitions. Corresponds to
+             {@link android.view.Window#FEATURE_CONTENT_TRANSITIONS}. -->
+        <attr name="windowContentTransitions" format="boolean" />
+
+        <!-- Reference to a TransitionManager XML resource defining the desired
+             transitions between different window content. -->
+        <attr name="windowContentTransitionManager" format="reference" />
+
         <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
@@ -1618,6 +1627,9 @@
         <attr name="windowCloseOnTouchOutside" />
         <attr name="windowTranslucentStatus" />
         <attr name="windowTranslucentNavigation" />
+        <attr name="windowContentTransitions" />
+        <attr name="windowContentTransitionManager" />
+
         <!-- The minimum width the window is allowed to be, along the major
              axis of the screen.  That is, when in landscape.  Can be either
              an absolute dimension or a fraction of the screen size in that
@@ -4675,6 +4687,14 @@
         <attr name="fromScene" format="reference" />
         <!-- The destination scene in this scene change. -->
         <attr name="toScene" format="reference" />
+        <!-- The name of the originating scene in this scene change.
+             Apps should treat this name as an API in the same sense
+             that an Intent action or extra key is. -->
+        <attr name="fromSceneName" format="string" />
+        <!-- The name of the destination scene in this scene change.
+             Apps should treat this name as an API in the same sense
+             that an Intent action or extra key is. -->
+        <attr name="toSceneName" format="string" />
     </declare-styleable>
 
     <!-- ========================== -->

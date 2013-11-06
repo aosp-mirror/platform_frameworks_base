@@ -2094,6 +2094,8 @@
 
   <public type="attr" name="fragmentBreadCrumbsStyle" />
   <public type="attr" name="fastScrollStyle" />
+  <public type="attr" name="windowContentTransitions" />
+  <public type="attr" name="windowContentTransitionManager" />
 
   <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
   <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
@@ -2104,5 +2106,7 @@
   <public type="style" name="Widget.Holo.Light.FastScroll" />
   <public type="style" name="Widget.DeviceDefault.FastScroll" />
   <public type="style" name="Widget.DeviceDefault.Light.FastScroll" />
+
+  <public type="style" name="Theme.Quantum" />
 
 </resources>

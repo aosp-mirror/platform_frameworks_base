@@ -1925,4 +1925,11 @@ please see themes_device_defaults.xml.
     <style name="Theme.Holo.Wallpaper.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <!-- Default Quantum Paper theme. -->
+    <style name="Theme.Quantum" parent="@android:style/Theme.Holo.Light">
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Quantum.Activity</item>
+    </style>
+
 </resources>

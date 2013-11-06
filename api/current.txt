@@ -1207,6 +1207,8 @@ package android {
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
+    field public static final int windowContentTransitionManager = 16843765; // 0x10103f5
+    field public static final int windowContentTransitions = 16843764; // 0x10103f4
     field public static final int windowDisablePreview = 16843298; // 0x1010222
     field public static final int windowEnableSplitTouch = 16843543; // 0x1010317
     field public static final int windowEnterAnimation = 16842932; // 0x10100b4
@@ -1810,6 +1812,7 @@ package android {
     field public static final int Theme_NoTitleBar_Fullscreen = 16973831; // 0x1030007
     field public static final int Theme_NoTitleBar_OverlayActionModes = 16973930; // 0x103006a
     field public static final int Theme_Panel = 16973913; // 0x1030059
+    field public static final int Theme_Quantum = 16974318; // 0x10301ee
     field public static final int Theme_Translucent = 16973839; // 0x103000f
     field public static final int Theme_Translucent_NoTitleBar = 16973840; // 0x1030010
     field public static final int Theme_Translucent_NoTitleBar_Fullscreen = 16973841; // 0x1030011
@@ -26277,7 +26280,8 @@ package android.transition {
 
   public final class Scene {
     ctor public Scene(android.view.ViewGroup);
-    ctor public Scene(android.view.ViewGroup, android.view.ViewGroup);
+    ctor public Scene(android.view.ViewGroup, android.view.View);
+    ctor public deprecated Scene(android.view.ViewGroup, android.view.ViewGroup);
     method public void enter();
     method public void exit();
     method public static android.transition.Scene getSceneForLayout(android.view.ViewGroup, int, android.content.Context);
@@ -29337,6 +29341,7 @@ package android.view {
     field public static final int FEATURE_ACTION_BAR = 8; // 0x8
     field public static final int FEATURE_ACTION_BAR_OVERLAY = 9; // 0x9
     field public static final int FEATURE_ACTION_MODE_OVERLAY = 10; // 0xa
+    field public static final int FEATURE_CONTENT_TRANSITIONS = 11; // 0xb
     field public static final int FEATURE_CONTEXT_MENU = 6; // 0x6
     field public static final int FEATURE_CUSTOM_TITLE = 7; // 0x7
     field public static final int FEATURE_INDETERMINATE_PROGRESS = 5; // 0x5
