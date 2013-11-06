@@ -1,0 +1,75 @@
+page.title=Introduction to Android
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>To learn how apps work, start with
+<a href="{@docRoot}guide/components/fundamentals.html">App Fundamentals</a>.</p>
+<p>To begin coding right away, read <a
+href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>.</p>
+</div>
+
+<p>Android provides a rich application framework that allows you to build innovative apps and games
+for mobile devices in a Java language environment. The documents listed in the left
+navigation provide details about how to build apps using Android's various APIs.</p>
+
+<p>If you're new to Android development, it's important that you understand
+the following fundamental concepts about the Android app framework:</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>Apps provide multiple entry points</h4>
+
+<p>Android apps are built as a combination of distinct components that can be invoked
+individually. For instance, an individual <em>activity</em> provides a single
+screen for a user interface, and a <em>service</em> independently performs
+work in the background.</p>
+
+<p>From one component you can start another component using an <em>intent</em>. You can even start
+a component in a different app, such an activity in a maps app to show an address. This model
+provides multiple entry points for a single app and allows any app to behave as a user's "default"
+for an action that other apps may invoke.</p>
+
+
+<p><b>Learn more:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">App Fundamentals</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+<li><a href="{@docRoot}guide/components/activities.html">Activities</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>Apps adapt to different devices</h4>
+
+<p>Android provides an adaptive app framework that allows you to provide unique resources
+for different device configurations. For example, you can create different XML
+layout files for different screen sizes and the system
+determines which layout to apply based on the current device's screen size.</p>
+
+<p>You can query the availability of device features at runtime if any app features require
+specific hardware such as a camera. If necessary, you can also declare features your app requires
+so app markets such as Google Play Store do not allow installation on devices that do not support
+that feature.</p>
+
+
+<p><b>Learn more:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">Device Compatibility</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">Resources Overview</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">User Interface Overview</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+
