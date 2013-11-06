@@ -53,16 +53,19 @@ using namespace android;
 #define PER_ARRAY_TYPE(flag, fnc, ...) {                                                \
     jint len = 0;                                                                       \
     void *ptr = NULL;                                                                   \
+    size_t typeBytes = 0;                                                               \
     switch(dataType) {                                                                  \
     case RS_TYPE_FLOAT_32:                                                              \
         len = _env->GetArrayLength((jfloatArray)data);                                  \
         ptr = _env->GetFloatArrayElements((jfloatArray)data, flag);                     \
+        typeBytes = 4;                                                                  \
         fnc(__VA_ARGS__);                                                               \
         _env->ReleaseFloatArrayElements((jfloatArray)data, (jfloat *)ptr, JNI_ABORT);   \
         return;                                                                         \
     case RS_TYPE_FLOAT_64:                                                              \
         len = _env->GetArrayLength((jdoubleArray)data);                                 \
         ptr = _env->GetDoubleArrayElements((jdoubleArray)data, flag);                   \
+        typeBytes = 8;                                                                  \
         fnc(__VA_ARGS__);                                                               \
         _env->ReleaseDoubleArrayElements((jdoubleArray)data, (jdouble *)ptr, JNI_ABORT);\
         return;                                                                         \
@@ -70,6 +73,7 @@ using namespace android;
     case RS_TYPE_UNSIGNED_8:                                                            \
         len = _env->GetArrayLength((jbyteArray)data);                                   \
         ptr = _env->GetByteArrayElements((jbyteArray)data, flag);                       \
+        typeBytes = 1;                                                                  \
         fnc(__VA_ARGS__);                                                               \
         _env->ReleaseByteArrayElements((jbyteArray)data, (jbyte*)ptr, JNI_ABORT);       \
         return;                                                                         \
@@ -77,6 +81,7 @@ using namespace android;
     case RS_TYPE_UNSIGNED_16:                                                           \
         len = _env->GetArrayLength((jshortArray)data);                                  \
         ptr = _env->GetShortArrayElements((jshortArray)data, flag);                     \
+        typeBytes = 2;                                                                  \
         fnc(__VA_ARGS__);                                                               \
         _env->ReleaseShortArrayElements((jshortArray)data, (jshort *)ptr, JNI_ABORT);   \
         return;                                                                         \
@@ -84,6 +89,7 @@ using namespace android;
     case RS_TYPE_UNSIGNED_32:                                                           \
         len = _env->GetArrayLength((jintArray)data);                                    \
         ptr = _env->GetIntArrayElements((jintArray)data, flag);                         \
+        typeBytes = 4;                                                                  \
         fnc(__VA_ARGS__);                                                               \
         _env->ReleaseIntArrayElements((jintArray)data, (jint *)ptr, JNI_ABORT);         \
         return;                                                                         \
@@ -91,6 +97,7 @@ using namespace android;
     case RS_TYPE_UNSIGNED_64:                                                           \
         len = _env->GetArrayLength((jlongArray)data);                                   \
         ptr = _env->GetLongArrayElements((jlongArray)data, flag);                       \
+        typeBytes = 8;                                                                  \
         fnc(__VA_ARGS__);                                                               \
         _env->ReleaseLongArrayElements((jlongArray)data, (jlong *)ptr, JNI_ABORT);      \
         return;                                                                         \
@@ -742,48 +749,34 @@ nAllocationData3D_alloc(JNIEnv *_env, jobject _this, RsContext con,
                             srcXoff, srcYoff, srcZoff, srcMip);
 }
 
+
 static void
-nAllocationRead_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jintArray data)
+nAllocationRead(JNIEnv *_env, jobject _this, RsContext con, jint _alloc, jobject data, int dataType)
 {
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
-    jint *ptr = _env->GetIntArrayElements(data, NULL);
-    jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(int));
-    _env->ReleaseIntArrayElements(data, ptr, 0);
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    LOG_API("nAllocationRead, con(%p), alloc(%p)", con, (RsAllocation)alloc);
+    PER_ARRAY_TYPE(0, rsAllocationRead, con, alloc, ptr, len * typeBytes);
 }
 
 static void
-nAllocationRead_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jshortArray data)
+nAllocationRead1D(JNIEnv *_env, jobject _this, RsContext con, jint _alloc, jint offset, jint lod,
+                  jint count, jobject data, int sizeBytes, int dataType)
 {
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
-    jshort *ptr = _env->GetShortArrayElements(data, NULL);
-    jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(short));
-    _env->ReleaseShortArrayElements(data, ptr, 0);
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    LOG_API("nAllocation1DRead, con(%p), adapter(%p), offset(%i), count(%i), len(%i), sizeBytes(%i), dataType(%i)",
+            con, alloc, offset, count, len, sizeBytes, dataType);
+    PER_ARRAY_TYPE(0, rsAllocation1DRead, con, alloc, offset, lod, count, ptr, sizeBytes);
 }
 
 static void
-nAllocationRead_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jbyteArray data)
+nAllocationRead2D(JNIEnv *_env, jobject _this, RsContext con, jint _alloc, jint xoff, jint yoff, jint lod, jint _face,
+                  jint w, jint h, jobject data, int sizeBytes, int dataType)
 {
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
-    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
-    jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(char));
-    _env->ReleaseByteArrayElements(data, ptr, 0);
-}
-
-static void
-nAllocationRead_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jfloatArray data)
-{
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationRead_f, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
-    jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(float));
-    _env->ReleaseFloatArrayElements(data, ptr, 0);
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    RsAllocationCubemapFace face = (RsAllocationCubemapFace)_face;
+    LOG_API("nAllocation2DRead, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i) type(%i)",
+            con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
+    PER_ARRAY_TYPE(0, rsAllocation2DRead, con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
 }
 
 static jint
@@ -1572,10 +1565,9 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationData2D",              "(IIIIIIIIIIIII)V",                      (void*)nAllocationData2D_alloc },
 {"rsnAllocationData3D",              "(IIIIIIIIILjava/lang/Object;II)V",      (void*)nAllocationData3D },
 {"rsnAllocationData3D",              "(IIIIIIIIIIIIII)V",                     (void*)nAllocationData3D_alloc },
-{"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
-{"rsnAllocationRead",                "(II[S)V",                               (void*)nAllocationRead_s },
-{"rsnAllocationRead",                "(II[B)V",                               (void*)nAllocationRead_b },
-{"rsnAllocationRead",                "(II[F)V",                               (void*)nAllocationRead_f },
+{"rsnAllocationRead",                "(IILjava/lang/Object;I)V",              (void*)nAllocationRead },
+{"rsnAllocationRead1D",              "(IIIIILjava/lang/Object;II)V",          (void*)nAllocationRead1D },
+{"rsnAllocationRead2D",              "(IIIIIIIILjava/lang/Object;II)V",       (void*)nAllocationRead2D },
 {"rsnAllocationGetType",             "(II)I",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(III)V",                                (void*)nAllocationResize1D },
 {"rsnAllocationGenerateMipmaps",     "(II)V",                                 (void*)nAllocationGenerateMipmaps },
