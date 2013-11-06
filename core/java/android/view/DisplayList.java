@@ -177,6 +177,20 @@ public abstract class DisplayList {
     public static final int STATUS_DREW = 0x4;
 
     /**
+     * Creates a new display list that can be used to record batches of
+     * drawing operations.
+     *
+     * @param name The name of the display list, used for debugging purpose. May be null.
+     *
+     * @return A new display list.
+     *
+     * @hide
+     */
+    public static DisplayList create(String name) {
+        return new GLES20DisplayList(name);
+    }
+
+    /**
      * Starts recording the display list. All operations performed on the
      * returned canvas are recorded and stored in this display list.
      *

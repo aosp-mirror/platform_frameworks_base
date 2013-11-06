@@ -1346,7 +1346,7 @@ public class Editor {
                 DisplayList blockDisplayList = mTextDisplayLists[blockIndex];
                 if (blockDisplayList == null) {
                     blockDisplayList = mTextDisplayLists[blockIndex] =
-                            mTextView.getHardwareRenderer().createDisplayList("Text " + blockIndex);
+                            DisplayList.create("Text " + blockIndex);
                 } else {
                     if (blockIsInvalid) blockDisplayList.clear();
                 }
