@@ -2529,7 +2529,7 @@
                  android:hasCode="false"
                  android:label="@string/android_system_label"
                  android:allowClearUserData="false"
-                 android:backupAgent="com.android.server.SystemBackupAgent"
+                 android:backupAgent="com.android.server.backup.SystemBackupAgent"
                  android:killAfterRestore="false"
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true">

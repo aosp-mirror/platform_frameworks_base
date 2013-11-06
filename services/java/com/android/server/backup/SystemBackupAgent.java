@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.backup;
 
 
+import android.app.IWallpaperManager;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
@@ -26,10 +27,10 @@ import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Slog;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -63,16 +64,23 @@ public class SystemBackupAgent extends BackupAgentHelper {
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
         // We only back up the data under the current "wallpaper" schema with metadata
-        WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
+        IWallpaperManager wallpaper = (IWallpaperManager)ServiceManager.getService(
                 Context.WALLPAPER_SERVICE);
         String[] files = new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO };
         String[] keys = new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY };
-        if (wallpaper != null && wallpaper.getName() != null && wallpaper.getName().length() > 0) {
-            // When the wallpaper has a name, back up the info by itself.
-            // TODO: Don't rely on the innards of the service object like this!
-            // TODO: Send a delete for any stored wallpaper image in this case?
-            files = new String[] { WALLPAPER_INFO };
-            keys = new String[] { WALLPAPER_INFO_KEY };
+        if (wallpaper != null) {
+            try {
+                final String wallpaperName = wallpaper.getName();
+                if (wallpaperName != null && wallpaperName.length() > 0) {
+                    // When the wallpaper has a name, back up the info by itself.
+                    // TODO: Don't rely on the innards of the service object like this!
+                    // TODO: Send a delete for any stored wallpaper image in this case?
+                    files = new String[] { WALLPAPER_INFO };
+                    keys = new String[] { WALLPAPER_INFO_KEY };
+                }
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Couldn't get wallpaper name\n" + re);
+            }
         }
         addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files, keys));
         super.onBackup(oldState, data, newState);
@@ -109,9 +117,15 @@ public class SystemBackupAgent extends BackupAgentHelper {
         try {
             super.onRestore(data, appVersionCode, newState);
 
-            WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
+            IWallpaperManager wallpaper = (IWallpaperManager) ServiceManager.getService(
                     Context.WALLPAPER_SERVICE);
-            wallpaper.settingsRestored();
+            if (wallpaper != null) {
+                try {
+                    wallpaper.settingsRestored();
+                } catch (RemoteException re) {
+                    Slog.e(TAG, "Couldn't restore settings\n" + re);
+                }
+            }
         } catch (IOException ex) {
             // If there was a failure, delete everything for the wallpaper, this is too aggressive,
             // but this is hopefully a rare failure.
@@ -149,10 +163,16 @@ public class SystemBackupAgent extends BackupAgentHelper {
             FullBackup.restoreFile(data, size, type, mode, mtime, outFile);
 
             if (restoredWallpaper) {
-                WallpaperManagerService wallpaper =
-                        (WallpaperManagerService)ServiceManager.getService(
+                IWallpaperManager wallpaper =
+                        (IWallpaperManager)ServiceManager.getService(
                         Context.WALLPAPER_SERVICE);
-                wallpaper.settingsRestored();
+                if (wallpaper != null) {
+                    try {
+                        wallpaper.settingsRestored();
+                    } catch (RemoteException re) {
+                        Slog.e(TAG, "Couldn't restore settings\n" + re);
+                    }
+                }
             }
         } catch (IOException e) {
             if (restoredWallpaper) {
