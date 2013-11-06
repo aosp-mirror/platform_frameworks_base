@@ -71,6 +71,9 @@ class names, for example "android.*.R**" ("*" does not matches dots whilst "**" 
 and "." and "$" are interpreted as-is).
 In practice we almost but not quite request the inclusion of full packages.
 
+The analyzer is also given a list of classes to exclude. A fake implementation of these
+classes is injected by the Generator.
+
 With this information, the analyzer parses the input zip to find all the classes.
 All classes deriving from the requested bases classes are kept.
 All classes which name matched the glob pattern are kept.
@@ -93,6 +96,7 @@ and lists:
 - specific methods for which to delegate calls.
 - specific methods to remove based on their return type.
 - specific classes to rename.
+- specific classes to refactor.
 
 Each of these are specific strategies we use to be able to modify the Android code
 to fit within the Eclipse renderer. These strategies are explained beow.
@@ -100,10 +104,7 @@ to fit within the Eclipse renderer. These strategies are explained beow.
 The core method of the generator is transform(): it takes an input ASM ClassReader
 and modifies it to produce a byte array suitable for the final JAR file.
 
-The first step of the transformation is changing the name of the class in case
-we requested the class to be renamed. This uses the RenameClassAdapter to also rename
-all inner classes and references in methods and types. Note that other classes are
-not transformed and keep referencing the original name.
+The first step of the transformation is to implement the method delegates.
 
 The TransformClassAdapter is then used to process the potentially renamed class.
 All protected or private classes are market as public.
@@ -115,11 +116,25 @@ Methods are also changed from protected/private to public.
 The code of the methods is then kept as-is, except for native methods which are
 replaced by a stub. Methods that are to be overridden are also replaced by a stub.
 
-The transformed class is then fed through the DelegateClassAdapter to implement
-method delegates. 
-
 Finally fields are also visited and changed from protected/private to public.
 
+The next step of the transformation is changing the name of the class in case
+we requested the class to be renamed. This uses the RenameClassAdapter to also rename
+all inner classes and references in methods and types. Note that other classes are
+not transformed and keep referencing the original name.
+
+The class is then fed to RefactorClassAdapter which is like RenameClassAdapter but
+updates the references in all classes. This is used to update the references of classes
+in the java package that were added in the Dalvik VM but are not a part of the standard
+JVM. The existing classes are modified to update all references to these non-standard
+classes. An alternate implementation of these (com.android.tools.layoutlib.java.*) is
+injected.
+
+The ClassAdapters are chained together to achieve the desired output. (Look at section
+2.2.7 Transformation chains in the asm user guide, link in the References.) The order of
+execution of these is:
+ClassReader -> [DelegateClassAdapter] -> TransformClassAdapter -> [RenameClassAdapter] ->
+RefactorClassAdapter -> ClassWriter
 
 - Method stubs
 --------------
@@ -141,19 +156,27 @@ This strategy is now obsolete and replaced by the method delegates.
 - Strategies
 ------------
 
-We currently have 4 strategies to deal with overriding the rendering code
+We currently have 6 strategies to deal with overriding the rendering code
 and make it run in Eclipse. Most of these strategies are implemented hand-in-hand
 by the bridge (which runs in Eclipse) and the generator.
 
 
 1- Class Injection
 
-This is the easiest: we currently inject 4 classes, namely:
+This is the easiest: we currently inject the following classes:
 - OverrideMethod and its associated MethodListener and MethodAdapter are used
   to intercept calls to some specific methods that are stubbed out and change
   their return value.
 - CreateInfo class, which configured the generator. Not used yet, but could
   in theory help us track what the generator changed.
+- AutoCloseable and Objects are part of Java 7. To enable us to still run on Java 6, new
+  classes are injected. The implementation for these classes has been taken from
+  Android's libcore (platform/libcore/luni/src/main/java/java/...).
+- Charsets, IntegralToString and UnsafeByteSequence are not part of the standard JAVA VM.
+  They are added to the Dalvik VM for performance reasons. An implementation that is very
+  close to the original (which is at platform/libcore/luni/src/main/java/...) is injected.
+  Since these classees were in part of the java package, where we can't inject classes,
+  all references to these have been updated (See strategy 4- Refactoring Classes).
 
 
 2- Overriding methods
@@ -189,7 +212,15 @@ we don't control object creation.
 This won't rename/replace the inner static methods of a given class.
 
 
-4- Method erasure based on return type
+4- Refactoring classes
+
+This is very similar to the Renaming classes except that it also updates the reference in
+all classes. This is done for classes which are added to the Dalvik VM for performance
+reasons but are not present in the Standard Java VM. An implementation for these classes
+is also injected.
+
+
+5- Method erasure based on return type
 
 This is mostly an implementation detail of the bridge: in the Paint class
 mentioned above, some inner static classes are used to pass around
@@ -201,7 +232,7 @@ example, the inner class Paint$Style in the Paint class should be discarded and 
 bridge will provide its own implementation.
 
 
-5- Method Delegates
+6- Method Delegates
 
 This strategy is used to override method implementations.
 Given a method SomeClass.MethodName(), 1 or 2 methods are generated:
@@ -233,7 +264,7 @@ Bytecode opcode list:
   http://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
 
 ASM user guide:
-  http://download.forge.objectweb.org/asm/asm-guide.pdf
+  http://download.forge.objectweb.org/asm/asm4-guide.pdf
 
 
 --

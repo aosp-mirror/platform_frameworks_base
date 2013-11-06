@@ -17,6 +17,11 @@
 package com.android.tools.layoutlib.create;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+import com.android.tools.layoutlib.java.AutoCloseable;
+import com.android.tools.layoutlib.java.Charsets;
+import com.android.tools.layoutlib.java.IntegralToString;
+import com.android.tools.layoutlib.java.Objects;
+import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
 /**
  * Describes the work to be done by {@link AsmGenerator}.
@@ -84,6 +89,15 @@ public final class CreateInfo implements ICreateInfo {
         return DELETE_RETURNS;
     }
 
+    /**
+     * Returns the list of classes to refactor, must be an even list: the binary FQCN of class to
+     * replace followed by the new FQCN. All references to the old class should be updated to the
+     * new class. The list can be empty but must not be null.
+     */
+    @Override
+    public String[] getJavaPkgClasses() {
+      return JAVA_PKG_CLASSES;
+    }
     //-----
 
     /**
@@ -95,7 +109,13 @@ public final class CreateInfo implements ICreateInfo {
             MethodAdapter.class,
             ICreateInfo.class,
             CreateInfo.class,
-            LayoutlibDelegate.class
+            LayoutlibDelegate.class,
+            /* Java package classes */
+            AutoCloseable.class,
+            Objects.class,
+            IntegralToString.class,
+            UnsafeByteSequence.class,
+            Charsets.class,
         };
 
     /**
@@ -111,6 +131,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.HandlerThread#run",
         "android.os.Build#getString",
         "android.text.format.DateFormat#is24HourFormat",
+        "android.text.format.Time#format1",
         "android.view.Choreographer#getRefreshRate",
         "android.view.Display#updateDisplayInfoLocked",
         "android.view.LayoutInflater#rInflate",
@@ -169,6 +190,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.text.AndroidBidi",
         "android.util.FloatMath",
         "android.view.Display",
+        "libcore.icu.DateIntervalFormat",
         "libcore.icu.ICU",
     };
 
@@ -192,6 +214,20 @@ public final class CreateInfo implements ICreateInfo {
             "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
             "android.webkit.WebView",                          "android.webkit._Original_WebView",
             "com.android.internal.policy.PolicyManager",       "com.android.internal.policy._Original_PolicyManager",
+        };
+
+    /**
+     * The list of class references to update, must be an even list: the binary
+     * FQCN of class to replace followed by the new FQCN. The classes to
+     * replace are to be excluded from the output.
+     */
+    private final static String[] JAVA_PKG_CLASSES =
+        new String[] {
+            "java.lang.AutoCloseable",                         "com.android.tools.layoutlib.java.AutoCloseable",
+            "java.util.Objects",                               "com.android.tools.layoutlib.java.Objects",
+            "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
+            "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
+            "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
         };
 
     /**

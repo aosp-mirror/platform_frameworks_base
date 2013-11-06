@@ -48,6 +48,11 @@ import java.util.Map;
  */
 public final class NinePatch_Delegate {
 
+    // ---- delegate manager ----
+    private static final DelegateManager<NinePatch_Delegate> sManager =
+            new DelegateManager<NinePatch_Delegate>(NinePatch_Delegate.class);
+
+    // ---- delegate helper data ----
     /**
      * Cache map for {@link NinePatchChunk}.
      * When the chunks are created they are serialized into a byte[], and both are put
@@ -59,6 +64,10 @@ public final class NinePatch_Delegate {
      */
     private final static Map<byte[], SoftReference<NinePatchChunk>> sChunkCache =
         new HashMap<byte[], SoftReference<NinePatchChunk>>();
+
+    // ---- delegate data ----
+    private byte[] chunk;
+
 
     // ---- Public Helper methods ----
 
@@ -149,32 +158,39 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void validateNinePatchChunk(int bitmap, byte[] chunk) {
+    /*package*/ static int validateNinePatchChunk(int bitmap, byte[] chunk) {
         // the default JNI implementation only checks that the byte[] has the same
         // size as the C struct it represent. Since we cannot do the same check (serialization
         // will return different size depending on content), we do nothing.
+        NinePatch_Delegate newDelegate = new NinePatch_Delegate();
+        newDelegate.chunk = chunk;
+        return sManager.addNewDelegate(newDelegate);
+    }
+
+    /*package*/ static void nativeFinalize(int chunk) {
+        sManager.removeJavaReferenceFor(chunk);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeDraw(int canvas_instance, RectF loc, int bitmap_instance,
-            byte[] c, int paint_instance_or_null, int destDensity, int srcDensity) {
+            int chunk, int paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
                 (int) loc.left, (int) loc.top, (int) loc.width(), (int) loc.height(),
-                bitmap_instance, c, paint_instance_or_null,
+                bitmap_instance, chunk, paint_instance_or_null,
                 destDensity, srcDensity);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeDraw(int canvas_instance, Rect loc, int bitmap_instance,
-            byte[] c, int paint_instance_or_null, int destDensity, int srcDensity) {
+            int chunk, int paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
                 loc.left, loc.top, loc.width(), loc.height(),
-                bitmap_instance, c, paint_instance_or_null,
+                bitmap_instance, chunk, paint_instance_or_null,
                 destDensity, srcDensity);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeGetTransparentRegion(int bitmap, byte[] chunk, Rect location) {
+    /*package*/ static int nativeGetTransparentRegion(int bitmap, int chunk, Rect location) {
         return 0;
     }
 
@@ -182,7 +198,7 @@ public final class NinePatch_Delegate {
 
     private static void draw(int canvas_instance,
             final int left, final int top, final int right, final int bottom,
-            int bitmap_instance, byte[] c, int paint_instance_or_null,
+            int bitmap_instance, int chunk, int paint_instance_or_null,
             final int destDensity, final int srcDensity) {
         // get the delegate from the native int.
         final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
@@ -190,6 +206,11 @@ public final class NinePatch_Delegate {
             return;
         }
 
+        byte[] c = null;
+        NinePatch_Delegate delegate = sManager.getDelegate(chunk);
+        if (delegate != null) {
+            c = delegate.chunk;
+        }
         if (c == null) {
             // not a 9-patch?
             BufferedImage image = bitmap_delegate.getImage();
