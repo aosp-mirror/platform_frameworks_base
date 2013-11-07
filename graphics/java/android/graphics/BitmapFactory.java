@@ -469,7 +469,7 @@ public class BitmapFactory {
      *
      * @param res The resources object containing the image data
      * @param id The resource id of the image data
-     * @return The decoded bitmap, or null if the image could not be decode.
+     * @return The decoded bitmap, or null if the image could not be decoded.
      */
     public static Bitmap decodeResource(Resources res, int id) {
         return decodeResource(res, id, null);
@@ -517,7 +517,7 @@ public class BitmapFactory {
      * @param offset offset into imageData for where the decoder should begin
      *               parsing.
      * @param length the number of bytes, beginning at offset, to parse
-     * @return The decoded bitmap, or null if the image could not be decode.
+     * @return The decoded bitmap, or null if the image could not be decoded.
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length) {
         return decodeByteArray(data, offset, length, null);

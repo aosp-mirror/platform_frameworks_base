@@ -1213,8 +1213,8 @@ public class Instrumentation {
     }
 
     /**
-     * Perform calling of an activity's {@link Activity#onPause} method.  The
-     * default implementation simply calls through to that method.
+     * Perform calling of an activity's {@link Activity#onSaveInstanceState}
+     * method.  The default implementation simply calls through to that method.
      * 
      * @param activity The activity being saved.
      * @param outState The bundle to pass to the call.

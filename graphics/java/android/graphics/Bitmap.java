@@ -995,7 +995,7 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Returns true if the bitmap is marked as mutable (i.e. can be drawn into)
+     * Returns true if the bitmap is marked as mutable (i.e.&nbsp;can be drawn into)
      */
     public final boolean isMutable() {
         return mIsMutable;
