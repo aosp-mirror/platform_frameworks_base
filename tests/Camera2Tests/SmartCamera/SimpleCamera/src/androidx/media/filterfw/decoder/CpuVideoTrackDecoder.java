@@ -29,7 +29,6 @@ import androidx.media.filterfw.Frame;
 import androidx.media.filterfw.FrameImage2D;
 import androidx.media.filterfw.PixelUtils;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -215,13 +214,7 @@ public class CpuVideoTrackDecoder extends VideoTrackDecoder {
             return null;
         } else {
             String bestCodec = candidateCodecs.firstEntry().getValue();
-            try {
-                return MediaCodec.createByCodecName(bestCodec);
-            } catch (IOException e) {
-                throw new RuntimeException(
-                        "IOException in MediaCodec.createByCodecName for "
-                        + bestCodec, e);
-            }
+            return MediaCodec.createByCodecName(bestCodec);
         }
     }
 

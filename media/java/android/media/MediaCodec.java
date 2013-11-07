@@ -23,7 +23,6 @@ import android.media.MediaFormat;
 import android.os.Bundle;
 import android.view.Surface;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
@@ -67,8 +66,8 @@ import java.util.Map;
  *
  * Each codec maintains a number of input and output buffers that are
  * referred to by index in API calls.
- * The contents of these buffers are represented by the ByteBuffer[] arrays
- * accessible through {@link #getInputBuffers} and {@link #getOutputBuffers}.
+ * The contents of these buffers is represented by the ByteBuffer[] arrays
+ * accessible through getInputBuffers() and getOutputBuffers().
  *
  * After a successful call to {@link #start} the client "owns" neither
  * input nor output buffers, subsequent calls to {@link #dequeueInputBuffer}
@@ -118,18 +117,7 @@ import java.util.Map;
  * own any buffers anymore.
  * Note that the format of the data submitted after a flush must not change,
  * flush does not support format discontinuities,
- * for this a full {@link #stop}, {@link #configure}, {@link #start}
- * cycle is necessary.
- *
- * <p> The factory methods
- * {@link #createByCodecName},
- * {@link #createDecoderByType},
- * and {@link #createEncoderByType}
- * throw {@link java.io.IOException} on failure which
- * the caller must catch or declare to pass up.
- * Other methods will throw {@link java.lang.IllegalStateException}
- * if the codec is in an Uninitialized, Invalid, or Error state (e.g. not
- * initialized properly).  Exceptions are thrown elsewhere as noted. </p>
+ * for this a full stop(), configure(), start() cycle is necessary.
  *
  */
 final public class MediaCodec {
@@ -193,22 +181,16 @@ final public class MediaCodec {
      * </ul>
      *
      * @param type The mime type of the input data.
-     * @throws IOException if the codec cannot be created.
-     * @throws IllegalArgumentException if type is null.
      */
-    public static MediaCodec createDecoderByType(String type)
-            throws IOException {
+    public static MediaCodec createDecoderByType(String type) {
         return new MediaCodec(type, true /* nameIsType */, false /* encoder */);
     }
 
     /**
      * Instantiate an encoder supporting output data of the given mime type.
      * @param type The desired mime type of the output data.
-     * @throws IOException if the codec cannot be created.
-     * @throws IllegalArgumentException if type is null.
      */
-    public static MediaCodec createEncoderByType(String type)
-            throws IOException {
+    public static MediaCodec createEncoderByType(String type) {
         return new MediaCodec(type, true /* nameIsType */, true /* encoder */);
     }
 
@@ -217,11 +199,8 @@ final public class MediaCodec {
      * use this method to instantiate it. Use with caution.
      * Likely to be used with information obtained from {@link android.media.MediaCodecList}
      * @param name The name of the codec to be instantiated.
-     * @throws IOException if the codec cannot be created.
-     * @throws IllegalArgumentException if name is null.
      */
-    public static MediaCodec createByCodecName(String name)
-            throws IOException {
+    public static MediaCodec createByCodecName(String name) {
         return new MediaCodec(
                 name, false /* nameIsType */, false /* unused */);
     }
