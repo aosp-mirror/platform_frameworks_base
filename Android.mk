@@ -622,7 +622,7 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/BasicSyncAdapter \
  		            samples/BasicSyncAdapter "" \
 		-samplecode $(sample_dir)/StorageClient \
- 		            samples/StorageClient ""
+ 		            samples/StorageClient "" \
 		-samplecode $(sample_dir)/StorageProvider \
  		            samples/StorageProvider ""
 #       -samplecode $(sample_dir)/AndroidBeamDemo \
