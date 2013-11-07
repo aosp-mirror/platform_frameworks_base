@@ -1130,10 +1130,11 @@ shell. To exit and return to the adb remote shell, use <code>exit</code> or <cod
 
 <h3 id="screenrecord">Recording a device screen</h3>
 
-<p>The {@code screenrecord} command is a shell utility for recording the display of a device as you
-  use it. The utility records screen activity to an MPEG-4 file, which you can then download and use
-  as part of a video presentation. This utility is useful for developers who want to create
-  promotional or training videos without using a separate recording device.</p>
+<p>The {@code screenrecord} command is a shell utility for recording the display of devices
+  running Android 4.4 (API level 19) and higher. The utility records screen activity to an MPEG-4
+  file, which you can then download and use as part of a video presentation. This utility is useful
+  for developers who want to create promotional or training videos without using a separate
+  recording device.</p>
 
 <p>To use the {@code screenrecord} from the command line, type the following:
 
