@@ -799,7 +799,13 @@ public class WifiManager {
      */
     public boolean requestBatchedScan(BatchedScanSettings requested) {
         try {
-            return mService.requestBatchedScan(requested, new Binder());
+            return mService.requestBatchedScan(requested, new Binder(), null);
+        } catch (RemoteException e) { return false; }
+    }
+    /** @hide */
+    public boolean requestBatchedScan(BatchedScanSettings requested, WorkSource workSource) {
+        try {
+            return mService.requestBatchedScan(requested, new Binder(), workSource);
         } catch (RemoteException e) { return false; }
     }
 
