@@ -36,7 +36,6 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
-import android.os.Trace;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.Objects;
 import com.android.server.Watchdog;
@@ -64,12 +63,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
@@ -1924,26 +1925,38 @@ final class ActivityStack {
                 // bottom of the activity stack.  This also keeps it
                 // correctly ordered with any activities we previously
                 // moved.
+                final ThumbnailHolder newThumbHolder;
+                final TaskRecord targetTask;
                 final ActivityRecord bottom =
                         !mTaskHistory.isEmpty() && !mTaskHistory.get(0).mActivities.isEmpty() ?
-                        mTaskHistory.get(0).mActivities.get(0) : null;
+                                mTaskHistory.get(0).mActivities.get(0) : null;
                 if (bottom != null && target.taskAffinity != null
                         && target.taskAffinity.equals(bottom.task.affinity)) {
                     // If the activity currently at the bottom has the
                     // same task affinity as the one we are moving,
                     // then merge it into the same task.
-                    target.setTask(bottom.task, bottom.thumbHolder, false);
+                    targetTask = bottom.task;
+                    newThumbHolder = bottom.thumbHolder == null ? targetTask : bottom.thumbHolder;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to bottom task " + bottom.task);
                 } else {
-                    target.setTask(createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
-                            null, false), null, false);
-                    target.task.affinityIntent = target.intent;
+                    targetTask = createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
+                            null, false);
+                    newThumbHolder = targetTask;
+                    targetTask.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to new task " + target.task);
                 }
 
-                final TaskRecord targetTask = target.task;
+                if (clearWhenTaskReset) {
+                    // This is the start of a new sub-task.
+                    if (target.thumbHolder == null) {
+                        target.thumbHolder = new ThumbnailHolder();
+                    }
+                } else {
+                    target.thumbHolder = newThumbHolder;
+                }
+
                 final int targetTaskId = targetTask.taskId;
                 mWindowManager.setAppGroupId(target.appToken, targetTaskId);
 
@@ -1964,8 +1977,8 @@ final class ActivityStack {
                         }
                     }
                     if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing activity " + p + " from task="
-                            + task + " adding to task=" + targetTask,
-                            new RuntimeException("here").fillInStackTrace());
+                            + task + " adding to task=" + targetTask
+                            + " Callers=" + Debug.getCallers(4));
                     if (DEBUG_TASKS) Slog.v(TAG, "Pushing next activity " + p
                             + " out to target's task " + target.task);
                     p.setTask(targetTask, curThumbHolder, false);
