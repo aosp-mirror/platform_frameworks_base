@@ -29666,6 +29666,9 @@ package android.view.accessibility {
     method public boolean performAction(int, android.os.Bundle);
     method public void recycle();
     method public boolean refresh();
+    method public void removeAction(int);
+    method public boolean removeChild(android.view.View);
+    method public boolean removeChild(android.view.View, int);
     method public void setAccessibilityFocused(boolean);
     method public void setBoundsInParent(android.graphics.Rect);
     method public void setBoundsInScreen(android.graphics.Rect);

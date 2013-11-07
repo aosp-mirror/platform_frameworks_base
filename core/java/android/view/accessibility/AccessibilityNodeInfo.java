@@ -22,8 +22,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
+import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
-import android.util.SparseLongArray;
 import android.view.View;
 
 import java.util.Collections;
@@ -503,7 +503,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mContentDescription;
     private String mViewIdResourceName;
 
-    private final SparseLongArray mChildNodeIds = new SparseLongArray();
+    private LongArray mChildNodeIds;
     private int mActions;
 
     private int mMovementGranularities;
@@ -666,12 +666,26 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * @return The ids of the children.
+     * Returns the array containing the IDs of this node's children.
      *
      * @hide
      */
-    public SparseLongArray getChildNodeIds() {
+    public LongArray getChildNodeIds() {
         return mChildNodeIds;
+    }
+
+    /**
+     * Returns the id of the child at the specified index.
+     *
+     * @throws IndexOutOfBoundsException when index &lt; 0 || index &gt;=
+     *             getChildCount()
+     * @hide
+     */
+    public long getChildId(int index) {
+        if (mChildNodeIds == null) {
+            throw new IndexOutOfBoundsException();
+        }
+        return mChildNodeIds.get(index);
     }
 
     /**
@@ -680,7 +694,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child count.
      */
     public int getChildCount() {
-        return mChildNodeIds.size();
+        return mChildNodeIds == null ? 0 : mChildNodeIds.size();
     }
 
     /**
@@ -699,6 +713,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getChild(int index) {
         enforceSealed();
+        if (mChildNodeIds == null) {
+            return null;
+        }
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
         }
@@ -721,7 +738,35 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addChild(View child) {
-        addChild(child, UNDEFINED);
+        addChildInternal(child, UNDEFINED, true);
+    }
+
+    /**
+     * Unchecked version of {@link #addChild(View)} that does not verify
+     * uniqueness. For framework use only.
+     *
+     * @hide
+     */
+    public void addChildUnchecked(View child) {
+        addChildInternal(child, UNDEFINED, false);
+    }
+
+    /**
+     * Removes a child. If the child was not previously added to the node,
+     * calling this method has no effect.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param child The child.
+     * @return true if the child was present
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public boolean removeChild(View child) {
+        return removeChild(child, UNDEFINED);
     }
 
     /**
@@ -739,12 +784,49 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual child.
      */
     public void addChild(View root, int virtualDescendantId) {
+        addChildInternal(root, virtualDescendantId, true);
+    }
+
+    private void addChildInternal(View root, int virtualDescendantId, boolean checked) {
         enforceNotSealed();
-        final int index = mChildNodeIds.size();
+        if (mChildNodeIds == null) {
+            mChildNodeIds = new LongArray();
+        }
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
-        mChildNodeIds.put(index, childNodeId);
+        // If we're checking uniqueness and the ID already exists, abort.
+        if (checked && mChildNodeIds.indexOf(childNodeId) >= 0) {
+            return;
+        }
+        mChildNodeIds.add(childNodeId);
+    }
+
+    /**
+     * Removes a virtual child which is a descendant of the given
+     * <code>root</code>. If the child was not previously added to the node,
+     * calling this method has no effect.
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual child.
+     * @return true if the child was present
+     * @see #addChild(View, int)
+     */
+    public boolean removeChild(View root, int virtualDescendantId) {
+        enforceNotSealed();
+        final LongArray childIds = mChildNodeIds;
+        if (childIds == null) {
+            return false;
+        }
+        final int rootAccessibilityViewId =
+                (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
+        final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+        final int index = childIds.indexOf(childNodeId);
+        if (index < 0) {
+            return false;
+        }
+        childIds.remove(index);
+        return true;
     }
 
     /**
@@ -786,6 +868,24 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void addAction(int action) {
         enforceNotSealed();
         mActions |= action;
+    }
+
+    /**
+     * Removes an action that can be performed on the node. If the action was
+     * not already added to the node, calling this method has no effect.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param action The action.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void removeAction(int action) {
+        enforceNotSealed();
+        mActions &= ~action;
     }
 
     /**
@@ -1408,8 +1508,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
-     *
-     * @return collectionItem True if the node is an item.
      */
     public void setCollectionItemInfo(CollectionItemInfo collectionItemInfo) {
         enforceNotSealed();
@@ -1951,6 +2049,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -2114,6 +2213,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *      is recycled. You must not touch the object after calling this function.
      * </p>
      */
+    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeLong(mSourceNodeId);
@@ -2123,11 +2223,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeLong(mLabeledById);
         parcel.writeInt(mConnectionId);
 
-        SparseLongArray childIds = mChildNodeIds;
-        final int childIdsSize = childIds.size();
-        parcel.writeInt(childIdsSize);
-        for (int i = 0; i < childIdsSize; i++) {
-            parcel.writeLong(childIds.valueAt(i));
+        final LongArray childIds = mChildNodeIds;
+        if (childIds == null) {
+            parcel.writeInt(0);
+        } else {
+            final int childIdsSize = childIds.size();
+            parcel.writeInt(childIdsSize);
+            for (int i = 0; i < childIdsSize; i++) {
+                parcel.writeLong(childIds.get(i));
+            }
         }
 
         parcel.writeInt(mBoundsInParent.top);
@@ -2222,10 +2326,16 @@ public class AccessibilityNodeInfo implements Parcelable {
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
         mMovementGranularities = other.mMovementGranularities;
-        final int otherChildIdCount = other.mChildNodeIds.size();
-        for (int i = 0; i < otherChildIdCount; i++) {
-            mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));
+
+        final LongArray otherChildNodeIds = other.mChildNodeIds;
+        if (otherChildNodeIds != null && otherChildNodeIds.size() > 0) {
+            if (mChildNodeIds == null) {
+                mChildNodeIds = otherChildNodeIds.clone();
+            } else {
+                mChildNodeIds.addAll(otherChildNodeIds);
+            }
         }
+
         mTextSelectionStart = other.mTextSelectionStart;
         mTextSelectionEnd = other.mTextSelectionEnd;
         mInputType = other.mInputType;
@@ -2255,11 +2365,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLabeledById = parcel.readLong();
         mConnectionId = parcel.readInt();
 
-        SparseLongArray childIds = mChildNodeIds;
         final int childrenSize = parcel.readInt();
-        for (int i = 0; i < childrenSize; i++) {
-            final long childId = parcel.readLong();
-            childIds.put(i, childId);
+        if (childrenSize <= 0) {
+            mChildNodeIds = null;
+        } else {
+            mChildNodeIds = new LongArray(childrenSize);
+            for (int i = 0; i < childrenSize; i++) {
+                final long childId = parcel.readLong();
+                mChildNodeIds.add(childId);
+            }
         }
 
         mBoundsInParent.top = parcel.readInt();
@@ -2331,7 +2445,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         mWindowId = UNDEFINED;
         mConnectionId = UNDEFINED;
         mMovementGranularities = 0;
-        mChildNodeIds.clear();
+        if (mChildNodeIds != null) {
+            mChildNodeIds.clear();
+        }
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
@@ -2493,12 +2609,14 @@ public class AccessibilityNodeInfo implements Parcelable {
             }
             builder.append("]");
 
-            SparseLongArray childIds = mChildNodeIds;
             builder.append("; childAccessibilityIds: [");
-            for (int i = 0, count = childIds.size(); i < count; i++) {
-                builder.append(childIds.valueAt(i));
-                if (i < count - 1) {
-                    builder.append(", ");
+            final LongArray childIds = mChildNodeIds;
+            if (childIds != null) {
+                for (int i = 0, count = childIds.size(); i < count; i++) {
+                    builder.append(childIds.get(i));
+                    if (i < count - 1) {
+                        builder.append(", ");
+                    }
                 }
             }
             builder.append("]");
@@ -2893,16 +3011,18 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * @see Parcelable.Creator
+     * @see android.os.Parcelable.Creator
      */
     public static final Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
             new Parcelable.Creator<AccessibilityNodeInfo>() {
+        @Override
         public AccessibilityNodeInfo createFromParcel(Parcel parcel) {
             AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
             info.initFromParcel(parcel);
             return info;
         }
 
+        @Override
         public AccessibilityNodeInfo[] newArray(int size) {
             return new AccessibilityNodeInfo[size];
         }

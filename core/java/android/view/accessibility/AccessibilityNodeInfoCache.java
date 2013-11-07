@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import android.os.Build;
 import android.util.Log;
+import android.util.LongArray;
 import android.util.LongSparseArray;
 import android.util.SparseLongArray;
 
@@ -172,12 +173,12 @@ public class AccessibilityNodeInfoCache {
                     // the new one represents a source state where some of the
                     // children have been removed to avoid having disconnected
                     // subtrees in the cache.
-                    SparseLongArray oldChildrenIds = oldInfo.getChildNodeIds();
-                    SparseLongArray newChildrenIds = info.getChildNodeIds();
-                    final int oldChildCount = oldChildrenIds.size();
+                    // TODO: Runs in O(n^2), could optimize to O(n + n log n)
+                    final LongArray newChildrenIds = info.getChildNodeIds();
+                    final int oldChildCount = oldInfo.getChildCount();
                     for (int i = 0; i < oldChildCount; i++) {
-                        final long oldChildId = oldChildrenIds.valueAt(i);
-                        if (newChildrenIds.indexOfValue(oldChildId) < 0) {
+                        final long oldChildId = oldInfo.getChildId(i);
+                        if (newChildrenIds.indexOf(oldChildId) < 0) {
                             clearSubTreeLocked(oldChildId);
                         }
                     }
@@ -237,10 +238,9 @@ public class AccessibilityNodeInfoCache {
             return;
         }
         mCacheImpl.remove(rootNodeId);
-        SparseLongArray childNodeIds = current.getChildNodeIds();
-        final int childCount = childNodeIds.size();
+        final int childCount = current.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            final long childNodeId = childNodeIds.valueAt(i);
+            final long childNodeId = current.getChildId(i);
             clearSubTreeRecursiveLocked(childNodeId);
         }
     }
@@ -301,11 +301,10 @@ public class AccessibilityNodeInfoCache {
                     }
                 }
 
-                SparseLongArray childIds = current.getChildNodeIds();
-                final int childCount = childIds.size();
+                final int childCount = current.getChildCount();
                 for (int i = 0; i < childCount; i++) {
-                    final long childId = childIds.valueAt(i);
-                    AccessibilityNodeInfo child = mCacheImpl.get(childId);
+                    final long childId = current.getChildId(i);
+                    final AccessibilityNodeInfo child = mCacheImpl.get(childId);
                     if (child != null) {
                         fringe.add(child);
                     }
