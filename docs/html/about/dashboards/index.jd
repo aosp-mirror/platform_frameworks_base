@@ -111,7 +111,7 @@ support for any lower version (for example, support for version 2.0 also implies
 
 
 <img alt="" style="float:right"
-src="//chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1%20only|GL%202.0%20%26%201.1&chd=t%3A0.2,99.8&chf=bg,s,00000000" />
+src="//chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1%20only|GL%202.0|GL%203.0&chd=t%3A0.1,98.3,1.6&chf=bg,s,00000000" />
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
@@ -132,8 +132,12 @@ uses.</p>
 <td>0.1%</td>
 </tr>
 <tr>
-<td>2.0 &amp; 1.1</th>
-<td>99.9%</td>
+<td>2.0 (+ 1.1)</th>
+<td>98.3%</td>
+</tr>
+<tr>
+<td>3.0 (+ 2.0 + 1.1)</th>
+<td>1.6%</td>
 </tr>
 </table>
 
