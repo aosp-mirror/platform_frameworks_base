@@ -1187,6 +1187,7 @@ public final class ActiveServices {
         if (!mRestartingServices.contains(r)) {
             r.createdFromFg = false;
             mRestartingServices.add(r);
+            r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
         }
 
         r.cancelNotification();
@@ -1220,6 +1221,9 @@ public final class ActiveServices {
         if (removed || callingUid != r.appInfo.uid) {
             r.resetRestartCounter();
         }
+        if (removed) {
+            r.clearRestarting(mAm.mProcessStats.getMemFactorLocked(), SystemClock.uptimeMillis());
+        }
         mAm.mHandler.removeCallbacks(r.restarter);
         return true;
     }
@@ -1243,7 +1247,9 @@ public final class ActiveServices {
 
         // We are now bringing the service up, so no longer in the
         // restarting state.
-        mRestartingServices.remove(r);
+        if (mRestartingServices.remove(r)) {
+            r.clearRestarting(mAm.mProcessStats.getMemFactorLocked(), SystemClock.uptimeMillis());
+        }
 
         // Make sure this service is no longer considered delayed, we are starting it now.
         if (r.delayed) {
@@ -1581,6 +1587,7 @@ public final class ActiveServices {
             }
             r.app.services.remove(r);
             if (r.app.thread != null) {
+                updateServiceForegroundLocked(r.app, false);
                 try {
                     bumpServiceExecutingLocked(r, false, "destroy");
                     mDestroyingServices.add(r);
@@ -1591,7 +1598,6 @@ public final class ActiveServices {
                             + r.shortName, e);
                     serviceProcessGoneLocked(r);
                 }
-                updateServiceForegroundLocked(r.app, false);
             } else {
                 if (DEBUG_SERVICE) Slog.v(
                     TAG, "Removed service that has no process: " + r);
@@ -1816,6 +1822,9 @@ public final class ActiveServices {
                     r.tracker = null;
                 }
             }
+            if (finishing) {
+                r.app = null;
+            }
         }
     }
 
@@ -1960,8 +1969,7 @@ public final class ActiveServices {
         }
     }
 
-    final void killServicesLocked(ProcessRecord app,
-            boolean allowRestart) {
+    final void killServicesLocked(ProcessRecord app, boolean allowRestart) {
         // Report disconnected services.
         if (false) {
             // XXX we are letting the client link to the service for
@@ -1990,16 +1998,8 @@ public final class ActiveServices {
             }
         }
 
-        // Clean up any connections this application has to other services.
-        for (int i=app.connections.size()-1; i>=0; i--) {
-            ConnectionRecord r = app.connections.valueAt(i);
-            removeConnectionLocked(r, app, null);
-        }
-        app.connections.clear();
-
+        // First clear app state from services.
         for (int i=app.services.size()-1; i>=0; i--) {
-            // Any services running in the application need to be placed
-            // back in the pending list.
             ServiceRecord sr = app.services.valueAt(i);
             synchronized (sr.stats.getBatteryStats()) {
                 sr.stats.stopLaunchedLocked();
@@ -2020,8 +2020,21 @@ public final class ActiveServices {
                 b.binder = null;
                 b.requested = b.received = b.hasBound = false;
             }
+        }
 
-            if (sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
+        // Clean up any connections this application has to other services.
+        for (int i=app.connections.size()-1; i>=0; i--) {
+            ConnectionRecord r = app.connections.valueAt(i);
+            removeConnectionLocked(r, app, null);
+        }
+        app.connections.clear();
+
+        // Now do remaining service cleanup.
+        for (int i=app.services.size()-1; i>=0; i--) {
+            // Any services running in the application may need to be placed
+            // back in the pending list.
+            ServiceRecord sr = app.services.valueAt(i);
+            if (allowRestart && sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
                     &ApplicationInfo.FLAG_PERSISTENT) == 0) {
                 Slog.w(TAG, "Service crashed " + sr.crashCount
                         + " times, stopping: " + sr);
@@ -2054,6 +2067,17 @@ public final class ActiveServices {
 
         if (!allowRestart) {
             app.services.clear();
+
+            // Make sure there are no more restarting services for this process.
+            for (int i=mRestartingServices.size()-1; i>=0; i--) {
+                ServiceRecord r = mRestartingServices.get(i);
+                if (r.processName.equals(app.processName) &&
+                        r.serviceInfo.applicationInfo.uid == app.info.uid) {
+                    mRestartingServices.remove(i);
+                    r.clearRestarting(mAm.mProcessStats.getMemFactorLocked(),
+                            SystemClock.uptimeMillis());
+                }
+            }
         }
 
         // Make sure we have no more records on the stopping list.
