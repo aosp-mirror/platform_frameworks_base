@@ -992,7 +992,7 @@ window.onhashchange = function () {
   <img src="{@docRoot}images/kk-pseudolocale-rtl.png" alt="" width="260" style=
   "margin-bottom:0;">
   <p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">
-    Pseudo-locales make it easier to test your app's localization.
+    The <strong>Force RTL layout</strong> option makes it easier to test your app's localization.
   </p>
 </div>
 
@@ -1003,15 +1003,15 @@ window.onhashchange = function () {
   files by using a new attribute.
 </p>
 
-<h4 id="44-pseudolocale-rtl">RTL pseudo-locale</h4>
+<h4 id="44-pseudolocale-rtl">Force RTL Layout</h4>
 
 <p>
-  To make it easier to test and debug your layouts, Android includes an RTL
-  pseudo-locale as a new developer option.
+  To make it easier to test and debug your layouts, Android includes a new
+  developer option to force RTL layout direction in all apps.
 </p>
 
 <p>
-  The RTL pseudo-locale switches the device to RTL layout for all locales and
+  The Force RTL layout option switches the device to RTL layout for all locales and
   displays text in your current language. This can help you find layout issues
   across your app, without having to display the app in an RTL language. You
   can access the RTL pseudo-localed as in <strong>Settings &gt; Developer
