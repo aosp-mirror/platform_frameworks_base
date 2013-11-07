@@ -750,23 +750,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     return;
                 } else {
                     // Not an option, last argument must be a package name.
-                    try {
-                        IPackageManager pm = AppGlobals.getPackageManager();
-                        if (pm.getPackageUid(arg, UserHandle.getCallingUserId()) >= 0) {
-                            reqPackage = arg;
-                            // Include all details, since we know we are only going to
-                            // be dumping a smaller set of data.  In fact only the details
-                            // container per-package data, so that are needed to be able
-                            // to dump anything at all when filtering by package.
-                            dumpDetails = true;
-                        }
-                    } catch (RemoteException e) {
-                    }
-                    if (reqPackage == null) {
-                        pw.println("Unknown package: " + arg);
-                        dumpHelp(pw);
-                        return;
-                    }
+                    reqPackage = arg;
+                    // Include all details, since we know we are only going to
+                    // be dumping a smaller set of data.  In fact only the details
+                    // container per-package data, so that are needed to be able
+                    // to dump anything at all when filtering by package.
+                    dumpDetails = true;
                 }
             }
         }
@@ -816,13 +805,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
             return;
         } else if (aggregateHours != 0) {
+            pw.print("AGGREGATED OVER LAST "); pw.print(aggregateHours); pw.println(" HOURS:");
             dumpAggregatedStats(pw, aggregateHours, now, reqPackage, isCompact,
                     dumpDetails, dumpFullDetails, dumpAll, activeOnly);
             return;
         }
 
         boolean sepNeeded = false;
-        if (!currentOnly || isCheckin) {
+        if (dumpAll || isCheckin) {
             mWriteLock.lock();
             try {
                 ArrayList<String> files = getCommittedFiles(0, false, !isCheckin);
@@ -882,11 +872,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
         }
         if (!isCheckin) {
-            if (dumpAll) {
+            if (!currentOnly) {
                 if (sepNeeded) {
                     pw.println();
-                    pw.println("AGGREGATED OVER LAST 24 HOURS:");
                 }
+                pw.println("AGGREGATED OVER LAST 24 HOURS:");
                 dumpAggregatedStats(pw, 24, now, reqPackage, isCompact,
                         dumpDetails, dumpFullDetails, dumpAll, activeOnly);
                 pw.println();
@@ -901,8 +891,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 } else {
                     if (sepNeeded) {
                         pw.println();
-                        pw.println("CURRENT STATS:");
                     }
+                    pw.println("CURRENT STATS:");
                     if (dumpDetails || dumpFullDetails) {
                         mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll,
                                 activeOnly);
