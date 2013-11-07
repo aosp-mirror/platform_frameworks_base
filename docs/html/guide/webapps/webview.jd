@@ -136,7 +136,6 @@ custom user agent string with {@link android.webkit.WebSettings#setUserAgentStri
 setUserAgentString()}, then query the custom user agent in your web page to verify that the
 client requesting your web page is actually your Android application.</p>
 
-from your Android SDK {@code tools/} directory
 <h3 id="BindingJavaScript">Binding JavaScript code to Android code</h3>
 
 <p>When developing a web application that's designed specifically for the {@link
