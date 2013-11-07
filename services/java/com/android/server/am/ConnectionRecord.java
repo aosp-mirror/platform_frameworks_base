@@ -27,7 +27,7 @@ import java.io.PrintWriter;
  */
 final class ConnectionRecord {
     final AppBindRecord binding;    // The application/service binding.
-    final ActivityRecord activity;   // If non-null, the owning activity.
+    final ActivityRecord activity;  // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
     final int flags;                // Binding options.
     final int clientLabel;          // String resource labeling this client.
