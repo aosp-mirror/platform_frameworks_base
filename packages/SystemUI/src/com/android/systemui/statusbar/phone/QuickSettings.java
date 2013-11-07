@@ -316,11 +316,19 @@ class QuickSettings {
                 collapsePanels();
                 final UserManager um = UserManager.get(mContext);
                 if (um.getUsers(true).size() > 1) {
-                    try {
-                        WindowManagerGlobal.getWindowManagerService().lockNow(null);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Couldn't show user switcher", e);
-                    }
+                    // Since keyguard and systemui were merged into the same process to save
+                    // memory, they share the same Looper and graphics context.  As a result,
+                    // there's no way to allow concurrent animation while keyguard inflates.
+                    // The workaround is to add a slight delay to allow the animation to finish.
+                    mHandler.postDelayed(new Runnable() {
+                        public void run() {
+                            try {
+                                WindowManagerGlobal.getWindowManagerService().lockNow(null);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Couldn't show user switcher", e);
+                            }
+                        }
+                    }, 400); // TODO: ideally this would be tied to the collapse of the panel
                 } else {
                     Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
                             mContext, v, ContactsContract.Profile.CONTENT_URI,
