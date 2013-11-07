@@ -22,7 +22,7 @@
     <!-- Do not translate. These are all of the drawable resources that should be preloaded by
          the zygote process before it starts forking application processes. -->
     <array name="preloaded_drawables">
-       <item>@drawable/toast_frame_holo</item>
+       <item>@drawable/toast_frame</item>
        <item>@drawable/btn_check_on_pressed_holo_light</item>
        <item>@drawable/btn_check_on_pressed_holo_dark</item>
        <item>@drawable/btn_check_on_holo_light</item>
