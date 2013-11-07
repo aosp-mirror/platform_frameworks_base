@@ -30,12 +30,15 @@ import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.NetworkUpdateResult;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
+
 import android.os.Environment;
 import android.os.FileObserver;
-import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Process;
 import android.os.UserHandle;
+import android.security.Credentials;
+import android.security.KeyChain;
 import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -57,7 +60,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -154,6 +160,61 @@ class WifiConfigStore {
     private static final String PROXY_PAC_FILE = "proxyPac";
     private static final String EXCLUSION_LIST_KEY = "exclusionList";
     private static final String EOS = "eos";
+
+
+    /* Enterprise configuration keys */
+    /**
+     * In old configurations, the "private_key" field was used. However, newer
+     * configurations use the key_id field with the engine_id set to "keystore".
+     * If this field is found in the configuration, the migration code is
+     * triggered.
+     */
+    public static final String OLD_PRIVATE_KEY_NAME = "private_key";
+
+    /**
+     * String representing the keystore OpenSSL ENGINE's ID.
+     */
+    public static final String ENGINE_ID_KEYSTORE = "keystore";
+
+    /**
+     * String representing the keystore URI used for wpa_supplicant.
+     */
+    public static final String KEYSTORE_URI = "keystore://";
+
+    /**
+     * String to set the engine value to when it should be enabled.
+     */
+    public static final String ENGINE_ENABLE = "1";
+
+    /**
+     * String to set the engine value to when it should be disabled.
+     */
+    public static final String ENGINE_DISABLE = "0";
+
+    public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
+    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + Credentials.USER_CERTIFICATE;
+    public static final String EAP_KEY             = "eap";
+    public static final String PHASE2_KEY          = "phase2";
+    public static final String IDENTITY_KEY        = "identity";
+    public static final String ANON_IDENTITY_KEY   = "anonymous_identity";
+    public static final String PASSWORD_KEY        = "password";
+    public static final String CLIENT_CERT_KEY     = "client_cert";
+    public static final String CA_CERT_KEY         = "ca_cert";
+    public static final String SUBJECT_MATCH_KEY   = "subject_match";
+    public static final String ENGINE_KEY          = "engine";
+    public static final String ENGINE_ID_KEY       = "engine_id";
+    public static final String PRIVATE_KEY_ID_KEY  = "key_id";
+    public static final String OPP_KEY_CACHING     = "proactive_key_caching";
+
+    /** This represents an empty value of an enterprise field.
+     * NULL is used at wpa_supplicant to indicate an empty value
+     */
+    static final String EMPTY_VALUE = "NULL";
+
+    /** Internal use only */
+    private static final String[] ENTERPRISE_CONFIG_SUPPLICANT_KEYS = new String[] { EAP_KEY,
+            PHASE2_KEY, IDENTITY_KEY, ANON_IDENTITY_KEY, PASSWORD_KEY, CLIENT_CERT_KEY,
+            CA_CERT_KEY, SUBJECT_MATCH_KEY, ENGINE_KEY, ENGINE_ID_KEY, PRIVATE_KEY_ID_KEY };
 
     private final LocalLog mLocalLog;
     private final WpaConfigFileObserver mFileObserver;
@@ -390,7 +451,7 @@ class WifiConfigStore {
         if (config != null) {
             // Remove any associated keys
             if (config.enterpriseConfig != null) {
-                config.enterpriseConfig.removeKeys(mKeyStore);
+                removeKeys(config.enterpriseConfig);
             }
             mConfiguredNetworks.remove(netId);
             mNetworkIds.remove(configKey(config));
@@ -754,7 +815,7 @@ class WifiConfigStore {
             if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP)
                     && config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
 
-                if (config.enterpriseConfig.needsSoftwareBackedKeyStore()) {
+                if (needsSoftwareBackedKeyStore(config.enterpriseConfig)) {
                     return true;
                 }
             }
@@ -1239,7 +1300,7 @@ class WifiConfigStore {
 
                 WifiEnterpriseConfig enterpriseConfig = config.enterpriseConfig;
 
-                if (enterpriseConfig.needsKeyStore()) {
+                if (needsKeyStore(enterpriseConfig)) {
                     /**
                      * Keyguard settings may eventually be controlled by device policy.
                      * We check here if keystore is unlocked before installing
@@ -1259,7 +1320,7 @@ class WifiConfigStore {
                         WifiConfiguration currentConfig = mConfiguredNetworks.get(netId);
                         String keyId = config.getKeyIdForCredentials(currentConfig);
 
-                        if (!enterpriseConfig.installKeys(mKeyStore, keyId)) {
+                        if (!installKeys(enterpriseConfig, keyId)) {
                             loge(config.SSID + ": failed to install keys");
                             break setVariables;
                         }
@@ -1276,7 +1337,7 @@ class WifiConfigStore {
                                     netId,
                                     key,
                                     value)) {
-                            enterpriseConfig.removeKeys(mKeyStore);
+                            removeKeys(enterpriseConfig);
                             loge(config.SSID + ": failed to set " + key +
                                     ": " + value);
                             break setVariables;
@@ -1589,21 +1650,21 @@ class WifiConfigStore {
             config.enterpriseConfig = new WifiEnterpriseConfig();
         }
         HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
-        for (String key : WifiEnterpriseConfig.getSupplicantKeys()) {
+        for (String key : ENTERPRISE_CONFIG_SUPPLICANT_KEYS) {
             value = mWifiNative.getNetworkVariable(netId, key);
             if (!TextUtils.isEmpty(value)) {
                 enterpriseFields.put(key, removeDoubleQuotes(value));
             } else {
-                enterpriseFields.put(key, WifiEnterpriseConfig.EMPTY_VALUE);
+                enterpriseFields.put(key, EMPTY_VALUE);
             }
         }
 
-        if (config.enterpriseConfig.migrateOldEapTlsNative(mWifiNative, netId)) {
+        if (migrateOldEapTlsNative(config.enterpriseConfig, netId)) {
             saveConfig();
         }
 
-        config.enterpriseConfig.migrateCerts(mKeyStore);
-        config.enterpriseConfig.initializeSoftwareKeystoreFlag(mKeyStore);
+        migrateCerts(config.enterpriseConfig);
+        // initializeSoftwareKeystoreFlag(config.enterpriseConfig, mKeyStore);
     }
 
     private String removeDoubleQuotes(String string) {
@@ -1725,4 +1786,241 @@ class WifiConfigStore {
         }
     }
 
+    // Certificate and privake key management for EnterpriseConfig
+    boolean needsKeyStore(WifiEnterpriseConfig config) {
+        // Has no keys to be installed
+        if (config.getClientCertificate() == null && config.getCaCertificate() == null)
+            return false;
+        return true;
+    }
+
+    static boolean isHardwareBackedKey(PrivateKey key) {
+        return KeyChain.isBoundKeyAlgorithm(key.getAlgorithm());
+    }
+
+    static boolean hasHardwareBackedKey(Certificate certificate) {
+        return KeyChain.isBoundKeyAlgorithm(certificate.getPublicKey().getAlgorithm());
+    }
+
+    boolean needsSoftwareBackedKeyStore(WifiEnterpriseConfig config) {
+        String client = config.getClientCertificateAlias();
+        if (!TextUtils.isEmpty(client)) {
+            // a valid client certificate is configured
+
+            // BUGBUG: keyStore.get() never returns certBytes; because it is not
+            // taking WIFI_UID as a parameter. It always looks for certificate
+            // with SYSTEM_UID, and never finds any Wifi certificates. Assuming that
+            // all certificates need software keystore until we get the get() API
+            // fixed.
+
+            return true;
+        }
+
+        /*
+        try {
+
+            if (DBG) Slog.d(TAG, "Loading client certificate " + Credentials
+                    .USER_CERTIFICATE + client);
+
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            if (factory == null) {
+                Slog.e(TAG, "Error getting certificate factory");
+                return;
+            }
+
+            byte[] certBytes = keyStore.get(Credentials.USER_CERTIFICATE + client);
+            if (certBytes != null) {
+                Certificate cert = (X509Certificate) factory.generateCertificate(
+                        new ByteArrayInputStream(certBytes));
+
+                if (cert != null) {
+                    mNeedsSoftwareKeystore = hasHardwareBackedKey(cert);
+
+                    if (DBG) Slog.d(TAG, "Loaded client certificate " + Credentials
+                            .USER_CERTIFICATE + client);
+                    if (DBG) Slog.d(TAG, "It " + (mNeedsSoftwareKeystore ? "needs" :
+                            "does not need" ) + " software key store");
+                } else {
+                    Slog.d(TAG, "could not generate certificate");
+                }
+            } else {
+                Slog.e(TAG, "Could not load client certificate " + Credentials
+                        .USER_CERTIFICATE + client);
+                mNeedsSoftwareKeystore = true;
+            }
+
+        } catch(CertificateException e) {
+            Slog.e(TAG, "Could not read certificates");
+            mCaCert = null;
+            mClientCertificate = null;
+        }
+        */
+
+        return false;
+    }
+
+    boolean installKeys(WifiEnterpriseConfig config, String name) {
+        boolean ret = true;
+        String privKeyName = Credentials.USER_PRIVATE_KEY + name;
+        String userCertName = Credentials.USER_CERTIFICATE + name;
+        String caCertName = Credentials.CA_CERTIFICATE + name;
+        if (config.getClientCertificate() != null) {
+            byte[] privKeyData = config.getClientPrivateKey().getEncoded();
+            if (isHardwareBackedKey(config.getClientPrivateKey())) {
+                // Hardware backed key store is secure enough to store keys un-encrypted, this
+                // removes the need for user to punch a PIN to get access to these keys
+                if (DBG) Log.d(TAG, "importing keys " + name + " in hardware backed store");
+                ret = mKeyStore.importKey(privKeyName, privKeyData, android.os.Process.WIFI_UID,
+                        KeyStore.FLAG_NONE);
+            } else {
+                // Software backed key store is NOT secure enough to store keys un-encrypted.
+                // Save keys encrypted so they are protected with user's PIN. User will
+                // have to unlock phone before being able to use these keys and connect to
+                // networks.
+                if (DBG) Log.d(TAG, "importing keys " + name + " in software backed store");
+                ret = mKeyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
+                        KeyStore.FLAG_ENCRYPTED);
+            }
+            if (ret == false) {
+                return ret;
+            }
+
+            ret = putCertInKeyStore(userCertName, config.getClientCertificate());
+            if (ret == false) {
+                // Remove private key installed
+                mKeyStore.delKey(privKeyName, Process.WIFI_UID);
+                return ret;
+            }
+        }
+
+        if (config.getCaCertificate() != null) {
+            ret = putCertInKeyStore(caCertName, config.getCaCertificate());
+            if (ret == false) {
+                if (config.getClientCertificate() != null) {
+                    // Remove client key+cert
+                    mKeyStore.delKey(privKeyName, Process.WIFI_UID);
+                    mKeyStore.delete(userCertName, Process.WIFI_UID);
+                }
+                return ret;
+            }
+        }
+
+        // Set alias names
+        if (config.getClientCertificate() != null) {
+            config.setClientCertificateAlias(name);
+            config.resetClientKeyEntry();
+        }
+
+        if (config.getCaCertificate() != null) {
+            config.setCaCertificateAlias(name);
+            config.resetCaCertificate();
+        }
+
+        return ret;
+    }
+
+    private boolean putCertInKeyStore(String name, Certificate cert) {
+        try {
+            byte[] certData = Credentials.convertToPem(cert);
+            if (DBG) Log.d(TAG, "putting certificate " + name + " in keystore");
+            return mKeyStore.put(name, certData, Process.WIFI_UID, KeyStore.FLAG_NONE);
+
+        } catch (IOException e1) {
+            return false;
+        } catch (CertificateException e2) {
+            return false;
+        }
+    }
+
+    void removeKeys(WifiEnterpriseConfig config) {
+        String client = config.getClientCertificateAlias();
+        // a valid client certificate is configured
+        if (!TextUtils.isEmpty(client)) {
+            if (DBG) Log.d(TAG, "removing client private key and user cert");
+            mKeyStore.delKey(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
+            mKeyStore.delete(Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
+        }
+
+        String ca = config.getCaCertificateAlias();
+        // a valid ca certificate is configured
+        if (!TextUtils.isEmpty(ca)) {
+            if (DBG) Log.d(TAG, "removing CA cert");
+            mKeyStore.delete(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
+        }
+    }
+
+
+    /** Migrates the old style TLS config to the new config style. This should only be used
+     * when restoring an old wpa_supplicant.conf or upgrading from a previous
+     * platform version.
+     * @return true if the config was updated
+     * @hide
+     */
+    boolean migrateOldEapTlsNative(WifiEnterpriseConfig config, int netId) {
+        String oldPrivateKey = mWifiNative.getNetworkVariable(netId, OLD_PRIVATE_KEY_NAME);
+        /*
+         * If the old configuration value is not present, then there is nothing
+         * to do.
+         */
+        if (TextUtils.isEmpty(oldPrivateKey)) {
+            return false;
+        } else {
+            // Also ignore it if it's empty quotes.
+            oldPrivateKey = removeDoubleQuotes(oldPrivateKey);
+            if (TextUtils.isEmpty(oldPrivateKey)) {
+                return false;
+            }
+        }
+
+        config.setFieldValue(ENGINE_KEY, ENGINE_ENABLE);
+        config.setFieldValue(ENGINE_ID_KEY, ENGINE_ID_KEYSTORE);
+
+        /*
+        * The old key started with the keystore:// URI prefix, but we don't
+        * need that anymore. Trim it off if it exists.
+        */
+        final String keyName;
+        if (oldPrivateKey.startsWith(KEYSTORE_URI)) {
+            keyName = new String(oldPrivateKey.substring(KEYSTORE_URI.length()));
+        } else {
+            keyName = oldPrivateKey;
+        }
+        config.setFieldValue(PRIVATE_KEY_ID_KEY, keyName);
+
+        mWifiNative.setNetworkVariable(netId, ENGINE_KEY, config.getFieldValue(ENGINE_KEY, ""));
+
+        mWifiNative.setNetworkVariable(netId, ENGINE_ID_KEY,
+                config.getFieldValue(ENGINE_ID_KEY, ""));
+
+        mWifiNative.setNetworkVariable(netId, PRIVATE_KEY_ID_KEY,
+                config.getFieldValue(PRIVATE_KEY_ID_KEY, ""));
+
+        // Remove old private_key string so we don't run this again.
+        mWifiNative.setNetworkVariable(netId, OLD_PRIVATE_KEY_NAME, EMPTY_VALUE);
+
+        return true;
+    }
+
+    /** Migrate certs from global pool to wifi UID if not already done */
+    void migrateCerts(WifiEnterpriseConfig config) {
+        String client = config.getClientCertificateAlias();
+        // a valid client certificate is configured
+        if (!TextUtils.isEmpty(client)) {
+            if (!mKeyStore.contains(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID)) {
+                mKeyStore.duplicate(Credentials.USER_PRIVATE_KEY + client, -1,
+                        Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
+                mKeyStore.duplicate(Credentials.USER_CERTIFICATE + client, -1,
+                        Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
+            }
+        }
+
+        String ca = config.getCaCertificateAlias();
+        // a valid ca certificate is configured
+        if (!TextUtils.isEmpty(ca)) {
+            if (!mKeyStore.contains(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID)) {
+                mKeyStore.duplicate(Credentials.CA_CERTIFICATE + ca, -1,
+                        Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
+            }
+        }
+    }
 }
