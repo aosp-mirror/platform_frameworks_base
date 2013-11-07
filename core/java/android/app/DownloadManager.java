@@ -1011,15 +1011,15 @@ public class DownloadManager {
     }
 
     /**
-     * Returns {@link Uri} for the given downloaded file id, if the file is
-     * downloaded successfully. otherwise, null is returned.
+     * Returns the {@link Uri} of the given downloaded file id, if the file is
+     * downloaded successfully. Otherwise, null is returned.
      *<p>
      * If the specified downloaded file is in external storage (for example, /sdcard dir),
      * then it is assumed to be safe for anyone to read and the returned {@link Uri} corresponds
      * to the filepath on sdcard.
      *
      * @param id the id of the downloaded file.
-     * @return the {@link Uri} for the given downloaded file id, if download was successful. null
+     * @return the {@link Uri} of the given downloaded file id, if download was successful. null
      * otherwise.
      */
     public Uri getUriForDownloadedFile(long id) {
@@ -1064,15 +1064,11 @@ public class DownloadManager {
     }
 
     /**
-     * Returns {@link Uri} for the given downloaded file id, if the file is
-     * downloaded successfully. otherwise, null is returned.
-     *<p>
-     * If the specified downloaded file is in external storage (for example, /sdcard dir),
-     * then it is assumed to be safe for anyone to read and the returned {@link Uri} corresponds
-     * to the filepath on sdcard.
+     * Returns the media type of the given downloaded file id, if the file was
+     * downloaded successfully. Otherwise, null is returned.
      *
      * @param id the id of the downloaded file.
-     * @return the {@link Uri} for the given downloaded file id, if download was successful. null
+     * @return the media type of the given downloaded file id, if download was successful. null
      * otherwise.
      */
     public String getMimeTypeForDownloadedFile(long id) {
