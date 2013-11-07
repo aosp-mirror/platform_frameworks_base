@@ -464,21 +464,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             private NetworkStatsCollection mUidTagComplete;
 
             private NetworkStatsCollection getUidComplete() {
-                if (mUidComplete == null) {
-                    synchronized (mStatsLock) {
+                synchronized (mStatsLock) {
+                    if (mUidComplete == null) {
                         mUidComplete = mUidRecorder.getOrLoadCompleteLocked();
                     }
+                    return mUidComplete;
                 }
-                return mUidComplete;
             }
 
             private NetworkStatsCollection getUidTagComplete() {
-                if (mUidTagComplete == null) {
-                    synchronized (mStatsLock) {
+                synchronized (mStatsLock) {
+                    if (mUidTagComplete == null) {
                         mUidTagComplete = mUidTagRecorder.getOrLoadCompleteLocked();
                     }
+                    return mUidTagComplete;
                 }
-                return mUidTagComplete;
             }
 
             @Override
