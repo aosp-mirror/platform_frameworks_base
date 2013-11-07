@@ -1014,7 +1014,7 @@ window.onhashchange = function () {
   The Force RTL layout option switches the device to RTL layout for all locales and
   displays text in your current language. This can help you find layout issues
   across your app, without having to display the app in an RTL language. You
-  can access the RTL pseudo-localed as in <strong>Settings &gt; Developer
+  can access the option in <strong>Settings &gt; Developer
   options &gt; Force RTL layout direction</strong>.
 </p>
 
