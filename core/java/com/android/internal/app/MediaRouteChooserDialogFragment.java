@@ -501,7 +501,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
                 final RouteInfo route = (RouteInfo) item;
                 if (type == VIEW_ROUTE) {
-                    mRouter.selectRouteInt(mRouteTypes, route);
+                    mRouter.selectRouteInt(mRouteTypes, route, true);
                     dismiss();
                 } else if (type == VIEW_GROUPING_ROUTE) {
                     final Checkable c = (Checkable) view;
@@ -514,7 +514,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                         if (mRouter.getSelectedRoute(mRouteTypes) == oldGroup) {
                             // Old group was selected but is now empty. Select the group
                             // we're manipulating since that's where the last route went.
-                            mRouter.selectRouteInt(mRouteTypes, mEditingGroup);
+                            mRouter.selectRouteInt(mRouteTypes, mEditingGroup, true);
                         }
                         oldGroup.removeRoute(route);
                         mEditingGroup.addRoute(route);
@@ -555,7 +555,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 mEditingGroup = group;
                 mCategoryEditingGroups = group.getCategory();
                 getDialog().setCanceledOnTouchOutside(false);
-                mRouter.selectRouteInt(mRouteTypes, mEditingGroup);
+                mRouter.selectRouteInt(mRouteTypes, mEditingGroup, true);
                 update();
                 scrollToEditingGroup();
             }
