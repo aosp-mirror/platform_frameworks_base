@@ -66,13 +66,6 @@ public abstract class HardwareRenderer {
     private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
 
     /**
-     * Turn on to only refresh the parts of the screen that need updating.
-     * When turned on the property defined by {@link #RENDER_DIRTY_REGIONS_PROPERTY}
-     * must also have the value "true".
-     */
-    static final boolean RENDER_DIRTY_REGIONS = true;
-
-    /**
      * System property used to enable or disable dirty regions invalidation.
      * This property is only queried if {@link #RENDER_DIRTY_REGIONS} is true.
      * The default value of this property is assumed to be true.
@@ -509,18 +502,6 @@ public abstract class HardwareRenderer {
             Rect dirty);
 
     /**
-     * Creates a new display list that can be used to record batches of
-     * drawing operations.
-     *
-     * @param name The name of the display list, used for debugging purpose. May be null.
-     *
-     * @return A new display list.
-     *
-     * @hide
-     */
-    public abstract DisplayList createDisplayList(String name);
-
-    /**
      * Creates a new hardware layer. A hardware layer built by calling this
      * method will be treated as a texture layer, instead of as a render target.
      *
@@ -853,7 +834,7 @@ public abstract class HardwareRenderer {
         static {
             String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
             //noinspection PointlessBooleanExpression,ConstantConditions
-            sDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
+            sDirtyRegions = "true".equalsIgnoreCase(dirtyProperty);
             sDirtyRegionsRequested = sDirtyRegions;
         }
 
@@ -2184,11 +2165,6 @@ public abstract class HardwareRenderer {
         @Override
         void flushLayerUpdates() {
             mGlCanvas.flushLayerUpdates();
-        }
-
-        @Override
-        public DisplayList createDisplayList(String name) {
-            return new GLES20DisplayList(name);
         }
 
         @Override
