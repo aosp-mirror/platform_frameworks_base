@@ -37,8 +37,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/cling_bg"
-            android:paddingLeft="14dp"
-            android:paddingRight="14dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:paddingTop="24dp"
             android:paddingBottom="24dp">
             <TextView
