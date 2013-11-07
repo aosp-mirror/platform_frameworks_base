@@ -106,6 +106,11 @@ public abstract class BatteryStats implements Parcelable {
     public static final int FOREGROUND_ACTIVITY = 10;
 
     /**
+     * A constant indicating a wifi batched scan is active
+     */
+    public static final int WIFI_BATCHED_SCAN = 11;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -270,6 +275,8 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteFullWifiLockReleasedLocked();
         public abstract void noteWifiScanStartedLocked();
         public abstract void noteWifiScanStoppedLocked();
+        public abstract void noteWifiBatchedScanStartedLocked(int csph);
+        public abstract void noteWifiBatchedScanStoppedLocked();
         public abstract void noteWifiMulticastEnabledLocked();
         public abstract void noteWifiMulticastDisabledLocked();
         public abstract void noteAudioTurnedOnLocked();
@@ -281,12 +288,15 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getWifiRunningTime(long batteryRealtime, int which);
         public abstract long getFullWifiLockTime(long batteryRealtime, int which);
         public abstract long getWifiScanTime(long batteryRealtime, int which);
+        public abstract long getWifiBatchedScanTime(int csphBin, long batteryRealtime, int which);
         public abstract long getWifiMulticastTime(long batteryRealtime,
                                                   int which);
         public abstract long getAudioTurnedOnTime(long batteryRealtime, int which);
         public abstract long getVideoTurnedOnTime(long batteryRealtime, int which);
         public abstract Timer getForegroundActivityTimer();
         public abstract Timer getVibratorOnTimer();
+
+        public static final int NUM_WIFI_BATCHED_SCAN_BINS = 5;
 
         /**
          * Note that these must match the constants in android.os.PowerManager.
@@ -2081,9 +2091,11 @@ public abstract class BatteryStats implements Parcelable {
                                         TimeUtils.formatDuration(ew.usedTime, pw);
                                         pw.print(" over ");
                                         TimeUtils.formatDuration(ew.overTime, pw);
-                                        pw.print(" (");
-                                        pw.print((ew.usedTime*100)/ew.overTime);
-                                        pw.println("%)");
+                                        if (ew.overTime != 0) {
+                                            pw.print(" (");
+                                            pw.print((ew.usedTime*100)/ew.overTime);
+                                            pw.println("%)");
+                                        }
                             }
                         }
                         uidActivity = true;
