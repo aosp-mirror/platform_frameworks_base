@@ -10946,15 +10946,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_DIRTY;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
-            //noinspection PointlessBooleanExpression,ConstantConditions
-            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
-                if (p != null && ai != null && ai.mHardwareAccelerated) {
-                    // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                    // with a null dirty rect, which tells the ViewAncestor to redraw everything
-                    p.invalidateChild(this, null);
-                    return;
-                }
-            }
             if (p != null && ai != null) {
                 final int scrollX = mScrollX;
                 final int scrollY = mScrollY;
@@ -10989,15 +10980,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_DIRTY;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
-            //noinspection PointlessBooleanExpression,ConstantConditions
-            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
-                if (p != null && ai != null && ai.mHardwareAccelerated) {
-                    // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                    // with a null dirty rect, which tells the ViewAncestor to redraw everything
-                    p.invalidateChild(this, null);
-                    return;
-                }
-            }
             if (p != null && ai != null && l < r && t < b) {
                 final int scrollX = mScrollX;
                 final int scrollY = mScrollY;
@@ -11045,15 +11027,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             final AttachInfo ai = mAttachInfo;
             final ViewParent p = mParent;
-            //noinspection PointlessBooleanExpression,ConstantConditions
-            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
-                if (p != null && ai != null && ai.mHardwareAccelerated) {
-                    // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                    // with a null dirty rect, which tells the ViewAncestor to redraw everything
-                    p.invalidateChild(this, null);
-                    return;
-                }
-            }
 
             if (p != null && ai != null) {
                 final Rect r = ai.mTmpInvalRect;
@@ -13433,7 +13406,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mRecreateDisplayList = true;
             }
             if (displayList == null) {
-                displayList = mAttachInfo.mHardwareRenderer.createDisplayList(getClass().getName());
+                displayList = DisplayList.create(getClass().getName());
                 // If we're creating a new display list, make sure our parent gets invalidated
                 // since they will need to recreate their display list to account for this
                 // new child display list.
