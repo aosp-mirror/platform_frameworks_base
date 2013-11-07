@@ -253,6 +253,11 @@ public class KeyguardViewMediator {
     private final float mLockSoundVolume;
 
     /**
+     * For managing external displays
+     */
+    private KeyguardDisplayManager mKeyguardDisplayManager;
+
+    /**
      * Cache of avatar drawables, for use by KeyguardMultiUserAvatar.
      */
     private static MultiUserAvatarCache sMultiUserAvatarCache = new MultiUserAvatarCache();
@@ -483,6 +488,8 @@ public class KeyguardViewMediator {
 
         mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
 
+        mKeyguardDisplayManager = new KeyguardDisplayManager(context);
+
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
@@ -597,6 +604,7 @@ public class KeyguardViewMediator {
             }
         }
         KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurndOff(why);
+        mKeyguardDisplayManager.show();
     }
 
     private void doKeyguardLaterLocked() {
@@ -1218,6 +1226,7 @@ public class KeyguardViewMediator {
 
             mShowKeyguardWakeLock.release();
         }
+        mKeyguardDisplayManager.show();
     }
 
     /**
@@ -1239,6 +1248,7 @@ public class KeyguardViewMediator {
             mKeyguardDonePending = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
+            mKeyguardDisplayManager.hide();
         }
     }
 
