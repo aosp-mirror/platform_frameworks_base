@@ -178,7 +178,7 @@ apps) and {@link android.nfc.cardemulation.CardEmulation#CATEGORY_OTHER}
 
 <p>Your application can check whether a device supports HCE by checking for the 
 {@link android.content.pm.PackageManager#FEATURE_NFC_HOST_CARD_EMULATION} feature. You should use the 
-{@code &lt;uses-feature>} tag in the manifest of your application to declare that your app 
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a> tag in the manifest of your application to declare that your app 
 uses the HCE feature, and whether it is required for the app to function or not.</p>
 
 <h3 id="ServiceImplementation">Service implementation</h3>
