@@ -61,6 +61,12 @@ parent.link=index.html
   <p>To enable ProGuard so that it runs as part of an Ant or Eclipse build, set the
   <code>proguard.config</code> property in the <code>&lt;project_root&gt;/project.properties</code>
   file. The path can be an absolute path or a path relative to the project's root.</p>
+
+<p class="note"><strong>Note:</strong> When using Android Studio, you must add Proguard
+to your <code>gradle.build</code> file's build types. For more information, see the
+<a href="http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Running-ProGuard"
+>Gradle Plugin User Guide</a>.
+
 <p>If you left the <code>proguard.cfg</code> file in its default location (the project's root directory),
 you can specify its location like this:</p>
 <pre class="no-pretty-print">
