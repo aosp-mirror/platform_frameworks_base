@@ -11901,6 +11901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean dumpDalvik = false;
         boolean oomOnly = false;
         boolean isCompact = false;
+        boolean localOnly = false;
         
         int opti = 0;
         while (opti < args.length) {
@@ -11919,12 +11920,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 isCompact = true;
             } else if ("--oom".equals(opt)) {
                 oomOnly = true;
+            } else if ("--local".equals(opt)) {
+                localOnly = true;
             } else if ("-h".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [-d] [-c] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
                 pw.println("  -d: include dalvik details when dumping process details.");
                 pw.println("  -c: dump in a compact machine-parseable representation.");
                 pw.println("  --oom: only show processes organized by oom adj.");
+                pw.println("  --local: only collect details locally, don't call process.");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
                 return;
@@ -12041,14 +12045,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mi.dalvikPrivateDirty = (int)tmpLong[0];
                 }
                 if (dumpDetails) {
-                    try {
-                        pw.flush();
-                        thread.dumpMemInfo(fd, mi, isCheckinRequest, dumpFullDetails,
-                                dumpDalvik, innerArgs);
-                    } catch (RemoteException e) {
-                        if (!isCheckinRequest) {
-                            pw.println("Got RemoteException!");
+                    if (localOnly) {
+                        ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
+                                dumpDalvik, pid, r.processName, 0, 0, 0, 0, 0, 0);
+                        if (isCheckinRequest) {
+                            pw.println();
+                        }
+                    } else {
+                        try {
                             pw.flush();
+                            thread.dumpMemInfo(fd, mi, isCheckinRequest, dumpFullDetails,
+                                    dumpDalvik, innerArgs);
+                        } catch (RemoteException e) {
+                            if (!isCheckinRequest) {
+                                pw.println("Got RemoteException!");
+                                pw.flush();
+                            }
                         }
                     }
                 }
