@@ -35,7 +35,8 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-feat
 </div>
 
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;uses-permission android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>
+<dd><pre class="stx">&lt;uses-permission android:<a href="#nm">name</a>="<i>string</i>"
+        android:<a href="#maxSdk">maxSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
 
 <dt>contained in:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
@@ -62,6 +63,25 @@ element, a permission defined by another application, or one of the
 standard system permissions, such as "{@code android.permission.CAMERA}" 
 or "{@code android.permission.READ_CONTACTS}".  As these examples show, 
 a permission name typically includes the package name as a prefix.</dd>
+
+<dt><a name="maxSdk"></a>{@code android:maxSdkVersion}</dt>
+<dd>The highest API level at which this permission should be granted to your app.
+Setting this attribute is useful if the permission your app requires is no longer needed beginning
+at a certain API level.
+<p>For example, beginning with Android 4.4 (API level 19), it's no longer necessary for your app
+to request the {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission when your
+app wants to write to its own application-specific directories on external storage (the directories
+provided by {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}). However,
+the permission <em>is required</em> for API level 18 and lower. So you can declare that this
+permission is needed only up to API level 18 with a declaration such as this:
+<pre>
+&lt;uses-permission
+     android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+     android:maxSdkVersion="18" />
+</pre>
+<p>This way, beginning with API level 19, the system will no longer grant your app the
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
+</dd>
 
 </dl></dd>
 
