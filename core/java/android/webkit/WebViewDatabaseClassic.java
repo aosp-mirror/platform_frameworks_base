@@ -37,7 +37,7 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
     private static final String DATABASE_FILE = "webview.db";
     private static final String CACHE_DATABASE_FILE = "webviewCache.db";
 
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
     // 2 -> 3 Modified Cache table to allow cache of redirects
     // 3 -> 4 Added Oma-Downloads table
     // 4 -> 5 Modified Cache table to support persistent contentLength
@@ -50,6 +50,7 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
     // 10 -> 11 Drop cookies and cache now managed by the chromium stack,
     //          and update the form data table to use the new format
     //          implemented for b/5265606.
+    // 11 -> 12 Add a delimiter between scheme and host when storing passwords
 
     private static WebViewDatabaseClassic sInstance = null;
     private static final Object sInstanceLock = new Object();
@@ -169,9 +170,21 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
     private static void upgradeDatabase() {
         upgradeDatabaseToV10();
         upgradeDatabaseFromV10ToV11();
+        upgradeDatabaseFromV11ToV12();
         // Add future database upgrade functions here, one version at a
         // time.
         sDatabase.setVersion(DATABASE_VERSION);
+    }
+
+    private static void upgradeDatabaseFromV11ToV12() {
+        int oldVersion = sDatabase.getVersion();
+
+        if (oldVersion >= 12) {
+            // Nothing to do.
+            return;
+        }
+        // delete the rows in the database.
+        sDatabase.delete(mTableNames[TABLE_PASSWORD_ID], null, null);
     }
 
     private static void upgradeDatabaseFromV10ToV11() {
