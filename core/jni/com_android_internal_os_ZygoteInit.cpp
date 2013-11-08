@@ -159,29 +159,6 @@ static void com_android_internal_os_ZygoteInit_setCloseOnExec (JNIEnv *env,
     }
 }
 
-static jlong com_android_internal_os_ZygoteInit_capgetPermitted (JNIEnv *env,
-    jobject clazz, jint pid)
-{
-    struct __user_cap_header_struct capheader;
-    struct __user_cap_data_struct capdata;
-    int err;
-
-    memset (&capheader, 0, sizeof(capheader));
-    memset (&capdata, 0, sizeof(capdata));
-
-    capheader.version = _LINUX_CAPABILITY_VERSION;
-    capheader.pid = pid;
-
-    err = capget (&capheader, &capdata);
-
-    if (err < 0) {
-        jniThrowIOException(env, errno);
-        return 0;
-    }
-
-    return (jlong) capdata.permitted;
-}
-
 static jint com_android_internal_os_ZygoteInit_selectReadable (
         JNIEnv *env, jobject clazz, jobjectArray fds)
 {
@@ -274,8 +251,6 @@ static JNINativeMethod gMethods[] = {
             (void *) com_android_internal_os_ZygoteInit_reopenStdio},
     { "setCloseOnExec", "(Ljava/io/FileDescriptor;Z)V",
         (void *)  com_android_internal_os_ZygoteInit_setCloseOnExec},
-    { "capgetPermitted", "(I)J",
-        (void *) com_android_internal_os_ZygoteInit_capgetPermitted },
     { "selectReadable", "([Ljava/io/FileDescriptor;)I",
         (void *) com_android_internal_os_ZygoteInit_selectReadable },
     { "createFileDescriptor", "(I)Ljava/io/FileDescriptor;",
