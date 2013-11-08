@@ -575,10 +575,13 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mUpdateRotation = false;
         boolean mWallpaperActionPending = false;
 
-        private static final int DISPLAY_CONTENT_UNKNOWN = 0;
-        private static final int DISPLAY_CONTENT_MIRROR = 1;
-        private static final int DISPLAY_CONTENT_UNIQUE = 2;
-        private int mDisplayHasContent = DISPLAY_CONTENT_UNKNOWN;
+        // Set to true when the display contains content to show the user.
+        // When false, the display manager may choose to mirror or blank the display.
+        boolean mDisplayHasContent = false;
+
+        // Only set while traversing the default display based on its content.
+        // Affects the behavior of mirroring on secondary displays.
+        boolean mObscureApplicationContentOnSecondaryDisplays = false;
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
@@ -8767,6 +8770,14 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
+        final boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
+
+        if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
+            // This window completely covers everything behind it,
+            // so we want to leave all of them as undimmed (for
+            // performance reasons).
+            mInnerFields.mObscured = true;
+        }
 
         if (w.mHasSurface) {
             if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
@@ -8795,21 +8806,23 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (canBeSeen) {
-                if (type == TYPE_DREAM || type == TYPE_KEYGUARD) {
-                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_MIRROR;
-                } else if (mInnerFields.mDisplayHasContent
-                        == LayoutFields.DISPLAY_CONTENT_UNKNOWN) {
-                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNIQUE;
+                // This function assumes that the contents of the default display are
+                // processed first before secondary displays.
+                if (w.mDisplayContent.isDefaultDisplay) {
+                    // While a dream or keyguard is showing, obscure ordinary application
+                    // content on secondary displays (by forcibly enabling mirroring unless
+                    // there is other content we want to show) but still allow opaque
+                    // keyguard dialogs to be shown.
+                    if (type == TYPE_DREAM || type == TYPE_KEYGUARD) {
+                        mInnerFields.mObscureApplicationContentOnSecondaryDisplays = true;
+                    }
+                    mInnerFields.mDisplayHasContent = true;
+                } else if (!mInnerFields.mObscureApplicationContentOnSecondaryDisplays
+                        || (mInnerFields.mObscured && type == TYPE_KEYGUARD_DIALOG)) {
+                    // Allow full screen keyguard presentation dialogs to be seen.
+                    mInnerFields.mDisplayHasContent = true;
                 }
             }
-        }
-
-        boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
-        if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
-            // This window completely covers everything behind it,
-            // so we want to leave all of them as undimmed (for
-            // performance reasons).
-            mInnerFields.mObscured = true;
         }
     }
 
@@ -8888,7 +8901,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
         mInnerFields.mUserActivityTimeout = -1;
-        mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
+        mInnerFields.mObscureApplicationContentOnSecondaryDisplays = false;
 
         mTransactionSequence++;
 
@@ -8923,10 +8936,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int innerDh = displayInfo.appHeight;
                 final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
 
-                // Reset for each display unless we are forcing mirroring.
-                if (mInnerFields.mDisplayHasContent != LayoutFields.DISPLAY_CONTENT_MIRROR) {
-                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
-                }
+                // Reset for each display.
+                mInnerFields.mDisplayHasContent = false;
 
                 int repeats = 0;
                 do {
@@ -9135,20 +9146,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateResizingWindows(w);
                 }
 
-                final boolean hasUniqueContent;
-                switch (mInnerFields.mDisplayHasContent) {
-                    case LayoutFields.DISPLAY_CONTENT_MIRROR:
-                        hasUniqueContent = isDefaultDisplay;
-                        break;
-                    case LayoutFields.DISPLAY_CONTENT_UNIQUE:
-                        hasUniqueContent = true;
-                        break;
-                    case LayoutFields.DISPLAY_CONTENT_UNKNOWN:
-                    default:
-                        hasUniqueContent = false;
-                        break;
-                }
-                mDisplayManagerService.setDisplayHasContent(displayId, hasUniqueContent,
+                mDisplayManagerService.setDisplayHasContent(displayId,
+                        mInnerFields.mDisplayHasContent,
                         true /* inTraversal, must call performTraversalInTrans... below */);
 
                 getDisplayContentLocked(displayId).stopDimmingIfNeeded();
