@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2009, The Android Open Source Project
+** Copyright 2013, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License")
 ** you may not use this file except in compliance with the License.
@@ -18,22 +18,18 @@
 -->
 
 <!-- This is a view that shows general status information in Keyguard. -->
-<com.android.keyguard.KeyguardWidgetFrame
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
-    android:id="@+id/keyguard_status_view"
+    android:id="@+id/presentation"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
-    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
-    android:gravity="center">
+    android:layout_height="match_parent">
 
     <com.android.keyguard.KeyguardStatusView
-        android:id="@+id/keyguard_status_view_face_palm"
+        android:id="@+id/clock"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal|top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:contentDescription="@string/keyguard_accessibility_status">
         <LinearLayout
             android:layout_width="match_parent"
@@ -55,6 +51,13 @@
                 android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
 
             <include layout="@layout/keyguard_status_area" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dip"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/kg_security_lock_normal" />
         </LinearLayout>
     </com.android.keyguard.KeyguardStatusView>
-</com.android.keyguard.KeyguardWidgetFrame>
+
+</FrameLayout>
