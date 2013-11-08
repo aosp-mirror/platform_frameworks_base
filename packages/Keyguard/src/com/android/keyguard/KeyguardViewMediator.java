@@ -309,6 +309,11 @@ public class KeyguardViewMediator {
          * Report that the keyguard is dismissable, pending the next keyguardDone call.
          */
         void keyguardDonePending();
+
+        /**
+         * Report when keyguard is actually gone
+         */
+        void keyguardGone();
     }
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
@@ -461,6 +466,11 @@ public class KeyguardViewMediator {
         @Override
         public void keyguardDonePending() {
             mKeyguardDonePending = true;
+        }
+
+        @Override
+        public void keyguardGone() {
+            mKeyguardDisplayManager.hide();
         }
     };
 
@@ -1248,7 +1258,6 @@ public class KeyguardViewMediator {
             mKeyguardDonePending = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
-            mKeyguardDisplayManager.hide();
         }
     }
 
