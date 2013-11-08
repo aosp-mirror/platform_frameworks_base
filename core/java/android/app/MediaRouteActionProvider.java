@@ -60,7 +60,7 @@ public class MediaRouteActionProvider extends ActionProvider {
         }
         mRouteTypes = types;
         if (types != 0) {
-            mRouter.addCallback(types, mCallback);
+            mRouter.addCallback(types, mCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
         }
         if (mView != null) {
             mView.setRouteTypes(mRouteTypes);
