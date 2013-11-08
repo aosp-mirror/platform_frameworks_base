@@ -643,6 +643,15 @@ public final class Display {
                 || uid == 0;
     }
 
+    /**
+     * Returns true if the display is a public presentation display.
+     * @hide
+     */
+    public boolean isPublicPresentation() {
+        return (mFlags & (Display.FLAG_PRIVATE | Display.FLAG_PRESENTATION)) ==
+                Display.FLAG_PRESENTATION;
+    }
+
     private void updateDisplayInfoLocked() {
         // Note: The display manager caches display info objects on our behalf.
         DisplayInfo newInfo = mGlobal.getDisplayInfo(mDisplayId);

@@ -123,14 +123,14 @@ public class MediaRouteButton extends View {
 
         if (mToggleMode) {
             if (mRemoteActive) {
-                mRouter.selectRouteInt(mRouteTypes, mRouter.getDefaultRoute());
+                mRouter.selectRouteInt(mRouteTypes, mRouter.getDefaultRoute(), true);
             } else {
                 final int N = mRouter.getRouteCount();
                 for (int i = 0; i < N; i++) {
                     final RouteInfo route = mRouter.getRouteAt(i);
                     if ((route.getSupportedTypes() & mRouteTypes) != 0 &&
                             route != mRouter.getDefaultRoute()) {
-                        mRouter.selectRouteInt(mRouteTypes, route);
+                        mRouter.selectRouteInt(mRouteTypes, route, true);
                     }
                 }
             }
@@ -201,7 +201,8 @@ public class MediaRouteButton extends View {
 
         if (mAttachedToWindow) {
             updateRouteInfo();
-            mRouter.addCallback(types, mRouterCallback);
+            mRouter.addCallback(types, mRouterCallback,
+                    MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
         }
     }
 
@@ -217,8 +218,7 @@ public class MediaRouteButton extends View {
     void updateRemoteIndicator() {
         final RouteInfo selected = mRouter.getSelectedRoute(mRouteTypes);
         final boolean isRemote = selected != mRouter.getDefaultRoute();
-        final boolean isConnecting = selected != null &&
-                selected.getStatusCode() == RouteInfo.STATUS_CONNECTING;
+        final boolean isConnecting = selected != null && selected.isConnecting();
 
         boolean needsRefresh = false;
         if (mRemoteActive != isRemote) {
@@ -238,7 +238,7 @@ public class MediaRouteButton extends View {
     void updateRouteCount() {
         final int N = mRouter.getRouteCount();
         int count = 0;
-        boolean hasVideoRoutes = false;
+        boolean scanRequired = false;
         for (int i = 0; i < N; i++) {
             final RouteInfo route = mRouter.getRouteAt(i);
             final int routeTypes = route.getSupportedTypes();
@@ -248,8 +248,9 @@ public class MediaRouteButton extends View {
                 } else {
                     count++;
                 }
-                if ((routeTypes & MediaRouter.ROUTE_TYPE_LIVE_VIDEO) != 0) {
-                    hasVideoRoutes = true;
+                if (((routeTypes & MediaRouter.ROUTE_TYPE_LIVE_VIDEO
+                        | MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY)) != 0) {
+                    scanRequired = true;
                 }
             }
         }
@@ -257,9 +258,10 @@ public class MediaRouteButton extends View {
         setEnabled(count != 0);
 
         // Only allow toggling if we have more than just user routes.
-        // Don't toggle if we support video routes, we may have to let the dialog scan.
-        mToggleMode = count == 2 && (mRouteTypes & MediaRouter.ROUTE_TYPE_LIVE_AUDIO) != 0 &&
-                !hasVideoRoutes;
+        // Don't toggle if we support video or remote display routes, we may have to
+        // let the dialog scan.
+        mToggleMode = count == 2 && (mRouteTypes & MediaRouter.ROUTE_TYPE_LIVE_AUDIO) != 0
+                && !scanRequired;
     }
 
     @Override
@@ -313,7 +315,8 @@ public class MediaRouteButton extends View {
         super.onAttachedToWindow();
         mAttachedToWindow = true;
         if (mRouteTypes != 0) {
-            mRouter.addCallback(mRouteTypes, mRouterCallback);
+            mRouter.addCallback(mRouteTypes, mRouterCallback,
+                    MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
             updateRouteInfo();
         }
     }
