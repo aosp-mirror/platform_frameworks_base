@@ -722,15 +722,6 @@ public class ZygoteInit {
             throws IOException;
 
     /**
-     * Retrieves the permitted capability set from another process.
-     *
-     * @param pid &gt;=0 process ID or 0 for this process
-     * @throws IOException on error
-     */
-    static native long capgetPermitted(int pid)
-            throws IOException;
-
-    /**
      * Invokes select() on the provider array of file descriptors (selecting
      * for readability only). Array elements of null are ignored.
      *
