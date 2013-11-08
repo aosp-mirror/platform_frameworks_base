@@ -308,17 +308,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
-    private final class PointerLocationPointerEventListener implements PointerEventListener {
-        @Override
-        public void onPointerEvent(MotionEvent motionEvent) {
-            if (mPointerLocationView != null) {
-                mPointerLocationView.addPointerEvent(motionEvent);
-            }
-        }
-    }
-
-    // Pointer location view state, only modified on the mHandler Looper.
-    PointerLocationPointerEventListener mPointerLocationPointerEventListener;
     PointerLocationView mPointerLocationView;
 
     // The current size of the screen; really; extends into the overscan area of
@@ -1190,7 +1179,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mPointerLocationView == null) {
             mPointerLocationView = new PointerLocationView(mContext);
             mPointerLocationView.setPrintCoords(false);
-
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
@@ -1210,22 +1198,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
             wm.addView(mPointerLocationView, lp);
-
-            mPointerLocationPointerEventListener = new PointerLocationPointerEventListener();
-            mWindowManagerFuncs.registerPointerEventListener(mPointerLocationPointerEventListener);
+            mWindowManagerFuncs.registerPointerEventListener(mPointerLocationView);
         }
     }
 
     private void disablePointerLocation() {
-        if (mPointerLocationPointerEventListener != null) {
-            mWindowManagerFuncs.unregisterPointerEventListener(
-                    mPointerLocationPointerEventListener);
-            mPointerLocationPointerEventListener = null;
-        }
-
         if (mPointerLocationView != null) {
-            WindowManager wm = (WindowManager)
-                    mContext.getSystemService(Context.WINDOW_SERVICE);
+            mWindowManagerFuncs.unregisterPointerEventListener(mPointerLocationView);
+            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.removeView(mPointerLocationView);
             mPointerLocationView = null;
         }

@@ -31,11 +31,13 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.MotionEvent.PointerCoords;
 
 import java.util.ArrayList;
 
-public class PointerLocationView extends View implements InputDeviceListener {
+public class PointerLocationView extends View implements InputDeviceListener,
+        PointerEventListener {
     private static final String TAG = "Pointer";
 
     // The system property key used to specify an alternate velocity tracker strategy
@@ -520,7 +522,8 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 .toString());
     }
 
-    public void addPointerEvent(MotionEvent event) {
+    @Override
+    public void onPointerEvent(MotionEvent event) {
         final int action = event.getAction();
         int NP = mPointers.size();
 
@@ -648,7 +651,7 @@ public class PointerLocationView extends View implements InputDeviceListener {
     
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        addPointerEvent(event);
+        onPointerEvent(event);
 
         if (event.getAction() == MotionEvent.ACTION_DOWN && !isFocused()) {
             requestFocus();
@@ -660,7 +663,7 @@ public class PointerLocationView extends View implements InputDeviceListener {
     public boolean onGenericMotionEvent(MotionEvent event) {
         final int source = event.getSource();
         if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            addPointerEvent(event);
+            onPointerEvent(event);
         } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
             logMotionEvent("Joystick", event);
         } else if ((source & InputDevice.SOURCE_CLASS_POSITION) != 0) {
