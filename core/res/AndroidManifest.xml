@@ -1992,6 +1992,14 @@
         android:description="@string/permdesc_bindWallpaper"
         android:protectionLevel="signature|system" />
 
+    <!-- Must be required by a {@link com.android.media.remotedisplay.RemoteDisplayProvider},
+         to ensure that only the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_REMOTE_DISPLAY"
+        android:label="@string/permlab_bindRemoteDisplay"
+        android:description="@string/permdesc_bindRemoteDisplay"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by device administration receiver, to ensure that only the
          system can interact with it. -->
     <permission android:name="android.permission.BIND_DEVICE_ADMIN"
