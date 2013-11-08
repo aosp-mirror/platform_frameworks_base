@@ -37,8 +37,9 @@ public class BarController {
     private static final boolean DEBUG = false;
 
     private static final int TRANSIENT_BAR_NONE = 0;
-    private static final int TRANSIENT_BAR_SHOWING = 1;
-    private static final int TRANSIENT_BAR_HIDING = 2;
+    private static final int TRANSIENT_BAR_SHOW_REQUESTED = 1;
+    private static final int TRANSIENT_BAR_SHOWING = 2;
+    private static final int TRANSIENT_BAR_HIDING = 3;
 
     private static final int TRANSLUCENT_ANIMATION_DELAY_MS = 1000;
 
@@ -73,18 +74,18 @@ public class BarController {
         mWin = win;
     }
 
-    public boolean isHidden() {
-        return mState == StatusBarManager.WINDOW_STATE_HIDDEN;
-    }
-
     public void showTransient() {
         if (mWin != null) {
-            setTransientBarState(TRANSIENT_BAR_SHOWING);
+            setTransientBarState(TRANSIENT_BAR_SHOW_REQUESTED);
         }
     }
 
     public boolean isTransientShowing() {
         return mTransientBarState == TRANSIENT_BAR_SHOWING;
+    }
+
+    public boolean isTransientShowRequested() {
+        return mTransientBarState == TRANSIENT_BAR_SHOW_REQUESTED;
     }
 
     public boolean wasRecentlyTranslucent() {
@@ -198,6 +199,9 @@ public class BarController {
         if (mTransientBarState == TRANSIENT_BAR_SHOWING) {
             if (DEBUG) Slog.d(mTag, "Not showing transient bar, already shown");
             return false;
+        } else if (mTransientBarState == TRANSIENT_BAR_SHOW_REQUESTED) {
+            if (DEBUG) Slog.d(mTag, "Not showing transient bar, already requested");
+            return false;
         } else if (mWin == null) {
             if (DEBUG) Slog.d(mTag, "Not showing transient bar, bar doesn't exist");
             return false;
@@ -211,12 +215,13 @@ public class BarController {
 
     public int updateVisibilityLw(boolean transientAllowed, int oldVis, int vis) {
         if (mWin == null) return vis;
-        if (mTransientBarState == TRANSIENT_BAR_SHOWING) { // transient bar requested
+        if (isTransientShowing() || isTransientShowRequested()) { // transient bar requested
             if (transientAllowed) {
                 vis |= mTransientFlag;
                 if ((oldVis & mTransientFlag) == 0) {
                     vis |= mUnhideFlag;  // tell sysui we're ready to unhide
                 }
+                setTransientBarState(TRANSIENT_BAR_SHOWING);  // request accepted
             } else {
                 setTransientBarState(TRANSIENT_BAR_NONE);  // request denied
             }
@@ -254,6 +259,7 @@ public class BarController {
     private static String transientBarStateToString(int state) {
         if (state == TRANSIENT_BAR_HIDING) return "TRANSIENT_BAR_HIDING";
         if (state == TRANSIENT_BAR_SHOWING) return "TRANSIENT_BAR_SHOWING";
+        if (state == TRANSIENT_BAR_SHOW_REQUESTED) return "TRANSIENT_BAR_SHOW_REQUESTED";
         if (state == TRANSIENT_BAR_NONE) return "TRANSIENT_BAR_NONE";
         throw new IllegalArgumentException("Unknown state " + state);
     }
