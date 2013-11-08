@@ -5166,9 +5166,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBar != null &&
                 hideNavBarSysui && immersiveSticky;
 
-        boolean denyTransientStatus = mStatusBarController.isTransientShowing()
+        boolean denyTransientStatus = mStatusBarController.isTransientShowRequested()
                 && !transientStatusBarAllowed && hideStatusBarSysui;
-        boolean denyTransientNav = mNavigationBarController.isTransientShowing()
+        boolean denyTransientNav = mNavigationBarController.isTransientShowRequested()
                 && !transientNavBarAllowed;
         if (denyTransientStatus || denyTransientNav) {
             // clear the clearable flags instead
