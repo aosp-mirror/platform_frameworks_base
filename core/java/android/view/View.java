@@ -18,7 +18,6 @@ package android.view;
 
 import android.content.ClipData;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -3102,7 +3101,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int UNDEFINED_PADDING = Integer.MIN_VALUE;
 
-    private boolean mUseBackgroundPadding = false;
+    /**
+     * Cache if a left padding has been defined
+     */
+    private boolean mLeftPaddingDefined = false;
+
+    /**
+     * Cache if a right padding has been defined
+     */
+    private boolean mRightPaddingDefined = false;
 
     /**
      * @hide
@@ -3532,8 +3539,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int overScrollMode = mOverScrollMode;
         boolean initializeScrollbars = false;
 
-        boolean leftPaddingDefined = false;
-        boolean rightPaddingDefined = false;
         boolean startPaddingDefined = false;
         boolean endPaddingDefined = false;
 
@@ -3550,13 +3555,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     padding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingLeftInitial = padding;
                     mUserPaddingRightInitial = padding;
-                    leftPaddingDefined = true;
-                    rightPaddingDefined = true;
+                    mLeftPaddingDefined = true;
+                    mRightPaddingDefined = true;
                     break;
                  case com.android.internal.R.styleable.View_paddingLeft:
                     leftPadding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingLeftInitial = leftPadding;
-                    leftPaddingDefined = true;
+                    mLeftPaddingDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingTop:
                     topPadding = a.getDimensionPixelSize(attr, -1);
@@ -3564,7 +3569,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case com.android.internal.R.styleable.View_paddingRight:
                     rightPadding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingRightInitial = rightPadding;
-                    rightPaddingDefined = true;
+                    mRightPaddingDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingBottom:
                     bottomPadding = a.getDimensionPixelSize(attr, -1);
@@ -3884,11 +3889,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Padding from the background drawable is stored at this point in mUserPaddingLeftInitial
             // and mUserPaddingRightInitial) so drawable padding will be used as ultimate default if
             // defined.
-            if (!leftPaddingDefined && startPaddingDefined) {
+            if (!mLeftPaddingDefined && startPaddingDefined) {
                 leftPadding = startPadding;
             }
             mUserPaddingLeftInitial = (leftPadding >= 0) ? leftPadding : mUserPaddingLeftInitial;
-            if (!rightPaddingDefined && endPaddingDefined) {
+            if (!mRightPaddingDefined && endPaddingDefined) {
                 rightPadding = endPadding;
             }
             mUserPaddingRightInitial = (rightPadding >= 0) ? rightPadding : mUserPaddingRightInitial;
@@ -3900,10 +3905,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // defined.
             final boolean hasRelativePadding = startPaddingDefined || endPaddingDefined;
 
-            if (leftPaddingDefined && !hasRelativePadding) {
+            if (mLeftPaddingDefined && !hasRelativePadding) {
                 mUserPaddingLeftInitial = leftPadding;
             }
-            if (rightPaddingDefined && !hasRelativePadding) {
+            if (mRightPaddingDefined && !hasRelativePadding) {
                 mUserPaddingRightInitial = rightPadding;
             }
         }
@@ -12347,15 +12352,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // If start / end padding are defined, they will be resolved (hence overriding) to
             // left / right or right / left depending on the resolved layout direction.
             // If start / end padding are not defined, use the left / right ones.
-            if (mBackground != null && mUseBackgroundPadding) {
+            if (mBackground != null && (!mLeftPaddingDefined || !mRightPaddingDefined)) {
                 Rect padding = sThreadLocal.get();
                 if (padding == null) {
                     padding = new Rect();
                     sThreadLocal.set(padding);
                 }
                 mBackground.getPadding(padding);
-                mUserPaddingLeftInitial = padding.left;
-                mUserPaddingRightInitial = padding.right;
+                if (!mLeftPaddingDefined) {
+                    mUserPaddingLeftInitial = padding.left;
+                }
+                if (!mRightPaddingDefined) {
+                    mUserPaddingRightInitial = padding.right;
+                }
             }
             switch (resolvedLayoutDirection) {
                 case LAYOUT_DIRECTION_RTL:
@@ -15352,9 +15361,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         mUserPaddingRightInitial = padding.right;
                         internalSetPadding(padding.left, padding.top, padding.right, padding.bottom);
                 }
-                mUseBackgroundPadding = true;
-            } else {
-                mUseBackgroundPadding = false;
             }
 
             // Compare the minimum sizes of the old Drawable and the new.  If there isn't an old or
@@ -15379,8 +15385,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             /* Remove the background */
             mBackground = null;
-
-            mUseBackgroundPadding = false;
 
             if ((mPrivateFlags & PFLAG_ONLY_DRAWS_BACKGROUND) != 0) {
                 /*
@@ -15452,8 +15456,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mUserPaddingLeftInitial = left;
         mUserPaddingRightInitial = right;
-
-        mUseBackgroundPadding = false;
 
         internalSetPadding(left, top, right, bottom);
     }
@@ -15540,8 +15542,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
-
-        mUseBackgroundPadding = false;
 
         switch(getLayoutDirection()) {
             case LAYOUT_DIRECTION_RTL:
