@@ -154,11 +154,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private final void checkWritePermission(int userId) {
-        mContext.checkCallingOrSelfPermission(PERMISSION);
+        mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsWrite");
     }
 
     private final void checkPasswordReadPermission(int userId) {
-        mContext.checkCallingOrSelfPermission(PERMISSION);
+        mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsRead");
     }
 
     private final void checkReadPermission(String requestedKey, int userId) {
