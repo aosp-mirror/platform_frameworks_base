@@ -81,6 +81,7 @@
     <ul>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/tablets.html">Tablet Stories</a></li>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/games.html">Game Stories</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/localization.html">Localization Stories</a></li>
     </ul>
   </li> 
 
