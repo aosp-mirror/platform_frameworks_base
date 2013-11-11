@@ -1255,17 +1255,16 @@
 
   <java-symbol type="attr" name="mediaRouteButtonStyle" />
   <java-symbol type="attr" name="externalRouteEnabledDrawable" />
-  <java-symbol type="id" name="extended_settings" />
-  <java-symbol type="id" name="check" />
-  <java-symbol type="id" name="volume_slider" />
-  <java-symbol type="id" name="volume_icon" />
-  <java-symbol type="drawable" name="ic_media_route_on_holo_dark" />
-  <java-symbol type="layout" name="media_route_chooser_layout" />
-  <java-symbol type="layout" name="media_route_list_item_top_header" />
-  <java-symbol type="layout" name="media_route_list_item_section_header" />
+  <java-symbol type="layout" name="media_route_chooser_dialog" />
+  <java-symbol type="layout" name="media_route_controller_dialog" />
   <java-symbol type="layout" name="media_route_list_item" />
-  <java-symbol type="layout" name="media_route_list_item_checkable" />
-  <java-symbol type="layout" name="media_route_list_item_collapse_group" />
+  <java-symbol type="id" name="media_route_list" />
+  <java-symbol type="id" name="media_route_volume_layout" />
+  <java-symbol type="id" name="media_route_volume_slider" />
+  <java-symbol type="id" name="media_route_control_frame" />
+  <java-symbol type="id" name="media_route_disconnect_button" />
+  <java-symbol type="id" name="media_route_extended_settings_button" />
+  <java-symbol type="string" name="media_route_chooser_title" />
   <java-symbol type="string" name="bluetooth_a2dp_audio_route_name" />
 
   <java-symbol type="dimen" name="config_minScalingSpan" />
