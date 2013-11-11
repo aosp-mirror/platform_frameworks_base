@@ -1389,6 +1389,7 @@ public final class ActiveServices {
         } finally {
             if (!created) {
                 app.services.remove(r);
+                r.app = null;
                 scheduleServiceRestartLocked(r, false);
             }
         }
@@ -1775,6 +1776,7 @@ public final class ActiveServices {
             long now = SystemClock.uptimeMillis();
             r.tracker.setExecuting(false, memFactor, now);
             r.tracker.setBound(false, memFactor, now);
+            r.tracker.setStarted(false, memFactor, now);
         }
         serviceDoneExecutingLocked(r, true, true);
     }
