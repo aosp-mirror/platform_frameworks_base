@@ -1452,7 +1452,6 @@
   <java-symbol type="color" name="config_defaultNotificationColor" />
   <java-symbol type="color" name="input_method_navigation_guard" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
-  <java-symbol type="drawable" name="ic_notify_wifidisplay" />
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="stat_notify_car_mode" />
   <java-symbol type="drawable" name="stat_notify_disabled" />

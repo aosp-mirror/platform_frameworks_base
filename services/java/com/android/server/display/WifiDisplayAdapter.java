@@ -499,7 +499,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                     .setContentText(r.getString(
                             R.string.wifi_display_notification_message))
                     .setContentIntent(mSettingsPendingIntent)
-                    .setSmallIcon(R.drawable.ic_notify_wifidisplay)
+                    .setSmallIcon(R.drawable.ic_media_route_on_holo_dark)
                     .setOngoing(true)
                     .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                             r.getString(R.string.wifi_display_notification_disconnect),
