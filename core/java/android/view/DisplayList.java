@@ -86,18 +86,15 @@ import android.graphics.Matrix;
  *
  * <pre class="prettyprint">
  *     private void createDisplayList() {
- *         HardwareRenderer renderer = getHardwareRenderer();
- *         if (renderer != null) {
- *             mDisplayList = renderer.createDisplayList();
- *             HardwareCanvas canvas = mDisplayList.start(width, height);
- *             try {
- *                 for (Bitmap b : mBitmaps) {
- *                     canvas.drawBitmap(b, 0.0f, 0.0f, null);
- *                     canvas.translate(0.0f, b.getHeight());
- *                 }
- *             } finally {
- *                 displayList.end();
+ *         mDisplayList = DisplayList.create("MyDisplayList");
+ *         HardwareCanvas canvas = mDisplayList.start(width, height);
+ *         try {
+ *             for (Bitmap b : mBitmaps) {
+ *                 canvas.drawBitmap(b, 0.0f, 0.0f, null);
+ *                 canvas.translate(0.0f, b.getHeight());
  *             }
+ *         } finally {
+ *             displayList.end();
  *         }
  *     }
  *

@@ -13358,20 +13358,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @return The {@link HardwareRenderer} associated with that view or null if
-     *         hardware rendering is not supported or this view is not attached
-     *         to a window.
-     *
-     * @hide
-     */
-    public HardwareRenderer getHardwareRenderer() {
-        if (mAttachInfo != null) {
-            return mAttachInfo.mHardwareRenderer;
-        }
-        return null;
-    }
-
-    /**
      * Returns a DisplayList. If the incoming displayList is null, one will be created.
      * Otherwise, the same display list will be returned (after having been rendered into
      * along the way, depending on the invalidation state of the view).
