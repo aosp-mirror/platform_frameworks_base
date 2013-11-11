@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HardwareRenderer"
+#define LOG_TAG "GLRenderer"
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -60,7 +60,7 @@ namespace android {
 // Surface and display management
 // ----------------------------------------------------------------------------
 
-static jboolean android_view_HardwareRenderer_preserveBackBuffer(JNIEnv* env, jobject clazz) {
+static jboolean android_view_GLRenderer_preserveBackBuffer(JNIEnv* env, jobject clazz) {
     EGLDisplay display = eglGetCurrentDisplay();
     EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
 
@@ -75,7 +75,7 @@ static jboolean android_view_HardwareRenderer_preserveBackBuffer(JNIEnv* env, jo
     return error == EGL_SUCCESS;
 }
 
-static jboolean android_view_HardwareRenderer_isBackBufferPreserved(JNIEnv* env, jobject clazz) {
+static jboolean android_view_GLRenderer_isBackBufferPreserved(JNIEnv* env, jobject clazz) {
     EGLDisplay display = eglGetCurrentDisplay();
     EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
     EGLint value;
@@ -95,14 +95,14 @@ static jboolean android_view_HardwareRenderer_isBackBufferPreserved(JNIEnv* env,
 // Tracing and debugging
 // ----------------------------------------------------------------------------
 
-static bool android_view_HardwareRenderer_loadProperties(JNIEnv* env, jobject clazz) {
+static bool android_view_GLRenderer_loadProperties(JNIEnv* env, jobject clazz) {
     if (uirenderer::Caches::hasInstance()) {
         return uirenderer::Caches::getInstance().initProperties();
     }
     return false;
 }
 
-static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz,
+static void android_view_GLRenderer_beginFrame(JNIEnv* env, jobject clazz,
         jintArray size) {
 
     EGLDisplay display = eglGetCurrentDisplay();
@@ -124,7 +124,7 @@ static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz,
     eglBeginFrame(display, surface);
 }
 
-static jlong android_view_HardwareRenderer_getSystemTime(JNIEnv* env, jobject clazz) {
+static jlong android_view_GLRenderer_getSystemTime(JNIEnv* env, jobject clazz) {
     if (uirenderer::Extensions::getInstance().hasNvSystemTime()) {
         return eglGetSystemTimeNV();
     }
@@ -137,7 +137,7 @@ static jlong android_view_HardwareRenderer_getSystemTime(JNIEnv* env, jobject cl
 // Shaders
 // ----------------------------------------------------------------------------
 
-static void android_view_HardwareRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
+static void android_view_GLRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
         jstring diskCachePath) {
 
     const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
@@ -149,24 +149,24 @@ static void android_view_HardwareRenderer_setupShadersDiskCache(JNIEnv* env, job
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/HardwareRenderer";
+const char* const kClassPathName = "android/view/GLRenderer";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "nIsBackBufferPreserved", "()Z",   (void*) android_view_HardwareRenderer_isBackBufferPreserved },
-    { "nPreserveBackBuffer",    "()Z",   (void*) android_view_HardwareRenderer_preserveBackBuffer },
-    { "nLoadProperties",        "()Z",   (void*) android_view_HardwareRenderer_loadProperties },
+    { "isBackBufferPreserved", "()Z",   (void*) android_view_GLRenderer_isBackBufferPreserved },
+    { "preserveBackBuffer",    "()Z",   (void*) android_view_GLRenderer_preserveBackBuffer },
+    { "loadProperties",        "()Z",   (void*) android_view_GLRenderer_loadProperties },
 
-    { "nBeginFrame",            "([I)V", (void*) android_view_HardwareRenderer_beginFrame },
+    { "beginFrame",            "([I)V", (void*) android_view_GLRenderer_beginFrame },
 
-    { "nGetSystemTime",         "()J",   (void*) android_view_HardwareRenderer_getSystemTime },
+    { "getSystemTime",         "()J",   (void*) android_view_GLRenderer_getSystemTime },
 #endif
 
-    { "nSetupShadersDiskCache", "(Ljava/lang/String;)V",
-            (void*) android_view_HardwareRenderer_setupShadersDiskCache },
+    { "setupShadersDiskCache", "(Ljava/lang/String;)V",
+            (void*) android_view_GLRenderer_setupShadersDiskCache },
 };
 
-int register_android_view_HardwareRenderer(JNIEnv* env) {
+int register_android_view_GLRenderer(JNIEnv* env) {
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
