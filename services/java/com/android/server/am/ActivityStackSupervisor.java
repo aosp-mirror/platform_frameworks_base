@@ -1386,17 +1386,22 @@ public final class ActivityStackSupervisor {
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
         }
 
+        ActivityInfo newTaskInfo = null;
+        Intent newTaskIntent = null;
         final ActivityStack sourceStack;
         if (sourceRecord != null) {
             if (sourceRecord.finishing) {
                 // If the source is finishing, we can't further count it as our source.  This
                 // is because the task it is associated with may now be empty and on its way out,
                 // so we don't want to blindly throw it in to that task.  Instead we will take
-                // the NEW_TASK flow and try to find a task for it.
+                // the NEW_TASK flow and try to find a task for it. But save the task information
+                // so it can be used when creating the new task.
                 if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
                     Slog.w(TAG, "startActivity called from finishing " + sourceRecord
                             + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                     launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+                    newTaskInfo = sourceRecord.info;
+                    newTaskIntent = sourceRecord.task.intent;
                 }
                 sourceRecord = null;
                 sourceStack = null;
@@ -1668,8 +1673,10 @@ public final class ActivityStackSupervisor {
             targetStack = adjustStackFocus(r);
             moveHomeStack(targetStack.isHomeStack());
             if (reuseTask == null) {
-                r.setTask(targetStack.createTaskRecord(getNextTaskId(), r.info, intent, true),
-                        null, true);
+                r.setTask(targetStack.createTaskRecord(getNextTaskId(),
+                        newTaskInfo != null ? newTaskInfo : r.info,
+                        newTaskIntent != null ? newTaskIntent : intent,
+                        true), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
