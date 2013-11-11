@@ -3468,6 +3468,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 // Maintain fullscreen layout until incoming animation is complete.
                 topIsFullscreen = mTopIsFullscreen && mStatusBar.isAnimatingLw();
+                // Transient status bar on the lockscreen is not allowed
+                if (mForceStatusBarFromKeyguard && mStatusBarController.isTransientShowing()) {
+                    mStatusBarController.updateVisibilityLw(false /*transientAllowed*/,
+                            mLastSystemUiFlags, mLastSystemUiFlags);
+                }
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 if (localLOGV) {
                     Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
