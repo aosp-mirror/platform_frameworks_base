@@ -41,10 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Iskalno polje je prikazano"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Iskalno polje je skrito"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Dodajanje tiskalnika"</string>
-    <!-- no translation found for print_select_printer (7388760939873368698) -->
-    <skip />
-    <!-- no translation found for print_forget_printer (5035287497291910766) -->
-    <skip />
+    <string name="print_select_printer" msgid="7388760939873368698">"Izbira tiskalnika"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Odstranitev tiskalnika"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"Najden <xliff:g id="COUNT">%1$s</xliff:g> tiskalnik"</item>
     <item quantity="other" msgid="6533817036607128241">"Število najdenih tiskalnikov: <xliff:g id="COUNT">%1$s</xliff:g>"</item>
