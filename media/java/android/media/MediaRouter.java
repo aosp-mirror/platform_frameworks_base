@@ -137,8 +137,7 @@ public class MediaRouter {
             mDefaultAudioVideo = new RouteInfo(mSystemCategory);
             mDefaultAudioVideo.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudioVideo.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
-            mDefaultAudioVideo.mPresentationDisplay = choosePresentationDisplayForRoute(
-                    mDefaultAudioVideo, getAllPresentationDisplays());
+            mDefaultAudioVideo.updatePresentationDisplay();
             addRouteStatic(mDefaultAudioVideo);
 
             // This will select the active wifi display route if there is one.
@@ -311,15 +310,12 @@ public class MediaRouter {
         }
 
         private void updatePresentationDisplays(int changedDisplayId) {
-            final Display[] displays = getAllPresentationDisplays();
             final int count = mRoutes.size();
             for (int i = 0; i < count; i++) {
-                final RouteInfo info = mRoutes.get(i);
-                Display display = choosePresentationDisplayForRoute(info, displays);
-                if (display != info.mPresentationDisplay
-                        || (display != null && display.getDisplayId() == changedDisplayId)) {
-                    info.mPresentationDisplay = display;
-                    dispatchRoutePresentationDisplayChanged(info);
+                final RouteInfo route = mRoutes.get(i);
+                if (route.updatePresentationDisplay() || (route.mPresentationDisplay != null
+                        && route.mPresentationDisplay.getDisplayId() == changedDisplayId)) {
+                    dispatchRoutePresentationDisplayChanged(route);
                 }
             }
         }
@@ -480,7 +476,8 @@ public class MediaRouter {
             route.mVolume = globalRoute.volume;
             route.mVolumeMax = globalRoute.volumeMax;
             route.mVolumeHandling = globalRoute.volumeHandling;
-            route.mPresentationDisplay = getDisplayForGlobalRoute(globalRoute);
+            route.mPresentationDisplayId = globalRoute.presentationDisplayId;
+            route.updatePresentationDisplay();
             return route;
         }
 
@@ -532,9 +529,9 @@ public class MediaRouter {
                 changed = true;
                 volumeChanged = true;
             }
-            final Display presentationDisplay = getDisplayForGlobalRoute(globalRoute);
-            if (route.mPresentationDisplay != presentationDisplay) {
-                route.mPresentationDisplay = presentationDisplay;
+            if (route.mPresentationDisplayId != globalRoute.presentationDisplayId) {
+                route.mPresentationDisplayId = globalRoute.presentationDisplayId;
+                route.updatePresentationDisplay();
                 changed = true;
                 presentationDisplayChanged = true;
             }
@@ -548,19 +545,6 @@ public class MediaRouter {
             if (presentationDisplayChanged) {
                 dispatchRoutePresentationDisplayChanged(route);
             }
-        }
-
-        Display getDisplayForGlobalRoute(MediaRouterClientState.RouteInfo globalRoute) {
-            // Ensure that the specified display is valid for presentations.
-            // This check will normally disallow the default display unless it was configured
-            // as a presentation display for some reason.
-            if (globalRoute.presentationDisplayId >= 0) {
-                Display display = mDisplayService.getDisplay(globalRoute.presentationDisplayId);
-                if (display != null && display.isPublicPresentation()) {
-                    return display;
-                }
-            }
-            return null;
         }
 
         RouteInfo findGlobalRoute(String globalRouteId) {
@@ -1312,9 +1296,7 @@ public class MediaRouter {
         newRoute.mName = display.getFriendlyDisplayName();
         newRoute.mDescription = sStatic.mResources.getText(
                 com.android.internal.R.string.wireless_display_route_description);
-
-        newRoute.mPresentationDisplay = choosePresentationDisplayForRoute(newRoute,
-                sStatic.getAllPresentationDisplays());
+        newRoute.updatePresentationDisplay();
         return newRoute;
     }
 
@@ -1364,27 +1346,6 @@ public class MediaRouter {
         return null;
     }
 
-    private static Display choosePresentationDisplayForRoute(RouteInfo route, Display[] displays) {
-        if ((route.mSupportedTypes & ROUTE_TYPE_LIVE_VIDEO) != 0) {
-            if (route.mDeviceAddress != null) {
-                // Find the indicated Wifi display by its address.
-                for (Display display : displays) {
-                    if (display.getType() == Display.TYPE_WIFI
-                            && route.mDeviceAddress.equals(display.getAddress())) {
-                        return display;
-                    }
-                }
-                return null;
-            }
-
-            if (route == sStatic.mDefaultAudioVideo && displays.length > 0) {
-                // Choose the first presentation display from the list.
-                return displays[0];
-            }
-        }
-        return null;
-    }
-
     /**
      * Information about a media route.
      */
@@ -1405,6 +1366,7 @@ public class MediaRouter {
         int mPlaybackStream = AudioManager.STREAM_MUSIC;
         VolumeCallbackInfo mVcb;
         Display mPresentationDisplay;
+        int mPresentationDisplayId = -1;
 
         String mDeviceAddress;
         boolean mEnabled = true;
@@ -1741,6 +1703,50 @@ public class MediaRouter {
          */
         public Display getPresentationDisplay() {
             return mPresentationDisplay;
+        }
+
+        boolean updatePresentationDisplay() {
+            Display display = choosePresentationDisplay();
+            if (mPresentationDisplay != display) {
+                mPresentationDisplay = display;
+                return true;
+            }
+            return false;
+        }
+
+        private Display choosePresentationDisplay() {
+            if ((mSupportedTypes & ROUTE_TYPE_LIVE_VIDEO) != 0) {
+                Display[] displays = sStatic.getAllPresentationDisplays();
+
+                // Ensure that the specified display is valid for presentations.
+                // This check will normally disallow the default display unless it was
+                // configured as a presentation display for some reason.
+                if (mPresentationDisplayId >= 0) {
+                    for (Display display : displays) {
+                        if (display.getDisplayId() == mPresentationDisplayId) {
+                            return display;
+                        }
+                    }
+                    return null;
+                }
+
+                // Find the indicated Wifi display by its address.
+                if (mDeviceAddress != null) {
+                    for (Display display : displays) {
+                        if (display.getType() == Display.TYPE_WIFI
+                                && mDeviceAddress.equals(display.getAddress())) {
+                            return display;
+                        }
+                    }
+                    return null;
+                }
+
+                // For the default route, choose the first presentation display from the list.
+                if (this == sStatic.mDefaultAudioVideo && displays.length > 0) {
+                    return displays[0];
+                }
+            }
+            return null;
         }
 
         /**
