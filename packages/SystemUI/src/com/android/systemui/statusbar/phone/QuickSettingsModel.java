@@ -808,8 +808,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY);
         boolean enabled = connectedRoute != null && (connectedRoute.getSupportedTypes()
                 & MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY) != 0;
-        if (!enabled) {
+        boolean connecting;
+        if (enabled) {
+            connecting = connectedRoute.isConnecting();
+        } else {
             connectedRoute = null;
+            connecting = false;
             final int count = mMediaRouter.getRouteCount();
             for (int i = 0; i < count; i++) {
                 MediaRouter.RouteInfo route = mMediaRouter.getRouteAt(i);
@@ -823,11 +827,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRemoteDisplayState.enabled = enabled;
         if (connectedRoute != null) {
             mRemoteDisplayState.label = connectedRoute.getName().toString();
-            mRemoteDisplayState.iconId = R.drawable.ic_qs_remote_display_connected;
+            mRemoteDisplayState.iconId = connecting ?
+                    com.android.internal.R.drawable.ic_media_route_connecting_holo_dark :
+                    com.android.internal.R.drawable.ic_media_route_on_holo_dark;
         } else {
             mRemoteDisplayState.label = mContext.getString(
                     R.string.quick_settings_remote_display_no_connection_label);
-            mRemoteDisplayState.iconId = R.drawable.ic_qs_remote_display;
+            mRemoteDisplayState.iconId =
+                    com.android.internal.R.drawable.ic_media_route_off_holo_dark;
         }
         mRemoteDisplayCallback.refreshView(mRemoteDisplayTile, mRemoteDisplayState);
     }

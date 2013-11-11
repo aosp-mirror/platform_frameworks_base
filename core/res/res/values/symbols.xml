@@ -1092,6 +1092,8 @@
   <java-symbol type="drawable" name="notification_template_icon_bg" />
   <java-symbol type="drawable" name="notification_template_icon_low_bg" />
   <java-symbol type="drawable" name="ic_media_route_on_holo_dark" />
+  <java-symbol type="drawable" name="ic_media_route_off_holo_dark" />
+  <java-symbol type="drawable" name="ic_media_route_connecting_holo_dark" />
   <java-symbol type="drawable" name="ic_media_route_disabled_holo_dark" />
   <java-symbol type="drawable" name="cling_button" />
   <java-symbol type="drawable" name="cling_arrow_up" />
