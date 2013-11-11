@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Umožňuje držiteli navázat se na nejvyšší úroveň služby VPN. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vazba na tapetu"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"navázat se na službu widgetu"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Umožňuje držiteli navázat se na nejvyšší úroveň služby widgetu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovat se správcem zařízení"</string>
@@ -1489,8 +1493,15 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systém"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth Audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Bezdrátový displej"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Hotovo"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Výstup médií"</string>
+    <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
+    <skip />
+    <!-- no translation found for media_route_controller_disconnect (8966120286374158649) -->
+    <skip />
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Vyhledávání…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Připojování…"</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Dostupná"</string>

@@ -382,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"‏به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس Vpn متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"پیوند شده به تصویر زمینه"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"‏به دارنده اجازه می‎دهد تا به رابط سطح بالای تصویر زمینه متصل شود. برنامه‎های معمولی هرگز به این ویژگی نیاز ندارند."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"اتصال به نمایشگر راه دور"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"به دارنده ام‍ک‍ان می‌دهد تا به رابط سطح بالای نمایشگر راه دور وصل شود. نباید هرگز برای برنامه‌های عادی لازم باشد."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"اتصال به یک سرویس ابزارک"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس ابزارک متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"تعامل با یک سرپرست دستگاه"</string>
@@ -1489,8 +1491,15 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"انجام شد"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"خروجی رسانه"</string>
+    <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
+    <skip />
+    <!-- no translation found for media_route_controller_disconnect (8966120286374158649) -->
+    <skip />
     <string name="media_route_status_scanning" msgid="7279908761758293783">"در حال اسکن کردن…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"درحال اتصال…"</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"در دسترس"</string>

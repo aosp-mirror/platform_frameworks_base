@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Приложение сможет подключаться к базовому интерфейсу службы VPN. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"Привязка к фоновому рисунку"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Приложение сможет подключаться к базовому интерфейсу службы обоев. Это разрешение не используется обычными приложениями."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"Подключение к службе виджетов"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Приложение сможет подключаться к базовому интерфейсу службы виджетов. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Взаимодействие с администратором устройства"</string>
@@ -1489,8 +1493,15 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Система"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Воспроизведение звука через Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Беспроводной монитор"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Перенаправлять поток мультимедиа"</string>
+    <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
+    <skip />
+    <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
+    <skip />
+    <!-- no translation found for media_route_controller_disconnect (8966120286374158649) -->
+    <skip />
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Сканирование..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Подключение..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Доступен"</string>
