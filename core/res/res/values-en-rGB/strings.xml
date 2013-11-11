@@ -382,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Allows the holder to bind to the top-level interface of a Vpn service. Should never be needed for normal apps."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind to wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Allows the holder to bind to the top-level interface of wallpaper. Should never be needed for normal applications."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"bind to a remote display"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Allows the holder to bind to the top-level interface of a remote display. Should never be needed for normal apps."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind to a widget service"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Allows the holder to bind to the top-level interface of a widget service. Should never be needed for normal apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interact with device admin"</string>

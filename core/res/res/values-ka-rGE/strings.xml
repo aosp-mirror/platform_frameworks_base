@@ -382,6 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"აპს შეეძლება Vpn სერვისის ზედა დონის ინტერფეისთან დაკავშირება. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ფონზე მიჭედება"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"მფლობელს შეეძლება ფონის ზედა დონის ინტერფეისთან დაკავშირება. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"დისტანციურ მონიტორზე მიბმა"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"მფლობელს შეეძლება მიებას დისტანციურ მონიტორის ზედა დონის ინტერფეისს. ჩვეულებრივ აპს ეს წესით არასოდეს არ უნდა დაჭირდეს."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ვიჯეტ სერვისთან დაკავშირება"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"აპს შეეძლება ზედა დონის ინტერფეისის ვიჯეტთან დაკავშირება. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"მოწყობილობის ადმინთან ინტერაქცია"</string>

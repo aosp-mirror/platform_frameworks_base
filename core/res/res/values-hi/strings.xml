@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"धारक को किसी Vpn सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"वॉलपेपर से आबद्ध करें"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"धारक को किसी वॉलपेपर के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"किसी विजेट सेवा से आबद्ध करें"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"धारक को किसी विजेट सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"किसी उपकरण व्‍यवस्‍थापक के साथ सहभागिता करें"</string>

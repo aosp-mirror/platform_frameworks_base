@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງເຊື່ອມໂຍງກັບສ່ວນຕິດຕໍ່ລະດັບເທິງສຸດ ຂອງບໍລິການ VPN. ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ເຊື່ອມໂຍງກັບພາບພື້ນຫຼັງ"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ອະນຸຍາດໃຫ້ຜູ່ໃຊ້ເຊື່ອມໂຍງກັບສ່ວນຕິດຕໍ່ລະດັບສູງສຸດ ຂອງພາບພື້ນຫຼັງໃດນຶ່ງ. ແອັບຯທຳມະດາບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ເຊື່ອມໂຍງໄປຫາບໍລິການວິດເຈັດ"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບອິນເຕີເຟດລະດັບສູງສຸດ ຂອງບໍລິການວິເຈັດ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ຕິດຕໍ່ກັບຜູ່ເບິ່ງແຍງອຸປະກອນ"</string>

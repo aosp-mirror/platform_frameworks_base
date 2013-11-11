@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite al titular vincularse a la interfaz de nivel superior de un servicio de VPN. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un fondo de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite al propietario vincularse a la interfaz de nivel superior de un fondo de pantalla. Las aplicaciones normales no deben utilizar este permiso."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a un servicio de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite al propietario vincularse a la interfaz de nivel superior del servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con un administrador de dispositivos"</string>

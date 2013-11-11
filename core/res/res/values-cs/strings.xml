@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Umožňuje držiteli navázat se na nejvyšší úroveň služby VPN. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vazba na tapetu"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"navázat se na službu widgetu"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Umožňuje držiteli navázat se na nejvyšší úroveň služby widgetu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovat se správcem zařízení"</string>
