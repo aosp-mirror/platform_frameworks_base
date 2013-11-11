@@ -382,6 +382,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite enlazar con la interfaz de nivel superior de un servicio de VPN. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"enlazar con un fondo de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite enlazar con la interfaz de nivel superior de un fondo de pantalla. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"enlazar con un servicio de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite enlazar con la interfaz de nivel superior de un servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con el administrador de un dispositivo"</string>
@@ -790,7 +794,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo!"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Conversaciones"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>

@@ -396,6 +396,10 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Дазваляе ўладальніку звязвацца з інтэрфейсам службы VPN вышэйшага ўзроўню. Не патрэбна для звычайных прыкладанняў."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"прывязаць да шпалер"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Дазваляе ўладальніку ўсталёўваць прывязку да інтэрфейсу шпалер верхняга ўзроўню. Не патрабуецца для звычайных прыкладанняў."</string>
+    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
+    <skip />
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"прывязаць да службы віджэту"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню службы віджэта. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"узаемадзейнічаць з адміністратарам прылады"</string>
