@@ -438,9 +438,9 @@ SetupWizard, Clock, Downloads, and more.</p>
 
 <p>Android 4.3 also includes new utilities and APIs for creating better RTL
 strings and testing your localized UIs. A new <strong>BidiFormatter</strong>
-provides a set of simple APIs for wrapping Unicode strings so that you can
-fine-tune your text rendering in RTL scripts. To let you use this utility more
-broadly in your apps, the BidiFormatter APIs are also now available for earlier
+class provides a simple API for wrapping Unicode strings, so that RTL-script
+data is displayed as intended in LTR-locale messages and vice-versa. To let you use this utility more
+broadly in your apps, the BidiFormatter API is also now available for earlier
 platform versions through the Support Package in the Android SDK. </p>
 
 <p>To assist you with managing date formatting across locales, Android 4.3
