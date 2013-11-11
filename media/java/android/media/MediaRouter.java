@@ -59,7 +59,7 @@ public class MediaRouter {
 
     static class Static implements DisplayManager.DisplayListener {
         // Time between wifi display scans when actively scanning in milliseconds.
-        private static final int WIFI_DISPLAY_SCAN_INTERVAL = 15000;
+        private static final int WIFI_DISPLAY_SCAN_INTERVAL = 10000;
 
         final Context mAppContext;
         final Resources mResources;
@@ -82,7 +82,6 @@ public class MediaRouter {
 
         RouteInfo mSelectedRoute;
 
-        WifiDisplayStatus mLastKnownWifiDisplayStatus;
         boolean mActivelyScanningWifiDisplays;
 
         int mDiscoveryRequestRouteTypes;
@@ -1244,60 +1243,57 @@ public class MediaRouter {
         }
     }
 
-    static void updateWifiDisplayStatus(WifiDisplayStatus newStatus) {
-        final WifiDisplayStatus oldStatus = sStatic.mLastKnownWifiDisplayStatus;
-
-        // TODO Naive implementation. Make this smarter later.
+    static void updateWifiDisplayStatus(WifiDisplayStatus status) {
         boolean wantScan = false;
-        boolean blockScan = false;
-        WifiDisplay[] oldDisplays = oldStatus != null ?
-                oldStatus.getDisplays() : WifiDisplay.EMPTY_ARRAY;
-        WifiDisplay[] newDisplays;
+        WifiDisplay[] displays;
         WifiDisplay activeDisplay;
 
-        if (newStatus.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON) {
-            newDisplays = newStatus.getDisplays();
-            activeDisplay = newStatus.getActiveDisplay();
+        if (status.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON) {
+            displays = status.getDisplays();
+            activeDisplay = status.getActiveDisplay();
         } else {
-            newDisplays = WifiDisplay.EMPTY_ARRAY;
+            displays = WifiDisplay.EMPTY_ARRAY;
             activeDisplay = null;
         }
 
-        for (int i = 0; i < newDisplays.length; i++) {
-            final WifiDisplay d = newDisplays[i];
-            if (d.isRemembered()) {
+        // Add or update routes.
+        for (int i = 0; i < displays.length; i++) {
+            final WifiDisplay d = displays[i];
+            if (shouldShowWifiDisplay(d, activeDisplay)) {
                 RouteInfo route = findWifiDisplayRoute(d);
                 if (route == null) {
-                    route = makeWifiDisplayRoute(d, newStatus);
+                    route = makeWifiDisplayRoute(d, status);
                     addRouteStatic(route);
                     wantScan = true;
                 } else {
-                    updateWifiDisplayRoute(route, d, newStatus);
+                    updateWifiDisplayRoute(route, d, status);
                 }
                 if (d.equals(activeDisplay)) {
                     selectRouteStatic(route.getSupportedTypes(), route, false);
-
-                    // Don't scan if we're already connected to a wifi display,
-                    // the scanning process can cause a hiccup with some configurations.
-                    blockScan = true;
-                }
-            }
-        }
-        for (int i = 0; i < oldDisplays.length; i++) {
-            final WifiDisplay d = oldDisplays[i];
-            if (d.isRemembered()) {
-                final WifiDisplay newDisplay = findMatchingDisplay(d, newDisplays);
-                if (newDisplay == null || !newDisplay.isRemembered()) {
-                    removeRouteStatic(findWifiDisplayRoute(d));
                 }
             }
         }
 
-        if (wantScan && !blockScan) {
+        // Remove stale routes.
+        for (int i = sStatic.mRoutes.size(); i-- > 0; ) {
+            RouteInfo route = sStatic.mRoutes.get(i);
+            if (route.mDeviceAddress != null) {
+                WifiDisplay d = findWifiDisplay(displays, route.mDeviceAddress);
+                if (d == null || !shouldShowWifiDisplay(d, activeDisplay)) {
+                    removeRouteStatic(route);
+                }
+            }
+        }
+
+        // Don't scan if we're already connected to a wifi display,
+        // the scanning process can cause a hiccup with some configurations.
+        if (wantScan && activeDisplay != null) {
             sStatic.mDisplayService.scanWifiDisplays();
         }
+    }
 
-        sStatic.mLastKnownWifiDisplayStatus = newStatus;
+    private static boolean shouldShowWifiDisplay(WifiDisplay d, WifiDisplay activeDisplay) {
+        return d.isRemembered() || d.equals(activeDisplay);
     }
 
     static int getWifiDisplayStatusCode(WifiDisplay d, WifiDisplayStatus wfdStatus) {
@@ -1375,11 +1371,11 @@ public class MediaRouter {
         }
     }
 
-    private static WifiDisplay findMatchingDisplay(WifiDisplay d, WifiDisplay[] displays) {
+    private static WifiDisplay findWifiDisplay(WifiDisplay[] displays, String deviceAddress) {
         for (int i = 0; i < displays.length; i++) {
-            final WifiDisplay other = displays[i];
-            if (d.hasSameAddress(other)) {
-                return other;
+            final WifiDisplay d = displays[i];
+            if (d.getDeviceAddress().equals(deviceAddress)) {
+                return d;
             }
         }
         return null;
@@ -1802,6 +1798,11 @@ public class MediaRouter {
                 }
             }
             return null;
+        }
+
+        /** @hide */
+        public String getDeviceAddress() {
+            return mDeviceAddress;
         }
 
         /**
