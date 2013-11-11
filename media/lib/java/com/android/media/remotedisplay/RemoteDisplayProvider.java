@@ -257,6 +257,15 @@ public abstract class RemoteDisplayProvider {
         publishState();
     }
 
+    /**
+     * Finds the remote display with the specified id, returns null if not found.
+     *
+     * @param id Id of the remote display.
+     */
+    public RemoteDisplay findRemoteDisplay(String id) {
+        return mDisplays.get(id);
+    }
+
     void setCallback(IRemoteDisplayCallback callback) {
         mCallback = callback;
         publishState();
@@ -283,10 +292,6 @@ public abstract class RemoteDisplayProvider {
                 // system server died?
             }
         }
-    }
-
-    RemoteDisplay findRemoteDisplay(String id) {
-        return mDisplays.get(id);
     }
 
     final class ProviderStub extends IRemoteDisplayProvider.Stub {
