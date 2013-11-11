@@ -1006,8 +1006,9 @@ window.onhashchange = function () {
 <h4 id="44-pseudolocale-rtl">Force RTL Layout</h4>
 
 <p>
-  To make it easier to test and debug your layouts, Android includes a new
-  developer option to force RTL layout direction in all apps.
+  To make it easier to test and debug layout mirroring issues without switching
+  to an RTL language, Android includes a new developer option to force RTL layout
+  direction in all apps.
 </p>
 
 <p>
