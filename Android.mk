@@ -98,6 +98,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothMap.aidl \
 	core/java/android/bluetooth/IBluetoothStateChangeCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHandsfreeClient.aidl \
+	core/java/android/bluetooth/IBluetoothHidDevice.aidl \
+	core/java/android/bluetooth/IBluetoothHidDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothGatt.aidl \
 	core/java/android/bluetooth/IBluetoothGattCallback.aidl \
 	core/java/android/bluetooth/IBluetoothGattServerCallback.aidl \
