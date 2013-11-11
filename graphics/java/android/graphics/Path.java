@@ -16,8 +16,6 @@
 
 package android.graphics;
 
-import android.view.HardwareRenderer;
-
 /**
  * The Path class encapsulates compound (multiple contour) geometric paths
  * consisting of straight line segments, quadratic curves, and cubic curves.
@@ -39,7 +37,6 @@ public class Path {
      * @hide
      */
     public Region rects;
-    private boolean mDetectSimplePaths;
     private Direction mLastDirection = null;
 
     /**
@@ -47,7 +44,6 @@ public class Path {
      */
     public Path() {
         mNativePath = init1();
-        mDetectSimplePaths = HardwareRenderer.isAvailable();
     }
 
     /**
@@ -65,7 +61,6 @@ public class Path {
             }
         }
         mNativePath = init2(valNative);
-        mDetectSimplePaths = HardwareRenderer.isAvailable();
     }
     
     /**
@@ -74,10 +69,8 @@ public class Path {
      */
     public void reset() {
         isSimplePath = true;
-        if (mDetectSimplePaths) {
-            mLastDirection = null;
-            if (rects != null) rects.setEmpty();
-        }
+        mLastDirection = null;
+        if (rects != null) rects.setEmpty();
         // We promised not to change this, so preserve it around the native
         // call, which does now reset fill type.
         final FillType fillType = getFillType();
@@ -91,10 +84,8 @@ public class Path {
      */
     public void rewind() {
         isSimplePath = true;
-        if (mDetectSimplePaths) {
-            mLastDirection = null;
-            if (rects != null) rects.setEmpty();
-        }
+        mLastDirection = null;
+        if (rects != null) rects.setEmpty();
         native_rewind(mNativePath);
     }
 
@@ -475,16 +466,14 @@ public class Path {
     }
     
     private void detectSimplePath(float left, float top, float right, float bottom, Direction dir) {
-        if (mDetectSimplePaths) {
-            if (mLastDirection == null) {
-                mLastDirection = dir;
-            }
-            if (mLastDirection != dir) {
-                isSimplePath = false;
-            } else {
-                if (rects == null) rects = new Region();
-                rects.op((int) left, (int) top, (int) right, (int) bottom, Region.Op.UNION);
-            }
+        if (mLastDirection == null) {
+            mLastDirection = dir;
+        }
+        if (mLastDirection != dir) {
+            isSimplePath = false;
+        } else {
+            if (rects == null) rects = new Region();
+            rects.op((int) left, (int) top, (int) right, (int) bottom, Region.Op.UNION);
         }
     }
 
