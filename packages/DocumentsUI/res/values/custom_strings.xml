@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
+    <string name="title_standalone">Files</string>
+
+    <!-- Toast shown after successfully deleting files -->
+    <string name="toast_success_delete">Files deleted</string>
+
+    <!-- Title of the Delete confirmation dialog -->
+    <string name="dialog_delete_confirm_title">Delete files?</string>
+
+    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_copy">Copy</string>
+    <!-- Menu item title that cuts the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_cut">Cut</string>
+    <!-- Menu item title that pastes the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_paste">Paste</string>
+
+
+    <!-- Text shown in a toast when the user copies files -->
+    <plurals name="files_copied">
+        <item quantity="one">The file has been put in the clipboard</item>
+        <item quantity="other">%d files have been put in the clipboard</item>
+    </plurals>
+
+    <!-- Text shown in a toast when the user pastes files -->
+    <plurals name="files_pasted">
+        <item quantity="one">The file has been pasted. Upload might be finishing in background.</item>
+        <item quantity="other">%d files have been pasted. Upload might be finishing in background.</item>
+    </plurals>
+
+    <!-- Text show in the progress dialog while files are being copied -->
+    <string name="copy_in_progress">Copying...</string>
+
+    <!-- Text show in the progress dialog while files are being deleted -->
+    <string name="delete_in_progress">Deleting...</string>
+
+    <plurals name="dialog_delete_confirm_message">
+        <item quantity="one">This file will be permanently deleted!</item>
+        <item quantity="other">This will permanently delete the %d files selected!</item>
+    </plurals>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+</resources>

@@ -21,6 +21,11 @@
         android:icon="@drawable/ic_menu_new_folder"
         android:showAsAction="always" />
     <item
+        android:id="@+id/menu_paste"
+        android:title="@string/menu_paste"
+        android:icon="@*android:drawable/ic_menu_paste_holo_light"
+        android:showAsAction="always" />
+    <item
         android:id="@+id/menu_search"
         android:title="@string/menu_search"
         android:icon="@drawable/ic_menu_search"

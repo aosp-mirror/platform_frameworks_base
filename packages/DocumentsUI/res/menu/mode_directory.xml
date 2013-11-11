@@ -20,6 +20,16 @@
         android:title="@string/menu_open"
         android:showAsAction="always" />
     <item
+        android:id="@+id/menu_copy"
+        android:icon="@drawable/ic_menu_copy"
+        android:title="@string/menu_copy"
+        android:showAsAction="always" />
+    <item
+        android:id="@+id/menu_cut"
+        android:title="@string/menu_cut"
+        android:icon="@drawable/ic_menu_cut_holo_light"
+        android:showAsAction="always" />
+    <item
         android:id="@+id/menu_share"
         android:icon="@drawable/ic_menu_share"
         android:title="@string/menu_share"
