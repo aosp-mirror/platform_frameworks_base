@@ -372,24 +372,24 @@ properly.</p>
 <p>After the translations are merged back into your app, start <a
 href="#testing">testing the localized app</a>.</p>
 
+<h4 id="gp-trans">Purchase professional translations through Google Play
+<br />App Translation Service</h4>
+
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2>Join the translation pilot</h2>
-<p>Google Play is offering translation services as part of a pilot
-program. If you're interested, sign up on the APK page in your
-Developer Console.</p>
+<h2>App Translations in Google Play</h2>
 
-<p>If you join, also try the <a
+<p>Hear from developers who have used the Google Play App Translation Service in <a
+href="{@docRoot}distribute/googleplay/spotlight/localization.html">Developer
+Stories: Localization in Google Play</a>.</p>
+
+<p>To make it easy to export your app's strings and import
+the finished translations into your project, try the <a
 href="{@docRoot}sdk/installing/installing-adt.html#tmgr">
-ADT Translation Manager Plugin</a>, which makes it easy to upload
-your strings to the Developer Console and download translations
-right into your project. </div>
+ADT Translation Manager Plugin</a>.</div>
 </div>
 
-<h4 id="gp-trans">Purchase professional translations through the
-Developer Console</h4>
-
-<p>Google Play can help you quickly find and purchase translations of your app.
+<p>Google Play App Translation Service can help you quickly find and purchase translations of your app.
 In the Developer Console, you can browse a list of third-party vendors who are
 pre-qualified by Google to offer high-quality translation at competitive prices.
 You can upload the strings you want translated, select the languages you want to
