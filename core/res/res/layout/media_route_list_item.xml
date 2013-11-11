@@ -20,13 +20,6 @@
               android:background="@drawable/item_background_activated_holo_dark"
               android:gravity="center_vertical">
 
-    <ImageView android:layout_width="56dp"
-               android:layout_height="56dp"
-               android:scaleType="center"
-               android:id="@+id/icon"
-               android:visibility="gone"
-               android:duplicateParentState="true" />
-
     <LinearLayout android:layout_width="0dp"
                   android:layout_height="match_parent"
                   android:layout_weight="1"
@@ -52,15 +45,5 @@
                   android:textAppearance="?android:attr/textAppearanceSmall"
                   android:duplicateParentState="true" />
     </LinearLayout>
-
-    <ImageButton
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:id="@+id/expand_button"
-        android:background="?android:attr/selectableItemBackground"
-        android:src="@drawable/ic_media_group_expand"
-        android:scaleType="center"
-        android:visibility="gone"
-        android:duplicateParentState="true" />
 
 </LinearLayout>

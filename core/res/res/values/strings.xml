@@ -4096,11 +4096,20 @@
     <!-- Description of a wireless display route. [CHAR LIMIT=50] -->
     <string name="wireless_display_route_description">Wireless display</string>
 
-    <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
-    <string name="media_route_chooser_grouping_done">Done</string>
-
     <!-- Content description of a MediaRouteButton for accessibility support -->
     <string name="media_route_button_content_description">Media output</string>
+
+    <!-- Title of the media route chooser dialog. [CHAR LIMIT=30] -->
+    <string name="media_route_chooser_title">Connect to device</string>
+
+    <!-- Placeholder text to show when no devices have been found. [CHAR LIMIT=50] -->
+    <string name="media_route_chooser_searching">Searching for devices\u2026</string>
+
+    <!-- Button to access extended settings.  [CHAR LIMIT=30] -->
+    <string name="media_route_chooser_extended_settings">Settings</string>
+
+    <!-- Button to disconnect from a media route.  [CHAR LIMIT=30] -->
+    <string name="media_route_controller_disconnect">Disconnect</string>
 
     <!-- Status message for remote routes attempting to scan/determine availability -->
     <string name="media_route_status_scanning">Scanning...</string>
