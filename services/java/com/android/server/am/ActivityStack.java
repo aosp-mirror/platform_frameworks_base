@@ -1097,8 +1097,6 @@ final class ActivityStack {
                             // to now show its window.
                             if (DEBUG_VISBILITY) Slog.v(
                                     TAG, "Making visible and scheduling visibility: " + r);
-                            mStackSupervisor.mStackLog.add(
-                                    "ensureVisibility: Scheduling visibility: " + r);
                             try {
                                 if (mTranslucentActivityWaiting != null) {
                                     mUndrawnActivitiesBelowTopTranslucent.add(r);
@@ -1147,8 +1145,6 @@ final class ActivityStack {
                                     if (r.app != null && r.app.thread != null) {
                                         if (DEBUG_VISBILITY) Slog.v(
                                                 TAG, "Scheduling invisibility: " + r);
-                                        mStackSupervisor.mStackLog.add(
-                                                "ensureVisibility: Scheduling invisibility: " + r);
                                         r.app.thread.scheduleWindowVisibility(r.appToken, false);
                                     }
                                     break;
@@ -3021,7 +3017,6 @@ final class ActivityStack {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.isHomeTask()) {
                 if (DEBUG_TASKS || DEBUG_STACK) Slog.d(TAG, "moveHomeTaskToTop: moving " + task);
-                mStackSupervisor.mStackLog.add("moveHomeTaskToTop: moving " + task);
                 mTaskHistory.remove(taskNdx);
                 mTaskHistory.add(top, task);
                 mWindowManager.moveTaskToTop(task.taskId);
@@ -3049,7 +3044,6 @@ final class ActivityStack {
 
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
         if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
-        mStackSupervisor.mStackLog.add("moveTaskToFrontLocked: " + tr);
 
         final int numTasks = mTaskHistory.size();
         final int index = mTaskHistory.indexOf(tr);
@@ -3137,7 +3131,6 @@ final class ActivityStack {
         if (tr == null) {
             return false;
         }
-        mStackSupervisor.mStackLog.add("moveTaskToBackLocked: " + tr);
 
         mTaskHistory.remove(tr);
         mTaskHistory.add(0, tr);

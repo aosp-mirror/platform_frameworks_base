@@ -72,7 +72,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.TransferPipe;
-import com.android.server.CircularLog;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.StackBox;
@@ -207,8 +206,6 @@ public final class ActivityStackSupervisor {
     /** Stack id of the front stack when user switched, indexed by userId. */
     SparseIntArray mUserStackInFront = new SparseIntArray(2);
 
-    CircularLog mStackLog = new CircularLog(30);
-
     public ActivityStackSupervisor(ActivityManagerService service, Context context,
             Looper looper) {
         mService = service;
@@ -276,9 +273,6 @@ public final class ActivityStackSupervisor {
             if (DEBUG_STACK) Slog.d(TAG, "moveHomeTask: mStackState old=" +
                     stackStateToString(mStackState) + " new=" + stackStateToString(homeInFront ?
                     STACK_STATE_HOME_TO_BACK : STACK_STATE_HOME_TO_FRONT));
-            mStackLog.add("moveHomeTask: mStackState old=" + stackStateToString(mStackState)
-                    + " new=" + stackStateToString(homeInFront ?
-                            STACK_STATE_HOME_TO_BACK : STACK_STATE_HOME_TO_FRONT));
             mStackState = homeInFront ? STACK_STATE_HOME_TO_BACK : STACK_STATE_HOME_TO_FRONT;
         }
     }
@@ -2397,8 +2391,6 @@ public final class ActivityStackSupervisor {
         pw.print(prefix); pw.println("mSleepTimeout=" + mSleepTimeout);
         pw.print(prefix); pw.println("mCurTaskId=" + mCurTaskId);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
-        pw.print(prefix); pw.println("mStackLog=");
-                mStackLog.dump(pw, prefix + "  ");
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
