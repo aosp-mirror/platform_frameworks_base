@@ -600,8 +600,16 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private static final int MSG_CONNECTION_TIMED_OUT = 9;
 
         private static final int TIMEOUT_REASON_NOT_AVAILABLE = 1;
-        private static final int TIMEOUT_REASON_WAITING_FOR_CONNECTING = 2;
-        private static final int TIMEOUT_REASON_WAITING_FOR_CONNECTED = 3;
+        private static final int TIMEOUT_REASON_CONNECTION_LOST = 2;
+        private static final int TIMEOUT_REASON_WAITING_FOR_CONNECTING = 3;
+        private static final int TIMEOUT_REASON_WAITING_FOR_CONNECTED = 4;
+
+        // The relative order of these constants is important and expresses progress
+        // through the process of connecting to a route.
+        private static final int PHASE_NOT_AVAILABLE = -1;
+        private static final int PHASE_NOT_CONNECTED = 0;
+        private static final int PHASE_CONNECTING = 1;
+        private static final int PHASE_CONNECTED = 2;
 
         private final MediaRouterService mService;
         private final UserRecord mUserRecord;
@@ -614,6 +622,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private boolean mRunning;
         private int mDiscoveryMode = RemoteDisplayState.DISCOVERY_MODE_NONE;
         private RouteRecord mGloballySelectedRouteRecord;
+        private int mConnectionPhase = PHASE_NOT_AVAILABLE;
         private int mConnectionTimeoutReason;
         private long mConnectionTimeoutStartTime;
         private boolean mClientStateUpdateScheduled;
@@ -675,6 +684,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             pw.println(indent + "mRunning=" + mRunning);
             pw.println(indent + "mDiscoveryMode=" + mDiscoveryMode);
             pw.println(indent + "mGloballySelectedRouteRecord=" + mGloballySelectedRouteRecord);
+            pw.println(indent + "mConnectionPhase=" + mConnectionPhase);
             pw.println(indent + "mConnectionTimeoutReason=" + mConnectionTimeoutReason);
             pw.println(indent + "mConnectionTimeoutStartTime=" + (mConnectionTimeoutReason != 0 ?
                     TimeUtils.formatUptime(mConnectionTimeoutStartTime) : "<n/a>"));
@@ -843,6 +853,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private void checkGloballySelectedRouteState() {
             // Unschedule timeouts when the route is unselected.
             if (mGloballySelectedRouteRecord == null) {
+                mConnectionPhase = PHASE_NOT_AVAILABLE;
                 updateConnectionTimeout(0);
                 return;
             }
@@ -854,29 +865,34 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 return;
             }
 
+            // Make sure we haven't lost our connection.
+            final int oldPhase = mConnectionPhase;
+            mConnectionPhase = getConnectionPhase(mGloballySelectedRouteRecord.getStatus());
+            if (oldPhase >= PHASE_CONNECTING && mConnectionPhase < PHASE_CONNECTING) {
+                updateConnectionTimeout(TIMEOUT_REASON_CONNECTION_LOST);
+                return;
+            }
+
             // Check the route status.
-            switch (mGloballySelectedRouteRecord.getStatus()) {
-                case MediaRouter.RouteInfo.STATUS_NONE:
-                case MediaRouter.RouteInfo.STATUS_CONNECTED:
-                    if (mConnectionTimeoutReason != 0) {
+            switch (mConnectionPhase) {
+                case PHASE_CONNECTED:
+                    if (oldPhase != PHASE_CONNECTED) {
                         Slog.i(TAG, "Connected to global route: "
                                 + mGloballySelectedRouteRecord);
                     }
                     updateConnectionTimeout(0);
                     break;
-                case MediaRouter.RouteInfo.STATUS_CONNECTING:
-                    if (mConnectionTimeoutReason != 0) {
+                case PHASE_CONNECTING:
+                    if (oldPhase != PHASE_CONNECTING) {
                         Slog.i(TAG, "Connecting to global route: "
                                 + mGloballySelectedRouteRecord);
                     }
                     updateConnectionTimeout(TIMEOUT_REASON_WAITING_FOR_CONNECTED);
                     break;
-                case MediaRouter.RouteInfo.STATUS_SCANNING:
-                case MediaRouter.RouteInfo.STATUS_AVAILABLE:
+                case PHASE_NOT_CONNECTED:
                     updateConnectionTimeout(TIMEOUT_REASON_WAITING_FOR_CONNECTING);
                     break;
-                case MediaRouter.RouteInfo.STATUS_NOT_AVAILABLE:
-                case MediaRouter.RouteInfo.STATUS_IN_USE:
+                case PHASE_NOT_AVAILABLE:
                 default:
                     updateConnectionTimeout(TIMEOUT_REASON_NOT_AVAILABLE);
                     break;
@@ -892,7 +908,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 mConnectionTimeoutStartTime = SystemClock.uptimeMillis();
                 switch (reason) {
                     case TIMEOUT_REASON_NOT_AVAILABLE:
-                        // Route became unavailable.  Unselect it immediately.
+                    case TIMEOUT_REASON_CONNECTION_LOST:
+                        // Route became unavailable or connection lost.
+                        // Unselect it immediately.
                         sendEmptyMessage(MSG_CONNECTION_TIMED_OUT);
                         break;
                     case TIMEOUT_REASON_WAITING_FOR_CONNECTING:
@@ -917,6 +935,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             switch (mConnectionTimeoutReason) {
                 case TIMEOUT_REASON_NOT_AVAILABLE:
                     Slog.i(TAG, "Global route no longer available: "
+                            + mGloballySelectedRouteRecord);
+                    break;
+                case TIMEOUT_REASON_CONNECTION_LOST:
+                    Slog.i(TAG, "Global route connection lost: "
                             + mGloballySelectedRouteRecord);
                     break;
                 case TIMEOUT_REASON_WAITING_FOR_CONNECTING:
@@ -1002,6 +1024,23 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
             }
             return null;
+        }
+
+        private static int getConnectionPhase(int status) {
+            switch (status) {
+                case MediaRouter.RouteInfo.STATUS_NONE:
+                case MediaRouter.RouteInfo.STATUS_CONNECTED:
+                    return PHASE_CONNECTED;
+                case MediaRouter.RouteInfo.STATUS_CONNECTING:
+                    return PHASE_CONNECTING;
+                case MediaRouter.RouteInfo.STATUS_SCANNING:
+                case MediaRouter.RouteInfo.STATUS_AVAILABLE:
+                    return PHASE_NOT_CONNECTED;
+                case MediaRouter.RouteInfo.STATUS_NOT_AVAILABLE:
+                case MediaRouter.RouteInfo.STATUS_IN_USE:
+                default:
+                    return PHASE_NOT_AVAILABLE;
+            }
         }
 
         static final class ProviderRecord {
