@@ -631,6 +631,36 @@ public interface CameraDevice extends AutoCloseable {
         }
 
         /**
+         * This method is called when some results from an image capture are
+         * available.
+         *
+         * <p>The result provided here will contain some subset of the fields of
+         * a full result. Multiple onCapturePartial calls may happen per
+         * capture; a given result field will only be present in one partial
+         * capture at most. The final onCaptureCompleted call will always
+         * contain all the fields, whether onCapturePartial was called or
+         * not.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param camera The CameraDevice sending the callback.
+         * @param request The request that was given to the CameraDevice
+         * @param result The partial output metadata from the capture, which
+         * includes a subset of the CaptureResult fields.
+         *
+         * @see #capture
+         * @see #captureBurst
+         * @see #setRepeatingRequest
+         * @see #setRepeatingBurst
+         *
+         * @hide
+         */
+        public void onCapturePartial(CameraDevice camera,
+                CaptureRequest request, CaptureResult result) {
+            // default empty implementation
+        }
+
+        /**
          * This method is called when an image capture has completed and the
          * result metadata is available.
          *
