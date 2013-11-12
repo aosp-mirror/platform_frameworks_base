@@ -160,13 +160,14 @@ a soft reference to the bitmap is placed
 in a {@link java.util.HashSet}, for possible reuse later with
 {@link android.graphics.BitmapFactory.Options#inBitmap}:
 
-<pre>HashSet&lt;SoftReference&lt;Bitmap&gt;&gt; mReusableBitmaps;
+<pre>Set&lt;SoftReference&lt;Bitmap&gt;&gt; mReusableBitmaps;
 private LruCache&lt;String, BitmapDrawable&gt; mMemoryCache;
 
-// If you're running on Honeycomb or newer, create
-// a HashSet of references to reusable bitmaps.
+// If you're running on Honeycomb or newer, create a
+// synchronized HashSet of references to reusable bitmaps.
 if (Utils.hasHoneycomb()) {
-    mReusableBitmaps = new HashSet&lt;SoftReference&lt;Bitmap&gt;&gt;();
+    mReusableBitmaps =
+            Collections.synchronizedSet(new HashSet&lt;SoftReference&lt;Bitmap&gt;&gt;());
 }
 
 mMemoryCache = new LruCache&lt;String, BitmapDrawable&gt;(mCacheParams.memCacheSize) {
@@ -243,25 +244,27 @@ protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
         Bitmap bitmap = null;
 
     if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {
-        final Iterator&lt;SoftReference&lt;Bitmap&gt;&gt; iterator
-                = mReusableBitmaps.iterator();
-        Bitmap item;
+        synchronized (mReusableBitmaps) {
+            final Iterator&lt;SoftReference&lt;Bitmap&gt;&gt; iterator
+                    = mReusableBitmaps.iterator();
+            Bitmap item;
 
-        while (iterator.hasNext()) {
-            item = iterator.next().get();
+            while (iterator.hasNext()) {
+                item = iterator.next().get();
 
-            if (null != item && item.isMutable()) {
-                // Check to see it the item can be used for inBitmap.
-                if (canUseForInBitmap(item, options)) {
-                    bitmap = item;
+                if (null != item && item.isMutable()) {
+                    // Check to see it the item can be used for inBitmap.
+                    if (canUseForInBitmap(item, options)) {
+                        bitmap = item;
 
-                    // Remove from reusable set so it can't be used again.
+                        // Remove from reusable set so it can't be used again.
+                        iterator.remove();
+                        break;
+                    }
+                } else {
+                    // Remove from the set if the reference has been cleared.
                     iterator.remove();
-                    break;
                 }
-            } else {
-                // Remove from the set if the reference has been cleared.
-                iterator.remove();
             }
         }
     }
