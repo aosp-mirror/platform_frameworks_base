@@ -70,7 +70,7 @@ protocol frames to a secure element. Figure 2 illustrates how host-based card em
 works.</p>
 
 <img src="{@docRoot}images/nfc/host-based-card.png" />
-<p class="img-caption"><strong>Figure 2.</strong> NFC card emulation with a secure element.</p>
+<p class="img-caption"><strong>Figure 2.</strong> NFC card emulation without a secure element.</p>
 
 
 <h2 id="SupportedProtocols">Supported NFC Cards and Protocols</h2>
@@ -288,12 +288,12 @@ enforces that only the Android OS can bind to your service. </p>
 
 <pre>
 &lt;service android:name=".MyHostApduService" android:exported="true"
-        android:permission="android.permission.BIND_NFC_SERVICE">
+         android:permission="android.permission.BIND_NFC_SERVICE">
     &lt;intent-filter>
         &lt;action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE"/>
     &lt;/intent-filter>
     &lt;meta-data android:name="android.nfc.cardemulation.host_apdu_service"
-        android:resource="@xml/apduservice"/>
+               android:resource="@xml/apduservice"/>
 &lt;/service>
 </pre>
 
@@ -306,7 +306,7 @@ below:</p>
            android:description="@string/servicedesc" 
            android:requireDeviceUnlock="false">
     &lt;aid-group android:description="@string/aiddescription" 
-                android:category="other">
+               android:category="other">
         &lt;aid-filter android:name="F0010203040506"/>
         &lt;aid-filter android:name="F0394148148100"/>
     &lt;/aid-group>
@@ -381,14 +381,14 @@ shown below:</p>
 
 <pre>
 &lt;host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
-           android:description="@string/servicedesc" 
-           android:requireDeviceUnlock="false"
-           android:apduServiceBanner="@drawable/my_banner">
-       &lt;aid-group android:description="@string/aiddescription"
-                  android:category="payment">
-           &lt;aid-filter android:name="F0010203040506"/>
-           &lt;aid-filter android:name="F0394148148100"/>
-       &lt;/aid-group>
+        android:description="@string/servicedesc" 
+        android:requireDeviceUnlock="false"
+        android:apduServiceBanner="@drawable/my_banner">
+    &lt;aid-group android:description="@string/aiddescription"
+               android:category="payment">
+        &lt;aid-filter android:name="F0010203040506"/>
+        &lt;aid-filter android:name="F0394148148100"/>
+    &lt;/aid-group>
 &lt;/host-apdu-service>
 </pre>
 
@@ -478,12 +478,12 @@ almost identical to the declaration of a HCE service. The exceptions are:</p>
 
 <pre>
 &lt;service android:name=".MyOffHostApduService" android:exported="true"
-     android:permission="android.permission.BIND_NFC_SERVICE">
+         android:permission="android.permission.BIND_NFC_SERVICE">
     &lt;intent-filter>
         &lt;action android:name="android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE"/>
     &lt;/intent-filter>
     &lt;meta-data android:name="android.nfc.cardemulation.off_host_apdu_ervice"
-         android:resource="@xml/apduservice"/>
+               android:resource="@xml/apduservice"/>
 &lt;/service>
 </pre>
 </li>
