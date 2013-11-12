@@ -1087,7 +1087,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
-        mDisplayContent.mVisibilityLog.add("showLw: Policy visibility true: " + this);
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mWinAnimator.mAnimation);
@@ -1134,7 +1133,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 doAnimation = false;
             }
         }
-        mDisplayContent.mVisibilityLog.add("hideLw: Policy visibility false: " + this);
         if (doAnimation) {
             mPolicyVisibilityAfterAnim = false;
         } else {

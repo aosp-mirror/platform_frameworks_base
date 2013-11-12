@@ -127,14 +127,12 @@ public class TaskStack {
     boolean moveTaskToTop(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToTop: task=" + task + " Callers="
                 + Debug.getCallers(6));
-        mDisplayContent.mVisibilityLog.add("moveTaskToTop: " + task);
         mTasks.remove(task);
         return addTask(task, true);
     }
 
     boolean moveTaskToBottom(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToBottom: task=" + task);
-        mDisplayContent.mVisibilityLog.add("moveTaskToBottom: " + task);
         mTasks.remove(task);
         return addTask(task, false);
     }
