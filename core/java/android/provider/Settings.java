@@ -3252,9 +3252,14 @@ public final class Settings {
 
         /**
          * A 64-bit number (as a hex string) that is randomly
-         * generated on the device's first boot and should remain
-         * constant for the lifetime of the device.  (The value may
-         * change if a factory reset is performed on the device.)
+         * generated when the user first sets up the device and should remain
+         * constant for the lifetime of the user's device. The value may
+         * change if a factory reset is performed on the device.
+         * <p class="note"><strong>Note:</strong> When a device has <a
+         * href="{@docRoot}about/versions/android-4.2.html#MultipleUsers">multiple users</a>
+         * (available on certain devices running Android 4.2 or higher), each user appears as a
+         * completely separate device, so the {@code ANDROID_ID} value is unique to each
+         * user.</p>
          */
         public static final String ANDROID_ID = "android_id";
 
