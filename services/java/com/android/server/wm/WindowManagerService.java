@@ -10271,7 +10271,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int numDisplays = mDisplayContents.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                 final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-                displayContent.dump(pw, "  ");
+                displayContent.dump("  ", pw);
             }
         } else {
             pw.println("  NO DISPLAY");
