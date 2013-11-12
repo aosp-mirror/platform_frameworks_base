@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import com.android.internal.util.XmlUtils;
-import com.android.server.PreferredComponent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
