@@ -25,9 +25,11 @@ import android.app.ActivityManager.StackBoxInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -97,9 +99,6 @@ class DisplayContent {
     /** True when the home StackBox is at the top of mStackBoxes, false otherwise. */
     private TaskStack mHomeStack = null;
 
-    /** Sorted most recent at top, oldest at [0]. */
-    ArrayList<TaskStack> mStackHistory = new ArrayList<TaskStack>();
-
     /** Detect user tapping outside of current focused stack bounds .*/
     StackTapPointerEventListener mTapDetector;
 
@@ -107,7 +106,7 @@ class DisplayContent {
     Region mTouchExcludeRegion = new Region();
 
     /** Save allocating when retrieving tasks */
-    ArrayList<Task> mTaskHistory = new ArrayList<Task>();
+    private ArrayList<Task> mTaskHistory = new ArrayList<Task>();
 
     /** Save allocating when calculating rects */
     Rect mTmpRect = new Rect();
@@ -160,12 +159,6 @@ class DisplayContent {
         return mStackBoxes.get(0).mStack != mHomeStack;
     }
 
-    void moveStack(TaskStack stack, boolean toTop) {
-        mStackHistory.remove(stack);
-        mStackHistory.add(toTop ? mStackHistory.size() : 0, stack);
-        mService.moveStackWindowsLocked(this);
-    }
-
     public boolean isPrivate() {
         return (mDisplay.getFlags() & Display.FLAG_PRIVATE) != 0;
     }
@@ -200,6 +193,7 @@ class DisplayContent {
         }
 
         mTaskHistory.add(taskNdx, task);
+        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.taskId, toTop ? 1 : 0, taskNdx);
     }
 
     void removeTask(Task task) {
@@ -277,6 +271,8 @@ class DisplayContent {
         if (newStack != null) {
             layoutNeeded = true;
         }
+        EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, relativeStackBoxId, position,
+                (int)(weight * 100 + 0.5));
         return newStack;
     }
 
@@ -345,6 +341,7 @@ class DisplayContent {
     boolean moveHomeStackBox(boolean toTop) {
         if (DEBUG_STACK) Slog.d(TAG, "moveHomeStackBox: toTop=" + toTop + " Callers=" +
                 Debug.getCallers(4));
+        EventLog.writeEvent(EventLogTags.WM_HOME_STACK_MOVED, toTop ? 1 : 0);
         switch (mStackBoxes.size()) {
             case 0: throw new RuntimeException("moveHomeStackBox: No home StackBox!");
             case 1: return false; // Only the home StackBox exists.

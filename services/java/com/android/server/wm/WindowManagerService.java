@@ -3397,10 +3397,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (stack == null) {
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
+        EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
         Task task = new Task(atoken, stack, userId);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, true);
-        stack.getDisplayContent().moveStack(stack, true);
         return task;
     }
 
@@ -4791,7 +4791,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.moveHomeStackBox(isHomeStackTask);
                 }
                 stack.moveTaskToTop(task);
-                displayContent.moveStack(stack, true);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4845,7 +4844,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         weight);
                 if (stack != null) {
                     mStackIdToStack.put(stackId, stack);
-                    displayContent.moveStack(stack, true);
                     performLayoutAndPlaceSurfacesLocked();
                     return;
                 }
@@ -4877,6 +4875,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             final TaskStack stack = task.mStack;
+            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
             stack.removeTask(task);
             stack.getDisplayContent().layoutNeeded = true;
         }
