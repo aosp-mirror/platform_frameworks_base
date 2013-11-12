@@ -469,7 +469,7 @@ public class MediaRouter {
             route.mDescription = globalRoute.description;
             route.mSupportedTypes = globalRoute.supportedTypes;
             route.mEnabled = globalRoute.enabled;
-            route.setStatusCode(globalRoute.statusCode);
+            route.setRealStatusCode(globalRoute.statusCode);
             route.mPlaybackType = globalRoute.playbackType;
             route.mPlaybackStream = globalRoute.playbackStream;
             route.mVolume = globalRoute.volume;
@@ -501,8 +501,8 @@ public class MediaRouter {
                 route.mEnabled = globalRoute.enabled;
                 changed = true;
             }
-            if (route.mStatusCode != globalRoute.statusCode) {
-                route.setStatusCode(globalRoute.statusCode);
+            if (route.mRealStatusCode != globalRoute.statusCode) {
+                route.setRealStatusCode(globalRoute.statusCode);
                 changed = true;
             }
             if (route.mPlaybackType != globalRoute.playbackType) {
@@ -918,8 +918,14 @@ public class MediaRouter {
 
         if (oldRoute != null) {
             dispatchRouteUnselected(types & oldRoute.getSupportedTypes(), oldRoute);
+            if (oldRoute.resolveStatusCode()) {
+                dispatchRouteChanged(oldRoute);
+            }
         }
         if (route != null) {
+            if (route.resolveStatusCode()) {
+                dispatchRouteChanged(route);
+            }
             dispatchRouteSelected(types & route.getSupportedTypes(), route);
         }
     }
@@ -1337,7 +1343,7 @@ public class MediaRouter {
         newRoute.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
         newRoute.mPlaybackType = RouteInfo.PLAYBACK_TYPE_REMOTE;
 
-        newRoute.setStatusCode(getWifiDisplayStatusCode(display, wfdStatus));
+        newRoute.setRealStatusCode(getWifiDisplayStatusCode(display, wfdStatus));
         newRoute.mEnabled = isWifiDisplayEnabled(display, wfdStatus);
         newRoute.mName = display.getFriendlyDisplayName();
         newRoute.mDescription = sStatic.mResources.getText(
@@ -1359,7 +1365,7 @@ public class MediaRouter {
         changed |= route.mEnabled != enabled;
         route.mEnabled = enabled;
 
-        changed |= route.setStatusCode(getWifiDisplayStatusCode(display, wfdStatus));
+        changed |= route.setRealStatusCode(getWifiDisplayStatusCode(display, wfdStatus));
 
         if (changed) {
             dispatchRouteChanged(route);
@@ -1422,7 +1428,8 @@ public class MediaRouter {
         String mGlobalRouteId;
 
         // A predetermined connection status that can override mStatus
-        private int mStatusCode;
+        private int mRealStatusCode;
+        private int mResolvedStatusCode;
 
         /** @hide */ public static final int STATUS_NONE = 0;
         /** @hide */ public static final int STATUS_SCANNING = 1;
@@ -1526,43 +1533,71 @@ public class MediaRouter {
          * Set this route's status by predetermined status code. If the caller
          * should dispatch a route changed event this call will return true;
          */
-        boolean setStatusCode(int statusCode) {
-            if (statusCode != mStatusCode) {
-                mStatusCode = statusCode;
-                int resId;
-                switch (statusCode) {
-                    case STATUS_SCANNING:
-                        resId = com.android.internal.R.string.media_route_status_scanning;
-                        break;
-                    case STATUS_CONNECTING:
-                        resId = com.android.internal.R.string.media_route_status_connecting;
-                        break;
-                    case STATUS_AVAILABLE:
-                        resId = com.android.internal.R.string.media_route_status_available;
-                        break;
-                    case STATUS_NOT_AVAILABLE:
-                        resId = com.android.internal.R.string.media_route_status_not_available;
-                        break;
-                    case STATUS_IN_USE:
-                        resId = com.android.internal.R.string.media_route_status_in_use;
-                        break;
-                    case STATUS_CONNECTED:
-                    case STATUS_NONE:
-                    default:
-                        resId = 0;
-                        break;
-                }
-                mStatus = resId != 0 ? sStatic.mResources.getText(resId) : null;
-                return true;
+        boolean setRealStatusCode(int statusCode) {
+            if (mRealStatusCode != statusCode) {
+                mRealStatusCode = statusCode;
+                return resolveStatusCode();
             }
             return false;
+        }
+
+        /**
+         * Resolves the status code whenever the real status code or selection state
+         * changes.
+         */
+        boolean resolveStatusCode() {
+            int statusCode = mRealStatusCode;
+            if (isSelected()) {
+                switch (statusCode) {
+                    // If the route is selected and its status appears to be between states
+                    // then report it as connecting even though it has not yet had a chance
+                    // to officially move into the CONNECTING state.  Note that routes in
+                    // the NONE state are assumed to not require an explicit connection
+                    // lifecycle whereas those that are AVAILABLE are assumed to have
+                    // to eventually proceed to CONNECTED.
+                    case STATUS_AVAILABLE:
+                    case STATUS_SCANNING:
+                        statusCode = STATUS_CONNECTING;
+                        break;
+                }
+            }
+            if (mResolvedStatusCode == statusCode) {
+                return false;
+            }
+
+            mResolvedStatusCode = statusCode;
+            int resId;
+            switch (statusCode) {
+                case STATUS_SCANNING:
+                    resId = com.android.internal.R.string.media_route_status_scanning;
+                    break;
+                case STATUS_CONNECTING:
+                    resId = com.android.internal.R.string.media_route_status_connecting;
+                    break;
+                case STATUS_AVAILABLE:
+                    resId = com.android.internal.R.string.media_route_status_available;
+                    break;
+                case STATUS_NOT_AVAILABLE:
+                    resId = com.android.internal.R.string.media_route_status_not_available;
+                    break;
+                case STATUS_IN_USE:
+                    resId = com.android.internal.R.string.media_route_status_in_use;
+                    break;
+                case STATUS_CONNECTED:
+                case STATUS_NONE:
+                default:
+                    resId = 0;
+                    break;
+            }
+            mStatus = resId != 0 ? sStatic.mResources.getText(resId) : null;
+            return true;
         }
 
         /**
          * @hide
          */
         public int getStatusCode() {
-            return mStatusCode;
+            return mResolvedStatusCode;
         }
 
         /**
@@ -1821,19 +1856,7 @@ public class MediaRouter {
          * @return True if this route is in the process of connecting.
          */
         public boolean isConnecting() {
-            // If the route is selected and its status appears to be between states
-            // then report it as connecting even though it has not yet had a chance
-            // to move into the CONNECTING state.  Note that routes in the NONE state
-            // are assumed to not require an explicit connection lifecycle.
-            if (isSelected()) {
-                switch (mStatusCode) {
-                    case STATUS_AVAILABLE:
-                    case STATUS_SCANNING:
-                    case STATUS_CONNECTING:
-                        return true;
-                }
-            }
-            return false;
+            return mResolvedStatusCode == STATUS_CONNECTING;
         }
 
         /** @hide */
