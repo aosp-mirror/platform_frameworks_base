@@ -522,6 +522,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         || pm.getReceiverInfo(aa.info.getComponent(), 0, userHandle) == null) {
                     removed = true;
                     policy.mAdminList.remove(i);
+                    policy.mAdminMap.remove(aa.info.getComponent());
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen
