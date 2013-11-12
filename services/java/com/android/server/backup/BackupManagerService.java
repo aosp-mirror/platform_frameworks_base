@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.backup;
 
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -81,7 +81,8 @@ import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
 import com.android.internal.backup.LocalTransport;
-import com.android.server.PackageManagerBackupAgent.Metadata;
+import com.android.server.EventLogTags;
+import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -133,7 +134,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-class BackupManagerService extends IBackupManager.Stub {
+public class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
     private static final boolean MORE_DEBUG = false;
@@ -1111,7 +1112,8 @@ class BackupManagerService extends IBackupManager.Stub {
         // First, on an encrypted device we require matching the device pw
         final boolean isEncrypted;
         try {
-            isEncrypted = (mMountService.getEncryptionState() != MountService.ENCRYPTION_STATE_NONE);
+            isEncrypted = (mMountService.getEncryptionState() !=
+                    IMountService.ENCRYPTION_STATE_NONE);
             if (isEncrypted) {
                 if (DEBUG) {
                     Slog.i(TAG, "Device encrypted; verifying against device data pw");
@@ -5337,7 +5339,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
                         boolean isEncrypted;
                         try {
-                            isEncrypted = (mMountService.getEncryptionState() != MountService.ENCRYPTION_STATE_NONE);
+                            isEncrypted = (mMountService.getEncryptionState() !=
+                                    IMountService.ENCRYPTION_STATE_NONE);
                             if (isEncrypted) Slog.w(TAG, "Device is encrypted; forcing enc password");
                         } catch (RemoteException e) {
                             // couldn't contact the mount service; fail "safe" and assume encryption
