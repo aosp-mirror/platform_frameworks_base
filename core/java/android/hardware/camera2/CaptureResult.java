@@ -591,6 +591,32 @@ public final class CaptureResult extends CameraMetadata {
 
     /**
      * <p>
+     * Whether a result given to the framework is the
+     * final one for the capture, or only a partial that contains a
+     * subset of the full set of dynamic metadata
+     * values.
+     * </p>
+     * <p>
+     * The entries in the result metadata buffers for a
+     * single capture may not overlap, except for this entry. The
+     * FINAL buffers must retain FIFO ordering relative to the
+     * requests that generate them, so the FINAL buffer for frame 3 must
+     * always be sent to the framework after the FINAL buffer for frame 2, and
+     * before the FINAL buffer for frame 4. PARTIAL buffers may be returned
+     * in any order relative to other frames, but all PARTIAL buffers for a given
+     * capture must arrive before the FINAL buffer for that capture. This entry may
+     * only be used by the HAL if quirks.usePartialResult is set to 1.
+     * </p>
+     *
+     * <b>Optional</b> - This value may be null on some devices.
+     *
+     * @hide
+     */
+    public static final Key<Boolean> QUIRKS_PARTIAL_RESULT =
+            new Key<Boolean>("android.quirks.partialResult", boolean.class);
+
+    /**
+     * <p>
      * A frame counter set by the framework. This value monotonically
      * increases with every new result (that is, each new result has a unique
      * frameCount value).

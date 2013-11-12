@@ -577,6 +577,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             }
             final CaptureListenerHolder holder;
 
+            Boolean quirkPartial = result.get(CaptureResult.QUIRKS_PARTIAL_RESULT);
+            boolean quirkIsPartialResult = (quirkPartial != null && quirkPartial);
+
             synchronized (mLock) {
                 // TODO: move this whole map into this class to make it more testable,
                 //        exposing the methods necessary like subscribeToRequest, unsubscribe..
@@ -585,7 +588,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
 
                 // Clean up listener once we no longer expect to see it.
-                if (holder != null && !holder.isRepeating()) {
+                if (holder != null && !holder.isRepeating() && !quirkIsPartialResult) {
                     CameraDevice.this.mCaptureListenerMap.remove(requestId);
                 }
 
@@ -595,7 +598,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // If we received a result for a repeating request and have
                 // prior repeating requests queued for deletion, remove those
                 // requests from mCaptureListenerMap.
-                if (holder != null && holder.isRepeating()
+                if (holder != null && holder.isRepeating() && !quirkIsPartialResult
                         && mRepeatingRequestIdDeletedList.size() > 0) {
                     Iterator<Integer> iter = mRepeatingRequestIdDeletedList.iterator();
                     while (iter.hasNext()) {
@@ -619,8 +622,25 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             final CaptureRequest request = holder.getRequest();
             final CaptureResult resultAsCapture = new CaptureResult(result, request, requestId);
 
-            holder.getHandler().post(
-                new Runnable() {
+            Runnable resultDispatch = null;
+
+            // Either send a partial result or the final capture completed result
+            if (quirkIsPartialResult) {
+                // Partial result
+                resultDispatch = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!CameraDevice.this.isClosed()){
+                            holder.getListener().onCapturePartial(
+                                CameraDevice.this,
+                                request,
+                                resultAsCapture);
+                        }
+                    }
+                };
+            } else {
+                // Final capture result
+                resultDispatch = new Runnable() {
                     @Override
                     public void run() {
                         if (!CameraDevice.this.isClosed()){
@@ -630,7 +650,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                                 resultAsCapture);
                         }
                     }
-                });
+                };
+            }
+
+            holder.getHandler().post(resultDispatch);
         }
 
     }
