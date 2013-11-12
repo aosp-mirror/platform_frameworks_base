@@ -65,8 +65,9 @@ following table shows the core gesture set that is supported in Android.</p>
   <div class="layout-content-col span-4">
     <img src="{@docRoot}design/media/gesture_doubletouch.png">
     <h4>Double touch </h4>
-    <p>Scales up the smallest targetable view, if available, or scales a standard amount
-      around the gesture. Also used as a secondary gesture for text selection.</p>
+    <p> Scales up a standard amount around the target with each repeated gesture until reaching
+    maximum scale. For nested views, scales up the smallest targetable view, or returns it to
+    its original scale. Also used as a secondary gesture for text selection.</p>
     <ul>
       <li class="no-bullet with-icon action">
         <h4>Action</h4>

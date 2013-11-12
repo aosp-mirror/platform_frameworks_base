@@ -9,8 +9,9 @@ page.tags="full screen","immersive", "leanback"
   controls and protecting users from escaping the app accidentally.
 </p>
 
+<div style="margin:auto;padding:auto;text-align:center;">
     <img src="{@docRoot}design/media/fullscreen_landing.png" style="margin:1em auto 2em auto;">
-
+</div>
 <p>
   In version 4.4, Android offers two approaches for making your app go full
   screen: Lean Back and Immersive. In both approaches, all persistent system

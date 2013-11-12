@@ -49,16 +49,16 @@ and app name in the action bar.</p>
 <div class="vspace size-1">&nbsp;</div>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6">
-        <img src="{@docRoot}design/media/yourbranding_icon.png" style="width:60px;float:left;padding-right:1em;">
-    <div class="figure-caption" style="widdth:220px;margin-left:20px;">
-    The HowzAbout app uses a launcher icon that is a shortened version of its full logo.
+  <div class="layout-content-col span-6" style="padding-top:24px;">
+        <img src="{@docRoot}design/media/branding_launcher_icon.png" style="width:60px;float:left;padding-right:1em;">
+    <div class="figure-caption" style="width:290px;margin-left:20px;">
+    Google+ reinforces its brand by carrying its launcher icon through to the action bar.
     </div>
-
+        <img src="{@docRoot}design/media/branding_logo_icon_action_bar.png" style="width:320px;float:left;padding-right:1em;">
   </div>
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}design/media/yourbranding_app.png" style="width:94%">
-    <div class="figure-caption">
+    <img src="{@docRoot}design/media/yourbranding_app.png" style="width:320px;">
+    <div class="figure-caption" style="width:320px;">
       Example of a the logo in the action bar. This works well in cases where the brand's logo matches the name of the app.
     </div>
   </div>
@@ -77,7 +77,7 @@ and app name in the action bar.</p>
   </div>
 
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}design/media/yourbranding_in-app-icons.png" style="width:300px;margin:12px 48px 0 16px;"">
+    <img src="{@docRoot}design/media/yourbranding_in-app-icons.png" style="width:300px;margin:12px 48px 0 16px;">
     </div>
   </div>
 </div>
@@ -100,9 +100,9 @@ and app name in the action bar.</p>
 
     <div style="margin-bottom:1em;">
       <span class="do-dont-label bad" style="margin-left:12px">Don't</span>
-      <span style="margin-left: 44px;"  class="do-dont-label good"><strong>Do</strong></span>
+      <span style="margin-left: 64px;"  class="do-dont-label good"><strong>Do</strong></span>
     </div>
-      <img src="{@docRoot}design/media/yourbranding_sharing.png" style="width:200px;">
+      <img src="{@docRoot}design/media/yourbranding_sharing.png" style="width:180px;">
   </div>
 </div>
 
