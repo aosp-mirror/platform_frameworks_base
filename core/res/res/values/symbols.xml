@@ -1751,23 +1751,18 @@
   <java-symbol type="dimen" name="subtitle_shadow_offset" />
   <java-symbol type="dimen" name="subtitle_outline_width" />
 
-  <!—- ***************************** —->
-  <!—- Start of SuperNexus additions —->
-  <!—- ***************************** —->
+  <!-- ***************************** -->
+  <!-- Start of SuperNexus additions -->
+  <!-- ***************************** -->
 
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
   <java-symbol type="integer" name="config_wallpaperMaxWidth" />
   <java-symbol type="string" name="config_legacyUmsLunFile" />
-  <java-symbol type="bool" name="config_hasRemovableLid" />
 
   <!-- Telephony -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
   <java-symbol type="bool" name="config_samsung_stk" />
   <java-symbol type="array" name="config_telephony_set_audioparameters" />
-
-  <!-- HW rotation lock -->
-  <java-symbol type="string" name="toast_rotation_unlocked" />
-  <java-symbol type="string" name="toast_rotation_locked" />
 
   <!-- Wifi -->
   <java-symbol type="bool" name="config_wifiApStartInterface" />
