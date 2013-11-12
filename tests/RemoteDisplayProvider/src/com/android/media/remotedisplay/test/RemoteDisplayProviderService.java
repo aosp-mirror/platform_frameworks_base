@@ -52,6 +52,9 @@ public class RemoteDisplayProviderService extends Service {
         private RemoteDisplay mTestDisplay5; // available but ignores request to connect
         private RemoteDisplay mTestDisplay6; // available but never finishes connecting
         private RemoteDisplay mTestDisplay7; // blinks in and out of existence
+        private RemoteDisplay mTestDisplay8; // available but connecting attempt flakes out
+        private RemoteDisplay mTestDisplay9; // available but connection flakes out
+        private RemoteDisplay mTestDisplay10; // available and reconnects periodically
 
         private final Handler mHandler;
         private boolean mBlinking;
@@ -112,6 +115,27 @@ public class RemoteDisplayProviderService extends Service {
                     mTestDisplay6.setStatus(RemoteDisplay.STATUS_AVAILABLE);
                     addDisplay(mTestDisplay6);
                 }
+                if (mTestDisplay8 == null) {
+                    mTestDisplay8 = new RemoteDisplay("testDisplay8",
+                            "Test Display 8 (flaky when connecting)");
+                    mTestDisplay8.setDescription("Aborts spontaneously while connecting");
+                    mTestDisplay8.setStatus(RemoteDisplay.STATUS_AVAILABLE);
+                    addDisplay(mTestDisplay8);
+                }
+                if (mTestDisplay9 == null) {
+                    mTestDisplay9 = new RemoteDisplay("testDisplay9",
+                            "Test Display 9 (flaky when connected)");
+                    mTestDisplay9.setDescription("Aborts spontaneously while connected");
+                    mTestDisplay9.setStatus(RemoteDisplay.STATUS_AVAILABLE);
+                    addDisplay(mTestDisplay9);
+                }
+                if (mTestDisplay10 == null) {
+                    mTestDisplay10 = new RemoteDisplay("testDisplay10",
+                            "Test Display 10 (reconnects periodically)");
+                    mTestDisplay10.setDescription("Reconnects spontaneously");
+                    mTestDisplay10.setStatus(RemoteDisplay.STATUS_AVAILABLE);
+                    addDisplay(mTestDisplay10);
+                }
             } else {
                 // When discovery ends, go hide some of the routes we can't actually use.
                 // This isn't something a normal route provider would do though.
@@ -144,6 +168,7 @@ public class RemoteDisplayProviderService extends Service {
 
             if (display == mTestDisplay1 || display == mTestDisplay2) {
                 display.setStatus(RemoteDisplay.STATUS_CONNECTING);
+                updateDisplay(display);
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -154,12 +179,67 @@ public class RemoteDisplayProviderService extends Service {
                         }
                     }
                 }, 2000);
-                updateDisplay(display);
-            }
-            if (display == mTestDisplay6 || display == mTestDisplay7) {
+            } else if (display == mTestDisplay6 || display == mTestDisplay7) {
                 // never finishes connecting
                 display.setStatus(RemoteDisplay.STATUS_CONNECTING);
                 updateDisplay(display);
+            } else if (display == mTestDisplay8) {
+                // flakes out while connecting
+                display.setStatus(RemoteDisplay.STATUS_CONNECTING);
+                updateDisplay(display);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if ((display == mTestDisplay8)
+                                && display.getStatus() == RemoteDisplay.STATUS_CONNECTING) {
+                            display.setStatus(RemoteDisplay.STATUS_AVAILABLE);
+                            updateDisplay(display);
+                        }
+                    }
+                }, 2000);
+            } else if (display == mTestDisplay9) {
+                // flakes out when connected
+                display.setStatus(RemoteDisplay.STATUS_CONNECTING);
+                updateDisplay(display);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if ((display == mTestDisplay9)
+                                && display.getStatus() == RemoteDisplay.STATUS_CONNECTING) {
+                            display.setStatus(RemoteDisplay.STATUS_CONNECTED);
+                            updateDisplay(display);
+                        }
+                    }
+                }, 2000);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if ((display == mTestDisplay9)
+                                && display.getStatus() == RemoteDisplay.STATUS_CONNECTED) {
+                            display.setStatus(RemoteDisplay.STATUS_AVAILABLE);
+                            updateDisplay(display);
+                        }
+                    }
+                }, 5000);
+            } else if (display == mTestDisplay10) {
+                display.setStatus(RemoteDisplay.STATUS_CONNECTING);
+                updateDisplay(display);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (display == mTestDisplay10) {
+                            if (display.getStatus() == RemoteDisplay.STATUS_CONNECTING) {
+                                display.setStatus(RemoteDisplay.STATUS_CONNECTED);
+                                updateDisplay(display);
+                                mHandler.postDelayed(this, 7000);
+                            } else if (display.getStatus() == RemoteDisplay.STATUS_CONNECTED) {
+                                display.setStatus(RemoteDisplay.STATUS_CONNECTING);
+                                updateDisplay(display);
+                                mHandler.postDelayed(this, 2000);
+                            }
+                        }
+                    }
+                }, 2000);
             }
         }
 
@@ -168,7 +248,8 @@ public class RemoteDisplayProviderService extends Service {
             Log.d(TAG, "onDisconnect: display.getId()=" + display.getId());
 
             if (display == mTestDisplay1 || display == mTestDisplay2
-                    || display == mTestDisplay6) {
+                    || display == mTestDisplay6 || display == mTestDisplay8
+                    || display == mTestDisplay9 || display == mTestDisplay10) {
                 display.setStatus(RemoteDisplay.STATUS_AVAILABLE);
                 updateDisplay(display);
             }
