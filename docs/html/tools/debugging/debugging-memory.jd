@@ -181,11 +181,18 @@ Moving that object into a global member is a simple fix that helps improve perfo
 
 <h2 id="ViewingAllocations">Viewing Overall Memory Allocations</h2>
 
-<p>For further analysis, you may want to observe how that your app's memory is
-divided between different categories, which you can do with the <code>adb meminfo</code> data.</p>
+<p>For further analysis, you may want to observe how your app's memory is
+divided between different types of RAM allocation with the
+following <a href="{@docRoot}tools/help/adb.html">adb</a> command:</p>
 
-<p>When talking about how much RAM your app is using with this data, the key metrics
-discussed below are:</p>
+<pre class="no-pretty-print">
+adb shell dumpsys meminfo &lt;package_name>
+</pre>
+
+<p>The output lists all of your app's current allocations, measured in kilobytes.</p>
+
+<p>When inspecting this information, you should be familiar with the
+following types of allocation:</p>
 
 <dl>
 <dt>Private (Clean and Dirty) RAM</dt>
@@ -210,15 +217,9 @@ determine the actual memory being used by all processes. This means PSS is a goo
 actual RAM weight of a process and for comparison against the RAM use of other processes and the
 total available RAM.</p>
 
-<p>You can look at the memory use of your app (measured in kilobytes) with the
-following adb command:</p>
-
-<pre class="no-pretty-print">
-adb shell dumpsys meminfo &lt;package_name>
-</pre>
 
 <p>For example, below is the the output for Gmail’s process on a tablet device. There is a lot of
-information here, but key points for discussion are highlighted in different colors.</p>
+information here, but key points for discussion are listed below.</p>
 
 <p class="note"><strong>Note:</strong> The information you see may vary slightly from what is shown
 here, as some details of the output differ across platform versions.</p>
