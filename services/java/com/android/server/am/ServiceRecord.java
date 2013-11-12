@@ -354,13 +354,6 @@ final class ServiceRecord extends Binder {
         restartTracker.setRestarting(true, memFactor, now);
     }
 
-    public void clearRestarting(int memFactor, long now) {
-        if (restartTracker != null) {
-            restartTracker.setRestarting(false, memFactor, now);
-            restartTracker = null;
-        }
-    }
-
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
             ProcessRecord app) {
         Intent.FilterComparison filter = new Intent.FilterComparison(intent);
