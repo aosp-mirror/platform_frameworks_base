@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import android.util.EventLog;
+import com.android.server.EventLogTags;
+
 class Task {
 //    private final String TAG = "TaskGroup";
     TaskStack mStack;
@@ -41,6 +44,8 @@ class Task {
     boolean removeAppToken(AppWindowToken wtoken) {
         mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {
+            EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, taskId,
+                    "removeAppToken: last token");
             mStack.removeTask(this);
             return true;
         }

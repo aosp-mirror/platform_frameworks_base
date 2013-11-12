@@ -123,6 +123,18 @@ option java_package com.android.server
 # ---------------------------
 # Out of memory for surfaces.
 31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
+# Task created.
+31001 wm_task_created (TaskId|1|5),(StackId|1|5)
+# Task moved to top (1) or bottom (0).
+31002 wm_task_moved (TaskId|1|5),(ToTop|1),(Index|1)
+# Task removed with source explanation.
+31003 wm_task_removed (TaskId|1|5),(Reason|3)
+# Stack created.
+31004 wm_stack_created (StackId|1|5),(RelativeBoxId|1|5),(Position|1),(Weight|1|6)
+# Home stack moved to top (1) or bottom (0).
+31005 wm_home_stack_moved (ToTop|1)
+# Stack removed.
+31006 wm_stack_removed (StackId|1|5)
 
 
 # ---------------------------
