@@ -1262,7 +1262,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
         validateIsInt8();
         mRS.validate();
-        mRS.nAllocationRead(getID(mRS), d);
+        mRS.nAllocationRead(getID(mRS), d, Element.DataType.SIGNED_8);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1277,7 +1277,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
         validateIsInt16();
         mRS.validate();
-        mRS.nAllocationRead(getID(mRS), d);
+        mRS.nAllocationRead(getID(mRS), d, Element.DataType.SIGNED_16);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1292,7 +1292,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
         validateIsInt32();
         mRS.validate();
-        mRS.nAllocationRead(getID(mRS), d);
+        mRS.nAllocationRead(getID(mRS), d, Element.DataType.SIGNED_32);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1307,7 +1307,7 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
         validateIsFloat32();
         mRS.validate();
-        mRS.nAllocationRead(getID(mRS), d);
+        mRS.nAllocationRead(getID(mRS), d, Element.DataType.FLOAT_32);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
