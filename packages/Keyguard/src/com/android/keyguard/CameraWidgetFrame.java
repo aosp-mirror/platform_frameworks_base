@@ -19,7 +19,6 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -41,7 +40,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
     private static final int WIDGET_ANIMATION_DURATION = 250; // ms
-    private static final int WIDGET_WAIT_DURATION = 650; // ms
+    private static final int WIDGET_WAIT_DURATION = 400; // ms
     private static final int RECOVERY_DELAY = 1000; // ms
 
     interface Callbacks {
