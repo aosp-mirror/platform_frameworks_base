@@ -4143,10 +4143,14 @@
     <!-- Title text to append when the display is secure.  [CHAR LIMIT=30] -->
     <string name="display_manager_overlay_display_secure_suffix">, secure</string>
 
+    <!-- Title of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=50] -->
+    <string name="wifi_display_notification_connecting_title">Starting screen cast</string>
+    <!-- Message of the notification to indicate the process of connectig to a wifi display.  [CHAR LIMIT=80] -->
+    <string name="wifi_display_notification_connecting_message">Connecting to <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Title of the notification to indicate an active wifi display connection.  [CHAR LIMIT=50] -->
-    <string name="wifi_display_notification_title">Wireless display is connected</string>
+    <string name="wifi_display_notification_connected_title">Screen cast in progress</string>
     <!-- Message of the notification to indicate an active wifi display connection.  [CHAR LIMIT=80] -->
-    <string name="wifi_display_notification_message">This screen is showing on another device</string>
+    <string name="wifi_display_notification_connected_message">Connected to <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Label of a button to disconnect an active wifi display connection.  [CHAR LIMIT=25] -->
     <string name="wifi_display_notification_disconnect">Disconnect</string>
 
