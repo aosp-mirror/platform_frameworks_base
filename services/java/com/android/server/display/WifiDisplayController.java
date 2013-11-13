@@ -76,7 +76,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private static final int DEFAULT_CONTROL_PORT = 7236;
     private static final int MAX_THROUGHPUT = 50;
     private static final int CONNECTION_TIMEOUT_SECONDS = 60;
-    private static final int RTSP_TIMEOUT_SECONDS = 15;
+    private static final int RTSP_TIMEOUT_SECONDS = 30;
     private static final int RTSP_TIMEOUT_SECONDS_CERT_MODE = 120;
 
     private static final int DISCOVER_PEERS_MAX_RETRIES = 10;

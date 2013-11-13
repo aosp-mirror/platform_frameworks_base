@@ -1095,6 +1095,8 @@
   <java-symbol type="drawable" name="ic_media_route_off_holo_dark" />
   <java-symbol type="drawable" name="ic_media_route_connecting_holo_dark" />
   <java-symbol type="drawable" name="ic_media_route_disabled_holo_dark" />
+  <java-symbol type="drawable" name="ic_notification_cast_connecting" />
+  <java-symbol type="drawable" name="ic_notification_cast_on" />
   <java-symbol type="drawable" name="cling_button" />
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
@@ -1590,8 +1592,10 @@
   <java-symbol type="string" name="vpn_lockdown_error" />
   <java-symbol type="string" name="vpn_lockdown_config" />
   <java-symbol type="string" name="wallpaper_binding_label" />
-  <java-symbol type="string" name="wifi_display_notification_title" />
-  <java-symbol type="string" name="wifi_display_notification_message" />
+  <java-symbol type="string" name="wifi_display_notification_connecting_title" />
+  <java-symbol type="string" name="wifi_display_notification_connecting_message" />
+  <java-symbol type="string" name="wifi_display_notification_connected_title" />
+  <java-symbol type="string" name="wifi_display_notification_connected_message" />
   <java-symbol type="string" name="wifi_display_notification_disconnect" />
   <java-symbol type="style" name="Theme.Dialog.AppError" />
   <java-symbol type="style" name="Theme.Toast" />
