@@ -526,7 +526,7 @@ public class ActionBarView extends AbsActionBarView {
         if (mLogoNavItem != null) {
             mLogoNavItem.setTitle(title);
         }
-        mUpGoerFive.setContentDescription(buildHomeContentDescription());
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public CharSequence getSubtitle() {
@@ -544,7 +544,7 @@ public class ActionBarView extends AbsActionBarView {
                     (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
             mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
         }
-        mUpGoerFive.setContentDescription(buildHomeContentDescription());
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public void setHomeButtonEnabled(boolean enable) {
@@ -681,7 +681,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         // Make sure the home button has an accurate content description for accessibility.
-        updateHomeAccessibility(!mUpGoerFive.isEnabled());
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public void setIcon(Drawable icon) {
@@ -1332,11 +1332,13 @@ public class ActionBarView extends AbsActionBarView {
 
     public void setHomeActionContentDescription(CharSequence description) {
         mHomeDescription = description;
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     public void setHomeActionContentDescription(int resId) {
         mHomeDescriptionRes = resId;
         mHomeDescription = resId != 0 ? getResources().getText(resId) : null;
+        updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
     static class SavedState extends BaseSavedState {
