@@ -148,7 +148,7 @@ public class EditorInfo implements InputType, Parcelable {
      * of the application be shown behind, through transparent UI parts in the
      * fullscreen IME. The part of the UI visible to the user may not be responsive
      * to touch because the IME will receive touch events, which may confuse the
-     * user; use {@link IME_FLAG_NO_FULLSCREEN} instead for a better experience.
+     * user; use {@link #IME_FLAG_NO_FULLSCREEN} instead for a better experience.
      * Using this flag is discouraged and it may become deprecated in the future.
      * Its meaning is unclear in some situations and it may not work appropriately
      * on older versions of the platform.
