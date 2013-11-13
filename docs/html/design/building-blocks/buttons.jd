@@ -9,39 +9,83 @@ page.tags="button","input"
   </div>
 </a>
 
-<p>A button consists of text and/or an image that clearly communicates what action will occur when the
-user touches it. Android supports two different types of buttons: <em>basic buttons</em> and <em>borderless
-buttons</em>. Both can contain text labels and/or images.</p>
+<p>A button consists of text and/or an image that clearly communicates what action
+  will occur when the user touches it. A button can have an image, text, or both.
+</p>
 
-<img src="{@docRoot}design/media/buttons_basic.png">
-
-<h2 id="basic">Basic Buttons</h2>
-
-<p>Basic buttons are traditional buttons with borders and background. Android supports two styles for
-basic buttons: default and small. Default buttons have slightly larger font size and are optimized
-for display outside of form content. Small buttons are intended for display alongside other content.
-They have a smaller font and smaller minimum height. Use small buttons in forms where they need to
-align with other UI elements.</p>
-
-<img src="{@docRoot}design/media/buttons_default_small.png">
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-    <div class="figure-caption">
-      Default buttons in Holo Dark &amp; Light.
-    </div>
+<div class="layout-content-row" style="margin-top:22px">
+  <div class="layout-content-col span-3">
+    <img src="{@docRoot}design/media/icon_magnifying_glass.png" style="height:64px;padding:20px 0 0 40px;">
   </div>
-  <div class="layout-content-col span-6">
-    <div class="figure-caption">
-      Small buttons in Holo Dark &amp; Light.
-    </div>
+  <div class="layout-content-col span-3">
+    <img src="{@docRoot}design/media/buttons_text.png"  style="height:94px;">
+  </div>
+  <div class="layout-content-col span-7">
+    <img src="{@docRoot}design/media/buttons_image_and_text.png"  style="height:94px;">
   </div>
 </div>
 
-<h2 id="borderless">Borderless Buttons</h2>
+<div class="layout-content-row" style="margin-top:0;">
+  <div class="layout-content-col span-3">
+      <p>An image alone works best when the action can be represented by a symbol that's well understood.</p>
+  </div>
+  <div class="layout-content-col span-3">
+      <p>Text alone is most appropriate for actions that would be difficult to
+      represent visually, or are critical to convey in words to avoid any ambiguity.</p>
+  </div>
+  <div class="layout-content-col span-7">
+    <p>
+      Both an icon and text is most appropriate when they complement each other:
+      each carrying its own bit of information, but together making a larger whole.
+    </p>
 
-<p>Borderless buttons resemble basic buttons except that they have no borders or background. You can
-use borderless buttons with both icons and text. Borderless buttons are visually more lightweight
-than basic buttons and integrate nicely with other content.</p>
+    <p>
+      For example, in a birthday reminder card in Google Now, the button's text
+      describes the action while its image indicates that the action will be done
+      in Google+.
+    </p>
+  </div>
+</div>
 
-<img src="{@docRoot}design/media/buttons_borderless.png">
+<h3>What about button backgrounds?</h3>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <p>For <strong>image-only</strong> buttons, a background isn't necessary because
+    users are accustomed to interacting with objects.</p>
+
+    <div class="layout-content-row" style="margin-left:72px">
+      <div class="layout-content-col span-2">
+        <div class="do-dont-label bad emulate-content-left-padding" style="width:30px">Don't</div>
+        <img src="{@docRoot}design/media/buttons_image_bg_dont.png" style="padding-left:14px;">
+      </div>
+      <div class="layout-content-col span-2" style="width:29px;margin-left:10px;">
+        <div class="do-dont-label good"><strong>Do</strong></div>
+        <img src="{@docRoot}design/media/icon_alarm.png" style="width:31px;padding-top:7px;">
+      </div>
+    </div>
+  </div>
+
+<div class="layout-content-col span-7">
+<p>
+  For buttons <strong>with text</strong>, a background is also usually
+  unnecessary. To invite users to touch, phrase it as a clear action (e.g.
+  "Start", "Sign in") and use different color and formatting than the screen's
+  usual body text.
+</p>
+
+<p>
+  Use buttons with backgrounds sparingly. Because they have a heavy appearance,
+  they work best when there's only one or two of them on the screen. They're
+  most appropriate for:
+</p>
+
+<ul>
+  <li>A call to action you really want users to pursue (e.g. "Sign up")</li>
+  <li>A key decision point (e.g. "Accept" / "Decline")</li>
+  <li>When the user is about to commit a significant action (e.g. "Erase
+  everything", "Buy now")</li>
+</ul>
+</div>
+</div>
 
