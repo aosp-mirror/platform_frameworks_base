@@ -141,15 +141,36 @@ public abstract class PrintDocumentAdapter {
      * or {@link LayoutResultCallback#onLayoutCancelled()} if layout was
      * cancelled in a response to a cancellation request via the passed in
      * {@link CancellationSignal}. Note that you <strong>must</strong> call one of
-     * the methods of the given callback for this method to be considered complete.
+     * the methods of the given callback for this method to be considered complete
+     * which is you will not receive any calls to this adapter until the current
+     * layout operation is complete by invoking a method on the callback instance.
+     * The callback methods can be invoked from an arbitrary thread.
      * </p>
+     * <p>
+     * One of the arguments passed to this method is a {@link CancellationSignal}
+     * which is used to propagate requests from the system to your application for
+     * canceling the current layout operation. For example, a cancellation may be
+     * requested if the user changes a print option that may affect layout while
+     * you are performing a layout operation. In such a case the system will make
+     * an attempt to cancel the current layout as another one will have to be performed.
+     * Typically, you should register a cancellation callback in the cancellation
+     * signal. The cancellation callback <strong>will not</strong> be made on the
+     * main thread and can be registered as follows:
+     * </p>
+     * <pre>
+     * cancellationSignal.setOnCancelListener(new OnCancelListener() {
+     *     &#064;Override
+     *     public void onCancel() {
+     *         // Cancel layout
+     *     }
+     * });
+     * </pre>
      * <p>
      * <strong>Note:</strong> If the content is large and a layout will be
      * performed, it is a good practice to schedule the work on a dedicated
      * thread and register an observer in the provided {@link
      * CancellationSignal} upon invocation of which you should stop the
-     * layout. The cancellation callback <strong>will not</strong> be made on
-     * the main thread.
+     * layout.
      * </p>
      *
      * @param oldAttributes The old print attributes.
@@ -177,14 +198,36 @@ public abstract class PrintDocumentAdapter {
      * CharSequence)}, if an error occurred; or {@link WriteResultCallback#onWriteCancelled()},
      * if writing was cancelled in a response to a cancellation request via the passed
      * in {@link CancellationSignal}. Note that you <strong>must</strong> call one of
-     * the methods of the given callback for this method to be considered complete.
+     * the methods of the given callback for this method to be considered complete which
+     * is you will not receive any calls to this adapter until the current write
+     * operation is complete by invoking a method on the callback instance. The callback
+     * methods can be invoked from an arbitrary thread.
      * </p>
+     * <p>
+     * One of the arguments passed to this method is a {@link CancellationSignal}
+     * which is used to propagate requests from the system to your application for
+     * canceling the current write operation. For example, a cancellation may be
+     * requested if the user changes a print option that may affect layout while
+     * you are performing a write operation. In such a case the system will make
+     * an attempt to cancel the current write as a layout will have to be performed
+     * which then may be followed by a write. Typically, you should register a
+     * cancellation callback in the cancellation signal. The cancellation callback
+     * <strong>will not</strong> be made on the main thread and can be registered
+     * as follows:
+     * </p>
+     * <pre>
+     * cancellationSignal.setOnCancelListener(new OnCancelListener() {
+     *     &#064;Override
+     *     public void onCancel() {
+     *         // Cancel write
+     *     }
+     * });
+     * </pre>
      * <p>
      * <strong>Note:</strong> If the printed content is large, it is a good
      * practice to schedule writing it on a dedicated thread and register an
      * observer in the provided {@link CancellationSignal} upon invocation of
-     * which you should stop writing. The cancellation callback will not be
-     * made on the main thread.
+     * which you should stop writing.
      * </p>
      *
      * @param pages The pages whose content to print - non-overlapping in ascending order.
