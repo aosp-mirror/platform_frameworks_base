@@ -128,8 +128,8 @@ public interface InputType {
      * the IME will not try to correct typos. You should always set this flag
      * unless you really expect users to type non-words in this field, for
      * example to choose a name for a character in a game.
-     * Contrast this with {@link TYPE_TEXT_FLAG_AUTO_COMPLETE} and
-     * {@link TYPE_TEXT_FLAG_NO_SUGGESTIONS}:
+     * Contrast this with {@link #TYPE_TEXT_FLAG_AUTO_COMPLETE} and
+     * {@link #TYPE_TEXT_FLAG_NO_SUGGESTIONS}:
      * {@code TYPE_TEXT_FLAG_AUTO_CORRECT} means that the IME will try to
      * auto-correct typos as the user is typing, but does not define whether
      * the IME offers an interface to show suggestions.
@@ -147,9 +147,9 @@ public interface InputType {
      * InputMethodSession.displayCompletions()} as a result of the editor calling
      * {@link android.view.inputmethod.InputMethodManager#displayCompletions
      * InputMethodManager.displayCompletions()}.
-     * Note the contrast with {@link TYPE_TEXT_FLAG_AUTO_CORRECT} and
-     * {@link TYPE_TEXT_FLAG_NO_SUGGESTIONS}:
-     * {@link TYPE_TEXT_FLAG_AUTO_COMPLETE} means the editor should show an
+     * Note the contrast with {@link #TYPE_TEXT_FLAG_AUTO_CORRECT} and
+     * {@link #TYPE_TEXT_FLAG_NO_SUGGESTIONS}:
+     * {@code TYPE_TEXT_FLAG_AUTO_COMPLETE} means the editor should show an
      * interface for displaying suggestions, but instead of supplying its own
      * it will rely on the Editor to pass completions/corrections.
      */
@@ -180,10 +180,10 @@ public interface InputType {
      * Please avoid using this unless you are certain this is what you want.
      * Many input methods need suggestions to work well, for example the ones
      * based on gesture typing. Consider clearing
-     * {@link TYPE_TEXT_FLAG_AUTO_CORRECT} instead if you just do not
+     * {@link #TYPE_TEXT_FLAG_AUTO_CORRECT} instead if you just do not
      * want the IME to correct typos.
-     * Note the contrast with {@link TYPE_TEXT_FLAG_AUTO_CORRECT} and
-     * {@link TYPE_TEXT_FLAG_AUTO_COMPLETE}:
+     * Note the contrast with {@link #TYPE_TEXT_FLAG_AUTO_CORRECT} and
+     * {@link #TYPE_TEXT_FLAG_AUTO_COMPLETE}:
      * {@code TYPE_TEXT_FLAG_NO_SUGGESTIONS} means the IME should never
      * show an interface to display suggestions. Most IMEs will also take this to
      * mean they should not try to auto-correct what the user is typing.
