@@ -253,36 +253,36 @@ download (or continue to use) the
     <td>Windows</td>
     <td>
   <a onclick="return onDownload(this)" id="win-studio"
-      href="http://dl.google.com/android/studio/android-studio-bundle-132.883541-windows.exe">
-      android-studio-bundle-132.883541-windows.exe
+      href="http://dl.google.com/android/studio/install/0.3.2/android-studio-bundle-132.893413-windows.exe">
+      android-studio-bundle-132.893413-windows.exe
       </a>
     </td>
-    <td>448245492 bytes</td>
-    <td>ca5f5c4d21b4350ddf3bda7021a6ee5e</td>
+    <td>484345454 bytes</td>
+    <td>14cbf0109a822688f4e2f886c0b0c85a</td>
   </tr>
 
   <tr>
     <td><nobr>Mac OS X</nobr></td>
     <td>
   <a onclick="return onDownload(this)" id="mac-studio"
-    href="http://dl.google.com/android/studio/android-studio-bundle-132.883541-mac.dmg">
-    android-studio-bundle-132.883541-mac.dmg
+    href="http://dl.google.com/android/studio/install/0.3.2/android-studio-bundle-132.893413-mac.dmg">
+    android-studio-bundle-132.893413-mac.dmg
     </a>
     </td>
-    <td>427317993 bytes</td>
-    <td>67831af6e7896a0a146d43423fabb542</td>
+    <td>463332508 bytes</td>
+    <td>0cd4ac59864890f7de57314bcc7ea5aa</td>
   </tr>
 
   <tr>
     <td>Linux</td>
     <td>
   <a onclick="return onDownload(this)" id="linux-studio"
-    href="http://dl.google.com/android/studio/android-studio-bundle-132.883541-linux.tgz">
-    android-studio-bundle-132.883541-linux.tgz
+    href="http://dl.google.com/android/studio/install/0.3.2/android-studio-bundle-132.893413-linux.tgz">
+    android-studio-bundle-132.893413-linux.tgz
     </a>
     </td>
-    <td>451652493 bytes</td>
-    <td>7a6f9b12b2cd5321ab0818b51306e01c</td>
+    <td>487694946 bytes</td>
+    <td>9f1306100314b03ff5b691b94f154501</td>
   </tr>
   </table>
 
@@ -424,7 +424,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>Android Studio v0.3.1</a> <em>(Oct 2013)</em>
+      alt=""/>Android Studio v0.3.2</a> <em>(Oct 2013)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -618,7 +618,7 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
   if (os) {
     /* set up primary ACE download button */
     $('#download-ide-button').show();
-    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.3.1</span>"
+    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.3.2</span>"
         + "<br/> <span class='small'>for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
