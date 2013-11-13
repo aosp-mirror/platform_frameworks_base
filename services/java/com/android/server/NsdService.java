@@ -483,10 +483,14 @@ public class NsdService extends INsdManager.Stub {
                         clientInfo.mResolvedService.setPort(Integer.parseInt(cooked[4]));
 
                         stopResolveService(id);
-                        if (!getAddrInfo(id, cooked[3])) {
+                        removeRequestMap(clientId, id, clientInfo);
+
+                        int id2 = getUniqueId();
+                        if (getAddrInfo(id2, cooked[3])) {
+                            storeRequestMap(clientId, id2, clientInfo);
+                        } else {
                             clientInfo.mChannel.sendMessage(NsdManager.RESOLVE_SERVICE_FAILED,
                                     NsdManager.FAILURE_INTERNAL_ERROR, clientId);
-                            removeRequestMap(clientId, id, clientInfo);
                             clientInfo.mResolvedService = null;
                         }
                         break;
