@@ -1275,6 +1275,12 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     String8 wakeMechanism("EPOLLWAKEUP");
     if (!mUsingEpollWakeup) {
+#ifndef EVIOCSSUSPENDBLOCK
+        // uapi headers don't include EVIOCSSUSPENDBLOCK, and future kernels
+        // will use an epoll flag instead, so as long as we want to support
+        // this feature, we need to be prepared to define the ioctl ourselves.
+#define EVIOCSSUSPENDBLOCK _IOW('E', 0x91, int)
+#endif
         if (ioctl(fd, EVIOCSSUSPENDBLOCK, 1)) {
             wakeMechanism = "<none>";
         } else {
