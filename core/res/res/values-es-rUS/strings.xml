@@ -382,10 +382,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permite al titular vincularse a la interfaz de nivel superior de un servicio de VPN. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un fondo de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite al propietario vincularse a la interfaz de nivel superior de un fondo de pantalla. Las aplicaciones normales no deben utilizar este permiso."</string>
-    <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
-    <skip />
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincular a una pantalla remota"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite al propietario vincularse a la interfaz de nivel superior de una pantalla remota. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a un servicio de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite al propietario vincularse a la interfaz de nivel superior del servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con un administrador de dispositivos"</string>
@@ -1494,14 +1492,10 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla inalámbrica"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Salida multimedia"</string>
-    <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
-    <skip />
-    <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
-    <skip />
-    <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
-    <skip />
-    <!-- no translation found for media_route_controller_disconnect (8966120286374158649) -->
-    <skip />
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectar al dispositivo"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Configuración"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Desconectar"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Examinando..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Conectando..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Disponible"</string>
@@ -1512,8 +1506,14 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposición #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", segura"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Se conectó la pantalla inalámbrica"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Esta pantalla se muestra en otro dispositivo."</string>
+    <!-- no translation found for wifi_display_notification_connecting_title (9102788196896266990) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connecting_message (5837350993752841389) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_title (4118323329495921271) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_message (2587209325701109715) -->
+    <skip />
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconectar"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Realizar llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Olvidaste el patrón?"</string>
