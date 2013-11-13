@@ -62,7 +62,8 @@ import java.io.FileNotFoundException;
  *            android:authorities="com.example.mycloudprovider"
  *            android:exported="true"
  *            android:grantUriPermissions="true"
- *            android:permission="android.permission.MANAGE_DOCUMENTS"&gt;
+ *            android:permission="android.permission.MANAGE_DOCUMENTS"
+ *            android:enabled="@bool/isAtLeastKitKat"&gt;
  *            &lt;intent-filter&gt;
  *                &lt;action android:name="android.content.action.DOCUMENTS_PROVIDER" /&gt;
  *            &lt;/intent-filter&gt;
@@ -252,7 +253,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
      * you are still fetching additional data. Then, when the network data is
      * available, you can send a change notification to trigger a requery and
-     * return the complete contents.
+     * return the complete contents. To return a Cursor with extras, you need to
+     * extend and override {@link Cursor#getExtras()}.
      * <p>
      * To support change notifications, you must
      * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
@@ -362,7 +364,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param documentId the document to return.
      * @param mode the mode to open with, such as 'r', 'w', or 'rw'.
      * @param signal used by the caller to signal if the request should be
-     *            cancelled.
+     *            cancelled. May be null.
      * @see ParcelFileDescriptor#open(java.io.File, int, android.os.Handler,
      *      OnCloseListener)
      * @see ParcelFileDescriptor#createReliablePipe()
@@ -386,7 +388,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param documentId the document to return.
      * @param sizeHint hint of the optimal thumbnail dimensions.
      * @param signal used by the caller to signal if the request should be
-     *            cancelled.
+     *            cancelled. May be null.
      * @see Document#FLAG_SUPPORTS_THUMBNAIL
      */
     @SuppressWarnings("unused")
