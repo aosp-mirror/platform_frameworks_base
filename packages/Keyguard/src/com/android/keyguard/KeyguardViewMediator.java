@@ -200,7 +200,7 @@ public class KeyguardViewMediator {
 
     // cached value of whether we are showing (need to know this to quickly
     // answer whether the input should be restricted)
-    private boolean mShowing = false;
+    private boolean mShowing;
 
     // true if the keyguard is hidden by another window
     private boolean mHidden = false;
@@ -507,6 +507,9 @@ public class KeyguardViewMediator {
         mLockPatternUtils = lockPatternUtils != null
                 ? lockPatternUtils : new LockPatternUtils(mContext);
         mLockPatternUtils.setCurrentUser(UserHandle.USER_OWNER);
+
+        // Assume keyguard is showing (unless it's disabled) until we know for sure...
+        mShowing = !mLockPatternUtils.isLockScreenDisabled();
 
         WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
