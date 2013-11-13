@@ -3,26 +3,25 @@ page.metaDescription=How Google Play for Education helps you reach a new audienc
 excludeFromSuggestions=true
 @jd:body
 
-<div style="position:absolute;margin-left: 636px;
+    <div style="position:absolute;margin-left: 636px;
             margin-top:-76px;color:#777;">If you're interested<br>
             <a href="{@docRoot}distribute/googleplay/edu/contact.html"
             class="go-link"
             style="display: block;text-align: right;">SIGN UP</a></div>
 
     <div style="float:right;margin:0px 0px 24px 44px;">
-  <img src="{@docRoot}images/gp-edu-knum-landscape.png" style="width:420px" alt="" />
+  <img src="{@docRoot}images/gp-edu-apps-n7.jpg" style="width:420px" alt="" />
 </div>
 
 <p>Introducing Google Play for Education, the online destination where schools
 can find the right tablet content and tools for their students and teachers.</p>
 
-<p>With easy bulk ordering for groups, schools will be able to purchase and
-instantly distribute apps, videos, and books right to their students’
+<p>With easy bulk ordering for groups, schools can purchase and
+instantly distribute your apps, and videos right to their students’
 devices.</p>
 
-<p>The Google Play team looks forward to seeing you create first class content
-that will help schools. We want to help you create innovative educational apps,
-without having to knock on school doors to reach teachers and students.</p>
+<p>Google Play for Education can help your innovative educational apps
+gain visibility with the right audiences, without having to knock on school doors. </p>
 
 <p><a class="landing-page-link" style="text-align:right;" href="#video">Watch a Video</a></p>
 
@@ -32,36 +31,36 @@ without having to knock on school doors to reach teachers and students.</p>
 
 <h4>Get discovered</h4>
 
-<p>With Google Play for Education, teachers and administrators will be able to
+<p>With Google Play for Education, teachers and administrators can
 browse content by curriculum, grade, and standard &mdash; discovering the right
-content at the right time for their students. If your app offers an exciting new
-way to learn sixth grade algebra, we'll make it easy for math educators to find,
-purchase, and distribute your app to their classes.</p>
+content for their students. If your app offers an exciting new
+way to learn sixth grade algebra, math educators will be able to find,
+purchase, and distribute your app to their classes in a few clicks.</p>
 
 <h4>Reach more schools and students</h4>
 
-<p>Google has built a strong network of K-12 schools who are already using
-Google Apps for Education and other Google services. These schools are excited
-and looking forward to bringing your apps and content into their classrooms with
-Nexus tablets.</p>
+<p>Over 30 million students, faculty, and staff are already using
+Google Apps for Education and other Google services. Many of these schools are
+excited to take advantage of tablets with Google Play for Education and they
+look to bringing your apps into their classrooms,
+especially apps using Google sign-on.</p>
 
 <h4>Monetize effectively</h4>
-<p>With the wide launch of Google Play for Education later this year, educators
-will be able to make high-volume purchases using standard institutional payment
-mechanisms and distribute them to the students they want &mdash; whether it is a
-class of 30 or a district of 30,000.</p>
-
+<p>With Google Play for Education, educators are able to make high-volume purchases
+using standard institutional payment mechanisms and distribute them to the students
+they want &mdash; whether it is a class of 20 or a district of 20,000.</p>
+<code></code>
   </div>
 
   <div class="col-6 normal-links">
     <h3 style="clear:left">For Educators</h3>
     <h4>Android tablets in the classroom</h4>
     <p>Google Play for Education brings the innovation of Android technology
-into classrooms. Educators can set up and deploy large numbers of devices in
+into classrooms. School districts can set up and deploy large numbers of devices in
 just minutes or hours rather than days.</p>
 
     <h4>Curriculum-based discovery</h4>
-    <p>Powerful browsing tools let educators quickly discover apps, books,
+    <p>Powerful browsing tools let educators quickly discover apps,
 videos, and other content&mdash;with many recommended by teachers and
 categorized according to familiar Core Curriculum standards.  
 
