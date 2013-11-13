@@ -311,7 +311,7 @@
             android:layout_height="80dp"
             android:layout_width="match_parent"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/search_light"
+            android:src="@drawable/search_light_land"
             android:scaleType="center"
             android:visibility="gone"
             android:contentDescription="@string/accessibility_search_light"
