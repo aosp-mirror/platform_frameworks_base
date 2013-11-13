@@ -142,7 +142,11 @@ public interface InputConnection {
      * conditions in implementing this call. An IME can make a change
      * to the text and use this method right away; you need to make
      * sure the returned value is consistent with the result of the
-     * latest edits.
+     * latest edits. Also, you may return less than n characters if performance
+     * dictates so, but keep in mind IMEs are relying on this for many
+     * functions: you should not, for example, limit the returned value to
+     * the current line, and specifically do not return 0 characters unless
+     * the cursor is really at the start of the text.</p>
      *
      * @param n The expected length of the text.
      * @param flags Supplies additional options controlling how the text is
@@ -176,7 +180,11 @@ public interface InputConnection {
      * conditions in implementing this call. An IME can make a change
      * to the text and use this method right away; you need to make
      * sure the returned value is consistent with the result of the
-     * latest edits.</p>
+     * latest edits. Also, you may return less than n characters if performance
+     * dictates so, but keep in mind IMEs are relying on this for many
+     * functions: you should not, for example, limit the returned value to
+     * the current line, and specifically do not return 0 characters unless
+     * the cursor is really at the end of the text.</p>
      *
      * @param n The expected length of the text.
      * @param flags Supplies additional options controlling how the text is
