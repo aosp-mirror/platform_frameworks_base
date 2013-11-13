@@ -154,6 +154,10 @@ public class KeyguardViewStateManager implements
     public void onPageSwitching(View newPage, int newPageIndex) {
         if (mKeyguardWidgetPager != null && mChallengeLayout instanceof SlidingChallengeLayout) {
             boolean isCameraPage = newPage instanceof CameraWidgetFrame;
+            if (isCameraPage) {
+                CameraWidgetFrame camera = (CameraWidgetFrame) newPage;
+                camera.setUseFastTransition(mKeyguardWidgetPager.isWarping());
+            }
             SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
             scl.setChallengeInteractive(!isCameraPage);
             final int currentFlags = mKeyguardWidgetPager.getSystemUiVisibility();
