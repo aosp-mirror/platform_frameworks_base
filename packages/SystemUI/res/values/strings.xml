@@ -491,7 +491,7 @@
     <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_off_label">Wi-Fi Off</string>
     <!-- QuickSettings: Remote display [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_remote_display_no_connection_label">Cast Screen</string>
+    <string name="quick_settings_remote_display_no_connection_label">Screen Cast</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->

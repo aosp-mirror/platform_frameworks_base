@@ -706,13 +706,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         if (connectedRoute != null) {
             mRemoteDisplayState.label = connectedRoute.getName().toString();
             mRemoteDisplayState.iconId = connecting ?
-                    com.android.internal.R.drawable.ic_media_route_connecting_holo_dark :
-                    com.android.internal.R.drawable.ic_media_route_on_holo_dark;
+                    R.drawable.ic_qs_cast_connecting : R.drawable.ic_qs_cast_connected;
         } else {
             mRemoteDisplayState.label = mContext.getString(
                     R.string.quick_settings_remote_display_no_connection_label);
-            mRemoteDisplayState.iconId =
-                    com.android.internal.R.drawable.ic_media_route_off_holo_dark;
+            mRemoteDisplayState.iconId = R.drawable.ic_qs_cast_available;
         }
         mRemoteDisplayCallback.refreshView(mRemoteDisplayTile, mRemoteDisplayState);
     }
