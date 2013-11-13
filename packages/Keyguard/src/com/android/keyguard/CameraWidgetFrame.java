@@ -68,6 +68,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private FixedSizeFrameLayout mPreview;
     private View mFullscreenPreview;
     private View mFakeNavBar;
+    private boolean mUseFastTransition;
 
     private final Runnable mTransitionToCameraRunnable = new Runnable() {
         @Override
@@ -418,7 +419,8 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private void rescheduleTransitionToCamera() {
         if (DEBUG) Log.d(TAG, "rescheduleTransitionToCamera at " + SystemClock.uptimeMillis());
         mHandler.removeCallbacks(mTransitionToCameraRunnable);
-        mHandler.postDelayed(mTransitionToCameraRunnable, WIDGET_WAIT_DURATION);
+        final long duration = mUseFastTransition ? 0 : WIDGET_WAIT_DURATION;
+        mHandler.postDelayed(mTransitionToCameraRunnable, duration);
     }
 
     private void cancelTransitionToCamera() {
@@ -512,5 +514,9 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     public void setInsets(Rect insets) {
         if (DEBUG) Log.d(TAG, "setInsets: " + insets);
         mInsets.set(insets);
+    }
+
+    public void setUseFastTransition(boolean useFastTransition) {
+        mUseFastTransition = useFastTransition;
     }
 }

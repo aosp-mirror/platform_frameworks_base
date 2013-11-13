@@ -1938,10 +1938,12 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
         if (isWarping()) {
             dispatchOnPageEndWarp();
+            notifyPageSwitching(whichPage);
             resetPageWarp();
+        } else {
+            notifyPageSwitching(whichPage);
         }
 
-        notifyPageSwitching(whichPage);
         View focusedChild = getFocusedChild();
         if (focusedChild != null && whichPage != mCurrentPage &&
                 focusedChild == getPageAt(mCurrentPage)) {
