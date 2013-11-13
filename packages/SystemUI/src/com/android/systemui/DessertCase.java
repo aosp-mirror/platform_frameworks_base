@@ -36,7 +36,8 @@ public class DessertCase extends Activity {
         if (pm.getComponentEnabledSetting(cn) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             Slog.v("DessertCase", "ACHIEVEMENT UNLOCKED");
             pm.setComponentEnabledSetting(cn,
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP);
         }
 
         mView = new DessertCaseView(this);

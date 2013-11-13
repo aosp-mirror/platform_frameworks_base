@@ -496,7 +496,6 @@ public class DessertCaseView extends FrameLayout {
     }
 
     public static class RescalingContainer extends FrameLayout {
-        private static final int SYSTEM_UI_MODE_800 = 0x00000800;
         private DessertCaseView mView;
         private float mDarkness;
 
@@ -509,7 +508,7 @@ public class DessertCaseView extends FrameLayout {
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | SYSTEM_UI_MODE_800
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             );
         }
 
