@@ -176,7 +176,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Mode pesawat"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Mengisi baterai, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Ditagih"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Terisi"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Perangkat)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Mati"</string>
@@ -196,7 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Tidak Tersambung"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Tidak Ada Jaringan"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Mati"</string>
-    <!-- no translation found for quick_settings_remote_display_no_connection_label (372107699274391290) -->
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (3319785626703585888) -->
     <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Kecerahan"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OTOMATIS"</string>
