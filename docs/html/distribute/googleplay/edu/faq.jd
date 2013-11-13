@@ -1,0 +1,372 @@
+page.title=Google Play for Education FAQ
+page.metaDescription=Questions and answers about Google Play for Education.
+excludeFromSuggestions=true
+@jd:body
+
+     <div style="position:absolute;margin-left: 636px;
+            margin-top:-76px;color:#777;">If you're interested<br>
+            <a href="{@docRoot}distribute/googleplay/edu/contact.html"
+            class="go-link"
+            style="display: block;text-align: right;">SIGN UP</a></div>
+    
+ 
+    <style>
+  dt {
+    font-weight:bold;
+  }
+  </style>
+  
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#business">Business Model</a></li>
+  <li><a href="#free_trials">Free Trials</a></li>
+  <li><a href="#discovery">Discovery</a></li>
+  <li><a href="#reviews">App Review Process</a></li>
+  <li><a href="#features">App Features</a></li>
+  <li><a href="#marketing">Marketing and ROI</a></li>
+  <li><a href="#devices">Devices</a></li>
+  <li><a href="#accounts">Accounts</a></li>
+</ol>
+</div>
+
+<p>
+  The sections below provide more information about Google Play for Education
+  and answer common questions that you might have about it.
+</p>
+
+
+<h2 id="business">Business Model and Monetization</h2>
+
+<dl>
+  <dt>
+    What is Google Play for Education?
+  </dt>
+
+  <dd>
+    Google Play for Education is a new online destination designed for schools.
+    Teachers can discover educational apps, books, and videos to meet the needs
+    of a single student, a classroom, or a whole district. Educators can browse
+    apps by grade, subject, keyword, or standard including common core.
+    Purchasing is done via PO with no credit card required. Apps are
+    distributed to tablets instantly via the cloud.
+  </dd>
+
+  <dt>
+    Is Google Play for Education primarily for students or educators?
+  </dt>
+
+  <dd>
+    The store on Google Play for Education is for educators, but its content is
+    for both educators and students. Teachers and administrators have the
+    ability to make purchases and control who within their school has access to
+    the purchase flows.
+  </dd>
+
+  <dt>
+    Will Google Play for Education support subscription purchases?
+  </dt>
+
+  <dd>
+    Currently, Google Play for Education supports one-time purchases. We are
+    investigating additional purchase mechanisms to enable more flexible
+    pricing models for developers and schools.
+  </dd>
+
+  <dt>
+    Why is it recommended to disable in-app purchases?
+  </dt>
+
+  <dd>
+    In-app purchase is currently not supported with Google Play for Education,
+    and a student device will block the Play transaction if a student attempts
+    to make an in-app purchase. To avoid student confusion in the classroom,
+    also recommend not including any in-app purchase buttons and other UI in
+    your application. We are investigating additional purchase mechanisms to
+    enable more flexible pricing models for developers and schools.
+  </dd>
+
+  <dt>
+    Is Google Play for Education restricted so only its users can purchase from
+    the Google Play for Education? Or will anyone be able to purchase from it?
+  </dt>
+
+  <dd>
+    Currently, only schools that are signed up for Google Play for Education
+    can make purchases on it.
+  </dd>
+
+  <dt>
+    Is there a way to differentiate an app's pricing between Google Play for
+    Education and Google Play?
+  </dt>
+
+  <dd>
+    For each app that you publish, you can set a single price that applies to
+    both Google Play and Google Play for Education &mdash. You can’t set a
+    different price for a given app (based on a single package name) in Google
+    Play for Education.
+  </dd>
+</dl>
+
+
+<h2 id="free_trials">Free Trials</h2>
+
+<dl>
+  <dt>
+    Can I offer free trials through Google Play for Education?
+  </dt>
+
+  <dd>
+    Google Play for Education doesn't currently support free trials. If you
+    want, you can offer a free version of your app with limited functionality
+    in Google Play for Education, but that app would need to be separate from
+    your paid app and be reviewed separately for educational content.
+  </dd>
+
+  <dt>
+    Can I offer a free trial through Google Play's "In-app Subscriptions with
+    Free Trials" feature?
+  </dt>
+
+  <dd>
+    Google Play for Education does not currently support In-app Billing or
+    In-app Subscriptions with free trials.
+  </dd>
+</dl>
+
+
+<h2 id="discovery">Discovery</h2>
+
+<dl>
+  <dt>
+    What are the categories in Google Play for Education?
+  </dt>
+
+  <dd>
+    Google Play for Education includes categories for all grade levels from
+    Kindergarten to 12 and the following subjects: English Language Arts, World
+    Languages, Mathematics, Science, Social Science, Elective, OER (Open
+    Education Resources), and Tools.
+  </dd>
+
+  <dt>
+    I created an app specifically for Google Play for Education and do not want
+    it to show up in Google Play. Is this possible?
+  </dt>
+
+  <dd>
+    Currently, it is not possible to publish an app Google Play for Education
+    and make it unavailable on Google Play.
+  </dd>
+
+  <dt>
+    If my app offers content for every level of education, how will it fit the
+    common-core standard filters?
+  </dt>
+
+  <dd>
+    If your app applies to multiple levels of education, then the app will show
+    up filtered results for in multiple levels.
+  </dd>
+</dl>
+
+
+<h2 id="reviews">App Review Process</h2>
+
+<dl>
+  <dt>
+    How are apps being reviewed? By whom and with what criteria?
+  </dt>
+
+  <dd>
+    Apps are being reviewed by a third party network of educators. These
+    educators assign the appropriate subject, grade, and common core standards
+    metadata, as well as evaluating whether the app meets the Google Play for
+    Education <a href=
+    "{@docRoot}distribute/googleplay/edu/guidelines.html">criteria for
+    classroom use</a>. You can learn more about the submission process and
+    criteria at <a href=
+    "http://developer.android.com/edu">developer.android.com/edu</a>.
+  </dd>
+
+  <dt>
+    How do I update my apps in Google Play for Education?
+  </dt>
+
+  <dd>
+    Developers can update their apps on Google Play for Education in the same
+    manner that they do for Google Play. App updates will not be reviewed prior
+    to being made available through Play for Education. However, we will
+    periodically review updated apps for quality.
+  </dd>
+
+  <dt>
+    Does the app maturity rating reflect solely what a user can do within my
+    Android app, or does the web version of my app influence the rating as
+    well?
+  </dt>
+
+  <dd>
+    The maturity rating that you set for your Android app refers only to the
+    content displayed in that application.
+  </dd>
+</dl>
+
+
+<h2 id="features">App Features</h2>
+
+<dl>
+  <dt>
+    Do I need separate builds of my phone and tablet apps for Google Play for
+    Education, or is it the exact same app that lives on Google Play?
+  </dt>
+
+  <dd>
+    We recommend you create one app and use it in both Google Play and Google
+    Play for Education.
+  </dd>
+
+  <dt>
+    What is the best way to get students’ work within apps sent back to their
+    teachers?
+  </dt>
+
+  <dd>
+    Many teachers have mentioned that the way apps treat this now is via an
+    email from a third party, which is not optimal for schools. As many schools
+    use Google Apps for Education, consider integrating your app with Google
+    Drive using the SDK which can be found here: <a class="external-link" href=
+    "https://developers.google.com/drive/about-sdk">developers.google.com/drive/about-sdk</a>.
+  </dd>
+
+  <dt>
+    How can developers test the teacher experience in Google Play for
+    Education? Is there a way to get an account to test it?
+  </dt>
+
+  <dd>
+    Currently, we are unable to provide developers with a test account to test
+    the Google Play for Education user experience. We are investigating ways to
+    allow developers to simulate the environment.
+  </dd>
+
+  <dt>
+    If I already have an app in the Chrome Apps Pack will I get some help
+    migrating this to Android?
+  </dt>
+
+  <dd>
+    If you’d like to reach users of Nexus tablets for schools we encourage you
+    to build a native app for the optimal user experience. Considerations for
+    building your app and instructions for registering it can be found at
+    <a href="http://developer.android.com/edu">developer.android.com/edu</a>.
+  </dd>
+</dl>
+
+
+<h2 id="marketing">Marketing and ROI</h2>
+
+<dl>
+  <dt>
+    What are you doing to promote these apps to educators?
+  </dt>
+
+  <dd>
+    Google Play for Education is an extension of Google Play targeting schools
+    and making discovery easier for educational apps. It helps your apps gain
+    visibility with the right audiences, without having to knock on school
+    doors. We are constantly referring to the highest quality apps in our
+    educator outreach. We have also developed a series of collections to help
+    educators quickly browse apps for the most common use cases.
+  </dd>
+
+  <dt>
+    How many installs have similar apps had on Play? How much can I expect to
+    make if I do an ROI analysis?
+  </dt>
+
+  <dd>
+    While we cannot disclose specific numbers, Google Play app listings provide
+    app download ranges for all apps.
+  </dd>
+
+  <dt>
+    What is the seasonality like for the education market? What are the key
+    timing considerations for app developers?
+  </dt>
+
+  <dd>
+    In the United States, school districts’ budget decisions go through a
+    planning phase in the Spring with budgets being released on July 1. We have
+    observed high purchase-volumes in the second quarter of the calendar year,
+    using up end-of-year budgets. New budget purchases begin in the third
+    quarter of the calendar year.
+  </dd>
+
+  <dt>
+    Is there a way to offer a special deal, such as a discount, only on Google
+    Play for Education and not on Google Play?
+  </dt>
+
+  <dd>
+    No, this is not possible. Pricing, including special offers, must be the
+    same between Google Play for Education and Google Play.
+  </dd>
+</dl>
+
+
+<h2 id="devices">Devices</h2>
+
+<dl>
+  <dt>
+    Which devices are available in the program? Will more be available?
+  </dt>
+
+  <dd>
+    Nexus 7 is available for shipment now, and the Asus Transformer will be
+    available in early 2014. We look forward to welcoming more Android devices
+    into the Google in Education family soon.
+  </dd>
+
+  <dt>
+    Can the devices be shared among many students?
+  </dt>
+
+  <dd>
+    No. Currently, this program is for one-to-one usage. Each student can login
+    to one specific tablet that is allocated to them.
+  </dd>
+</dl>
+
+
+<h2 id="accounts">
+  Accounts
+</h2>
+
+<dl>
+  <dt>
+    Will an app know whether a user is a teacher or student?
+  </dt>
+
+  <dd>
+    No, the app has no mechanism for knowing if it is running on a teacher’s
+    device or a student’s device. We recommend developers use their own user
+    database to enable this feature, where logins can be based on Google
+    Account information.
+  </dd>
+
+  <dt>
+    What log-in method do you recommend for an app on Google Play for
+    Education?
+  </dt>
+
+  <dd>
+    One of the key pieces of feedback we have heard multiple times from various
+    schools is that they prefer apps that offer Google Single Sign-on, so that
+    teachers and students do not need to remember multiple log-in credentials.
+    As schools in the program use Google Accounts and Google Apps for
+    Education, offering Google Single Sign-on is ideal.
+  </dd>
+</dl>
