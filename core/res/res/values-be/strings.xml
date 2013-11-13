@@ -1561,8 +1561,14 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> кр. на цалю"</string>
     <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
     <skip />
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Падключаны бесправадны дысплей"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Гэты экран паказваецца на іншай прыладзе"</string>
+    <!-- no translation found for wifi_display_notification_connecting_title (9102788196896266990) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connecting_message (5837350993752841389) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_title (4118323329495921271) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_connected_message (2587209325701109715) -->
+    <skip />
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Адключыць"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Экстранны выклік"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забылі ключ"</string>
