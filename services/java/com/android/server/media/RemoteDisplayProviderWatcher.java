@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -116,7 +117,7 @@ public final class RemoteDisplayProviderWatcher {
         for (ResolveInfo resolveInfo : mPackageManager.queryIntentServicesAsUser(
                 intent, 0, mUserId)) {
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-            if (serviceInfo != null) {
+            if (serviceInfo != null && verifyServiceTrusted(serviceInfo)) {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
                     RemoteDisplayProviderProxy provider =
@@ -144,6 +145,43 @@ public final class RemoteDisplayProviderWatcher {
                 provider.stop();
             }
         }
+    }
+
+    private boolean verifyServiceTrusted(ServiceInfo serviceInfo) {
+        if (serviceInfo.permission == null || !serviceInfo.permission.equals(
+                Manifest.permission.BIND_REMOTE_DISPLAY)) {
+            // If the service does not require this permission then any app could
+            // potentially bind to it and cause the remote display service to
+            // misbehave.  So we only want to trust providers that require the
+            // correct permissions.
+            Slog.w(TAG, "Ignoring remote display provider service because it did not "
+                    + "require the BIND_REMOTE_DISPLAY permission in its manifest: "
+                    + serviceInfo.packageName + "/" + serviceInfo.name);
+            return false;
+        }
+        if (!hasCaptureVideoPermission(serviceInfo.packageName)) {
+            // If the service does not have permission to capture video then it
+            // isn't going to be terribly useful as a remote display, is it?
+            // Kind of makes you wonder what it's doing there in the first place.
+            Slog.w(TAG, "Ignoring remote display provider service because it does not "
+                    + "have the CAPTURE_VIDEO_OUTPUT or CAPTURE_SECURE_VIDEO_OUTPUT "
+                    + "permission: " + serviceInfo.packageName + "/" + serviceInfo.name);
+            return false;
+        }
+        // Looks good.
+        return true;
+    }
+
+    private boolean hasCaptureVideoPermission(String packageName) {
+        if (mPackageManager.checkPermission(Manifest.permission.CAPTURE_VIDEO_OUTPUT,
+                packageName) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (mPackageManager.checkPermission(Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT,
+                packageName) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        return false;
     }
 
     private int findProvider(String packageName, String className) {
