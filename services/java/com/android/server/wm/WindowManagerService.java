@@ -3406,7 +3406,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId) {
+            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
+            int configChanges) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3438,6 +3439,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.appFullscreen = fullscreen;
             atoken.showWhenLocked = showWhenLocked;
             atoken.requestedOrientation = requestedOrientation;
+            atoken.configChanges = configChanges;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
@@ -8267,8 +8269,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || win.mAttrs.type == TYPE_KEYGUARD && win.isConfigChanged()
-                    || mOpeningApps.contains(win.mAppToken)
+                    || win.isConfigChanged() && (win.mAttrs.type == TYPE_KEYGUARD ||
+                            (win.mAppToken != null && (win.mAppToken.configChanges &
+                            (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION))
+                                    != 0))
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
