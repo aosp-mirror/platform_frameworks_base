@@ -10011,11 +10011,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (filter.countDataAuthorities() != 0
                 || filter.countDataPaths() != 0
-                || filter.countDataSchemes() != 0
+                || filter.countDataSchemes() > 1
                 || filter.countDataTypes() != 0) {
             throw new IllegalArgumentException(
                     "replacePreferredActivity expects filter to have no data authorities, " +
-                    "paths, schemes or types.");
+                    "paths, or types; and at most one scheme.");
         }
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
@@ -10032,33 +10032,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final int callingUserId = UserHandle.getCallingUserId();
-            ArrayList<PreferredActivity> removed = null;
             PreferredIntentResolver pir = mSettings.mPreferredActivities.get(callingUserId);
             if (pir != null) {
-                Iterator<PreferredActivity> it = pir.filterIterator();
-                String action = filter.getAction(0);
-                String category = filter.getCategory(0);
-                while (it.hasNext()) {
-                    PreferredActivity pa = it.next();
-                    if ((pa.countActions() == 0) || (pa.countCategories() == 0)
-                            || (pa.getAction(0).equals(action)
-                                    && pa.getCategory(0).equals(category))) {
-                        if (removed == null) {
-                            removed = new ArrayList<PreferredActivity>();
-                        }
-                        removed.add(pa);
-                        if (DEBUG_PREFERRED) {
-                            Slog.i(TAG, "Removing preferred activity "
-                                    + pa.mPref.mComponent + ":");
-                            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                        }
-                    }
+                Intent intent = new Intent(filter.getAction(0)).addCategory(filter.getCategory(0));
+                if (filter.countDataSchemes() == 1) {
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme(filter.getDataScheme(0));
+                    intent.setData(builder.build());
                 }
-                if (removed != null) {
-                    for (int i=0; i<removed.size(); i++) {
-                        PreferredActivity pa = removed.get(i);
-                        pir.removeFilter(pa);
+                List<PreferredActivity> matches = pir.queryIntent(
+                        intent, null, true, callingUserId);
+                if (DEBUG_PREFERRED) {
+                    Slog.i(TAG, matches.size() + " preferred matches for " + intent);
+                }
+                for (int i = 0; i < matches.size(); i++) {
+                    PreferredActivity pa = matches.get(i);
+                    if (DEBUG_PREFERRED) {
+                        Slog.i(TAG, "Removing preferred activity "
+                                + pa.mPref.mComponent + ":");
+                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
+                    pir.removeFilter(pa);
                 }
             }
             addPreferredActivityInternal(filter, match, set, activity, true, callingUserId);
