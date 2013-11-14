@@ -180,8 +180,8 @@ project</a> based on the support library code:</p>
         file and select <strong>Build Path &gt; Add to Build Path</strong>. For example, when
         creating the the v7 appcompat project, add both the {@code android-support-v4.jar} and
         {@code android-support-v7-appcompat.jar} files to the build path.</li>
-      <li>Right-click the project and select <strong>Build Path &gt; Configure Build Path</strong>.
-        </li>
+      <li>Right-click the library project folder and select <strong>Build Path &gt; Configure
+        Build Path</strong>.</li>
       <li>In the <strong>Order and Export</strong> tab, check the <code>.jar</code> files you just
         added to the build path, so they are available to projects that depend on this library
         project. For example, the {@code appcompat} project requires you to export both the
@@ -197,12 +197,13 @@ project</a> based on the support library code:</p>
 
 <p>Add the library to your application project:</p>
   <ol>
-    <li>In the Project Explorer, right-click your project and select <strong>Properties</strong>.
-    <li>In the Library pane, click <strong>Add</strong>.
+    <li>In the Project Explorer, right-click your project and select <strong>Properties</strong>.</li>
+    <li>In the category panel on the left side of the dialog, select <strong>Android</strong>.</li>
+    <li>In the Library pane, click the <strong>Add</strong> button.</li>
     <li>Select the library project and click <strong>OK</strong>. For example, the
       {@code appcompat} project should be listed as <strong>android-support-v7-appcompat</strong>.
       </li>
-    <li>In the properties window, click <strong>OK</strong>.
+    <li>In the properties window, click <strong>OK</strong>.</li>
   </ol>
 
   </div>
