@@ -12,6 +12,7 @@ trainingnavtop=true
 <ol>
   <li><a href="#40">Hide the Status Bar on Android 4.0 and Lower</a></li>
   <li><a href="#41">Hide the Status Bar on Android 4.1 and Higher</a></li>
+  <li><a href="#44">Hide the Status Bar on Android 4.4 and Higher</a></li>
 
   <li><a href="#behind">Make Content Appear Behind the Status Bar</a></li>
   <li><a href="#action-bar">Synchronize the Status Bar with Action Bar Transition</a></li>
@@ -31,6 +32,13 @@ trainingnavtop=true
     </li>
 </ul>
 
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}samples/ImmersiveMode/index.html"
+class="button">Get the sample</a>
+ <p class="filename">ImmersiveMode sample</p>
+</div>
 
 </div>
 </div>
@@ -160,15 +168,13 @@ or {@link android.view.Window.Callback#onWindowFocusChanged onWindowFocusChanged
   set with {@link android.view.View#setSystemUiVisibility setSystemUiVisibility()}
   to be cleared.</li>
 </ul>
-
-
  </p>
 
  <h2 id="behind">Make Content Appear Behind the Status Bar</h2>
 <p>On Android 4.1 and higher, you can set your application's content to appear behind
 the status bar, so that the content doesn't resize as the status bar hides and shows.
 To do this, use
-{@link android.view.View#setSystemUiVisibility setSystemuiVisibility(SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)}.
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
 You may also need to use
 {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} to help your app maintain a
 stable layout.</p>
@@ -209,12 +215,12 @@ insets (and hence your app's layout) however you want. </p>
 
 
 <p>Then use
-{@link android.view.View#setSystemUiVisibility setSystemuiVisibility(SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)},
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN},
 as described above,
 to set  your activity layout to use the same screen area that's available when you've enabled
 {@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}.
 
-When you want to hide the system UI, call
-{@link android.view.View#setSystemUiVisibility setSystemUiVisibility(SYSTEM_UI_FLAG_FULLSCREEN)}.
+When you want to hide the system UI, use
+{@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}.
 This also hides the action bar (because {@code windowActionBarOverlay=”true”)} and does
 so with a coordinated animation when both hiding and showing the two.</p>
