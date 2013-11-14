@@ -3383,6 +3383,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String pacFileUrl = "";
             if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
                     !TextUtils.isEmpty(proxyProperties.getPacFileUrl()))) {
+                if (!proxyProperties.isValid()) {
+                    if (DBG)
+                        log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
+                    return;
+                }
                 mGlobalProxy = new ProxyProperties(proxyProperties);
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
@@ -3426,6 +3431,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } else {
                 proxyProperties = new ProxyProperties(host, port, exclList);
             }
+            if (!proxyProperties.isValid()) {
+                if (DBG) log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
+                return;
+            }
+
             synchronized (mProxyLock) {
                 mGlobalProxy = proxyProperties;
             }
@@ -3450,6 +3460,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized (mProxyLock) {
             if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
             if (mDefaultProxy == proxy) return; // catches repeated nulls
+            if (!proxy.isValid()) {
+                if (DBG) log("Invalid proxy properties, ignoring: " + proxy.toString());
+                return;
+            }
             mDefaultProxy = proxy;
 
             if (mGlobalProxy != null) return;
