@@ -1,5 +1,5 @@
 page.title=Confirming &amp; Acknowledging
-page.tags="dialog","toast","notification"
+page.tags=dialog,toast,notification
 @jd:body
 
 <p>In some situations, when a user invokes an action in your app, it's a good idea to <em>confirm</em> or <em>acknowledge</em> that action through text.</p>

@@ -1,5 +1,5 @@
 page.title=Swipe Views
-page.tags="viewpager","navigation","tabs"
+page.tags=viewpager,navigation,tabs
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}training/implementing-navigation/lateral.html">

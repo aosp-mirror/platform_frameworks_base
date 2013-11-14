@@ -1,5 +1,5 @@
 page.title=App Structure
-page.tags="navigation","layout","tablet"
+page.tags=navigation,layout,tablet
 @jd:body
 
     <p>Apps come in many varieties that address very different needs. For example:</p>

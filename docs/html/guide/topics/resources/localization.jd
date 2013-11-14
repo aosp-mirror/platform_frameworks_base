@@ -1,6 +1,6 @@
 page.title=Localizing with Resources
 parent.title=Application Resources
-page.tags="localizing","localization","resources", "formats", "l10n"
+page.tags=localizing,localization,resources,formats,l10n
 parent.link=index.html
 @jd:body
 
@@ -39,7 +39,7 @@ graphics in ways appropriate to the locales where your application will be used.
 </p>
 
 <p>This document describes best practices for localizing Android
-applications. The principles apply whether you are developing your application  
+applications. The principles apply whether you are developing your application
 using ADT with Eclipse, Ant-based tools, or any other IDE. </p>
 
 <p>You should already have a working knowledge of Java and be  familiar with
@@ -56,7 +56,7 @@ functionality:</p>
 user interface into resource files, as described in this document and in <a
 href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a>.</li>
   <li>The <em>behavior</em> of the user interface, on the other hand, is driven
-by your Java code. 
+by your Java code.
     For example, if users input data that needs to be formatted or sorted
 differently depending on locale, then you would use Java to handle the data
 programmatically. This document does not cover how to  localize your Java code.
@@ -72,7 +72,7 @@ href="{@docRoot}training/basics/supporting-devices/languages.html">Supporting Di
 <p>Resources are text strings, layouts, sounds, graphics, and any other static
 data that your  Android application  needs. An application can include multiple
 sets of resources, each customized for a different device configuration. When a
-user runs the application,  Android    automatically selects and loads the 
+user runs the application,  Android    automatically selects and loads the
 resources that best match the device.</p>
 
 <p>(This document focuses on localization and locale. For a complete description
@@ -89,7 +89,7 @@ Alternative Resources</a>.)</p>
     You create a set of default resources, plus alternatives to be used in
     different locales.</p></td>
     <td style="border: 0pt none; padding:0">
-    <p style="border:0; padding:0"><img src="../../../images/resources/right-arrow.png" alt="right-arrow" 
+    <p style="border:0; padding:0"><img src="../../../images/resources/right-arrow.png" alt="right-arrow"
     width="51" height="17"></p></td>
     <td width="180" style="border: 0pt none ;"><p class="special-note">
     <strong>When a user runs your application:</strong>
@@ -109,38 +109,38 @@ specially named subdirectories of the project's <code>res/</code> directory.
 
 <p>Whenever the application runs in a locale for which you have not provided
 locale-specific text,  Android will load the default strings from
-<code>res/values/strings.xml</code>. If this default  file is absent, or if it 
-is missing a string that your application needs, then your application will not run 
-and will show an error. 
+<code>res/values/strings.xml</code>. If this default  file is absent, or if it
+is missing a string that your application needs, then your application will not run
+and will show an error.
 The example below illustrates what can happen when the default text file is incomplete. </p>
 
 <p><em>Example:</em>
-<p>An application's Java code refers to just two strings, <code>text_a</code> and 
-	<code>text_b</code>. This application includes a localized resource file 
-	(<code>res/values-en/strings.xml</code>) that defines <code>text_a</code> and 
-	<code>text_b</code> in English. This application also includes a default 
-	resource file (<code>res/values/strings.xml</code>) that includes a
+<p>An application's Java code refers to just two strings, <code>text_a</code> and
+  <code>text_b</code>. This application includes a localized resource file
+  (<code>res/values-en/strings.xml</code>) that defines <code>text_a</code> and
+  <code>text_b</code> in English. This application also includes a default
+  resource file (<code>res/values/strings.xml</code>) that includes a
 definition for <code>text_a</code>, but not for <code>text_b</code>:
 <ul>
-  <li>This application might compile without a problem. An IDE such as Eclipse 
-  	will not highlight any errors if a resource is missing.</li>
-  <li>When this application is launched on a device with locale set to English, 
-  	the application  might run without a problem, because 
-  	<code>res/values-en/strings.xml</code> contains both of the needed text 
-  	strings.</li>
-  <li>However, <strong>the user  will see an error message and a Force Close 
-  	button</strong> when this application is launched on a device set to a 
-  	language other than English. The application will not load.</li>
+  <li>This application might compile without a problem. An IDE such as Eclipse
+    will not highlight any errors if a resource is missing.</li>
+  <li>When this application is launched on a device with locale set to English,
+    the application  might run without a problem, because
+    <code>res/values-en/strings.xml</code> contains both of the needed text
+    strings.</li>
+  <li>However, <strong>the user  will see an error message and a Force Close
+    button</strong> when this application is launched on a device set to a
+    language other than English. The application will not load.</li>
 </ul>
 
 
-<p>To prevent this situation, make sure that a <code>res/values/strings.xml</code> 
-	file exists and that it defines every needed string. The situation applies to 
-	all types of resources, not just strings: You 
-	need to create a  set of default resource files containing all 
-	the resources that your application calls upon &#8212; layouts, drawables, 
-	animations, etc. For information about testing, see <a href="#test-for-default">
-	Testing for Default Resources</a>.</p>
+<p>To prevent this situation, make sure that a <code>res/values/strings.xml</code>
+  file exists and that it defines every needed string. The situation applies to
+  all types of resources, not just strings: You
+  need to create a  set of default resource files containing all
+  the resources that your application calls upon &#8212; layouts, drawables,
+  animations, etc. For information about testing, see <a href="#test-for-default">
+  Testing for Default Resources</a>.</p>
 
 <h2 id="using-framework">Using Resources for Localization</h2>
 
@@ -154,26 +154,26 @@ a file with the following location and name:</p>
 default language, which is the language that you expect most of your application's users to
 speak.  </p>
 
-<p>The default resource set must also include any default drawables and layouts, 
-	and can include other types of resources such as animations. 
+<p>The default resource set must also include any default drawables and layouts,
+  and can include other types of resources such as animations.
 <br>
   <code>&nbsp;&nbsp;&nbsp;&nbsp;res/drawable/</code>(required directory holding at least
   one graphic file, for the application's icon on Google Play)<br>
   <code>&nbsp;&nbsp;&nbsp;&nbsp;res/layout/</code> (required directory holding an XML
   file that defines the default layout)<br>
-  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/anim/</code> (required if you have any 
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/anim/</code> (required if you have any
   <code>res/anim-<em>&lt;qualifiers&gt;</em></code> folders)<br>
-  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/xml/</code> (required if you have any 
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/xml/</code> (required if you have any
   <code>res/xml-<em>&lt;qualifiers&gt;</em></code> folders)<br>
-  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/raw/</code> (required if you have any 
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/raw/</code> (required if you have any
   <code>res/raw-<em>&lt;qualifiers&gt;</em></code> folders)
 </p>
 
-<p class="note"><strong>Tip:</strong> In your code, examine each reference to 
-	an Android resource. Make sure that a default resource is defined for each
-	one. Also make sure that the default string file is complete: A <em>
-	localized</em> string file can contain a subset of the strings, but the 
-	<em>default</em> string file must contain them all. 
+<p class="note"><strong>Tip:</strong> In your code, examine each reference to
+  an Android resource. Make sure that a default resource is defined for each
+  one. Also make sure that the default string file is complete: A <em>
+  localized</em> string file can contain a subset of the strings, but the
+  <em>default</em> string file must contain them all.
 </p>
 
 <h3 id="creating-alternatives">How to Create Alternative Resources</h3>
@@ -184,9 +184,9 @@ sounds, layouts, and other locale-specific resources. </p>
 
 <p>An application can specify many <code>res/<em>&lt;qualifiers&gt;</em>/</code>
 directories, each with different qualifiers. To create an alternative resource for
-a different locale, you use a qualifier that specifies a language or a 
-language-region combination. (The name of a resource directory must conform 
-to the naming scheme described in 
+a different locale, you use a qualifier that specifies a language or a
+language-region combination. (The name of a resource directory must conform
+to the naming scheme described in
 <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing
 Alternative Resources</a>,
 or else it will not compile.)</p>
@@ -243,7 +243,7 @@ sets of graphics, each optimized for a different device setup:</p>
     Contains
   default graphics.</li>
   <li><code>res/drawable-small-land-stylus/</code><br>
-  Contains  graphics optimized for use with a device that expects input from a 
+  Contains  graphics optimized for use with a device that expects input from a
   stylus and has a QVGA low-density screen in landscape orientation.</li>
   <li><code>res/drawable-ja/</code> <br>
   Contains  graphics optimized for use with Japanese.</li>
@@ -251,7 +251,7 @@ sets of graphics, each optimized for a different device setup:</p>
 
 <p>If the application runs on a device that is configured to use Japanese,
 Android will load graphics from  <code>res/drawable-ja/</code>, even if the
-device happens to be one that expects input from a stylus and has a QVGA 
+device happens to be one that expects input from a stylus and has a QVGA
 low-density screen in landscape orientation.</p>
 
 <p class="note"><strong>Exception:</strong> The only qualifiers that take
@@ -316,8 +316,8 @@ Checklist</a> document.</p>
 
 <p>You cannot assume anything about the device on which a user will
 run your application. The device might have hardware that you were not
-anticipating, or it might be set to a locale that you did not plan for or that 
-you cannot test. Design your application so that it will function normally or fail gracefully no 
+anticipating, or it might be set to a locale that you did not plan for or that
+you cannot test. Design your application so that it will function normally or fail gracefully no
 matter what device it runs on.</p>
 
 <p class="note"><strong>Important:</strong> Make sure that your application
@@ -326,14 +326,14 @@ includes a full set of default resources.</p> <p>Make sure to include
 additional modifiers in the folder names) that contain all the images and text
 that your application will need. </p>
 
-<p>If an application is missing even one default resource, it will not run on a 
-	device that is set to an unsupported locale. For example, the 
-	<code>res/values/strings.xml</code> default file might lack one string that 
-	the application needs: When the application runs in an unsupported locale and 
-	attempts to load <code>res/values/strings.xml</code>, the user will see an 
-	error message and a Force Close button. An IDE such as Eclipse will not 
-	highlight this kind of error, and you will not see the problem when you 
-	test the application on a device or emulator that is set to a supported locale.</p>
+<p>If an application is missing even one default resource, it will not run on a
+  device that is set to an unsupported locale. For example, the
+  <code>res/values/strings.xml</code> default file might lack one string that
+  the application needs: When the application runs in an unsupported locale and
+  attempts to load <code>res/values/strings.xml</code>, the user will see an
+  error message and a Force Close button. An IDE such as Eclipse will not
+  highlight this kind of error, and you will not see the problem when you
+  test the application on a device or emulator that is set to a supported locale.</p>
 
 <p>For more information, see <a href="#test-for-default">Testing for Default Resources</a>.</p>
 
@@ -396,11 +396,11 @@ that Android makes available:</p>
 <h2 id="testing">Testing Localized Applications</h2>
 
 <h3 id="device">Testing on a Device</h3>
-<p>Keep in mind that the device you are testing may be significantly different from 
-	the devices available to consumers in other geographies. The locales available 
-	on your device may differ from those available on other devices. Also, the 
-	resolution and density of the device screen may differ, which could affect 
-	the display of strings and drawables in your UI.</p>
+<p>Keep in mind that the device you are testing may be significantly different from
+  the devices available to consumers in other geographies. The locales available
+  on your device may differ from those available on other devices. Also, the
+  resolution and density of the device screen may differ, which could affect
+  the display of strings and drawables in your UI.</p>
 
 <p>To change the locale on a device, use  the Settings application  (Home &gt;
 Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
@@ -420,7 +420,7 @@ the emulator. There are two ways to do this:</p>
 
 <ul>
   <li>Use the Custom Locale application, which is accessible from the
-Application tab. (After you create a custom locale, switch to it by 
+Application tab. (After you create a custom locale, switch to it by
 pressing and holding the locale name.)</li>
   <li>Change to a custom locale from the adb shell, as described below.</li>
 </ul>
@@ -463,25 +463,23 @@ the new locale. </p>
 
 <h3 id="test-for-default">Testing for Default Resources</h3>
 <p>Here's how to test whether an application includes every string resource that it needs:  </p>
-<ol><li>Set the emulator or device to a language that your application does not 
-	support. For example, if the application has French strings in 
-	<code>res/values-fr/</code> but does not have any Spanish strings in 
-	<code>res/values-es/</code>, then set the emulator's locale to Spanish. 
-	(You can use the Custom Locale application to set the emulator to an 
-	unsupported locale.)</li>
-	<li>Run the application.</li>  
-<li>If the application shows an error message and a Force Close button, it might 
-	be looking for a string that is not available. Make sure that your 
-	<code>res/values/strings.xml</code> file includes a definition for 
-	every string that the application uses.</li>
-</ol> 
-</p> 
+<ol><li>Set the emulator or device to a language that your application does not
+  support. For example, if the application has French strings in
+  <code>res/values-fr/</code> but does not have any Spanish strings in
+  <code>res/values-es/</code>, then set the emulator's locale to Spanish.
+  (You can use the Custom Locale application to set the emulator to an
+  unsupported locale.)</li>
+  <li>Run the application.</li>
+<li>If the application shows an error message and a Force Close button, it might
+  be looking for a string that is not available. Make sure that your
+  <code>res/values/strings.xml</code> file includes a definition for
+  every string that the application uses.</li>
+</ol>
+</p>
 
-<p>If the test is successful, repeat it for other types of 
-	configurations. For example, if the application has a layout file called 
-	<code>res/layout-land/main.xml</code> but does not contain a file called 
-	<code>res/layout-port/main.xml</code>, then set the emulator or device to 
-	portrait orientation and see if the application will run. 
-
-
+<p>If the test is successful, repeat it for other types of
+  configurations. For example, if the application has a layout file called
+  <code>res/layout-land/main.xml</code> but does not contain a file called
+  <code>res/layout-port/main.xml</code>, then set the emulator or device to
+  portrait orientation and see if the application will run.
 
