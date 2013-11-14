@@ -166,7 +166,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         ALOGE("Error creating AudioRecord: channel mask %#x is not valid.", channelMask);
         return (jint) AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
     }
-    uint32_t nbChannels = popcount(channelMask);
+    uint32_t channelCount = popcount(channelMask);
 
     // compare the format against the Java constants
     audio_format_t format = audioFormatToNative(audioFormat);
@@ -181,7 +181,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
          ALOGE("Error creating AudioRecord: frameCount is 0.");
         return (jint) AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
     }
-    size_t frameSize = nbChannels * bytesPerSample;
+    size_t frameSize = channelCount * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
 
     if ((uint32_t(source) >= AUDIO_SOURCE_CNT) && (uint32_t(source) != AUDIO_SOURCE_HOTWORD)) {
@@ -501,17 +501,17 @@ static jint android_media_AudioRecord_get_pos_update_period(JNIEnv *env,  jobjec
 // returns 0 if the parameter combination is not supported.
 // return -1 if there was an error querying the buffer size.
 static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject thiz,
-    jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
+    jint sampleRateInHertz, jint channelCount, jint audioFormat) {
 
     ALOGV(">> android_media_AudioRecord_get_min_buff_size(%d, %d, %d)",
-          sampleRateInHertz, nbChannels, audioFormat);
+          sampleRateInHertz, channelCount, audioFormat);
 
     size_t frameCount = 0;
     audio_format_t format = audioFormatToNative(audioFormat);
     status_t result = AudioRecord::getMinFrameCount(&frameCount,
             sampleRateInHertz,
             format,
-            audio_channel_in_mask_from_count(nbChannels));
+            audio_channel_in_mask_from_count(channelCount));
 
     if (result == BAD_VALUE) {
         return 0;
@@ -519,7 +519,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     if (result != NO_ERROR) {
         return -1;
     }
-    return frameCount * nbChannels * audio_bytes_per_sample(format);
+    return frameCount * channelCount * audio_bytes_per_sample(format);
 }
 
 

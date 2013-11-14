@@ -214,14 +214,14 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     // Java channel masks don't map directly to the native definition, but it's a simple shift
     // to skip the two deprecated channel configurations "default" and "mono".
-    uint32_t nativeChannelMask = ((uint32_t)javaChannelMask) >> 2;
+    audio_channel_mask_t nativeChannelMask = ((uint32_t)javaChannelMask) >> 2;
 
     if (!audio_is_output_channel(nativeChannelMask)) {
         ALOGE("Error creating AudioTrack: invalid channel mask %#x.", javaChannelMask);
         return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
 
-    int nbChannels = popcount(nativeChannelMask);
+    uint32_t channelCount = popcount(nativeChannelMask);
 
     // check the stream type
     audio_stream_type_t atStreamType;
@@ -265,7 +265,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     // compute the frame count
     const size_t bytesPerSample = audio_bytes_per_sample(format);
-    size_t frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
+    size_t frameCount = buffSizeInBytes / (channelCount * bytesPerSample);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -867,7 +867,7 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
 // returns the minimum required size for the successful creation of a streaming AudioTrack
 // returns -1 if there was an error querying the hardware.
 static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thiz,
-    jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
+    jint sampleRateInHertz, jint channelCount, jint audioFormat) {
 
     size_t frameCount;
     const status_t status = AudioTrack::getMinFrameCount(&frameCount, AUDIO_STREAM_DEFAULT,
@@ -879,7 +879,7 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
     }
     const audio_format_t format = audioFormatToNative(audioFormat);
     const size_t bytesPerSample = audio_bytes_per_sample(format);
-    return frameCount * nbChannels * bytesPerSample;
+    return frameCount * channelCount * bytesPerSample;
 }
 
 // ----------------------------------------------------------------------------
