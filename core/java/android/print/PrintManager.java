@@ -860,6 +860,11 @@ public final class PrintManager {
                 }
                 final ILayoutResultCallback callback;
                 synchronized (mLock) {
+                    if (mDestroyed) {
+                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                                + "finish the printing activity before print completion?");
+                        return;
+                    }
                     callback = mCallback;
                     clearLocked();
                 }
@@ -876,6 +881,11 @@ public final class PrintManager {
             public void onLayoutFailed(CharSequence error) {
                 final ILayoutResultCallback callback;
                 synchronized (mLock) {
+                    if (mDestroyed) {
+                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                                + "finish the printing activity before print completion?");
+                        return;
+                    }
                     callback = mCallback;
                     clearLocked();
                 }
@@ -891,6 +901,11 @@ public final class PrintManager {
             @Override
             public void onLayoutCancelled() {
                 synchronized (mLock) {
+                    if (mDestroyed) {
+                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                                + "finish the printing activity before print completion?");
+                        return;
+                    }
                     clearLocked();
                 }
             }
@@ -918,6 +933,11 @@ public final class PrintManager {
             public void onWriteFinished(PageRange[] pages) {
                 final IWriteResultCallback callback;
                 synchronized (mLock) {
+                    if (mDestroyed) {
+                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                                + "finish the printing activity before print completion?");
+                        return;
+                    }
                     callback = mCallback;
                     clearLocked();
                 }
@@ -940,6 +960,11 @@ public final class PrintManager {
             public void onWriteFailed(CharSequence error) {
                 final IWriteResultCallback callback;
                 synchronized (mLock) {
+                    if (mDestroyed) {
+                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                                + "finish the printing activity before print completion?");
+                        return;
+                    }
                     callback = mCallback;
                     clearLocked();
                 }
@@ -955,6 +980,11 @@ public final class PrintManager {
             @Override
             public void onWriteCancelled() {
                 synchronized (mLock) {
+                    if (mDestroyed) {
+                        Log.e(LOG_TAG, "PrintDocumentAdapter is destroyed. Did you "
+                                + "finish the printing activity before print completion?");
+                        return;
+                    }
                     clearLocked();
                 }
             }
