@@ -534,6 +534,13 @@ public final class InputMethodSubtype implements Parcelable {
     private static int hashCodeInternal(String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype,
             boolean isAsciiCapable) {
+        // CAVEAT: Must revisit how to compute needsToCalculateCompatibleHashCode when a new
+        // attribute is added in order to avoid enabled subtypes being unexpectedly disabled.
+        final boolean needsToCalculateCompatibleHashCode = !isAsciiCapable;
+        if (needsToCalculateCompatibleHashCode) {
+            return Arrays.hashCode(new Object[] {locale, mode, extraValue, isAuxiliary,
+                    overridesImplicitlyEnabledSubtype});
+        }
         return Arrays.hashCode(new Object[] {locale, mode, extraValue, isAuxiliary,
                 overridesImplicitlyEnabledSubtype, isAsciiCapable});
     }
