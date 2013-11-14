@@ -36,11 +36,13 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.FloatMath;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Controls the power state of the display.
@@ -67,7 +69,7 @@ import java.io.PrintWriter;
 final class DisplayPowerController {
     private static final String TAG = "DisplayPowerController";
 
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
@@ -110,7 +112,7 @@ final class DisplayPowerController {
 
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
-    private static final int MSG_LIGHT_SENSOR_DEBOUNCED = 3;
+    private static final int MSG_UPDATE_AMBIENT_LUX = 3;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -126,31 +128,22 @@ final class DisplayPowerController {
     // Light sensor event rate in milliseconds.
     private static final int LIGHT_SENSOR_RATE_MILLIS = 1000;
 
-    // A rate for generating synthetic light sensor events in the case where the light
-    // sensor hasn't reported any new data in a while and we need it to update the
-    // debounce filter.  We only synthesize light sensor measurements when needed.
-    private static final int SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS =
-            LIGHT_SENSOR_RATE_MILLIS * 2;
+    // Period of time in which to consider light samples in milliseconds.
+    private static final int AMBIENT_LIGHT_HORIZON = 10000;
+
+    private static final int WEIGHTING_INTERCEPT = AMBIENT_LIGHT_HORIZON;
 
     // Brightness animation ramp rate in brightness units per second.
     private static final int BRIGHTNESS_RAMP_RATE_FAST = 200;
     private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
 
-    // IIR filter time constants in milliseconds for computing two moving averages of
-    // the light samples.  One is a long-term average and the other is a short-term average.
-    // We can use these filters to assess trends in ambient brightness.
-    // The short term average gives us a filtered but relatively low latency measurement.
-    // The long term average informs us about the overall trend.
-    private static final long SHORT_TERM_AVERAGE_LIGHT_TIME_CONSTANT = 1000;
-    private static final long LONG_TERM_AVERAGE_LIGHT_TIME_CONSTANT = 5000;
-
-    // Stability requirements in milliseconds for accepting a new brightness
-    // level.  This is used for debouncing the light sensor.  Different constants
-    // are used to debounce the light sensor when adapting to brighter or darker environments.
-    // This parameter controls how quickly brightness changes occur in response to
-    // an observed change in light level that exceeds the hysteresis threshold.
-    private static final long BRIGHTENING_LIGHT_DEBOUNCE = 4000;
-    private static final long DARKENING_LIGHT_DEBOUNCE = 8000;
+   // Stability requirements in milliseconds for accepting a new brightness level.  This is used
+   // for debouncing the light sensor.  Different constants are used to debounce the light sensor
+   // when adapting to brighter or darker environments.  This parameter controls how quickly
+   // brightness changes occur in response to an observed change in light level that exceeds the
+   // hysteresis threshold.
+   private static final long BRIGHTENING_LIGHT_DEBOUNCE = 4000;
+   private static final long DARKENING_LIGHT_DEBOUNCE = 8000;
 
     // Hysteresis constraints for brightening or darkening.
     // The recent lux must have changed by at least this fraction relative to the
@@ -308,18 +301,7 @@ final class DisplayPowerController {
     // The number of light samples collected since the light sensor was enabled.
     private int mRecentLightSamples;
 
-    // The long-term and short-term filtered light measurements.
-    private float mRecentShortTermAverageLux;
-    private float mRecentLongTermAverageLux;
-
-    // The direction in which the average lux is moving relative to the current ambient lux.
-    //    0 if not changing or within hysteresis threshold.
-    //    1 if brightening beyond hysteresis threshold.
-    //   -1 if darkening beyond hysteresis threshold.
-    private int mDebounceLuxDirection;
-
-    // The time when the average lux last changed direction.
-    private long mDebounceLuxTime;
+    private AmbientLightRingBuffer mAmbientLightRingBuffer;
 
     // The screen brightness level that has been chosen by the auto-brightness
     // algorithm.  The actual brightness should ramp towards this value.
@@ -397,6 +379,8 @@ final class DisplayPowerController {
             mLightSensorWarmUpTimeConfig = resources.getInteger(
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
         }
+
+        mAmbientLightRingBuffer = new AmbientLightRingBuffer();
 
         mScreenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightnessMinimum);
         mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
@@ -916,7 +900,8 @@ final class DisplayPowerController {
                 mLightSensorEnabled = false;
                 mAmbientLuxValid = false;
                 mRecentLightSamples = 0;
-                mHandler.removeMessages(MSG_LIGHT_SENSOR_DEBOUNCED);
+                mAmbientLightRingBuffer.clear();
+                mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
         }
@@ -926,25 +911,16 @@ final class DisplayPowerController {
     }
 
     private void handleLightSensorEvent(long time, float lux) {
-        mHandler.removeMessages(MSG_LIGHT_SENSOR_DEBOUNCED);
+        mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
 
         applyLightSensorMeasurement(time, lux);
         updateAmbientLux(time);
     }
 
     private void applyLightSensorMeasurement(long time, float lux) {
-        // Update our filters.
-        mRecentLightSamples += 1;
-        if (mRecentLightSamples == 1) {
-            mRecentShortTermAverageLux = lux;
-            mRecentLongTermAverageLux = lux;
-        } else {
-            final long timeDelta = time - mLastObservedLuxTime;
-            mRecentShortTermAverageLux += (lux - mRecentShortTermAverageLux)
-                    * timeDelta / (SHORT_TERM_AVERAGE_LIGHT_TIME_CONSTANT + timeDelta);
-            mRecentLongTermAverageLux += (lux - mRecentLongTermAverageLux)
-                    * timeDelta / (LONG_TERM_AVERAGE_LIGHT_TIME_CONSTANT + timeDelta);
-        }
+        mRecentLightSamples++;
+        mAmbientLightRingBuffer.prune(time - AMBIENT_LIGHT_HORIZON);
+        mAmbientLightRingBuffer.push(time, lux);
 
         // Remember this sample value.
         mLastObservedLux = lux;
@@ -957,6 +933,130 @@ final class DisplayPowerController {
         mDarkeningLuxThreshold = mAmbientLux * (1.0f - DARKENING_LIGHT_HYSTERESIS);
     }
 
+    private float calculateAmbientLux(long now) {
+        final int N = mAmbientLightRingBuffer.size();
+        if (N == 0) {
+            Slog.e(TAG, "calculateAmbientLux: No ambient light readings available");
+            return 0;
+        }
+        float sum = 0;
+        float totalWeight = 0;
+        long endTime = 1;
+        for (int i = N - 1; i >= 0; i--) {
+            long startTime = (mAmbientLightRingBuffer.getTime(i) - now);
+            float weight = calculateWeight(startTime, endTime);
+            if (DEBUG) {
+                Slog.d(TAG, "calculateAmbientLux: [" +
+                        (startTime) + ", " +
+                        (endTime) + "]: " + weight);
+            }
+            totalWeight += weight;
+            sum += mAmbientLightRingBuffer.getLux(i) * weight;
+            endTime = startTime;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "calculateAmbientLux: totalWeight=" + totalWeight +
+                    ", newAmbientLux=" + (sum / totalWeight));
+        }
+        return sum / totalWeight;
+    }
+
+    private static float calculateWeight(long startDelta, long endDelta) {
+        return weightIntegral(endDelta) - weightIntegral(startDelta);
+    }
+
+    // Calculates the integral of y = x + WEIGHTING_INTERCEPT from 0 to x
+    private static float weightIntegral(long x) {
+        return x * (x * 0.5f + WEIGHTING_INTERCEPT);
+    }
+
+    private long nextAmbientLightBrighteningTransition(long time) {
+        final int N = mAmbientLightRingBuffer.size();
+        for (int i = 0; i < N; i++) {
+            if (mAmbientLightRingBuffer.getLux(i) <= mBrighteningLuxThreshold) {
+                long nextCheck;
+                if (i + 1 < N) {
+                    nextCheck = mAmbientLightRingBuffer.getTime(i+1) + AMBIENT_LIGHT_HORIZON;
+                } else {
+                    nextCheck = time + BRIGHTENING_LIGHT_DEBOUNCE;
+                }
+                if (DEBUG) {
+                    Slog.e(TAG, "{lux= " + mAmbientLightRingBuffer.getLux(i) +
+                            ", time= " + mAmbientLightRingBuffer.getTime(i) +
+                            "} is below brightening threshold, checking again in " +
+                            TimeUtils.formatUptime(nextCheck));
+                }
+                return nextCheck;
+            }
+        }
+        if (N == 0) {
+            long nextCheck = time + BRIGHTENING_LIGHT_DEBOUNCE;
+            if (DEBUG) {
+                Slog.e(TAG, "No data, checking again in " + TimeUtils.formatUptime(nextCheck));
+            }
+            return nextCheck;
+        }
+
+        if (time - mAmbientLightRingBuffer.getTime(0) < BRIGHTENING_LIGHT_DEBOUNCE) {
+            long nextCheck = mAmbientLightRingBuffer.getTime(0) + BRIGHTENING_LIGHT_DEBOUNCE;
+            if (DEBUG) {
+                Slog.e(TAG, "{lux= " + mAmbientLightRingBuffer.getLux(0) +
+                        ", time= " + mAmbientLightRingBuffer.getTime(0) +
+                        "} hasn't passed debounce threshold, checking again in " +
+                        TimeUtils.formatUptime(nextCheck));
+            }
+            return nextCheck;
+        }
+
+        return 0;
+    }
+
+    private long nextAmbientLightDarkeningTransition(long time) {
+        final int N = mAmbientLightRingBuffer.size();
+        for (int i = 0; i < N; i ++) {
+            if (mAmbientLightRingBuffer.getLux(i) >= mDarkeningLuxThreshold) {
+                long nextCheck;
+                if (i + 1 < N) {
+                    nextCheck = mAmbientLightRingBuffer.getTime(i+1) + AMBIENT_LIGHT_HORIZON;
+                } else {
+                    nextCheck = time + DARKENING_LIGHT_DEBOUNCE;
+                }
+                if (DEBUG) {
+                    Slog.e(TAG, "{lux= " + mAmbientLightRingBuffer.getLux(i) +
+                            ", time= " + mAmbientLightRingBuffer.getTime(i) +
+                            "} is above darkening threshold, checking again in " +
+                            TimeUtils.formatUptime(nextCheck));
+                }
+                return nextCheck;
+            }
+        }
+        if (N == 0) {
+            long nextCheck = time + DARKENING_LIGHT_DEBOUNCE;
+            if (DEBUG) {
+                Slog.e(TAG, "No data, checking again in " + TimeUtils.formatUptime(nextCheck));
+            }
+            return nextCheck;
+        }
+
+        if (time - mAmbientLightRingBuffer.getTime(0) < DARKENING_LIGHT_DEBOUNCE) {
+            long nextCheck = mAmbientLightRingBuffer.getTime(0) + DARKENING_LIGHT_DEBOUNCE;
+            if (DEBUG) {
+                Slog.e(TAG, "{lux= " + mAmbientLightRingBuffer.getLux(0) +
+                        ", time= " + mAmbientLightRingBuffer.getTime(0) +
+                        "} hasn't passed debounce threshold, checking again in " +
+                        TimeUtils.formatUptime(nextCheck));
+            }
+            return nextCheck;
+        }
+        return 0;
+    }
+
+    private void updateAmbientLux() {
+        long time = SystemClock.uptimeMillis();
+        mAmbientLightRingBuffer.prune(time - AMBIENT_LIGHT_HORIZON);
+        updateAmbientLux(time);
+    }
+
     private void updateAmbientLux(long time) {
         // If the light sensor was just turned on then immediately update our initial
         // estimate of the current ambient light level.
@@ -964,121 +1064,56 @@ final class DisplayPowerController {
             final long timeWhenSensorWarmedUp =
                 mLightSensorWarmUpTimeConfig + mLightSensorEnableTime;
             if (time < timeWhenSensorWarmedUp) {
-                mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED,
+                if (DEBUG) {
+                    Slog.d(TAG, "updateAmbientLux: Sensor not  ready yet: "
+                            + "time=" + time
+                            + ", timeWhenSensorWarmedUp=" + timeWhenSensorWarmedUp);
+                }
+                mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX,
                         timeWhenSensorWarmedUp);
                 return;
             }
-            setAmbientLux(mRecentShortTermAverageLux);
+            setAmbientLux(calculateAmbientLux(time));
             mAmbientLuxValid = true;
-            mDebounceLuxDirection = 0;
-            mDebounceLuxTime = time;
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: Initializing: "
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
+                        + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
                         + ", mAmbientLux=" + mAmbientLux);
             }
             updateAutoBrightness(true);
-        } else if (mRecentShortTermAverageLux > mBrighteningLuxThreshold
-                && mRecentLongTermAverageLux > mBrighteningLuxThreshold) {
-            // The ambient environment appears to be brightening.
-            if (mDebounceLuxDirection <= 0) {
-                mDebounceLuxDirection = 1;
-                mDebounceLuxTime = time;
-                if (DEBUG) {
-                    Slog.d(TAG, "updateAmbientLux: Possibly brightened, waiting for "
-                            + BRIGHTENING_LIGHT_DEBOUNCE + " ms: "
-                            + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                            + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                            + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                            + ", mAmbientLux=" + mAmbientLux);
-                }
-            }
-            long debounceTime = mDebounceLuxTime + BRIGHTENING_LIGHT_DEBOUNCE;
-            if (time < debounceTime) {
-                mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, debounceTime);
-                return;
-            }
-            setAmbientLux(mRecentShortTermAverageLux);
+        }
+
+        long nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
+        long nextDarkenTransition = nextAmbientLightDarkeningTransition(time);
+
+        if (nextBrightenTransition == 0) {
+            setAmbientLux(calculateAmbientLux(time));
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: Brightened: "
                         + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
+                        + ", mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
                         + ", mAmbientLux=" + mAmbientLux);
             }
             updateAutoBrightness(true);
-        } else if (mRecentShortTermAverageLux < mDarkeningLuxThreshold
-                && mRecentLongTermAverageLux < mDarkeningLuxThreshold) {
-            // The ambient environment appears to be darkening.
-            if (mDebounceLuxDirection >= 0) {
-                mDebounceLuxDirection = -1;
-                mDebounceLuxTime = time;
-                if (DEBUG) {
-                    Slog.d(TAG, "updateAmbientLux: Possibly darkened, waiting for "
-                            + DARKENING_LIGHT_DEBOUNCE + " ms: "
-                            + "mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
-                            + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                            + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                            + ", mAmbientLux=" + mAmbientLux);
-                }
-            }
-            long debounceTime = mDebounceLuxTime + DARKENING_LIGHT_DEBOUNCE;
-            if (time < debounceTime) {
-                mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, debounceTime);
-                return;
-            }
-            // Be conservative about reducing the brightness, only reduce it a little bit
-            // at a time to avoid having to bump it up again soon.
-            setAmbientLux(Math.max(mRecentShortTermAverageLux, mRecentLongTermAverageLux));
+            nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
+        } else if (nextDarkenTransition == 0) {
+            setAmbientLux(calculateAmbientLux(time));
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: Darkened: "
                         + "mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
+                        + ", mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
                         + ", mAmbientLux=" + mAmbientLux);
             }
             updateAutoBrightness(true);
-        } else if (mDebounceLuxDirection != 0) {
-            // No change or change is within the hysteresis thresholds.
-            mDebounceLuxDirection = 0;
-            mDebounceLuxTime = time;
+            nextDarkenTransition = nextAmbientLightDarkeningTransition(time);
+        }
+        long nextTransitionTime = Math.min(nextDarkenTransition, nextBrightenTransition);
+        if (nextTransitionTime > time) {
             if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Canceled debounce: "
-                        + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                        + ", mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                        + ", mAmbientLux=" + mAmbientLux);
+                Slog.d(TAG, "updateAmbientLux: Scheduling ambient lux update for "
+                        + nextTransitionTime + TimeUtils.formatUptime(nextTransitionTime));
             }
-        }
-
-        // Now that we've done all of that, we haven't yet posted a debounce
-        // message. So consider the case where current lux is beyond the
-        // threshold. It's possible that the light sensor may not report values
-        // if the light level does not change, so we need to occasionally
-        // synthesize sensor readings in order to make sure the brightness is
-        // adjusted accordingly. Note these thresholds may have changed since
-        // we entered the function because we called setAmbientLux and
-        // updateAutoBrightness along the way.
-        if (mLastObservedLux > mBrighteningLuxThreshold
-                || mLastObservedLux < mDarkeningLuxThreshold) {
-            mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED,
-                    time + SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS);
-        }
-    }
-
-    private void debounceLightSensor() {
-        if (mLightSensorEnabled) {
-            long time = SystemClock.uptimeMillis();
-            if (time >= mLastObservedLuxTime + SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS) {
-                if (DEBUG) {
-                    Slog.d(TAG, "debounceLightSensor: Synthesizing light sensor measurement "
-                            + "after " + (time - mLastObservedLuxTime) + " ms.");
-                }
-                applyLightSensorMeasurement(time, mLastObservedLux);
-            }
-            updateAmbientLux(time);
+            mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX, nextTransitionTime);
         }
     }
 
@@ -1092,7 +1127,7 @@ final class DisplayPowerController {
 
         if (USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT
                 && mPowerRequest.screenAutoBrightnessAdjustment != 0.0f) {
-            final float adjGamma = FloatMath.pow(SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA,
+            final float adjGamma = MathUtils.pow(SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA,
                     Math.min(1.0f, Math.max(-1.0f,
                             -mPowerRequest.screenAutoBrightnessAdjustment)));
             gamma *= adjGamma;
@@ -1260,10 +1295,7 @@ final class DisplayPowerController {
         pw.println("  mLastObservedLuxTime="
                 + TimeUtils.formatUptime(mLastObservedLuxTime));
         pw.println("  mRecentLightSamples=" + mRecentLightSamples);
-        pw.println("  mRecentShortTermAverageLux=" + mRecentShortTermAverageLux);
-        pw.println("  mRecentLongTermAverageLux=" + mRecentLongTermAverageLux);
-        pw.println("  mDebounceLuxDirection=" + mDebounceLuxDirection);
-        pw.println("  mDebounceLuxTime=" + TimeUtils.formatUptime(mDebounceLuxTime));
+        pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mUsingScreenAutoBrightness=" + mUsingScreenAutoBrightness);
         pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
@@ -1330,8 +1362,8 @@ final class DisplayPowerController {
                     debounceProximitySensor();
                     break;
 
-                case MSG_LIGHT_SENSOR_DEBOUNCED:
-                    debounceLightSensor();
+                case MSG_UPDATE_AMBIENT_LUX:
+                    updateAmbientLux();
                     break;
             }
         }
@@ -1377,4 +1409,151 @@ final class DisplayPowerController {
             updatePowerState();
         }
     };
+
+    private static class AmbientLightRingBuffer{
+        // Proportional extra capacity of the buffer beyond the expected number of light samples
+        // in the horizon
+        private static final float BUFFER_SLACK = 1.5f;
+        private float[] mRingLux;
+        private long[] mRingTime;
+        private int mCapacity;
+
+        // The first valid element and the next open slot.
+        // Note that if mCount is zero then there are no valid elements.
+        private int mStart;
+        private int mEnd;
+        private int mCount;
+
+        public AmbientLightRingBuffer() {
+            this((int) (AMBIENT_LIGHT_HORIZON / LIGHT_SENSOR_RATE_MILLIS * BUFFER_SLACK));
+        }
+
+        public AmbientLightRingBuffer(int initialCapacity) {
+            mCapacity = initialCapacity;
+            mRingLux = new float[mCapacity];
+            mRingTime = new long[mCapacity];
+            mStart = 0;
+            mEnd = 0;
+            mCount = 0;
+        }
+
+        public float getLux(int index) {
+            if (index >= size() || index < 0) {
+                throw new ArrayIndexOutOfBoundsException(index);
+            }
+            index += mStart;
+            if (index >= mCapacity) {
+                index -= mCapacity;
+            }
+            return mRingLux[index];
+        }
+
+        public long getTime(int index) {
+            if (index >= size() || index < 0) {
+                throw new ArrayIndexOutOfBoundsException(index);
+            }
+            index += mStart;
+            if (index >= mCapacity) {
+                index -= mCapacity;
+            }
+            return mRingTime[index];
+        }
+
+        public void push(long time, float lux) {
+            int next = mEnd;
+            if (mCount == mCapacity) {
+                int newSize = mCapacity * 2;
+
+                float[] newRingLux = new float[newSize];
+                long[] newRingTime = new long[newSize];
+                int length = mCapacity - mStart;
+                System.arraycopy(mRingLux, mStart, newRingLux, 0, length);
+                System.arraycopy(mRingTime, mStart, newRingTime, 0, length);
+                if (mStart != 0) {
+                    System.arraycopy(mRingLux, 0, newRingLux, length, mCapacity - length);
+                    System.arraycopy(mRingTime, 0, newRingTime, length, mCapacity - length);
+                }
+                mRingLux = newRingLux;
+                mRingTime = newRingTime;
+
+                next = mCapacity;
+                mCapacity = newSize;
+                mStart = 0;
+            }
+            mRingTime[next] = time;
+            mRingLux[next] = lux;
+            mEnd = next + 1;
+            if (mEnd == mCapacity) {
+                mEnd = 0;
+            }
+            mCount++;
+        }
+
+        public void prune(long horizon) {
+            int removalCount = 0;
+            while(removalCount < size() && getTime(removalCount) <= horizon) {
+                removalCount++;
+            }
+
+            if (removalCount > 0) {
+                // Some light sensors only produce data upon a change in the ambient light levels,
+                // so we need to consider the previous measurement as the ambient light level for
+                // all points in time up until we receive a new measurement. Thus, we always want
+                // to keep the youngest element that would be removed from the buffer and just set
+                // its measurement time to the horizon time since at that point it is the ambient
+                // light level, and to remove it would be to drop a valid data point within our
+                // horizon.
+                removalCount--;
+
+                mCount -= removalCount;
+                mStart += removalCount;
+                if (mStart >= mCapacity) {
+                    mStart -= mCapacity;
+                }
+
+                if (getTime(0) < horizon) {
+                    mRingTime[mStart] = horizon;
+                }
+            }
+        }
+
+        public int size() {
+            return mCount;
+        }
+
+        public boolean isEmpty() {
+            return mCount == 0;
+        }
+
+        public void clear() {
+            mStart = 0;
+            mEnd = 0;
+            mCount = 0;
+        }
+
+        @Override
+        public String toString() {
+            final int length = mCapacity - mStart;
+            float[] lux = new float[mCount];
+            long[] time = new long[mCount];
+
+            if (mCount <= length) {
+                System.arraycopy(mRingLux, mStart, lux, 0, mCount);
+                System.arraycopy(mRingTime, mStart, time, 0, mCount);
+            } else {
+                System.arraycopy(mRingLux, mStart, lux, 0, length);
+                System.arraycopy(mRingLux, 0, lux, length, mCount - length);
+
+                System.arraycopy(mRingTime, mStart, time, 0, length);
+                System.arraycopy(mRingTime, 0, time, length, mCount - length);
+            }
+            return "AmbientLightRingBuffer{mCapacity=" + mCapacity
+                + ", mStart=" + mStart
+                + ", mEnd=" + mEnd
+                + ", mCount=" + mCount
+                + ", mRingLux=" + Arrays.toString(lux)
+                + ", mRingTime=" + Arrays.toString(time)
+                + "}";
+        }
+    }
 }
