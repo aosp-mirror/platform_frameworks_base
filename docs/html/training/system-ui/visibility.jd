@@ -28,6 +28,13 @@ trainingnavtop=true
     </li>
 </ul>
 
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}samples/ImmersiveMode/index.html"
+class="button">Get the sample</a>
+ <p class="filename">ImmersiveMode sample</p>
+</div>
 
 </div>
 </div>

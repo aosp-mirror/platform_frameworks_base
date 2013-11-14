@@ -10,7 +10,7 @@ trainingnavtop=true
 <!-- table of contents -->
 <h2>This lesson teaches you to</h2>
 <ol>
-  <li><a href="#40">Hiding the Navigation Bar on 4.0 and Higher</a></li>
+  <li><a href="#40">Hide the Navigation Bar on 4.0 and Higher</a></li>
   <li><a href="#behind">Make Content Appear Behind the Navigation Bar</a></li>
 </ol>
 
@@ -29,6 +29,13 @@ trainingnavtop=true
     </li>
 </ul>
 
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}samples/ImmersiveMode/index.html"
+class="button">Get the sample</a>
+ <p class="filename">ImmersiveMode sample</p>
+</div>
 
 </div>
 </div>
@@ -90,7 +97,7 @@ or {@link android.view.Window.Callback#onWindowFocusChanged onWindowFocusChanged
 <p>On Android 4.1 and higher, you can set your application's content to appear behind
 the navigation bar, so that the content doesn't resize as the navigation bar hides and
 shows. To do this, use
-{@link android.view.View#setSystemUiVisibility setSystemuiVisibility(SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)}.
+{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
 You may also need to use
 {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} to help your app maintain a
 stable layout.</p>
