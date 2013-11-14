@@ -1,5 +1,5 @@
 page.title=Seek Bars and Sliders
-page.tags="seekbar","progressbar"
+page.tags=seekbar,progressbar
 @jd:body
 
 <p>Interactive sliders make it possible to select a value from a continuous or discrete range of values

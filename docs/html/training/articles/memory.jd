@@ -1,5 +1,5 @@
 page.title=Managing Your App's Memory
-page.tags="ram","low memory","OutOfMemoryError","onTrimMemory"
+page.tags=ram,low memory,OutOfMemoryError,onTrimMemory
 page.article=true
 @jd:body
 

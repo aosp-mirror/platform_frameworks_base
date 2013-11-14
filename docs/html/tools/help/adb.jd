@@ -1,7 +1,7 @@
 page.title=Android Debug Bridge
 parent.title=Tools
 parent.link=index.html
-page.tags="adb"
+page.tags=adb
 @jd:body
 
 <div id="qv-wrapper">

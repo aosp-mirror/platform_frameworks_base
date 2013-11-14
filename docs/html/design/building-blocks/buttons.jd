@@ -1,5 +1,5 @@
 page.title=Buttons
-page.tags="button","input"
+page.tags=button,input
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/button.html">

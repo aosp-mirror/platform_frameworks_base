@@ -1,5 +1,5 @@
 page.title=Widgets
-page.tags="appwidget","home"
+page.tags=appwidget,home
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}guide/topics/appwidgets/index.html">

@@ -1,5 +1,5 @@
 page.title=Host-based Card Emulation
-page.tags="host card emulation", "hce","HostApduService","OffHostApduService","tap and pay"
+page.tags=host card emulation,hce,HostApduService,OffHostApduService,tap and pay
 
 @jd:body
 

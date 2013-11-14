@@ -1,5 +1,5 @@
 page.title=JNI Tips
-page.tags="ndk","native"
+page.tags=ndk,native
 
 page.article=true
 @jd:body

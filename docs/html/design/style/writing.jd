@@ -1,5 +1,5 @@
 page.title=Writing Style
-page.tags="dialog","toast","notification"
+page.tags=dialog,toast,notification
 @jd:body
 
 <h2 id="voa">Android's Voice</h2>
