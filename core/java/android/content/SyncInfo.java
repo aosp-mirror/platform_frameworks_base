@@ -55,6 +55,14 @@ public class SyncInfo implements Parcelable {
     }
 
     /** @hide */
+    public SyncInfo(SyncInfo other) {
+        this.authorityId = other.authorityId;
+        this.account = new Account(other.account.name, other.account.type);
+        this.authority = other.authority;
+        this.startTime = other.startTime;
+    }
+
+    /** @hide */
     public int describeContents() {
         return 0;
     }
