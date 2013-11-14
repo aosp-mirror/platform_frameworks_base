@@ -115,6 +115,16 @@ public class ProxyProperties implements Parcelable {
         return false;
     }
 
+    public boolean isValid() {
+        try {
+            Proxy.validate(mHost == null ? "" : mHost, mPort == 0 ? "" : Integer.toString(mPort),
+                    mExclusionList == null ? "" : mExclusionList);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
     public java.net.Proxy makeProxy() {
         java.net.Proxy proxy = java.net.Proxy.NO_PROXY;
         if (mHost != null) {
