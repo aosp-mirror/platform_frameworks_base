@@ -70,6 +70,7 @@ public class SyncInfo implements Parcelable {
         this.account = new Account(other.account.name, other.account.type);
         this.authority = other.authority;
         this.startTime = other.startTime;
+        this.service = other.service;
     }
 
     /** @hide */
