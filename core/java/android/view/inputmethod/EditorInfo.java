@@ -70,14 +70,14 @@ public class EditorInfo implements InputType, Parcelable {
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "search"
      * operation, taking the user to the results of searching for the text
-     * the have typed (in whatever context is appropriate).
+     * they have typed (in whatever context is appropriate).
      */
     public static final int IME_ACTION_SEARCH = 0x00000003;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "send"
      * operation, delivering the text to its target.  This is typically used
-     * when composing a message.
+     * when composing a message in IM or SMS where sending is immediate.
      */
     public static final int IME_ACTION_SEND = 0x00000004;
     
@@ -89,22 +89,31 @@ public class EditorInfo implements InputType, Parcelable {
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: the action key performs a "done"
-     * operation, typically meaning the IME will be closed.
+     * operation, typically meaning there is nothing more to input and the
+     * IME will be closed.
      */
     public static final int IME_ACTION_DONE = 0x00000006;
     
     /**
      * Bits of {@link #IME_MASK_ACTION}: Like {@link #IME_ACTION_NEXT}, but
      * for moving to the previous field.  This will normally not be used to
-     * specify an action (since it precludes {@link #IME_ACTION_NEXT}, but
+     * specify an action (since it precludes {@link #IME_ACTION_NEXT}), but
      * can be returned to the app if it sets {@link #IME_FLAG_NAVIGATE_PREVIOUS}.
      */
     public static final int IME_ACTION_PREVIOUS = 0x00000007;
 
     /**
      * Flag of {@link #imeOptions}: used to request that the IME never go
-     * into fullscreen mode.  Applications need to be aware that the flag is not
-     * a guarantee, and not all IMEs will respect it.
+     * into fullscreen mode.
+     * By default, IMEs may go into full screen mode when they think
+     * it's appropriate, for example on small screens in landscape
+     * orientation where displaying a software keyboard may occlude
+     * such a large portion of the screen that the remaining part is
+     * too small to meaningfully display the application UI.
+     * If this flag is set, compliant IMEs will never go into full screen mode,
+     * and always leave some space to display the application UI.
+     * Applications need to be aware that the flag is not a guarantee, and
+     * some IMEs may ignore it.
      */
     public static final int IME_FLAG_NO_FULLSCREEN = 0x2000000;
 
@@ -136,50 +145,56 @@ public class EditorInfo implements InputType, Parcelable {
      * Flag of {@link #imeOptions}: used to specify that the IME does not need
      * to show its extracted text UI.  For input methods that may be fullscreen,
      * often when in landscape mode, this allows them to be smaller and let part
-     * of the application be shown behind.  Though there will likely be limited
-     * access to the application available from the user, it can make the
-     * experience of a (mostly) fullscreen IME less jarring.  Note that when
-     * this flag is specified the IME may <em>not</em> be set up to be able
-     * to display text, so it should only be used in situations where this is
-     * not needed.
+     * of the application be shown behind, through transparent UI parts in the
+     * fullscreen IME. The part of the UI visible to the user may not be responsive
+     * to touch because the IME will receive touch events, which may confuse the
+     * user; use {@link #IME_FLAG_NO_FULLSCREEN} instead for a better experience.
+     * Using this flag is discouraged and it may become deprecated in the future.
+     * Its meaning is unclear in some situations and it may not work appropriately
+     * on older versions of the platform.
      */
     public static final int IME_FLAG_NO_EXTRACT_UI = 0x10000000;
     
     /**
-     * Flag of {@link #imeOptions}: used in conjunction with
-     * {@link #IME_MASK_ACTION}, this indicates that the action should not
-     * be available as an accessory button when the input method is full-screen.
-     * Note that by setting this flag, there can be cases where the action
-     * is simply never available to the user.  Setting this generally means
-     * that you think showing text being edited is more important than the
-     * action you have supplied. 
+     * Flag of {@link #imeOptions}: used in conjunction with one of the actions
+     * masked by {@link #IME_MASK_ACTION}, this indicates that the action
+     * should not be available as an accessory button on the right of the extracted
+     * text when the input method is full-screen. Note that by setting this flag,
+     * there can be cases where the action is simply never available to the
+     * user. Setting this generally means that you think that in fullscreen mode,
+     * where there is little space to show the text, it's not worth taking some
+     * screen real estate to display the action and it should be used instead
+     * to show more text.
      */
     public static final int IME_FLAG_NO_ACCESSORY_ACTION = 0x20000000;
     
     /**
-     * Flag of {@link #imeOptions}: used in conjunction with
-     * {@link #IME_MASK_ACTION}, this indicates that the action should not
-     * be available in-line as a replacement for "enter" key.  Typically this is
-     * because the action has such a significant impact or is not recoverable
-     * enough that accidentally hitting it should be avoided, such as sending
-     * a message.  Note that {@link android.widget.TextView} will automatically set this
-     * flag for you on multi-line text views.
+     * Flag of {@link #imeOptions}: used in conjunction with one of the actions
+     * masked by {@link #IME_MASK_ACTION}. If this flag is not set, IMEs will
+     * normally replace the "enter" key with the action supplied. This flag
+     * indicates that the action should not be available in-line as a replacement
+     * for the "enter" key. Typically this is because the action has such a
+     * significant impact or is not recoverable enough that accidentally hitting
+     * it should be avoided, such as sending a message. Note that
+     * {@link android.widget.TextView} will automatically set this flag for you
+     * on multi-line text views.
      */
     public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
 
     /**
-     * Flag of {@link #imeOptions}: used to request that the IME is capable of
+     * Flag of {@link #imeOptions}: used to request an IME that is capable of
      * inputting ASCII characters.  The intention of this flag is to ensure that
-     * the user can type Roman alphabet characters in a {@link android.widget.TextView}
-     * used for, typically, account ID or password input.  It is expected that IMEs
-     * normally are able to input ASCII even without being told so (such IMEs
-     * already respect this flag in a sense), but there could be some cases they
-     * aren't when, for instance, only non-ASCII input languagaes like Arabic,
-     * Greek, Hebrew, Russian are enabled in the IME.  Applications need to be
-     * aware that the flag is not a guarantee, and not all IMEs will respect it.
+     * the user can type Roman alphabet characters in a {@link android.widget.TextView}.
+     * It is typically used for an account ID or password input. A lot of the time,
+     * IMEs are already able to input ASCII even without being told so (such IMEs
+     * already respect this flag in a sense), but there are cases when this is not
+     * the default. For instance, users of languages using a different script like
+     * Arabic, Greek, Hebrew or Russian typically have a keyboard that can't
+     * input ASCII characters by default. Applications need to be
+     * aware that the flag is not a guarantee, and some IMEs may not respect it.
      * However, it is strongly recommended for IME authors to respect this flag
-     * especially when their IME could end up with a state that has only non-ASCII
-     * input languages enabled.
+     * especially when their IME could end up with a state where only languages
+     * using non-ASCII are enabled.
      */
     public static final int IME_FLAG_FORCE_ASCII = 0x80000000;
 
@@ -209,8 +224,13 @@ public class EditorInfo implements InputType, Parcelable {
     
     /**
      * In some cases an IME may be able to display an arbitrary label for
-     * a command the user can perform, which you can specify here.  You can
-     * not count on this being used.
+     * a command the user can perform, which you can specify here. This is
+     * typically used as the label for the action to use in-line as a replacement
+     * for the "enter" key (see {@link #actionId}). Remember the key where
+     * this will be displayed is typically very small, and there are significant
+     * localization challenges to make this fit in all supported languages. Also
+     * you can not count absolutely on this being used, as some IMEs may
+     * ignore this.
      */
     public CharSequence actionLabel = null;
     
@@ -224,13 +244,17 @@ public class EditorInfo implements InputType, Parcelable {
     
     /**
      * The text offset of the start of the selection at the time editing
-     * began; -1 if not known.
+     * began; -1 if not known. Keep in mind some IMEs may not be able
+     * to give their full feature set without knowing the cursor position;
+     * avoid passing -1 here if you can.
      */
     public int initialSelStart = -1;
     
     /**
      * The text offset of the end of the selection at the time editing
-     * began; -1 if not known.
+     * began; -1 if not known. Keep in mind some IMEs may not be able
+     * to give their full feature set without knowing the cursor position;
+     * avoid passing -1 here if you can.
      */
     public int initialSelEnd = -1;
     
@@ -280,7 +304,7 @@ public class EditorInfo implements InputType, Parcelable {
      * Any extra data to supply to the input method.  This is for extended
      * communication with specific input methods; the name fields in the
      * bundle should be scoped (such as "com.mydomain.im.SOME_FIELD") so
-     * that they don't conflict with others.  This field is can be
+     * that they don't conflict with others.  This field can be
      * filled in from the {@link android.R.attr#editorExtras}
      * attribute of a TextView.
      */
