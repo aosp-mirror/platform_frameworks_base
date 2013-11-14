@@ -614,7 +614,14 @@ public class KeyguardViewMediator {
             }
         }
         KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurndOff(why);
-        mKeyguardDisplayManager.show();
+
+        // This needs to run on the UI thread
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mKeyguardDisplayManager.show();
+            }
+        });
     }
 
     private void doKeyguardLaterLocked() {
