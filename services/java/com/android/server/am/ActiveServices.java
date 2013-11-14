@@ -1847,6 +1847,9 @@ public final class ActiveServices {
                 }
             }
             if (finishing) {
+                if (r.app != null) {
+                    r.app.services.remove(r);
+                }
                 r.app = null;
             }
         }
@@ -1927,6 +1930,7 @@ public final class ActiveServices {
                 Slog.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
                     service.app.removed = true;
+                    service.app.services.remove(service);
                 }
                 service.app = null;
                 service.isolatedProc = null;
@@ -2028,6 +2032,9 @@ public final class ActiveServices {
             synchronized (sr.stats.getBatteryStats()) {
                 sr.stats.stopLaunchedLocked();
             }
+            if (sr.app != null) {
+                sr.app.services.remove(sr);
+            }
             sr.app = null;
             sr.isolatedProc = null;
             sr.executeNesting = 0;
@@ -2053,11 +2060,23 @@ public final class ActiveServices {
         }
         app.connections.clear();
 
+        ServiceMap smap = getServiceMap(app.userId);
+
         // Now do remaining service cleanup.
         for (int i=app.services.size()-1; i>=0; i--) {
+            ServiceRecord sr = app.services.valueAt(i);
+            // Sanity check: if the service listed for the app is not one
+            // we actually are maintaining, drop it.
+            if (smap.mServicesByName.get(sr.name) != sr) {
+                ServiceRecord cur = smap.mServicesByName.get(sr.name);
+                Slog.wtf(TAG, "Service " + sr + " in process " + app
+                        + " not same as in map: " + cur);
+                app.services.removeAt(i);
+                continue;
+            }
+
             // Any services running in the application may need to be placed
             // back in the pending list.
-            ServiceRecord sr = app.services.valueAt(i);
             if (allowRestart && sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
                     &ApplicationInfo.FLAG_PERSISTENT) == 0) {
                 Slog.w(TAG, "Service crashed " + sr.crashCount
