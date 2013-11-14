@@ -990,6 +990,10 @@ include the action bar on devices running Android 2.1 or higher."
             Hiding the Navigation Bar
           </a>
           </li>
+          <li><a href="/training/system-ui/immersive.html">
+            Using Immersive Full-Screen Mode
+          </a>
+          </li>
           <li><a href="<?cs var:toroot ?>training/system-ui/visibility.html">
             Responding to UI Visibility Changes
           </a>
