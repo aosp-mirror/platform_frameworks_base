@@ -110,6 +110,14 @@ dependencies {
 <img src="{@docRoot}images/tools/sync-project.png" style="vertical-align:bottom;margin:0;height:19px" />
 in the toolbar.
   </li>
+  <li>Open your app's manifest file and add the following tag as a child of the <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
+element:
+<pre>
+&lt;meta-data android:name="com.google.android.gms.version"
+           android:value="&#64;integer/google_play_services_version" />
+</pre>
+  </li>
 </ol>
 
 <p>You can now begin developing features with the
@@ -128,6 +136,16 @@ Library Project on the Command Line</a> for more information on how to do this.<
 <p class="note"><strong>Note:</strong>
 You should be referencing a copy of the library that you copied to your development
 workspace&mdash;you should not reference the library directly from the Android SDK directory.</p>
+
+<p>After you've added the Google Play services library as a dependency for your app project,
+open your app's manifest file and add the following tag as a child of the <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
+element:
+<pre>
+&lt;meta-data android:name="com.google.android.gms.version"
+           android:value="&#64;integer/google_play_services_version" />
+</pre>
+
 
 <p>Once you've set up your project to reference the library project,
 you can begin developing features with the
