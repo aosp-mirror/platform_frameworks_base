@@ -92,7 +92,7 @@ also add a {@link android.opengl.GLSurfaceView}.</p>
 {@link android.opengl.GLSurfaceView} as its primary view:</p>
 
 <pre>
-public class OpenGLES20 extends Activity {
+public class OpenGLES20Activity extends Activity {
 
     private GLSurfaceView mGLView;
 
@@ -190,11 +190,11 @@ the geometry of the view changes, for example when the device's screen orientati
 gray background in the {@link android.opengl.GLSurfaceView}:</p>
 
 <pre>
-public class MyGL20Renderer implements GLSurfaceView.Renderer {
+public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         // Set the background frame color
-        GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     public void onDrawFrame(GL10 unused) {

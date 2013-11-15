@@ -75,7 +75,9 @@ public boolean onTouchEvent(MotionEvent e) {
               dy = dy * -1 ;
             }
 
-            mRenderer.mAngle += (dx + dy) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
+            mRenderer.setAngle(
+                    mRenderer.getAngle() +
+                    ((dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
             requestRender();
     }
 
@@ -123,16 +125,20 @@ add {@code mAngle}, which contains the touch input generated angle:</p>
 <pre>
 public void onDrawFrame(GL10 gl) {
     ...
+    float[] scratch = new float[16];
+
     // Create a rotation for the triangle
     // long time = SystemClock.uptimeMillis() % 4000L;
     // float angle = 0.090f * ((int) time);
     <strong>Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, -1.0f);</strong>
 
     // Combine the rotation matrix with the projection and camera view
-    Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
+    // Note that the mMVPMatrix factor *must be first* in order
+    // for the matrix multiplication product to be correct.
+    Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 
     // Draw triangle
-    mTriangle.draw(mMVPMatrix);
+    mTriangle.draw(scratch);
 }
 </pre>
 

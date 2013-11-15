@@ -79,12 +79,12 @@ public void onSurfaceChanged(GL10 unused, int width, int height) {
 
     // this projection matrix is applied to object coordinates
     // in the onDrawFrame() method
-    Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+    Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 }
 </pre>
 
-<p>This code populates a projection matrix, {@code mProjMatrix} which you can then combine with a
-camera view transformation in the {@link android.opengl.GLSurfaceView.Renderer#onDrawFrame
+<p>This code populates a projection matrix, {@code mProjectionMatrix} which you can then combine
+with a camera view transformation in the {@link android.opengl.GLSurfaceView.Renderer#onDrawFrame
 onDrawFrame()} method, which is shown in the next section.</p>
 
 <p class="note"><strong>Note:</strong> Just applying a projection transformation to your
@@ -104,12 +104,11 @@ are then passed to the drawn shape.</p>
 &#64;Override
 public void onDrawFrame(GL10 unused) {
     ...
-
     // Set the camera position (View matrix)
-    Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+    Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
     // Calculate the projection and view transformation
-    Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
+    Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
     // Draw shape
     mTriangle.draw(mMVPMatrix);
@@ -130,7 +129,7 @@ public void draw(float[] mvpMatrix) { // pass in the calculated transformation m
     // get handle to shape's transformation matrix
     mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
 
-    // Apply the projection and view transformation
+    // Pass the projection and view transformation to the shader
     GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
     // Draw the triangle
@@ -139,7 +138,7 @@ public void draw(float[] mvpMatrix) { // pass in the calculated transformation m
 }
 </pre>
 
-<p>Once you have correctly calulated and applied the projection and camera view transformations,
+<p>Once you have correctly calculated and applied the projection and camera view transformations,
 your graphic objects are drawn in correct proportions and should look like this:</p>
 
 
