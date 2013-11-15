@@ -269,6 +269,7 @@ public final class NdefRecord implements Parcelable {
             "urn:epc:pat:", // 0x20
             "urn:epc:raw:", // 0x21
             "urn:epc:", // 0x22
+            "urn:nfc:", // 0x23
     };
 
     private static final int MAX_PAYLOAD_SIZE = 10 * (1 << 20);  // 10 MB payload limit
