@@ -190,6 +190,8 @@ void usage(void)
         "       with --debug-mode, --min-sdk-version, --target-sdk-version --version-code\n"
         "       and --version-name.\n"
         "       Insertion typically fails if the manifest already defines the attribute.\n"
+        "   --error-on-missing-config-entry\n"
+        "       Forces aapt to return an error if it fails to find an entry for a configuration.\n"
         "   --output-text-symbols\n"
         "       Generates a text file containing the resource symbols of the R class in the\n"
         "       specified folder.\n"
@@ -587,6 +589,8 @@ int main(int argc, char* const argv[])
                     bundle.setAutoAddOverlay(true);
                 } else if (strcmp(cp, "-error-on-failed-insert") == 0) {
                     bundle.setErrorOnFailedInsert(true);
+                } else if (strcmp(cp, "-error-on-missing-config-entry") == 0) {
+                    bundle.setErrorOnMissingConfigEntry(true);
                 } else if (strcmp(cp, "-output-text-symbols") == 0) {
                     argc--;
                     argv++;

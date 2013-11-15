@@ -2971,12 +2971,20 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->header.size = htodl(data->getSize()-typeStart);
             }
 
+            bool missing_entry = false;
+            const char* log_prefix = bundle->getErrorOnMissingConfigEntry() ?
+                    "error" : "warning";
             for (size_t i = 0; i < N; ++i) {
                 if (!validResources[i]) {
                     sp<ConfigList> c = t->getOrderedConfigs().itemAt(i);
-                    fprintf(stderr, "warning: no entries written for %s/%s\n",
+                    fprintf(stderr, "%s: no entries written for %s/%s\n", log_prefix,
                             String8(typeName).string(), String8(c->getName()).string());
+                    missing_entry = true;
                 }
+            }
+            if (bundle->getErrorOnMissingConfigEntry() && missing_entry) {
+                fprintf(stderr, "Error: Missing entries, quit!\n");
+                return NOT_ENOUGH_DATA;
             }
         }
 
