@@ -299,6 +299,10 @@ public final class DisplayManager {
     /**
      * Initiates a fresh scan of availble Wifi displays.
      * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
+     * <p>
+     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY}.
+     * </p>
+     *
      * @hide
      */
     public void scanWifiDisplays() {
@@ -312,8 +316,7 @@ public final class DisplayManager {
      * Automatically remembers the display after a successful connection, if not
      * already remembered.
      * </p><p>
-     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY} to connect
-     * to unknown displays.  No permissions are required to connect to already known displays.
+     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY}.
      * </p>
      *
      * @param deviceAddress The MAC address of the device to which we should connect.
