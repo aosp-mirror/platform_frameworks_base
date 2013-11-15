@@ -441,6 +441,7 @@ public final class PrintSpoolerService extends Service {
 
     private void removeObsoletePrintJobs() {
         synchronized (mLock) {
+            boolean persistState = false;
             final int printJobCount = mPrintJobs.size();
             for (int i = printJobCount - 1; i >= 0; i--) {
                 PrintJobInfo printJob = mPrintJobs.get(i);
@@ -450,9 +451,12 @@ public final class PrintSpoolerService extends Service {
                         Slog.i(LOG_TAG, "[REMOVE] " + printJob.getId().flattenToString());
                     }
                     removePrintJobFileLocked(printJob.getId());
+                    persistState = true;
                 }
             }
-            mPersistanceManager.writeStateLocked();
+            if (persistState) {
+                mPersistanceManager.writeStateLocked();
+            }
         }
     }
 
@@ -798,6 +802,10 @@ public final class PrintSpoolerService extends Service {
                 final int printJobCount = printJobs.size();
                 for (int j = 0; j < printJobCount; j++) {
                     PrintJobInfo printJob = printJobs.get(j);
+
+                    if (!shouldPersistPrintJob(printJob)) {
+                        continue;
+                    }
 
                     serializer.startTag(null, TAG_JOB);
 
