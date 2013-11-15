@@ -8504,7 +8504,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
                 transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
-                mAnimateWallpaperWithTarget = true;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit away from wallpaper: " + transit);
             } else if (mWallpaperTarget != null && mWallpaperTarget.isVisibleLw()) {
