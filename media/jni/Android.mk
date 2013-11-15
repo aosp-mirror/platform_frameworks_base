@@ -60,8 +60,15 @@ LOCAL_C_INCLUDES += \
     frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
     frameworks/av/media/libstagefright/codecs/amrnb/common \
     frameworks/av/media/libstagefright/codecs/amrnb/common/include \
-    frameworks/av/media/mtp \
-    frameworks/native/include/media/openmax \
+    frameworks/av/media/mtp
+
+ifneq ($(TI_CUSTOM_DOMX_PATH),)
+LOCAL_C_INCLUDES += $(TI_CUSTOM_DOMX_PATH)/omx_core/inc
+else
+LOCAL_C_INCLUDES += frameworks/native/include/media/openmax
+endif
+
+LOCAL_C_INCLUDES += \
     $(call include-path-for, libhardware)/hardware \
     system/media/camera/include \
     $(PV_INCLUDES) \
