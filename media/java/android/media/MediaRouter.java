@@ -18,11 +18,13 @@ package android.media;
 
 import com.android.internal.util.Objects;
 
+import android.Manifest;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -30,6 +32,7 @@ import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -82,6 +85,7 @@ public class MediaRouter {
 
         RouteInfo mSelectedRoute;
 
+        final boolean mCanConfigureWifiDisplays;
         boolean mActivelyScanningWifiDisplays;
 
         int mDiscoveryRequestRouteTypes;
@@ -129,6 +133,13 @@ public class MediaRouter {
                     com.android.internal.R.string.default_audio_route_category_name,
                     ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO, false);
             mSystemCategory.mIsSystem = true;
+
+            // Only the system can configure wifi displays.  The display manager
+            // enforces this with a permission check.  Set a flag here so that we
+            // know whether this process is actually allowed to scan and connect.
+            mCanConfigureWifiDisplays = appContext.checkPermission(
+                    Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                    Process.myPid(), Process.myUid()) == PackageManager.PERMISSION_GRANTED;
         }
 
         // Called after sStatic is initialized
@@ -255,7 +266,7 @@ public class MediaRouter {
                 }
                 if ((cbi.flags & CALLBACK_FLAG_PERFORM_ACTIVE_SCAN) != 0) {
                     activeScan = true;
-                    if ((cbi.type & (ROUTE_TYPE_LIVE_VIDEO | ROUTE_TYPE_REMOTE_DISPLAY)) != 0) {
+                    if ((cbi.type & ROUTE_TYPE_REMOTE_DISPLAY) != 0) {
                         activeScanWifiDisplay = true;
                     }
                 }
@@ -268,7 +279,7 @@ public class MediaRouter {
             }
 
             // Update wifi display scanning.
-            if (activeScanWifiDisplay) {
+            if (activeScanWifiDisplay && mCanConfigureWifiDisplays) {
                 if (!mActivelyScanningWifiDisplays) {
                     mActivelyScanningWifiDisplays = true;
                     mHandler.post(mScanWifiDisplays);
@@ -493,7 +504,8 @@ public class MediaRouter {
                 route.mDescription = globalRoute.description;
                 changed = true;
             }
-            if (route.mSupportedTypes != globalRoute.supportedTypes) {
+            final int oldSupportedTypes = route.mSupportedTypes;
+            if (oldSupportedTypes != globalRoute.supportedTypes) {
                 route.mSupportedTypes = globalRoute.supportedTypes;
                 changed = true;
             }
@@ -536,7 +548,7 @@ public class MediaRouter {
             }
 
             if (changed) {
-                dispatchRouteChanged(route);
+                dispatchRouteChanged(route, oldSupportedTypes);
             }
             if (volumeChanged) {
                 dispatchRouteVolumeChanged(route);
@@ -908,7 +920,12 @@ public class MediaRouter {
         final boolean newRouteHasAddress = route != null && route.mDeviceAddress != null;
         if (activeDisplay != null || oldRouteHasAddress || newRouteHasAddress) {
             if (newRouteHasAddress && !matchesDeviceAddress(activeDisplay, route)) {
-                sStatic.mDisplayService.connectWifiDisplay(route.mDeviceAddress);
+                if (sStatic.mCanConfigureWifiDisplays) {
+                    sStatic.mDisplayService.connectWifiDisplay(route.mDeviceAddress);
+                } else {
+                    Log.e(TAG, "Cannot connect to wifi displays because this process "
+                            + "is not allowed to do so.");
+                }
             } else if (activeDisplay != null && !newRouteHasAddress) {
                 sStatic.mDisplayService.disconnectWifiDisplay();
             }
@@ -1175,9 +1192,33 @@ public class MediaRouter {
     }
 
     static void dispatchRouteChanged(RouteInfo info) {
+        dispatchRouteChanged(info, info.mSupportedTypes);
+    }
+
+    static void dispatchRouteChanged(RouteInfo info, int oldSupportedTypes) {
+        final int newSupportedTypes = info.mSupportedTypes;
         for (CallbackInfo cbi : sStatic.mCallbacks) {
-            if (cbi.filterRouteEvent(info)) {
+            // Reconstruct some of the history for callbacks that may not have observed
+            // all of the events needed to correctly interpret the current state.
+            // FIXME: This is a strong signal that we should deprecate route type filtering
+            // completely in the future because it can lead to inconsistencies in
+            // applications.
+            final boolean oldVisibility = cbi.filterRouteEvent(oldSupportedTypes);
+            final boolean newVisibility = cbi.filterRouteEvent(newSupportedTypes);
+            if (!oldVisibility && newVisibility) {
+                cbi.cb.onRouteAdded(cbi.router, info);
+                if (info.isSelected()) {
+                    cbi.cb.onRouteSelected(cbi.router, newSupportedTypes, info);
+                }
+            }
+            if (oldVisibility || newVisibility) {
                 cbi.cb.onRouteChanged(cbi.router, info);
+            }
+            if (oldVisibility && !newVisibility) {
+                if (info.isSelected()) {
+                    cbi.cb.onRouteUnselected(cbi.router, oldSupportedTypes, info);
+                }
+                cbi.cb.onRouteRemoved(cbi.router, info);
             }
         }
     }
@@ -1257,6 +1298,18 @@ public class MediaRouter {
         if (status.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON) {
             displays = status.getDisplays();
             activeDisplay = status.getActiveDisplay();
+
+            // Only the system is able to connect to wifi display routes.
+            // The display manager will enforce this with a permission check but it
+            // still publishes information about all available displays.
+            // Filter the list down to just the active display.
+            if (!sStatic.mCanConfigureWifiDisplays) {
+                if (activeDisplay != null) {
+                    displays = new WifiDisplay[] { activeDisplay };
+                } else {
+                    displays = WifiDisplay.EMPTY_ARRAY;
+                }
+            }
         } else {
             displays = WifiDisplay.EMPTY_ARRAY;
             activeDisplay = null;
@@ -1293,7 +1346,7 @@ public class MediaRouter {
 
         // Don't scan if we're already connected to a wifi display,
         // the scanning process can cause a hiccup with some configurations.
-        if (wantScan && activeDisplay != null) {
+        if (wantScan && activeDisplay != null && sStatic.mCanConfigureWifiDisplays) {
             sStatic.mDisplayService.scanWifiDisplays();
         }
     }
@@ -2547,8 +2600,12 @@ public class MediaRouter {
         }
 
         public boolean filterRouteEvent(RouteInfo route) {
+            return filterRouteEvent(route.mSupportedTypes);
+        }
+
+        public boolean filterRouteEvent(int supportedTypes) {
             return (flags & CALLBACK_FLAG_UNFILTERED_EVENTS) != 0
-                    || (type & route.mSupportedTypes) != 0;
+                    || (type & supportedTypes) != 0;
         }
     }
 
