@@ -234,7 +234,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
 
-    boolean mHeadless;
     boolean mSafeMode;
     WindowState mStatusBar = null;
     int mStatusBarHeight;
@@ -847,7 +846,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mContext = context;
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
-        mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
         mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
@@ -3587,9 +3585,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
-        // do nothing if headless
-        if (mHeadless) return;
-
         // lid changed state
         final int newLidState = lidOpen ? LID_OPEN : LID_CLOSED;
         if (newLidState == mLidState) {
@@ -3822,7 +3817,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         //        the device some other way (which is why we have an exemption here for injected
         //        events).
         int result;
-        if ((isScreenOn && !mHeadless) || (isInjected && !isWakeKey)) {
+        if (isScreenOn || (isInjected && !isWakeKey)) {
             // When the screen is on or if the key is injected pass the key to the application.
             result = ACTION_PASS_TO_USER;
         } else {
@@ -4648,10 +4643,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void systemReady() {
-        if (!mHeadless) {
-            mKeyguardDelegate = new KeyguardServiceDelegate(mContext, null);
-            mKeyguardDelegate.onSystemReady();
-        }
+        mKeyguardDelegate = new KeyguardServiceDelegate(mContext, null);
+        mKeyguardDelegate.onSystemReady();
+
         synchronized (mLock) {
             updateOrientationListenerLp();
             mSystemReady = true;
@@ -4678,7 +4672,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void showBootMessage(final CharSequence msg, final boolean always) {
-        if (mHeadless) return;
         mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {

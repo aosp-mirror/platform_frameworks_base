@@ -127,7 +127,6 @@ class ServerThread {
         String factoryTestStr = SystemProperties.get("ro.factorytest");
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);
-        final boolean headless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         Installer installer = null;
         AccountManagerService accountManager = null;
@@ -629,10 +628,8 @@ class ServerThread {
                         R.bool.config_enableWallpaperService)) {
                 try {
                     Slog.i(TAG, "Wallpaper Service");
-                    if (!headless) {
-                        wallpaper = new WallpaperManagerService(context);
-                        ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
-                    }
+                    wallpaper = new WallpaperManagerService(context);
+                    ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
                 } catch (Throwable e) {
                     reportWtf("starting Wallpaper Service", e);
                 }
@@ -949,9 +946,7 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("observing native crashes", e);
                 }
-                if (!headless) {
-                    startSystemUi(contextF);
-                }
+                startSystemUi(contextF);
                 try {
                     if (mountServiceF != null) mountServiceF.systemReady();
                 } catch (Throwable e) {
