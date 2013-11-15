@@ -61,10 +61,10 @@ import java.util.Hashtable;
 public class LinkProperties implements Parcelable {
     // The interface described by the network link.
     private String mIfaceName;
-    private Collection<LinkAddress> mLinkAddresses = new ArrayList<LinkAddress>();
-    private Collection<InetAddress> mDnses = new ArrayList<InetAddress>();
+    private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<LinkAddress>();
+    private ArrayList<InetAddress> mDnses = new ArrayList<InetAddress>();
     private String mDomains;
-    private Collection<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
+    private ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
     private ProxyProperties mHttpProxy;
     private int mMtu;
 
@@ -156,28 +156,52 @@ public class LinkProperties implements Parcelable {
         return addresses;
     }
 
-    /**
-     * Adds a link address if it does not exist, or update it if it does.
-     * @param address The {@code LinkAddress} to add.
-     * @return true if the address was added, false if it already existed.
-     */
-    public boolean addLinkAddress(LinkAddress address) {
-        // TODO: when the LinkAddress has other attributes beyond the
-        // address and the prefix length, update them here.
-        if (address != null && !mLinkAddresses.contains(address)) {
-            mLinkAddresses.add(address);
-            return true;
+    private int findLinkAddressIndex(LinkAddress address) {
+        for (int i = 0; i < mLinkAddresses.size(); i++) {
+            if (mLinkAddresses.get(i).isSameAddressAs(address)) {
+                return i;
+            }
         }
-        return false;
+        return -1;
     }
 
     /**
-     * Removes a link address.
-     * @param address The {@code LinkAddress} to remove.
+     * Adds a link address if it does not exist, or updates it if it does.
+     * @param address The {@code LinkAddress} to add.
+     * @return true if {@code address} was added or updated, false otherwise.
+     */
+    public boolean addLinkAddress(LinkAddress address) {
+        if (address == null) {
+            return false;
+        }
+        int i = findLinkAddressIndex(address);
+        if (i < 0) {
+            // Address was not present. Add it.
+            mLinkAddresses.add(address);
+            return true;
+        } else if (mLinkAddresses.get(i).equals(address)) {
+            // Address was present and has same properties. Do nothing.
+            return false;
+        } else {
+            // Address was present and has different properties. Update it.
+            mLinkAddresses.set(i, address);
+            return true;
+        }
+    }
+
+    /**
+     * Removes a link address. Specifically, removes the link address, if any, for which
+     * {@code isSameAddressAs(toRemove)} returns true.
+     * @param address A {@code LinkAddress} specifying the address to remove.
      * @return true if the address was removed, false if it did not exist.
      */
     public boolean removeLinkAddress(LinkAddress toRemove) {
-        return mLinkAddresses.remove(toRemove);
+        int i = findLinkAddressIndex(toRemove);
+        if (i >= 0) {
+            mLinkAddresses.remove(i);
+            return true;
+        }
+        return false;
     }
 
     /**
