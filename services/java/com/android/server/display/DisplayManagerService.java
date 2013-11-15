@@ -102,7 +102,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     // Otherwise WFD is enabled according to the value of config_enableWifiDisplay.
     private static final String FORCE_WIFI_DISPLAY_ENABLE = "persist.debug.wfd.enable";
 
-    private static final String SYSTEM_HEADLESS = "ro.config.headless";
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
 
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER = 1;
@@ -116,7 +115,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private static final int DISPLAY_BLANK_STATE_UNBLANKED = 2;
 
     private final Context mContext;
-    private final boolean mHeadless;
     private final DisplayManagerHandler mHandler;
     private final Handler mUiHandler;
     private final DisplayAdapterListener mDisplayAdapterListener;
@@ -202,8 +200,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     public DisplayManagerService(Context context, Handler mainHandler) {
         mContext = context;
-        mHeadless = SystemProperties.get(SYSTEM_HEADLESS).equals("1");
-
         mHandler = new DisplayManagerHandler(mainHandler.getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
@@ -267,15 +263,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
-    }
-
-    /**
-     * Returns true if the device is headless.
-     *
-     * @return True if the device is headless.
-     */
-    public boolean isHeadless() {
-        return mHeadless;
     }
 
     /**
@@ -779,13 +766,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private void registerDefaultDisplayAdapter() {
         // Register default display adapter.
         synchronized (mSyncRoot) {
-            if (mHeadless) {
-                registerDisplayAdapterLocked(new HeadlessDisplayAdapter(
-                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
-            } else {
-                registerDisplayAdapterLocked(new LocalDisplayAdapter(
-                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
-            }
+            registerDisplayAdapterLocked(new LocalDisplayAdapter(
+                    mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
         }
     }
 
@@ -1153,7 +1135,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         pw.println("DISPLAY MANAGER (dumpsys display)");
 
         synchronized (mSyncRoot) {
-            pw.println("  mHeadless=" + mHeadless);
             pw.println("  mOnlyCode=" + mOnlyCore);
             pw.println("  mSafeMode=" + mSafeMode);
             pw.println("  mPendingTraversal=" + mPendingTraversal);
