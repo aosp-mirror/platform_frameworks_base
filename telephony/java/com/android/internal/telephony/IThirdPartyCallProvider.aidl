@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import com.android.internal.telephony.IThirdPartyCallListener;
+import com.android.internal.telephony.IThirdPartyCallSendDtmfCallback;
 
 /**
  * Interface sent to ThirdPartyCallListener.onCallProviderAttached. This is used to control an
@@ -42,5 +43,5 @@ oneway interface IThirdPartyCallProvider {
     /**
      * Sends the given DTMF code. The code can be '0'-'9', 'A'-'D', '#', or '*'.
      */
-    void sendDtmf(char c);
+    void sendDtmf(char c, IThirdPartyCallSendDtmfCallback callback);
 }
