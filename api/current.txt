@@ -2938,7 +2938,7 @@ package android.app {
     method public final void setSecondaryProgress(int);
     method public void setTitle(java.lang.CharSequence);
     method public void setTitle(int);
-    method public void setTitleColor(int);
+    method public deprecated void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
     method public boolean shouldUpRecreateTask(android.content.Intent);
@@ -29320,7 +29320,7 @@ package android.view {
     method public void setLogo(int);
     method public void setSoftInputMode(int);
     method public abstract void setTitle(java.lang.CharSequence);
-    method public abstract void setTitleColor(int);
+    method public abstract deprecated void setTitleColor(int);
     method public void setType(int);
     method public void setUiOptions(int);
     method public void setUiOptions(int, int);

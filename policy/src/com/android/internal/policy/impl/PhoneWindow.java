@@ -397,6 +397,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    @Deprecated
     public void setTitleColor(int textColor) {
         if (mTitleView != null) {
             mTitleView.setTextColor(textColor);
