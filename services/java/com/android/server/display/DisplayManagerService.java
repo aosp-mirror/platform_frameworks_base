@@ -466,6 +466,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void scanWifiDisplays() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to scan wifi displays");
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -483,13 +486,14 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to connect to a wifi display");
 
-        final boolean trusted = canCallerConfigureWifiDisplay();
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
                 if (mWifiDisplayAdapter != null) {
-                    mWifiDisplayAdapter.requestConnectLocked(address, trusted);
+                    mWifiDisplayAdapter.requestConnectLocked(address);
                 }
             }
         } finally {
@@ -499,12 +503,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override
     public void pauseWifiDisplay() {
-        if (mContext.checkCallingPermission(
-                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY"
-                    + "permission to pause a wifi display session.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to pause a wifi display session");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -520,12 +520,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override
     public void resumeWifiDisplay() {
-        if (mContext.checkCallingPermission(
-                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY"
-                    + "permission to resume a wifi display session.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to resume a wifi display session");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -541,6 +537,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void disconnectWifiDisplay() {
+        // This request does not require special permissions.
+        // Any app can request disconnection from the currently active wifi display.
+        // This exception should no longer be needed once wifi display control moves
+        // to the media router service.
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -558,10 +559,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
-        if (!canCallerConfigureWifiDisplay()) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission to "
-                    + "rename a wifi display.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to rename to a wifi display");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -580,10 +579,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
-        if (!canCallerConfigureWifiDisplay()) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission to "
-                    + "forget a wifi display.");
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
+                "Permission required to forget to a wifi display");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -599,6 +596,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public WifiDisplayStatus getWifiDisplayStatus() {
+        // This request does not require special permissions.
+        // Any app can get information about available wifi displays.
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -610,11 +610,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    private boolean canCallerConfigureWifiDisplay() {
-        return mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override // Binder call
