@@ -19,6 +19,7 @@ package com.android.internal.backup;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.RestoreSet;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -69,6 +70,10 @@ public class LocalTransport extends IBackupTransport.Stub {
         if (!SELinux.restorecon(mDataDir)) {
             Log.e(TAG, "SELinux restorecon failed for " + mDataDir);
         }
+    }
+
+    public String name() {
+        return new ComponentName(mContext, this.getClass()).flattenToShortString();
     }
 
     public Intent configurationIntent() {
