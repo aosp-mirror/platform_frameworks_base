@@ -15540,6 +15540,11 @@ package android.nfc {
     method public android.nfc.NfcAdapter getDefaultAdapter();
   }
 
+  public class NfcUnlock {
+    method public static synchronized android.nfc.NfcUnlock getInstance(android.nfc.NfcAdapter);
+    method public boolean getNfcUnlockEnabled();
+  }
+
   public final class Tag implements android.os.Parcelable {
     method public int describeContents();
     method public byte[] getId();
@@ -21696,6 +21701,7 @@ package android.provider {
     field public static final java.lang.String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
     field public static final deprecated java.lang.String LOGGING_ID = "logging_id";
     field public static final deprecated java.lang.String NETWORK_PREFERENCE = "network_preference";
+    field public static final java.lang.String NFC_UNLOCK_ENABLED = "nfc_unlock_enabled";
     field public static final java.lang.String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
     field public static final java.lang.String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
     field public static final java.lang.String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
