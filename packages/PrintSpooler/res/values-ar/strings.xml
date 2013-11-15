@@ -23,7 +23,7 @@
     <string name="label_destination" msgid="9132510997381599275">"الوجهة"</string>
     <string name="label_copies" msgid="3634531042822968308">"عدد النسخ"</string>
     <string name="label_paper_size" msgid="8681895607876809323">"حجم الورق"</string>
-    <string name="label_color" msgid="1108690305218188969">"اللون"</string>
+    <string name="label_color" msgid="1108690305218188969">"ألوان"</string>
     <string name="label_orientation" msgid="2853142581990496477">"الاتجاه"</string>
     <string name="label_pages" msgid="6300874667546617333">"الصفحات (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"على سبيل المثال، 1—5،8،11—13"</string>
@@ -66,11 +66,11 @@
     <string name="print_error_default_message" msgid="8568506918983980567">"تعذر إنشاء عملية الطباعة"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"أبيض وأسود"</item>
-    <item msgid="2762241247228983754">"اللون"</item>
+    <item msgid="2762241247228983754">"ملونة"</item>
   </string-array>
   <string-array name="orientation_labels">
     <item msgid="4061931020926489228">"عمودي"</item>
-    <item msgid="3199660090246166812">"أفقية"</item>
+    <item msgid="3199660090246166812">"أفقي"</item>
   </string-array>
   <string-array name="page_options_labels">
     <item msgid="7421377442011699994">"الكل"</item>
