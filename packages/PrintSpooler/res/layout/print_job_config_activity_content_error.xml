@@ -35,7 +35,6 @@
             android:layout_marginBottom="32dip"
             android:layout_gravity="center"
             style="?android:attr/buttonBarButtonStyle"
-            android:singleLine="true"
             android:ellipsize="end"
             android:text="@string/print_error_default_message"
             android:textColor="@color/important_text"
