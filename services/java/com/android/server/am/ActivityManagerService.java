@@ -331,8 +331,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public IntentFirewall mIntentFirewall;
 
-    private final boolean mHeadless;
-
     // Whether we should show our dialogs (ANR, crash, etc) or just perform their
     // default actuion automatically.  Important for devices without direct input
     // devices.
@@ -1984,8 +1982,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
 
-        mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
-
         // User 0 is the first and only user that runs at boot.
         mStartedUsers.put(0, new UserStartedState(new UserHandle(0), true));
         mUserLru.add(Integer.valueOf(0));
@@ -2852,13 +2848,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     boolean startHomeActivityLocked(int userId) {
-        if (mHeadless) {
-            // Added because none of the other calls to ensureBootCompleted seem to fire
-            // when running headless.
-            ensureBootCompleted();
-            return false;
-        }
-
         if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
                 && mTopAction == null) {
             // We are running in factory test mode, but unable to find
@@ -5003,7 +4992,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // See if the top visible activity is waiting to run in this process...
         if (normalMode) {
             try {
-                if (mStackSupervisor.attachApplicationLocked(app, mHeadless)) {
+                if (mStackSupervisor.attachApplicationLocked(app)) {
                     didSomething = true;
                 }
             } catch (Exception e) {
@@ -9502,10 +9491,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private boolean handleAppCrashLocked(ProcessRecord app, String shortMsg, String longMsg,
             String stackTrace) {
-        if (mHeadless) {
-            Log.e(TAG, "handleAppCrashLocked: " + app.processName);
-            return false;
-        }
         long now = SystemClock.uptimeMillis();
 
         Long crashTime;
@@ -14049,9 +14034,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     boolean updateConfigurationLocked(Configuration values,
             ActivityRecord starting, boolean persistent, boolean initLocale) {
-        // do nothing if we are headless
-        if (mHeadless) return true;
-
         int changes = 0;
 
         if (values != null) {
