@@ -35,7 +35,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * This class implements the route chooser dialog for {@link MediaRouter}.
@@ -125,7 +124,9 @@ public class MediaRouteChooserDialog extends Dialog {
         getWindow().requestFeature(Window.FEATURE_LEFT_ICON);
 
         setContentView(R.layout.media_route_chooser_dialog);
-        setTitle(R.string.media_route_chooser_title);
+        setTitle(mRouteTypes == MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY
+                ? R.string.media_route_chooser_title_for_remote_display
+                : R.string.media_route_chooser_title);
 
         // Must be called after setContentView.
         getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,

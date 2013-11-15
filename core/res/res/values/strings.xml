@@ -4099,8 +4099,11 @@
     <!-- Content description of a MediaRouteButton for accessibility support -->
     <string name="media_route_button_content_description">Media output</string>
 
-    <!-- Title of the media route chooser dialog. [CHAR LIMIT=30] -->
+    <!-- Title of the media route chooser dialog. [CHAR LIMIT=40] -->
     <string name="media_route_chooser_title">Connect to device</string>
+
+    <!-- Title of the media route chooser dialog for selecting remote display routes. [CHAR LIMIT=40] -->
+    <string name="media_route_chooser_title_for_remote_display">Cast screen to device</string>
 
     <!-- Placeholder text to show when no devices have been found. [CHAR LIMIT=50] -->
     <string name="media_route_chooser_searching">Searching for devices\u2026</string>
@@ -4144,11 +4147,11 @@
     <string name="display_manager_overlay_display_secure_suffix">, secure</string>
 
     <!-- Title of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=50] -->
-    <string name="wifi_display_notification_connecting_title">Starting screen cast</string>
-    <!-- Message of the notification to indicate the process of connectig to a wifi display.  [CHAR LIMIT=80] -->
+    <string name="wifi_display_notification_connecting_title">Casting screen</string>
+    <!-- Message of the notification to indicate the process of connecting to a wifi display.  [CHAR LIMIT=80] -->
     <string name="wifi_display_notification_connecting_message">Connecting to <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Title of the notification to indicate an active wifi display connection.  [CHAR LIMIT=50] -->
-    <string name="wifi_display_notification_connected_title">Screen cast in progress</string>
+    <string name="wifi_display_notification_connected_title">Casting screen</string>
     <!-- Message of the notification to indicate an active wifi display connection.  [CHAR LIMIT=80] -->
     <string name="wifi_display_notification_connected_message">Connected to <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Label of a button to disconnect an active wifi display connection.  [CHAR LIMIT=25] -->
