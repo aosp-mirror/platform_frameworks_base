@@ -53,16 +53,20 @@ camera view transformation matrices:</p>
 private float[] mRotationMatrix = new float[16];
 public void onDrawFrame(GL10 gl) {
     ...
+    float[] scratch = new float[16];
+
     // Create a rotation transformation for the triangle
     long time = SystemClock.uptimeMillis() % 4000L;
     float angle = 0.090f * ((int) time);
     Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, -1.0f);
 
     // Combine the rotation matrix with the projection and camera view
-    Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
+    // Note that the mMVPMatrix factor *must be first* in order
+    // for the matrix multiplication product to be correct.
+    Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 
     // Draw triangle
-    mTriangle.draw(mMVPMatrix);
+    mTriangle.draw(scratch);
 }
 </pre>
 
@@ -82,8 +86,9 @@ android.opengl.GLSurfaceView} container:</p>
 <pre>
 public MyGLSurfaceView(Context context) {
     ...
-    // Render the view only when there is a change in the drawing data
-    //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // comment out for auto-rotation
+    // Render the view only when there is a change in the drawing data.
+    // To allow the triangle to rotate automatically, this line is commented out:
+    <strong>//setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);</strong>
 }
 </pre>
 
