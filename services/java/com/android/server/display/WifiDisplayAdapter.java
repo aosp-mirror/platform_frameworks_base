@@ -172,19 +172,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         });
     }
 
-    public void requestConnectLocked(final String address, final boolean trusted) {
+    public void requestConnectLocked(final String address) {
         if (DEBUG) {
-            Slog.d(TAG, "requestConnectLocked: address=" + address + ", trusted=" + trusted);
-        }
-
-        if (!trusted) {
-            synchronized (getSyncRoot()) {
-                if (!isRememberedDisplayLocked(address)) {
-                    Slog.w(TAG, "Ignoring request by an untrusted client to connect to "
-                            + "an unknown wifi display: " + address);
-                    return;
-                }
-            }
+            Slog.d(TAG, "requestConnectLocked: address=" + address);
         }
 
         getHandler().post(new Runnable() {

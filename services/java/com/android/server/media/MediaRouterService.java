@@ -128,10 +128,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         final int pid = Binder.getCallingPid();
         final int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
                 false /*allowAll*/, true /*requireFull*/, "registerClientAsUser", packageName);
+        final boolean trusted = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY) ==
+                PackageManager.PERMISSION_GRANTED;
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerClientLocked(client, pid, packageName, resolvedUserId);
+                registerClientLocked(client, pid, packageName, resolvedUserId, trusted);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -306,7 +309,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
 
     private void registerClientLocked(IMediaRouterClient client,
-            int pid, String packageName, int userId) {
+            int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
         ClientRecord clientRecord = mAllClientRecords.get(binder);
         if (clientRecord == null) {
@@ -316,7 +319,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 userRecord = new UserRecord(userId);
                 newUser = true;
             }
-            clientRecord = new ClientRecord(userRecord, client, pid, packageName);
+            clientRecord = new ClientRecord(userRecord, client, pid, packageName, trusted);
             try {
                 binder.linkToDeath(clientRecord, 0);
             } catch (RemoteException ex) {
@@ -347,7 +350,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private MediaRouterClientState getStateLocked(IMediaRouterClient client) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
         if (clientRecord != null) {
-            return clientRecord.mUserRecord.mState;
+            return clientRecord.getState();
         }
         return null;
     }
@@ -357,6 +360,11 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         final IBinder binder = client.asBinder();
         ClientRecord clientRecord = mAllClientRecords.get(binder);
         if (clientRecord != null) {
+            // Only let the system discover remote display routes for now.
+            if (!clientRecord.mTrusted) {
+                routeTypes &= ~MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
+            }
+
             if (clientRecord.mRouteTypes != routeTypes
                     || clientRecord.mActiveScan != activeScan) {
                 if (DEBUG) {
@@ -385,11 +393,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
                 clientRecord.mSelectedRouteId = routeId;
                 if (explicit) {
+                    // Any app can disconnect from the globally selected route.
                     if (oldRouteId != null) {
                         clientRecord.mUserRecord.mHandler.obtainMessage(
                                 UserHandler.MSG_UNSELECT_ROUTE, oldRouteId).sendToTarget();
                     }
-                    if (routeId != null) {
+                    // Only let the system connect to new global routes for now.
+                    // A similar check exists in the display manager for wifi display.
+                    if (routeId != null && clientRecord.mTrusted) {
                         clientRecord.mUserRecord.mHandler.obtainMessage(
                                 UserHandler.MSG_SELECT_ROUTE, routeId).sendToTarget();
                     }
@@ -486,17 +497,19 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         public final IMediaRouterClient mClient;
         public final int mPid;
         public final String mPackageName;
+        public final boolean mTrusted;
 
         public int mRouteTypes;
         public boolean mActiveScan;
         public String mSelectedRouteId;
 
         public ClientRecord(UserRecord userRecord, IMediaRouterClient client,
-                int pid, String packageName) {
+                int pid, String packageName, boolean trusted) {
             mUserRecord = userRecord;
             mClient = client;
             mPid = pid;
             mPackageName = packageName;
+            mTrusted = trusted;
         }
 
         public void dispose() {
@@ -508,10 +521,15 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             clientDied(this);
         }
 
+        MediaRouterClientState getState() {
+            return mTrusted ? mUserRecord.mTrustedState : mUserRecord.mUntrustedState;
+        }
+
         public void dump(PrintWriter pw, String prefix) {
             pw.println(prefix + this);
 
             final String indent = prefix + "  ";
+            pw.println(indent + "mTrusted=" + mTrusted);
             pw.println(indent + "mRouteTypes=0x" + Integer.toHexString(mRouteTypes));
             pw.println(indent + "mActiveScan=" + mActiveScan);
             pw.println(indent + "mSelectedRouteId=" + mSelectedRouteId);
@@ -531,7 +549,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         public final int mUserId;
         public final ArrayList<ClientRecord> mClientRecords = new ArrayList<ClientRecord>();
         public final UserHandler mHandler;
-        public MediaRouterClientState mState;
+        public MediaRouterClientState mTrustedState;
+        public MediaRouterClientState mUntrustedState;
 
         public UserRecord(int userId) {
             mUserId = userId;
@@ -550,6 +569,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             } else {
                 pw.println(indent + "<no clients>");
             }
+
+            pw.println(indent + "State");
+            pw.println(indent + "mTrustedState=" + mTrustedState);
+            pw.println(indent + "mUntrustedState=" + mUntrustedState);
 
             if (!mHandler.runWithScissors(new Runnable() {
                 @Override
@@ -729,8 +752,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             }
 
             final int newDiscoveryMode;
-            if ((routeTypes & (MediaRouter.ROUTE_TYPE_LIVE_VIDEO
-                    | MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY)) != 0) {
+            if ((routeTypes & MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY) != 0) {
                 if (activeScan) {
                     newDiscoveryMode = RemoteDisplayState.DISCOVERY_MODE_ACTIVE;
                 } else {
@@ -968,19 +990,30 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private void updateClientState() {
             mClientStateUpdateScheduled = false;
 
-            // Build a new client state.
-            MediaRouterClientState state = new MediaRouterClientState();
-            state.globallySelectedRouteId = mGloballySelectedRouteRecord != null ?
+            final String globallySelectedRouteId = mGloballySelectedRouteRecord != null ?
                     mGloballySelectedRouteRecord.getUniqueId() : null;
+
+            // Build a new client state for trusted clients.
+            MediaRouterClientState trustedState = new MediaRouterClientState();
+            trustedState.globallySelectedRouteId = globallySelectedRouteId;
             final int providerCount = mProviderRecords.size();
             for (int i = 0; i < providerCount; i++) {
-                mProviderRecords.get(i).appendClientState(state);
+                mProviderRecords.get(i).appendClientState(trustedState);
+            }
+
+            // Build a new client state for untrusted clients that can only see
+            // the currently selected route.
+            MediaRouterClientState untrustedState = new MediaRouterClientState();
+            untrustedState.globallySelectedRouteId = globallySelectedRouteId;
+            if (globallySelectedRouteId != null) {
+                untrustedState.routes.add(trustedState.getRoute(globallySelectedRouteId));
             }
 
             try {
                 synchronized (mService.mLock) {
                     // Update the UserRecord.
-                    mUserRecord.mState = state;
+                    mUserRecord.mTrustedState = trustedState;
+                    mUserRecord.mUntrustedState = untrustedState;
 
                     // Collect all clients.
                     final int count = mUserRecord.mClientRecords.size();
