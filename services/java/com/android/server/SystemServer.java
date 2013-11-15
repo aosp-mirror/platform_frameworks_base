@@ -941,7 +941,11 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("observing native crashes", e);
                 }
-                startSystemUi(contextF);
+                try {
+                    startSystemUi(contextF);
+                } catch (Throwable e) {
+                    reportWtf("starting System UI", e);
+                }
                 try {
                     if (mountServiceF != null) mountServiceF.systemReady();
                 } catch (Throwable e) {
