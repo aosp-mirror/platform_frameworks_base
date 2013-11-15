@@ -22,6 +22,7 @@ package android {
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
+    field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
@@ -3083,18 +3084,18 @@ package android.app {
     method public void cancel(android.app.PendingIntent);
     method public void set(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
-    method public deprecated void setInexactRepeating(int, long, long, android.app.PendingIntent);
+    method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method public void setTime(long);
     method public void setTimeZone(java.lang.String);
     method public void setWindow(int, long, long, android.app.PendingIntent);
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
-    field public static final deprecated long INTERVAL_DAY = 86400000L; // 0x5265c00L
-    field public static final deprecated long INTERVAL_FIFTEEN_MINUTES = 900000L; // 0xdbba0L
-    field public static final deprecated long INTERVAL_HALF_DAY = 43200000L; // 0x2932e00L
-    field public static final deprecated long INTERVAL_HALF_HOUR = 1800000L; // 0x1b7740L
-    field public static final deprecated long INTERVAL_HOUR = 3600000L; // 0x36ee80L
+    field public static final long INTERVAL_DAY = 86400000L; // 0x5265c00L
+    field public static final long INTERVAL_FIFTEEN_MINUTES = 900000L; // 0xdbba0L
+    field public static final long INTERVAL_HALF_DAY = 43200000L; // 0x2932e00L
+    field public static final long INTERVAL_HALF_HOUR = 1800000L; // 0x1b7740L
+    field public static final long INTERVAL_HOUR = 3600000L; // 0x36ee80L
     field public static final int RTC = 1; // 0x1
     field public static final int RTC_WAKEUP = 0; // 0x0
   }
@@ -13232,6 +13233,7 @@ package android.media.audiofx {
     field public static final java.util.UUID EFFECT_TYPE_BASS_BOOST;
     field public static final java.util.UUID EFFECT_TYPE_ENV_REVERB;
     field public static final java.util.UUID EFFECT_TYPE_EQUALIZER;
+    field public static final java.util.UUID EFFECT_TYPE_LOUDNESS_ENHANCER;
     field public static final java.util.UUID EFFECT_TYPE_NS;
     field public static final java.util.UUID EFFECT_TYPE_PRESET_REVERB;
     field public static final java.util.UUID EFFECT_TYPE_VIRTUALIZER;
@@ -13389,6 +13391,7 @@ package android.media.audiofx {
   }
 
   public class LoudnessEnhancer extends android.media.audiofx.AudioEffect {
+    ctor public LoudnessEnhancer(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.RuntimeException, java.lang.UnsupportedOperationException;
     method public float getTargetGain() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public void setTargetGain(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     field public static final int PARAM_TARGET_GAIN_MB = 0; // 0x0
@@ -25637,10 +25640,8 @@ package android.transition {
     ctor public TransitionManager();
     method public static void beginDelayedTransition(android.view.ViewGroup);
     method public static void beginDelayedTransition(android.view.ViewGroup, android.transition.Transition);
-    method public static android.transition.Transition getDefaultTransition();
     method public static void go(android.transition.Scene);
     method public static void go(android.transition.Scene, android.transition.Transition);
-    method public void setDefaultTransition(android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Transition);
     method public void setTransition(android.transition.Scene, android.transition.Scene, android.transition.Transition);
     method public void transitionTo(android.transition.Scene);

@@ -1104,6 +1104,19 @@ public class SystemServer {
     private static native void nativeInit();
 
     public static void main(String[] args) {
+
+        /*
+         * In case the runtime switched since last boot (such as when
+         * the old runtime was removed in an OTA), set the system
+         * property so that it is in sync. We can't do this in
+         * libnativehelper's JniInvocation::Init code where we already
+         * had to fallback to a different runtime because it is
+         * running as root and we need to be the system user to set
+         * the property. http://b/11463182
+         */
+        SystemProperties.set("persist.sys.dalvik.vm.lib",
+                             VMRuntime.getRuntime().vmLibrary());
+
         if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
             // If a device's clock is before 1970 (before 0), a lot of
             // APIs crash dealing with negative numbers, notably

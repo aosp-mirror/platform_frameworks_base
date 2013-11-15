@@ -120,8 +120,6 @@ public class AudioEffect {
             .fromString("58b4b260-8e06-11e0-aa8e-0002a5d5c51b");
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * UUID for Loudness Enhancer
      */
     public static final UUID EFFECT_TYPE_LOUDNESS_ENHANCER = UUID

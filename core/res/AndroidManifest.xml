@@ -1958,8 +1958,7 @@
 
     <!-- Must be required by a {@link android.nfc.cardemulation.HostApduService}
          or {@link android.nfc.cardemulation.OffHostApduService} to ensure that only
-         the system can bind to it.
-         @hide -->
+         the system can bind to it. -->
     <permission android:name="android.permission.BIND_NFC_SERVICE"
         android:label="@string/permlab_bindNfcService"
         android:description="@string/permdesc_bindNfcService"
