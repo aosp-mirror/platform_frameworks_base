@@ -1143,6 +1143,8 @@ public class PhoneNumberUtils
      * @param source The phone number to format
      * @return A locally acceptable formatting of the input, or the raw input if
      *  formatting rules aren't known for the number
+     *
+     * @deprecated Use {@link #formatNumber(String phoneNumber, String defaultCountryIso)} instead
      */
     public static String formatNumber(String source) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
@@ -1159,7 +1161,8 @@ public class PhoneNumberUtils
      * not begin with +[country_code]
      * @return The phone number formatted with the given formatting type.
      *
-     * @hide TODO: Should be unhidden.
+     * @hide
+     * @deprecated Use {@link #formatNumber(String phoneNumber, String defaultCountryIso)} instead
      */
     public static String formatNumber(String source, int defaultFormattingType) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
@@ -1173,6 +1176,8 @@ public class PhoneNumberUtils
      * @param locale The locale of interest, usually {@link Locale#getDefault()}
      * @return The formatting type for the given locale, or FORMAT_UNKNOWN if the formatting
      * rules are not known for the given locale
+     *
+     * @deprecated Use {@link #formatNumber(String phoneNumber, String defaultCountryIso)} instead
      */
     public static int getFormatTypeForLocale(Locale locale) {
         String country = locale.getCountry();
@@ -1187,6 +1192,8 @@ public class PhoneNumberUtils
      * @param text The number to be formatted, will be modified with the formatting
      * @param defaultFormattingType The default formatting rules to apply if the number does
      * not begin with +[country_code]
+     *
+     * @deprecated Use {@link #formatNumber(String phoneNumber, String defaultCountryIso)} instead
      */
     public static void formatNumber(Editable text, int defaultFormattingType) {
         int formatType = defaultFormattingType;
@@ -1233,6 +1240,8 @@ public class PhoneNumberUtils
      * </code></p>
      *
      * @param text the number to be formatted, will be modified with the formatting
+     *
+     * @deprecated Use {@link #formatNumber(String phoneNumber, String defaultCountryIso)} instead
      */
     public static void formatNanpNumber(Editable text) {
         int length = text.length();
@@ -1346,6 +1355,8 @@ public class PhoneNumberUtils
      *
      * @param text the number to be formatted, will be modified with
      * the formatting
+     *
+     * @deprecated Use {@link #formatNumber(String phoneNumber, String defaultCountryIso)} instead
      */
     public static void formatJapaneseNumber(Editable text) {
         JapanesePhoneNumberFormatter.format(text);
@@ -1382,8 +1393,6 @@ public class PhoneNumberUtils
      *            the ISO 3166-1 two letters country code
      * @return the E.164 representation, or null if the given phone number is
      *         not valid.
-     *
-     * @hide
      */
     public static String formatNumberToE164(String phoneNumber, String defaultCountryIso) {
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
@@ -1410,8 +1419,6 @@ public class PhoneNumberUtils
      *            the ISO 3166-1 two letters country code whose convention will
      *            be used if the given number doesn't have the country code.
      * @return the formatted number, or null if the given number is not valid.
-     *
-     * @hide
      */
     public static String formatNumber(String phoneNumber, String defaultCountryIso) {
         // Do not attempt to format numbers that start with a hash or star symbol.
@@ -1446,8 +1453,6 @@ public class PhoneNumberUtils
      *            contains IDD.
      * @return the formatted number if the given number has been formatted,
      *            otherwise, return the given number.
-     *
-     * @hide
      */
     public static String formatNumber(
             String phoneNumber, String phoneNumberE164, String defaultCountryIso) {
@@ -1483,11 +1488,8 @@ public class PhoneNumberUtils
      * the given number has keypad letters, the letters will be converted to
      * digits first.
      *
-     * @param phoneNumber
-     *            the number to be normalized.
+     * @param phoneNumber the number to be normalized.
      * @return the normalized number.
-     *
-     * @hide
      */
     public static String normalizeNumber(String phoneNumber) {
         StringBuilder sb = new StringBuilder();
@@ -1508,12 +1510,10 @@ public class PhoneNumberUtils
     }
 
     /**
-     * Replace arabic/unicode digits with decimal digits.
-     * @param number
-     *            the number to be normalized.
-     * @return the replaced number.
+     * Replaces all unicode(e.g. Arabic, Persian) digits with their decimal digit equivalents.
      *
-     * @hide
+     * @param number the number to perform the replacement on.
+     * @return the replaced number.
      */
     public static String replaceUnicodeDigits(String number) {
         StringBuilder normalizedDigits = new StringBuilder(number.length());
@@ -1737,16 +1737,12 @@ public class PhoneNumberUtils
     }
 
     /**
-     * Checks if a given number is an emergency number for the country that the user is in. The
-     * current country is determined using the CountryDetector.
+     * Checks if a given number is an emergency number for the country that the user is in.
      *
      * @param number the number to look up.
      * @param context the specific context which the number should be checked against
-     * @return true if the specified number is an emergency number for a local country, based on the
-     *              CountryDetector.
-     *
-     * @see android.location.CountryDetector
-     * @hide
+     * @return true if the specified number is an emergency number for the country the user
+     * is currently in.
      */
     public static boolean isLocalEmergencyNumber(String number, Context context) {
         return isLocalEmergencyNumberInternal(number,
@@ -1825,7 +1821,6 @@ public class PhoneNumberUtils
      * @return true if the number is in the list of voicemail. False
      * otherwise, including if the caller does not have the permission
      * to read the VM number.
-     * @hide TODO: pending API Council approval
      */
     public static boolean isVoiceMailNumber(String number) {
         String vmNumber;

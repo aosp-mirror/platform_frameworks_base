@@ -23890,6 +23890,7 @@ package android.telephony {
 
   public class PhoneNumberFormattingTextWatcher implements android.text.TextWatcher {
     ctor public PhoneNumberFormattingTextWatcher();
+    ctor public PhoneNumberFormattingTextWatcher(java.lang.String);
     method public synchronized void afterTextChanged(android.text.Editable);
     method public void beforeTextChanged(java.lang.CharSequence, int, int, int);
     method public void onTextChanged(java.lang.CharSequence, int, int, int);
@@ -23904,11 +23905,14 @@ package android.telephony {
     method public static java.lang.String convertKeypadLettersToDigits(java.lang.String);
     method public static java.lang.String extractNetworkPortion(java.lang.String);
     method public static java.lang.String extractPostDialPortion(java.lang.String);
-    method public static void formatJapaneseNumber(android.text.Editable);
-    method public static void formatNanpNumber(android.text.Editable);
-    method public static java.lang.String formatNumber(java.lang.String);
-    method public static void formatNumber(android.text.Editable, int);
-    method public static int getFormatTypeForLocale(java.util.Locale);
+    method public static deprecated void formatJapaneseNumber(android.text.Editable);
+    method public static deprecated void formatNanpNumber(android.text.Editable);
+    method public static deprecated java.lang.String formatNumber(java.lang.String);
+    method public static deprecated void formatNumber(android.text.Editable, int);
+    method public static java.lang.String formatNumber(java.lang.String, java.lang.String);
+    method public static java.lang.String formatNumber(java.lang.String, java.lang.String, java.lang.String);
+    method public static java.lang.String formatNumberToE164(java.lang.String, java.lang.String);
+    method public static deprecated int getFormatTypeForLocale(java.util.Locale);
     method public static java.lang.String getNumberFromIntent(android.content.Intent, android.content.Context);
     method public static java.lang.String getStrippedReversed(java.lang.String);
     method public static final boolean is12Key(char);
@@ -23916,13 +23920,17 @@ package android.telephony {
     method public static boolean isEmergencyNumber(java.lang.String);
     method public static boolean isGlobalPhoneNumber(java.lang.String);
     method public static boolean isISODigit(char);
+    method public static boolean isLocalEmergencyNumber(java.lang.String, android.content.Context);
     method public static final boolean isNonSeparator(char);
     method public static final boolean isReallyDialable(char);
     method public static final boolean isStartsPostDial(char);
+    method public static boolean isVoiceMailNumber(java.lang.String);
     method public static boolean isWellFormedSmsAddress(java.lang.String);
     method public static byte[] networkPortionToCalledPartyBCD(java.lang.String);
     method public static byte[] networkPortionToCalledPartyBCDWithLength(java.lang.String);
+    method public static java.lang.String normalizeNumber(java.lang.String);
     method public static byte[] numberToCalledPartyBCD(java.lang.String);
+    method public static java.lang.String replaceUnicodeDigits(java.lang.String);
     method public static java.lang.String stringFromStringAndTOA(java.lang.String, int);
     method public static java.lang.String stripSeparators(java.lang.String);
     method public static java.lang.String toCallerIDMinMatch(java.lang.String);
