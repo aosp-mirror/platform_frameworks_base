@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 
 #include "GraphicsJNI.h"
 #include "SkStream.h"
 #include "SkTypeface.h"
+#include "TypefaceImpl.h"
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
 
@@ -27,112 +44,46 @@ private:
     const char* fCStr;
 };
 
-static SkTypeface* Typeface_create(JNIEnv* env, jobject, jstring name,
+static TypefaceImpl* Typeface_create(JNIEnv* env, jobject, jstring name,
                                    SkTypeface::Style style) {
-    SkTypeface* face = NULL;
+    TypefaceImpl* face = NULL;
 
     if (NULL != name) {
         AutoJavaStringToUTF8    str(env, name);
-        face = SkTypeface::CreateFromName(str.c_str(), style);
-        // Try to find the closest matching font, using the standard heuristic
-        if (NULL == face) {
-            face = SkTypeface::CreateFromName(str.c_str(), (SkTypeface::Style)(style ^ SkTypeface::kItalic));
-        }
-        for (int i = 0; NULL == face && i < 4; i++) {
-            face = SkTypeface::CreateFromName(str.c_str(), (SkTypeface::Style)i);
-        }
+        face = TypefaceImpl_createFromName(str.c_str(), style);
     }
 
     // return the default font at the best style if no exact match exists
     if (NULL == face) {
-        face = SkTypeface::CreateFromName(NULL, style);
+        face = TypefaceImpl_createFromName(NULL, style);
     }
     return face;
 }
 
-static SkTypeface* Typeface_createFromTypeface(JNIEnv* env, jobject, SkTypeface* family, int style) {
-    SkTypeface* face = SkTypeface::CreateFromTypeface(family, (SkTypeface::Style)style);
+static TypefaceImpl* Typeface_createFromTypeface(JNIEnv* env, jobject, TypefaceImpl* family, int style) {
+    TypefaceImpl* face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)style);
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
-        face = SkTypeface::CreateFromTypeface(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
+        face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
     }
     for (int i = 0; NULL == face && i < 4; i++) {
-        face = SkTypeface::CreateFromTypeface(family, (SkTypeface::Style)i);
+        face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)i);
     }
     if (NULL == face) {
-        face = SkTypeface::CreateFromName(NULL, (SkTypeface::Style)style);
+        face = TypefaceImpl_createFromName(NULL, (SkTypeface::Style)style);
     }
     return face;
 }
 
-static void Typeface_unref(JNIEnv* env, jobject obj, SkTypeface* face) {
-    SkSafeUnref(face);
+static void Typeface_unref(JNIEnv* env, jobject obj, TypefaceImpl* face) {
+    TypefaceImpl_unref(face);
 }
 
-static int Typeface_getStyle(JNIEnv* env, jobject obj, SkTypeface* face) {
-    return face->style();
+static int Typeface_getStyle(JNIEnv* env, jobject obj, TypefaceImpl* face) {
+    return TypefaceImpl_getStyle(face);
 }
 
-class AssetStream : public SkStream {
-public:
-    AssetStream(Asset* asset, bool hasMemoryBase) : fAsset(asset)
-    {
-        fMemoryBase = hasMemoryBase ? fAsset->getBuffer(false) : NULL;
-    }
-
-    virtual ~AssetStream()
-    {
-        delete fAsset;
-    }
-
-    virtual const void* getMemoryBase()
-    {
-        return fMemoryBase;
-    }
-
-	virtual bool rewind()
-    {
-        off64_t pos = fAsset->seek(0, SEEK_SET);
-        return pos != (off64_t)-1;
-    }
-
-	virtual size_t read(void* buffer, size_t size)
-    {
-        ssize_t amount;
-
-        if (NULL == buffer)
-        {
-            if (0 == size)  // caller is asking us for our total length
-                return fAsset->getLength();
-
-            // asset->seek returns new total offset
-            // we want to return amount that was skipped
-
-            off64_t oldOffset = fAsset->seek(0, SEEK_CUR);
-            if (-1 == oldOffset)
-                return 0;
-            off64_t newOffset = fAsset->seek(size, SEEK_CUR);
-            if (-1 == newOffset)
-                return 0;
-
-            amount = newOffset - oldOffset;
-        }
-        else
-        {
-            amount = fAsset->read(buffer, size);
-        }
-
-        if (amount < 0)
-            amount = 0;
-        return amount;
-    }
-
-private:
-    Asset*      fAsset;
-    const void* fMemoryBase;
-};
-
-static SkTypeface* Typeface_createFromAsset(JNIEnv* env, jobject,
+static TypefaceImpl* Typeface_createFromAsset(JNIEnv* env, jobject,
                                             jobject jassetMgr,
                                             jstring jpath) {
 
@@ -150,21 +101,15 @@ static SkTypeface* Typeface_createFromAsset(JNIEnv* env, jobject,
         return NULL;
     }
 
-    SkStream* stream = new AssetStream(asset, true);
-    SkTypeface* face = SkTypeface::CreateFromStream(stream);
-    // SkTypeFace::CreateFromStream calls ref() on the stream, so we
-    // need to unref it here or it won't be freed later on
-    stream->unref();
-
-    return face;
+    return TypefaceImpl_createFromAsset(asset);
 }
 
-static SkTypeface* Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {
+static TypefaceImpl* Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
     AutoJavaStringToUTF8 str(env, jpath);
 
-    return SkTypeface::CreateFromFile(str.c_str());
+    return TypefaceImpl_createFromFile(str.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

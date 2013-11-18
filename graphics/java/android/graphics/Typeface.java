@@ -48,7 +48,10 @@ public class Typeface {
     private static final SparseArray<SparseArray<Typeface>> sTypefaceCache =
             new SparseArray<SparseArray<Typeface>>(3);
 
-    int native_instance;
+    /**
+     * @hide
+     */
+    public int native_instance;
 
     // Style
     public static final int NORMAL = 0;

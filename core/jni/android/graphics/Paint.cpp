@@ -245,7 +245,12 @@ public:
     }
 
     static SkTypeface* setTypeface(JNIEnv* env, jobject clazz, SkPaint* obj, SkTypeface* typeface) {
+#ifndef USE_MINIKIN
         return obj->setTypeface(typeface);
+#else
+        // TODO(raph): not yet implemented
+        return NULL;
+#endif
     }
 
     static SkRasterizer* setRasterizer(JNIEnv* env, jobject clazz, SkPaint* obj, SkRasterizer* rasterizer) {
