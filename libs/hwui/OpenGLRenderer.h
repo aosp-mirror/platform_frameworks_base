@@ -98,6 +98,24 @@ enum ClipSideFlags {
     kClipSide_ConservativeFull = 0x1F
 };
 
+/**
+ * Defines additional transformation that should be applied by the model view matrix, beyond that of
+ * the currentTransform()
+ */
+enum ModelViewMode {
+    /**
+     * Used when the model view should simply translate geometry passed to the shader. The resulting
+     * matrix will be a simple translation.
+     */
+    kModelViewMode_Translate = 0,
+
+    /**
+     * Used when the model view should translate and scale geometry. The resulting matrix will be a
+     * translation + scale. This is frequently used together with VBO 0, the (0,0,1,1) rect.
+     */
+    kModelViewMode_TranslateAndScale = 1,
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -829,32 +847,33 @@ private:
      * @param swapSrcDst Whether or not the src and dst blending operations should be swapped
      * @param ignoreTransform True if the current transform should be ignored
      * @param vbo The VBO used to draw the mesh
-     * @param ignoreScale True if the model view matrix should not be scaled
+     * @param modelViewMode Defines whether the model view matrix should be scaled
      * @param dirty True if calling this method should dirty the current layer
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
-            bool ignoreScale = false, bool dirty = true);
+            ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale, bool dirty = true);
 
     void drawIndexedTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
-            bool ignoreScale = false, bool dirty = true);
+            ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale, bool dirty = true);
 
     void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
             GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool ignoreTransform, bool ignoreScale = false, bool dirty = true);
+            bool ignoreTransform, ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale,
+            bool dirty = true);
 
     /**
      * Draws the specified list of vertices as quads using indexed GL_TRIANGLES.
      * If the number of vertices to draw exceeds the number of indices we have
      * pre-allocated, this method will generate several glDrawElements() calls.
      */
-    void drawIndexedQuads(Vertex* mesh, GLsizei quadsCount);
+    void issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount);
 
     /**
      * Draws text underline and strike-through if needed.
@@ -975,14 +994,26 @@ private:
             bool swapSrcDst = false);
     void setupDrawProgram();
     void setupDrawDirtyRegionsDisabled();
-    void setupDrawModelViewIdentity(bool offset = false);
-    void setupDrawModelView(float left, float top, float right, float bottom,
-            bool ignoreTransform = false, bool ignoreModelView = false);
-    void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
-            bool ignoreTransform = false);
+
+    /**
+     * Setup the current program matrices based upon the nature of the geometry.
+     *
+     * @param mode If kModelViewMode_Translate, the geometry must be translated by the left and top
+     * parameters. If kModelViewMode_TranslateAndScale, the geometry that exists in the (0,0, 1,1)
+     * space must be scaled up and translated to fill the quad provided in (l,t,r,b). These
+     * transformations are stored in the modelView matrix and uploaded to the shader.
+     *
+     * @param offset Set to true if the the matrix should be fudged (translated) slightly to disambiguate
+     * geometry pixel positioning. See Vertex::gGeometryFudgeFactor.
+     *
+     * @param ignoreTransform Set to true if l,t,r,b coordinates already in layer space,
+     * currentTransform() will be ignored. (e.g. when drawing clip in layer coordinates to stencil,
+     * or when simple translation has been extracted)
+     */
+    void setupDrawModelView(ModelViewMode mode, bool offset,
+            float left, float top, float right, float bottom, bool ignoreTransform = false);
     void setupDrawColorUniforms();
     void setupDrawPureColorUniforms();
-    void setupDrawShaderIdentityUniforms();
     void setupDrawShaderUniforms(bool ignoreTransform = false);
     void setupDrawColorFilterUniforms();
     void setupDrawSimpleMesh();
@@ -1054,7 +1085,20 @@ private:
     // Matrix used for ortho projection in shaders
     mat4 mOrthoMatrix;
 
-    // Model-view matrix used to position/size objects
+    /**
+     * Model-view matrix used to position/size objects
+     *
+     * Stores operation-local modifications to the draw matrix that aren't incorporated into the
+     * currentTransform().
+     *
+     * If generated with kModelViewMode_Translate, the mModelView will reflect an x/y offset,
+     * e.g. the offset in drawLayer(). If generated with kModelViewMode_TranslateAndScale,
+     * mModelView will reflect a translation and scale, e.g. the translation and scale required to
+     * make VBO 0 (a rect of (0,0,1,1)) scaled to match the x,y offset, and width/height of a
+     * bitmap.
+     *
+     * Used as input to SkiaShader transformation.
+     */
     mat4 mModelView;
 
     // Number of saved states

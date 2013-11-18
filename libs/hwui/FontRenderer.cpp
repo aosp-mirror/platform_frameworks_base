@@ -76,7 +76,8 @@ status_t TextSetupFunctor::operator ()(int what, void* data) {
     renderer->setupDrawShader();
     renderer->setupDrawBlending(true, mode);
     renderer->setupDrawProgram();
-    renderer->setupDrawModelView(x, y, x, y, pureTranslate, true);
+    renderer->setupDrawModelView(kModelViewMode_Translate, false,
+            0.0f, 0.0f, 0.0f, 0.0f, pureTranslate);
     // Calling setupDrawTexture with the name 0 will enable the
     // uv attributes and increase the texture unit count
     // texture binding will be performed by the font renderer as

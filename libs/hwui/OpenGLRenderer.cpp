@@ -1120,10 +1120,12 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
         const float y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
 
         layer->setFilter(GL_NEAREST);
-        setupDrawModelView(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
+        setupDrawModelView(kModelViewMode_TranslateAndScale, false,
+                x, y, x + rect.getWidth(), y + rect.getHeight(), true);
     } else {
         layer->setFilter(GL_LINEAR);
-        setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
+        setupDrawModelView(kModelViewMode_TranslateAndScale, false,
+                rect.left, rect.top, rect.right, rect.bottom);
     }
     setupDrawTextureTransformUniforms(layer->getTexTransform());
     setupDrawMesh(&mMeshVertices[0].x, &mMeshVertices[0].u);
@@ -1235,10 +1237,12 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             const float y = (int) floorf(rect.top + currentTransform().getTranslateY() + 0.5f);
 
             layer->setFilter(GL_NEAREST);
-            setupDrawModelViewTranslate(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
+            setupDrawModelView(kModelViewMode_Translate, false,
+                    x, y, x + rect.getWidth(), y + rect.getHeight(), true);
         } else {
             layer->setFilter(GL_LINEAR);
-            setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
+            setupDrawModelView(kModelViewMode_Translate, false,
+                    rect.left, rect.top, rect.right, rect.bottom);
         }
         setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
 
@@ -1349,7 +1353,7 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
     }
 }
 
-void OpenGLRenderer::drawIndexedQuads(Vertex* mesh, GLsizei quadsCount) {
+void OpenGLRenderer::issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount) {
     GLsizei elementsCount = quadsCount * 6;
     while (elementsCount > 0) {
         GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
@@ -1401,9 +1405,10 @@ void OpenGLRenderer::clearLayerRegions() {
         setupDrawBlending(true, SkXfermode::kClear_Mode);
         setupDrawProgram();
         setupDrawPureColorUniforms();
-        setupDrawModelViewTranslate(0.0f, 0.0f, 0.0f, 0.0f, true);
+        setupDrawModelView(kModelViewMode_Translate, false,
+                0.0f, 0.0f, 0.0f, 0.0f, true);
 
-        drawIndexedQuads(&mesh[0], count);
+        issueIndexedQuadDraw(&mesh[0], count);
 
         if (scissorChanged) mCaches.enableScissor();
     } else {
@@ -1868,39 +1873,20 @@ void OpenGLRenderer::setupDrawDirtyRegionsDisabled() {
     mTrackDirtyRegions = false;
 }
 
-void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float right, float bottom,
-        bool ignoreTransform) {
+void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
+        float left, float top, float right, float bottom, bool ignoreTransform) {
     mModelView.loadTranslate(left, top, 0.0f);
-    if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, currentTransform());
-        if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, currentTransform());
-    } else {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
-        if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
-    }
-}
-
-void OpenGLRenderer::setupDrawModelViewIdentity(bool offset) {
-    mCaches.currentProgram->set(mOrthoMatrix, mat4::identity(), currentTransform(), offset);
-}
-
-void OpenGLRenderer::setupDrawModelView(float left, float top, float right, float bottom,
-        bool ignoreTransform, bool ignoreModelView) {
-    if (!ignoreModelView) {
-        mModelView.loadTranslate(left, top, 0.0f);
+    if (mode == kModelViewMode_TranslateAndScale) {
         mModelView.scale(right - left, bottom - top, 1.0f);
-    } else {
-        mModelView.loadIdentity();
     }
+
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
     if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, currentTransform());
-        if (mTrackDirtyRegions && dirty) {
-            dirtyLayer(left, top, right, bottom, currentTransform());
-        }
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, currentTransform(), offset);
+        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, currentTransform());
     } else {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity());
-        if (mTrackDirtyRegions && dirty) dirtyLayer(left, top, right, bottom);
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mat4::identity(), offset);
+        if (dirty && mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
     }
 }
 
@@ -1919,17 +1905,16 @@ void OpenGLRenderer::setupDrawPureColorUniforms() {
 void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
     if (mDrawModifiers.mShader) {
         if (ignoreTransform) {
-            mModelView.loadInverse(currentTransform());
+            // if ignoreTransform=true was passed to setupDrawModelView, undo currentTransform()
+            // because it was built into modelView / the geometry, and the SkiaShader needs to
+            // compensate.
+            mat4 modelViewWithoutTransform;
+            modelViewWithoutTransform.loadInverse(currentTransform());
+            modelViewWithoutTransform.multiply(mModelView);
+            mModelView.load(modelViewWithoutTransform);
         }
         mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
                 mModelView, *mSnapshot, &mTextureUnit);
-    }
-}
-
-void OpenGLRenderer::setupDrawShaderIdentityUniforms() {
-    if (mDrawModifiers.mShader) {
-        mDrawModifiers.mShader->setupProgram(mCaches.currentProgram,
-                mat4::identity(), *mSnapshot, &mTextureUnit);
     }
 }
 
@@ -2121,12 +2106,14 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry,
         drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, paint != NULL, color, alpha, mode,
                 &vertices[0].x, &vertices[0].u,
-                GL_TRIANGLES, bitmapCount * 6, true, true, false);
+                GL_TRIANGLES, bitmapCount * 6, true,
+                kModelViewMode_Translate, false);
     } else {
         drawTextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, alpha / 255.0f, mode, texture->blend,
                 &vertices[0].x, &vertices[0].u,
-                GL_TRIANGLES, bitmapCount * 6, false, true, 0, true, false);
+                GL_TRIANGLES, bitmapCount * 6, false, true, 0,
+                kModelViewMode_Translate, false);
     }
 
     return DrawGlInfo::kStatusDrew;
@@ -2303,7 +2290,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     setupDrawBlending(true, mode, false);
     setupDrawProgram();
     setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(0.0f, 0.0f, 1.0f, 1.0f, false);
+    setupDrawModelView(kModelViewMode_TranslateAndScale, false, 0.0f, 0.0f, 1.0f, 1.0f);
     setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
@@ -2464,22 +2451,21 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtl
             }
         }
 
+        bool ignoreTransform = false;
         if (CC_LIKELY(pureTranslate)) {
             const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
             const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
 
             right = x + right - left;
             bottom = y + bottom - top;
-            drawIndexedTextureMesh(x, y, right, bottom, texture->id, alpha / 255.0f,
-                    mode, texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
-                    GL_TRIANGLES, mesh->indexCount, false, true,
-                    mCaches.patchCache.getMeshBuffer(), true, !mesh->hasEmptyQuads);
-        } else {
-            drawIndexedTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
-                    mode, texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
-                    GL_TRIANGLES, mesh->indexCount, false, false,
-                    mCaches.patchCache.getMeshBuffer(), true, !mesh->hasEmptyQuads);
+            left = x;
+            top = y;
+            ignoreTransform = true;
         }
+        drawIndexedTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
+                mode, texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
+                GL_TRIANGLES, mesh->indexCount, false, ignoreTransform,
+                mCaches.patchCache.getMeshBuffer(), kModelViewMode_Translate, !mesh->hasEmptyQuads);
     }
 
     return DrawGlInfo::kStatusDrew;
@@ -2506,13 +2492,15 @@ status_t OpenGLRenderer::drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
 
     drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
             mode, texture->blend, &vertices[0].x, &vertices[0].u,
-            GL_TRIANGLES, indexCount, false, true, 0, true, false);
+            GL_TRIANGLES, indexCount, false, true, 0, kModelViewMode_Translate, false);
 
     return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPaint* paint,
         bool useOffset) {
+    // not missing call to quickReject/dirtyLayer, always done at a higher level
+
     if (!vertexBuffer.getVertexCount()) {
         // no vertices to draw
         return DrawGlInfo::kStatusDone;
@@ -2530,10 +2518,10 @@ status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPa
     setupDrawShader();
     setupDrawBlending(isAA, mode);
     setupDrawProgram();
-    setupDrawModelViewIdentity(useOffset);
+    setupDrawModelView(kModelViewMode_Translate, useOffset, 0, 0, 0, 0);
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawShaderIdentityUniforms();
+    setupDrawShaderUniforms();
 
     void* vertices = vertexBuffer.getBuffer();
     bool force = mCaches.unbindMeshBuffer();
@@ -2830,7 +2818,8 @@ void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesC
     setupDrawShader();
     setupDrawBlending(true, mode);
     setupDrawProgram();
-    setupDrawModelView(sx, sy, sx + shadow->width, sy + shadow->height);
+    setupDrawModelView(kModelViewMode_TranslateAndScale, false,
+            sx, sy, sx + shadow->width, sy + shadow->height);
     setupDrawTexture(shadow->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
@@ -3111,11 +3100,11 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
                 int ty = (int) floorf(y + currentTransform().getTranslateY() + 0.5f);
 
                 layer->setFilter(GL_NEAREST);
-                setupDrawModelViewTranslate(tx, ty,
+                setupDrawModelView(kModelViewMode_Translate, false, tx, ty,
                         tx + layer->layer.getWidth(), ty + layer->layer.getHeight(), true);
             } else {
                 layer->setFilter(GL_LINEAR);
-                setupDrawModelViewTranslate(x, y,
+                setupDrawModelView(kModelViewMode_Translate, false, x, y,
                         x + layer->layer.getWidth(), y + layer->layer.getHeight());
             }
 
@@ -3261,7 +3250,8 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
     setupDrawShader();
     setupDrawBlending(true, mode);
     setupDrawProgram();
-    setupDrawModelView(x, y, x + texture->width, y + texture->height);
+    setupDrawModelView(kModelViewMode_TranslateAndScale, false,
+            x, y, x + texture->width, y + texture->height);
     setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
@@ -3378,7 +3368,8 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     setupDrawBlending(mode);
     setupDrawProgram();
     setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(0.0f, 0.0f, 1.0f, 1.0f, ignoreTransform, true);
+    setupDrawModelView(kModelViewMode_Translate, false,
+            0.0f, 0.0f, 0.0f, 0.0f, ignoreTransform);
     setupDrawColorUniforms();
     setupDrawShaderUniforms();
     setupDrawColorFilterUniforms();
@@ -3387,7 +3378,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         dirtyLayer(left, top, right, bottom, currentTransform());
     }
 
-    drawIndexedQuads(&mesh[0], count / 4);
+    issueIndexedQuadDraw(&mesh[0], count / 4);
 
     return DrawGlInfo::kStatusDrew;
 }
@@ -3406,7 +3397,8 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     setupDrawColorFilter();
     setupDrawBlending(mode);
     setupDrawProgram();
-    setupDrawModelView(left, top, right, bottom, ignoreTransform);
+    setupDrawModelView(kModelViewMode_TranslateAndScale, false,
+            left, top, right, bottom, ignoreTransform);
     setupDrawColorUniforms();
     setupDrawShaderUniforms(ignoreTransform);
     setupDrawColorFilterUniforms();
@@ -3464,7 +3456,8 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool swapSrcDst, bool ignoreTransform, GLuint vbo, bool ignoreScale, bool dirty) {
+        bool swapSrcDst, bool ignoreTransform, GLuint vbo,
+        ModelViewMode modelViewMode, bool dirty) {
 
     setupDraw();
     setupDrawWithTexture();
@@ -3473,11 +3466,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     setupDrawBlending(blend, mode, swapSrcDst);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
-    if (!ignoreScale) {
-        setupDrawModelView(left, top, right, bottom, ignoreTransform);
-    } else {
-        setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
-    }
+    setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
@@ -3489,7 +3478,8 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool swapSrcDst, bool ignoreTransform, GLuint vbo, bool ignoreScale, bool dirty) {
+        bool swapSrcDst, bool ignoreTransform, GLuint vbo,
+        ModelViewMode modelViewMode, bool dirty) {
 
     setupDraw();
     setupDrawWithTexture();
@@ -3498,11 +3488,7 @@ void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, 
     setupDrawBlending(blend, mode, swapSrcDst);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
-    if (!ignoreScale) {
-        setupDrawModelView(left, top, right, bottom, ignoreTransform);
-    } else {
-        setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
-    }
+    setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
@@ -3514,7 +3500,7 @@ void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, 
 void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, float bottom,
         GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool ignoreTransform, bool ignoreScale, bool dirty) {
+        bool ignoreTransform, ModelViewMode modelViewMode, bool dirty) {
 
     setupDraw();
     setupDrawWithTexture(true);
@@ -3526,15 +3512,11 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
     setupDrawBlending(true, mode);
     setupDrawProgram();
     if (!dirty) setupDrawDirtyRegionsDisabled();
-    if (!ignoreScale) {
-        setupDrawModelView(left, top, right, bottom, ignoreTransform);
-    } else {
-        setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
-    }
+    setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
     setupDrawTexture(texture);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms();
+    setupDrawShaderUniforms(ignoreTransform);
     setupDrawMesh(vertices, texCoords);
 
     glDrawArrays(drawMode, 0, elementsCount);
