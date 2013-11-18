@@ -196,8 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"បិទ​វ៉ាយហ្វាយ"</string>
-    <!-- no translation found for quick_settings_remote_display_no_connection_label (3319785626703585888) -->
-    <skip />
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"ចាត់​ថ្នាក់​អេក្រង់"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ពន្លឺ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ស្វ័យប្រវត្តិ"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
