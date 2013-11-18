@@ -46,7 +46,7 @@ import java.util.ArrayList;
  * is currently running.
  */
 final class ProcessRecord {
-    final BatteryStatsImpl.Uid.Proc batteryStats; // where to collect runtime statistics
+    private final BatteryStatsImpl mBatteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final boolean isolated;     // true if this is a special isolated process
     final int uid;              // uid of process; may be different from 'info' if isolated
@@ -273,8 +273,8 @@ final class ProcessRecord {
         }
         if (!keeping) {
             long wtime;
-            synchronized (batteryStats.getBatteryStats()) {
-                wtime = batteryStats.getBatteryStats().getProcessWakeTime(info.uid,
+            synchronized (mBatteryStats) {
+                wtime = mBatteryStats.getProcessWakeTime(info.uid,
                         pid, SystemClock.elapsedRealtime());
             }
             long timeUsed = wtime - lastWakeTime;
@@ -359,9 +359,9 @@ final class ProcessRecord {
         }
     }
     
-    ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, ApplicationInfo _info,
+    ProcessRecord(BatteryStatsImpl _batteryStats, ApplicationInfo _info,
             String _processName, int _uid) {
-        batteryStats = _batteryStats;
+        mBatteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
         uid = _uid;
