@@ -219,6 +219,7 @@ int getformat(int audioformat)
     switch (audioformat) {
     case ENCODING_PCM_16BIT:
         return AUDIO_FORMAT_PCM_16_BIT;
+#ifdef QCOM_HARDWARE
     case ENCODING_PCM_8BIT:
         return AUDIO_FORMAT_PCM_8_BIT;
     case ENCODING_AMRNB:
@@ -233,6 +234,7 @@ int getformat(int audioformat)
         return AUDIO_FORMAT_EVRCWB;
     case ENCODING_EVRCNW:
         return AUDIO_FORMAT_EVRCNW;
+#endif
     default:
         return AUDIO_FORMAT_PCM_8_BIT;
     }
@@ -292,13 +294,15 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // check the format.
     // This function was called from Java, so we compare the format against the Java constants
     if ((audioFormat != ENCODING_PCM_16BIT)
-        && (audioFormat != ENCODING_PCM_8BIT)
+#ifdef QCOM_HARDWARE
         && (audioFormat != ENCODING_AMRNB)
         && (audioFormat != ENCODING_AMRWB)
         && (audioFormat != ENCODING_EVRC)
         && (audioFormat != ENCODING_EVRCB)
         && (audioFormat != ENCODING_EVRCWB)
-        && (audioFormat != ENCODING_EVRCNW)) {
+        && (audioFormat != ENCODING_EVRCNW)
+#endif
+        && (audioFormat != ENCODING_PCM_8BIT)) {
         ALOGE("Error creating AudioTrack: unsupported audio format.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
     }
@@ -575,6 +579,7 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
             written = 0;
         }
     } else {
+#ifdef QCOM_HARDWARE
         if ((audioFormat == ENCODING_PCM_16BIT)
         || (audioFormat == ENCODING_AMRNB)
         || (audioFormat == ENCODING_AMRWB)
@@ -582,6 +587,9 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
         || (audioFormat == ENCODING_EVRCB)
         || (audioFormat == ENCODING_EVRCWB)
         || (audioFormat == ENCODING_EVRCNW)) {
+#else
+        if (audioFormat == ENCODING_PCM_16BIT) {
+#endif
             // writing to shared memory, check for capacity
             if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
                 sizeInBytes = track->sharedBuffer()->size();
