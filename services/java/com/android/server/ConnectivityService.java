@@ -3457,7 +3457,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized (mProxyLock) {
             if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
             if (mDefaultProxy == proxy) return; // catches repeated nulls
-            if (!proxy.isValid()) {
+            if (proxy != null &&  !proxy.isValid()) {
                 if (DBG) log("Invalid proxy properties, ignoring: " + proxy.toString());
                 return;
             }
