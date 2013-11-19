@@ -46,7 +46,7 @@ public class ICU_Delegate {
     // --- Native methods accessing ICU's database.
 
     @LayoutlibDelegate
-    /*package*/ static String getBestDateTimePattern(String skeleton, String localeName) {
+    /*package*/ static String getBestDateTimePatternNative(String skeleton, String localeName) {
         return DateTimePatternGenerator.getInstance(new ULocale(localeName))
                 .getBestPattern(skeleton);
     }
@@ -167,7 +167,7 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean initLocaleDataImpl(String locale, LocaleData result) {
+    /*package*/ static boolean initLocaleDataNative(String locale, LocaleData result) {
 
         // Used by Calendar.
         result.firstDayOfWeek = Integer.valueOf(1);
