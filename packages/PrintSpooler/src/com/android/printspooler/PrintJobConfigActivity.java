@@ -1529,9 +1529,13 @@ public class PrintJobConfigActivity extends Activity {
                                 builder.append(',');
                             }
                             PageRange pageRange = pageRanges[i];
-                            builder.append(pageRange.getStart());
-                            builder.append('-');
-                            builder.append(pageRange.getEnd());
+                            final int shownStartPage = pageRange.getStart() + 1;
+                            final int shownEndPage = pageRange.getEnd() + 1;
+                            builder.append(shownStartPage);
+                            if (shownStartPage != shownEndPage) {
+                                builder.append('-');
+                                builder.append(shownEndPage);
+                            }
                         }
                         mPageRangeEditText.setText(builder.toString());
                     }
