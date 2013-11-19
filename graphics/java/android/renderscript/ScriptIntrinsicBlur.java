@@ -30,7 +30,7 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
     private final float[] mValues = new float[9];
     private Allocation mInput;
 
-    private ScriptIntrinsicBlur(int id, RenderScript rs) {
+    private ScriptIntrinsicBlur(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -49,7 +49,7 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
         if ((!e.isCompatible(Element.U8_4(rs))) && (!e.isCompatible(Element.U8(rs)))) {
             throw new RSIllegalArgumentException("Unsuported element type.");
         }
-        int id = rs.nScriptIntrinsicCreate(5, e.getID(rs));
+        long id = rs.nScriptIntrinsicCreate(5, e.getID(rs));
         ScriptIntrinsicBlur sib = new ScriptIntrinsicBlur(id, rs);
         sib.setRadius(5.f);
         return sib;
