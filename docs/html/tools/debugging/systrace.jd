@@ -1,4 +1,5 @@
-page.title=Analyzing Display and Performance with Systrace
+page.title=Analyzing Display and Performance
+page.tags=systrace,speed
 parent.title=Debugging
 parent.link=index.html
 @jd:body
@@ -12,10 +13,11 @@ parent.link=index.html
       <li><a href="#generate">Generating Traces</a>
         <ol>
           <li><a href="#limit-trace">Limiting trace data</a></li>
-          <li><a href="#config-categories">Configuring trace data categories</a></li>
-          <li><a href="#running">Running a trace</a></li>
+          <li><a href="#running-4.3">Tracing on Android 4.3 and higher</a>
+          <li><a href="#running-4.2">Tracing on Android 4.2 and lower</a></li>
         </ol>
       </li>
+      <li><a href="#app-trace">Tracing Application Code</a></li>
       <li><a href="#analysis">Analyzing Traces</a>
         <ol>
           <li><a href="#long-processes">Long running processes</a></li>
@@ -25,13 +27,12 @@ parent.link=index.html
     </ol>
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}tools/help/systrace.html">Systrace</a>
-      </li>
+      <li><a href="{@docRoot}tools/help/systrace.html">Systrace</a></li>
     </ol>
   </div>
 </div>
 
-<p>After building features, eliminating bugs and cleaning up your code, you should spend some
+<p>After building features, eliminating bugs, and cleaning up your code, you should spend some
   time looking at the performance of your application. The speed and smoothness with which your
   application draws pixels and performs operations has an significant impact on your users'
   experience.</p>
@@ -42,21 +43,21 @@ parent.link=index.html
   threaded processes for resources, which can cause performance problems that are hard to diagnose.
 </p>
 
-<p>The {@code systrace} tool allows you to collect and review code execution data for your
+<p>The Systrace tool allows you to collect and review code execution data for your
   application and the Android system. You can use this data to diagnose execution problems and
   improve the performance of your application.</p>
 
 
 <h2 id="overview">Overview</h2>
 
-<p>{@code systrace} helps you analyze how the execution of your application fits into the larger
+<p>Systrace helps you analyze how the execution of your application fits into the larger
   Android environment, letting you see system and applications process execution on a common
   timeline. The tool allows you to generate highly detailed, interactive reports from devices
   running Android 4.1 and higher, such as the report in figure 1.</p>
 
 <img src="{@docRoot}images/systrace/report.png" alt="Systrace example report" id="figure1" />
 <p class="img-caption">
-  <strong>Figure 1.</strong> An example {@code systrace} report on 5 seconds of process execution
+  <strong>Figure 1.</strong> An example Systrace report on 5 seconds of process execution
   for a running application and related Android system processes.
 </p>
 
@@ -64,16 +65,21 @@ parent.link=index.html
 <h2 id="generate">Generating Traces</h2>
 
 <p>In order to create a trace of your application, you must perform a few setup steps. First, you
-  must have a device running Android 4.1 or higher. Setup the device for
+  must have a device running Android 4.1 or higher. Set up the device for
   <a href="{@docRoot}tools/device.html#setting-up">debugging</a>, connect it to your development
-  system and install your application. Some types of trace information, specifically disk activity
-  and kernel work queues, require root access to the device, but most {@code systrace} log data
-  only requires that the device be enabled for developer debugging.</p>
+  system, and install your application. Some types of trace information, specifically disk activity
+  and kernel work queues, require that you have root access to the device. However, most Systrace
+  log data only requires that the device be enabled for developer debugging.</p>
+
+<p>Systrace traces can be run either from a
+  <a href="{@docRoot}tools/help/systrace.html#options">command line</a> or from a
+  <a href="{@docRoot}tools/help/systrace.html#gui">graphical user interface</a>. This guide
+  focuses on using the command line options.</p>
 
 
 <h3 id="limit-trace">Limiting trace data</h3>
 
-<p>The {@code systrace} tool can generate a potentially huge amount of data from applications
+<p>The Systrace tool can generate a potentially huge amount of data from applications
   and system sources. To limit the amount of data the tool collects and make the data more relevant
   to your analysis, use the following options:</p>
 
@@ -81,39 +87,68 @@ parent.link=index.html
   <li>Limit the amount of time covered by the trace with the {@code -t, --time} option. The default
     length of a trace is 5 seconds.</li>
   <li>Limit the size of the data collected by the trace with the {@code -b, --buf-size} option.</li>
-  <li>Specify what types of processes are traced using the {@code --set-tags} option and the
-  {@code --disk}, {@code --cpu-freq}, {@code --cpu-idle}, {@code --cpu-load} options.</li>
+  <li>Specify what types of processes are traced. The types of processes that can be traced depends
+    on the version of Android you are running:
+    <ul>
+      <li>Android 4.2 and lower devices: Use the {@code --set-tags} option and the {@code --disk},
+        {@code --cpu-freq}, {@code --cpu-idle}, {@code --cpu-load} options.</li>
+      <li>Android 4.3 and higher devices: Use the {@code --list-categories} option to see what
+        categories are available on your test device.</li>
+    </ul>
+   </li>
 </ul>
 
 
-<h3 id="config-categories">Configuring trace data categories</h3>
+<h3 id="running-4.3">Tracing on Android 4.3 and higher</h3>
 
-<p>To use {@code systrace} effectively, you must specify the types of processes you want to trace.
+<p>To run a trace on Android 4.3 and higher devices:</p>
+
+<ol>
+  <li>Make sure the device is connected through a USB cable and is
+  <a href="{@docRoot}tools/device.html#setting-up">enabled for debugging</a>.</li>
+  <li>Run the trace with the options you want, for example:
+<pre>
+$ cd android-sdk/platform-tools/systrace
+$ python systrace.py --time=10 -o mynewtrace.html sched gfx view wm
+</pre>
+  </li>
+  <li>On the device, execute any user actions you want be included in the trace.</li>
+</ol>
+
+<p>For more information on the available options for running Systrace, see the
+<a href="{@docRoot}tools/help/systrace.html#options-4.3">Systrace</a> help page.</p>
+
+
+<h3 id="running-4.2">Tracing on Android 4.2 and lower</h3>
+
+<p>To use Systrace effectively with devices running Android 4.2 and lower,
+  you must configure the types of processes you want to trace before running a trace.
   The tool can gather the following types of process information:</p>
 
 <ul>
   <li>General system processes such as graphics, audio and input processes (selected using trace
-    <a href="{@docRoot}tools/help/systrace.html#tags">Tags</a>).</li>
+    <a href="{@docRoot}tools/help/systrace.html#tags">category tags</a>).</li>
   <li>Low level system information such as CPU, kernel and disk activity (selected using
-    <a href="{@docRoot}tools/help/systrace.html#options">Options</a>).</li>
+    <a href="{@docRoot}tools/help/systrace.html#options">options</a>).</li>
 </ul>
 
-<p>To set trace tags for {@code systrace} using the command-line:</p>
+<p>To set trace tags for Systrace using the command-line:</p>
 
 <ol>
   <li>Use the {@code --set-tags} option:
 <pre>
-$> python systrace.py --set-tags=gfx,view,wm
+$ cd android-sdk/platform-tools/systrace
+$ python systrace.py --set-tags=gfx,view,wm
 </pre>
   </li>
   <li>Stop and restart the {@code adb} shell to enable tracing of these processes.
 <pre>
-$> adb shell stop
-$> adb shell start
+$ adb shell stop
+$ adb shell start
 </pre></li>
 </ol>
 
-<p>To set trace tags for {@code systrace} using the device user interface:</p>
+<p>To set trace tags for Systrace using the device user interface:</p>
 
 <ol>
   <li>On the device connected for tracing, navigate to: <strong>Settings &gt;
@@ -126,9 +161,6 @@ $> adb shell start
   selecting trace tags using this method.
 </p>
 
-
-<h3 id="running">Running a trace</h3>
-
 <p>After you have configured the category tags for your trace, you can start collecting
   information for analysis.</p>
 
@@ -139,21 +171,77 @@ $> adb shell start
   <a href="{@docRoot}tools/device.html#setting-up">enabled for debugging</a>.</li>
   <li>Run the trace with the low-level system trace options and limits you want, for example:
 <pre>
-$> python systrace.py --cpu-freq --cpu-load --time=10 -o mytracefile.html
+$ python systrace.py --cpu-freq --cpu-load --time=10 -o mytracefile.html
 </pre>
   </li>
   <li>On the device, execute any user actions you want be included in the trace.</li>
 </ol>
 
+<p>For more information on the available options for running Systrace, see the
+<a href="{@docRoot}tools/help/systrace.html#options-pre-4.3">Systrace</a> help page.</p>
+
+
+<h2 id="app-trace">Tracing Application Code</h2>
+
+<p>The Systrace tool can trace the execution of code within your application. In Android
+4.3 (API level 18) and higher, you can use the methods of the {@link android.os.Trace} class to
+add instrumentation to your application code and see the results in a Systrace report.</p>
+
+<p>The following code example shows how to use the {@link android.os.Trace} class to track
+execution of an application method, including two nested code blocks within that method.</p>
+
+<pre>
+public void ProcessPeople() {
+    Trace.beginSection("ProcessPeople");
+    try {
+        Trace.beginSection("Processing Jane");
+        try {
+            // code for Jane task...
+        } finally {
+            Trace.endSection(); // ends "Processing Jane"
+        }
+
+        Trace.beginSection("Processing John");
+        try {
+            // code for John task...
+        } finally {
+            Trace.endSection(); // ends "Processing John"
+        }
+    } finally {
+        Trace.endSection(); // ends "ProcessPeople"
+    }
+}
+</pre>
+<p class="note">
+  <strong>Note:</strong> When you nest trace calls within each other, the
+  {@link android.os.Trace#endSection} method ends the most recently called
+  {@link android.os.Trace#beginSection} method. This means that a trace started within another
+  trace cannot extend beyond the end of the enclosing trace, so make sure your beginning and
+  ending method calls are properly matched to measure your applications processing.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Traces must begin and end on the same thread. Do not call
+  {@link android.os.Trace#beginSection} on one thread of execution and then attempt to end the
+  trace with a call to {@link android.os.Trace#endSection} on another thread.
+</p>
+
+<p>When using application-level tracing with Systrace, you must specify the package name of your
+application in the user interface or specify the {@code -a} or {@code --app=} options on the
+command line. For more information, see the
+<a href="{@docRoot}tools/help/systrace.html">Systrace</a> help page.</p>
+
+<!-- todo: add ndk coverage -->
+
 
 <h2 id="analysis">Analyzing Traces</h2>
 
-<p>After you have generated a trace using {@code systrace}, it lists the location of the output
+<p>After you have generated a trace using Systrace, it lists the location of the output
   file and you can open the report using a web browser.
   How you use the trace data depends on the performance issues you are investigating. However,
   this section provides some general instructions on how to analyze a trace.</p>
 
-<p>The reports generated by {@code systrace} are interactive, allowing you to zoom into and out of
+<p>The reports generated by Systrace are interactive, allowing you to zoom into and out of
   the process execution details. Use the <em>W</em> key to zoom in, the <em>S</em>
   key to zoom out, the <em>A</em> key to pan left and the <em>D</em> key to pan
   right. Select a task in timeline using your mouse to get more information about the task.
@@ -193,7 +281,7 @@ id="figure2" />
 
 <h3 id="display-interupts">Interruptions in display execution</h3>
 
-<p>The {@code systrace} tool is particularly useful in analyzing application display slowness,
+<p>The Systrace tool is particularly useful in analyzing application display slowness,
   or pauses in animations, because it shows you the execution of your application across multiple
   system processes. With display execution, drawing screen frames with a regular rhythm is essential
   for good performance. Having a regular rhythm for display ensures that animations and motion are
@@ -201,7 +289,7 @@ id="figure2" />
   from the users perspective.</p>
 
 <p>If you are analyzing an application for this type of problem, examine the
-  <strong>SurfaceFlinger</strong> process in the {@code systrace} report where your application is
+  <strong>SurfaceFlinger</strong> process in the Systrace report where your application is
   also executing to look for places where it drops out of its regular rhythm.</p>
 
 <img src="{@docRoot}images/systrace/display-rhythm.png" alt="Systrace exerpt of display processing"
@@ -231,9 +319,9 @@ id="figure3" />
 </p>
 
 <p class="note">
-  <strong>Note:</strong> When using {@code systrace} to analyze display problems, make sure
+  <strong>Note:</strong> When using Systrace to analyze display problems, make sure
   you activate the tracing tags for <strong>Graphics</strong> and <strong>Views</strong>.
 </p>
 
-<p>For more information on the command line options and keyboard controls for {@code systrace},
-see the <a href="{@docRoot}tools/help/systrace.html">Systrace</a> reference page.</p>
+<p>For more information on the command line options and keyboard controls for Systrace,
+see the <a href="{@docRoot}tools/help/systrace.html">Systrace</a> help page.</p>
