@@ -63,4 +63,18 @@ public class X509TrustManagerExtensions {
                                                     String host) throws CertificateException {
         return mDelegate.checkServerTrusted(chain, authType, host);
     }
+
+    /**
+     * Checks whether a CA certificate is added by an user.
+     *
+     * <p>Since {@link X509TrustManager#checkServerTrusted} allows its parameter {@code chain} to
+     * chain up to user-added CA certificates, this method can be used to perform additional
+     * policies for user-added CA certificates.
+     *
+     * @return {@code true} to indicate that the certificate was added by the user, {@code false}
+     * otherwise.
+     */
+    public boolean isUserAddedCertificate(X509Certificate cert) {
+        return mDelegate.isUserAddedCertificate(cert);
+    }
 }
