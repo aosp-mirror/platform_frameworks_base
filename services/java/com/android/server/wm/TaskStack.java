@@ -271,6 +271,8 @@ public class TaskStack {
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowState win = windows.get(winNdx);
                     if (!resizingWindows.contains(win)) {
+                        if (WindowManagerService.DEBUG_RESIZE) Slog.d(TAG,
+                                "setBounds: Resizing " + win);
                         resizingWindows.add(win);
                     }
                     win.mUnderStatusBar = underStatusBar;
