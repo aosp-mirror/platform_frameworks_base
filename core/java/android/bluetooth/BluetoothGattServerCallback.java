@@ -18,8 +18,6 @@ package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 
-import android.util.Log;
-
 /**
  * This abstract class is used to implement {@link BluetoothGattServer} callbacks.
  */

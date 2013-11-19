@@ -20,14 +20,11 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageUserState;
-import android.content.pm.UserInfo;
 import android.util.SparseArray;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Settings base class for pending and resolved classes.

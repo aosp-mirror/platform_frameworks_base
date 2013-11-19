@@ -23,16 +23,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.os.BatteryManager;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.View;
 import android.widget.TextView;
 

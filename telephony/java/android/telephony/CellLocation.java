@@ -19,9 +19,6 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
-import android.provider.Settings;
-
 
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;

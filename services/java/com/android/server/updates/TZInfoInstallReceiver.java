@@ -17,7 +17,6 @@
 package com.android.server.updates;
 
 import android.util.Base64;
-import android.util.Slog;
 
 import java.io.IOException;
 

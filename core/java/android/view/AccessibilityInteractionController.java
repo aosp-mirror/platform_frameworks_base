@@ -24,8 +24,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.util.LongArray;
-import android.util.SparseLongArray;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;

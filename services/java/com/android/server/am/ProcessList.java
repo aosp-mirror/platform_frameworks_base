@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;

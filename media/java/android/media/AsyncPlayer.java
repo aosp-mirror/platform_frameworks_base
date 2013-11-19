@@ -22,8 +22,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.io.IOException;
-import java.lang.IllegalStateException;
 import java.util.LinkedList;
 
 /**

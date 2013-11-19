@@ -16,15 +16,6 @@
 
 package android.text.method;
 
-import android.graphics.Rect;
-import android.text.Editable;
-import android.text.GetChars;
-import android.text.Spannable;
-import android.text.Spanned;
-import android.text.SpannedString;
-import android.text.TextUtils;
-import android.view.View;
-
 /**
  * This transformation method causes any newline characters (\n) to be
  * displayed as spaces instead of causing line breaks, and causes

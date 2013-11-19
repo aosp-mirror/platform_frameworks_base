@@ -16,14 +16,10 @@
 package android.speech.tts;
 
 import android.media.AudioFormat;
-import android.os.FileUtils;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;

@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -29,8 +28,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;

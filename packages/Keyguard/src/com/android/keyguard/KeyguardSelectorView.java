@@ -16,19 +16,14 @@
 package com.android.keyguard;
 
 import android.animation.ObjectAnimator;
-import android.app.ActivityManager;
-import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;

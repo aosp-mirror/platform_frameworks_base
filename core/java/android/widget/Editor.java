@@ -45,8 +45,6 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.DynamicLayout;

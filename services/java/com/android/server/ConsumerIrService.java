@@ -16,33 +16,13 @@
 
 package com.android.server;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
-import android.hardware.input.InputManager;
 import android.hardware.IConsumerIrService;
-import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Process;
-import android.os.RemoteException;
-import android.os.IBinder;
-import android.os.Binder;
-import android.os.ServiceManager;
-import android.os.SystemClock;
-import android.os.UserHandle;
-import android.os.WorkSource;
-import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
-import android.view.InputDevice;
 
 import java.lang.RuntimeException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.ListIterator;
 
 public class ConsumerIrService extends IConsumerIrService.Stub {
     private static final String TAG = "ConsumerIrService";

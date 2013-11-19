@@ -16,16 +16,8 @@
 
 package android.renderscript;
 
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
-
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 

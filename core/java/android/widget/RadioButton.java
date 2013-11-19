@@ -21,8 +21,6 @@ import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.android.internal.R;
-
 
 /**
  * <p>

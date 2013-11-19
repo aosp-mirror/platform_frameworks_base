@@ -18,8 +18,6 @@ package android.os;
 
 import java.util.ArrayList;
 
-import android.util.Log;
-
 
 /**
  * Gives access to the system properties store.  The system properties

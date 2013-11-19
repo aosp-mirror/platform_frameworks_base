@@ -17,15 +17,11 @@
 package android.renderscript;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.os.Process;
 import android.util.Log;

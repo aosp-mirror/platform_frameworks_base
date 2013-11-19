@@ -16,7 +16,6 @@
 
 package com.android.server.location;
 
-import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationProvider;

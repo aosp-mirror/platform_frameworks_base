@@ -21,9 +21,7 @@ import android.content.Context;
 import java.net.Socket;
 import java.io.IOException;
 
-import org.apache.http.HttpClientConnection;
 import org.apache.http.HttpHost;
-import org.apache.http.impl.DefaultHttpClientConnection;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 

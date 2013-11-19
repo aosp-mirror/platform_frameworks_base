@@ -19,7 +19,6 @@ package android.view.inputmethod;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 /**
  * Information given to an {@link InputMethod} about a client connecting

@@ -16,9 +16,6 @@
 
 package android.renderscript;
 
-import java.lang.Math;
-import android.util.Log;
-
 
 /**
  * Class for exposing the native RenderScript double3 type back

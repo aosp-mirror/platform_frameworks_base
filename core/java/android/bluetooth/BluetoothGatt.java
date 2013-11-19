@@ -18,18 +18,9 @@ package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothProfile.ServiceListener;
-import android.bluetooth.IBluetoothManager;
-import android.bluetooth.IBluetoothStateChangeCallback;
-
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
 import java.util.ArrayList;

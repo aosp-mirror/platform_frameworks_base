@@ -29,8 +29,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;

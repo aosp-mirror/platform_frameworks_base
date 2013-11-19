@@ -17,10 +17,8 @@
 package android.os;
 
 import android.os.Handler;         
-import android.os.Message;         
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /** @hide */
 public class RegistrantList

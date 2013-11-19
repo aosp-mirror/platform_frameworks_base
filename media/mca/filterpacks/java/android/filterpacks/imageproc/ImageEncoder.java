@@ -17,21 +17,16 @@
 
 package android.filterpacks.imageproc;
 
-import android.content.Context;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 
-import android.util.Log;
-
 import java.io.OutputStream;
-import java.io.IOException;
 
 /**
  * @hide

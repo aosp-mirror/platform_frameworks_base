@@ -19,10 +19,7 @@ package android.media.effect;
 
 import android.filterfw.core.CachedFrameManager;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterFactory;
 import android.filterfw.core.GLEnvironment;
-import android.filterfw.core.GLFrame;
-import android.filterfw.core.FrameManager;
 import android.opengl.GLES20;
 
 /**

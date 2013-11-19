@@ -17,7 +17,6 @@
 package android.content.res;
 
 import android.os.ParcelFileDescriptor;
-import android.os.Trace;
 import android.util.Log;
 import android.util.TypedValue;
 

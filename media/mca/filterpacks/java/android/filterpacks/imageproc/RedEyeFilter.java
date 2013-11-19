@@ -21,9 +21,6 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
-import android.filterfw.core.KeyValueMap;
-import android.filterfw.core.NativeProgram;
-import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
@@ -31,8 +28,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
-import android.util.Log;
 
 /**
  * @hide

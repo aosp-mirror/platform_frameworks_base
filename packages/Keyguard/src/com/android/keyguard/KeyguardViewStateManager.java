@@ -20,7 +20,6 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 
 public class KeyguardViewStateManager implements

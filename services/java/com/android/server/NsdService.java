@@ -26,11 +26,8 @@ import android.net.nsd.DnsSdTxtRecord;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
 import android.os.Binder;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -39,20 +36,13 @@ import android.util.SparseArray;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.server.am.BatteryStatsService;
-import com.android.server.NativeDaemonConnector.Command;
-import com.android.internal.R;
 
 /**
  * Network Service Discovery Service handles remote service discovery operation requests by

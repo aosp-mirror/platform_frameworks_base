@@ -19,8 +19,6 @@ package android.net.wifi;
 import android.os.Parcelable;
 import android.os.Parcel;
 
-import java.util.BitSet;
-
 /**
  * A class representing Wi-Fi Protected Setup
  *

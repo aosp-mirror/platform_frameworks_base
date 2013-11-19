@@ -15,7 +15,6 @@
  */
 package com.android.proxyhandler;
 
-import android.net.ProxyProperties;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -25,7 +24,6 @@ import com.google.android.collect.Lists;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;

@@ -16,8 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
-
 /**
  * Intrinsic for applying a per-channel lookup table. Each
  * channel of the input has an independant lookup table. The

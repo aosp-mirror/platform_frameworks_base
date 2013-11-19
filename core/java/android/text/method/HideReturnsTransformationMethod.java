@@ -16,13 +16,6 @@
 
 package android.text.method;
 
-import android.graphics.Rect;
-import android.text.GetChars;
-import android.text.Spanned;
-import android.text.SpannedString;
-import android.text.TextUtils;
-import android.view.View; 
-
 /**
  * This transformation method causes any carriage return characters (\r)
  * to be hidden by displaying them as zero-width non-breaking space

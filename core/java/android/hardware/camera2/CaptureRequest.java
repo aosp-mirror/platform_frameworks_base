@@ -17,7 +17,6 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.CameraDevice.CaptureListener;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;

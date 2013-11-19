@@ -54,8 +54,6 @@ import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;

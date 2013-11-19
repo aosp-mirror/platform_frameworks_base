@@ -20,7 +20,6 @@ import android.text.format.Time;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 

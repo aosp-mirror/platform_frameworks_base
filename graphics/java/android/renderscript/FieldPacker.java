@@ -16,7 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
 import java.util.BitSet;
 
 /**

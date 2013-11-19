@@ -22,8 +22,6 @@ import android.os.IBinder;
 import android.util.ArrayMap;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * A particular Intent that has been bound to a Service.

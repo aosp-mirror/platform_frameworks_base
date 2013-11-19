@@ -56,7 +56,6 @@ import android.net.wifi.WpsResult.Status;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.BatteryStats;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.INetworkManagementService;

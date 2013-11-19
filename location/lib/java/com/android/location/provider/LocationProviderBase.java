@@ -24,7 +24,6 @@ import android.content.Context;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;

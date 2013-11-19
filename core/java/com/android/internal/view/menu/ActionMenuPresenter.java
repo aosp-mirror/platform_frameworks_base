@@ -21,8 +21,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.transition.Transition;
-import android.transition.TransitionManager;
 import android.util.SparseBooleanArray;
 import android.view.ActionProvider;
 import android.view.Gravity;

@@ -32,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -45,7 +44,6 @@ import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
-import com.android.internal.widget.LockPatternUtils;
 
 /**
  * An adapter to a RemoteViewsService which fetches and caches RemoteViews

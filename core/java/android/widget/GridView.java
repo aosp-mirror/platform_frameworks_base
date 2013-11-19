@@ -35,7 +35,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.animation.GridLayoutAnimationController;
-import android.widget.AbsListView.LayoutParams;
 import android.widget.RemoteViews.RemoteView;
 
 import java.lang.annotation.Retention;

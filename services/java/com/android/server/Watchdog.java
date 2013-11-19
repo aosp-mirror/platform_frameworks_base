@@ -22,14 +22,11 @@ import android.os.RemoteException;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.power.PowerManagerService;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,7 +42,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {

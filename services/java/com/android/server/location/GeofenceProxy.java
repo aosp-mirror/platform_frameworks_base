@@ -32,8 +32,6 @@ import android.os.UserHandle;
 import android.util.Log;
 import com.android.server.ServiceWatcher;
 
-import java.util.List;
-
 /**
  * @hide
  */

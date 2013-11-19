@@ -31,7 +31,6 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 final class ContentProviderRecord {
     final ActivityManagerService service;

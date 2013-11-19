@@ -17,9 +17,6 @@
 package android.renderscript;
 
 
-import android.util.Log;
-
-
 /**
  * @hide
  * <p>ProgramStore contains a set of parameters that control how

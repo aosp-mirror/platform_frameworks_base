@@ -32,7 +32,6 @@ import android.media.RemoteControlClient;
 import android.media.RemoteController;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.transition.ChangeBounds;

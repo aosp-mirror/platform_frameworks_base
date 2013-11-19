@@ -16,12 +16,6 @@
 
 package android.renderscript;
 
-
-import java.lang.reflect.Field;
-
-import android.graphics.ImageFormat;
-import android.util.Log;
-
 /**
  * <p>A Type describes the {@link android.renderscript.Element} and dimensions used for an {@link
  * android.renderscript.Allocation} or a parallel operation. Types are created through {@link

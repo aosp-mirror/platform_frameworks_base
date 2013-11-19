@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import android.util.EventLog;
-import com.android.server.EventLogTags;
 
 class Task {
 //    private final String TAG = "TaskGroup";

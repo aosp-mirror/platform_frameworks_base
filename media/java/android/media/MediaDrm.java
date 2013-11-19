@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.media.MediaDrmException;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.HashMap;
@@ -24,7 +23,6 @@ import java.util.List;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 

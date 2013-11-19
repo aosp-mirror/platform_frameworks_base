@@ -16,17 +16,10 @@
 
 package android.renderscript;
 
-import java.lang.reflect.Field;
-
 import android.content.Context;
-import android.graphics.PixelFormat;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 
 /**
  * @hide

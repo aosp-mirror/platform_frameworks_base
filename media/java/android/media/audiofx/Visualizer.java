@@ -18,7 +18,6 @@ package android.media.audiofx;
 
 import android.util.Log;
 import java.lang.ref.WeakReference;
-import java.io.IOException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;

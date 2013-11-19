@@ -27,7 +27,6 @@ import android.database.ContentObserver;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplaySessionInfo;
 import android.hardware.display.WifiDisplayStatus;
-import android.media.AudioManager;
 import android.media.RemoteDisplay;
 import android.net.NetworkInfo;
 import android.net.Uri;

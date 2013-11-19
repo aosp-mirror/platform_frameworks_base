@@ -21,7 +21,6 @@ import android.os.SystemClock;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ListIterator;
 import java.util.LinkedList;
 
 import javax.net.ssl.SSLHandshakeException;

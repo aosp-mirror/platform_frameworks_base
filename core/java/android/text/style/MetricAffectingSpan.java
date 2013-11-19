@@ -16,7 +16,6 @@
 
 package android.text.style;
 
-import android.graphics.Paint;
 import android.text.TextPaint;
 
 /**

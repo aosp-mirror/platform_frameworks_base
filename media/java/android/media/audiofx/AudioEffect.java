@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;

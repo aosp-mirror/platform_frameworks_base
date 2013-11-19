@@ -18,8 +18,6 @@ package android.mtp;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 /**
  * This class represents an MTP or PTP device connected on the USB host bus. An application can

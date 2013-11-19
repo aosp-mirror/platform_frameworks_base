@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 
 import com.android.internal.telephony.IThirdPartyCallListener;

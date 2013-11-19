@@ -86,7 +86,6 @@ import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

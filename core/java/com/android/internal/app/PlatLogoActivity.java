@@ -18,7 +18,6 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.provider.Settings;
@@ -26,19 +25,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.method.AllCapsTransformationMethod;
-import android.text.method.TransformationMethod;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class PlatLogoActivity extends Activity {
     FrameLayout mContent;

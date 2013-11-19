@@ -20,7 +20,6 @@ import android.os.Parcelable;
 import android.os.Parcel;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;

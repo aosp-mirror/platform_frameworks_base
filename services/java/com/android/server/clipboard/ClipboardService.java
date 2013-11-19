@@ -31,7 +31,6 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -40,7 +39,6 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 

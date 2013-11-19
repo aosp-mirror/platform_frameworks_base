@@ -23,7 +23,6 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.format.PrimitiveFormat;
 

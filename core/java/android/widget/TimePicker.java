@@ -17,13 +17,11 @@
 package android.widget;
 
 import android.annotation.Widget;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 

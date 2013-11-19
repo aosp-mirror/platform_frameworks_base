@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.UserHandle;
 import com.android.internal.os.BackgroundThread;

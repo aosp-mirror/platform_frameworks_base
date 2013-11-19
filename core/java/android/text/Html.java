@@ -48,11 +48,8 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
-import com.android.internal.util.XmlUtils;
-
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
 
 /**
  * This class processes HTML strings into displayable styled text.

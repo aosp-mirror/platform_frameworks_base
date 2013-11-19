@@ -16,9 +16,6 @@
 
 package android.app.backup;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 

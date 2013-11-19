@@ -38,7 +38,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowSession;

@@ -17,7 +17,6 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;

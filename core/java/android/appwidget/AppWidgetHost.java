@@ -19,7 +19,6 @@ package android.appwidget;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
@@ -31,7 +30,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
 import android.widget.RemoteViews.OnClickHandler;
