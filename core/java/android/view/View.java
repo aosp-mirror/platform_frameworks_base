@@ -11325,10 +11325,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 attachInfo.mHandler.removeCallbacks(action);
                 attachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
                         Choreographer.CALLBACK_ANIMATION, action, null);
-            } else {
-                // Assume that post will succeed later
-                ViewRootImpl.getRunQueue().removeCallbacks(action);
             }
+            // Assume that post will succeed later
+            ViewRootImpl.getRunQueue().removeCallbacks(action);
         }
         return true;
     }
@@ -15103,9 +15102,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mAttachInfo != null) {
                 mAttachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
                         Choreographer.CALLBACK_ANIMATION, what, who);
-            } else {
-                ViewRootImpl.getRunQueue().removeCallbacks(what);
             }
+            ViewRootImpl.getRunQueue().removeCallbacks(what);
         }
     }
 
