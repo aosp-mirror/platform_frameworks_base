@@ -31,7 +31,7 @@ import android.util.Log;
  *
  **/
 public class ProgramFragmentFixedFunction extends ProgramFragment {
-    ProgramFragmentFixedFunction(int id, RenderScript rs) {
+    ProgramFragmentFixedFunction(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -58,23 +58,23 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
 
             for (int i=0; i < mInputCount; i++) {
                 tmp[idx++] = ProgramParam.INPUT.mID;
-                tmp[idx++] = mInputs[i].getID(mRS);
+                tmp[idx++] = (int)mInputs[i].getID(mRS);
             }
             for (int i=0; i < mOutputCount; i++) {
                 tmp[idx++] = ProgramParam.OUTPUT.mID;
-                tmp[idx++] = mOutputs[i].getID(mRS);
+                tmp[idx++] = (int)mOutputs[i].getID(mRS);
             }
             for (int i=0; i < mConstantCount; i++) {
                 tmp[idx++] = ProgramParam.CONSTANT.mID;
-                tmp[idx++] = mConstants[i].getID(mRS);
+                tmp[idx++] = (int)mConstants[i].getID(mRS);
             }
             for (int i=0; i < mTextureCount; i++) {
                 tmp[idx++] = ProgramParam.TEXTURE_TYPE.mID;
-                tmp[idx++] = mTextureTypes[i].mID;
+                tmp[idx++] = (int)mTextureTypes[i].mID;
                 texNames[i] = mTextureNames[i];
             }
 
-            int id = mRS.nProgramFragmentCreate(mShader, texNames, tmp);
+            long id = mRS.nProgramFragmentCreate(mShader, texNames, tmp);
             ProgramFragmentFixedFunction pf = new ProgramFragmentFixedFunction(id, mRS);
             initProgram(pf);
             return pf;

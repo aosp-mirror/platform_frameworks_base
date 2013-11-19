@@ -54,7 +54,7 @@ public class ProgramRaster extends BaseObj {
     boolean mPointSprite;
     CullMode mCullMode;
 
-    ProgramRaster(int id, RenderScript rs) {
+    ProgramRaster(long id, RenderScript rs) {
         super(id, rs);
 
         mPointSprite = false;
@@ -154,7 +154,7 @@ public class ProgramRaster extends BaseObj {
          */
         public ProgramRaster create() {
             mRS.validate();
-            int id = mRS.nProgramRasterCreate(mPointSprite, mCullMode.mID);
+            long id = mRS.nProgramRasterCreate(mPointSprite, mCullMode.mID);
             ProgramRaster programRaster = new ProgramRaster(id, mRS);
             programRaster.mPointSprite = mPointSprite;
             programRaster.mCullMode = mCullMode;

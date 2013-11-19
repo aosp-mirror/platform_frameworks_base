@@ -232,7 +232,8 @@ public class FieldPacker {
 
     public void addObj(BaseObj obj) {
         if (obj != null) {
-            addI32(obj.getID(null));
+            // FIXME: this is fine for 32-bit but needs a path for 64-bit
+            addI32((int)obj.getID(null));
         } else {
             addI32(0);
         }
