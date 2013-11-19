@@ -51,7 +51,7 @@ public class FilteringCursorWrapper extends AbstractCursor {
         mPosition = new int[count];
 
         cursor.moveToPosition(-1);
-        while (cursor.moveToNext()) {
+        while (cursor.moveToNext() && mCount < count) {
             final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
             final long lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
             if (rejectMimes != null && MimePredicate.mimeMatches(rejectMimes, mimeType)) {
