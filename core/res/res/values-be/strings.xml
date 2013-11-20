@@ -1543,6 +1543,8 @@
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Мультымедыйны выхад"</string>
     <!-- no translation found for media_route_chooser_title (1751618554539087622) -->
     <skip />
+    <!-- no translation found for media_route_chooser_title_for_remote_display (3395541745872017583) -->
+    <skip />
     <!-- no translation found for media_route_chooser_searching (4776236202610828706) -->
     <skip />
     <!-- no translation found for media_route_chooser_extended_settings (87015534236701604) -->
@@ -1561,11 +1563,11 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> кр. на цалю"</string>
     <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
     <skip />
-    <!-- no translation found for wifi_display_notification_connecting_title (9102788196896266990) -->
+    <!-- no translation found for wifi_display_notification_connecting_title (2838646471050359706) -->
     <skip />
     <!-- no translation found for wifi_display_notification_connecting_message (5837350993752841389) -->
     <skip />
-    <!-- no translation found for wifi_display_notification_connected_title (4118323329495921271) -->
+    <!-- no translation found for wifi_display_notification_connected_title (8567308065912676285) -->
     <skip />
     <!-- no translation found for wifi_display_notification_connected_message (2587209325701109715) -->
     <skip />
