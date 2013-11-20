@@ -205,7 +205,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Няма падключэння"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Няма сеткi"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi адключаны"</string>
-    <!-- no translation found for quick_settings_remote_display_no_connection_label (3319785626703585888) -->
+    <!-- no translation found for quick_settings_remote_display_no_connection_label (372107699274391290) -->
     <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркасць"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АЎТА"</string>
