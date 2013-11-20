@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import android.net.http.Headers;
-
 import java.io.InputStream;
 
 /**

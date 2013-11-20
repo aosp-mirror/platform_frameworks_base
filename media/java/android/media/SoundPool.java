@@ -18,7 +18,6 @@ package android.media;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import android.content.Context;

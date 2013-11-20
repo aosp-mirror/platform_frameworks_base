@@ -18,7 +18,6 @@ package com.android.media.remotedisplay;
 
 import com.android.internal.util.Objects;
 
-import android.media.MediaRouter;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.text.TextUtils;
 

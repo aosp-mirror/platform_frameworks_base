@@ -18,7 +18,6 @@ package android.app.backup;
 
 import android.app.QueuedWork;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 

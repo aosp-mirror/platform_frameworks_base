@@ -20,9 +20,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import libcore.io.ErrnoException;
-import libcore.io.IoUtils;
 import libcore.io.Libcore;
-import libcore.io.OsConstants;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

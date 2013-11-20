@@ -16,8 +16,6 @@
 
 package android.preference;
 
-import java.util.Map;
-
 import android.content.Context;
 import android.util.AttributeSet;
 

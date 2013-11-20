@@ -16,7 +16,6 @@
 
 package android.content.res;
 
-import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;

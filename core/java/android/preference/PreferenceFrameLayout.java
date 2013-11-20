@@ -16,7 +16,6 @@
 
 package android.preference;
 
-import android.app.FragmentBreadCrumbs;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;

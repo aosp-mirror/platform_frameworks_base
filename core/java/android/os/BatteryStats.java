@@ -26,7 +26,6 @@ import java.util.Map;
 
 import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
-import android.util.Log;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;

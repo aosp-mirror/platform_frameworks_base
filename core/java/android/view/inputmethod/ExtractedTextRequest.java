@@ -18,7 +18,6 @@ package android.view.inputmethod;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 /**
  * Description of what an input method would like from an application when

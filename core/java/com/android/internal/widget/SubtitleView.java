@@ -18,7 +18,6 @@ package com.android.internal.widget;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources.Theme;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -33,7 +32,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.accessibility.CaptioningManager.CaptionStyle;
 

@@ -17,7 +17,6 @@
 package com.android.server.search;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.ISearchManager;
 import android.app.SearchManager;
@@ -39,7 +38,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.content.PackageMonitor;

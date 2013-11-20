@@ -17,12 +17,9 @@
 package android.security;
 
 import android.content.Context;
-import android.security.KeyPairGeneratorSpec.Builder;
 
 import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
 import java.security.KeyStore.ProtectionParameter;
-import java.security.cert.Certificate;
 
 /**
  * This provides the optional parameters that can be specified for

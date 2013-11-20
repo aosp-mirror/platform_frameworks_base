@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Locale;
 
 /**

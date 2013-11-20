@@ -27,11 +27,8 @@ import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.widget.TextView;
 import android.widget.RemoteViews.RemoteView;
-
-import com.android.internal.R;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

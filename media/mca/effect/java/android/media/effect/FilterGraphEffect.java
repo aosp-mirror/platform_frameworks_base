@@ -19,16 +19,12 @@ package android.media.effect;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterGraph;
 import android.filterfw.core.GraphRunner;
-import android.filterfw.core.SimpleScheduler;
 import android.filterfw.core.SyncRunner;
-import android.media.effect.Effect;
 import android.media.effect.FilterEffect;
 import android.media.effect.EffectContext;
 import android.filterfw.io.GraphIOException;
 import android.filterfw.io.GraphReader;
 import android.filterfw.io.TextGraphReader;
-
-import android.util.Log;
 
 /**
  * Effect subclass for effects based on a single Filter. Subclasses need only invoke the

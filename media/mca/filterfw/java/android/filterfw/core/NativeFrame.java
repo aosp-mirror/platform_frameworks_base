@@ -24,8 +24,6 @@ import android.filterfw.core.GLFrame;
 import android.filterfw.core.NativeBuffer;
 import android.graphics.Bitmap;
 
-import android.util.Log;
-
 import java.nio.ByteBuffer;
 
 /**

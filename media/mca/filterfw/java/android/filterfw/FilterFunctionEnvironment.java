@@ -20,7 +20,6 @@ package android.filterfw;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterFactory;
 import android.filterfw.core.FilterFunction;
-import android.filterfw.core.Frame;
 import android.filterfw.core.FrameManager;
 
 /**

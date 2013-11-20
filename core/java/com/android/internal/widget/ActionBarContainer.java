@@ -16,7 +16,6 @@
 
 package com.android.internal.widget;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;

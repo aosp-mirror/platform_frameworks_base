@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import libcore.icu.LocaleData;

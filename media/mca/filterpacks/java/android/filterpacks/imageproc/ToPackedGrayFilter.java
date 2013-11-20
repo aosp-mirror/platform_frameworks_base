@@ -27,8 +27,6 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
-import android.util.Log;
-
 import java.lang.Math;
 /**
  * @hide

@@ -16,7 +16,6 @@
 
 package com.android.internal.widget;
 
-import java.util.Locale;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;

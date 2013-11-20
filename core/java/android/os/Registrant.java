@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 
 /** @hide */
 public class Registrant

@@ -16,7 +16,6 @@
 
 package android.appwidget;
 
-import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

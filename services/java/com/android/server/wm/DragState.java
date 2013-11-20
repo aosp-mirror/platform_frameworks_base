@@ -33,7 +33,6 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.InputChannel;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;

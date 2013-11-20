@@ -16,12 +16,8 @@
 
 package android.hardware.usb;
 
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
-
-import java.io.FileDescriptor;
 
 /**
  * This class represents a USB device attached to the android device with the android device

@@ -16,8 +16,6 @@
 
 package android.net;
 
-import java.util.Map;
-
 /**
  * Interface used to get feedback about a {@link android.net.LinkSocket}.  Instance is optionally
  * passed when a LinkSocket is constructed.  Multiple LinkSockets may use the same notifier.

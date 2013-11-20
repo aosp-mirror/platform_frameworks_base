@@ -2,8 +2,6 @@ package junit.runner;
 
 import java.util.*;
 
-import junit.runner.*;
-
 /**
  * A custom quick sort with support to customize the swap behaviour.
  * NOTICE: We can't use the the sorting support from the JDK 1.2 collection

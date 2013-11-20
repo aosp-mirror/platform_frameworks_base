@@ -16,8 +16,6 @@
 
 package android.os;
 
-import android.util.Log;
-
 /**
  * Vibrator implementation that does nothing.
  *

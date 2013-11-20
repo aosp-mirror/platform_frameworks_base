@@ -82,7 +82,6 @@ import android.util.StringBuilderPrinter;
 import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
-import com.android.internal.backup.LocalTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 

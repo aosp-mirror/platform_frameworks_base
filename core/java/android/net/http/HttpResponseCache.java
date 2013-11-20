@@ -17,9 +17,6 @@
 package android.net.http;
 
 import android.content.Context;
-import com.android.okhttp.OkResponseCache;
-import com.android.okhttp.ResponseSource;
-import com.android.okhttp.internal.DiskLruCache;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +29,6 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
-import libcore.io.IoUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**

@@ -22,7 +22,6 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
-import android.util.Log;
 
 import com.google.android.collect.Maps;
 

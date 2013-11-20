@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 

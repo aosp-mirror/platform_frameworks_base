@@ -17,7 +17,6 @@
 package android.app;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 

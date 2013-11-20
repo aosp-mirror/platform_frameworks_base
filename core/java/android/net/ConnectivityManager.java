@@ -25,7 +25,6 @@ import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.provider.Settings;
 
 import java.net.InetAddress;

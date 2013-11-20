@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IUpdateLock;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.TokenWatcher;
 import android.os.UpdateLock;
 import android.os.UserHandle;

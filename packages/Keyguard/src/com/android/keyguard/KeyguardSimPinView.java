@@ -20,16 +20,12 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;

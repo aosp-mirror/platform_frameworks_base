@@ -45,7 +45,6 @@ import android.os.Handler;
 import android.os.Messenger;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -53,7 +52,6 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.AsyncTask;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Slog;
 
 import java.io.FileNotFoundException;
@@ -66,10 +64,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;

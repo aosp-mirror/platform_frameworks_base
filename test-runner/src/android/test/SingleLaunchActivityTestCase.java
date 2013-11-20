@@ -17,8 +17,6 @@
 package android.test;
 
 import android.app.Activity;
-import android.view.IWindowManager;
-import android.os.ServiceManager;
 
 /**
  * If you would like to test a single activity with an

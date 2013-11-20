@@ -16,7 +16,6 @@
 package android.bluetooth;
 
 import java.util.ArrayList;
-import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.UUID;
 

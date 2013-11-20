@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.Trace;
-import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.util.Log;
 

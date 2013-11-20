@@ -23,9 +23,6 @@ import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * A simple object for retrieving the results of a DHCP request.

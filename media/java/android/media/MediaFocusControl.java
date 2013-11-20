@@ -51,7 +51,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;

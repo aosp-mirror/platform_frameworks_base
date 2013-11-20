@@ -16,13 +16,7 @@
 
 package android.webkit;
 
-import android.content.Context;
-import android.net.http.Headers;
-import android.util.Log;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

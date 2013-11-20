@@ -16,8 +16,6 @@
 
 package android.os;
 
-import android.util.Log;
-
 /**
  * Schedule a countdown until a time in the future, with
  * regular notifications on intervals along the way.

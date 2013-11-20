@@ -20,7 +20,6 @@ import android.os.Build;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.LongSparseArray;
-import android.util.SparseLongArray;
 
 import java.util.HashSet;
 import java.util.LinkedList;

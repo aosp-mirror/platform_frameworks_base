@@ -17,7 +17,6 @@ package android.os;
 
 import android.app.ActivityManagerNative;
 import android.content.Context;
-import android.content.RestrictionEntry;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;

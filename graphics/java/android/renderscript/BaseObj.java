@@ -16,8 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
-
 /**
  * BaseObj is the base class for all RenderScript objects owned by a RS context.
  * It is responsible for lifetime management and resource tracking. This class

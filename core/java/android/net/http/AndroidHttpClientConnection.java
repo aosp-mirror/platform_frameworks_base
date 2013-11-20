@@ -16,8 +16,6 @@
 
 package android.net.http;
 
-import org.apache.http.Header;
-
 import org.apache.http.HttpConnection;
 import org.apache.http.HttpClientConnection;
 import org.apache.http.HttpConnectionMetrics;
@@ -27,12 +25,10 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseFactory;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.ContentLengthStrategy;
-import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.HttpConnectionMetricsImpl;
 import org.apache.http.impl.entity.EntitySerializer;
 import org.apache.http.impl.entity.StrictContentLengthStrategy;

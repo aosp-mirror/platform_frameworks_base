@@ -18,8 +18,6 @@ package android.test;
 
 import android.app.Activity;
 
-import java.lang.reflect.Field;
-
 /**
  * This class provides functional testing of a single activity.  The activity under test will
  * be created using the system infrastructure (by calling InstrumentationTestCase.launchActivity())

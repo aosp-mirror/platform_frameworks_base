@@ -16,9 +16,7 @@
 
 package android.webkit;
 
-import android.os.Build;
 import android.os.StrictMode;
-import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 

@@ -16,10 +16,6 @@
 
 package android.renderscript;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.util.Log;
-
 /**
  * Intrinsic Histogram filter.
  *

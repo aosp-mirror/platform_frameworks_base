@@ -18,7 +18,6 @@ package android.os;
 
 import android.util.Log;
 import android.util.Printer;
-import android.util.PrefixPrinter;
 
 /**
   * Class used to run a message loop for a thread.  Threads by default do

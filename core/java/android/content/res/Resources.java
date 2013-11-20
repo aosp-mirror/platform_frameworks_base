@@ -36,7 +36,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
-import android.view.DisplayAdjustments;
 
 import java.io.IOException;
 import java.io.InputStream;

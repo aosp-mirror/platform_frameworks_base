@@ -17,10 +17,8 @@
 package android.content;
 
 import android.accounts.Account;
-import android.content.pm.RegisteredServicesCache;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 /**
  * Information about the sync operation that is currently underway.

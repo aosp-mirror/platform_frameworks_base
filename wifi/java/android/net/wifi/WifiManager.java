@@ -35,7 +35,6 @@ import android.util.SparseArray;
 import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
-import com.android.internal.R;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 

@@ -26,7 +26,6 @@ import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
 
@@ -35,8 +34,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.android.internal.util.AsyncChannel;
 
 /* Polls for traffic stats and notifies the clients */
 final class WifiTrafficPoller {

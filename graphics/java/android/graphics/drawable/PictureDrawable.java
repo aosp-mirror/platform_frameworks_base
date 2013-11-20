@@ -16,16 +16,12 @@
 
 package android.graphics.drawable;
 
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
 import android.graphics.drawable.Drawable;
 import android.graphics.Picture;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.view.Gravity;
 
 /**
  * Drawable subclass that wraps a Picture, allowing the picture to be used

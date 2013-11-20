@@ -16,16 +16,12 @@
 
 package android.renderscript;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import android.content.res.Resources;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Surface;
 import android.util.Log;
-import android.util.TypedValue;
 import android.graphics.Canvas;
 import android.os.Trace;
 

@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import dalvik.system.Zygote;
 
