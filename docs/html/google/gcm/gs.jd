@@ -18,7 +18,8 @@ page.tags=cloud,push,messaging
 <h2>See Also</h2>
 
 <ol class="toc">
-<li><a href="https://code.google.com/apis/console">Google APIs Console page</a></li>
+<li><a href="https://cloud.google.com/console">Google Cloud Console</a></li>
+<li><a href="https://developers.google.com/console/help/new/">Google Cloud Console Help</a></li>
 <li><a href="https://services.google.com/fb/forms/gcm/" class="external-link" target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
@@ -32,66 +33,53 @@ the Google Play Services SDK</a>. You need this SDK to use the
 <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
 {@code GoogleCloudMessaging}</a> methods.</p>
 
-
 <h2 id="create-proj">Creating a Google API project</h2>
 <p>To create a Google API project:</p>
 <ol>
-  <li>Open the <a href="https://code.google.com/apis/console">Google APIs Console page</a>.
+  <li>Open the <a href="https://cloud.google.com/console">Google Cloud Console</a>.
   </li>
-  <li>If you haven't created an API project yet, this page will prompt you to do so:
-  <p><img src="{@docRoot}images/gcm/gcm-create-api-proj.png" class="screenshot" /></p>
-<p class="note"><strong>Note:</strong> If you already have existing projects,
-the first page you see will be the <strong>Dashboard</strong> page. From there
-you can create a new project by opening the project drop-down menu (upper left corner)
-and choosing <strong>Other projects > Create</strong>.</p></li>
-  <li> Click <strong>Create project</strong>.
-    Your browser URL will change to something like:</li>
+  <li>If you haven't created an API project yet, click <strong>Create Project</strong>.</li>
 
-<pre> https://code.google.com/apis/console/#project:<strong>4815162342</strong></pre>
+ <li>Supply a project name and click <strong>Create</strong>.
 
-  <li> Take note of the value after <code>#project:</code> (4815162342 in this
-example). This is your project number, and it will be used later on as the GCM sender ID.</li>
+<p>Once the project has been created, a page appears that displays your project ID and
+project number. For example, <strong>Project Number: 670330094152</strong>.</p></li>
+
+  <li>Copy down your project number. You will use it later on as the
+  <a href="{@docRoot}google/gcm/gcm.html#senderid">GCM sender ID</a>.</li>
   
 </ol>
 <h2 id="gcm-service">Enabling the GCM Service</h2>
 <p>To enable the GCM service:</p>
 <ol>
-  <li> In the main Google APIs Console page, select <strong>Services</strong>.</li>
-  <li>Turn the <strong>Google Cloud Messaging</strong> toggle to ON.</li>
-  <li>In the Terms of Service page, accept the terms.
-  </li>
+  <li>In the sidebar on the left, select <strong>APIs &amp; auth</strong>. </li>
+  <li>In the displayed list of APIs, turn the <strong>Google Cloud Messaging for Android
+  </strong> toggle to ON.</li>
+
 </ol>
 <h2 id="access-key">Obtaining an API Key</h2>
 <p>To obtain an API  key:</p>
 <ol>
-  <li> In the main Google APIs Console page, select <strong>API Access</strong>.
-You will see a screen that resembles the following:</li>
+ <li>In the sidebar on the left, select <strong>APIs &amp; auth > Registered apps</strong>.</li>
+<li>Click <strong>Register app</strong>. </li>
 
+<li>In the <strong>Name</strong> field, type your app's name.</li>
+<li>Click <strong>Android > Accessing APIs directly from Android</strong>.</li>
+<li>Under <strong>Android identification</strong>, type the package name for your app.</li>
+<li>Enter an SHA1 fingerprint. To get this value, follow the instructions in the
+<a href="http://developers.google.com/console/help/new/#installedapplications">console
+help</a>.</li>
+<li>Click <strong>Register</strong>.</li>
 
-<img src="{@docRoot}images/gcm/gcm-api-access.png" style="width:400px;padding:4px;">
+<li>In the new page, open the <strong>Android Key</strong> section and copy the
+<a href="{@docRoot}google/gcm/gcm.html#apikey">API key</a>.
+You will need the API key later on to perform authentication in your application server.</li>
 
-  <li>Click  <strong>Create new Server key</strong>. Either a server key or a
-browser key should work. The advantage to using a server key is that it allows
-you to whitelist IP addresses. The following screen appears:</li>
-
-
-<img src="{@docRoot}images/gcm/gcm-config-server-key.png" style="width:400px;padding:4px;">
-
-  
-  <li>Click <strong>Create</strong>:</li>
-  
-
-<img src="{@docRoot}images/gcm/gcm-api-key.png" style="width:400px;padding:4px;">
-
-
-
-</ol>
-<p> Take note of the <strong>API key</strong> value (<code>YourKeyWillBeShownHere</code>)
-in this example, as it will be used later on.</p>
 <p class="note"><strong>Note:</strong> If you need to rotate the key, click
-<strong>Generate new key</strong>. A new key  will be created while the old one
-will still be active for up to 24 hours. If you want to get rid of the old key
-immediately (for example, if you feel it was compromised), click <strong>Delete key</strong>.</p>
+the "recycle key" icon. A new key  will be created. If you think the key has been compromised
+and you want to delete it immediately, you can accomplish this by deleting the app from
+the console. Then create a new entry for the app with the same SHA1 and package name.</p>
+</ol>
 
 <h2 id="next">Next Steps</h2>
 
@@ -112,5 +100,4 @@ Implementing GCM Server</a>.</li>
 <li>Write your client app. This is the GCM-enabled Android application that runs
 on a device. See <a href="client.html">Implementing GCM Client</a> for more information.</li>
 </ol>
-
 

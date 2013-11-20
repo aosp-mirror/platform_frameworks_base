@@ -134,7 +134,7 @@ server sends a message:</p>
   <li>When the device is online, Google sends the message to the device.</li>
   <li>On the device, the system broadcasts the message to the specified Android
 application via Intent broadcast with proper permissions, so that only the targeted
-ndroid application gets the message. This wakes the Android application up.
+Android application gets the message. This wakes the Android application up.
 The Android application does not need to be running beforehand to receive the message.</li>
   <li>The Android application processes the message. </li>
 </ol>
@@ -146,7 +146,7 @@ sending messages.</p>
 <p>Required. When your app server sends a message in GCM, it must specify a target.</p>
 <p>For HTTP you must specify the target as one of:</p>
 <ul>
-<li><code>registration_ids</code>: For sending to 1 more more devices (up to 1000).
+<li><code>registration_ids</code>: For sending to 1 or more devices (up to 1000).
 When you send a message to multiple registration IDs, that is called a multicast message.</li>
 <li><code>notification_key</code>: For sending to multiple devices owned by a single user.</li>
 </ul>
