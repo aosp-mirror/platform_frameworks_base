@@ -416,15 +416,18 @@ private void registerInBackground() {
         }
     }.execute(null, null, null);
     ...
-    /**
-     * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP
-     * or CCS to send messages to your app. Not needed for this demo since the
-     * device sends upstream messages to a server that echoes back the message
-     * using the 'from' address in the message.
-     */
-    private void sendRegistrationIdToBackend() {
-      // Your implementation here.
-    }
+}</pre>
+
+<p>Once you've received your registration ID, send it to your server:</p>
+<pre>
+/**
+ * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP
+ * or CCS to send messages to your app. Not needed for this demo since the
+ * device sends upstream messages to a server that echoes back the message
+ * using the 'from' address in the message.
+ */
+private void sendRegistrationIdToBackend() {
+    // Your implementation here.
 }</pre>
 
 <p>After registering, the app calls {@code storeRegistrationId()} to store the
@@ -659,5 +662,4 @@ want to view GCM stats.
 </ol>
 <p class="note"><strong>Note:</strong> Stats on the Google API Console are not
 enabled for GCM. You must use the <a href="http://play.google.com/apps/publish">Developer Console</a>.</p>
-
 
