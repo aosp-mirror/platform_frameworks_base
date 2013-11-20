@@ -664,6 +664,7 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
       $("#tos").hide();
       $("#main").show();
       location.hash = "Updating";
+      _gaq.push(['_trackEvent', 'SDK', 'Android Studio', $("#downloadForRealz").html()]);
       return true;
     } else {
       $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,
