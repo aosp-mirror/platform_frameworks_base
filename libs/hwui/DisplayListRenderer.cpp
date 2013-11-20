@@ -506,7 +506,7 @@ void DisplayListRenderer::addStateOp(StateOp* op) {
 void DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
     if (op->getLocalBounds(mDrawModifiers, localBounds)) {
-        bool rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
+        bool rejected = quickRejectConservative(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);
     }

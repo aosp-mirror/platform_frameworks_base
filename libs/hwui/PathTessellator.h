@@ -102,7 +102,7 @@ private:
 
 class PathTessellator {
 public:
-    static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint, bool forceExpand);
+    static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint);
 
     static void tessellatePath(const SkPath& path, const SkPaint* paint,
             const mat4 *transform, VertexBuffer& vertexBuffer);
