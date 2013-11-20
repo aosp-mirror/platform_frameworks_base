@@ -1,3 +1,4 @@
+excludeFromSuggestions=true
 fullpage=true
 page.title=Google I/O 13
 @jd:body
