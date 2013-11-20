@@ -28,6 +28,8 @@
 #include "pathops/SkPathOps.h"
 
 #include <Caches.h>
+#include <vector>
+#include <map>
 
 namespace android {
 
@@ -265,6 +267,196 @@ public:
     static jboolean op(JNIEnv* env, jobject clazz, SkPath* p1, SkPath* p2, SkPathOp op, SkPath* r) {
          return Op(*p1, *p2, op, r);
      }
+
+
+    typedef SkPoint (*bezierCalculation)(float t, const SkPoint* points);
+
+    static void addMove(std::vector<SkPoint>& segmentPoints, std::vector<float>& lengths,
+            const SkPoint& point) {
+        float length = 0;
+        if (!lengths.empty()) {
+            length = lengths.back();
+        }
+        segmentPoints.push_back(point);
+        lengths.push_back(length);
+    }
+
+    static void addLine(std::vector<SkPoint>& segmentPoints, std::vector<float>& lengths,
+            const SkPoint& toPoint) {
+        if (segmentPoints.empty()) {
+            segmentPoints.push_back(SkPoint::Make(0, 0));
+            lengths.push_back(0);
+        } else if (segmentPoints.back() == toPoint) {
+            return; // Empty line
+        }
+        float length = lengths.back() + SkPoint::Distance(segmentPoints.back(), toPoint);
+        segmentPoints.push_back(toPoint);
+        lengths.push_back(length);
+    }
+
+    static float cubicCoordinateCalculation(float t, float p0, float p1, float p2, float p3) {
+        float oneMinusT = 1 - t;
+        float oneMinusTSquared = oneMinusT * oneMinusT;
+        float oneMinusTCubed = oneMinusTSquared * oneMinusT;
+        float tSquared = t * t;
+        float tCubed = tSquared * t;
+        return (oneMinusTCubed * p0) + (3 * oneMinusTSquared * t * p1)
+                + (3 * oneMinusT * tSquared * p2) + (tCubed * p3);
+    }
+
+    static SkPoint cubicBezierCalculation(float t, const SkPoint* points) {
+        float x = cubicCoordinateCalculation(t, points[0].x(), points[1].x(),
+            points[2].x(), points[3].x());
+        float y = cubicCoordinateCalculation(t, points[0].y(), points[1].y(),
+            points[2].y(), points[3].y());
+        return SkPoint::Make(x, y);
+    }
+
+    static float quadraticCoordinateCalculation(float t, float p0, float p1, float p2) {
+        float oneMinusT = 1 - t;
+        return oneMinusT * ((oneMinusT * p0) + (t * p1)) + t * ((oneMinusT * p1) + (t * p2));
+    }
+
+    static SkPoint quadraticBezierCalculation(float t, const SkPoint* points) {
+        float x = quadraticCoordinateCalculation(t, points[0].x(), points[1].x(), points[2].x());
+        float y = quadraticCoordinateCalculation(t, points[0].y(), points[1].y(), points[2].y());
+        return SkPoint::Make(x, y);
+    }
+
+    // Subdivide a section of the Bezier curve, set the mid-point and the mid-t value.
+    // Returns true if further subdivision is necessary as defined by errorSquared.
+    static bool subdividePoints(const SkPoint* points, bezierCalculation bezierFunction,
+            float t0, const SkPoint &p0, float t1, const SkPoint &p1,
+            float& midT, SkPoint &midPoint, float errorSquared) {
+        midT = (t1 + t0) / 2;
+        float midX = (p1.x() + p0.x()) / 2;
+        float midY = (p1.y() + p0.y()) / 2;
+
+        midPoint = (*bezierFunction)(midT, points);
+        float xError = midPoint.x() - midX;
+        float yError = midPoint.y() - midY;
+        float midErrorSquared = (xError * xError) + (yError * yError);
+        return midErrorSquared > errorSquared;
+    }
+
+    // Divides Bezier curves until linear interpolation is very close to accurate, using
+    // errorSquared as a metric. Cubic Bezier curves can have an inflection point that improperly
+    // short-circuit subdivision. If you imagine an S shape, the top and bottom points being the
+    // starting and end points, linear interpolation would mark the center where the curve places
+    // the point. It is clearly not the case that we can linearly interpolate at that point.
+    // doubleCheckDivision forces a second examination between subdivisions to ensure that linear
+    // interpolation works.
+    static void addBezier(const SkPoint* points,
+            bezierCalculation bezierFunction, std::vector<SkPoint>& segmentPoints,
+            std::vector<float>& lengths, float errorSquared, bool doubleCheckDivision) {
+        typedef std::map<float, SkPoint> PointMap;
+        PointMap tToPoint;
+
+        tToPoint[0] = (*bezierFunction)(0, points);
+        tToPoint[1] = (*bezierFunction)(1, points);
+
+        PointMap::iterator iter = tToPoint.begin();
+        PointMap::iterator next = iter;
+        ++next;
+        while (next != tToPoint.end()) {
+            bool needsSubdivision = true;
+            SkPoint midPoint;
+            do {
+                float midT;
+                needsSubdivision = subdividePoints(points, bezierFunction, iter->first,
+                    iter->second, next->first, next->second, midT, midPoint, errorSquared);
+                if (!needsSubdivision && doubleCheckDivision) {
+                    SkPoint quarterPoint;
+                    float quarterT;
+                    needsSubdivision = subdividePoints(points, bezierFunction, iter->first,
+                        iter->second, midT, midPoint, quarterT, quarterPoint, errorSquared);
+                    if (needsSubdivision) {
+                        // Found an inflection point. No need to double-check.
+                        doubleCheckDivision = false;
+                    }
+                }
+                if (needsSubdivision) {
+                    next = tToPoint.insert(iter, PointMap::value_type(midT, midPoint));
+                }
+            } while (needsSubdivision);
+            iter = next;
+            next++;
+        }
+
+        // Now that each division can use linear interpolation with less than the allowed error
+        for (iter = tToPoint.begin(); iter != tToPoint.end(); ++iter) {
+            addLine(segmentPoints, lengths, iter->second);
+        }
+    }
+
+    static void createVerbSegments(SkPath::Verb verb, const SkPoint* points,
+        std::vector<SkPoint>& segmentPoints, std::vector<float>& lengths, float errorSquared) {
+        switch (verb) {
+            case SkPath::kMove_Verb:
+                addMove(segmentPoints, lengths, points[0]);
+                break;
+            case SkPath::kClose_Verb:
+            case SkPath::kLine_Verb:
+                addLine(segmentPoints, lengths, points[1]);
+                break;
+            case SkPath::kQuad_Verb:
+                addBezier(points, quadraticBezierCalculation, segmentPoints, lengths,
+                    errorSquared, false);
+                break;
+            case SkPath::kCubic_Verb:
+                addBezier(points, cubicBezierCalculation, segmentPoints, lengths,
+                    errorSquared, true);
+                break;
+            default:
+                // Leave element as NULL, Conic sections are not supported.
+                break;
+        }
+    }
+
+    // Returns a float[] with each point along the path represented by 3 floats
+    // * fractional length along the path that the point resides
+    // * x coordinate
+    // * y coordinate
+    // Note that more than one point may have the same length along the path in
+    // the case of a move.
+    // NULL can be returned if the Path is empty.
+    static jfloatArray approximate(JNIEnv* env, jclass, SkPath* path, float acceptableError)
+    {
+        SkASSERT(path);
+        SkPath::Iter pathIter(*path, false);
+        SkPath::Verb verb;
+        SkPoint points[4];
+        std::vector<SkPoint> segmentPoints;
+        std::vector<float> lengths;
+        float errorSquared = acceptableError * acceptableError;
+
+        while ((verb = pathIter.next(points)) != SkPath::kDone_Verb) {
+            createVerbSegments(verb, points, segmentPoints, lengths, errorSquared);
+        }
+
+        if (segmentPoints.empty()) {
+            return NULL;
+        }
+
+        size_t numPoints = segmentPoints.size();
+        size_t approximationArraySize = numPoints * 3;
+
+        float* approximation = new float[approximationArraySize];
+        float totalLength = lengths.back();
+
+        int approximationIndex = 0;
+        for (int i = 0; i < numPoints; i++) {
+            const SkPoint& point = segmentPoints[i];
+            approximation[approximationIndex++] = lengths[i] / totalLength;
+            approximation[approximationIndex++] = point.x();
+            approximation[approximationIndex++] = point.y();
+        }
+
+        jfloatArray result = env->NewFloatArray(approximationArraySize);
+        env->SetFloatArrayRegion(result, 0, approximationArraySize, approximation);
+        delete[] approximation;
+        return result;
+    }
 };
 
 static JNINativeMethod methods[] = {
@@ -305,7 +497,8 @@ static JNINativeMethod methods[] = {
     {"native_setLastPoint","(IFF)V", (void*) SkPathGlue::setLastPoint},
     {"native_transform","(III)V", (void*) SkPathGlue::transform__MatrixPath},
     {"native_transform","(II)V", (void*) SkPathGlue::transform__Matrix},
-    {"native_op","(IIII)Z", (void*) SkPathGlue::op}
+    {"native_op","(IIII)Z", (void*) SkPathGlue::op},
+    {"native_approximate", "(IF)[F", (void*) SkPathGlue::approximate},
 };
 
 int register_android_graphics_Path(JNIEnv* env) {

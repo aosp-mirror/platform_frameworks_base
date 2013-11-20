@@ -692,6 +692,28 @@ public class Path {
         return mNativePath;
     }
 
+    /**
+     * Approximate the <code>Path</code> with a series of line segments.
+     * This returns float[] with the array containing point components.
+     * There are three components for each point, in order:
+     * <ul>
+     *     <li>Fraction along the length of the path that the point resides</li>
+     *     <li>The x coordinate of the point</li>
+     *     <li>The y coordinate of the point</li>
+     * </ul>
+     * <p>Two points may share the same fraction along its length when there is
+     * a move action within the Path.</p>
+     *
+     * @param acceptableError The acceptable error for a line on the
+     *                        Path. Typically this would be 0.5 so that
+     *                        the error is less than half a pixel.
+     * @return An array of components for points approximating the Path.
+     * @hide
+     */
+    public float[] approximate(float acceptableError) {
+        return native_approximate(mNativePath, acceptableError);
+    }
+
     private static native int init1();
     private static native int init2(int nPath);
     private static native void native_reset(int nPath);
@@ -738,4 +760,5 @@ public class Path {
     private static native void native_transform(int nPath, int matrix);
     private static native boolean native_op(int path1, int path2, int op, int result);
     private static native void finalizer(int nPath);
+    private static native float[] native_approximate(int nPath, float error);
 }
