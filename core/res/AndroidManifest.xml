@@ -2681,6 +2681,15 @@
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
+
+        <service android:name="com.android.internal.backup.LocalTransportService"
+                android:permission="android.permission.CONFIRM_FULL_BACKUP"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="android.backup.TRANSPORT_HOST" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
