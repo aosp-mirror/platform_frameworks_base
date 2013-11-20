@@ -25,6 +25,20 @@ startpage=true
 </div>
 </div>
 
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=rsQet4nBVi8">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Bitmap Allocation</p>
+</div>
+</a>
+
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=pMRnGDR6Cu0">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Making Apps Beautiful - Part 4 - Performance Tuning</p>
+</div>
+</a>
+
 <p>Learn how to use common techniques to process and load {@link
 android.graphics.Bitmap} objects in a way that keeps your user interface (UI) components responsive
 and avoids exceeding your application memory limit. If you're not careful, bitmaps can quickly
