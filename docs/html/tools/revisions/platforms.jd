@@ -7,13 +7,11 @@ page.title=Platforms
 
 <h2>See Also</h2>
 <ol>
+  <li><a href="{@docRoot}about/versions/kitkat.html">KitKat
+Highlights and APIs</a></li>
   <li><a href="{@docRoot}about/versions/jelly-bean.html">Jelly Bean
 Highlights and APIs</a></li>
   <li><a href="{@docRoot}about/versions/android-4.0-highlights.html">Ice Cream Sandwich
-Highlights and APIs</a></li>
-  <li><a href="{@docRoot}about/versions/android-3.0-highlights.html">Honeycomb
-Highlights and APIs</a></li>
-  <li><a href="{@docRoot}about/versions/android-2.3-highlights.html">Gingerbread
 Highlights and APIs</a></li>
 </ol>
 
@@ -52,11 +50,27 @@ components will not be available for download.</p>
 
 <h2 id="4.4">Android 4.4</h2>
 
-
 <div class="toggle-content opened">
-
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance release. The system version is 4.4.2.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>Android SDK Platform-tools r19 or higher is required.</dd>
+      <dd>Android SDK Tools 22.3 or higher is recommended.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
   </p>
 
@@ -72,19 +86,35 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
   </div>
 </div>
 
+
 <h3 id="gsi-4.4">Google APIs System Image</h3>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance release. This release includes
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 4.0.33,
+    allowing you to test your application in an emulator using the latest Google Play services.</p>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
   </p>
 
   <div class="toggle-content-toggleme">
 
     <p>Initial release. This release includes
-    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 4.0.30,
-    allowing you to test your application in an emulator using the latest Google Play services.</p>
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 4.0.30.
+    </p>
 
   </div>
 </div>
@@ -143,8 +173,8 @@ class="toggle-content-img" alt="" />Revision 3</a> <em>(September 2013)</em>
   <div class="toggle-content-toggleme">
 
     <p>Maintenance update. This release includes
-    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.2.65,
-    allowing you to test your application in an emulator using the latest Google Play services.</p>
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.2.65.
+    </p>
 
   </div>
 </div>
@@ -158,8 +188,8 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
   <div class="toggle-content-toggleme">
 
     <p>Maintenance update. This release includes
-    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.2.25,
-    allowing you to test your application in an emulator using the latest Google Play services.</p>
+    <a href="{@docRoot}google/play-services/index.html">Google Play services</a> version 3.2.25.
+    </p>
 
   </div>
 </div>
