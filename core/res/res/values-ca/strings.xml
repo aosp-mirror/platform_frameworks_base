@@ -990,10 +990,10 @@
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb la tauleta."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Fa 1 mes"</string>
-    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Fa menys d\'1 mes"</string>
+    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Fa més d\'1 mes"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one" msgid="4869870056547896011">"Fa 1 segon"</item>
-    <item quantity="other" msgid="3903706804349556379">"fa <xliff:g id="COUNT">%d</xliff:g> segons"</item>
+    <item quantity="other" msgid="3903706804349556379">"Fa <xliff:g id="COUNT">%d</xliff:g> segons"</item>
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"Fa 1 minut"</item>
@@ -1009,7 +1009,7 @@
     <string name="last_month" msgid="3959346739979055432">"El mes passat"</string>
     <string name="older" msgid="5211975022815554840">"Més antigues"</string>
   <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ahir"</item>
+    <item quantity="one" msgid="861358534398115820">"Ahir"</item>
     <item quantity="other" msgid="2479586466153314633">"Fa <xliff:g id="COUNT">%d</xliff:g> dies"</item>
   </plurals>
   <plurals name="in_num_seconds">
