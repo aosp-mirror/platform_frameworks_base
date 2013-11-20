@@ -23,7 +23,7 @@ package android.renderscript;
  *
  **/
 public class BaseObj {
-    BaseObj(int id, RenderScript rs) {
+    BaseObj(long id, RenderScript rs) {
         rs.validate();
         mRS = rs;
         mID = id;
@@ -44,9 +44,9 @@ public class BaseObj {
      * @param rs Context to verify against internal context for
      *           match.
      *
-     * @return int
+     * @return long
      */
-    int getID(RenderScript rs) {
+    long getID(RenderScript rs) {
         mRS.validate();
         if (mDestroyed) {
             throw new RSInvalidStateException("using a destroyed object.");
@@ -66,7 +66,7 @@ public class BaseObj {
         }
     }
 
-    private int mID;
+    private long mID;
     private boolean mDestroyed;
     private String mName;
     RenderScript mRS;
@@ -150,7 +150,7 @@ public class BaseObj {
      */
     @Override
     public int hashCode() {
-        return mID;
+        return (int)((mID & 0xfffffff) ^ (mID >> 32));
     }
 
     /**

@@ -28,7 +28,7 @@ public final class ScriptIntrinsic3DLUT extends ScriptIntrinsic {
     private Allocation mLUT;
     private Element mElement;
 
-    private ScriptIntrinsic3DLUT(int id, RenderScript rs, Element e) {
+    private ScriptIntrinsic3DLUT(long id, RenderScript rs, Element e) {
         super(id, rs);
         mElement = e;
     }
@@ -44,7 +44,7 @@ public final class ScriptIntrinsic3DLUT extends ScriptIntrinsic {
      * @return ScriptIntrinsic3DLUT
      */
     public static ScriptIntrinsic3DLUT create(RenderScript rs, Element e) {
-        int id = rs.nScriptIntrinsicCreate(8, e.getID(rs));
+        long id = rs.nScriptIntrinsicCreate(8, e.getID(rs));
 
         if (!e.isCompatible(Element.U8_4(rs))) {
             throw new RSIllegalArgumentException("Element must be compatible with uchar4.");

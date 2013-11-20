@@ -21,12 +21,12 @@ package android.renderscript;
  *
  **/
 public class AllocationAdapter extends Allocation {
-    AllocationAdapter(int id, RenderScript rs, Allocation alloc) {
+    AllocationAdapter(long id, RenderScript rs, Allocation alloc) {
         super(id, rs, alloc.mType, alloc.mUsage);
         mAdaptedAllocation = alloc;
     }
 
-    int getID(RenderScript rs) {
+    long getID(RenderScript rs) {
         throw new RSInvalidStateException(
             "This operation is not supported with adapters at this time.");
     }

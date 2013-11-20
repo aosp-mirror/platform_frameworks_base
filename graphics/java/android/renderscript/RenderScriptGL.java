@@ -279,7 +279,7 @@ public class RenderScriptGL extends RenderScript {
      */
     public void bindRootScript(Script s) {
         validate();
-        nContextBindRootScript(safeID(s));
+        nContextBindRootScript((int)safeID(s));
     }
 
     /**
@@ -291,7 +291,7 @@ public class RenderScriptGL extends RenderScript {
      */
     public void bindProgramStore(ProgramStore p) {
         validate();
-        nContextBindProgramStore(safeID(p));
+        nContextBindProgramStore((int)safeID(p));
     }
 
     /**
@@ -303,7 +303,7 @@ public class RenderScriptGL extends RenderScript {
      */
     public void bindProgramFragment(ProgramFragment p) {
         validate();
-        nContextBindProgramFragment(safeID(p));
+        nContextBindProgramFragment((int)safeID(p));
     }
 
     /**
@@ -315,7 +315,7 @@ public class RenderScriptGL extends RenderScript {
      */
     public void bindProgramRaster(ProgramRaster p) {
         validate();
-        nContextBindProgramRaster(safeID(p));
+        nContextBindProgramRaster((int)safeID(p));
     }
 
     /**
@@ -327,7 +327,7 @@ public class RenderScriptGL extends RenderScript {
      */
     public void bindProgramVertex(ProgramVertex p) {
         validate();
-        nContextBindProgramVertex(safeID(p));
+        nContextBindProgramVertex((int)safeID(p));
     }
 
 }

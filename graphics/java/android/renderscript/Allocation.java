@@ -73,8 +73,8 @@ public class Allocation extends BaseObj {
     int mCurrentDimY;
     int mCurrentDimZ;
     int mCurrentCount;
-    static HashMap<Integer, Allocation> mAllocationMap =
-            new HashMap<Integer, Allocation>();
+    static HashMap<Long, Allocation> mAllocationMap =
+            new HashMap<Long, Allocation>();
     OnBufferAvailableListener mBufferNotifier;
 
     /**
@@ -183,7 +183,7 @@ public class Allocation extends BaseObj {
     }
 
 
-    private int getIDSafe() {
+    private long getIDSafe() {
         if (mAdaptedAllocation != null) {
             return mAdaptedAllocation.getID(mRS);
         }
@@ -239,7 +239,7 @@ public class Allocation extends BaseObj {
         mBitmap = b;
     }
 
-    Allocation(int id, RenderScript rs, Type t, int usage) {
+    Allocation(long id, RenderScript rs, Type t, int usage) {
         super(id, rs);
         if ((usage & ~(USAGE_SCRIPT |
                        USAGE_GRAPHICS_TEXTURE |
@@ -340,7 +340,7 @@ public class Allocation extends BaseObj {
     @Override
     void updateFromNative() {
         super.updateFromNative();
-        int typeID = mRS.nAllocationGetType(getID(mRS));
+        long typeID = mRS.nAllocationGetType(getID(mRS));
         if(typeID != 0) {
             mType = new Type(typeID, mRS);
             mType.updateFromNative();
@@ -435,9 +435,11 @@ public class Allocation extends BaseObj {
             throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
                                                  mCurrentCount + ", array length = " + d.length);
         }
+        // FIXME: requires 64-bit path
+
         int i[] = new int[d.length];
         for (int ct=0; ct < d.length; ct++) {
-            i[ct] = d[ct].getID(mRS);
+            i[ct] = (int)d[ct].getID(mRS);
         }
         copy1DRangeFromUnchecked(0, mCurrentCount, i);
         Trace.traceEnd(RenderScript.TRACE_TAG);
@@ -1329,7 +1331,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationResize1D(getID(mRS), dimX);
         mRS.finish();  // Necessary because resize is fifoed and update is async.
 
-        int typeID = mRS.nAllocationGetType(getID(mRS));
+        long typeID = mRS.nAllocationGetType(getID(mRS));
         mType = new Type(typeID, mRS);
         mType.updateFromNative();
         updateCacheInfo(mType);
@@ -1359,7 +1361,7 @@ public class Allocation extends BaseObj {
         if (type.getID(rs) == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
+        long id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -1414,7 +1416,7 @@ public class Allocation extends BaseObj {
         b.setX(count);
         Type t = b.create();
 
-        int id = rs.nAllocationCreateTyped(t.getID(rs), MipmapControl.MIPMAP_NONE.mID, usage, 0);
+        long id = rs.nAllocationCreateTyped(t.getID(rs), MipmapControl.MIPMAP_NONE.mID, usage, 0);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -1498,7 +1500,7 @@ public class Allocation extends BaseObj {
         if (mips == MipmapControl.MIPMAP_NONE &&
             t.getElement().isCompatible(Element.RGBA_8888(rs)) &&
             usage == (USAGE_SHARED | USAGE_SCRIPT | USAGE_GRAPHICS_TEXTURE)) {
-            int id = rs.nAllocationCreateBitmapBackedAllocation(t.getID(rs), mips.mID, b, usage);
+            long id = rs.nAllocationCreateBitmapBackedAllocation(t.getID(rs), mips.mID, b, usage);
             if (id == 0) {
                 throw new RSRuntimeException("Load failed.");
             }
@@ -1510,7 +1512,7 @@ public class Allocation extends BaseObj {
         }
 
 
-        int id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
+        long id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
         if (id == 0) {
             throw new RSRuntimeException("Load failed.");
         }
@@ -1613,7 +1615,7 @@ public class Allocation extends BaseObj {
         tb.setMipmaps(mips == MipmapControl.MIPMAP_FULL);
         Type t = tb.create();
 
-        int id = rs.nAllocationCubeCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
+        long id = rs.nAllocationCubeCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
         if(id == 0) {
             throw new RSRuntimeException("Load failed for bitmap " + b + " element " + e);
         }
@@ -1838,14 +1840,14 @@ public class Allocation extends BaseObj {
      */
     public void setOnBufferAvailableListener(OnBufferAvailableListener callback) {
         synchronized(mAllocationMap) {
-            mAllocationMap.put(new Integer(getID(mRS)), this);
+            mAllocationMap.put(new Long(getID(mRS)), this);
             mBufferNotifier = callback;
         }
     }
 
     static void sendBufferNotification(int id) {
         synchronized(mAllocationMap) {
-            Allocation a = mAllocationMap.get(new Integer(id));
+            Allocation a = mAllocationMap.get(new Long(id));
 
             if ((a != null) && (a.mBufferNotifier != null)) {
                 a.mBufferNotifier.onBufferAvailable(a);

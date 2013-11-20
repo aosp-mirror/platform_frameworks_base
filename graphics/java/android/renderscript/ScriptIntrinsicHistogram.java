@@ -24,7 +24,7 @@ package android.renderscript;
 public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
     private Allocation mOut;
 
-    private ScriptIntrinsicHistogram(int id, RenderScript rs) {
+    private ScriptIntrinsicHistogram(long id, RenderScript rs) {
         super(id, rs);
     }
 
@@ -48,7 +48,7 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
             (!e.isCompatible(Element.U8(rs)))) {
             throw new RSIllegalArgumentException("Unsuported element type.");
         }
-        int id = rs.nScriptIntrinsicCreate(9, e.getID(rs));
+        long id = rs.nScriptIntrinsicCreate(9, e.getID(rs));
         ScriptIntrinsicHistogram sib = new ScriptIntrinsicHistogram(id, rs);
         return sib;
     }
