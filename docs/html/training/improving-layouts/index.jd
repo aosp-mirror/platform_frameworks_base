@@ -26,6 +26,13 @@ next.link=optimizing-layout.html
 </div>
 </div>
 
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=-FUw8HMbmBQ">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Optimising Layouts with Hierarchy Viewer</p>
+</div>
+</a>
+
 
 
 <p>Layouts are a key part of Android applications that directly affect the user experience. If
