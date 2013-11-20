@@ -1,4 +1,5 @@
-Rpage.title=Notepad Exercise 2
+excludeFromSuggestions=true
+page.title=Notepad Exercise 2
 parent.title=Notepad Tutorial
 parent.link=index.html
 @jd:body

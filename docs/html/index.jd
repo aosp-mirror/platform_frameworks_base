@@ -1,6 +1,7 @@
 fullpage=true
 no_footer_links=true
 carousel=true
+excludeFromSuggestions=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
 
