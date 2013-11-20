@@ -20,9 +20,15 @@ startpage=true
   <li><a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi P2P</a></li>
 </ul>
 
+</div>
+</div>
 
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=oi_ARV_I8Dc">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Network Service Discovery</p>
 </div>
-</div>
+</a>
 
 
 <p>Besides enabling communication with the cloud, Android's wireless APIs also
