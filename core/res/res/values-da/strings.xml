@@ -1122,7 +1122,7 @@
     <string name="capital_on" msgid="1544682755514494298">"TIL"</string>
     <string name="capital_off" msgid="6815870386972805832">"FRA"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Brug"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"Vælg en startsideapp"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Vælg en startapp"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Ryd standard i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Vælg en handling"</string>
