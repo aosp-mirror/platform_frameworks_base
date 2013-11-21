@@ -19,7 +19,6 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -41,7 +40,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
     private static final int WIDGET_ANIMATION_DURATION = 250; // ms
-    private static final int WIDGET_WAIT_DURATION = 650; // ms
+    private static final int WIDGET_WAIT_DURATION = 400; // ms
     private static final int RECOVERY_DELAY = 1000; // ms
 
     interface Callbacks {
@@ -68,6 +67,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private FixedSizeFrameLayout mPreview;
     private View mFullscreenPreview;
     private View mFakeNavBar;
+    private boolean mUseFastTransition;
 
     private final Runnable mTransitionToCameraRunnable = new Runnable() {
         @Override
@@ -418,7 +418,8 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private void rescheduleTransitionToCamera() {
         if (DEBUG) Log.d(TAG, "rescheduleTransitionToCamera at " + SystemClock.uptimeMillis());
         mHandler.removeCallbacks(mTransitionToCameraRunnable);
-        mHandler.postDelayed(mTransitionToCameraRunnable, WIDGET_WAIT_DURATION);
+        final long duration = mUseFastTransition ? 0 : WIDGET_WAIT_DURATION;
+        mHandler.postDelayed(mTransitionToCameraRunnable, duration);
     }
 
     private void cancelTransitionToCamera() {
@@ -512,5 +513,9 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     public void setInsets(Rect insets) {
         if (DEBUG) Log.d(TAG, "setInsets: " + insets);
         mInsets.set(insets);
+    }
+
+    public void setUseFastTransition(boolean useFastTransition) {
+        mUseFastTransition = useFastTransition;
     }
 }
