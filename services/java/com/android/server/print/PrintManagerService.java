@@ -399,7 +399,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
     private void registerBoradcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             @Override
-            public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            public void onPackageModified(String packageName) {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId());
                     Iterator<ComponentName> iterator = userState.getEnabledServices().iterator();
@@ -407,11 +407,9 @@ public final class PrintManagerService extends IPrintManager.Stub {
                         ComponentName componentName = iterator.next();
                         if (packageName.equals(componentName.getPackageName())) {
                             userState.updateIfNeededLocked();
-                            return true;
                         }
                     }
                 }
-                return false;
             }
 
             @Override
