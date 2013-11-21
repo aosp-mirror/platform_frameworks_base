@@ -168,7 +168,7 @@ public abstract class CameraMetadata {
 
             Key lhs = (Key) o;
 
-            return mName.equals(lhs.mName);
+            return mName.equals(lhs.mName) && mType.equals(lhs.mType);
         }
 
         /**

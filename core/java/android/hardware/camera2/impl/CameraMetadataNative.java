@@ -448,7 +448,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         } else if (key.equals(CaptureResult.STATISTICS_FACES)) {
             return (T) getFaces();
         } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
-            return (T) fixFaceRectangles();
+            return (T) getFaceRectangles();
         }
 
         // For other keys, get() falls back to getBase()
@@ -457,12 +457,15 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
 
     private int[] getAvailableFormats() {
         int[] availableFormats = getBase(CameraCharacteristics.SCALER_AVAILABLE_FORMATS);
-        for (int i = 0; i < availableFormats.length; i++) {
-            // JPEG has different value between native and managed side, need override.
-            if (availableFormats[i] == NATIVE_JPEG_FORMAT) {
-                availableFormats[i] = ImageFormat.JPEG;
+        if (availableFormats != null) {
+            for (int i = 0; i < availableFormats.length; i++) {
+                // JPEG has different value between native and managed side, need override.
+                if (availableFormats[i] == NATIVE_JPEG_FORMAT) {
+                    availableFormats[i] = ImageFormat.JPEG;
+                }
             }
         }
+
         return availableFormats;
     }
 
@@ -550,7 +553,7 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     // (left, top, width, height) at the native level, so the normal Rect
     // conversion that does (l, t, w, h) -> (l, t, r, b) is unnecessary. Undo
     // that conversion here for just the faces.
-    private Rect[] fixFaceRectangles() {
+    private Rect[] getFaceRectangles() {
         Rect[] faceRectangles = getBase(CaptureResult.STATISTICS_FACE_RECTANGLES);
         if (faceRectangles == null) return null;
 
@@ -590,6 +593,8 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
     private <T> boolean setOverride(Key<T> key, T value) {
         if (key.equals(CameraCharacteristics.SCALER_AVAILABLE_FORMATS)) {
             return setAvailableFormats((int[]) value);
+        } else if (key.equals(CaptureResult.STATISTICS_FACE_RECTANGLES)) {
+            return setFaceRectangles((Rect[]) value);
         }
 
         // For other keys, set() falls back to setBase().
@@ -612,6 +617,36 @@ public class CameraMetadataNative extends CameraMetadata implements Parcelable {
         }
 
         setBase(CameraCharacteristics.SCALER_AVAILABLE_FORMATS, newValues);
+        return true;
+    }
+
+    /**
+     * Convert Face Rectangles from managed side to native side as they have different definitions.
+     * <p>
+     * Managed side face rectangles are defined as: left, top, width, height.
+     * Native side face rectangles are defined as: left, top, right, bottom.
+     * The input face rectangle need to be converted to native side definition when set is called.
+     * </p>
+     *
+     * @param faceRects Input face rectangles.
+     * @return true if face rectangles can be set successfully. Otherwise, Let the caller
+     *             (setBase) to handle it appropriately.
+     */
+    private boolean setFaceRectangles(Rect[] faceRects) {
+        if (faceRects == null) {
+            return false;
+        }
+
+        Rect[] newFaceRects = new Rect[faceRects.length];
+        for (int i = 0; i < newFaceRects.length; i++) {
+            newFaceRects[i] = new Rect(
+                    faceRects[i].left,
+                    faceRects[i].top,
+                    faceRects[i].right + faceRects[i].left,
+                    faceRects[i].bottom + faceRects[i].top);
+        }
+
+        setBase(CaptureResult.STATISTICS_FACE_RECTANGLES, newFaceRects);
         return true;
     }
 
