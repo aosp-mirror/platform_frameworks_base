@@ -17,19 +17,13 @@ package android.net.wifi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.security.Credentials;
-import android.security.KeyChain;
-import android.security.KeyStore;
 import android.text.TextUtils;
-import android.util.Slog;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -44,62 +38,11 @@ import java.util.Map;
  * and any associated credentials.
  */
 public class WifiEnterpriseConfig implements Parcelable {
-    private static final String TAG = "WifiEnterpriseConfig";
-    private static final boolean DBG = false;
-    /**
-     * In old configurations, the "private_key" field was used. However, newer
-     * configurations use the key_id field with the engine_id set to "keystore".
-     * If this field is found in the configuration, the migration code is
-     * triggered.
-     */
-    private static final String OLD_PRIVATE_KEY_NAME = "private_key";
-
-    /**
-     * String representing the keystore OpenSSL ENGINE's ID.
-     */
-    private static final String ENGINE_ID_KEYSTORE = "keystore";
-
-    /**
-     * String representing the keystore URI used for wpa_supplicant.
-     */
-    private static final String KEYSTORE_URI = "keystore://";
-
-    /**
-     * String to set the engine value to when it should be enabled.
-     */
-    private static final String ENGINE_ENABLE = "1";
-
-    /**
-     * String to set the engine value to when it should be disabled.
-     */
-    private static final String ENGINE_DISABLE = "0";
-
-    private static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
-    private static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + Credentials.USER_CERTIFICATE;
-
-    private static final String EAP_KEY             = "eap";
-    private static final String PHASE2_KEY          = "phase2";
-    private static final String IDENTITY_KEY        = "identity";
-    private static final String ANON_IDENTITY_KEY   = "anonymous_identity";
-    private static final String PASSWORD_KEY        = "password";
-    private static final String CLIENT_CERT_KEY     = "client_cert";
-    private static final String CA_CERT_KEY         = "ca_cert";
-    private static final String SUBJECT_MATCH_KEY   = "subject_match";
-    private static final String ENGINE_KEY          = "engine";
-    private static final String ENGINE_ID_KEY       = "engine_id";
-    private static final String PRIVATE_KEY_ID_KEY  = "key_id";
-    private static final String OPP_KEY_CACHING     = "proactive_key_caching";
 
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate mCaCert;
     private PrivateKey mClientPrivateKey;
     private X509Certificate mClientCertificate;
-    private boolean mNeedsSoftwareKeystore = false;
-
-    /** This represents an empty value of an enterprise field.
-     * NULL is used at wpa_supplicant to indicate an empty value
-     */
-    static final String EMPTY_VALUE = "NULL";
 
     public WifiEnterpriseConfig() {
         // Do not set defaults so that the enterprise fields that are not changed
@@ -246,7 +189,8 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int GTC         = 4;
         private static final String PREFIX = "auth=";
         /** @hide */
-        public static final String[] strings = {EMPTY_VALUE, "PAP", "MSCHAP", "MSCHAPV2", "GTC" };
+        public static final String[] strings = {WifiConfigStore.EMPTY_VALUE, "PAP", "MSCHAP",
+                "MSCHAPV2", "GTC" };
 
         /** Prevent initialization */
         private Phase2() {}
@@ -255,13 +199,6 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** Internal use only */
     HashMap<String, String> getFields() {
         return mFields;
-    }
-
-    /** Internal use only */
-    static String[] getSupplicantKeys() {
-        return new String[] { EAP_KEY, PHASE2_KEY, IDENTITY_KEY, ANON_IDENTITY_KEY, PASSWORD_KEY,
-                CLIENT_CERT_KEY, CA_CERT_KEY, SUBJECT_MATCH_KEY, ENGINE_KEY, ENGINE_ID_KEY,
-                PRIVATE_KEY_ID_KEY };
     }
 
     /**
@@ -277,8 +214,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Eap.PWD:
             case Eap.TLS:
             case Eap.TTLS:
-                mFields.put(EAP_KEY, Eap.strings[eapMethod]);
-                mFields.put(OPP_KEY_CACHING, "1");
+                mFields.put(WifiConfigStore.EAP_KEY, Eap.strings[eapMethod]);
+                mFields.put(WifiConfigStore.OPP_KEY_CACHING, "1");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown EAP method");
@@ -290,7 +227,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return eap method configured
      */
     public int getEapMethod() {
-        String eapMethod  = mFields.get(EAP_KEY);
+        String eapMethod  = mFields.get(WifiConfigStore.EAP_KEY);
         return getStringIndex(Eap.strings, eapMethod, Eap.NONE);
     }
 
@@ -306,14 +243,14 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setPhase2Method(int phase2Method) {
         switch (phase2Method) {
             case Phase2.NONE:
-                mFields.put(PHASE2_KEY, EMPTY_VALUE);
+                mFields.put(WifiConfigStore.PHASE2_KEY, WifiConfigStore.EMPTY_VALUE);
                 break;
             /** Valid methods */
             case Phase2.PAP:
             case Phase2.MSCHAP:
             case Phase2.MSCHAPV2:
             case Phase2.GTC:
-                mFields.put(PHASE2_KEY, convertToQuotedString(
+                mFields.put(WifiConfigStore.PHASE2_KEY, convertToQuotedString(
                         Phase2.PREFIX + Phase2.strings[phase2Method]));
                 break;
             default:
@@ -326,7 +263,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return a phase 2 method defined at {@link Phase2}
      * */
     public int getPhase2Method() {
-        String phase2Method = removeDoubleQuotes(mFields.get(PHASE2_KEY));
+        String phase2Method = removeDoubleQuotes(mFields.get(WifiConfigStore.PHASE2_KEY));
         // Remove auth= prefix
         if (phase2Method.startsWith(Phase2.PREFIX)) {
             phase2Method = phase2Method.substring(Phase2.PREFIX.length());
@@ -339,7 +276,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param identity
      */
     public void setIdentity(String identity) {
-        setFieldValue(IDENTITY_KEY, identity, "");
+        setFieldValue(WifiConfigStore.IDENTITY_KEY, identity, "");
     }
 
     /**
@@ -347,7 +284,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return the identity
      */
     public String getIdentity() {
-        return getFieldValue(IDENTITY_KEY, "");
+        return getFieldValue(WifiConfigStore.IDENTITY_KEY, "");
     }
 
     /**
@@ -356,14 +293,14 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param anonymousIdentity the anonymous identity
      */
     public void setAnonymousIdentity(String anonymousIdentity) {
-        setFieldValue(ANON_IDENTITY_KEY, anonymousIdentity, "");
+        setFieldValue(WifiConfigStore.ANON_IDENTITY_KEY, anonymousIdentity, "");
     }
 
     /** Get the anonymous identity
      * @return anonymous identity
      */
     public String getAnonymousIdentity() {
-        return getFieldValue(ANON_IDENTITY_KEY, "");
+        return getFieldValue(WifiConfigStore.ANON_IDENTITY_KEY, "");
     }
 
     /**
@@ -371,7 +308,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param password the password
      */
     public void setPassword(String password) {
-        setFieldValue(PASSWORD_KEY, password, "");
+        setFieldValue(WifiConfigStore.PASSWORD_KEY, password, "");
     }
 
     /**
@@ -381,7 +318,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * framework, returns "*".
      */
     public String getPassword() {
-        return getFieldValue(PASSWORD_KEY, "");
+        return getFieldValue(WifiConfigStore.PASSWORD_KEY, "");
     }
 
     /**
@@ -394,7 +331,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public void setCaCertificateAlias(String alias) {
-        setFieldValue(CA_CERT_KEY, alias, CA_CERT_PREFIX);
+        setFieldValue(WifiConfigStore.CA_CERT_KEY, alias, WifiConfigStore.CA_CERT_PREFIX);
     }
 
     /**
@@ -403,7 +340,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public String getCaCertificateAlias() {
-        return getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
+        return getFieldValue(WifiConfigStore.CA_CERT_KEY, WifiConfigStore.CA_CERT_PREFIX);
     }
 
     /**
@@ -431,11 +368,17 @@ public class WifiEnterpriseConfig implements Parcelable {
 
     /**
      * Get CA certificate
-     *
      * @return X.509 CA certificate
      */
     public X509Certificate getCaCertificate() {
         return mCaCert;
+    }
+
+    /**
+     * @hide
+     */
+    public void resetCaCertificate() {
+        mCaCert = null;
     }
 
     /**
@@ -448,15 +391,16 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public void setClientCertificateAlias(String alias) {
-        setFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
-        setFieldValue(PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
+        setFieldValue(WifiConfigStore.CLIENT_CERT_KEY, alias, WifiConfigStore.CLIENT_CERT_PREFIX);
+        setFieldValue(WifiConfigStore.PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
         // Also, set engine parameters
         if (TextUtils.isEmpty(alias)) {
-            mFields.put(ENGINE_KEY, ENGINE_DISABLE);
-            mFields.put(ENGINE_ID_KEY, EMPTY_VALUE);
+            mFields.put(WifiConfigStore.ENGINE_KEY, WifiConfigStore.ENGINE_DISABLE);
+            mFields.put(WifiConfigStore.ENGINE_ID_KEY, WifiConfigStore.EMPTY_VALUE);
         } else {
-            mFields.put(ENGINE_KEY, ENGINE_ENABLE);
-            mFields.put(ENGINE_ID_KEY, convertToQuotedString(ENGINE_ID_KEYSTORE));
+            mFields.put(WifiConfigStore.ENGINE_KEY, WifiConfigStore.ENGINE_ENABLE);
+            mFields.put(WifiConfigStore.ENGINE_ID_KEY,
+                    convertToQuotedString(WifiConfigStore.ENGINE_ID_KEYSTORE));
         }
     }
 
@@ -466,7 +410,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @hide
      */
     public String getClientCertificateAlias() {
-        return getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
+        return getFieldValue(WifiConfigStore.CLIENT_CERT_KEY, WifiConfigStore.CLIENT_CERT_PREFIX);
     }
 
     /**
@@ -507,116 +451,19 @@ public class WifiEnterpriseConfig implements Parcelable {
         return mClientCertificate;
     }
 
-    boolean needsKeyStore() {
-        // Has no keys to be installed
-        if (mClientCertificate == null && mCaCert == null) return false;
-        return true;
+    /**
+     * @hide
+     */
+    public void resetClientKeyEntry() {
+        mClientPrivateKey = null;
+        mClientCertificate = null;
     }
 
-    static boolean isHardwareBackedKey(PrivateKey key) {
-        return KeyChain.isBoundKeyAlgorithm(key.getAlgorithm());
-    }
-
-    static boolean hasHardwareBackedKey(Certificate certificate) {
-        return KeyChain.isBoundKeyAlgorithm(certificate.getPublicKey().getAlgorithm());
-    }
-
-    boolean needsSoftwareBackedKeyStore() {
-        return mNeedsSoftwareKeystore;
-    }
-
-    boolean installKeys(android.security.KeyStore keyStore, String name) {
-        boolean ret = true;
-        String privKeyName = Credentials.USER_PRIVATE_KEY + name;
-        String userCertName = Credentials.USER_CERTIFICATE + name;
-        String caCertName = Credentials.CA_CERTIFICATE + name;
-        if (mClientCertificate != null) {
-            byte[] privKeyData = mClientPrivateKey.getEncoded();
-            if (isHardwareBackedKey(mClientPrivateKey)) {
-                // Hardware backed key store is secure enough to store keys un-encrypted, this
-                // removes the need for user to punch a PIN to get access to these keys
-                if (DBG) Slog.d(TAG, "importing keys " + name + " in hardware backed " +
-                        "store");
-                ret = keyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
-                                KeyStore.FLAG_NONE);
-            } else {
-                // Software backed key store is NOT secure enough to store keys un-encrypted.
-                // Save keys encrypted so they are protected with user's PIN. User will
-                // have to unlock phone before being able to use these keys and connect to
-                // networks.
-                if (DBG) Slog.d(TAG, "importing keys " + name + " in software backed store");
-                ret = keyStore.importKey(privKeyName, privKeyData, Process.WIFI_UID,
-                        KeyStore.FLAG_ENCRYPTED);
-                mNeedsSoftwareKeystore = true;
-            }
-            if (ret == false) {
-                return ret;
-            }
-
-            ret = putCertInKeyStore(keyStore, userCertName, mClientCertificate);
-            if (ret == false) {
-                // Remove private key installed
-                keyStore.delKey(privKeyName, Process.WIFI_UID);
-                return ret;
-            }
-        }
-
-        if (mCaCert != null) {
-            ret = putCertInKeyStore(keyStore, caCertName, mCaCert);
-            if (ret == false) {
-                if (mClientCertificate != null) {
-                    // Remove client key+cert
-                    keyStore.delKey(privKeyName, Process.WIFI_UID);
-                    keyStore.delete(userCertName, Process.WIFI_UID);
-                }
-                return ret;
-            }
-        }
-
-        // Set alias names
-        if (mClientCertificate != null) {
-            setClientCertificateAlias(name);
-            mClientPrivateKey = null;
-            mClientCertificate = null;
-        }
-
-        if (mCaCert != null) {
-            setCaCertificateAlias(name);
-            mCaCert = null;
-        }
-
-        return ret;
-    }
-
-    private boolean putCertInKeyStore(android.security.KeyStore keyStore, String name,
-            Certificate cert) {
-        try {
-            byte[] certData = Credentials.convertToPem(cert);
-            if (DBG) Slog.d(TAG, "putting certificate " + name + " in keystore");
-            return keyStore.put(name, certData, Process.WIFI_UID, KeyStore.FLAG_NONE);
-
-        } catch (IOException e1) {
-            return false;
-        } catch (CertificateException e2) {
-            return false;
-        }
-    }
-
-    void removeKeys(KeyStore keyStore) {
-        String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
-        // a valid client certificate is configured
-        if (!TextUtils.isEmpty(client)) {
-            if (DBG) Slog.d(TAG, "removing client private key and user cert");
-            keyStore.delKey(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
-            keyStore.delete(Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
-        }
-
-        String ca = getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
-        // a valid ca certificate is configured
-        if (!TextUtils.isEmpty(ca)) {
-            if (DBG) Slog.d(TAG, "removing CA cert");
-            keyStore.delete(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
-        }
+    /**
+     * @hide
+     */
+    public PrivateKey getClientPrivateKey() {
+        return mClientPrivateKey;
     }
 
     /**
@@ -625,7 +472,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param subjectMatch substring to be matched
      */
     public void setSubjectMatch(String subjectMatch) {
-        setFieldValue(SUBJECT_MATCH_KEY, subjectMatch, "");
+        setFieldValue(WifiConfigStore.SUBJECT_MATCH_KEY, subjectMatch, "");
     }
 
     /**
@@ -633,145 +480,22 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return the subject match string
      */
     public String getSubjectMatch() {
-        return getFieldValue(SUBJECT_MATCH_KEY, "");
+        return getFieldValue(WifiConfigStore.SUBJECT_MATCH_KEY, "");
     }
 
     /** See {@link WifiConfiguration#getKeyIdForCredentials} @hide */
     String getKeyId(WifiEnterpriseConfig current) {
-        String eap = mFields.get(EAP_KEY);
-        String phase2 = mFields.get(PHASE2_KEY);
+        String eap = mFields.get(WifiConfigStore.EAP_KEY);
+        String phase2 = mFields.get(WifiConfigStore.PHASE2_KEY);
 
         // If either eap or phase2 are not initialized, use current config details
         if (TextUtils.isEmpty((eap))) {
-            eap = current.mFields.get(EAP_KEY);
+            eap = current.mFields.get(WifiConfigStore.EAP_KEY);
         }
         if (TextUtils.isEmpty(phase2)) {
-            phase2 = current.mFields.get(PHASE2_KEY);
+            phase2 = current.mFields.get(WifiConfigStore.PHASE2_KEY);
         }
         return eap + "_" + phase2;
-    }
-
-    /** Migrates the old style TLS config to the new config style. This should only be used
-     * when restoring an old wpa_supplicant.conf or upgrading from a previous
-     * platform version.
-     * @return true if the config was updated
-     * @hide
-     */
-    boolean migrateOldEapTlsNative(WifiNative wifiNative, int netId) {
-        String oldPrivateKey = wifiNative.getNetworkVariable(netId, OLD_PRIVATE_KEY_NAME);
-        /*
-         * If the old configuration value is not present, then there is nothing
-         * to do.
-         */
-        if (TextUtils.isEmpty(oldPrivateKey)) {
-            return false;
-        } else {
-            // Also ignore it if it's empty quotes.
-            oldPrivateKey = removeDoubleQuotes(oldPrivateKey);
-            if (TextUtils.isEmpty(oldPrivateKey)) {
-                return false;
-            }
-        }
-
-        mFields.put(ENGINE_KEY, ENGINE_ENABLE);
-        mFields.put(ENGINE_ID_KEY, convertToQuotedString(ENGINE_ID_KEYSTORE));
-
-        /*
-        * The old key started with the keystore:// URI prefix, but we don't
-        * need that anymore. Trim it off if it exists.
-        */
-        final String keyName;
-        if (oldPrivateKey.startsWith(KEYSTORE_URI)) {
-            keyName = new String(oldPrivateKey.substring(KEYSTORE_URI.length()));
-        } else {
-            keyName = oldPrivateKey;
-        }
-        mFields.put(PRIVATE_KEY_ID_KEY, convertToQuotedString(keyName));
-
-        wifiNative.setNetworkVariable(netId, ENGINE_KEY, mFields.get(ENGINE_KEY));
-        wifiNative.setNetworkVariable(netId, ENGINE_ID_KEY, mFields.get(ENGINE_ID_KEY));
-        wifiNative.setNetworkVariable(netId, PRIVATE_KEY_ID_KEY, mFields.get(PRIVATE_KEY_ID_KEY));
-        // Remove old private_key string so we don't run this again.
-        wifiNative.setNetworkVariable(netId, OLD_PRIVATE_KEY_NAME, EMPTY_VALUE);
-        return true;
-    }
-
-    /** Migrate certs from global pool to wifi UID if not already done */
-    void migrateCerts(android.security.KeyStore keyStore) {
-        String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
-        // a valid client certificate is configured
-        if (!TextUtils.isEmpty(client)) {
-            if (!keyStore.contains(Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID)) {
-                keyStore.duplicate(Credentials.USER_PRIVATE_KEY + client, -1,
-                        Credentials.USER_PRIVATE_KEY + client, Process.WIFI_UID);
-                keyStore.duplicate(Credentials.USER_CERTIFICATE + client, -1,
-                        Credentials.USER_CERTIFICATE + client, Process.WIFI_UID);
-            }
-        }
-
-        String ca = getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
-        // a valid ca certificate is configured
-        if (!TextUtils.isEmpty(ca)) {
-            if (!keyStore.contains(Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID)) {
-                keyStore.duplicate(Credentials.CA_CERTIFICATE + ca, -1,
-                        Credentials.CA_CERTIFICATE + ca, Process.WIFI_UID);
-            }
-        }
-    }
-
-    void initializeSoftwareKeystoreFlag(android.security.KeyStore keyStore) {
-        String client = getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
-        if (!TextUtils.isEmpty(client)) {
-            // a valid client certificate is configured
-
-            // BUGBUG: keyStore.get() never returns certBytes; because it is not
-            // taking WIFI_UID as a parameter. It always looks for certificate
-            // with SYSTEM_UID, and never finds any Wifi certificates. Assuming that
-            // all certificates need software keystore until we get the get() API
-            // fixed.
-
-            mNeedsSoftwareKeystore = true;
-
-            /*
-            try {
-
-                if (DBG) Slog.d(TAG, "Loading client certificate " + Credentials
-                        .USER_CERTIFICATE + client);
-
-                CertificateFactory factory = CertificateFactory.getInstance("X.509");
-                if (factory == null) {
-                    Slog.e(TAG, "Error getting certificate factory");
-                    return;
-                }
-
-                byte[] certBytes = keyStore.get(Credentials.USER_CERTIFICATE + client);
-                if (certBytes != null) {
-                    Certificate cert = (X509Certificate) factory.generateCertificate(
-                            new ByteArrayInputStream(certBytes));
-
-                    if (cert != null) {
-                        mNeedsSoftwareKeystore = hasHardwareBackedKey(cert);
-
-                        if (DBG) Slog.d(TAG, "Loaded client certificate " + Credentials
-                                .USER_CERTIFICATE + client);
-                        if (DBG) Slog.d(TAG, "It " + (mNeedsSoftwareKeystore ? "needs" :
-                                "does not need" ) + " software key store");
-                    } else {
-                        Slog.d(TAG, "could not generate certificate");
-                    }
-                } else {
-                    Slog.e(TAG, "Could not load client certificate " + Credentials
-                            .USER_CERTIFICATE + client);
-                    mNeedsSoftwareKeystore = true;
-                }
-
-            } catch(CertificateException e) {
-                Slog.e(TAG, "Could not read certificates");
-                mCaCert = null;
-                mClientCertificate = null;
-            }
-            */
-        }
     }
 
     private String removeDoubleQuotes(String string) {
@@ -806,11 +530,12 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param key into the hash
      * @param prefix is the prefix that the value may have
      * @return value
+     * @hide
      */
-    private String getFieldValue(String key, String prefix) {
+    String getFieldValue(String key, String prefix) {
         String value = mFields.get(key);
         // Uninitialized or known to be empty after reading from supplicant
-        if (TextUtils.isEmpty(value) || EMPTY_VALUE.equals(value)) return "";
+        if (TextUtils.isEmpty(value) || WifiConfigStore.EMPTY_VALUE.equals(value)) return "";
 
         value = removeDoubleQuotes(value);
         if (value.startsWith(prefix)) {
@@ -827,9 +552,24 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     private void setFieldValue(String key, String value, String prefix) {
         if (TextUtils.isEmpty(value)) {
-            mFields.put(key, EMPTY_VALUE);
+            mFields.put(key, WifiConfigStore.EMPTY_VALUE);
         } else {
             mFields.put(key, convertToQuotedString(prefix + value));
+        }
+    }
+
+
+    /** Set a value with an optional prefix at key
+     * @param key into the hash
+     * @param value to be set
+     * @param prefix an optional value to be prefixed to actual value
+     * @hide
+     */
+    public void setFieldValue(String key, String value) {
+        if (TextUtils.isEmpty(value)) {
+           mFields.put(key, WifiConfigStore.EMPTY_VALUE);
+        } else {
+            mFields.put(key, convertToQuotedString(value));
         }
     }
 
