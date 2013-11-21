@@ -20,7 +20,27 @@ startpage=true
   <li>Android 1.6 (API Level 4) or higher</li>
 </ul>
 
+<h2>You should also read</h2>
 
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}design/patterns/fullscreen.html">
+        Android Design Guide
+        </a>
+    </li>
+
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}samples/ImmersiveMode/index.html"
+class="button">Get the sample</a>
+ <p class="filename">ImmersiveMode sample</p>
+</div>
 
 </div>
 </div>
@@ -29,6 +49,13 @@ startpage=true
 <div>
     <h3>Design Guide</h3>
     <p>System Bars</p>
+</div>
+</a>
+
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=cBi8fjv90E4">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Android 4.4 Immersive Mode</p>
 </div>
 </a>
 
@@ -77,6 +104,12 @@ bars.
     </dt>
     <dd>
         Learn how to hide the navigation bar, in addition to the status bar.
+    </dd>
+     <dt>
+        <strong><a href="immersive.html">Using Immersive Full-Screen Mode</a></strong>
+    </dt>
+    <dd>
+        Learn how to create a fully immersive experience in your app.
     </dd>
 
     <dt>
