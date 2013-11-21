@@ -40,6 +40,14 @@ public class KeyguardServiceDelegate {
     private KeyguardState mKeyguardState = new KeyguardState();
 
     /* package */ static final class KeyguardState {
+        KeyguardState() {
+            // Assume keyguard is showing and secure until we know for sure. This is here in
+            // the event something checks before the service is actually started.
+            // KeyguardService itself should default to this state until the real state is known.
+            showing = true;
+            showingAndNotHidden = true;
+            secure = true;
+        }
         boolean showing;
         boolean showingAndNotHidden;
         boolean inputRestricted;
