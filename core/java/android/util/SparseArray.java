@@ -44,7 +44,7 @@ import com.android.internal.util.ArrayUtils;
  * {@link #keyAt(int)} and {@link #valueAt(int)}. Iterating over the keys using
  * <code>keyAt(int)</code> with ascending values of the index will return the
  * keys in ascending order, or the values corresponding to the keys in ascending
- * order in the case of <code>valueAt(int)<code>.</p>
+ * order in the case of <code>valueAt(int)</code>.</p>
  */
 public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
