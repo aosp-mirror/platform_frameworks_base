@@ -23,6 +23,12 @@ import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
 interface IBackupTransport {
+    /**
+     * Ask the transport for the name under which it should be registered.  This will
+     * typically be its host service's component name, but need not be.
+     */
+    String name();
+
 	/**
 	 * Ask the transport for an Intent that can be used to launch any internal
 	 * configuration Activity that it wishes to present.  For example, the transport
