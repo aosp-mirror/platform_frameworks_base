@@ -290,8 +290,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
-    private final boolean mHeadless;
-
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -731,7 +729,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerService = displayManager;
-        mHeadless = displayManager.isHeadless();
         mDisplaySettings = new DisplaySettings(context);
         mDisplaySettings.readSettingsLocked();
 
@@ -5249,7 +5246,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void performBootTimeout() {
         synchronized(mWindowMap) {
-            if (mDisplayEnabled || mHeadless) {
+            if (mDisplayEnabled) {
                 return;
             }
             Slog.w(TAG, "***** BOOT TIMEOUT: forcing display enabled");
@@ -5433,7 +5430,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // only allow disables from pids which have count on, etc.
     @Override
     public void showStrictModeViolation(boolean on) {
-        if (mHeadless) return;
         int pid = Binder.getCallingPid();
         mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, on ? 1 : 0, pid));
     }

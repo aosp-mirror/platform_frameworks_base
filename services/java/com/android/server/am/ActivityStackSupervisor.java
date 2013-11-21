@@ -366,7 +366,7 @@ public final class ActivityStackSupervisor {
         return resumedActivity;
     }
 
-    boolean attachApplicationLocked(ProcessRecord app, boolean headless) throws Exception {
+    boolean attachApplicationLocked(ProcessRecord app) throws Exception {
         boolean didSomething = false;
         final String processName = app.processName;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
@@ -379,10 +379,7 @@ public final class ActivityStackSupervisor {
                 if (hr.app == null && app.uid == hr.info.applicationInfo.uid
                         && processName.equals(hr.processName)) {
                     try {
-                        if (headless) {
-                            Slog.e(TAG, "Starting activities not supported on headless device: "
-                                    + hr);
-                        } else if (realStartActivityLocked(hr, app, true, true)) {
+                        if (realStartActivityLocked(hr, app, true, true)) {
                             didSomething = true;
                         }
                     } catch (Exception e) {

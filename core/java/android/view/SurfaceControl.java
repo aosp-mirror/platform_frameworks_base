@@ -79,9 +79,6 @@ public class SurfaceControl {
     private final String mName;
     int mNativeObject; // package visibility only for Surface.java access
 
-    private static final boolean HEADLESS = "1".equals(
-        SystemProperties.get("ro.config.headless", "0"));
-
     /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
 
     /**
@@ -231,8 +228,6 @@ public class SurfaceControl {
                     + "a transaction.  New surface name: " + name,
                     new Throwable());
         }
-
-        checkHeadless();
 
         mName = name;
         mNativeObject = nativeCreate(session, name, w, h, format, flags);
@@ -618,11 +613,5 @@ public class SurfaceControl {
             throw new IllegalArgumentException("consumer must not be null");
         }
         nativeScreenshot(display, consumer, width, height, minLayer, maxLayer, allLayers);
-    }
-
-    private static void checkHeadless() {
-        if (HEADLESS) {
-            throw new UnsupportedOperationException("Device is headless");
-        }
     }
 }
