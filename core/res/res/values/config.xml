@@ -1195,6 +1195,9 @@
         <item>12</item> <!-- EVDO_B -->
     </integer-array>
 
+    <!-- Set to true if after a provisioning apn the radio should be restarted -->
+    <bool name="config_restartRadioAfterProvisioning">false</bool>
+
     <!-- Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
      -->
