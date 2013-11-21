@@ -50,16 +50,16 @@ efficiency, you write these coordinates into a {@link java.nio.ByteBuffer}, that
 OpenGL ES graphics pipeline for processing.</p>
 
 <pre>
-class Triangle {
+public class Triangle {
 
     private FloatBuffer vertexBuffer;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = { // in counterclockwise order:
-         0.0f,  0.622008459f, 0.0f,   // top
-        -0.5f, -0.311004243f, 0.0f,   // bottom left
-         0.5f, -0.311004243f, 0.0f    // bottom right
+    static float triangleCoords[] = {   // in counterclockwise order:
+             0.0f,  0.622008459f, 0.0f, // top
+            -0.5f, -0.311004243f, 0.0f, // bottom left
+             0.5f, -0.311004243f, 0.0f  // bottom right
     };
 
     // Set color with red, green, blue and alpha (opacity) values
@@ -112,17 +112,18 @@ defining the two coordinates shared by each triangle twice, use a drawing list t
 OpenGL ES graphics pipeline how to draw these vertices. Here’s the code for this shape:</p>
 
 <pre>
-class Square {
+public class Square {
 
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static float squareCoords[] = { -0.5f,  0.5f, 0.0f,   // top left
-                                    -0.5f, -0.5f, 0.0f,   // bottom left
-                                     0.5f, -0.5f, 0.0f,   // bottom right
-                                     0.5f,  0.5f, 0.0f }; // top right
+    static float squareCoords[] = {
+            -0.5f,  0.5f, 0.0f,   // top left
+            -0.5f, -0.5f, 0.0f,   // bottom left
+             0.5f, -0.5f, 0.0f,   // bottom right
+             0.5f,  0.5f, 0.0f }; // top right
 
     private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
