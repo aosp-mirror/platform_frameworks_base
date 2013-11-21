@@ -4598,6 +4598,17 @@ public class Activity extends ContextThemeWrapper
         setTitle(getText(titleId));
     }
 
+    /**
+     * Change the color of the title associated with this activity.
+     * <p>
+     * This method is deprecated starting in API Level 11 and replaced by action
+     * bar styles. For information on styling the Action Bar, read the <a
+     * href="{@docRoot} guide/topics/ui/actionbar.html">Action Bar</a> developer
+     * guide.
+     *
+     * @deprecated Use action bar styles instead.
+     */
+    @Deprecated
     public void setTitleColor(int textColor) {
         mTitleColor = textColor;
         onTitleChanged(mTitle, textColor);

@@ -996,6 +996,7 @@ public abstract class Window {
 
     public abstract void setTitle(CharSequence title);
 
+    @Deprecated
     public abstract void setTitleColor(int textColor);
 
     public abstract void openPanel(int featureId, KeyEvent event);
