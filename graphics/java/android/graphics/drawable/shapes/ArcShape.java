@@ -18,7 +18,6 @@ package android.graphics.drawable.shapes;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 
 /**
  * Creates an arc shape. The arc shape starts at a specified

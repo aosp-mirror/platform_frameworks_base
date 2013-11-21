@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import libcore.icu.DateIntervalFormat;
 import libcore.icu.LocaleData;

@@ -16,8 +16,6 @@
 
 package android.hardware.camera2;
 
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.camera2.impl.CameraMetadataNative;
 
 /**

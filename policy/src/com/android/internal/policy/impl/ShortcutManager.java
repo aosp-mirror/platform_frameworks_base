@@ -25,7 +25,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
 
 import java.net.URISyntaxException;
 

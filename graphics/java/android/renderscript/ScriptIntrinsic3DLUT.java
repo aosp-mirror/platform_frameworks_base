@@ -16,8 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Log;
-
 /**
  *
  * Intrinsic for converting RGB to RGBA by using a 3D lookup table.  The

@@ -17,9 +17,6 @@
 package android.renderscript;
 
 
-import android.util.Log;
-
-
 /**
  * @hide
  * @deprecated in API 16

@@ -15,8 +15,6 @@
  */
 package android.hardware.camera2;
 
-import android.hardware.camera2.CameraDevice.CaptureListener;
-
 /**
  * A report of failed capture for a single image capture from the image sensor.
  *

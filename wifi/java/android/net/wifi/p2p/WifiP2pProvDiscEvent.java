@@ -16,10 +16,6 @@
 
 package android.net.wifi.p2p;
 
-import android.os.Parcelable;
-import android.os.Parcel;
-import android.util.Log;
-
 /**
  * A class representing a Wi-Fi p2p provisional discovery request/response
  * See {@link #WifiP2pProvDiscEvent} for supported types

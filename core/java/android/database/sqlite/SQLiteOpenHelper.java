@@ -18,7 +18,6 @@ package android.database.sqlite;
 
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
-import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
 

@@ -23,22 +23,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.os.SELinux;
 import android.util.Log;
 
 import com.android.org.bouncycastle.util.encoders.Base64;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Backup transport for stashing stuff into a known location on disk, and

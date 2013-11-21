@@ -17,7 +17,6 @@
 package android.os;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 /**
  * Base interface for a remotable object, the core part of a lightweight

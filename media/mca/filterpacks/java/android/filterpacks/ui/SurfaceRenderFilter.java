@@ -26,19 +26,11 @@ import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.GLEnvironment;
 import android.filterfw.core.GLFrame;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.NativeProgram;
-import android.filterfw.core.NativeFrame;
-import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
-import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-
-import android.graphics.Rect;
 
 import android.util.Log;
 

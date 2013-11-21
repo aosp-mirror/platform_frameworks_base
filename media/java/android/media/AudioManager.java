@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RemoteController.OnClientUpdateListener;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;

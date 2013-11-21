@@ -16,17 +16,6 @@
 
 package android.renderscript;
 
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.util.Log;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 /**
  * Sampler object that defines how Allocations can be read as textures within a
  * kernel. Samplers are used in conjunction with the {@code rsSample} runtime

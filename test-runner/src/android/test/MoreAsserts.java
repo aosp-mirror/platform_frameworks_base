@@ -16,7 +16,6 @@
 
 package android.test;
 
-import com.google.android.collect.Lists;
 import junit.framework.Assert;
 
 import java.util.Arrays;

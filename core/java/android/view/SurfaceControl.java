@@ -22,7 +22,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.Surface;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 

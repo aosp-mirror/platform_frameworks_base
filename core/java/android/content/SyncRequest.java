@@ -20,7 +20,6 @@ import android.accounts.Account;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Pair;
 
 public class SyncRequest implements Parcelable {
     private static final String TAG = "SyncRequest";

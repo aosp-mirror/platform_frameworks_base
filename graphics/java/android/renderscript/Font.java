@@ -17,7 +17,6 @@
 package android.renderscript;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +25,6 @@ import android.os.Environment;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.util.Log;
-import android.util.TypedValue;
 
 /**
  * @hide

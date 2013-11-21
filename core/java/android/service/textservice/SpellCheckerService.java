@@ -32,7 +32,6 @@ import android.util.Log;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
-import android.widget.SpellChecker;
 
 import java.lang.ref.WeakReference;
 import java.text.BreakIterator;

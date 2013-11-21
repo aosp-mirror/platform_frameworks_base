@@ -26,7 +26,6 @@ import android.content.IContentService;
 import android.content.ISyncStatusObserver;
 import android.content.PeriodicSync;
 import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
 import android.content.SyncAdapterType;
 import android.content.SyncInfo;
 import android.content.SyncRequest;
@@ -44,7 +43,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
 

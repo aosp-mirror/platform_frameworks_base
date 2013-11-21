@@ -21,11 +21,9 @@ import com.android.server.input.InputWindowHandle;
 
 import android.os.Looper;
 import android.os.Process;
-import android.util.Slog;
 import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
-import android.view.InputQueue;
 import android.view.WindowManagerPolicy;
 
 public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {

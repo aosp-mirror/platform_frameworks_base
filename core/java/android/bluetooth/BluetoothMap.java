@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.RemoteException;
 import android.os.IBinder;
-import android.os.ServiceManager;
 import android.util.Log;
 
 /**

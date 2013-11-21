@@ -20,7 +20,6 @@ package android.filterfw.core;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
-import android.filterfw.core.NativeBuffer;
 import android.filterfw.format.ObjectFormat;
 import android.graphics.Bitmap;
 
@@ -28,10 +27,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
 import java.io.OutputStream;
-import java.io.StreamCorruptedException;
-import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 
 /**

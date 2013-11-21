@@ -16,8 +16,6 @@
 
 package android.os;
 
-import android.util.Log;
-
 /**
  * Writes trace events to the system trace buffer.  These trace events can be
  * collected and visualized using the Systrace tool.

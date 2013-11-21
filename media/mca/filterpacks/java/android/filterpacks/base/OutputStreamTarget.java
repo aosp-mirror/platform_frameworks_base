@@ -20,7 +20,6 @@ package android.filterpacks.base;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
-import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
 
 import java.io.OutputStream;

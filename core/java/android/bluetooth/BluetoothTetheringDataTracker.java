@@ -17,9 +17,6 @@
 package android.bluetooth;
 
 import android.net.BaseNetworkStateTracker;
-import android.os.IBinder;
-import android.os.ServiceManager;
-import android.os.INetworkManagementService;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DhcpResults;
@@ -35,11 +32,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.text.TextUtils;
 import android.util.Log;
-import java.net.InterfaceAddress;
-import android.net.LinkAddress;
-import android.net.RouteInfo;
-import java.net.Inet4Address;
-import android.os.SystemProperties;
 
 import com.android.internal.util.AsyncChannel;
 

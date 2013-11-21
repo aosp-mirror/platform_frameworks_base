@@ -16,8 +16,6 @@
 
 package android.test;
 
-import java.lang.reflect.Field;
-
 /**
  * 
  * The InstrumentationUtils class has all the utility functions needed for

@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -63,14 +62,12 @@ import android.security.Credentials;
 import android.security.KeyStore;
 import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.R;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
-import com.android.internal.util.Preconditions;
 import com.android.server.ConnectivityService.VpnCallback;
 import com.android.server.net.BaseNetworkObserver;
 
@@ -78,10 +75,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import libcore.io.IoUtils;

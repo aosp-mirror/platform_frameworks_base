@@ -19,29 +19,19 @@ package android.filterpacks.videosrc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterSurfaceView;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.GLEnvironment;
 import android.filterfw.core.GLFrame;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.NativeProgram;
-import android.filterfw.core.NativeFrame;
-import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
 import android.filterfw.geometry.Quad;
 import android.filterfw.geometry.Point;
 
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-
-import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 
 import android.util.Log;

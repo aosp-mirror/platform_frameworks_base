@@ -18,7 +18,6 @@ package com.android.systemui.recent;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 public final class TaskDescription {

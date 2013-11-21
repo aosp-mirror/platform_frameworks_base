@@ -29,11 +29,8 @@ import android.net.wifi.RssiPacketCountInfo;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
-import android.util.Log;
 import android.util.LruCache;
 
-import com.android.internal.R;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;

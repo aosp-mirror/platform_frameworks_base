@@ -20,13 +20,11 @@ import android.content.pm.KeySet;
 import android.content.pm.PackageParser;
 import android.os.Binder;
 import android.util.Base64;
-import android.util.Log;
 import android.util.LongSparseArray;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

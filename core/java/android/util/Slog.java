@@ -16,11 +16,6 @@
 
 package android.util;
 
-import com.android.internal.os.RuntimeInit;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 /**
  * @hide
  */

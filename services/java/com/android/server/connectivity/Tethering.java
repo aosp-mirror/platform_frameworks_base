@@ -28,7 +28,6 @@ import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
-import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -52,7 +51,6 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.IoThread;
 import com.android.server.net.BaseNetworkObserver;
-import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

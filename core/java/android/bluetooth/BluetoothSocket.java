@@ -16,21 +16,16 @@
 
 package android.bluetooth;
 
-import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import android.net.LocalSocket;

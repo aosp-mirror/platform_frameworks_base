@@ -20,7 +20,6 @@ import android.nfc.ErrorCodes;
 import android.nfc.FormatException;
 import android.nfc.INfcTag;
 import android.nfc.NdefMessage;
-import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
 import android.os.RemoteException;

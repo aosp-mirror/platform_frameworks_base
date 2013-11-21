@@ -16,13 +16,10 @@
 
 package com.android.keyguard;
 
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
@@ -30,9 +27,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.widget.PasswordEntryKeyboardHelper;
-import com.android.internal.widget.PasswordEntryKeyboardView;
 
 import java.util.List;
 /**

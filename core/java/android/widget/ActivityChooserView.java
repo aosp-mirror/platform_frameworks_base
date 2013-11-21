@@ -18,7 +18,6 @@ package android.widget;
 
 import com.android.internal.R;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,7 +30,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionProvider;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;

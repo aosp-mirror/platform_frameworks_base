@@ -16,8 +16,6 @@
 
 package android.hardware.location;
 
-import android.location.Location;
-
 /**
  * This class represents the characteristics of the geofence.
  *

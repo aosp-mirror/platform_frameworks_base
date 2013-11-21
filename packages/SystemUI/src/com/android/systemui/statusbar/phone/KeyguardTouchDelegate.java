@@ -26,8 +26,6 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.view.MotionEvent;
 
-import com.android.internal.policy.IKeyguardExitCallback;
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardService;
 
 

@@ -24,7 +24,6 @@ import android.graphics.Paint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;

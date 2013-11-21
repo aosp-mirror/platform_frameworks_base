@@ -16,8 +16,6 @@
 
 package android.media;
 
-import android.util.Log;
-
 import java.io.InputStream;
 import java.io.IOException;
 

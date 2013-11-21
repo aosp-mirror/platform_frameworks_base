@@ -19,8 +19,6 @@ package android.net.http;
 import android.content.Context;
 import android.os.SystemClock;
 
-import org.apache.http.HttpHost;
-
 import java.lang.Thread;
 
 /**

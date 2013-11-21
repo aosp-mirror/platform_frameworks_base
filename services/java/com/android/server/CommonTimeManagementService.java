@@ -18,7 +18,6 @@ package com.android.server;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,10 +25,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
-import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.CommonTimeConfig;
 import android.os.Handler;

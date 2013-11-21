@@ -16,9 +16,6 @@
 
 package android.content;
 
-import android.app.Activity;
-import android.app.ActivityManagerNative;
-import android.app.LoadedApk;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -33,7 +30,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.DisplayAdjustments;
 import android.view.Display;

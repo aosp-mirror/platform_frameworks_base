@@ -26,7 +26,6 @@ import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.SurfaceControl.PhysicalDisplayInfo;
 
 import java.io.PrintWriter;
 

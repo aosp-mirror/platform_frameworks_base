@@ -28,7 +28,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Matrix;
 import android.media.videoeditor.VideoEditor.ExportProgressListener;
 import android.media.videoeditor.VideoEditor.PreviewProgressListener;

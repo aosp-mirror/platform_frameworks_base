@@ -16,16 +16,6 @@
 
 package android.graphics;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.util.DisplayMetrics;
-
-import java.io.OutputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-
 /**
  * LargeBitmap can be used to decode a rectangle region from an image.
  * LargeBimap is particularly useful when an original image is large and

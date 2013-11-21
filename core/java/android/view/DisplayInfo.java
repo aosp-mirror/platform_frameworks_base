@@ -20,7 +20,6 @@ import android.content.res.CompatibilityInfo;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.util.DisplayMetrics;
 
 import libcore.util.Objects;

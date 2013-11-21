@@ -19,7 +19,6 @@ package android.hardware.camera2;
 import android.content.Context;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
-import android.hardware.IProCameraUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;

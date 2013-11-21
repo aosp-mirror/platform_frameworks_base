@@ -22,7 +22,6 @@ import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.server.ServiceWatcher;

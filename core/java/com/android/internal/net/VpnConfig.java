@@ -25,8 +25,6 @@ import android.os.UserHandle;
 import android.net.RouteInfo;
 import android.net.LinkAddress;
 
-import com.android.internal.util.Preconditions;
-
 import java.net.InetAddress;
 import java.util.List;
 import java.util.ArrayList;

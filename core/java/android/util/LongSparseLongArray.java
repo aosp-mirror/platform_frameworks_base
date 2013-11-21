@@ -18,8 +18,6 @@ package android.util;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.Arrays;
-
 /**
  * Map of {@code long} to {@code long}. Unlike a normal array of longs, there
  * can be gaps in the indices. It is intended to be more memory efficient than using a

@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.AppGlobals;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Parcel;
@@ -25,7 +23,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;

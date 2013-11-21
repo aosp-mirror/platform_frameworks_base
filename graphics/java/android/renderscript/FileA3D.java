@@ -17,15 +17,10 @@
 package android.renderscript;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Log;
-import android.util.TypedValue;
 
 /**
  * @hide

@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -29,8 +28,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.media.AudioManager;
-import android.media.AudioService;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;

@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputChannel;

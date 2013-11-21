@@ -27,7 +27,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
-import android.util.SparseLongArray;
 
 import java.util.ArrayList;
 import java.util.Collections;

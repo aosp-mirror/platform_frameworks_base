@@ -18,8 +18,6 @@ package android.renderscript;
 
 import java.util.Vector;
 
-import android.util.Log;
-
 /**
  * @hide
  * @deprecated in API 16
