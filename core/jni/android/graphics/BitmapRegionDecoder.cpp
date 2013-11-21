@@ -75,7 +75,7 @@ private:
     int fHeight;
 };
 
-static jobject createBitmapRegionDecoder(JNIEnv* env, SkStream* stream) {
+static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream) {
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
     if (NULL == decoder) {
@@ -107,7 +107,7 @@ static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray b
         For now we just always copy the array's data if isShareable.
      */
     AutoJavaByteArray ar(env, byteArray);
-    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
+    SkMemoryStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
 
     jobject brd = createBitmapRegionDecoder(env, stream);
     SkSafeUnref(stream); // the decoder now holds a reference

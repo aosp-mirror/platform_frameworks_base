@@ -681,7 +681,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
             SkColorTable* ctable = bitmap.getColorTable();
             memcpy(data, ctable->lockColors(), ctable->count() * sizeof(SkPMColor));
             memcpy(pixels, p, size);
-            ctable->unlockColors(false);
+            ctable->unlockColors();
             glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
             free(data);
         } else {
