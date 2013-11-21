@@ -4,53 +4,147 @@ parent.link=index.html
 @jd:body
 
 
-<p>The {@code systrace} tool helps analyze the performance of your application by capturing and
+<p>The Systrace tool helps analyze the performance of your application by capturing and
   displaying execution times of your applications processes and other Android system processes. The
-  tool combines data from the Android kernel such as the CPU scheduler, disk activity and
+  tool combines data from the Android kernel such as the CPU scheduler, disk activity, and
   application threads to generate an HTML report that shows an overall picture of an Android
   device’s system processes for a given period of time.</p>
 
-<p>The {@code systrace} tool is particularly useful in diagnosing display problems where an
+<p>The Systrace tool is particularly useful in diagnosing display problems where an
   application is slow to draw or stutters while displaying motion or animation. For more information
-  on how to use {@code systrace}, see <a href="{@docRoot}tools/debugging/systrace.html">Analyzing
-  Display and Performance with Systrace</a>.</p>
+  on how to use Systrace, see <a href="{@docRoot}tools/debugging/systrace.html">Analyzing
+  Display and Performance</a>.</p>
 
 
-<h2 id="usage">Usage</h2>
 
-<p>In order to run {@code systrace}, the {@code adb} tool and
-<a href="http://www.python.org/">Python</a> must be installed and included in your development
+<h2 id="requirements">Requirements</h2>
+
+<p>In order to run Systrace, you must have Android SDK Tools 20 or later installed. You must also
+have <a href="http://www.python.org/">Python</a> installed and included in your development
 computer's execution path. In order to generate a trace, you must connect a device running Android
-4.1 (API Level 16) or higher to your development system using a USB debugging connection.</p>
+4.1 (API Level 16) or higher to your development system using a
+<a href="{@docRoot}tools/device.html#setting-up">USB debugging connection</a>.</p>
 
-<p>The syntax for running {@code systrace} is as follows.</p>
+<p>The Systrace tool can be run either from one of the Android SDK's graphical user interface
+tools, or from the command line. The following sections describe how to run the tool using either
+of these methods.</p>
+
+
+<h2 id="gui">User Interface</h2>
+
+<p>The Systrace tool can be run from the
+<a href="{@docRoot}tools/help/adt.html">Android Developer Tools</a> (ADT) in Eclipse,
+<a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>,
+or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
+
+<p>To run the Systrace user interface:</p>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Eclipse</a></p>
+
+  <div class="toggle-content-toggleme">
+  <ol>
+    <li>In Eclipse, open an Android application project.</li>
+    <li>Switch to the DDMS perspective, by selecting <strong>Window &gt; Perspectives &gt;
+      DDMS</strong>.</li>
+    <li>In the <strong>Devices</strong> tab, select the device on which to run a trace. If no
+      devices are listed, make sure your device is connected via USB cable and that debugging is
+      enabled on the device.</li>
+    <li>Click the Systrace icon <img src="{@docRoot}images/systrace/systrace-button.png"
+      style="margin:0"/> at the top of the <strong>Devices</strong> panel to configure tracing.</li>
+    <li>Set the tracing options and click <strong>OK</strong> to start the trace.</li>
+  </ol>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Android Studio</a></p>
+
+  <div class="toggle-content-toggleme">
+  <ol>
+    <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, open an
+      Android application project.</li>
+    <li>Open the Device Monitor by selecting <strong>Tools &gt; Android &gt; Monitor</strong>.</li>
+    <li>In the <strong>Devices</strong> tab, select the device on which to run a trace. If no
+      devices are listed, make sure your device is connected via USB cable and that debugging is
+      enabled on the device.</li>
+    <li>Click the Systrace icon <img src="{@docRoot}images/systrace/systrace-button.png"
+      style="margin:0"/> at the top of the <strong>Devices</strong> panel to configure tracing.</li>
+    <li>Set the tracing options and click <strong>OK</strong> to start the trace.</li>
+  </ol>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Device Monitor</a></p>
+
+  <div class="toggle-content-toggleme">
+  <ol>
+    <li>Navigate to your SDK {@code tools/} directory.</li>
+    <li>Run the {@code monitor} program.</li>
+    <li>In the <strong>Devices</strong> tab, select the device on which to run a trace. If no
+      devices are listed, make sure your device is connected via USB cable and that debugging is
+      enabled on the device.</li>
+    <li>Click the Systrace icon <img src="{@docRoot}images/systrace/systrace-button.png"
+      style="margin:0"/> at the top of the <strong>Devices</strong> panel to configure tracing.</li>
+    <li>Set the tracing options and click <strong>OK</strong> to start the trace.</li>
+  </ol>
+  </div>
+</div>
+
+
+
+<h2 id="options">Command Line Usage</h2>
+
+<p>The Systrace tool has different command line options for devices running Android 4.3 (API
+level 18) and higher versus devices running Android 4.2 (API level 17) and lower. The following
+sections describe the different command line options for each version.</p>
+
+<p>The general syntax for running Systrace from the command line is as follows.</p>
 
 <pre>
-$> python systrace.py [options]
+$ python systrace.py [options] [category1] [category2] ... [categoryN]
 </pre>
 
-<p>Here is an example execution run that sets trace tags and generates a trace from a connected
-Android device.</p>
+<p>See the sections below for example Systrace sessions.</p>
+
+
+<h3 id="options-4.3">Android 4.3 and higher options</h3>
+
+<p>When you use Systrace on devices running Android 4.3 and higher, you must specify at least one
+trace category tag. Here is an example execution run that sets trace tags and generates a trace
+from a connected device.</p>
 
 <pre>
-$> cd <em>android-sdk</em>/tools/systrace
-$> python systrace.py --set-tags gfx,view,wm
-$> adb shell stop
-$> adb shell start
-$> python systrace.py --disk --time=10 -o mynewtrace.html
+$ cd <em>android-sdk</em>/platform-tools/systrace
+$ python systrace.py --time=10 -o mynewtrace.html sched gfx view wm
 </pre>
 
+<p class="note">
+  <strong>Tip:</strong> If you want to see the names of tasks in the trace output, you <em>must</em>
+  include the {@code sched} category in your command parameters.
+</p>
 
-
-<h2 id="options">Options</h2>
-
-<p>The table below lists the command line options for {@code systrace}.</p>
+<p>The table below lists the Systrace command line options for devices running Android 4.3
+(API level 18) and higher.</p>
 
 <table>
   <tr>
     <th>Option</th>
 
     <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><nobr><code>-h, --help</code></nobr></td>
+
+    <td>Show the help message.</td>
   </tr>
 
   <tr>
@@ -62,14 +156,155 @@ $> python systrace.py --disk --time=10 -o mynewtrace.html
   <tr>
     <td><code>-t N, --time=N</code></td>
 
-    <td>Trace activity for N seconds. Default value is 5 seconds.</td>
+    <td>Trace activity for <em>N</em> seconds. The default value is 5 seconds.</td>
   </tr>
 
   <tr>
     <td><code>-b N, --buf-size=N</code></td>
 
-    <td>Use a trace buffer size of N kilobytes. This option lets you limit the total size of the
-    data collected during a trace.</td>
+    <td>Use a trace buffer size of <em>N</em> kilobytes. This option lets you limit the total size
+    of the data collected during a trace.</td>
+  </tr>
+
+  <tr>
+    <td><code>-k&nbsp;&lt;<em>KFUNCS</em>&gt;<br>
+        --ktrace=&lt;<em>KFUNCS</em>&gt;</code></td>
+
+    <td>Trace the activity of specific kernel functions, specified in a comma-separated list.</td>
+  </tr>
+
+  <tr>
+    <td><code>-l, --list-categories</code></td>
+
+    <td>List the available tracing category tags. The available tags are:
+
+      <ul>
+        <li><code>gfx</code> - Graphics</li>
+        <li><code>input</code> - Input</li>
+        <li><code>view</code> - View</li>
+        <li><code>webview</code> - WebView</li>
+        <li><code>wm</code> - Window Manager</li>
+        <li><code>am</code> - Activity Manager</li>
+        <li><code>audio</code> - Audio</li>
+        <li><code>video</code> - Video</li>
+        <li><code>camera</code> - Camera</li>
+        <li><code>hal</code> - Hardware Modules</li>
+        <li><code>res</code> - Resource Loading</li>
+        <li><code>dalvik</code> - Dalvik VM</li>
+        <li><code>rs</code> - RenderScript</li>
+        <li><code>sched</code> - CPU Scheduling</li>
+        <li><code>freq</code> - CPU Frequency</li>
+        <li><code>membus</code> - Memory Bus Utilization</li>
+        <li><code>idle</code> - CPU Idle</li>
+        <li><code>disk</code> - Disk input and output</li>
+        <li><code>load</code> - CPU Load</li>
+        <li><code>sync</code> - Synchronization Manager</li>
+        <li><code>workq</code> - Kernel Workqueues</li>
+      </ul>
+
+      <p class="note"><strong>Note:</strong> Some trace categories are not supported on all
+      devices.</p>
+
+      <p class="note"><strong>Tip:</strong> If you want to see the names of tasks in the trace
+      output, you <em>must</em> include the {@code sched} category in your command parameters.</p>
+
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>-a&nbsp;&lt;<em>APP_NAME</em>&gt;<br>
+        --app=&lt;<em>APP_NAME</em>&gt;</code></td>
+
+    <td>Enable tracing for applications, specified as a comma-separated list of
+    <a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package names</a>.
+    The apps must contain tracing instrumentation calls from the {@link android.os.Trace} class.
+    For more information, see <a href="{@docRoot}tools/debugging/systrace.html#app-trace">Analyzing
+    Display and Performance</a>.
+    </td>
+  </tr>
+
+
+
+  <tr>
+    <td><code>--link-assets</code></td>
+
+    <td>Link to the original CSS or JavaScript resources instead of embedding them in the HTML
+      trace report.</td>
+  </tr>
+
+  <tr>
+    <td><code>--from-file=&lt;<em>FROM_FILE</em>&gt;</code></td>
+
+    <td>Create the interactive Systrace report from a file, instead of running a live trace.</td>
+  </tr>
+
+  <tr>
+    <td><code>--asset-dir=&lt;<em>ASSET_DIR</em>&gt;</code></td>
+
+    <td>Specify a directory for the trace report assets. This option is useful for maintaining a
+      single set of assets for multiple Systrace reports.</td>
+  </tr>
+
+  <tr>
+    <td style="white-space:nowrap">
+    <code>-e &lt;<em>DEVICE_SERIAL</em>&gt;<br>
+    --serial=&lt;<em>DEVICE_SERIAL</em>&gt;</code></td>
+
+    <td>Conduct the trace on a specific connected device, identified by its
+      <a href="{@docRoot}tools/help/adb.html#devicestatus">device serial number</a>.</td>
+  </tr>
+
+</table>
+
+
+<h3 id="options-pre-4.3">Android 4.2 and lower options</h3>
+
+<p>Using Systrace on the command line with devices running Android 4.2 and lower is typically a
+two-step process. You must first set the trace tags you want to capture and then run the trace.
+Here is an example execution run that sets trace tags and generates a trace from a connected
+device.</p>
+
+<pre>
+$ cd <em>android-sdk</em>/platform-tools/systrace
+$ python systrace.py --set-tags gfx,view,wm
+$ adb shell stop
+$ adb shell start
+$ python systrace.py --disk --time=10 -o mynewtrace.html
+</pre>
+
+<p>The table below lists the Systrace command line options for devices running Android 4.2
+(API level 17) and lower.</p>
+
+<table>
+  <tr>
+    <th>Option</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><nobr><code>-h, --help</code></nobr></td>
+
+    <td>Show the help message.</td>
+  </tr>
+
+  <tr>
+    <td><code>-o&nbsp;&lt;<em>FILE</em>&gt;</code></td>
+
+    <td>Write the HTML trace report to the specified file.</td>
+  </tr>
+
+  <tr>
+    <td><code>-t N, --time=N</code></td>
+
+    <td>Trace activity for <em>N</em> seconds. The default value is 5 seconds.</td>
+  </tr>
+
+  <tr>
+    <td><code>-b N, --buf-size=N</code></td>
+
+    <td>Use a trace buffer size of <em>N</em> kilobytes. This option lets you limit the total size
+    of the data collected during a trace.</td>
   </tr>
 
   <tr>
@@ -106,6 +341,12 @@ $> python systrace.py --disk --time=10 -o mynewtrace.html
   </tr>
 
   <tr>
+    <td><nobr><code>-u, --bus-utilization</code></nobr></td>
+
+    <td>Trace the bus utilization levels. This option requires root access on the device.</td>
+  </tr>
+
+  <tr>
     <td><code>-w, --workqueue</code></td>
 
     <td>Trace kernel work queues. This option requires root access on the device.</td>
@@ -122,13 +363,13 @@ $> python systrace.py --disk --time=10 -o mynewtrace.html
         <li><code>webview</code> - WebView</li>
         <li><code>wm</code> - Window Manager</li>
         <li><code>am</code> - Activity Manager</li>
-        <li><code>sync</code> - Sync Manager</li>
+        <li><code>sync</code> - Synchronization Manager</li>
         <li><code>audio</code> - Audio</li>
         <li><code>video</code> - Video</li>
         <li><code>camera</code> - Camera</li>
       </ul>
       <p class="note"><strong>Note:</strong> When setting trace tags from the command line, you
-      must stop and restart the framework ({@code $&gt; adb shell stop; adb shell start}) for the
+      must stop and restart the framework ({@code $ adb shell stop; adb shell start}) for the
       tag tracing changes to take effect.</p>
     </td>
   </tr>
@@ -140,22 +381,16 @@ $> python systrace.py --disk --time=10 -o mynewtrace.html
     report.</td>
   </tr>
 
-  <tr>
-    <td><nobr><code>-h, --help</code></nobr></td>
-
-    <td>Show the help message.</td>
-  </tr>
-
 </table>
 
-<p>You can set the trace <a href="#tags">tags</a> for {@code systrace} with your device's user
-interface, by navigating to <strong>Settings &gt; Developer options &gt; Monitoring &gt; Enable
-traces</strong>.</p>
+<p>You can set the trace <a href="#tags">tags</a> for Systrace on
+your Android 4.2 and lower device by navigating to <strong>Settings &gt; Developer options &gt;
+Monitoring &gt; Enable traces</strong>.</p>
 
 
 <h2 id="viewing-options">Trace Viewing Shortcuts</h2>
 
-<p>The table below lists the keyboard shortcuts that are available while viewing a {@code systrace}
+<p>The table below lists the keyboard shortcuts that are available while viewing a Systrace
 trace HTML report.</p>
 
 <table>
