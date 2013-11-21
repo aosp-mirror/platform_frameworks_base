@@ -26,7 +26,7 @@ LOCAL_C_INCLUDES += \
 	$(rs_generated_include_dir) \
 	$(call include-path-for, corecg graphics)
 
-LOCAL_CFLAGS +=
+LOCAL_CFLAGS += -Wno-unused-parameter
 
 LOCAL_LDLIBS := -lpthread
 LOCAL_ADDITIONAL_DEPENDENCIES := $(addprefix $(rs_generated_include_dir)/,rsgApiFuncDecl.h)
