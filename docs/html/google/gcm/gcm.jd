@@ -104,7 +104,7 @@ application server and sending them to the device. </td>
     <th colspan="2">Credentials</th>
   </tr>
   <tr>
-    <td><strong>Sender ID</strong></td>
+    <td id="senderid"><strong>Sender ID</strong></td>
     <td>A project number you acquire from the API console, as described in
 <a href="gs.html#create-proj">Getting Started</a>. The sender
 ID is used in the <a href="#register">registration process</a> to identify a
@@ -140,7 +140,7 @@ which would cause delivery errors.
 account if the device is running a version lower than Android 4.0.4.</td>
   </tr>
   <tr>
-    <td><strong>Sender Auth Token</strong></td>
+    <td id="apikey"><strong>Sender Auth Token</strong></td>
     <td>An API key that is saved on the 3rd-party application
 server that gives the application server authorized access to Google services.
 The API key is included in the header of POST requests  that send messages.</td>
