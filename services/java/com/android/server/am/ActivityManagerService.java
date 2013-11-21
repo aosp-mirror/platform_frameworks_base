@@ -2145,7 +2145,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 totalUTime += otherUTime;
                                 totalSTime += otherSTime;
                                 if (pr != null) {
-                                    BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
+                                    BatteryStatsImpl.Uid.Proc ps = bstats.getProcessStatsLocked(
+                                            st.name, st.pid);
                                     ps.addCpuTimeLocked(st.rel_utime-otherUTime,
                                             st.rel_stime-otherSTime);
                                     ps.addSpeedStepTimes(cpuSpeedTimes);
@@ -2765,10 +2766,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, null);
 
-            BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
+            BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
             synchronized (bs) {
                 if (bs.isOnBattery()) {
-                    app.batteryStats.incStartsLocked();
+                    bs.getProcessStatsLocked(app.uid, app.processName).incStartsLocked();
                 }
             }
 
@@ -8143,10 +8144,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        synchronized (stats) {
-            ps = stats.getProcessStatsLocked(info.uid, proc);
-        }
-        return new ProcessRecord(ps, info, proc, uid);
+        return new ProcessRecord(stats, info, proc, uid);
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
