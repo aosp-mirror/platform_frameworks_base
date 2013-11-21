@@ -1403,7 +1403,7 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
         native_drawText(mNativeCanvas, text, index, count, x, y, paint.mBidiFlags,
-                paint.mNativePaint);
+                paint.mNativePaint, paint.mNativeTypeface);
     }
 
     /**
@@ -1417,7 +1417,7 @@ public class Canvas {
      */
     public void drawText(String text, float x, float y, Paint paint) {
         native_drawText(mNativeCanvas, text, 0, text.length(), x, y, paint.mBidiFlags,
-                paint.mNativePaint);
+                paint.mNativePaint, paint.mNativeTypeface);
     }
 
     /**
@@ -1436,7 +1436,7 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
         native_drawText(mNativeCanvas, text, start, end, x, y, paint.mBidiFlags,
-                paint.mNativePaint);
+                paint.mNativePaint, paint.mNativeTypeface);
     }
 
     /**
@@ -1456,7 +1456,7 @@ public class Canvas {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
-                    paint.mBidiFlags, paint.mNativePaint);
+                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                     paint);
@@ -1464,7 +1464,7 @@ public class Canvas {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
             native_drawText(mNativeCanvas, buf, 0, end - start, x, y,
-                    paint.mBidiFlags, paint.mNativePaint);
+                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1507,7 +1507,7 @@ public class Canvas {
         }
 
         native_drawTextRun(mNativeCanvas, text, index, count,
-                contextIndex, contextCount, x, y, dir, paint.mNativePaint);
+                contextIndex, contextCount, x, y, dir, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     /**
@@ -1545,7 +1545,7 @@ public class Canvas {
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             native_drawTextRun(mNativeCanvas, text.toString(), start, end,
-                    contextStart, contextEnd, x, y, flags, paint.mNativePaint);
+                    contextStart, contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, flags, paint);
@@ -1555,7 +1555,7 @@ public class Canvas {
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             native_drawTextRun(mNativeCanvas, buf, start - contextStart, len,
-                    0, contextLen, x, y, flags, paint.mNativePaint);
+                    0, contextLen, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1814,18 +1814,18 @@ public class Canvas {
     
     private static native void native_drawText(int nativeCanvas, char[] text,
                                                int index, int count, float x,
-                                               float y, int flags, int paint);
+                                               float y, int flags, int paint, int typeface);
     private static native void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
-                                               float y, int flags, int paint);
+                                               float y, int flags, int paint, int typeface);
 
     private static native void native_drawTextRun(int nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, int paint);
+            float x, float y, int flags, int paint, int typeface);
 
     private static native void native_drawTextRun(int nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
-            float x, float y, int flags, int paint);
+            float x, float y, int flags, int paint, int typeface);
 
     private static native void native_drawPosText(int nativeCanvas,
                                                   char[] text, int index,

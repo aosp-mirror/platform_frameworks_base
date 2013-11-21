@@ -33,6 +33,10 @@ public class Paint {
      * @hide
      */
     public int mNativePaint;
+    /**
+     * @hide
+     */
+    public int mNativeTypeface;
 
     private ColorFilter mColorFilter;
     private MaskFilter  mMaskFilter;
@@ -481,6 +485,7 @@ public class Paint {
         mRasterizer = null;
         mShader = null;
         mTypeface = null;
+        mNativeTypeface = 0;
         mXfermode = null;
 
         mHasCompatScaling = false;
@@ -525,6 +530,7 @@ public class Paint {
             mShader = null;
         }
         mTypeface = paint.mTypeface;
+        mNativeTypeface = paint.mNativeTypeface;
         mXfermode = paint.mXfermode;
 
         mHasCompatScaling = paint.mHasCompatScaling;
@@ -1087,6 +1093,7 @@ public class Paint {
         }
         native_setTypeface(mNativePaint, typefaceNative);
         mTypeface = typeface;
+        mNativeTypeface = typefaceNative;
         return typeface;
     }
     
