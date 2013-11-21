@@ -1847,7 +1847,7 @@ public final class ActiveServices {
                 }
             }
             if (finishing) {
-                if (r.app != null) {
+                if (r.app != null && !r.app.persistent) {
                     r.app.services.remove(r);
                 }
                 r.app = null;
@@ -1930,7 +1930,9 @@ public final class ActiveServices {
                 Slog.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
                     service.app.removed = true;
-                    service.app.services.remove(service);
+                    if (!service.app.persistent) {
+                        service.app.services.remove(service);
+                    }
                 }
                 service.app = null;
                 service.isolatedProc = null;
@@ -2032,7 +2034,7 @@ public final class ActiveServices {
             synchronized (sr.stats.getBatteryStats()) {
                 sr.stats.stopLaunchedLocked();
             }
-            if (sr.app != null) {
+            if (sr.app != null && !sr.app.persistent) {
                 sr.app.services.remove(sr);
             }
             sr.app = null;
