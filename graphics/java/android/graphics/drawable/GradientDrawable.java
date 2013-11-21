@@ -702,17 +702,20 @@ public class GradientDrawable extends Drawable {
             final int oldColor = mFillPaint.getColor();
             if (oldColor != newColor) {
                 mFillPaint.setColor(newColor);
-                invalidateSelf |= true;
+                invalidateSelf = true;
             }
         }
 
-        final ColorStateList strokeStateList = s.mStrokeColorStateList;
-        if (strokeStateList != null) {
-            final int newColor = stateList.getColorForState(stateSet, 0);
-            final int oldColor = mStrokePaint.getColor();
-            if (oldColor != newColor) {
-                mStrokePaint.setColor(newColor);
-                invalidateSelf |= true;
+        final Paint strokePaint = mStrokePaint;
+        if (strokePaint != null) {
+            final ColorStateList strokeStateList = s.mStrokeColorStateList;
+            if (strokeStateList != null) {
+                final int newStrokeColor = strokeStateList.getColorForState(stateSet, 0);
+                final int oldStrokeColor = strokePaint.getColor();
+                if (oldStrokeColor != newStrokeColor) {
+                    strokePaint.setColor(newStrokeColor);
+                    invalidateSelf = true;
+                }
             }
         }
 
