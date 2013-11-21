@@ -1,5 +1,5 @@
 page.title=Gestures
-page.tags="gesture","input","touch"
+page.tags=gesture,input,touch
 @jd:body
 
 <p>Gestures allow users to interact with your app by manipulating the screen objects you provide. The

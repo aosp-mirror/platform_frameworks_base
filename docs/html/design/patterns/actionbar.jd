@@ -1,5 +1,5 @@
 page.title=Action Bar
-page.tags="actionbar","navigation"
+page.tags=actionbar,navigation
 @jd:body
 
 <img src="{@docRoot}design/media/action_bar_pattern_overview.png">

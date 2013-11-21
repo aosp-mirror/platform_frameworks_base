@@ -1,5 +1,5 @@
 page.title=Position Sensors
-page.tags="sensorevent","orientation","proximity"
+page.tags=sensorevent,orientation,proximity
 @jd:body
 
 <div id="qv-wrapper">

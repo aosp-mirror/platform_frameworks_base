@@ -1,5 +1,5 @@
 page.title=Property Animation
-page.tags="valueanimator","objectanimator","layouttransition","ViewPropertyAnimator"
+page.tags=valueanimator,objectanimator,layouttransition,ViewPropertyAnimator
 @jd:body
 
   <div id="qv-wrapper">

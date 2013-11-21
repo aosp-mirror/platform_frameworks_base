@@ -1,5 +1,5 @@
 page.title=Motion Sensors
-page.tags="sensorevent","accelerometer","gyroscope","gravity","rotation"
+page.tags=sensorevent,accelerometer,gyroscope,gravity,rotation
 @jd:body
 
 <div id="qv-wrapper">

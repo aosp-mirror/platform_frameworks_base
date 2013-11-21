@@ -1,5 +1,5 @@
 page.title=Scrolling
-page.tags="scrollview","listview"
+page.tags=scrollview,listview
 @jd:body
 
 <p>Scrolling allows the user to navigate to content in the overflow using a swipe gesture. The
