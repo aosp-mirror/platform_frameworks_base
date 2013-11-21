@@ -44,6 +44,15 @@ page.tags=wireless,bluetoothadapter,bluetoothdevice,BLE,BTLE
 </div>
 </div>
 
+<a class="notice-developers-video" href="http://www.youtube.com/watch?v=vUbFB1Qypg8">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Bluetooth Low Energy API</p>
+</div>
+</a>
+
+
+
 
 <p>
 Android 4.3 (API Level 18) introduces built-in platform support for Bluetooth Low

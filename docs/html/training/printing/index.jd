@@ -17,6 +17,13 @@ startpage=true
   </div>
 </div>
 
+<a class="notice-developers-video wide" href="http://www.youtube.com/watch?v=Iub67ic87KI">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Android 4.4 Printing API</p>
+</div>
+</a>
+
 <p>
   Android users frequently view content solely on their devices, but there are times when
   showing someone a screen is not an adequate way to share information. Being able to print
