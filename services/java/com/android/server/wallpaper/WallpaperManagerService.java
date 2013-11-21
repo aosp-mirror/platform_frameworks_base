@@ -644,11 +644,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     private Point getDefaultDisplaySize() {
         Point p = new Point();
-        try {
-            mIWindowManager.getInitialDisplaySize(Display.DEFAULT_DISPLAY, p);
-        } catch (RemoteException e) {
-            // not remote
-        }
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display d = wm.getDefaultDisplay();
+        d.getRealSize(p);
         return p;
     }
 
