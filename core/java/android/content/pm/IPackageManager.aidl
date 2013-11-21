@@ -53,6 +53,7 @@ import android.content.IntentSender;
  *  {@hide}
  */
 interface IPackageManager {
+    boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
     int getPackageUid(String packageName, int userId);
     int[] getPackageGids(String packageName);
