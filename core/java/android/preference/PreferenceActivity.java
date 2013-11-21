@@ -521,9 +521,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         int initialTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_TITLE, 0);
         int initialShortTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_SHORT_TITLE, 0);
 
-        // Restore from headers only if they are supported which
-        // is in multi-pane mode.
-        if (savedInstanceState != null && !mSinglePane) {
+        if (savedInstanceState != null) {
             // We are restarting from a previous saved state; used that to
             // initialize, instead of starting fresh.
             ArrayList<Header> headers = savedInstanceState.getParcelableArrayList(HEADERS_TAG);
@@ -575,12 +573,14 @@ public abstract class PreferenceActivity extends ListActivity implements
             // Single pane, showing just a prefs fragment.
             findViewById(com.android.internal.R.id.headers).setVisibility(View.GONE);
             mPrefsContainer.setVisibility(View.VISIBLE);
+            CharSequence initialTitleStr = null;
+            CharSequence initialShortTitleStr = null;
             if (initialTitle != 0) {
-                CharSequence initialTitleStr = getText(initialTitle);
-                CharSequence initialShortTitleStr = initialShortTitle != 0
+                initialTitleStr = getText(initialTitle);
+                initialShortTitleStr = initialShortTitle != 0
                         ? getText(initialShortTitle) : null;
-                showBreadCrumbs(initialTitleStr, initialShortTitleStr);
             }
+            showBreadCrumbs(initialTitleStr, initialShortTitleStr);
         } else if (mHeaders.size() > 0) {
             setListAdapter(new HeaderAdapter(this, mHeaders));
             if (!mSinglePane) {
