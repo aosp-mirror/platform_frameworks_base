@@ -184,16 +184,18 @@ public class Type extends BaseObj {
     }
 
 
-    Type(int id, RenderScript rs) {
+    Type(long id, RenderScript rs) {
         super(id, rs);
     }
 
     @Override
     void updateFromNative() {
+        // FIXME: rsaTypeGetNativeData needs 32-bit and 64-bit paths
+
         // We have 6 integer to obtain mDimX; mDimY; mDimZ;
         // mDimLOD; mDimFaces; mElement;
         int[] dataBuffer = new int[6];
-        mRS.nTypeGetNativeData(getID(mRS), dataBuffer);
+        mRS.nTypeGetNativeData((int)getID(mRS), dataBuffer);
 
         mDimX = dataBuffer[0];
         mDimY = dataBuffer[1];
@@ -224,7 +226,7 @@ public class Type extends BaseObj {
             throw new RSInvalidStateException("Dimension must be >= 1.");
         }
 
-        int id = rs.nTypeCreate(e.getID(rs), dimX, 0, 0, false, false, 0);
+        long id = rs.nTypeCreate(e.getID(rs), dimX, 0, 0, false, false, 0);
         Type t = new Type(id, rs);
         t.mElement = e;
         t.mDimX = dimX;
@@ -248,7 +250,7 @@ public class Type extends BaseObj {
             throw new RSInvalidStateException("Dimension must be >= 1.");
         }
 
-        int id = rs.nTypeCreate(e.getID(rs), dimX, dimY, 0, false, false, 0);
+        long id = rs.nTypeCreate(e.getID(rs), dimX, dimY, 0, false, false, 0);
         Type t = new Type(id, rs);
         t.mElement = e;
         t.mDimX = dimX;
@@ -274,7 +276,7 @@ public class Type extends BaseObj {
             throw new RSInvalidStateException("Dimension must be >= 1.");
         }
 
-        int id = rs.nTypeCreate(e.getID(rs), dimX, dimY, dimZ, false, false, 0);
+        long id = rs.nTypeCreate(e.getID(rs), dimX, dimY, dimZ, false, false, 0);
         Type t = new Type(id, rs);
         t.mElement = e;
         t.mDimX = dimX;
@@ -405,7 +407,7 @@ public class Type extends BaseObj {
                 }
             }
 
-            int id = mRS.nTypeCreate(mElement.getID(mRS),
+            long id = mRS.nTypeCreate(mElement.getID(mRS),
                                      mDimX, mDimY, mDimZ, mDimMipmaps, mDimFaces, mYuv);
             Type t = new Type(id, mRS);
             t.mElement = mElement;
