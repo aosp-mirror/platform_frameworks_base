@@ -81,6 +81,7 @@ import android.util.AttributeSet;
 public class AnimationDrawable extends DrawableContainer implements Runnable, Animatable {
     private final AnimationState mAnimationState;
     private int mCurFrame = -1;
+    private boolean mAnimating;
     private boolean mMutated;
 
     public AnimationDrawable() {
@@ -137,7 +138,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      * @return true if the animation is running, false otherwise
      */
     public boolean isRunning() {
-        return mCurFrame > -1;
+        return mAnimating;
     }
 
     /**
@@ -153,6 +154,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     @Override
     public void unscheduleSelf(Runnable what) {
         mCurFrame = -1;
+        mAnimating = false;
         super.unscheduleSelf(what);
     }
 
@@ -222,12 +224,13 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         }
         mCurFrame = frame;
         selectDrawable(frame);
-        if (unschedule) {
+        if (unschedule || animate) {
             unscheduleSelf(this);
         }
         if (animate) {
-            // Unscheduling may have clobbered this value; restore it to record that we're animating
+            // Unscheduling may have clobbered these values; restore them
             mCurFrame = frame;
+            mAnimating = true;
             scheduleSelf(this, SystemClock.uptimeMillis() + mAnimationState.mDurations[frame]);
         }
     }
