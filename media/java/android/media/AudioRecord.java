@@ -800,7 +800,7 @@ public class AudioRecord
     //--------------------
 
     private native final int native_setup(Object audiorecord_this,
-            int recordSource, int sampleRate, int nbChannels, int audioFormat,
+            int recordSource, int sampleRate, int channelMask, int audioFormat,
             int buffSizeInBytes, int[] sessionId);
 
     private native final void native_finalize();
