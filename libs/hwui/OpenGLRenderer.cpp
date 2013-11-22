@@ -1032,7 +1032,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const bool fboLayer = current->flags & Snapshot::kFlagIsFboLayer;
 
     bool clipRequired = false;
-    quickRejectNoScissor(rect, &clipRequired); // safely ignore return, should never be rejected
+    calculateQuickRejectForScissor(rect.left, rect.top, rect.right, rect.bottom,
+            &clipRequired, false); // safely ignore return, should never be rejected
     mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
 
     if (fboLayer) {
@@ -1629,8 +1630,18 @@ const Rect& OpenGLRenderer::getClipBounds() {
     return mSnapshot->getLocalClip();
 }
 
-bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom,
-        bool snapOut, bool* clipRequired) {
+/**
+ * Calculates whether content drawn within the passed bounds would be outside of, or intersect with
+ * the clipRect. Does not modify the scissor.
+ *
+ * @param clipRequired if not null, will be set to true if element intersects clip
+ *         (and wasn't rejected)
+ *
+ * @param snapOut if set, the geometry will be treated as having an AA ramp.
+ *         See Rect::snapGeometryToPixelBoundaries()
+ */
+bool OpenGLRenderer::calculateQuickRejectForScissor(float left, float top,
+        float right, float bottom, bool* clipRequired, bool snapOut) const {
     if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
         return true;
     }
@@ -1644,31 +1655,65 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
 
     if (!clipRect.intersects(r)) return true;
 
+    // clip is required if geometry intersects clip rect
     if (clipRequired) *clipRequired = !clipRect.contains(r);
     return false;
 }
 
-bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, float bottom,
-        SkPaint* paint) {
-    // AA geometry will likely have a ramp around it (not accounted for in local bounds). Snap out
-    // the final mapped rect to ensure correct clipping behavior for the ramp.
-    bool snapOut = paint->isAntiAlias();
-
-    if (paint->getStyle() != SkPaint::kFill_Style) {
-        float outset = paint->getStrokeWidth() * 0.5f;
-        return quickReject(left - outset, top - outset, right + outset, bottom + outset, snapOut);
-    } else {
-        return quickReject(left, top, right, bottom, snapOut);
+/**
+ * Returns false if drawing won't be clipped out.
+ *
+ * Makes the decision conservatively, by rounding out the mapped rect before comparing with the
+ * clipRect. To be used when perfect, pixel accuracy is not possible (esp. with tessellation) but
+ * rejection is still desired.
+ *
+ * This function, unlike quickRejectSetupScissor, should be used where precise geometry information
+ * isn't known (esp. when geometry adjusts based on scale). Generally, this will be first pass
+ * rejection where precise rejection isn't important, or precise information isn't available.
+ */
+bool OpenGLRenderer::quickRejectConservative(float left, float top,
+        float right, float bottom) const {
+    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
+        return true;
     }
+
+    Rect r(left, top, right, bottom);
+    currentTransform().mapRect(r);
+    r.roundOut(); // rounded out to be conservative
+
+    Rect clipRect(*mSnapshot->clipRect);
+    clipRect.snapToPixelBoundaries();
+
+    if (!clipRect.intersects(r)) return true;
+
+    return false;
 }
 
-bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom, bool snapOut) {
+/**
+ * Returns false and sets scissor enable based upon bounds if drawing won't be clipped out.
+ *
+ * @param paint if not null, the bounds will be expanded to account for stroke depending on paint
+ *         style, and tessellated AA ramp
+ */
+bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right, float bottom,
+        SkPaint* paint) {
     bool clipRequired = false;
-    if (quickRejectNoScissor(left, top, right, bottom, snapOut, &clipRequired)) {
+    bool snapOut = paint && paint->isAntiAlias();
+
+    if (paint && paint->getStyle() != SkPaint::kFill_Style) {
+        float outset = paint->getStrokeWidth() * 0.5f;
+        left -= outset;
+        top -= outset;
+        right += outset;
+        bottom += outset;
+    }
+
+    if (calculateQuickRejectForScissor(left, top, right, bottom, &clipRequired, snapOut)) {
         return true;
     }
 
     if (!isDeferred()) {
+        // not quick rejected, so enable the scissor if clipRequired
         mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
     }
     return false;
@@ -1743,7 +1788,7 @@ Rect* OpenGLRenderer::getClipRect() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setupDraw(bool clear) {
-    // TODO: It would be best if we could do this before quickReject()
+    // TODO: It would be best if we could do this before quickRejectSetupScissor()
     //       changes the scissor test state
     if (clear) clearLayerRegions();
     // Make sure setScissor & setStencil happen at the beginning of
@@ -2123,7 +2168,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkP
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
-    if (quickReject(left, top, right, bottom)) {
+    if (quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2146,7 +2191,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint*
     const mat4 transform(*matrix);
     transform.mapRect(r);
 
-    if (quickReject(r.left, r.top, r.right, r.bottom)) {
+    if (quickRejectSetupScissor(r.left, r.top, r.right, r.bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2173,7 +2218,7 @@ status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
-    if (quickReject(left, top, right, bottom)) {
+    if (quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2256,7 +2301,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
         }
     }
 
-    if (quickReject(left, top, right, bottom)) {
+    if (quickRejectSetupScissor(left, top, right, bottom)) {
         if (cleanupColors) delete[] colors;
         return DrawGlInfo::kStatusDone;
     }
@@ -2312,7 +2357,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
          SkPaint* paint) {
-    if (quickReject(dstLeft, dstTop, dstRight, dstBottom)) {
+    if (quickRejectSetupScissor(dstLeft, dstTop, dstRight, dstBottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2402,7 +2447,7 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
 status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
-    if (quickReject(left, top, right, bottom)) {
+    if (quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2415,7 +2460,7 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 
 status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
         float left, float top, float right, float bottom, SkPaint* paint) {
-    if (quickReject(left, top, right, bottom)) {
+    if (quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2564,7 +2609,7 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
 
     if (hasLayer()) {
         SkRect bounds = path.getBounds();
-        PathTessellator::expandBoundsForStroke(bounds, paint, false);
+        PathTessellator::expandBoundsForStroke(bounds, paint);
         dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, currentTransform());
     }
 
@@ -2591,7 +2636,8 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     SkRect bounds;
     PathTessellator::tessellateLines(points, count, paint, mSnapshot->transform, bounds, buffer);
 
-    if (quickReject(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
+    // can't pass paint, since style would be checked for outset. outset done by tessellation.
+    if (quickRejectSetupScissor(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2610,7 +2656,8 @@ status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     SkRect bounds;
     PathTessellator::tessellatePoints(points, count, paint, mSnapshot->transform, bounds, buffer);
 
-    if (quickReject(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
+    // can't pass paint, since style would be checked for outset. outset done by tessellation.
+    if (quickRejectSetupScissor(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2647,7 +2694,7 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2672,7 +2719,7 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
 }
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(x - radius, y - radius,
+    if (mSnapshot->isIgnored() || quickRejectSetupScissor(x - radius, y - radius,
             x + radius, y + radius, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
@@ -2694,7 +2741,7 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) 
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
         SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2716,7 +2763,7 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2753,7 +2800,7 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
 #define SkPaintDefaults_MiterLimit SkIntToScalar(4)
 
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p) ||
+    if (mSnapshot->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2917,7 +2964,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
         // The checks for corner-case ignorable text and quick rejection is only done for immediate
         // drawing as ops from DeferredDisplayList are already filtered for these
         if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint) ||
-                quickReject(bounds)) {
+                quickRejectSetupScissor(bounds)) {
             return DrawGlInfo::kStatusDone;
         }
     }
@@ -3062,8 +3109,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
     }
 
     bool clipRequired = false;
-    const bool rejected = quickRejectNoScissor(x, y,
-            x + layer->layer.getWidth(), y + layer->layer.getHeight(), false, &clipRequired);
+    const bool rejected = calculateQuickRejectForScissor(x, y,
+            x + layer->layer.getWidth(), y + layer->layer.getHeight(), &clipRequired, false);
 
     if (rejected) {
         if (transform && !transform->isIdentity()) {
@@ -3235,7 +3282,7 @@ Texture* OpenGLRenderer::getTexture(SkBitmap* bitmap) {
 
 void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
         float x, float y, SkPaint* paint) {
-    if (quickReject(x, y, x + texture->width, y + texture->height)) {
+    if (quickRejectSetupScissor(x, y, x + texture->width, y + texture->height)) {
         return;
     }
 
@@ -3356,7 +3403,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         bottom = fmaxf(bottom, b);
     }
 
-    if (clip && quickReject(left, top, right, bottom)) {
+    if (clip && quickRejectSetupScissor(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 

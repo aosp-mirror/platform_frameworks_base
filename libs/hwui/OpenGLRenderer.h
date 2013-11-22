@@ -268,30 +268,8 @@ public:
 
     ANDROID_API const Rect& getClipBounds();
 
-    /**
-     * Performs a quick reject but adjust the bounds to account for stroke width if necessary,
-     * and handling snapOut for AA geometry.
-     */
-    bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
-
-    /**
-     * Returns false and sets scissor based upon bounds if drawing won't be clipped out
-     */
-    bool quickReject(float left, float top, float right, float bottom, bool snapOut = false);
-    bool quickReject(const Rect& bounds) {
-        return quickReject(bounds.left, bounds.top, bounds.right, bounds.bottom);
-    }
-
-    /**
-     * Same as quickReject, without the scissor, instead returning clipRequired through pointer.
-     * clipRequired will be only set if not rejected
-     */
-    ANDROID_API bool quickRejectNoScissor(float left, float top, float right, float bottom,
-            bool snapOut = false, bool* clipRequired = NULL);
-    bool quickRejectNoScissor(const Rect& bounds, bool* clipRequired = NULL) {
-        return quickRejectNoScissor(bounds.left, bounds.top, bounds.right, bounds.bottom,
-                clipRequired);
-    }
+    ANDROID_API bool quickRejectConservative(float left, float top,
+            float right, float bottom) const;
 
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
@@ -494,6 +472,16 @@ protected:
      * attaches it to the specified layer.
      */
     void attachStencilBufferToLayer(Layer* layer);
+
+    bool calculateQuickRejectForScissor(float left, float top, float right, float bottom,
+            bool* clipRequired, bool snapOut) const;
+
+    bool quickRejectSetupScissor(float left, float top, float right, float bottom,
+            SkPaint* paint = NULL);
+    bool quickRejectSetupScissor(const Rect& bounds, SkPaint* paint = NULL) {
+        return quickRejectSetupScissor(bounds.left, bounds.top,
+                bounds.right, bounds.bottom, paint);
+    }
 
     /**
      * Compose the layer defined in the current snapshot with the layer
